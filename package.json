@@ -1,0 +1,21 @@
+{
+  "name": "business",
+  "version": "0.0.1",
+  "description": "Web interface for Bud's execution mode",
+  "main": "src/index.js",
+  "scripts": {},
+  "author": "delucca <delucca@pm.me>",
+  "license": "Apache-2.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/budproj/business.git"
+  },
+  "bugs": {
+    "url": "https://github.com/budproj/business/issues"
+  },
+  "engines": {
+    "yarn": ">=2.3.3",
+    "node": ">=15.0.0"
+  }
+}
