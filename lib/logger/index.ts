@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import { cyan, grey } from 'chalk' // eslint-disable-line unicorn/import-style
 import { TransformableInfo } from 'logform'
 import { WinstonModule } from 'nest-winston'
 import { transports, format } from 'winston'
@@ -12,7 +12,7 @@ export interface BudTransformableInfo extends TransformableInfo {
 }
 
 const customFormat = ({ level, message, label, timestamp }: BudTransformableInfo) =>
-  `${chalk.cyan('➤')} ${chalk.grey(`[${timestamp}]`)} ${label ?? '-'} ${level}: ${message}`
+  `${cyan('➤')} ${grey(`[${timestamp}]`)} ${label ?? '-'} ${level}: ${message}`
 
 const Logger = WinstonModule.createLogger({
   level: 'info',

@@ -3,10 +3,10 @@ import { ConfigModule } from '@nestjs/config'
 
 import appConfig from 'config/app'
 
-import { HelloModule } from './hello'
+import { KeyResultsModule } from './key-results'
 
 @Module({
-  imports: [ConfigModule.forFeature(appConfig), HelloModule],
+  imports: [ConfigModule.forFeature(appConfig), KeyResultsModule],
 })
 class AppModule {}
 
