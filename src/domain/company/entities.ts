@@ -1,12 +1,25 @@
-import { Entity, JoinTable, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import {
+  CreateDateColumn,
+  Entity,
+  JoinTable,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm'
 
-import { Team } from 'domain/team/entities'
 import { Cycle } from 'domain/cycle/entities'
+import { Team } from 'domain/team/entities'
 
 @Entity()
 export class Company {
   @PrimaryGeneratedColumn()
   public id: number
+
+  @CreateDateColumn()
+  public createdAt: Date
+
+  @UpdateDateColumn()
+  public updatedAt: Date
 
   @OneToMany(() => Team, (team) => team.company)
   @JoinTable()

@@ -1,5 +1,16 @@
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinTable,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm'
+
+import { Cycle } from 'domain/cycle/entities'
 import { KeyResult } from 'domain/key-result/entities'
-import { Column, Entity, JoinTable, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity()
 export class Objective {
@@ -9,7 +20,16 @@ export class Objective {
   @Column()
   public title: string
 
+  @CreateDateColumn()
+  public createdAt: Date
+
+  @UpdateDateColumn()
+  public updatedAt: Date
+
   @OneToMany(() => KeyResult, (keyResult) => keyResult.objective)
   @JoinTable()
   public keyResults: KeyResult[]
+
+  @ManyToOne(() => Cycle, (cycle) => cycle.objectives)
+  public cycle: Cycle
 }

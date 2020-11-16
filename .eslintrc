@@ -7,12 +7,6 @@
     "@budproj/eslint-config-prettier-ts",
   ],
   "rules": {
-    "new-cap": "off",
-    "unicorn/filename-case": [
-      "error",
-      {
-        "ignore": "src/migrations/*"
-      }
-    ]
+    "new-cap": "off"
   }
 }
