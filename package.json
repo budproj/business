@@ -5,8 +5,7 @@
   "main": "src/main.js",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "nest buiappld",
-    "compile": "tsc",
+    "build": "nest build",
     "format": "prettier --write 'src/**/*.ts'",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -14,8 +13,9 @@
     "start:prod": "node dist/main",
     "lint": "eslint '{src,lib}/**/*.ts'",
     "lint:fix": "yarn lint --fix",
-    "migration:generate": "yarn compile && typeorm migration:generate --config dist/src/config/database/config -n",
-    "migration:run": "yarn compile && typeorm migration:run --config dist/src/config/database/config"
+    "typeorm": "ts-node -r tsconfig-paths/register ./.yarn/cache/typeorm-npm-0.2.29-c30de22860-c70f986138.zip/node_modules/typeorm/cli.js --config src/config/database/config",
+    "migration:generate": "yarn typeorm migration:generate -n",
+    "migration:run": "yarn typeorm migration:run"
   },
   "author": "delucca <delucca@pm.me>",
   "license": "Apache-2.0",

@@ -20,8 +20,8 @@ export interface DatabaseConfigOptions {
 const config: DatabaseConfigOptions = {
   type: 'postgres',
   database: 'business',
-  migrations: ['dist/src/migrations/**/*.js'],
-  entities: ['dist/src/domain/**/entities.js'],
+  migrations: ['src/migrations/**/*.ts'],
+  entities: ['src/domain/**/entities.ts'],
   host: TYPEORM_HOST,
   port: Number.parseInt(TYPEORM_PORT, 10) || 5432,
   username: TYPEORM_USER,

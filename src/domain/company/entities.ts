@@ -1,7 +1,13 @@
-import { Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Entity, JoinTable, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+
+import { Team } from 'domain/team/entities'
 
 @Entity()
 export class Company {
   @PrimaryGeneratedColumn()
-  id: number
+  public id: number
+
+  @OneToMany(() => Team, (team) => team.company)
+  @JoinTable()
+  public teams: Team[]
 }
