@@ -12,7 +12,10 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint '{src,lib}/**/*.ts'",
-    "lint:fix": "yarn lint --fix"
+    "lint:fix": "yarn lint --fix",
+    "typeorm": "ts-node -r tsconfig-paths/register ./.yarn/cache/typeorm-npm-0.2.29-c30de22860-c70f986138.zip/node_modules/typeorm/cli.js --config src/config/database/config",
+    "migration:generate": "yarn typeorm migration:generate -n",
+    "migration:run": "yarn typeorm migration:run"
   },
   "author": "delucca <delucca@pm.me>",
   "license": "Apache-2.0",
@@ -39,8 +42,10 @@
     "fastify": "^3.8.0",
     "logform": "^2.2.0",
     "nest-winston": "^1.4.0",
+    "pg": "^8.5.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.6.3",
+    "typeorm": "^0.2.29",
     "winston": "^3.3.3"
   },
   "devDependencies": {
