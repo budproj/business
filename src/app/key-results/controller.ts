@@ -1,12 +1,14 @@
-import { Controller, Get } from '@nestjs/common'
+import { Controller, Get, UseGuards } from '@nestjs/common'
+import { AuthGuard } from '@nestjs/passport'
 
 import KeyResultsService from './service'
 
-@Controller()
+@Controller('key-results')
 class KeyResultsController {
   constructor(private readonly KeyResultsService: KeyResultsService) {}
 
-  @Get('/key-results')
+  @UseGuards(AuthGuard('jwt'))
+  @Get()
   getKeyResults(): string {
     return this.KeyResultsService.getKeyResults()
   }

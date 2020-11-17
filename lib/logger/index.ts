@@ -1,28 +1,29 @@
-import { cyan, grey } from 'chalk' // eslint-disable-line unicorn/import-style
 import { TransformableInfo } from 'logform'
-import { WinstonModule } from 'nest-winston'
+import { WinstonModule, utilities } from 'nest-winston'
 import { transports, format } from 'winston'
 
 const { Console } = transports
-const { combine, timestamp, prettyPrint, colorize, printf } = format
+const { combine, timestamp } = format
+
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 
 export interface BudTransformableInfo extends TransformableInfo {
   timestamp: string
   label: string
 }
 
-const customFormat = ({ level, message, label, timestamp }: BudTransformableInfo) =>
-  `${cyan('➤')} ${grey(`[${timestamp}]`)} ${label ?? '-'} ${level}: ${message}`
+const buildLogger = (level: LogLevel, serviceName: string) => {
+  const logger = WinstonModule.createLogger({
+    level,
+    defaultMeta: { service: serviceName },
+    transports: [
+      new Console({
+        format: combine(timestamp(), utilities.format.nestLike()),
+      }),
+    ],
+  })
 
-const Logger = WinstonModule.createLogger({
-  level: 'info',
-  defaultMeta: { service: 'bud@business' },
-  format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }), prettyPrint()),
-  transports: [
-    new Console({
-      format: combine(colorize(), printf(customFormat)),
-    }),
-  ],
-})
+  return logger
+}
 
-export default Logger
+export default buildLogger
