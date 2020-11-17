@@ -6,6 +6,7 @@ const {
   AUTH0_CLIENT_SECRET,
   AUTH0_ISSUER,
   AUTH0_AUDIENCE,
+  AUTH0_NAMESPACE,
   LOGGING_LEVEL,
   LOGGING_SERVICE_NAME,
 } = process.env
@@ -20,6 +21,7 @@ export interface AuthzConfigOptions {
   clientSecret: string
   issuer: string
   audience: string
+  namespace: string
 }
 
 export interface AppConfigOptions {
@@ -36,6 +38,7 @@ const config: AppConfigOptions = {
     clientSecret: AUTH0_CLIENT_SECRET,
     issuer: AUTH0_ISSUER,
     audience: AUTH0_AUDIENCE,
+    namespace: AUTH0_NAMESPACE,
   },
 
   logging: {

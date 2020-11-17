@@ -23,7 +23,6 @@ class AuthzService extends PassportStrategy(Strategy) {
 
   validate(token: unknown): unknown {
     this.logger.debug({ message: 'Received request to guarded endpoint with token', token })
-
     return token
   }
 }
