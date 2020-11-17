@@ -9,8 +9,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { Company } from 'domain/company/entities'
-import { Objective } from 'domain/objective/entities'
+import { Company } from 'domain/company-aggregate/company/entities'
+import { Objective } from 'domain/objective-aggregate/objective/entities'
 
 @Entity()
 export class Cycle {

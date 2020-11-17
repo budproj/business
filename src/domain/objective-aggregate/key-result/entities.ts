@@ -9,10 +9,10 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { ConfidenceReport } from 'domain/confidence-report/entities'
-import { Objective } from 'domain/objective/entities'
-import { ProgressReport } from 'domain/progress-report/entities'
-import { Team } from 'domain/team/entities'
+import { Team } from 'domain/company-aggregate/team/entities'
+import { ConfidenceReport } from 'domain/objective-aggregate/confidence-report/entities'
+import { Objective } from 'domain/objective-aggregate/objective/entities'
+import { ProgressReport } from 'domain/objective-aggregate/progress-report/entities'
 
 @Entity()
 export class KeyResult {

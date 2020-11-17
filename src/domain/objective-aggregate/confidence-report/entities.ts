@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 
-import { KeyResult } from 'domain/key-result/entities'
+import { KeyResult } from 'domain/objective-aggregate/key-result/entities'
 
 @Entity()
 export class ConfidenceReport {

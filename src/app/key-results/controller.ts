@@ -1,9 +1,13 @@
-import { Controller, Get, UseGuards } from '@nestjs/common'
+import { Controller, Get, Request, UseGuards } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 
-import { Permissions, PermissionsGuard } from 'app/authz'
+import { Permissions, PermissionsGuard, AuthzToken } from 'app/authz'
 
 import KeyResultsService from './service'
+
+export interface KeyResultsRequest {
+  user: AuthzToken
+}
 
 @Controller('key-results')
 class KeyResultsController {
@@ -12,8 +16,8 @@ class KeyResultsController {
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Get()
   @Permissions('read:key-results')
-  getKeyResults(): string {
-    return this.KeyResultsService.getKeyResults()
+  getKeyResults(@Request() request: KeyResultsRequest): string {
+    return this.KeyResultsService.getUserKeyResults(request.user.sub)
   }
 }
 

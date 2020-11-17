@@ -9,16 +9,16 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { Company } from 'domain/company/entities'
-import { KeyResult } from 'domain/key-result/entities'
+import { Cycle } from 'domain/company-aggregate/cycle/entities'
+import { KeyResult } from 'domain/objective-aggregate/key-result/entities'
 
 @Entity()
-export class Team {
+export class Objective {
   @PrimaryGeneratedColumn()
   public id: number
 
   @Column()
-  public name: string
+  public title: string
 
   @CreateDateColumn()
   public createdAt: Date
@@ -26,10 +26,10 @@ export class Team {
   @UpdateDateColumn()
   public updatedAt: Date
 
-  @ManyToOne(() => Company, (company) => company.teams)
-  public company: Company
-
-  @OneToMany(() => KeyResult, (keyResult) => keyResult.team)
+  @OneToMany(() => KeyResult, (keyResult) => keyResult.objective)
   @JoinTable()
   public keyResults: KeyResult[]
+
+  @ManyToOne(() => Cycle, (cycle) => cycle.objectives)
+  public cycle: Cycle
 }

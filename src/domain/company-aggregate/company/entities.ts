@@ -7,8 +7,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { Cycle } from 'domain/cycle/entities'
-import { Team } from 'domain/team/entities'
+import { Cycle } from 'domain/company-aggregate/cycle/entities'
+import { Team } from 'domain/company-aggregate/team/entities'
 
 @Entity()
 export class Company {
