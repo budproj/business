@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
+import { User } from 'domain/user-aggregate/user/entities'
+
 import { KeyResult } from './key-result/entities'
 import KeyResultService from './key-result/service'
 
@@ -7,8 +9,8 @@ import KeyResultService from './key-result/service'
 class ObjectiveAggregateService {
   constructor(private readonly keyResultService: KeyResultService) {}
 
-  async getKeyResultsOwnedBy(uid: number): Promise<KeyResult[]> {
-    return this.keyResultService.findWhere({ owner: uid })
+  async getKeyResultsOwnedBy(uid: User['id']): Promise<KeyResult[]> {
+    return this.keyResultService.getUserKeyResults(uid)
   }
 }
 

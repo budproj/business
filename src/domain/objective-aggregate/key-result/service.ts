@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { Repository, SelectQueryBuilder } from 'typeorm'
+
+import { User } from 'domain/user-aggregate/user/entities'
 
 import { KeyResult } from './entities'
 
@@ -13,8 +15,36 @@ class KeyResultService {
     private readonly keyResultRepository: Repository<KeyResult>,
   ) {}
 
-  async findWhere(selector: KeyResultFindWhereSelector): Promise<KeyResult[]> {
-    return this.keyResultRepository.find({ where: selector })
+  async getUserKeyResults(uid: User['id']): Promise<KeyResult[]> {
+    const desiredRelations = [
+      ['owner', 'user'],
+      'team',
+      'objective',
+      'progressReports',
+      'confidenceReports',
+    ]
+    const keyResults = this.getKeyResults({ owner: uid }, desiredRelations)
+
+    return keyResults
+  }
+
+  async getKeyResults(
+    selector: KeyResultFindWhereSelector,
+    relations?: Array<string | string[]>,
+  ): Promise<KeyResult[]> {
+    const repository = this.keyResultRepository.createQueryBuilder()
+    const query = repository.where(selector)
+    const joinedQuery =
+      relations?.reduce(
+        (currentQuery: SelectQueryBuilder<KeyResult>, subQuery: string[] | string) =>
+          currentQuery.leftJoinAndSelect(
+            `${KeyResult.name}.${typeof subQuery === 'string' ? subQuery : subQuery[0]}`,
+            typeof subQuery === 'string' ? subQuery : subQuery[1],
+          ),
+        query,
+      ) ?? query
+
+    return joinedQuery.getMany()
   }
 }
 
