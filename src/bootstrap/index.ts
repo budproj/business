@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 
-import Logger from 'lib/logger'
+import buildLogger from 'lib/logger'
 
 import BootstrapModule from './module'
 
@@ -13,10 +13,15 @@ async function bootstrap() {
     new FastifyAdapter(),
   )
 
-  app.useGlobalPipes(new ValidationPipe())
-  app.useLogger(Logger)
-
   const configService: ConfigService = app.get(ConfigService)
+
+  const logger = buildLogger(
+    configService.get('logging.level'),
+    configService.get('logging.serviceName'),
+  )
+
+  app.useGlobalPipes(new ValidationPipe())
+  app.useLogger(logger)
 
   await app.listen(configService.get('port'))
 }
