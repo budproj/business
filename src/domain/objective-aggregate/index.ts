@@ -1,3 +1,3 @@
-import ObjectiveAggregateService from './service'
+import ObjectiveAggregateModule from './module'
 
-export default ObjectiveAggregateService
+export default ObjectiveAggregateModule

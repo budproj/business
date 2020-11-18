@@ -1,5 +1,7 @@
-import config, { DatabaseConfigOptions } from './config'
+import { TypeOrmModuleOptions } from '@nestjs/typeorm'
 
-const database = (): DatabaseConfigOptions => config
+import config from './config'
+
+const database = (): TypeOrmModuleOptions => config
 
 export default database

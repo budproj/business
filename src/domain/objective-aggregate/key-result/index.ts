@@ -1,1 +1,3 @@
-export * from './entities'
+import KeyResultModule from './module'
+
+export default KeyResultModule

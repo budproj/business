@@ -1,22 +1,22 @@
 import { Injectable, Logger } from '@nestjs/common'
 
 import { AuthzToken } from 'app/authz'
-import CompanyAggregate from 'domain/company-aggregate'
-import ObjectiveAggregate from 'domain/objective-aggregate'
+import CompanyAggregateService from 'domain/company-aggregate/service'
+import ObjectiveAggregateService from 'domain/objective-aggregate/service'
 
 @Injectable()
 class KeyResultsService {
   private readonly logger = new Logger(KeyResultsService.name)
 
   constructor(
-    private readonly objectiveAggregate: ObjectiveAggregate,
-    private readonly companyAggregate: CompanyAggregate,
+    private readonly objectiveAggregateService: ObjectiveAggregateService,
+    private readonly companyAggregateService: CompanyAggregateService,
   ) {}
 
   getUserKeyResults(uid: AuthzToken['sub']): string {
     this.logger.debug(`Getting key results that are owned by user ${uid}`)
 
-    const keyResults = this.objectiveAggregate.getKeyResultsOwnedBy(uid)
+    const keyResults = this.objectiveAggregateService.getKeyResultsOwnedBy(uid)
 
     return keyResults
   }
@@ -24,7 +24,7 @@ class KeyResultsService {
   getUserTeamsKeyResults(uid: AuthzToken['sub']): string {
     this.logger.debug(`Getting all teams key results that user ${uid} is part of`)
 
-    const userTeams = this.companyAggregate.getUserTeams(uid)
+    const userTeams = this.companyAggregateService.getUserTeams(uid)
     console.log(userTeams)
 
     return 'My team Key Results'

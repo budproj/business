@@ -1,3 +1,3 @@
-import CompanyAggregateService from './service'
+import CompanyAggregateModule from './module'
 
-export default CompanyAggregateService
+export default CompanyAggregateModule

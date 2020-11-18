@@ -8,21 +8,23 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { Team } from 'domain/company-aggregate/team/entities'
-import { ConfidenceReport } from 'domain/objective-aggregate/confidence-report/entities'
-import { Objective } from 'domain/objective-aggregate/objective/entities'
-import { ProgressReport } from 'domain/objective-aggregate/progress-report/entities'
-import { User } from 'domain/user-aggregate/user/entities'
+import { ITeam } from 'domain/company-aggregate/team/dto'
+import { IConfidenceReport } from 'domain/objective-aggregate/confidence-report/dto'
+import { IObjective } from 'domain/objective-aggregate/objective/dto'
+import { IProgressReport } from 'domain/objective-aggregate/progress-report/dto'
+import { IUser } from 'domain/user-aggregate/user/dto'
+
+import { IKeyResult } from './dto'
 
 @Entity()
-export class KeyResult {
+export class KeyResult implements IKeyResult {
   @PrimaryGeneratedColumn()
   public id: number
 
   @Column()
   public title: string
 
-  @Column()
+  @Column('text')
   public description: string
 
   @Column('numeric')
@@ -31,24 +33,24 @@ export class KeyResult {
   @Column('numeric')
   public goal: number
 
-  @ManyToOne(() => User, (user) => user.keyResults)
-  public owner: User
-
   @CreateDateColumn()
   public createdAt: Date
 
   @UpdateDateColumn()
   public updatedAt: Date
 
-  @ManyToOne(() => Objective, (objective) => objective.keyResults)
-  public objective: Objective
+  @ManyToOne('User', 'keyResults')
+  public owner: IUser
 
-  @ManyToOne(() => Team, (team) => team.keyResults)
-  public team: Team
+  @ManyToOne('Objective', 'keyResults')
+  public objective: IObjective
 
-  @OneToMany(() => ProgressReport, (progressReport) => progressReport.keyResult)
-  public progressReports: ProgressReport[]
+  @ManyToOne('Team', 'keyResults')
+  public team: ITeam
 
-  @OneToMany(() => ConfidenceReport, (confidenceReport) => confidenceReport.keyResult)
-  public confidenceReports: ConfidenceReport[]
+  @OneToMany('ProgressReport', 'keyResult')
+  public progressReports: IProgressReport[]
+
+  @OneToMany('ConfidenceReport', 'keyResult')
+  public confidenceReports: IConfidenceReport[]
 }

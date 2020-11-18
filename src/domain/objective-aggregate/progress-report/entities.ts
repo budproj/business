@@ -1,10 +1,12 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 
-import { KeyResult } from 'domain/objective-aggregate/key-result/entities'
-import { User } from 'domain/user-aggregate/user/entities'
+import { IKeyResult } from 'domain/objective-aggregate/key-result/dto'
+import { IUser } from 'domain/user-aggregate/user/dto'
+
+import { IProgressReport } from './dto'
 
 @Entity()
-export class ProgressReport {
+export class ProgressReport implements IProgressReport {
   @PrimaryGeneratedColumn()
   public id: number
 
@@ -14,15 +16,15 @@ export class ProgressReport {
   @Column('numeric')
   public valueNew: number
 
-  @ManyToOne(() => User, (user) => user.progressReports)
-  public user: User
-
   @Column('text')
   public comment: string
 
   @CreateDateColumn()
   public createdAt: Date
 
-  @ManyToOne(() => KeyResult, (keyResult) => keyResult.progressReports)
-  public keyResult: KeyResult
+  @ManyToOne('User', 'progressReports')
+  public user: IUser
+
+  @ManyToOne('KeyResult', 'progressReports')
+  public keyResult: IKeyResult
 }

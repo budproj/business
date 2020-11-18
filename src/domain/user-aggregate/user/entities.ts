@@ -8,13 +8,15 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { Team } from 'domain/company-aggregate/team/entities'
-import { ConfidenceReport } from 'domain/objective-aggregate/confidence-report'
-import { KeyResult } from 'domain/objective-aggregate/key-result'
-import { ProgressReport } from 'domain/objective-aggregate/progress-report'
+import { ITeam } from 'domain/company-aggregate/team/dto'
+import { IConfidenceReport } from 'domain/objective-aggregate/confidence-report/dto'
+import { IKeyResult } from 'domain/objective-aggregate/key-result/dto'
+import { IProgressReport } from 'domain/objective-aggregate/progress-report/dto'
+
+import { IUser } from './dto'
 
 @Entity()
-export class User {
+export class User implements IUser {
   @PrimaryGeneratedColumn()
   public id: number
 
@@ -27,15 +29,15 @@ export class User {
   @UpdateDateColumn()
   public updatedAt: Date
 
-  @ManyToMany(() => Team, (team) => team.users)
-  public teams: Team[]
+  @ManyToMany('Team', 'users')
+  public teams: ITeam[]
 
-  @OneToMany(() => KeyResult, (keyResult) => keyResult.owner)
-  public keyResults: KeyResult[]
+  @OneToMany('KeyResult', 'owner')
+  public keyResults: IKeyResult[]
 
-  @OneToMany(() => ProgressReport, (progressReport) => progressReport.user)
-  public progressReports: ProgressReport[]
+  @OneToMany('ProgressReport', 'user')
+  public progressReports: IProgressReport[]
 
-  @OneToMany(() => ConfidenceReport, (confidenceReport) => confidenceReport.user)
-  public confidenceReports: ConfidenceReport[]
+  @OneToMany('ConfidenceReport', 'user')
+  public confidenceReports: IConfidenceReport[]
 }

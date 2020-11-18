@@ -2,16 +2,15 @@ import { Logger, Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 
 import appConfig from 'config/app'
-import CompanyAggregate from 'domain/company-aggregate'
-import ObjectiveAggregate from 'domain/objective-aggregate'
+import DomainModule from 'domain/module'
 
 import KeyResultsController from './controller'
 import KeyResultsService from './service'
 
 @Module({
-  imports: [ConfigModule.forFeature(appConfig)],
+  imports: [ConfigModule.forFeature(appConfig), DomainModule],
   controllers: [KeyResultsController],
-  providers: [KeyResultsService, ObjectiveAggregate, CompanyAggregate, Logger],
+  providers: [KeyResultsService, Logger],
 })
 class KeyResultsModule {}
 

@@ -1,5 +1,3 @@
-export { default as CompanyAggregate } from './company-aggregate'
+import DomainModule from './module'
 
-export { default as ObjectiveAggregate } from './objective-aggregate'
-
-export { default as UserAggregate } from './user-aggregate'
+export default DomainModule
