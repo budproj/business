@@ -2,7 +2,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -27,7 +26,6 @@ export class Objective {
   public updatedAt: Date
 
   @OneToMany(() => KeyResult, (keyResult) => keyResult.objective)
-  @JoinTable()
   public keyResults: KeyResult[]
 
   @ManyToOne(() => Cycle, (cycle) => cycle.objectives)

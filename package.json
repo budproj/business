@@ -12,10 +12,10 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint '{src,lib}/**/*.ts'",
-    "lint:fix": "npm lint --fix",
+    "lint:fix": "npm run lint -- --fix",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/.bin/typeorm --config src/config/database/config",
-    "migration:generate": "npm typeorm migration:generate -n",
-    "migration:run": "npm typeorm migration:run"
+    "migration:generate": "npm run typeorm migration:generate -- -n",
+    "migration:run": "npm run typeorm migration:run"
   },
   "author": "delucca <delucca@pm.me>",
   "license": "Apache-2.0",
@@ -49,6 +49,7 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.6.3",
     "typeorm": "^0.2.29",
+    "typeorm-naming-strategies": "^2.0.0",
     "winston": "^3.3.3"
   },
   "devDependencies": {

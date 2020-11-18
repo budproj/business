@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 import { KeyResult } from 'domain/objective-aggregate/key-result/entities'
+import { User } from 'domain/user-aggregate/user/entities'
 
 @Entity()
 export class ConfidenceReport {
@@ -13,8 +14,8 @@ export class ConfidenceReport {
   @Column('numeric')
   public valueNew: number
 
-  @Column()
-  public user: string
+  @ManyToOne(() => User, (user) => user.confidenceReports)
+  public user: User
 
   @Column('text')
   public comment: string

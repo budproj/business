@@ -1,7 +1,7 @@
 import {
+  Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -15,6 +15,9 @@ export class Company {
   @PrimaryGeneratedColumn()
   public id: number
 
+  @Column()
+  public name: string
+
   @CreateDateColumn()
   public createdAt: Date
 
@@ -22,10 +25,8 @@ export class Company {
   public updatedAt: Date
 
   @OneToMany(() => Team, (team) => team.company)
-  @JoinTable()
   public teams: Team[]
 
   @OneToMany(() => Cycle, (cycle) => cycle.company)
-  @JoinTable()
   public cycles: Cycle[]
 }

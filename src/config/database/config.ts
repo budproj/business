@@ -1,3 +1,6 @@
+import { NamingStrategyInterface } from 'typeorm'
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies/snake-naming.strategy'
+
 const { TYPEORM_HOST, TYPEORM_PORT, TYPEORM_USER, TYPEORM_PASSWORD, TYPEORM_LOGGING } = process.env
 
 export interface TypeORMCLIOptions {
@@ -14,6 +17,7 @@ export interface DatabaseConfigOptions {
   username: string
   password: string
   logging: boolean
+  namingStrategy: NamingStrategyInterface
   cli: TypeORMCLIOptions
 }
 
@@ -27,6 +31,7 @@ const config: DatabaseConfigOptions = {
   username: TYPEORM_USER,
   password: TYPEORM_PASSWORD,
   logging: Boolean(TYPEORM_LOGGING),
+  namingStrategy: new SnakeNamingStrategy(),
   cli: {
     migrationsDir: 'src/migrations/',
   },

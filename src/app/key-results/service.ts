@@ -14,12 +14,26 @@ class KeyResultsService {
   ) {}
 
   getUserKeyResults(uid: AuthzToken['sub']): string {
-    this.logger.debug(`Getting key results for user with ID ${uid}`)
+    this.logger.debug(`Getting key results that are owned by user ${uid}`)
+
+    const keyResults = this.objectiveAggregate.getKeyResultsOwnedBy(uid)
+
+    return keyResults
+  }
+
+  getUserTeamsKeyResults(uid: AuthzToken['sub']): string {
+    this.logger.debug(`Getting all teams key results that user ${uid} is part of`)
 
     const userTeams = this.companyAggregate.getUserTeams(uid)
-    this.objectiveAggregate.getKeyResultsForTeams(userTeams)
+    console.log(userTeams)
 
-    return 'My Key Results'
+    return 'My team Key Results'
+  }
+
+  getUserCompanyKeyResults(uid: AuthzToken['sub']): string {
+    this.logger.debug(`Getting all key results for user ${uid} company`)
+
+    return 'My company Key Results'
   }
 }
 

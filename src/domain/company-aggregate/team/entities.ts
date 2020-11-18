@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -11,6 +12,7 @@ import {
 
 import { Company } from 'domain/company-aggregate/company/entities'
 import { KeyResult } from 'domain/objective-aggregate/key-result/entities'
+import { User } from 'domain/user-aggregate/user/entities'
 
 @Entity()
 export class Team {
@@ -30,6 +32,9 @@ export class Team {
   public company: Company
 
   @OneToMany(() => KeyResult, (keyResult) => keyResult.team)
-  @JoinTable()
   public keyResults: KeyResult[]
+
+  @ManyToMany(() => User, (user) => user.teams)
+  @JoinTable()
+  public users: User[]
 }

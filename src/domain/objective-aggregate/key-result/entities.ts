@@ -2,7 +2,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -13,6 +12,7 @@ import { Team } from 'domain/company-aggregate/team/entities'
 import { ConfidenceReport } from 'domain/objective-aggregate/confidence-report/entities'
 import { Objective } from 'domain/objective-aggregate/objective/entities'
 import { ProgressReport } from 'domain/objective-aggregate/progress-report/entities'
+import { User } from 'domain/user-aggregate/user/entities'
 
 @Entity()
 export class KeyResult {
@@ -31,8 +31,8 @@ export class KeyResult {
   @Column('numeric')
   public goal: number
 
-  @Column()
-  public owner: string
+  @ManyToOne(() => User, (user) => user.keyResults)
+  public owner: User
 
   @CreateDateColumn()
   public createdAt: Date
@@ -47,10 +47,8 @@ export class KeyResult {
   public team: Team
 
   @OneToMany(() => ProgressReport, (progressReport) => progressReport.keyResult)
-  @JoinTable()
   public progressReports: ProgressReport[]
 
   @OneToMany(() => ConfidenceReport, (confidenceReport) => confidenceReport.keyResult)
-  @JoinTable()
   public confidenceReports: ConfidenceReport[]
 }

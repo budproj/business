@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Logger, Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 
 import appConfig from 'config/app'
@@ -11,7 +11,7 @@ import KeyResultsService from './service'
 @Module({
   imports: [ConfigModule.forFeature(appConfig)],
   controllers: [KeyResultsController],
-  providers: [KeyResultsService, ObjectiveAggregate, CompanyAggregate],
+  providers: [KeyResultsService, ObjectiveAggregate, CompanyAggregate, Logger],
 })
 class KeyResultsModule {}
 

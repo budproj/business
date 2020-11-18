@@ -1,4 +1,4 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["node_modules", "dist", ".yarn", ".pnp.js"]
+  "exclude": ["node_modules", "dist"]
 }
