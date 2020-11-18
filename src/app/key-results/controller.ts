@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Request, UseGuards } from '@nestjs/common'
+import { BadRequestException, Controller, Get, Query, Request, UseGuards } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 
 import { Permissions, PermissionsGuard, AuthzToken } from 'app/authz'
@@ -29,6 +29,10 @@ class KeyResultsController {
     }
     const { scope } = query
     const scopedHandler = handlers[scope]
+    if (!scopedHandler)
+      throw new BadRequestException(
+        `Invalid scope. Valid scopes are: ${Object.keys(handlers).join(', ')}`,
+      )
     const keyResults = await scopedHandler()
 
     const keyResultsHashmap = this.keyResultsService.buildHashmap(keyResults)

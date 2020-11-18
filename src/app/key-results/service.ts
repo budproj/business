@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 
 import { AuthzToken } from 'app/authz'
-import CompanyAggregateService from 'domain/company-aggregate/service'
 import { KeyResult } from 'domain/objective-aggregate/key-result/entities'
 import ObjectiveAggregateService from 'domain/objective-aggregate/service'
 import UserAggregateService from 'domain/user-aggregate/service'
@@ -14,7 +13,6 @@ class KeyResultsService {
 
   constructor(
     private readonly objectiveAggregateService: ObjectiveAggregateService,
-    private readonly companyAggregateService: CompanyAggregateService,
     private readonly userAggregateService: UserAggregateService,
   ) {}
 
@@ -25,21 +23,6 @@ class KeyResultsService {
     const keyResults = await this.objectiveAggregateService.getKeyResultsOwnedBy(uid)
 
     return keyResults
-  }
-
-  getUserTeamsKeyResults(uid: AuthzToken['sub']): string {
-    this.logger.debug(`Getting all teams key results that user ${uid} is part of`)
-
-    const userTeams = this.companyAggregateService.getUserTeams(uid)
-    console.log(userTeams)
-
-    return 'My team Key Results'
-  }
-
-  getUserCompanyKeyResults(uid: AuthzToken['sub']): string {
-    this.logger.debug(`Getting all key results for user ${uid} company`)
-
-    return 'My company Key Results'
   }
 
   buildHashmap(keyResults: KeyResult[]): KeyResultsHashmap {
