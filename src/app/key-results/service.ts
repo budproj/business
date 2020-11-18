@@ -20,19 +20,27 @@ class KeyResultsService {
     this.logger.debug(`Getting key results that are owned by user with Auth0 sub ${authzSub}`)
 
     const uid = await this.userAggregateService.getUserIDBasedOnAuthzSub(authzSub)
+    this.logger.debug(`Used user Auth0 sub ${authzSub} to select user with ID ${uid}`)
+
     const keyResults = await this.objectiveAggregateService.getKeyResultsOwnedBy(uid)
+    this.logger.debug({ message: `Selected key results owned by user ${uid}:`, keyResults })
 
     return keyResults
   }
 
   buildHashmap(keyResults: KeyResult[]): KeyResultsHashmap {
+    this.logger.debug({ message: 'Starting to create Key Results hashmap', keyResults })
+
     const initialHashmap = {}
     const reduceHandler = (previous: KeyResultsHashmap, next: KeyResult) => ({
       ...previous,
       [next.id]: next,
     })
 
-    return keyResults.reduce(reduceHandler, initialHashmap)
+    const hashmap = keyResults.reduce(reduceHandler, initialHashmap)
+    this.logger.debug({ message: 'Finished creating Key Results hashmap', keyResults, hashmap })
+
+    return hashmap
   }
 }
 
