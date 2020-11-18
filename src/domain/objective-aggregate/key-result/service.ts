@@ -4,6 +4,8 @@ import { Repository } from 'typeorm'
 
 import { KeyResult } from './entities'
 
+export type KeyResultFindWhereSelector = Partial<Record<keyof KeyResult, string | number>>
+
 @Injectable()
 class KeyResultService {
   constructor(
@@ -11,8 +13,8 @@ class KeyResultService {
     private readonly keyResultRepository: Repository<KeyResult>,
   ) {}
 
-  async findAll(): Promise<string> {
-    return Promise.resolve('ok')
+  async findWhere(selector: KeyResultFindWhereSelector): Promise<KeyResult[]> {
+    return this.keyResultRepository.find({ where: selector })
   }
 }
 

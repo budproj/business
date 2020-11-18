@@ -1,3 +1,3 @@
-import UserAggregateService from './service'
+import UserAggregateModule from './module'
 
-export default UserAggregateService
+export default UserAggregateModule

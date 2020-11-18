@@ -13,9 +13,11 @@
     "start:prod": "node dist/main",
     "lint": "eslint '{src,lib}/**/*.ts'",
     "lint:fix": "npm run lint -- --fix",
-    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/.bin/typeorm --config src/config/database/config",
-    "migration:generate": "npm run typeorm migration:generate -- -n",
-    "migration:run": "npm run typeorm migration:run"
+    "typeorm": "typeorm --config dist/src/config/database/config",
+    "typeorm:migration:compile": "tsc",
+    "typeorm:migration:generate": "npm run typeorm migration:generate -- -n",
+    "migration:generate": "npm run typeorm:migration:compile && npm run typeorm:migration:generate",
+    "migration:run": "npm run typeorm:migration:compile && npm run typeorm migration:run"
   },
   "author": "delucca <delucca@pm.me>",
   "license": "Apache-2.0",

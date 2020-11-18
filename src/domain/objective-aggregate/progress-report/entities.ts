@@ -16,8 +16,8 @@ export class ProgressReport implements IProgressReport {
   @Column('numeric')
   public valueNew: number
 
-  @Column('text')
-  public comment: string
+  @Column({ type: 'text', nullable: true })
+  public comment?: string | null
 
   @CreateDateColumn()
   public createdAt: Date

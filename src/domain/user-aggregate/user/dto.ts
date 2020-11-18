@@ -1,6 +1,6 @@
 export interface IUser {
   id: number
-  authzID: string
+  authzSub: string
   createdAt: Date
   updatedAt: Date
 }

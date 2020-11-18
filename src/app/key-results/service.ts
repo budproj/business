@@ -2,7 +2,11 @@ import { Injectable, Logger } from '@nestjs/common'
 
 import { AuthzToken } from 'app/authz'
 import CompanyAggregateService from 'domain/company-aggregate/service'
+import { KeyResult } from 'domain/objective-aggregate/key-result/entities'
 import ObjectiveAggregateService from 'domain/objective-aggregate/service'
+import UserAggregateService from 'domain/user-aggregate/service'
+
+export type KeyResultsHashmap = Record<KeyResult['id'], KeyResult>
 
 @Injectable()
 class KeyResultsService {
@@ -11,12 +15,14 @@ class KeyResultsService {
   constructor(
     private readonly objectiveAggregateService: ObjectiveAggregateService,
     private readonly companyAggregateService: CompanyAggregateService,
+    private readonly userAggregateService: UserAggregateService,
   ) {}
 
-  getUserKeyResults(uid: AuthzToken['sub']): string {
-    this.logger.debug(`Getting key results that are owned by user ${uid}`)
+  async getUserKeyResults(authzSub: AuthzToken['sub']): Promise<KeyResult[]> {
+    this.logger.debug(`Getting key results that are owned by user with Auth0 sub ${authzSub}`)
 
-    const keyResults = this.objectiveAggregateService.getKeyResultsOwnedBy(uid)
+    const uid = await this.userAggregateService.getUserIDBasedOnAuthzSub(authzSub)
+    const keyResults = await this.objectiveAggregateService.getKeyResultsOwnedBy(uid)
 
     return keyResults
   }
@@ -34,6 +40,16 @@ class KeyResultsService {
     this.logger.debug(`Getting all key results for user ${uid} company`)
 
     return 'My company Key Results'
+  }
+
+  buildHashmap(keyResults: KeyResult[]): KeyResultsHashmap {
+    const initialHashmap = {}
+    const reduceHandler = (previous: KeyResultsHashmap, next: KeyResult) => ({
+      ...previous,
+      [next.id]: next,
+    })
+
+    return keyResults.reduce(reduceHandler, initialHashmap)
   }
 }
 

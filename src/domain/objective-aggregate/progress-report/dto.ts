@@ -2,6 +2,6 @@ export interface IProgressReport {
   id: number
   valuePrevious: number
   valueNew: number
-  comment: string
+  comment?: string
   createdAt: Date
 }

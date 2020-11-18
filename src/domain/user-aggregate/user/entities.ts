@@ -21,7 +21,7 @@ export class User implements IUser {
   public id: number
 
   @Column()
-  public authzID: string
+  public authzSub: string
 
   @CreateDateColumn()
   public createdAt: Date

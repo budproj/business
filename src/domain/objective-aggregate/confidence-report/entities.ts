@@ -16,8 +16,8 @@ export class ConfidenceReport implements IConfidenceReport {
   @Column('numeric')
   public valueNew: number
 
-  @Column('text')
-  public comment: string
+  @Column({ type: 'text', nullable: true })
+  public comment?: string | null
 
   @CreateDateColumn()
   public createdAt: Date

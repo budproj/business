@@ -24,8 +24,8 @@ export class KeyResult implements IKeyResult {
   @Column()
   public title: string
 
-  @Column('text')
-  public description: string
+  @Column({ type: 'text', nullable: true })
+  public description?: string | null
 
   @Column('numeric')
   public initialValue: number
