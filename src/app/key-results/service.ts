@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
+import { omit } from 'lodash'
 
 import { KeyResult } from 'domain/objective-aggregate/key-result/entities'
-import { KeyResultsWithLatestReport } from 'domain/objective-aggregate/key-result/service'
 import ObjectiveAggregateService from 'domain/objective-aggregate/service'
 import { User } from 'domain/user-aggregate/user/entities'
 
@@ -14,17 +14,28 @@ class KeyResultsService {
   constructor(private readonly objectiveAggregateService: ObjectiveAggregateService) {}
 
   async getUserKeyResults(user: User): Promise<KeyResultsHashmap> {
-    const keyResults = await this.objectiveAggregateService.getOwnedBy(user)
-    const keyResultsHashmap = this.buildHashmap(keyResults)
+    const dataWithRelations = await this.objectiveAggregateService.getOwnedBy(user)
+    const dataFilteredByLatestReports = dataWithRelations.map((keyResult) => {
+      const keyResultWithLatestReports = this.objectiveAggregateService.getLatestReportsForKeyResult(
+        keyResult,
+      )
+      const normalizedKeyResult = omit(keyResultWithLatestReports, [
+        'progressReports',
+        'confidenceReports',
+      ])
 
-    return keyResultsHashmap
+      return normalizedKeyResult
+    })
+    const hashmap = this.buildHashmap(dataFilteredByLatestReports)
+
+    return hashmap
   }
 
-  buildHashmap(keyResults: KeyResultsWithLatestReport[]): KeyResultsHashmap {
+  buildHashmap(keyResults: Array<Partial<KeyResult>>): KeyResultsHashmap {
     this.logger.debug({ message: 'Starting to create Key Results hashmap', keyResults })
 
     const initialHashmap = {}
-    const reduceHandler = (previous: KeyResultsHashmap, next: KeyResultsWithLatestReport) => ({
+    const reduceHandler = (previous: KeyResultsHashmap, next: KeyResult) => ({
       ...previous,
       [next.id]: next,
     })

@@ -1,18 +1,14 @@
 import { Injectable } from '@nestjs/common'
-import { omit } from 'lodash'
-import { ObjectLiteral, OrderByCondition } from 'typeorm'
+import { ObjectLiteral } from 'typeorm'
 
+import { ICycle } from 'domain/company-aggregate/cycle/dto'
 import { User } from 'domain/user-aggregate/user/entities'
-
-import { IConfidenceReport } from '../confidence-report/dto'
-import { IProgressReport } from '../progress-report/dto'
 
 import { KeyResult } from './entities'
 import KeyResultRepository from './repository'
 
-export interface KeyResultsWithLatestReport extends Partial<KeyResult> {
-  latestProgressReport: IProgressReport
-  latestConfidenceReport: IConfidenceReport
+export interface KeyResultWithCycle extends KeyResult {
+  cycle: ICycle
 }
 
 @Injectable()
@@ -29,32 +25,13 @@ class KeyResultService {
     ]
   }
 
-  async getFromOwnerWithRelationsAndLatestReports(
-    owner: User['id'],
-  ): Promise<KeyResultsWithLatestReport[]> {
+  async getFromOwnerWithRelations(owner: User['id']): Promise<KeyResult[]> {
     const selector: ObjectLiteral = { owner }
     const relations = this.allRelations
-    const order: OrderByCondition = {
-      'progressReports.createdAt': 'DESC',
-      'confidenceReports.createdAt': 'DESC',
-    }
 
-    const keyResults = await this.repository.selectManyWithSelectorRelationsAndOrder(
-      selector,
-      relations,
-      order,
-    )
-    const keyResultsWithLatestReport = keyResults.map(this.filterLatestReports)
+    const keyResults = await this.repository.selectManyWithSelectorAndRelations(selector, relations)
 
-    return keyResultsWithLatestReport
-  }
-
-  filterLatestReports(keyResult: KeyResult): KeyResultsWithLatestReport {
-    return {
-      ...omit(keyResult, ['progressReports', 'confidenceReports']),
-      latestProgressReport: keyResult.progressReports[0],
-      latestConfidenceReport: keyResult.confidenceReports[0],
-    }
+    return keyResults
   }
 }
 

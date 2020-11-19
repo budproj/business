@@ -1,26 +1,18 @@
-import {
-  EntityRepository,
-  ObjectLiteral,
-  OrderByCondition,
-  Repository,
-  SelectQueryBuilder,
-} from 'typeorm'
+import { EntityRepository, ObjectLiteral, Repository, SelectQueryBuilder } from 'typeorm'
 
 import { KeyResult } from './entities'
 
 @EntityRepository(KeyResult)
 class KeyResultRepository extends Repository<KeyResult> {
-  async selectManyWithSelectorRelationsAndOrder(
+  async selectManyWithSelectorAndRelations(
     selector: ObjectLiteral,
     relations: Array<[string, string] | string>,
-    orderHashmap: OrderByCondition,
   ): Promise<KeyResult[]> {
     const query = this.createQueryBuilder()
     const filteredQuery = query.where(selector)
     const joinedQuery = relations.reduce(this.reduceRelationsToSubQuery, filteredQuery)
-    const orderedQuery = joinedQuery.orderBy(orderHashmap)
 
-    return orderedQuery.getMany()
+    return joinedQuery.getMany()
   }
 
   reduceRelationsToSubQuery(
