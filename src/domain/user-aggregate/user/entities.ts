@@ -23,6 +23,12 @@ export class User implements IUser {
   @Column()
   public authzSub: string
 
+  @Column({ nullable: true })
+  public role: string
+
+  @Column({ nullable: true })
+  public picture: string
+
   @CreateDateColumn()
   public createdAt: Date
 

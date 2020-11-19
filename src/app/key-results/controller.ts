@@ -1,19 +1,25 @@
-import { BadRequestException, Controller, Get, Query, Request, UseGuards } from '@nestjs/common'
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Query,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 
-import { Permissions, PermissionsGuard, AuthzToken } from 'app/authz'
+import { Permissions, PermissionsGuard, User, AuthzInterceptor } from 'app/authz'
+
+import { User as UserEntity } from '../../domain/user-aggregate/user/entities'
 
 import KeyResultsService, { KeyResultsHashmap } from './service'
 
-export interface KeyResultsRequest {
-  user: AuthzToken
-}
-
-export interface GetKeyResultsQueryParameters {
+export interface GetKeyResultsHashmapQueryParameters {
   scope: 'user' | 'team' | 'company'
 }
 
 @Controller('key-results')
+@UseInterceptors(AuthzInterceptor)
 class KeyResultsController {
   constructor(private readonly keyResultsService: KeyResultsService) {}
 
@@ -21,11 +27,11 @@ class KeyResultsController {
   @Get()
   @Permissions('read:key-results')
   async getKeyResultsHashmap(
-    @Request() request: KeyResultsRequest,
-    @Query() query: GetKeyResultsQueryParameters,
+    @Query() query: GetKeyResultsHashmapQueryParameters,
+    @User() user: UserEntity,
   ): Promise<KeyResultsHashmap> {
     const handlers = {
-      user: async () => this.keyResultsService.getUserKeyResults(request.user.sub),
+      user: async () => this.keyResultsService.getUserKeyResults(user),
     }
     const { scope } = query
     const scopedHandler = handlers[scope]
@@ -35,9 +41,7 @@ class KeyResultsController {
       )
     const keyResults = await scopedHandler()
 
-    const keyResultsHashmap = this.keyResultsService.buildHashmap(keyResults)
-
-    return keyResultsHashmap
+    return keyResults
   }
 }
 

@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common'
+import { omit } from 'lodash'
 
-import { AuthzToken } from 'app/authz'
 import { KeyResult } from 'domain/objective-aggregate/key-result/entities'
 import ObjectiveAggregateService from 'domain/objective-aggregate/service'
-import UserAggregateService from 'domain/user-aggregate/service'
+import { User } from 'domain/user-aggregate/user/entities'
 
 export type KeyResultsHashmap = Record<KeyResult['id'], KeyResult>
 
@@ -11,24 +11,27 @@ export type KeyResultsHashmap = Record<KeyResult['id'], KeyResult>
 class KeyResultsService {
   private readonly logger = new Logger(KeyResultsService.name)
 
-  constructor(
-    private readonly objectiveAggregateService: ObjectiveAggregateService,
-    private readonly userAggregateService: UserAggregateService,
-  ) {}
+  constructor(private readonly objectiveAggregateService: ObjectiveAggregateService) {}
 
-  async getUserKeyResults(authzSub: AuthzToken['sub']): Promise<KeyResult[]> {
-    this.logger.debug(`Getting key results that are owned by user with Auth0 sub ${authzSub}`)
+  async getUserKeyResults(user: User): Promise<KeyResultsHashmap> {
+    const dataWithRelations = await this.objectiveAggregateService.getOwnedBy(user)
+    const dataFilteredByLatestReports = dataWithRelations.map((keyResult) => {
+      const keyResultWithLatestReports = this.objectiveAggregateService.getLatestReportsForKeyResult(
+        keyResult,
+      )
+      const normalizedKeyResult = omit(keyResultWithLatestReports, [
+        'progressReports',
+        'confidenceReports',
+      ])
 
-    const uid = await this.userAggregateService.getUserIDBasedOnAuthzSub(authzSub)
-    this.logger.debug(`Used user Auth0 sub ${authzSub} to select user with ID ${uid}`)
+      return normalizedKeyResult
+    })
+    const hashmap = this.buildHashmap(dataFilteredByLatestReports)
 
-    const keyResults = await this.objectiveAggregateService.getKeyResultsOwnedBy(uid)
-    this.logger.debug({ message: `Selected key results owned by user ${uid}:`, keyResults })
-
-    return keyResults
+    return hashmap
   }
 
-  buildHashmap(keyResults: KeyResult[]): KeyResultsHashmap {
+  buildHashmap(keyResults: Array<Partial<KeyResult>>): KeyResultsHashmap {
     this.logger.debug({ message: 'Starting to create Key Results hashmap', keyResults })
 
     const initialHashmap = {}

@@ -4,20 +4,11 @@ import { PassportStrategy } from '@nestjs/passport'
 import { passportJwtSecret } from 'jwks-rsa'
 import { ExtractJwt, Strategy } from 'passport-jwt'
 
-export interface AuthzToken {
-  iss: string
-  sub: string
-  aud: string[]
-  iat: number
-  exp: number
-  azp: string
-  scope: string
-  permissions: string[]
-}
+import { AuthzToken } from './dto'
 
 @Injectable()
-class AuthzService extends PassportStrategy(Strategy) {
-  private readonly logger = new Logger(AuthzService.name)
+class AuthzStrategy extends PassportStrategy(Strategy) {
+  private readonly logger = new Logger(AuthzStrategy.name)
 
   constructor(private readonly configService: ConfigService) {
     super({
@@ -38,4 +29,4 @@ class AuthzService extends PassportStrategy(Strategy) {
   }
 }
 
-export default AuthzService
+export default AuthzStrategy

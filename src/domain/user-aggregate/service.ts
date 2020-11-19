@@ -1,20 +1,22 @@
 import { Injectable, Logger } from '@nestjs/common'
 
+import { AuthzRequest } from 'app/authz'
+
 import { User } from './user/entities'
-import UserService, { UserFindFilter, UserFindWhereSelector } from './user/service'
+import UserService from './user/service'
 
 @Injectable()
 class UserAggregateService {
   private readonly logger = new Logger(UserAggregateService.name)
+
   constructor(private readonly userService: UserService) {}
 
-  async getUserIDBasedOnAuthzSub(authzSub: User['authzSub']): Promise<User['id']> {
-    const selector: UserFindWhereSelector = { authzSub }
-    const filters: UserFindFilter[] = ['id']
+  async getUserForRequest(request: AuthzRequest): Promise<User> {
+    const authzToken = request.user
+    const user = await this.userService.getUserForToken(authzToken)
+    this.logger.debug(`Used Auth0 sub ${authzToken.sub} to fetch user with ID ${user.id}`)
 
-    const userData = await this.userService.findOneWithFilter(selector, filters)
-
-    return userData.id
+    return user
   }
 }
 

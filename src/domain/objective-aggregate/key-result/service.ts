@@ -1,20 +1,37 @@
 import { Injectable } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { ObjectLiteral } from 'typeorm'
+
+import { ICycle } from 'domain/company-aggregate/cycle/dto'
+import { User } from 'domain/user-aggregate/user/entities'
 
 import { KeyResult } from './entities'
+import KeyResultRepository from './repository'
 
-export type KeyResultFindWhereSelector = Partial<Record<keyof KeyResult, string | number>>
+export interface KeyResultWithCycle extends KeyResult {
+  cycle: ICycle
+}
 
 @Injectable()
 class KeyResultService {
-  constructor(
-    @InjectRepository(KeyResult)
-    private readonly keyResultRepository: Repository<KeyResult>,
-  ) {}
+  allRelations: Array<[string, string] | string>
 
-  async findWhere(selector: KeyResultFindWhereSelector): Promise<KeyResult[]> {
-    return this.keyResultRepository.find({ where: selector })
+  constructor(private readonly repository: KeyResultRepository) {
+    this.allRelations = [
+      ['owner', 'user'],
+      'team',
+      'objective',
+      'progressReports',
+      'confidenceReports',
+    ]
+  }
+
+  async getFromOwnerWithRelations(owner: User['id']): Promise<KeyResult[]> {
+    const selector: ObjectLiteral = { owner }
+    const relations = this.allRelations
+
+    const keyResults = await this.repository.selectManyWithSelectorAndRelations(selector, relations)
+
+    return keyResults
   }
 }
 
