@@ -2,19 +2,17 @@ import { Injectable } from '@nestjs/common'
 
 import { User } from 'domain/user-aggregate/user/entities'
 
-import KeyResultService, { KeyResultLatestReport } from './key-result/service'
+import { KeyResult } from './key-result/entities'
+import KeyResultService from './key-result/service'
 
 @Injectable()
 class ObjectiveAggregateService {
   constructor(private readonly keyResultService: KeyResultService) {}
 
-  async getKeyResultsOwnedBy(uid: User['id']): Promise<KeyResultLatestReport[]> {
+  async getKeyResultsOwnedBy(uid: User['id']): Promise<KeyResult[]> {
     const keyResults = await this.keyResultService.getUserKeyResults(uid)
-    const latestReportKeyResults = keyResults.map(
-      this.keyResultService.filterKeyResultToLatestReport,
-    )
 
-    return latestReportKeyResults
+    return keyResults
   }
 }
 

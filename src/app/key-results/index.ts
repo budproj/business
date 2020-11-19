@@ -1,5 +1,3 @@
-export { default as KeyResultsController } from './controller'
+import KeyResultsModule from './module'
 
-export { default as KeyResultsModule } from './module'
-
-export { default as KeyResultsService } from './service'
+export default KeyResultsModule

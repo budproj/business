@@ -1,17 +1,9 @@
 import { Injectable } from '@nestjs/common'
-import { omit } from 'lodash'
 
-import { IConfidenceReport } from 'domain/objective-aggregate/confidence-report/dto'
-import { IProgressReport } from 'domain/objective-aggregate/progress-report/dto'
 import { User } from 'domain/user-aggregate/user/entities'
 
 import { KeyResult } from './entities'
 import KeyResultRepository from './repository'
-
-export interface KeyResultLatestReport extends Partial<KeyResult> {
-  progressReport: IProgressReport
-  confidenceReport: IConfidenceReport
-}
 
 @Injectable()
 class KeyResultService {
@@ -31,14 +23,6 @@ class KeyResultService {
     )
 
     return keyResults
-  }
-
-  filterKeyResultToLatestReport(keyResult: KeyResult): KeyResultLatestReport {
-    return {
-      ...omit(keyResult, 'progressReports', 'confidenceReports'),
-      progressReport: keyResult.progressReports[0],
-      confidenceReport: keyResult.confidenceReports[0],
-    }
   }
 }
 

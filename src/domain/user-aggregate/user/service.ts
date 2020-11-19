@@ -14,7 +14,11 @@ class UserService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async findOneWithFilter(
+  async getUser(selector: UserFindWhereSelector): Promise<User> {
+    return this.userRepository.findOne({ where: selector })
+  }
+
+  async getUserWithFilters(
     selector: UserFindWhereSelector,
     filters: UserFindFilter[],
   ): Promise<User> {

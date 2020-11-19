@@ -16,8 +16,8 @@ export interface AuthzToken {
 }
 
 @Injectable()
-class AuthzService extends PassportStrategy(Strategy) {
-  private readonly logger = new Logger(AuthzService.name)
+class AuthzStrategy extends PassportStrategy(Strategy) {
+  private readonly logger = new Logger(AuthzStrategy.name)
 
   constructor(private readonly configService: ConfigService) {
     super({
@@ -38,4 +38,4 @@ class AuthzService extends PassportStrategy(Strategy) {
   }
 }
 
-export default AuthzService
+export default AuthzStrategy
