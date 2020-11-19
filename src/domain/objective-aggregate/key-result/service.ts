@@ -1,50 +1,44 @@
 import { Injectable } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, SelectQueryBuilder } from 'typeorm'
+import { omit } from 'lodash'
 
+import { IConfidenceReport } from 'domain/objective-aggregate/confidence-report/dto'
+import { IProgressReport } from 'domain/objective-aggregate/progress-report/dto'
 import { User } from 'domain/user-aggregate/user/entities'
 
 import { KeyResult } from './entities'
+import KeyResultRepository from './repository'
 
-export type KeyResultFindWhereSelector = Partial<Record<keyof KeyResult, string | number>>
+export interface KeyResultLatestReport extends Partial<KeyResult> {
+  progressReport: IProgressReport
+  confidenceReport: IConfidenceReport
+}
 
 @Injectable()
 class KeyResultService {
-  constructor(
-    @InjectRepository(KeyResult)
-    private readonly keyResultRepository: Repository<KeyResult>,
-  ) {}
+  relations = [['owner', 'user'], 'team', 'objective', 'progressReports', 'confidenceReports']
+  order: Record<string, 'ASC' | 'DESC'> = {
+    'progressReports.createdAt': 'DESC',
+    'confidenceReports.createdAt': 'DESC',
+  }
+
+  constructor(private readonly keyResultRepository: KeyResultRepository) {}
 
   async getUserKeyResults(uid: User['id']): Promise<KeyResult[]> {
-    const desiredRelations = [
-      ['owner', 'user'],
-      'team',
-      'objective',
-      'progressReports',
-      'confidenceReports',
-    ]
-    const keyResults = this.getKeyResults({ owner: uid }, desiredRelations)
+    const keyResults = await this.keyResultRepository.getAllKeyResultsWithSelector(
+      { owner: uid },
+      this.relations,
+      this.order,
+    )
 
     return keyResults
   }
 
-  async getKeyResults(
-    selector: KeyResultFindWhereSelector,
-    relations?: Array<string | string[]>,
-  ): Promise<KeyResult[]> {
-    const repository = this.keyResultRepository.createQueryBuilder()
-    const query = repository.where(selector)
-    const joinedQuery =
-      relations?.reduce(
-        (currentQuery: SelectQueryBuilder<KeyResult>, subQuery: string[] | string) =>
-          currentQuery.leftJoinAndSelect(
-            `${KeyResult.name}.${typeof subQuery === 'string' ? subQuery : subQuery[0]}`,
-            typeof subQuery === 'string' ? subQuery : subQuery[1],
-          ),
-        query,
-      ) ?? query
-
-    return joinedQuery.getMany()
+  filterKeyResultToLatestReport(keyResult: KeyResult): KeyResultLatestReport {
+    return {
+      ...omit(keyResult, 'progressReports', 'confidenceReports'),
+      progressReport: keyResult.progressReports[0],
+      confidenceReport: keyResult.confidenceReports[0],
+    }
   }
 }
 

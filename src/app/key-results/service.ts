@@ -2,10 +2,11 @@ import { Injectable, Logger } from '@nestjs/common'
 
 import { AuthzToken } from 'app/authz'
 import { KeyResult } from 'domain/objective-aggregate/key-result/entities'
+import { KeyResultLatestReport } from 'domain/objective-aggregate/key-result/service'
 import ObjectiveAggregateService from 'domain/objective-aggregate/service'
 import UserAggregateService from 'domain/user-aggregate/service'
 
-export type KeyResultsHashmap = Record<KeyResult['id'], KeyResult>
+export type KeyResultsHashmap = Record<KeyResult['id'], KeyResultLatestReport>
 
 @Injectable()
 class KeyResultsService {
@@ -16,7 +17,7 @@ class KeyResultsService {
     private readonly userAggregateService: UserAggregateService,
   ) {}
 
-  async getUserKeyResults(authzSub: AuthzToken['sub']): Promise<KeyResult[]> {
+  async getUserKeyResults(authzSub: AuthzToken['sub']): Promise<KeyResultLatestReport[]> {
     this.logger.debug(`Getting key results that are owned by user with Auth0 sub ${authzSub}`)
 
     const uid = await this.userAggregateService.getUserIDBasedOnAuthzSub(authzSub)

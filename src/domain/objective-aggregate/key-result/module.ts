@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import { KeyResult } from './entities'
+import KeyResultRepository from './repository'
 import KeyResultService from './service'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([KeyResult])],
+  imports: [TypeOrmModule.forFeature([KeyResultRepository])],
   providers: [KeyResultService],
   exports: [KeyResultService],
 })
