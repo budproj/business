@@ -1,4 +1,4 @@
-export interface IKeyResult {
+export class KeyResultDTO {
   id: number
   title: string
   description?: string | null

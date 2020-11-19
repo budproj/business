@@ -8,13 +8,13 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { ICycle } from 'domain/company-aggregate/cycle/dto'
-import { IKeyResult } from 'domain/objective-aggregate/key-result/dto'
+import { CycleDTO } from 'domain/company-aggregate/cycle/dto'
+import { KeyResultDTO } from 'domain/objective-aggregate/key-result/dto'
 
-import { IObjective } from './dto'
+import { ObjectiveDTO } from './dto'
 
 @Entity()
-export class Objective implements IObjective {
+export class Objective implements ObjectiveDTO {
   @PrimaryGeneratedColumn()
   public id: number
 
@@ -28,8 +28,8 @@ export class Objective implements IObjective {
   public updatedAt: Date
 
   @OneToMany('KeyResult', 'objective')
-  public keyResults: IKeyResult[]
+  public keyResults: KeyResultDTO[]
 
   @ManyToOne('Cycle', 'objectives')
-  public cycle: ICycle
+  public cycle: CycleDTO
 }

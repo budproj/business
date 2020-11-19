@@ -1,4 +1,4 @@
-export interface ICycle {
+export class CycleDTO {
   id: number
   dateStart: Date
   dateEnd: Date

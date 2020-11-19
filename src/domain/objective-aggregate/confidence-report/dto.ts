@@ -1,4 +1,4 @@
-export interface IConfidenceReport {
+export class ConfidenceReportDTO {
   id: number
   valuePrevious: number
   valueNew: number

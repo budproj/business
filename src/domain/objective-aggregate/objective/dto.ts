@@ -1,4 +1,4 @@
-export interface IObjective {
+export class ObjectiveDTO {
   id: number
   title: string
   createdAt: Date

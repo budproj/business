@@ -8,16 +8,16 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { ITeam } from 'domain/company-aggregate/team/dto'
-import { IConfidenceReport } from 'domain/objective-aggregate/confidence-report/dto'
-import { IObjective } from 'domain/objective-aggregate/objective/dto'
-import { IProgressReport } from 'domain/objective-aggregate/progress-report/dto'
-import { IUser } from 'domain/user-aggregate/user/dto'
+import { TeamDTO } from 'domain/company-aggregate/team/dto'
+import { ConfidenceReportDTO } from 'domain/objective-aggregate/confidence-report/dto'
+import { ObjectiveDTO } from 'domain/objective-aggregate/objective/dto'
+import { ProgressReportDTO } from 'domain/objective-aggregate/progress-report/dto'
+import { UserDTO } from 'domain/user-aggregate/user/dto'
 
-import { IKeyResult } from './dto'
+import { KeyResultDTO } from './dto'
 
 @Entity()
-export class KeyResult implements IKeyResult {
+export class KeyResult implements KeyResultDTO {
   @PrimaryGeneratedColumn()
   public id: number
 
@@ -40,17 +40,17 @@ export class KeyResult implements IKeyResult {
   public updatedAt: Date
 
   @ManyToOne('User', 'keyResults')
-  public owner: IUser
+  public owner: UserDTO
 
   @ManyToOne('Objective', 'keyResults')
-  public objective: IObjective
+  public objective: ObjectiveDTO
 
   @ManyToOne('Team', 'keyResults')
-  public team: ITeam
+  public team: TeamDTO
 
   @OneToMany('ProgressReport', 'keyResult')
-  public progressReports: IProgressReport[]
+  public progressReports: ProgressReportDTO[]
 
   @OneToMany('ConfidenceReport', 'keyResult')
-  public confidenceReports: IConfidenceReport[]
+  public confidenceReports: ConfidenceReportDTO[]
 }

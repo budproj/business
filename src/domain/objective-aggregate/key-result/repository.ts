@@ -1,18 +1,31 @@
+import { Logger } from '@nestjs/common'
 import { EntityRepository, ObjectLiteral, Repository, SelectQueryBuilder } from 'typeorm'
 
 import { KeyResult } from './entities'
 
 @EntityRepository(KeyResult)
 class KeyResultRepository extends Repository<KeyResult> {
-  async selectManyWithSelectorAndRelations(
+  defaultOrder = `${KeyResult.name}.updatedAt`
+
+  private readonly logger = new Logger(KeyResultRepository.name)
+
+  async selectManyWithRankAndRelations(
     selector: ObjectLiteral,
+    rankSortColumn: string,
     relations: Array<[string, string] | string>,
   ): Promise<KeyResult[]> {
+    this.logger.debug({
+      rankSortColumn,
+      message: `Using rankSortColumn to fetch key results`,
+    })
+
     const query = this.createQueryBuilder()
     const filteredQuery = query.where(selector)
     const joinedQuery = relations.reduce(this.reduceRelationsToSubQuery, filteredQuery)
+    const orderedByRank = joinedQuery.orderBy(rankSortColumn)
+    const orderedByDefault = orderedByRank.addOrderBy(this.defaultOrder, 'DESC')
 
-    return joinedQuery.getMany()
+    return orderedByDefault.getMany()
   }
 
   reduceRelationsToSubQuery(

@@ -1,12 +1,12 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 
-import { IKeyResult } from 'domain/objective-aggregate/key-result/dto'
-import { IUser } from 'domain/user-aggregate/user/dto'
+import { KeyResultDTO } from 'domain/objective-aggregate/key-result/dto'
+import { UserDTO } from 'domain/user-aggregate/user/dto'
 
-import { IConfidenceReport } from './dto'
+import { ConfidenceReportDTO } from './dto'
 
 @Entity()
-export class ConfidenceReport implements IConfidenceReport {
+export class ConfidenceReport implements ConfidenceReportDTO {
   @PrimaryGeneratedColumn()
   public id: number
 
@@ -23,8 +23,8 @@ export class ConfidenceReport implements IConfidenceReport {
   public createdAt: Date
 
   @ManyToOne('User', 'confidenceReports')
-  public user: IUser
+  public user: UserDTO
 
   @ManyToOne('KeyResult', 'confidenceReports')
-  public keyResult: IKeyResult
+  public keyResult: KeyResultDTO
 }
