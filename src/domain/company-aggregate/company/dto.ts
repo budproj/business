@@ -1,4 +1,4 @@
-export interface ICompany {
+export class CompanyDTO {
   id: number
   name: string
   createdAt: Date

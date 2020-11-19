@@ -3,7 +3,7 @@ import { EntityRepository, Repository } from 'typeorm'
 
 import { User } from 'domain/user-aggregate/user/entities'
 
-import { IKeyResultView, IKeyResultViewBinding } from './dto'
+import { KeyResultViewDTO, KeyResultViewBinding } from './dto'
 import { KeyResultView } from './entities'
 
 @EntityRepository(KeyResultView)
@@ -12,11 +12,11 @@ class KeyResultViewRepository extends Repository<KeyResultView> {
 
   async selectViewRankForUserBinding(
     user: User['id'],
-    binding: IKeyResultViewBinding,
-  ): Promise<IKeyResultView['rank']> {
+    binding: KeyResultViewBinding,
+  ): Promise<KeyResultViewDTO['rank']> {
     const query = this.createQueryBuilder()
     const selectedViews = query.where({ user, binding })
-    const data: IKeyResultView | undefined = await selectedViews.getOne()
+    const data: KeyResultViewDTO | undefined = await selectedViews.getOne()
     const rank = data?.rank
 
     this.logger.debug(

@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common'
 import { omit } from 'lodash'
 
 import {
-  IKeyResultView,
-  IKeyResultViewBinding,
+  KeyResultViewDTO,
+  KeyResultViewBinding,
 } from 'domain/objective-aggregate/key-result-view/dto'
 import ObjectiveAggregateService, {
   KeyResultWithLatestReports,
@@ -18,7 +18,7 @@ class KeyResultsService {
 
   async getUserKeyResults(
     user: User,
-    customRank: IKeyResultView['rank'] = [],
+    customRank: KeyResultViewDTO['rank'] = [],
   ): Promise<Array<Partial<KeyResultWithLatestReports>>> {
     const dataWithRelations = await this.objectiveAggregateService.getRankedKeyResultsOwnedBy(
       user,
@@ -51,7 +51,7 @@ class KeyResultsService {
 
   async getUserKeyResultsFromView(
     user: User,
-    view: IKeyResultViewBinding | null,
+    view: KeyResultViewBinding | null,
   ): Promise<Array<Partial<KeyResultWithLatestReports>>> {
     this.logger.debug(`Getting Key Results for user ${user.id} and view binding named "${view}"`)
 

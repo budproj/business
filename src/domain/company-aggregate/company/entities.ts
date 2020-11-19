@@ -7,13 +7,13 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { ICycle } from 'domain/company-aggregate/cycle/dto'
-import { ITeam } from 'domain/company-aggregate/team/dto'
+import { CycleDTO } from 'domain/company-aggregate/cycle/dto'
+import { TeamDTO } from 'domain/company-aggregate/team/dto'
 
-import { ICompany } from './dto'
+import { CompanyDTO } from './dto'
 
 @Entity()
-export class Company implements ICompany {
+export class Company implements CompanyDTO {
   @PrimaryGeneratedColumn()
   public id: number
 
@@ -27,8 +27,8 @@ export class Company implements ICompany {
   public updatedAt: Date
 
   @OneToMany('Team', 'company')
-  public teams: ITeam[]
+  public teams: TeamDTO[]
 
   @OneToMany('Cycle', 'company')
-  public cycles: ICycle[]
+  public cycles: CycleDTO[]
 }

@@ -10,14 +10,14 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { ICompany } from 'domain/company-aggregate/company/dto'
-import { IKeyResult } from 'domain/objective-aggregate/key-result/dto'
-import { IUser } from 'domain/user-aggregate/user/dto'
+import { CompanyDTO } from 'domain/company-aggregate/company/dto'
+import { KeyResultDTO } from 'domain/objective-aggregate/key-result/dto'
+import { UserDTO } from 'domain/user-aggregate/user/dto'
 
-import { ITeam } from './dto'
+import { TeamDTO } from './dto'
 
 @Entity()
-export class Team implements ITeam {
+export class Team implements TeamDTO {
   @PrimaryGeneratedColumn()
   public id: number
 
@@ -31,12 +31,12 @@ export class Team implements ITeam {
   public updatedAt: Date
 
   @ManyToOne('Company', 'teams')
-  public company: ICompany
+  public company: CompanyDTO
 
   @OneToMany('KeyResult', 'team')
-  public keyResults: IKeyResult[]
+  public keyResults: KeyResultDTO[]
 
   @ManyToMany('User', 'teams')
   @JoinTable()
-  public users: IUser[]
+  public users: UserDTO[]
 }

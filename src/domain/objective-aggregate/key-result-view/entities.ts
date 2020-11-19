@@ -8,21 +8,21 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { IUser } from 'domain/user-aggregate/user/dto'
+import { UserDTO } from 'domain/user-aggregate/user/dto'
 
-import { IKeyResultView, IKeyResultViewBinding } from './dto'
+import { KeyResultViewDTO, KeyResultViewBinding } from './dto'
 
 @Entity()
 @Unique(['user', 'binding'])
-export class KeyResultView implements IKeyResultView {
+export class KeyResultView implements KeyResultViewDTO {
   @PrimaryGeneratedColumn()
   public id: number
 
   @Column({ nullable: true })
   public title: string
 
-  @Column({ type: 'enum', enum: IKeyResultViewBinding, nullable: true })
-  public binding: IKeyResultViewBinding
+  @Column({ type: 'enum', enum: KeyResultViewBinding, nullable: true })
+  public binding: KeyResultViewBinding
 
   @Column({ type: 'simple-array', default: [] })
   public rank: number[]
@@ -34,5 +34,5 @@ export class KeyResultView implements IKeyResultView {
   public updatedAt: Date
 
   @ManyToOne('User', 'keyResultViews')
-  public user: IUser['id']
+  public user: UserDTO['id']
 }

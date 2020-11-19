@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common'
 import { ObjectLiteral } from 'typeorm'
 
-import { ICycle } from 'domain/company-aggregate/cycle/dto'
+import { CycleDTO } from 'domain/company-aggregate/cycle/dto'
 import { User } from 'domain/user-aggregate/user/entities'
 
-import { IKeyResultView } from '../key-result-view/dto'
+import { KeyResultViewDTO } from '../key-result-view/dto'
 
-import { IKeyResult } from './dto'
+import { KeyResultDTO } from './dto'
 import { KeyResult } from './entities'
 import KeyResultRepository from './repository'
 
 export interface KeyResultWithCycle extends KeyResult {
-  cycle: ICycle
+  cycle: CycleDTO
 }
 
 @Injectable()
@@ -30,7 +30,7 @@ class KeyResultService {
 
   async getRankedFromOwnerWithRelations(
     owner: User['id'],
-    customRank: IKeyResultView['rank'],
+    customRank: KeyResultViewDTO['rank'],
   ): Promise<KeyResult[]> {
     const selector: ObjectLiteral = { owner }
     const relations = this.allRelations
@@ -45,12 +45,12 @@ class KeyResultService {
     return keyResults
   }
 
-  buildRankSortColumn(customRank: IKeyResultView['rank']): string {
+  buildRankSortColumn(customRank: KeyResultViewDTO['rank']): string {
     if (customRank.length === 0) return ''
 
     const prefix = '(CASE'
     const parts = customRank.map(
-      (keyResultID: IKeyResult['id'], index: number) =>
+      (keyResultID: KeyResultDTO['id'], index: number) =>
         `WHEN ${KeyResult.name}.id=${keyResultID} THEN ${index}`,
     )
     const suffix = 'ELSE null END)'

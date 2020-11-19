@@ -1,4 +1,4 @@
-export interface IUser {
+export class UserDTO {
   id: number
   authzSub: string
   role: string

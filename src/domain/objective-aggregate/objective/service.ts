@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common'
 
-import { ICycle } from 'domain/company-aggregate/cycle/dto'
+import { CycleDTO } from 'domain/company-aggregate/cycle/dto'
 
-import { IObjective } from './dto'
+import { ObjectiveDTO } from './dto'
 import ObjectiveRepository from './repository'
 
 @Injectable()
 class ObjectiveService {
   constructor(private readonly repository: ObjectiveRepository) {}
 
-  async getCycle(objective: IObjective): Promise<ICycle> {
+  async getCycle(objective: ObjectiveDTO): Promise<CycleDTO> {
     const { id } = objective
     const cycle = await this.repository.selectRelatedCycle(id)
 

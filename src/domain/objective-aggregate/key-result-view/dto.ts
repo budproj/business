@@ -1,16 +1,16 @@
-import { IKeyResult } from 'domain/objective-aggregate/key-result/dto'
-import { IUser } from 'domain/user-aggregate/user/dto'
+import { KeyResultDTO } from 'domain/objective-aggregate/key-result/dto'
+import { UserDTO } from 'domain/user-aggregate/user/dto'
 
-export enum IKeyResultViewBinding {
+export enum KeyResultViewBinding {
   MINE = 'MINE',
 }
 
-export interface IKeyResultView {
+export class KeyResultViewDTO {
   id: number
-  user: IUser['id']
+  user: UserDTO['id']
   title: string
-  binding: IKeyResultViewBinding
-  rank: Array<IKeyResult['id']>
+  binding: KeyResultViewBinding
+  rank: Array<KeyResultDTO['id']>
   createdAt: Date
   updatedAt: Date
 }

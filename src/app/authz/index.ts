@@ -4,6 +4,6 @@ export * from './decorators'
 export * from './guards'
 export * from './strategy'
 export * from './interceptors'
-export * from './dto'
+export * from './types'
 
 export default AuthzModule

@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 
 import { User } from 'domain/user-aggregate/user/entities'
 
-import { IKeyResultView, IKeyResultViewBinding } from './dto'
+import { KeyResultViewDTO, KeyResultViewBinding } from './dto'
 import KeyResultViewRepository from './repository'
 
 @Injectable()
@@ -13,8 +13,8 @@ class KeyResultViewService {
 
   async getUserViewCustomRank(
     userID: User['id'],
-    view: IKeyResultViewBinding,
-  ): Promise<IKeyResultView['rank']> {
+    view: KeyResultViewBinding,
+  ): Promise<KeyResultViewDTO['rank']> {
     this.logger.debug(`Fetching user ${userID} custom "${view}" view rank`)
 
     const userCustomRank = await this.repository.selectViewRankForUserBinding(userID, view)

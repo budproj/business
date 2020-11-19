@@ -2,7 +2,7 @@ import { Controller, Get, Query, UseGuards, UseInterceptors } from '@nestjs/comm
 import { AuthGuard } from '@nestjs/passport'
 
 import { Permissions, PermissionsGuard, User, AuthzInterceptor } from 'app/authz'
-import { IKeyResultViewBinding } from 'domain/objective-aggregate/key-result-view/dto'
+import { KeyResultViewBinding } from 'domain/objective-aggregate/key-result-view/dto'
 import { KeyResultWithLatestReports } from 'domain/objective-aggregate/service'
 
 import { User as UserEntity } from '../../domain/user-aggregate/user/entities'
@@ -23,7 +23,7 @@ class KeyResultsController {
     @Query() { scope, view }: GetKeyResultsDTO,
   ): Promise<Array<Partial<KeyResultWithLatestReports>>> {
     const handlers = {
-      user: async (view: IKeyResultViewBinding) =>
+      user: async (view: KeyResultViewBinding) =>
         this.keyResultsService.getUserKeyResultsFromView(user, view),
     }
     const scopedHandler = handlers[scope]

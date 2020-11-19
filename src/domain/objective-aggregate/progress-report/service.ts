@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common'
 
-import { IProgressReport } from './dto'
+import { ProgressReportDTO } from './dto'
 
 @Injectable()
 class ProgressReportService {
   filterLatestFromList(
-    progressReports: IProgressReport[],
-  ): IProgressReport | Record<string, unknown> {
+    progressReports: ProgressReportDTO[],
+  ): ProgressReportDTO | Record<string, unknown> {
     return progressReports.reduce(
-      (previous: IProgressReport | Record<string, unknown>, next: IProgressReport) =>
+      (previous: ProgressReportDTO | Record<string, unknown>, next: ProgressReportDTO) =>
         next.id > previous?.id ? next : previous,
       {},
     )

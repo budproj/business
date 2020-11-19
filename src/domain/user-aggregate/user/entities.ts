@@ -8,15 +8,15 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { ITeam } from 'domain/company-aggregate/team/dto'
-import { IConfidenceReport } from 'domain/objective-aggregate/confidence-report/dto'
-import { IKeyResult } from 'domain/objective-aggregate/key-result/dto'
-import { IProgressReport } from 'domain/objective-aggregate/progress-report/dto'
+import { TeamDTO } from 'domain/company-aggregate/team/dto'
+import { ConfidenceReportDTO } from 'domain/objective-aggregate/confidence-report/dto'
+import { KeyResultDTO } from 'domain/objective-aggregate/key-result/dto'
+import { ProgressReportDTO } from 'domain/objective-aggregate/progress-report/dto'
 
-import { IUser } from './dto'
+import { UserDTO } from './dto'
 
 @Entity()
-export class User implements IUser {
+export class User implements UserDTO {
   @PrimaryGeneratedColumn()
   public id: number
 
@@ -36,14 +36,14 @@ export class User implements IUser {
   public updatedAt: Date
 
   @ManyToMany('Team', 'users')
-  public teams: ITeam[]
+  public teams: TeamDTO[]
 
   @OneToMany('KeyResult', 'owner')
-  public keyResults: IKeyResult[]
+  public keyResults: KeyResultDTO[]
 
   @OneToMany('ProgressReport', 'user')
-  public progressReports: IProgressReport[]
+  public progressReports: ProgressReportDTO[]
 
   @OneToMany('ConfidenceReport', 'user')
-  public confidenceReports: IConfidenceReport[]
+  public confidenceReports: ConfidenceReportDTO[]
 }
