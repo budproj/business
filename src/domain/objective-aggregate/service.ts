@@ -4,6 +4,8 @@ import { User } from 'domain/user-aggregate/user/entities'
 
 import { IConfidenceReport } from './confidence-report/dto'
 import ConfidenceReportService from './confidence-report/service'
+import { IKeyResultView, IKeyResultViewBinding } from './key-result-view/dto'
+import KeyResultViewService from './key-result-view/service'
 import { KeyResult } from './key-result/entities'
 import KeyResultService, { KeyResultWithCycle } from './key-result/service'
 import ObjectiveService from './objective/service'
@@ -24,11 +26,18 @@ class ObjectiveAggregateService {
     private readonly objectiveService: ObjectiveService,
     private readonly confidenceReportService: ConfidenceReportService,
     private readonly progressReportService: ProgressReportService,
+    private readonly keyResultViewService: KeyResultViewService,
   ) {}
 
-  async getOwnedBy(user: User): Promise<KeyResultWithCycle[]> {
+  async getRankedKeyResultsOwnedBy(
+    user: User,
+    customRank: IKeyResultView['rank'] | [],
+  ): Promise<KeyResultWithCycle[]> {
     const ownerID = user.id
-    const keyResults = await this.keyResultService.getFromOwnerWithRelations(ownerID)
+    const keyResults = await this.keyResultService.getRankedFromOwnerWithRelations(
+      ownerID,
+      customRank,
+    )
 
     this.logger.debug({
       keyResults,
@@ -62,6 +71,18 @@ class ObjectiveAggregateService {
         keyResult.confidenceReports,
       ),
     }
+  }
+
+  async getUserViewCustomRank(
+    user: User,
+    view: IKeyResultViewBinding | null,
+  ): Promise<IKeyResultView['rank']> {
+    if (!view) return []
+
+    const userID = user.id
+    const userCustomRank = await this.keyResultViewService.getUserViewCustomRank(userID, view)
+
+    return userCustomRank
   }
 }
 
