@@ -4,6 +4,8 @@ import { KeyResult } from './entities'
 
 @EntityRepository(KeyResult)
 class KeyResultRepository extends Repository<KeyResult> {
+  defaultOrder = `${KeyResult.name}.updatedAt`
+
   async selectManyWithSelectorAndRelations(
     selector: ObjectLiteral,
     relations: Array<[string, string] | string>,
@@ -11,8 +13,9 @@ class KeyResultRepository extends Repository<KeyResult> {
     const query = this.createQueryBuilder()
     const filteredQuery = query.where(selector)
     const joinedQuery = relations.reduce(this.reduceRelationsToSubQuery, filteredQuery)
+    const orderedQuery = joinedQuery.orderBy(this.defaultOrder, 'DESC')
 
-    return joinedQuery.getMany()
+    return orderedQuery.getMany()
   }
 
   reduceRelationsToSubQuery(

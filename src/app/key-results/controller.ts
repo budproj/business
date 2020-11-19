@@ -9,10 +9,11 @@ import {
 import { AuthGuard } from '@nestjs/passport'
 
 import { Permissions, PermissionsGuard, User, AuthzInterceptor } from 'app/authz'
+import { KeyResultWithLatestReports } from 'domain/objective-aggregate/service'
 
 import { User as UserEntity } from '../../domain/user-aggregate/user/entities'
 
-import KeyResultsService, { KeyResultsHashmap } from './service'
+import KeyResultsService from './service'
 
 export interface GetKeyResultsHashmapQueryParameters {
   scope: 'user' | 'team' | 'company'
@@ -29,7 +30,7 @@ class KeyResultsController {
   async getKeyResultsHashmap(
     @Query() query: GetKeyResultsHashmapQueryParameters,
     @User() user: UserEntity,
-  ): Promise<KeyResultsHashmap> {
+  ): Promise<Array<Partial<KeyResultWithLatestReports>>> {
     const handlers = {
       user: async () => this.keyResultsService.getUserKeyResults(user),
     }

@@ -11,8 +11,8 @@ import { IProgressReport } from './progress-report/dto'
 import ProgressReportService from './progress-report/service'
 
 export interface KeyResultWithLatestReports extends KeyResult {
-  latestProgressReport: IProgressReport
-  latestConfidenceReport: IConfidenceReport
+  latestProgressReport: IProgressReport | Record<string, unknown>
+  latestConfidenceReport: IConfidenceReport | Record<string, unknown>
 }
 
 @Injectable()
@@ -55,7 +55,9 @@ class ObjectiveAggregateService {
   getLatestReportsForKeyResult(keyResult: KeyResult): KeyResultWithLatestReports {
     return {
       ...keyResult,
-      latestProgressReport: keyResult.progressReports[0],
+      latestProgressReport: this.progressReportService.filterLatestFromList(
+        keyResult.progressReports,
+      ),
       latestConfidenceReport: this.confidenceReportService.filterLatestFromList(
         keyResult.confidenceReports,
       ),

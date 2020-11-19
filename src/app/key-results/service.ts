@@ -1,11 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { omit } from 'lodash'
 
-import { KeyResult } from 'domain/objective-aggregate/key-result/entities'
-import ObjectiveAggregateService from 'domain/objective-aggregate/service'
+import ObjectiveAggregateService, {
+  KeyResultWithLatestReports,
+} from 'domain/objective-aggregate/service'
 import { User } from 'domain/user-aggregate/user/entities'
-
-export type KeyResultsHashmap = Record<KeyResult['id'], KeyResult>
 
 @Injectable()
 class KeyResultsService {
@@ -13,9 +12,14 @@ class KeyResultsService {
 
   constructor(private readonly objectiveAggregateService: ObjectiveAggregateService) {}
 
-  async getUserKeyResults(user: User): Promise<KeyResultsHashmap> {
+  async getUserKeyResults(user: User): Promise<Array<Partial<KeyResultWithLatestReports>>> {
     const dataWithRelations = await this.objectiveAggregateService.getOwnedBy(user)
-    const dataFilteredByLatestReports = dataWithRelations.map((keyResult) => {
+    this.logger.debug({
+      dataWithRelations,
+      message: `Selected key results owned by user ${user.id}`,
+    })
+
+    const dataOnlyWithLatestReports = dataWithRelations.map((keyResult) => {
       const keyResultWithLatestReports = this.objectiveAggregateService.getLatestReportsForKeyResult(
         keyResult,
       )
@@ -26,24 +30,13 @@ class KeyResultsService {
 
       return normalizedKeyResult
     })
-    const hashmap = this.buildHashmap(dataFilteredByLatestReports)
-
-    return hashmap
-  }
-
-  buildHashmap(keyResults: Array<Partial<KeyResult>>): KeyResultsHashmap {
-    this.logger.debug({ message: 'Starting to create Key Results hashmap', keyResults })
-
-    const initialHashmap = {}
-    const reduceHandler = (previous: KeyResultsHashmap, next: KeyResult) => ({
-      ...previous,
-      [next.id]: next,
+    this.logger.debug({
+      dataWithRelations,
+      dataOnlyWithLatestReports,
+      message: `Reduced user ${user.id} key results confidence and progress reports to latest only`,
     })
 
-    const hashmap = keyResults.reduce(reduceHandler, initialHashmap)
-    this.logger.debug({ message: 'Finished creating Key Results hashmap', keyResults, hashmap })
-
-    return hashmap
+    return dataOnlyWithLatestReports
   }
 }
 
