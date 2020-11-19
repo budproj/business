@@ -1,28 +1,18 @@
 import { Injectable } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+
+import { AuthzToken } from 'app/authz'
 
 import { User } from './entities'
-
-export type UserFindWhereSelector = Partial<Record<keyof User, string | number>>
-export type UserFindFilter = keyof User
+import UserRepository from './repository'
 
 @Injectable()
 class UserService {
-  constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-  ) {}
+  constructor(private readonly repository: UserRepository) {}
 
-  async getUser(selector: UserFindWhereSelector): Promise<User> {
-    return this.userRepository.findOne({ where: selector })
-  }
+  async getUserForToken(authzToken: AuthzToken): Promise<User> {
+    const user = this.repository.findUserWithAuthzSub(authzToken.sub)
 
-  async getUserWithFilters(
-    selector: UserFindWhereSelector,
-    filters: UserFindFilter[],
-  ): Promise<User> {
-    return this.userRepository.findOne({ where: selector, select: filters })
+    return user
   }
 }
 

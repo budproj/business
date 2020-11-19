@@ -4,8 +4,6 @@ import { Observable } from 'rxjs'
 import UserAggregateService from 'domain/user-aggregate/service'
 import { User } from 'domain/user-aggregate/user/entities'
 
-import { AuthzToken } from '.'
-
 @Injectable()
 export class AuthzInterceptor implements NestInterceptor {
   private readonly logger = new Logger(AuthzInterceptor.name)
@@ -14,12 +12,11 @@ export class AuthzInterceptor implements NestInterceptor {
 
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<unknown>> {
     const request = context.switchToHttp().getRequest()
-    const authzToken: AuthzToken = request.user
 
-    const user: User = await this.userAggregateService.getUserBasedOnAuthzSub(authzToken.sub)
+    const user: User = await this.userAggregateService.getUserForRequest(request)
     this.logger.debug({
       user,
-      message: `Used user Auth0 sub ${authzToken.sub} to select user with ID ${user.id}. Selected data:`,
+      message: `Selected user with ID ${user.id} for current request. Selected data:`,
     })
 
     request._budUser = user

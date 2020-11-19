@@ -4,16 +4,7 @@ import { PassportStrategy } from '@nestjs/passport'
 import { passportJwtSecret } from 'jwks-rsa'
 import { ExtractJwt, Strategy } from 'passport-jwt'
 
-export interface AuthzToken {
-  iss: string
-  sub: string
-  aud: string[]
-  iat: number
-  exp: number
-  azp: string
-  scope: string
-  permissions: string[]
-}
+import { AuthzToken } from './dto'
 
 @Injectable()
 class AuthzStrategy extends PassportStrategy(Strategy) {
