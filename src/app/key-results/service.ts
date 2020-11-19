@@ -18,7 +18,7 @@ class KeyResultsService {
 
   async getUserKeyResults(
     user: User,
-    customRank: IKeyResultView['rank'] | [] = [],
+    customRank: IKeyResultView['rank'] = [],
   ): Promise<Array<Partial<KeyResultWithLatestReports>>> {
     const dataWithRelations = await this.objectiveAggregateService.getRankedKeyResultsOwnedBy(
       user,

@@ -31,7 +31,7 @@ class ObjectiveAggregateService {
 
   async getRankedKeyResultsOwnedBy(
     user: User,
-    customRank: IKeyResultView['rank'] | [],
+    customRank: IKeyResultView['rank'],
   ): Promise<KeyResultWithCycle[]> {
     const ownerID = user.id
     const keyResults = await this.keyResultService.getRankedFromOwnerWithRelations(

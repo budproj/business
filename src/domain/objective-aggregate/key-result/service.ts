@@ -30,7 +30,7 @@ class KeyResultService {
 
   async getRankedFromOwnerWithRelations(
     owner: User['id'],
-    customRank: IKeyResultView['rank'] | [],
+    customRank: IKeyResultView['rank'],
   ): Promise<KeyResult[]> {
     const selector: ObjectLiteral = { owner }
     const relations = this.allRelations
@@ -46,6 +46,8 @@ class KeyResultService {
   }
 
   buildRankSortColumn(customRank: IKeyResultView['rank']): string {
+    if (customRank.length === 0) return ''
+
     const prefix = '(CASE'
     const parts = customRank.map(
       (keyResultID: IKeyResult['id'], index: number) =>

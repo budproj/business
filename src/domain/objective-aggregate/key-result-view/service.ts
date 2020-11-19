@@ -14,7 +14,7 @@ class KeyResultViewService {
   async getUserViewCustomRank(
     userID: User['id'],
     view: IKeyResultViewBinding,
-  ): Promise<IKeyResultView['rank'] | []> {
+  ): Promise<IKeyResultView['rank']> {
     this.logger.debug(`Fetching user ${userID} custom "${view}" view rank`)
 
     const userCustomRank = await this.repository.selectViewRankForUserBinding(userID, view)

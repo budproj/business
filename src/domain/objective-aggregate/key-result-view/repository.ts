@@ -16,11 +16,11 @@ class KeyResultViewRepository extends Repository<KeyResultView> {
   ): Promise<IKeyResultView['rank']> {
     const query = this.createQueryBuilder()
     const selectedViews = query.where({ user, binding })
-    const data = await selectedViews.getOne()
-    const { rank } = data
+    const data: IKeyResultView | undefined = await selectedViews.getOne()
+    const rank = data?.rank
 
     this.logger.debug(
-      `The user ${user.toString()} binding "${binding}" custom rank is [${rank.toString()}]`,
+      `The user ${user.toString()} binding "${binding}" custom rank is [${rank?.toString()}]`,
     )
 
     return rank
