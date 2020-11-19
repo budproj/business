@@ -1,16 +1,26 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 
 import { User } from 'domain/user-aggregate/user/entities'
 
-import { KeyResult } from './key-result/entities'
-import KeyResultService from './key-result/service'
+import KeyResultService, { KeyResultsWithLatestReport } from './key-result/service'
 
 @Injectable()
 class ObjectiveAggregateService {
+  private readonly logger = new Logger(ObjectiveAggregateService.name)
+
   constructor(private readonly keyResultService: KeyResultService) {}
 
-  async getKeyResultsOwnedBy(uid: User['id']): Promise<KeyResult[]> {
-    const keyResults = await this.keyResultService.getUserKeyResults(uid)
+  async getOwnedBy(user: User): Promise<KeyResultsWithLatestReport[]> {
+    const ownerID = user.id
+    const keyResults = await this.keyResultService.getFromOwnerWithRelationsAndLatestReports(
+      ownerID,
+    )
+
+    this.logger.debug({
+      keyResults,
+      user,
+      message: `Selected all key results owned by user`,
+    })
 
     return keyResults
   }

@@ -1,28 +1,60 @@
 import { Injectable } from '@nestjs/common'
+import { omit } from 'lodash'
+import { ObjectLiteral, OrderByCondition } from 'typeorm'
 
 import { User } from 'domain/user-aggregate/user/entities'
+
+import { IConfidenceReport } from '../confidence-report/dto'
+import { IProgressReport } from '../progress-report/dto'
 
 import { KeyResult } from './entities'
 import KeyResultRepository from './repository'
 
+export interface KeyResultsWithLatestReport extends Partial<KeyResult> {
+  latestProgressReport: IProgressReport
+  latestConfidenceReport: IConfidenceReport
+}
+
 @Injectable()
 class KeyResultService {
-  relations = [['owner', 'user'], 'team', 'objective', 'progressReports', 'confidenceReports']
-  order: Record<string, 'ASC' | 'DESC'> = {
-    'progressReports.createdAt': 'DESC',
-    'confidenceReports.createdAt': 'DESC',
+  allRelations: Array<[string, string] | string>
+
+  constructor(private readonly repository: KeyResultRepository) {
+    this.allRelations = [
+      ['owner', 'user'],
+      'team',
+      'objective',
+      'progressReports',
+      'confidenceReports',
+    ]
   }
 
-  constructor(private readonly keyResultRepository: KeyResultRepository) {}
+  async getFromOwnerWithRelationsAndLatestReports(
+    owner: User['id'],
+  ): Promise<KeyResultsWithLatestReport[]> {
+    const selector: ObjectLiteral = { owner }
+    const relations = this.allRelations
+    const order: OrderByCondition = {
+      'progressReports.createdAt': 'DESC',
+      'confidenceReports.createdAt': 'DESC',
+    }
 
-  async getUserKeyResults(uid: User['id']): Promise<KeyResult[]> {
-    const keyResults = await this.keyResultRepository.getAllKeyResultsWithSelector(
-      { owner: uid },
-      this.relations,
-      this.order,
+    const keyResults = await this.repository.selectManyWithSelectorRelationsAndOrder(
+      selector,
+      relations,
+      order,
     )
+    const keyResultsWithLatestReport = keyResults.map(this.filterLatestReports)
 
-    return keyResults
+    return keyResultsWithLatestReport
+  }
+
+  filterLatestReports(keyResult: KeyResult): KeyResultsWithLatestReport {
+    return {
+      ...omit(keyResult, ['progressReports', 'confidenceReports']),
+      latestProgressReport: keyResult.progressReports[0],
+      latestConfidenceReport: keyResult.confidenceReports[0],
+    }
   }
 }
 

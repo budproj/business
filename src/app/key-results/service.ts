@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 
 import { KeyResult } from 'domain/objective-aggregate/key-result/entities'
+import { KeyResultsWithLatestReport } from 'domain/objective-aggregate/key-result/service'
 import ObjectiveAggregateService from 'domain/objective-aggregate/service'
 import { User } from 'domain/user-aggregate/user/entities'
 
@@ -12,20 +13,18 @@ class KeyResultsService {
 
   constructor(private readonly objectiveAggregateService: ObjectiveAggregateService) {}
 
-  async getUserKeyResults(uid: User['id']): Promise<KeyResult[]> {
-    this.logger.debug(`Getting key results that are owned by user ${uid}`)
+  async getUserKeyResults(user: User): Promise<KeyResultsHashmap> {
+    const keyResults = await this.objectiveAggregateService.getOwnedBy(user)
+    const keyResultsHashmap = this.buildHashmap(keyResults)
 
-    const keyResults = await this.objectiveAggregateService.getKeyResultsOwnedBy(uid)
-    this.logger.debug({ message: `Selected key results owned by user ${uid}:`, keyResults })
-
-    return keyResults
+    return keyResultsHashmap
   }
 
-  buildHashmap(keyResults: KeyResult[]): KeyResultsHashmap {
+  buildHashmap(keyResults: KeyResultsWithLatestReport[]): KeyResultsHashmap {
     this.logger.debug({ message: 'Starting to create Key Results hashmap', keyResults })
 
     const initialHashmap = {}
-    const reduceHandler = (previous: KeyResultsHashmap, next: KeyResult) => ({
+    const reduceHandler = (previous: KeyResultsHashmap, next: KeyResultsWithLatestReport) => ({
       ...previous,
       [next.id]: next,
     })

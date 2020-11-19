@@ -8,17 +8,13 @@ import {
 } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 
-import { Permissions, PermissionsGuard, AuthzToken, User, AuthzInterceptor } from 'app/authz'
+import { Permissions, PermissionsGuard, User, AuthzInterceptor } from 'app/authz'
 
 import { User as UserEntity } from '../../domain/user-aggregate/user/entities'
 
 import KeyResultsService, { KeyResultsHashmap } from './service'
 
-export interface KeyResultsRequest {
-  user: AuthzToken
-}
-
-export interface GetKeyResultsQueryParameters {
+export interface GetKeyResultsHashmapQueryParameters {
   scope: 'user' | 'team' | 'company'
 }
 
@@ -31,11 +27,11 @@ class KeyResultsController {
   @Get()
   @Permissions('read:key-results')
   async getKeyResultsHashmap(
-    @Query() query: GetKeyResultsQueryParameters,
+    @Query() query: GetKeyResultsHashmapQueryParameters,
     @User() user: UserEntity,
   ): Promise<KeyResultsHashmap> {
     const handlers = {
-      user: async () => this.keyResultsService.getUserKeyResults(user.id),
+      user: async () => this.keyResultsService.getUserKeyResults(user),
     }
     const { scope } = query
     const scopedHandler = handlers[scope]
@@ -45,9 +41,7 @@ class KeyResultsController {
       )
     const keyResults = await scopedHandler()
 
-    const keyResultsHashmap = this.keyResultsService.buildHashmap(keyResults)
-
-    return keyResultsHashmap
+    return keyResults
   }
 }
 

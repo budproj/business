@@ -7,7 +7,7 @@ export type UserFindFilter = keyof User
 
 @EntityRepository(User)
 class UserRepository extends Repository<User> {
-  async findUserWithAuthzSub(authzSub: User['authzSub']): Promise<User> {
+  async selectUserWithAuthzSub(authzSub: User['authzSub']): Promise<User> {
     const query = this.createQueryBuilder()
     const queryWithID = query.where({ authzSub })
 

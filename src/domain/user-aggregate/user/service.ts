@@ -10,7 +10,7 @@ class UserService {
   constructor(private readonly repository: UserRepository) {}
 
   async getUserForToken(authzToken: AuthzToken): Promise<User> {
-    const user = this.repository.findUserWithAuthzSub(authzToken.sub)
+    const user = this.repository.selectUserWithAuthzSub(authzToken.sub)
 
     return user
   }
