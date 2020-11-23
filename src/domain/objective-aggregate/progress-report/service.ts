@@ -25,6 +25,12 @@ class ProgressReportService {
 
     return latestReport
   }
+
+  async create(progressReport: Partial<ProgressReportDTO>): Promise<ProgressReport> {
+    const createdData = await this.repository.insert(progressReport)
+
+    return createdData.raw
+  }
 }
 
 export default ProgressReportService

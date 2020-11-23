@@ -147,6 +147,21 @@ class ObjectiveAggregateService {
 
     return keyResult.owner
   }
+
+  async createProgressReport(
+    data: Partial<ProgressReport>,
+    user: UserDTO,
+    keyResultID: KeyResultDTO['id'],
+  ): Promise<ProgressReport> {
+    const progressReport = {
+      ...data,
+      user: user.id,
+      keyResult: keyResultID,
+    }
+    const createdData = await this.progressReportService.create(progressReport)
+
+    return createdData
+  }
 }
 
 export default ObjectiveAggregateService

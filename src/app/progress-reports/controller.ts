@@ -2,6 +2,7 @@ import { Controller, Post, Logger, UseGuards, UseInterceptors, Body } from '@nes
 import { AuthGuard } from '@nestjs/passport'
 
 import { Permissions, PermissionsGuard, User, AuthzInterceptor } from 'app/authz'
+import { ProgressReport } from 'domain/objective-aggregate/progress-report/entities'
 import { User as UserEntity } from 'domain/user-aggregate/user/entities'
 
 import { PostProgressReportDTO } from './dto'
@@ -22,7 +23,7 @@ class ProgressReportsController {
   async postProgressReport(
     @User() user: UserEntity,
     @Body() body: PostProgressReportDTO,
-  ): Promise<string> {
+  ): Promise<ProgressReport> {
     this.logger.log({
       body,
       message: `Creating a new progress report for user ${user.id.toString()}`,
@@ -35,7 +36,7 @@ class ProgressReportsController {
       message: `Created new progress report for user ${user.id.toString()}`,
     })
 
-    return 'ok'
+    return createdData
   }
 }
 
