@@ -16,8 +16,8 @@
     "incremental": true,
     "skipLibCheck": true
   },
-  "include": [
-    "src/**/*.ts",
-    "lib/**/*.ts"
-  ]
+  "include": ["src/**/*.ts", "lib/**/*.ts"],
+  "preferences": {
+    "importModuleSpecifierPreference": "non-relative"
+  }
 }

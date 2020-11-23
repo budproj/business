@@ -34,5 +34,5 @@ export class KeyResultView implements KeyResultViewDTO {
   public updatedAt: Date
 
   @ManyToOne('User', 'keyResultViews')
-  public user: UserDTO['id']
+  public user: UserDTO
 }

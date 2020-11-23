@@ -16,7 +16,7 @@ class KeyResultsService {
 
   constructor(private readonly objectiveAggregateService: ObjectiveAggregateService) {}
 
-  async getUserKeyResults(
+  async getUserRankedKeyResults(
     user: User,
     customRank: KeyResultViewDTO['rank'] = [],
   ): Promise<Array<Partial<KeyResultWithLatestReports>>> {
@@ -49,22 +49,32 @@ class KeyResultsService {
     return dataOnlyWithLatestReports
   }
 
-  async getUserKeyResultsFromView(
+  async getUserBindedView(
     user: User,
-    view: KeyResultViewBinding | null,
-  ): Promise<Array<Partial<KeyResultWithLatestReports>>> {
-    this.logger.debug(`Getting Key Results for user ${user.id} and view binding named "${view}"`)
+    viewBinding: KeyResultViewBinding,
+  ): Promise<KeyResultViewDTO | null> {
+    this.logger.debug(`Getting user ${user.id} view for binding "${viewBinding}"`)
 
-    const viewCustomRank = await this.objectiveAggregateService.getUserViewCustomRank(user, view)
+    const userView = await this.objectiveAggregateService.getUserViewWithBinding(user, viewBinding)
     this.logger.debug({
-      viewCustomRank,
-      message: `Received user ${user.id} custom view "${view}" rank`,
+      userView,
+      message: `Received user ${user.id} custom view "${viewBinding}"`,
     })
 
-    const keyResults = await this.getUserKeyResults(user, viewCustomRank)
+    return userView
+  }
+
+  async getUserKeyResultsFromView(
+    user: User,
+    view: KeyResultViewDTO | null,
+  ): Promise<Array<Partial<KeyResultWithLatestReports>>> {
+    this.logger.debug(`Getting Key Results for user ${user.id} and view named "${view?.binding}"`)
+    const viewRank = view?.rank ?? []
+
+    const keyResults = await this.getUserRankedKeyResults(user, viewRank)
     this.logger.debug({
       keyResults,
-      message: `Received key results for user ${user.id} using view "${view}"`,
+      message: `Received key results for user ${user.id} using view "${view?.binding}"`,
     })
 
     return keyResults

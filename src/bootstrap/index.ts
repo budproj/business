@@ -20,7 +20,11 @@ async function bootstrap() {
     configService.get('logging.serviceName'),
   )
 
-  app.useGlobalPipes(new ValidationPipe())
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  )
   app.useLogger(logger)
 
   await app.listen(configService.get('port'))

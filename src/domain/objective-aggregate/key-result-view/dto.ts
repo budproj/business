@@ -7,7 +7,7 @@ export enum KeyResultViewBinding {
 
 export class KeyResultViewDTO {
   id: number
-  user: UserDTO['id']
+  user: UserDTO
   title: string
   binding: KeyResultViewBinding
   rank: Array<KeyResultDTO['id']>
