@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 
 import { KeyResultView } from 'domain/objective-aggregate/key-result-view/entities'
+import { UserDTO } from 'domain/user-aggregate/user/dto'
 import { User } from 'domain/user-aggregate/user/entities'
 
 import { ConfidenceReportDTO } from './confidence-report/dto'
@@ -96,6 +97,41 @@ class ObjectiveAggregateService {
     const createdData = await this.keyResultViewService.create(keyResultView)
 
     return createdData
+  }
+
+  async isViewFromUser(
+    keyResultViewID: KeyResultViewDTO['id'],
+    userID: UserDTO['id'],
+  ): Promise<boolean> {
+    this.logger.debug(
+      `Trying to validate if user ${userID.toString()} is owner of Key Result View ${keyResultViewID.toString()}`,
+    )
+
+    const keyResultViewOwnerID = await this.keyResultViewService.getUserID(keyResultViewID)
+    this.logger.debug(
+      `Discovered that key result view ${keyResultViewID} is owned by user ${keyResultViewOwnerID}`,
+    )
+
+    return keyResultViewOwnerID === userID
+  }
+
+  async updateKeyResultView(
+    keyResultViewID: KeyResultViewDTO['id'],
+    newKeyResultView: Partial<KeyResultView>,
+  ): Promise<KeyResultView> {
+    const data = {
+      id: keyResultViewID,
+      ...newKeyResultView,
+    }
+    const updatedKeyResultView = await this.keyResultViewService.update(data)
+
+    this.logger.debug({
+      data,
+      updatedKeyResultView,
+      message: `Updated key result view of ID ${keyResultViewID.toString()}`,
+    })
+
+    return updatedKeyResultView
   }
 }
 

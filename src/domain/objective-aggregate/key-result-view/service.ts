@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 
 import { KeyResultView } from 'domain/objective-aggregate/key-result-view/entities'
+import { UserDTO } from 'domain/user-aggregate/user/dto'
 import { User } from 'domain/user-aggregate/user/entities'
 
 import { KeyResultViewDTO, KeyResultViewBinding } from './dto'
@@ -43,6 +44,17 @@ class KeyResultViewService {
     const createdData = await this.repository.insert(keyResultView)
 
     return createdData.raw
+  }
+
+  async getUserID(viewID: KeyResultViewDTO['id']): Promise<UserDTO['id']> {
+    const userID = await this.repository.selectUserOf(viewID)
+
+    return userID
+  }
+
+  async update(keyResultView: Partial<KeyResultView>): Promise<KeyResultView> {
+    const data = await this.repository.save(keyResultView)
+    return data
   }
 }
 

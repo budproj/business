@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common'
 import { EntityRepository, Repository } from 'typeorm'
 
+import { UserDTO } from 'domain/user-aggregate/user/dto'
 import { User } from 'domain/user-aggregate/user/entities'
 
 import { KeyResultViewDTO, KeyResultViewBinding } from './dto'
@@ -37,6 +38,20 @@ class KeyResultViewRepository extends Repository<KeyResultView> {
     })
 
     return userViews
+  }
+
+  async selectUserOf(id: KeyResultViewDTO['id']): Promise<UserDTO['id']> {
+    const query = this.createQueryBuilder()
+    const filteredQuery = query.where({ id })
+    const joinedQuery = filteredQuery.leftJoinAndSelect(`${KeyResultView.name}.user`, 'user')
+    const data = await joinedQuery.getOne()
+
+    this.logger.debug({
+      data,
+      message: `Selected data while fetching for user of key result view with ID ${id}`,
+    })
+
+    return data.user.id
   }
 }
 
