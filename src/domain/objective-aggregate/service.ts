@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common'
 
 import { KeyResultView } from 'domain/objective-aggregate/key-result-view/entities'
+import { KeyResultDTO } from 'domain/objective-aggregate/key-result/dto'
+import { ProgressReport } from 'domain/objective-aggregate/progress-report/entities'
 import { UserDTO } from 'domain/user-aggregate/user/dto'
 import { User } from 'domain/user-aggregate/user/entities'
 
@@ -63,7 +65,7 @@ class ObjectiveAggregateService {
     return keyResultsWithObjectiveCycle
   }
 
-  getLatestReportsForKeyResult(keyResult: KeyResult): KeyResultWithLatestReports {
+  enhanceKeyResultWithLatestReports(keyResult: KeyResult): KeyResultWithLatestReports {
     return {
       ...keyResult,
       latestProgressReport: this.progressReportService.filterLatestFromList(
@@ -132,6 +134,33 @@ class ObjectiveAggregateService {
     })
 
     return updatedKeyResultView
+  }
+
+  async getLatestProgressReport(keyResultID: KeyResultDTO['id']): Promise<ProgressReport> {
+    const latestProgressReport = await this.progressReportService.getLatest(keyResultID)
+
+    return latestProgressReport
+  }
+
+  async getKeyResultOwner(keyResultID: KeyResultDTO['id']): Promise<KeyResult['owner']> {
+    const keyResult = await this.keyResultService.getWithID(keyResultID)
+
+    return keyResult.owner
+  }
+
+  async createProgressReport(
+    data: Partial<ProgressReport>,
+    user: UserDTO,
+    keyResultID: KeyResultDTO['id'],
+  ): Promise<ProgressReport> {
+    const progressReport = {
+      ...data,
+      user: user.id,
+      keyResult: keyResultID,
+    }
+    const createdData = await this.progressReportService.create(progressReport)
+
+    return createdData
   }
 }
 

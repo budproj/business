@@ -16,30 +16,18 @@ export interface KeyResultWithCycle extends KeyResult {
 
 @Injectable()
 class KeyResultService {
-  allRelations: Array<[string, string] | string>
-
-  constructor(private readonly repository: KeyResultRepository) {
-    this.allRelations = [
-      ['owner', 'user'],
-      'team',
-      'objective',
-      'progressReports',
-      'confidenceReports',
-    ]
-  }
+  constructor(private readonly repository: KeyResultRepository) {}
 
   async getRankedFromOwnerWithRelations(
     owner: User['id'],
     customRank: KeyResultViewDTO['rank'],
   ): Promise<KeyResult[]> {
     const selector: ObjectLiteral = { owner }
-    const relations = this.allRelations
     const rankSortColumn = this.buildRankSortColumn(customRank)
 
     const keyResults = await this.repository.selectManyWithRankAndRelations(
       selector,
       rankSortColumn,
-      relations,
     )
 
     return keyResults
@@ -58,6 +46,12 @@ class KeyResultService {
     const rankSortColumn = [prefix, ...parts, suffix].join(' ')
 
     return rankSortColumn
+  }
+
+  async getWithID(id: KeyResultDTO['id']): Promise<KeyResult> {
+    const data = await this.repository.selectSingleByIDWithRelations(id)
+
+    return data
   }
 }
 

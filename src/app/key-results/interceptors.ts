@@ -2,8 +2,7 @@ import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Logger } fr
 import { Observable } from 'rxjs'
 
 import { KeyResultViewDTO } from 'domain/objective-aggregate/key-result-view/dto'
-
-import { User } from '../../domain/user-aggregate/user/entities'
+import { User } from 'domain/user-aggregate/user/entities'
 
 import KeyResultsService from './service'
 

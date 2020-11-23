@@ -5,8 +5,7 @@ import { Permissions, PermissionsGuard, User, AuthzInterceptor } from 'app/authz
 import { InjectKeyResultView } from 'app/key-results/interceptors'
 import { KeyResultView } from 'domain/objective-aggregate/key-result-view/entities'
 import { KeyResultWithLatestReports } from 'domain/objective-aggregate/service'
-
-import { User as UserEntity } from '../../domain/user-aggregate/user/entities'
+import { User as UserEntity } from 'domain/user-aggregate/user/entities'
 
 import { View } from './decorators'
 import { GetKeyResultsDTO } from './dto'

@@ -30,7 +30,7 @@ class KeyResultsService {
     })
 
     const dataOnlyWithLatestReports = dataWithRelations.map((keyResult) => {
-      const keyResultWithLatestReports = this.objectiveAggregateService.getLatestReportsForKeyResult(
+      const keyResultWithLatestReports = this.objectiveAggregateService.enhanceKeyResultWithLatestReports(
         keyResult,
       )
       const normalizedKeyResult = omit(keyResultWithLatestReports, [

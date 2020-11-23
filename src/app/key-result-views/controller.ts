@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  ForbiddenException,
   Get,
   Logger,
   Param,
@@ -15,12 +14,11 @@ import { AuthGuard } from '@nestjs/passport'
 
 import { Permissions, PermissionsGuard, User, AuthzInterceptor } from 'app/authz'
 import { PatchKeyResultViewDTO, PostKeyResultViewDTO } from 'app/key-result-views/dto'
+import { RejectNotOwnedViews } from 'app/key-result-views/interceptors'
 import { Railway } from 'app/providers'
 import { KeyResultView } from 'domain/objective-aggregate/key-result-view/entities'
+import { User as UserEntity } from 'domain/user-aggregate/user/entities'
 import { RailwayError } from 'errors'
-import ResourceNotAllowed from 'errors/resource-not-allowed'
-
-import { User as UserEntity } from '../../domain/user-aggregate/user/entities'
 
 import KeyResultViewsService from './service'
 
@@ -79,6 +77,7 @@ class KeyResultViewsController {
 
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Permissions('update:key-result-views')
+  @UseInterceptors(RejectNotOwnedViews)
   @Patch('/:id')
   async patchKeyResultViews(
     @User() user: UserEntity,
@@ -90,12 +89,11 @@ class KeyResultViewsController {
       message: `Updating existing key result view with id ${id.toString()} for user ${user.id.toString()} with data:`,
     })
 
-    const promise = this.keyResultViewsService.updateOwnedKeyResultView(user, id, keyResultView)
+    const promise = this.keyResultViewsService.updateKeyResultView(id, keyResultView)
     const [error, updatedKeyResultView] = await this.railway.handleRailwayPromise<
       RailwayError,
       KeyResultView
     >(promise)
-    if (error?.code === ResourceNotAllowed.code) return new ForbiddenException(error.message)
     if (error?.code === '23505')
       return new PreconditionFailedException('View bindings must be unique')
 
