@@ -25,6 +25,18 @@ class KeyResultViewService {
 
     return userView
   }
+
+  async getUserViews(userID: User['id']): Promise<KeyResultViewDTO[]> {
+    this.logger.debug(`Fetching user ${userID} views`)
+
+    const userViews = await this.repository.selectViewsForUser(userID)
+    this.logger.debug({
+      userViews,
+      message: `Selected user ${userID} views`,
+    })
+
+    return userViews
+  }
 }
 
 export default KeyResultViewService

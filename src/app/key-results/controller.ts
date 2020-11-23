@@ -28,6 +28,10 @@ class KeyResultsController {
     @Query() { scope }: GetKeyResultsDTO,
     @View() view: KeyResultView,
   ): Promise<Array<Partial<KeyResultWithLatestReports>>> {
+    this.logger.log(
+      `Getting all Key Results for user ${user.id.toString()}, scopped at ${scope} based in view ${view.id.toString()}`,
+    )
+
     const handlers = {
       user: async () => this.keyResultsService.getUserKeyResultsFromView(user, view),
     }

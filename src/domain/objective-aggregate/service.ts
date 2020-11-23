@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 
+import { KeyResultView } from 'domain/objective-aggregate/key-result-view/entities'
 import { User } from 'domain/user-aggregate/user/entities'
 
 import { ConfidenceReportDTO } from './confidence-report/dto'
@@ -83,6 +84,12 @@ class ObjectiveAggregateService {
     const userView = await this.keyResultViewService.getUserViewWithBinding(userID, viewBinding)
 
     return userView
+  }
+
+  async getUserViews(userID: User['id']): Promise<KeyResultView[]> {
+    const views = await this.keyResultViewService.getUserViews(userID)
+
+    return views
   }
 }
 

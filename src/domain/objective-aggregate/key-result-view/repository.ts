@@ -25,6 +25,19 @@ class KeyResultViewRepository extends Repository<KeyResultView> {
 
     return userView
   }
+
+  async selectViewsForUser(user: User['id']): Promise<KeyResultViewDTO[]> {
+    const query = this.createQueryBuilder()
+    const selectedViews = query.where({ user })
+    const userViews: KeyResultViewDTO[] = await selectedViews.getMany()
+
+    this.logger.debug({
+      userViews,
+      message: `Selected user ${user.toString()} views"`,
+    })
+
+    return userViews
+  }
 }
 
 export default KeyResultViewRepository
