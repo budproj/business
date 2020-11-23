@@ -91,6 +91,12 @@ class ObjectiveAggregateService {
 
     return views
   }
+
+  async createKeyResultView(keyResultView: Partial<KeyResultViewDTO>): Promise<KeyResultView> {
+    const createdData = await this.keyResultViewService.create(keyResultView)
+
+    return createdData
+  }
 }
 
 export default ObjectiveAggregateService

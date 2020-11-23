@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 
+import { KeyResultView } from 'domain/objective-aggregate/key-result-view/entities'
 import { User } from 'domain/user-aggregate/user/entities'
 
 import { KeyResultViewDTO, KeyResultViewBinding } from './dto'
@@ -36,6 +37,12 @@ class KeyResultViewService {
     })
 
     return userViews
+  }
+
+  async create(keyResultView: Partial<KeyResultViewDTO>): Promise<KeyResultView> {
+    const createdData = await this.repository.insert(keyResultView)
+
+    return createdData.raw
   }
 }
 
