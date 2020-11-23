@@ -73,16 +73,16 @@ class ObjectiveAggregateService {
     }
   }
 
-  async getUserViewCustomRank(
+  async getUserViewWithBinding(
     user: User,
-    view: KeyResultViewBinding | null,
-  ): Promise<KeyResultViewDTO['rank']> {
-    if (!view) return []
+    viewBinding: KeyResultViewBinding | null,
+  ): Promise<KeyResultViewDTO | null> {
+    if (!viewBinding) return
 
     const userID = user.id
-    const userCustomRank = await this.keyResultViewService.getUserViewCustomRank(userID, view)
+    const userView = await this.keyResultViewService.getUserViewWithBinding(userID, viewBinding)
 
-    return userCustomRank
+    return userView
   }
 }
 

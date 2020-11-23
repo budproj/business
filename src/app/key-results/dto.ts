@@ -7,7 +7,7 @@ import { KeyResultScopes } from './types'
 export class GetKeyResultsDTO {
   @IsOptional()
   @IsEnum(KeyResultViewBinding)
-  readonly view: string
+  readonly viewBinding: KeyResultViewBinding
 
   @IsEnum(KeyResultScopes)
   readonly scope: string

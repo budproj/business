@@ -10,20 +10,20 @@ import { KeyResultView } from './entities'
 class KeyResultViewRepository extends Repository<KeyResultView> {
   private readonly logger = new Logger(KeyResultViewRepository.name)
 
-  async selectViewRankForUserBinding(
+  async selectViewForUserBinding(
     user: User['id'],
     binding: KeyResultViewBinding,
-  ): Promise<KeyResultViewDTO['rank']> {
+  ): Promise<KeyResultViewDTO> {
     const query = this.createQueryBuilder()
     const selectedViews = query.where({ user, binding })
-    const data: KeyResultViewDTO | undefined = await selectedViews.getOne()
-    const rank = data?.rank
+    const userView: KeyResultViewDTO | undefined = await selectedViews.getOne()
 
-    this.logger.debug(
-      `The user ${user.toString()} binding "${binding}" custom rank is [${rank?.toString()}]`,
-    )
+    this.logger.debug({
+      userView,
+      message: `Selected user ${user.toString()} binding "${binding}"`,
+    })
 
-    return rank
+    return userView
   }
 }
 

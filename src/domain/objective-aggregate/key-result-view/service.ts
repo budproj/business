@@ -11,19 +11,19 @@ class KeyResultViewService {
 
   constructor(private readonly repository: KeyResultViewRepository) {}
 
-  async getUserViewCustomRank(
+  async getUserViewWithBinding(
     userID: User['id'],
-    view: KeyResultViewBinding,
-  ): Promise<KeyResultViewDTO['rank']> {
-    this.logger.debug(`Fetching user ${userID} custom "${view}" view rank`)
+    viewBinding: KeyResultViewBinding,
+  ): Promise<KeyResultViewDTO> {
+    this.logger.debug(`Fetching user ${userID} custom "${viewBinding}" view rank`)
 
-    const userCustomRank = await this.repository.selectViewRankForUserBinding(userID, view)
+    const userView = await this.repository.selectViewForUserBinding(userID, viewBinding)
     this.logger.debug({
-      userCustomRank,
-      message: `Selected user ${userID} custom rank for view ${view}`,
+      userView,
+      message: `Selected user ${userID} custom rank for view ${viewBinding}`,
     })
 
-    return userCustomRank
+    return userView
   }
 }
 
