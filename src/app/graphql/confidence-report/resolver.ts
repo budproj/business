@@ -1,8 +1,10 @@
-import { Logger, NotFoundException, UseGuards } from '@nestjs/common'
+import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { Permissions } from 'app/authz/decorators'
+import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
+import { EnhanceWithBudUser } from 'app/authz/interceptors'
+import { AuthzUser } from 'app/authz/types'
 import { ConfidenceReportDTO } from 'domain/confidence-report/dto'
 import ConfidenceReportService from 'domain/confidence-report/service'
 import KeyResultService from 'domain/key-result/service'
@@ -11,6 +13,7 @@ import UserService from 'domain/user/service'
 import { ConfidenceReport } from './models'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
+@UseInterceptors(EnhanceWithBudUser)
 @Resolver(() => ConfidenceReport)
 class ConfidenceReportResolver {
   private readonly logger = new Logger(ConfidenceReportResolver.name)
@@ -23,10 +26,16 @@ class ConfidenceReportResolver {
 
   @Permissions('read:confidence-reports')
   @Query(() => ConfidenceReport)
-  async confidenceReport(@Args('id', { type: () => Int }) id: ConfidenceReportDTO['id']) {
+  async confidenceReport(
+    @Args('id', { type: () => Int }) id: ConfidenceReportDTO['id'],
+    @GraphQLUser() user: AuthzUser,
+  ) {
     this.logger.log(`Fetching confidence report with id ${id.toString()}`)
 
-    const confidenceReport = await this.confidenceReportService.getOneById(id)
+    const confidenceReport = await this.confidenceReportService.getOneByIdIfUserIsInCompany(
+      id,
+      user,
+    )
     if (!confidenceReport)
       throw new NotFoundException(`We could not found a confidence report with id ${id}`)
 
