@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 import { ObjectiveDTO } from 'domain/objective/dto'
+import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
 
 import { KeyResult } from './entities'
@@ -20,6 +21,10 @@ class KeyResultService {
 
   async getFromObjective(objectiveId: ObjectiveDTO['id']): Promise<KeyResult[]> {
     return this.repository.find({ objectiveId })
+  }
+
+  async getFromTeam(teamId: TeamDTO['id']): Promise<KeyResult[]> {
+    return this.repository.find({ teamId })
   }
 }
 

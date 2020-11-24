@@ -8,6 +8,7 @@ import {
 } from 'typeorm'
 
 import { ObjectiveDTO } from 'domain/objective/dto'
+import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
 
 import { KeyResultDTO } from './dto'
@@ -38,12 +39,18 @@ export class KeyResult implements KeyResultDTO {
   @Column({ nullable: true })
   public ownerId: UserDTO['id']
 
-  @ManyToOne('User', 'keyResults')
-  public owner: UserDTO
-
   @Column({ nullable: true })
   public objectiveId: UserDTO['id']
 
+  @Column({ nullable: true })
+  public teamId: TeamDTO['id']
+
+  @ManyToOne('User', 'keyResults')
+  public owner: UserDTO
+
   @ManyToOne('Objective', 'keyResults')
   public objective: ObjectiveDTO
+
+  @ManyToOne('Team', 'keyResults')
+  public team: TeamDTO
 }
