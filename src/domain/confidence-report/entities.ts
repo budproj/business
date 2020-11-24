@@ -9,10 +9,10 @@ import {
 
 import { KeyResultDTO } from 'domain/key-result/dto'
 
-import { ProgressReportDTO } from './dto'
+import { ConfidenceReportDTO } from './dto'
 
 @Entity()
-export class ProgressReport implements ProgressReportDTO {
+export class ConfidenceReport implements ConfidenceReportDTO {
   @PrimaryGeneratedColumn()
   public id: number
 
@@ -32,6 +32,6 @@ export class ProgressReport implements ProgressReportDTO {
   public keyResult: KeyResultDTO
 
   @Column()
-  @RelationId((progressReport: ProgressReport) => progressReport.keyResult)
+  @RelationId((progressReport: ConfidenceReport) => progressReport.keyResult)
   public keyResultId: KeyResultDTO['id']
 }

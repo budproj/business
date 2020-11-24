@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
+import { KeyResultDTO } from 'domain/key-result/dto'
+
 import { ProgressReport } from './entities'
 import ProgressReportRepository from './repository'
 
@@ -9,6 +11,10 @@ class ProgressReportService {
 
   async getOneById(id: ProgressReport['id']): Promise<ProgressReport> {
     return this.repository.findOne({ id })
+  }
+
+  async getFromKeyResult(keyResultId: KeyResultDTO['id']): Promise<ProgressReport[]> {
+    return this.repository.find({ keyResultId })
   }
 }
 

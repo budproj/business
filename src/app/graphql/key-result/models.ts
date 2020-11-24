@@ -1,6 +1,8 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql'
 
+import { ConfidenceReport } from 'app/graphql/confidence-report/models'
 import { Objective } from 'app/graphql/objective/models'
+import { ProgressReport } from 'app/graphql/progress-report/models'
 import { Team } from 'app/graphql/team/models'
 import { User } from 'app/graphql/user/models'
 
@@ -35,4 +37,10 @@ export class KeyResult {
 
   @Field(() => Team)
   team: Team
+
+  @Field(() => [ProgressReport])
+  progressReports: ProgressReport[]
+
+  @Field(() => [ConfidenceReport])
+  confidenceReports: ConfidenceReport[]
 }

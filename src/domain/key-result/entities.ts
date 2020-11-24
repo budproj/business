@@ -40,18 +40,21 @@ export class KeyResult implements KeyResultDTO {
   @ManyToOne('User', 'keyResults')
   public owner: UserDTO
 
+  @Column()
   @RelationId((keyResult: KeyResult) => keyResult.owner)
   public ownerId: UserDTO['id']
 
   @ManyToOne('Objective', 'keyResults')
   public objective: ObjectiveDTO
 
+  @Column()
   @RelationId((keyResult: KeyResult) => keyResult.objective)
   public objectiveId: ObjectiveDTO['id']
 
   @ManyToOne('Team', 'keyResults')
   public team: TeamDTO
 
+  @Column()
   @RelationId((keyResult: KeyResult) => keyResult.team)
   public teamId: TeamDTO['id']
 }

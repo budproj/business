@@ -3,9 +3,11 @@ import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphq
 
 import { Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, PermissionsGuard } from 'app/authz/guards'
+import ConfidenceReportService from 'domain/confidence-report/service'
 import { KeyResultDTO } from 'domain/key-result/dto'
 import KeyResultService from 'domain/key-result/service'
 import ObjectiveService from 'domain/objective/service'
+import ProgressReportService from 'domain/progress-report/service'
 import TeamService from 'domain/team/service'
 import UserService from 'domain/user/service'
 
@@ -21,6 +23,8 @@ class KeyResultResolver {
     private readonly userService: UserService,
     private readonly objectiveService: ObjectiveService,
     private readonly teamService: TeamService,
+    private readonly progressReportService: ProgressReportService,
+    private readonly confidenceReportService: ConfidenceReportService,
   ) {}
 
   @Permissions('read:key-results')
@@ -63,6 +67,26 @@ class KeyResultResolver {
     })
 
     return this.teamService.getOneById(keyResult.teamId)
+  }
+
+  @ResolveField()
+  async progressReports(@Parent() keyResult: KeyResultDTO) {
+    this.logger.log({
+      keyResult,
+      message: 'Fetching progress reports for key result',
+    })
+
+    return this.progressReportService.getFromKeyResult(keyResult.id)
+  }
+
+  @ResolveField()
+  async confidenceReports(@Parent() keyResult: KeyResultDTO) {
+    this.logger.log({
+      keyResult,
+      message: 'Fetching confidence reports for key result',
+    })
+
+    return this.confidenceReportService.getFromKeyResult(keyResult.id)
   }
 }
 
