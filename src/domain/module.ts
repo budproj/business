@@ -3,18 +3,12 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 
 import databaseConfig from 'config/database/config'
 
-import CompanyAggregateModule from './company-aggregate'
-import ObjectiveAggregateModule from './objective-aggregate'
-import UserAggregateModule from './user-aggregate'
+import KeyResultModule from './key-result'
+import UserModule from './user'
 
 @Module({
-  imports: [
-    ObjectiveAggregateModule,
-    CompanyAggregateModule,
-    UserAggregateModule,
-    TypeOrmModule.forRoot(databaseConfig),
-  ],
-  exports: [ObjectiveAggregateModule, CompanyAggregateModule, UserAggregateModule],
+  imports: [KeyResultModule, UserModule, TypeOrmModule.forRoot(databaseConfig)],
+  exports: [KeyResultModule, UserModule],
 })
 class DomainModule {}
 
