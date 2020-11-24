@@ -27,7 +27,7 @@ class TeamResolver {
     this.logger.log(`Fetching team with id ${id.toString()}`)
 
     const team = await this.teamService.getOneById(id)
-    if (!team) throw new NotFoundException(`Sorry, we could not found a team with id ${id}`)
+    if (!team) throw new NotFoundException(`We could not found a team with id ${id}`)
 
     return team
   }

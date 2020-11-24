@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common'
 
+import { KeyResultViewDTO } from 'domain/key-result-view/dto'
+import { UserDTO } from 'domain/user/dto'
+
 import { KeyResultView } from './entities'
 import KeyResultViewRepository from './repository'
 
@@ -7,8 +10,15 @@ import KeyResultViewRepository from './repository'
 class KeyResultViewService {
   constructor(private readonly repository: KeyResultViewRepository) {}
 
-  async getOneById(id: KeyResultView['id']): Promise<KeyResultView> {
+  async getOneById(id: KeyResultViewDTO['id']): Promise<KeyResultView> {
     return this.repository.findOne({ id })
+  }
+
+  async getOneByIDIfUserOwnsIt(
+    id: KeyResultViewDTO['id'],
+    user: UserDTO,
+  ): Promise<KeyResultView | null> {
+    return this.repository.findOne({ id, userId: user.id })
   }
 }
 

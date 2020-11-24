@@ -1,5 +1,3 @@
-import { CompanyDTO } from 'domain/company/dto'
-import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
 
 export interface AuthzToken {
@@ -15,6 +13,4 @@ export interface AuthzToken {
 
 export interface AuthzUser extends UserDTO {
   token: AuthzToken
-  companies: Array<CompanyDTO['id']>
-  teams: TeamDTO[]
 }

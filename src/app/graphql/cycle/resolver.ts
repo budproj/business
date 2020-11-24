@@ -27,7 +27,7 @@ class CycleResolver {
     this.logger.log(`Fetching cycle with id ${id.toString()}`)
 
     const cycle = await this.cycleService.getOneById(id)
-    if (!cycle) throw new NotFoundException(`Sorry, we could not found a cycle with id ${id}`)
+    if (!cycle) throw new NotFoundException(`We could not found a cycle with id ${id}`)
 
     return cycle
   }

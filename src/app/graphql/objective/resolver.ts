@@ -27,8 +27,7 @@ class ObjectiveResolver {
     this.logger.log(`Fetching objective with id ${id.toString()}`)
 
     const objective = await this.objectiveService.getOneById(id)
-    if (!objective)
-      throw new NotFoundException(`Sorry, we could not found an objective with id ${id}`)
+    if (!objective) throw new NotFoundException(`We could not found an objective with id ${id}`)
 
     return objective
   }

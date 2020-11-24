@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
+import { uniq } from 'lodash'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ObjectiveDTO } from 'domain/objective/dto'
@@ -10,10 +11,12 @@ import KeyResultRepository from './repository'
 
 @Injectable()
 class KeyResultService {
+  private readonly logger = new Logger(KeyResultService.name)
+
   constructor(private readonly repository: KeyResultRepository) {}
 
   async getOneById(id: KeyResultDTO['id']): Promise<KeyResult> {
-    return this.repository.findOne({ where: { id } })
+    return this.repository.findOne({ id })
   }
 
   async getFromOwner(ownerId: UserDTO['id']): Promise<KeyResult[]> {
@@ -30,12 +33,27 @@ class KeyResultService {
 
   async getManyByIdsPreservingOrder(ids: Array<KeyResultDTO['id']>): Promise<KeyResult[]> {
     const rankSortColumn = this.repository.buildRankSortColumn(ids)
+    const data = this.repository.findByIdsRanked(ids, rankSortColumn)
 
-    const query = this.repository.createQueryBuilder()
-    const filteredQuery = query.where('id IN (:...ids)', { ids })
-    const orderedQuery = filteredQuery.orderBy(rankSortColumn)
+    return data
+  }
 
-    return orderedQuery.getMany()
+  async getOneByIdIfUserIsInCompany(
+    id: KeyResultDTO['id'],
+    user: UserDTO,
+  ): Promise<KeyResult | null> {
+    const userTeams = await user.teams
+    const userCompanies = uniq(userTeams.map((team) => team.companyId))
+
+    this.logger.debug({
+      userCompanies,
+      user,
+      message: `Reduced companies for user`,
+    })
+
+    const data = await this.repository.findByIDWithCompanyConstraint(id, userCompanies)
+
+    return data
   }
 }
 

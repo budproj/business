@@ -1,9 +1,10 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { Permissions, GraphQLUser } from 'app/authz/decorators'
+import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
+import { AuthzUser } from 'app/authz/types'
 import { KeyResultViewDTO } from 'domain/key-result-view/dto'
 import KeyResultViewService from 'domain/key-result-view/service'
 import KeyResultService from 'domain/key-result/service'
@@ -27,15 +28,13 @@ class KeyResultViewResolver {
   @Query(() => KeyResultView)
   async keyResultView(
     @Args('id', { type: () => Int }) id: KeyResultViewDTO['id'],
-    @GraphQLUser() user,
+    @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log(`Fetching key result view with id ${id.toString()}`)
 
-    console.log(user)
-
-    const keyResultView = await this.keyResultViewService.getOneById(id)
+    const keyResultView = await this.keyResultViewService.getOneByIDIfUserOwnsIt(id, user)
     if (!keyResultView)
-      throw new NotFoundException(`Sorry, we could not found a key result view with id ${id}`)
+      throw new NotFoundException(`We could not found a key result view with id ${id}`)
 
     return keyResultView
   }

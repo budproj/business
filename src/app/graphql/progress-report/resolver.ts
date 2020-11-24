@@ -28,7 +28,7 @@ class ProgressReportResolver {
 
     const progressReport = await this.progressReportService.getOneById(id)
     if (!progressReport)
-      throw new NotFoundException(`Sorry, we could not found a progress report with id ${id}`)
+      throw new NotFoundException(`We could not found a progress report with id ${id}`)
 
     return progressReport
   }

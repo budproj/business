@@ -28,7 +28,7 @@ class ConfidenceReportResolver {
 
     const confidenceReport = await this.confidenceReportService.getOneById(id)
     if (!confidenceReport)
-      throw new NotFoundException(`Sorry, we could not found a confidence report with id ${id}`)
+      throw new NotFoundException(`We could not found a confidence report with id ${id}`)
 
     return confidenceReport
   }
