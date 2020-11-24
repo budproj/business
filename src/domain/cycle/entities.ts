@@ -2,8 +2,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -12,18 +10,20 @@ import {
 } from 'typeorm'
 
 import { CompanyDTO } from 'domain/company/dto'
-import { KeyResultDTO } from 'domain/key-result/dto'
-import { UserDTO } from 'domain/user/dto'
+import { ObjectiveDTO } from 'domain/objective/dto'
 
-import { TeamDTO } from './dto'
+import { CycleDTO } from './dto'
 
 @Entity()
-export class Team implements TeamDTO {
+export class Cycle implements CycleDTO {
   @PrimaryGeneratedColumn()
   public id: number
 
   @Column()
-  public name: string
+  public dateStart: Date
+
+  @Column()
+  public dateEnd: Date
 
   @CreateDateColumn()
   public createdAt: Date
@@ -31,17 +31,13 @@ export class Team implements TeamDTO {
   @UpdateDateColumn()
   public updatedAt: Date
 
-  @OneToMany('KeyResult', 'team')
-  public keyResults: KeyResultDTO[]
-
   @ManyToOne('Company', 'teams')
   public company: CompanyDTO
 
   @Column()
-  @RelationId((team: Team) => team.company)
+  @RelationId((team: Cycle) => team.company)
   public companyId: CompanyDTO['id']
 
-  @ManyToMany('User', 'teams', { lazy: true })
-  @JoinTable()
-  public users: UserDTO[]
+  @OneToMany('Objective', 'cycle')
+  public objectives: ObjectiveDTO[]
 }

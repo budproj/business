@@ -16,7 +16,7 @@ class KeyResultService {
     return this.repository.findOne({ where: { id } })
   }
 
-  async getOwnedBy(ownerId: UserDTO['id']): Promise<KeyResult[]> {
+  async getFromOwner(ownerId: UserDTO['id']): Promise<KeyResult[]> {
     return this.repository.find({ ownerId })
   }
 

@@ -3,7 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 
 import databaseConfig from 'config/database/config'
 
+import CompanyModule from './company'
 import ConfidenceReportModule from './confidence-report'
+import CycleModule from './cycle'
 import KeyResultModule from './key-result'
 import KeyResultViewModule from './key-result-view'
 import ObjectiveModule from './objective'
@@ -21,6 +23,8 @@ import UserModule from './user'
     ProgressReportModule,
     ConfidenceReportModule,
     KeyResultViewModule,
+    CompanyModule,
+    CycleModule,
   ],
   exports: [
     KeyResultModule,
@@ -30,6 +34,8 @@ import UserModule from './user'
     ProgressReportModule,
     ConfidenceReportModule,
     KeyResultViewModule,
+    CompanyModule,
+    CycleModule,
   ],
 })
 class DomainModule {}

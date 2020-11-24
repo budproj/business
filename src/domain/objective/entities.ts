@@ -2,11 +2,14 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  RelationId,
   UpdateDateColumn,
 } from 'typeorm'
 
+import { CycleDTO } from 'domain/cycle/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
 
 import { ObjectiveDTO } from './dto'
@@ -27,4 +30,11 @@ export class Objective implements ObjectiveDTO {
 
   @OneToMany('KeyResult', 'objective')
   public keyResults: KeyResultDTO[]
+
+  @ManyToOne('Cycle', 'objectives')
+  public cycle: CycleDTO
+
+  @Column()
+  @RelationId((objective: Objective) => objective.cycle)
+  public cycleId: CycleDTO['id']
 }

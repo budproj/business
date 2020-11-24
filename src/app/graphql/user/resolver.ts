@@ -41,7 +41,7 @@ class UserResolver {
       message: 'Fetching key results for user',
     })
 
-    return this.keyResultService.getOwnedBy(user.id)
+    return this.keyResultService.getFromOwner(user.id)
   }
 
   @ResolveField()

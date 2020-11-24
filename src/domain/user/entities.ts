@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -10,6 +11,7 @@ import {
 import { ConfidenceReportDTO } from 'domain/confidence-report/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ProgressReportDTO } from 'domain/progress-report/dto'
+import { TeamDTO } from 'domain/team/dto'
 
 import { UserDTO } from './dto'
 
@@ -41,4 +43,7 @@ export class User implements UserDTO {
 
   @OneToMany('ProgressReport', 'user')
   public progressReports: ProgressReportDTO[]
+
+  @ManyToMany('Team', 'users', { lazy: true })
+  public teams: TeamDTO[]
 }

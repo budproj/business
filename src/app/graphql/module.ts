@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common'
 import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql'
 
+import CompanyModule from './company'
 import ConfidenceReportModule from './confidence-report'
+import CycleModule from './cycle'
 import graphQLFactory from './factory'
 import KeyResultModule from './key-result'
 import KeyResultViewModule from './key-result-view'
@@ -20,6 +22,8 @@ import UserModule from './user'
     ProgressReportModule,
     ConfidenceReportModule,
     KeyResultViewModule,
+    CompanyModule,
+    CycleModule,
   ],
 })
 class GraphQLModule {}

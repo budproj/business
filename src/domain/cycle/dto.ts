@@ -1,8 +1,9 @@
 import { CompanyDTO } from 'domain/company/dto'
 
-export class TeamDTO {
+export class CycleDTO {
   id: number
-  name: string
+  dateStart: Date
+  dateEnd: Date
   createdAt: Date
   updatedAt: Date
   companyId: CompanyDTO['id']

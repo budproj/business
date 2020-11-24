@@ -3,6 +3,7 @@ import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphq
 
 import { Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, PermissionsGuard } from 'app/authz/guards'
+import CycleService from 'domain/cycle/service'
 import KeyResultService from 'domain/key-result/service'
 import { ObjectiveDTO } from 'domain/objective/dto'
 import ObjectiveService from 'domain/objective/service'
@@ -17,6 +18,7 @@ class ObjectiveResolver {
   constructor(
     private readonly keyResultService: KeyResultService,
     private readonly objectiveService: ObjectiveService,
+    private readonly cycleService: CycleService,
   ) {}
 
   @Permissions('read:objectives')
@@ -39,6 +41,16 @@ class ObjectiveResolver {
     })
 
     return this.keyResultService.getFromObjective(objective.id)
+  }
+
+  @ResolveField()
+  async cycle(@Parent() objective: ObjectiveDTO) {
+    this.logger.log({
+      objective,
+      message: 'Fetching cycke for objective',
+    })
+
+    return this.cycleService.getOneById(objective.cycleId)
   }
 }
 

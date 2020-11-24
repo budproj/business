@@ -3,6 +3,7 @@ import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphq
 
 import { Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, PermissionsGuard } from 'app/authz/guards'
+import CompanyService from 'domain/company/service'
 import KeyResultService from 'domain/key-result/service'
 import { TeamDTO } from 'domain/team/dto'
 import TeamService from 'domain/team/service'
@@ -17,6 +18,7 @@ class TeamResolver {
   constructor(
     private readonly keyResultService: KeyResultService,
     private readonly teamService: TeamService,
+    private readonly companyService: CompanyService,
   ) {}
 
   @Permissions('read:teams')
@@ -38,6 +40,16 @@ class TeamResolver {
     })
 
     return this.keyResultService.getFromTeam(team.id)
+  }
+
+  @ResolveField()
+  async company(@Parent() team: TeamDTO) {
+    this.logger.log({
+      team,
+      message: 'Fetching company for team',
+    })
+
+    return this.companyService.getOneById(team.companyId)
   }
 }
 

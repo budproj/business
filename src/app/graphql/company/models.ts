@@ -1,15 +1,15 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql'
 
 import { Cycle } from 'app/graphql/cycle/models'
-import { KeyResult } from 'app/graphql/key-result/models'
+import { Team } from 'app/graphql/team/models'
 
 @ObjectType()
-export class Objective {
+export class Company {
   @Field(() => Int)
   id: number
 
   @Field()
-  title: string
+  name: string
 
   @Field()
   createdAt: Date
@@ -17,9 +17,9 @@ export class Objective {
   @Field()
   updatedAt: Date
 
-  @Field(() => [KeyResult])
-  keyResults: KeyResult[]
+  @Field(() => [Team])
+  teams: Team[]
 
-  @Field(() => Cycle)
-  cycle: Cycle[]
+  @Field(() => [Cycle])
+  cycles: Cycle[]
 }
