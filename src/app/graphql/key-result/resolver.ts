@@ -1,4 +1,4 @@
-import { Logger, UseGuards } from '@nestjs/common'
+import { Logger, NotFoundException, UseGuards } from '@nestjs/common'
 import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { Permissions } from 'app/authz/decorators'
@@ -28,7 +28,11 @@ class KeyResultResolver {
   async keyResult(@Args('id', { type: () => Int }) id: number) {
     this.logger.log(`Fetching key result with id ${id.toString()}`)
 
-    return this.keyResultService.getOneById(id)
+    const keyResult = await this.keyResultService.getOneById(id)
+    if (!keyResult)
+      throw new NotFoundException(`Sorry, we could not found a key result with id ${id}`)
+
+    return keyResult
   }
 
   @ResolveField()

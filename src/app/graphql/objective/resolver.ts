@@ -1,4 +1,4 @@
-import { Logger, UseGuards } from '@nestjs/common'
+import { Logger, NotFoundException, UseGuards } from '@nestjs/common'
 import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { Permissions } from 'app/authz/decorators'
@@ -24,11 +24,15 @@ class ObjectiveResolver {
   async objective(@Args('id', { type: () => Int }) id: ObjectiveDTO['id']) {
     this.logger.log(`Fetching objective with id ${id.toString()}`)
 
-    return this.objectiveService.getOneById(id)
+    const objective = await this.objectiveService.getOneById(id)
+    if (!objective)
+      throw new NotFoundException(`Sorry, we could not found an objective with id ${id}`)
+
+    return objective
   }
 
   @ResolveField()
-  async keyResults(@Parent() objective: Objective) {
+  async keyResults(@Parent() objective: ObjectiveDTO) {
     this.logger.log({
       objective,
       message: 'Fetching key results for objective',

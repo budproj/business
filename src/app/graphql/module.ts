@@ -4,6 +4,7 @@ import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql'
 import graphQLFactory from './factory'
 import KeyResultModule from './key-result'
 import ObjectiveModule from './objective'
+import ProgressReportModule from './progress-report'
 import TeamModule from './team'
 import UserModule from './user'
 
@@ -14,6 +15,7 @@ import UserModule from './user'
     UserModule,
     ObjectiveModule,
     TeamModule,
+    ProgressReportModule,
   ],
 })
 class GraphQLModule {}

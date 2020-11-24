@@ -4,6 +4,7 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
+  RelationId,
   UpdateDateColumn,
 } from 'typeorm'
 
@@ -36,21 +37,21 @@ export class KeyResult implements KeyResultDTO {
   @UpdateDateColumn()
   public updatedAt: Date
 
-  @Column({ nullable: true })
-  public ownerId: UserDTO['id']
-
-  @Column({ nullable: true })
-  public objectiveId: UserDTO['id']
-
-  @Column({ nullable: true })
-  public teamId: TeamDTO['id']
-
   @ManyToOne('User', 'keyResults')
   public owner: UserDTO
+
+  @RelationId((keyResult: KeyResult) => keyResult.owner)
+  public ownerId: UserDTO['id']
 
   @ManyToOne('Objective', 'keyResults')
   public objective: ObjectiveDTO
 
+  @RelationId((keyResult: KeyResult) => keyResult.objective)
+  public objectiveId: ObjectiveDTO['id']
+
   @ManyToOne('Team', 'keyResults')
   public team: TeamDTO
+
+  @RelationId((keyResult: KeyResult) => keyResult.team)
+  public teamId: TeamDTO['id']
 }

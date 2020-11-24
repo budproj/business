@@ -1,4 +1,4 @@
-import { Logger, UseGuards } from '@nestjs/common'
+import { Logger, NotFoundException, UseGuards } from '@nestjs/common'
 import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { Permissions } from 'app/authz/decorators'
@@ -24,11 +24,14 @@ class TeamResolver {
   async team(@Args('id', { type: () => Int }) id: TeamDTO['id']) {
     this.logger.log(`Fetching team with id ${id.toString()}`)
 
-    return this.teamService.getOneById(id)
+    const team = await this.teamService.getOneById(id)
+    if (!team) throw new NotFoundException(`Sorry, we could not found a team with id ${id}`)
+
+    return team
   }
 
   @ResolveField()
-  async keyResults(@Parent() team: Team) {
+  async keyResults(@Parent() team: TeamDTO) {
     this.logger.log({
       team,
       message: 'Fetching key results for team',
