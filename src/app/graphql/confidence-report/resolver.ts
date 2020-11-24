@@ -6,6 +6,7 @@ import { GraphQLAuthGuard, PermissionsGuard } from 'app/authz/guards'
 import { ConfidenceReportDTO } from 'domain/confidence-report/dto'
 import ConfidenceReportService from 'domain/confidence-report/service'
 import KeyResultService from 'domain/key-result/service'
+import UserService from 'domain/user/service'
 
 import { ConfidenceReport } from './models'
 
@@ -17,6 +18,7 @@ class ConfidenceReportResolver {
   constructor(
     private readonly keyResultService: KeyResultService,
     private readonly confidenceReportService: ConfidenceReportService,
+    private readonly userService: UserService,
   ) {}
 
   @Permissions('read:confidence-reports')
@@ -39,6 +41,16 @@ class ConfidenceReportResolver {
     })
 
     return this.keyResultService.getOneById(confidenceReport.keyResultId)
+  }
+
+  @ResolveField()
+  async user(@Parent() confidenceReport: ConfidenceReportDTO) {
+    this.logger.log({
+      confidenceReport,
+      message: 'Fetching user for confidence report',
+    })
+
+    return this.userService.getOneById(confidenceReport.userId)
   }
 }
 

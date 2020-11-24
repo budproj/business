@@ -1,4 +1,5 @@
 import { KeyResultDTO } from 'domain/key-result/dto'
+import { UserDTO } from 'domain/user/dto'
 
 export class ConfidenceReportDTO {
   id: number
@@ -7,4 +8,5 @@ export class ConfidenceReportDTO {
   comment?: string
   createdAt: Date
   keyResultId: KeyResultDTO['id']
+  userId: UserDTO['id']
 }

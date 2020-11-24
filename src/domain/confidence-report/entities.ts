@@ -8,6 +8,7 @@ import {
 } from 'typeorm'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
+import { UserDTO } from 'domain/user/dto'
 
 import { ConfidenceReportDTO } from './dto'
 
@@ -28,10 +29,17 @@ export class ConfidenceReport implements ConfidenceReportDTO {
   @CreateDateColumn()
   public createdAt: Date
 
-  @ManyToOne('KeyResult', 'progressReports')
+  @ManyToOne('KeyResult', 'confidenceReports')
   public keyResult: KeyResultDTO
 
   @Column()
   @RelationId((progressReport: ConfidenceReport) => progressReport.keyResult)
   public keyResultId: KeyResultDTO['id']
+
+  @ManyToOne('User', 'confidenceReports')
+  public user: UserDTO
+
+  @Column()
+  @RelationId((progressReport: ConfidenceReport) => progressReport.user)
+  public userId: UserDTO['id']
 }

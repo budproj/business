@@ -7,7 +7,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
+import { ConfidenceReportDTO } from 'domain/confidence-report/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
+import { ProgressReportDTO } from 'domain/progress-report/dto'
 
 import { UserDTO } from './dto'
 
@@ -33,4 +35,10 @@ export class User implements UserDTO {
 
   @OneToMany('KeyResult', 'owner')
   public keyResults: KeyResultDTO[]
+
+  @OneToMany('ConfidenceReport', 'user')
+  public confidenceReports: ConfidenceReportDTO[]
+
+  @OneToMany('ProgressReport', 'user')
+  public progressReports: ProgressReportDTO[]
 }

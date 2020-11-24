@@ -8,6 +8,7 @@ import {
 } from 'typeorm'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
+import { UserDTO } from 'domain/user/dto'
 
 import { ProgressReportDTO } from './dto'
 
@@ -34,4 +35,11 @@ export class ProgressReport implements ProgressReportDTO {
   @Column()
   @RelationId((progressReport: ProgressReport) => progressReport.keyResult)
   public keyResultId: KeyResultDTO['id']
+
+  @ManyToOne('User', 'progressReports')
+  public user: UserDTO
+
+  @Column()
+  @RelationId((progressReport: ProgressReport) => progressReport.user)
+  public userId: UserDTO['id']
 }

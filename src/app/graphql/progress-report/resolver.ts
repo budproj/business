@@ -6,6 +6,7 @@ import { GraphQLAuthGuard, PermissionsGuard } from 'app/authz/guards'
 import KeyResultService from 'domain/key-result/service'
 import { ProgressReportDTO } from 'domain/progress-report/dto'
 import ProgressReportService from 'domain/progress-report/service'
+import UserService from 'domain/user/service'
 
 import { ProgressReport } from './models'
 
@@ -17,6 +18,7 @@ class ProgressReportResolver {
   constructor(
     private readonly keyResultService: KeyResultService,
     private readonly progressReportService: ProgressReportService,
+    private readonly userService: UserService,
   ) {}
 
   @Permissions('read:progress-reports')
@@ -39,6 +41,16 @@ class ProgressReportResolver {
     })
 
     return this.keyResultService.getOneById(progressReport.keyResultId)
+  }
+
+  @ResolveField()
+  async user(@Parent() progressReport: ProgressReportDTO) {
+    this.logger.log({
+      progressReport,
+      message: 'Fetching user for progress report',
+    })
+
+    return this.userService.getOneById(progressReport.userId)
   }
 }
 
