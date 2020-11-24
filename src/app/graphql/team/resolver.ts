@@ -1,8 +1,10 @@
-import { Logger, NotFoundException, UseGuards } from '@nestjs/common'
+import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { Permissions } from 'app/authz/decorators'
+import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
+import { EnhanceWithBudUser } from 'app/authz/interceptors'
+import { AuthzUser } from 'app/authz/types'
 import CompanyService from 'domain/company/service'
 import KeyResultService from 'domain/key-result/service'
 import { TeamDTO } from 'domain/team/dto'
@@ -11,6 +13,7 @@ import TeamService from 'domain/team/service'
 import { Team } from './models'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
+@UseInterceptors(EnhanceWithBudUser)
 @Resolver(() => Team)
 class TeamResolver {
   private readonly logger = new Logger(TeamResolver.name)
@@ -23,10 +26,10 @@ class TeamResolver {
 
   @Permissions('read:teams')
   @Query(() => Team)
-  async team(@Args('id', { type: () => Int }) id: TeamDTO['id']) {
+  async team(@Args('id', { type: () => Int }) id: TeamDTO['id'], @GraphQLUser() user: AuthzUser) {
     this.logger.log(`Fetching team with id ${id.toString()}`)
 
-    const team = await this.teamService.getOneById(id)
+    const team = await this.teamService.getOneByIdIfUserShareCompany(id, user)
     if (!team) throw new NotFoundException(`We could not found a team with id ${id}`)
 
     return team

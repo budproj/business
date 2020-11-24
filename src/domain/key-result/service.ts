@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { uniq } from 'lodash'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ObjectiveDTO } from 'domain/objective/dto'
 import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
+import UserService from 'domain/user/service'
 
 import { KeyResult } from './entities'
 import KeyResultRepository from './repository'
@@ -13,7 +13,10 @@ import KeyResultRepository from './repository'
 class KeyResultService {
   private readonly logger = new Logger(KeyResultService.name)
 
-  constructor(private readonly repository: KeyResultRepository) {}
+  constructor(
+    private readonly repository: KeyResultRepository,
+    private readonly userService: UserService,
+  ) {}
 
   async getOneById(id: KeyResultDTO['id']): Promise<KeyResult> {
     return this.repository.findOne({ id })
@@ -42,8 +45,7 @@ class KeyResultService {
     id: KeyResultDTO['id'],
     user: UserDTO,
   ): Promise<KeyResult | null> {
-    const userTeams = await user.teams
-    const userCompanies = uniq(userTeams.map((team) => team.companyId))
+    const userCompanies = await this.userService.parseRequestUserCompanies(user)
 
     this.logger.debug({
       userCompanies,

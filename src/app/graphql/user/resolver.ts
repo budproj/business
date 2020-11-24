@@ -1,8 +1,10 @@
-import { Logger, NotFoundException, UseGuards } from '@nestjs/common'
+import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { Permissions } from 'app/authz/decorators'
+import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
+import { EnhanceWithBudUser } from 'app/authz/interceptors'
+import { AuthzUser } from 'app/authz/types'
 import ConfidenceReportService from 'domain/confidence-report/service'
 import KeyResultService from 'domain/key-result/service'
 import ProgressReportService from 'domain/progress-report/service'
@@ -12,6 +14,7 @@ import UserService from 'domain/user/service'
 import { User } from './models'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
+@UseInterceptors(EnhanceWithBudUser)
 @Resolver(() => User)
 class UserResolver {
   private readonly logger = new Logger(UserResolver.name)
@@ -25,10 +28,13 @@ class UserResolver {
 
   @Permissions('read:users')
   @Query(() => User)
-  async user(@Args('id', { type: () => Int }) id: UserDTO['id']) {
+  async user(
+    @Args('id', { type: () => Int }) id: UserDTO['id'],
+    @GraphQLUser() authzUser: AuthzUser,
+  ) {
     this.logger.log(`Fetching user with id ${id.toString()}`)
 
-    const user = await this.userService.getOneById(id)
+    const user = await this.userService.getOneByIdIfUserShareCompany(id, authzUser)
     if (!user) throw new NotFoundException(`We could not found an user with id ${id}`)
 
     return user
