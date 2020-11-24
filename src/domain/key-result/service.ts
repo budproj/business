@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 
+import { KeyResultDTO } from 'domain/key-result/dto'
 import { ObjectiveDTO } from 'domain/objective/dto'
 import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
@@ -11,7 +12,7 @@ import KeyResultRepository from './repository'
 class KeyResultService {
   constructor(private readonly repository: KeyResultRepository) {}
 
-  async getOneById(id: KeyResult['id']): Promise<KeyResult> {
+  async getOneById(id: KeyResultDTO['id']): Promise<KeyResult> {
     return this.repository.findOne({ where: { id } })
   }
 
@@ -25,6 +26,16 @@ class KeyResultService {
 
   async getFromTeam(teamId: TeamDTO['id']): Promise<KeyResult[]> {
     return this.repository.find({ teamId })
+  }
+
+  async getManyByIdsPreservingOrder(ids: Array<KeyResultDTO['id']>): Promise<KeyResult[]> {
+    const rankSortColumn = this.repository.buildRankSortColumn(ids)
+
+    const query = this.repository.createQueryBuilder()
+    const filteredQuery = query.where('id IN (:...ids)', { ids })
+    const orderedQuery = filteredQuery.orderBy(rankSortColumn)
+
+    return orderedQuery.getMany()
   }
 }
 

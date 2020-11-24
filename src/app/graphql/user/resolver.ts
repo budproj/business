@@ -1,4 +1,4 @@
-import { Logger, UseGuards } from '@nestjs/common'
+import { Logger, NotFoundException, UseGuards } from '@nestjs/common'
 import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { Permissions } from 'app/authz/decorators'
@@ -28,7 +28,10 @@ class UserResolver {
   async user(@Args('id', { type: () => Int }) id: UserDTO['id']) {
     this.logger.log(`Fetching user with id ${id.toString()}`)
 
-    return this.userService.getOneById(id)
+    const user = await this.userService.getOneById(id)
+    if (!user) throw new NotFoundException(`Sorry, we could not found an user with id ${id}`)
+
+    return user
   }
 
   @ResolveField()

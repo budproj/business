@@ -13,10 +13,10 @@ export class User {
   authzSub: string
 
   @Field({ nullable: true })
-  role: string
+  role?: string
 
   @Field({ nullable: true })
-  picture: string
+  picture?: string
 
   @Field()
   createdAt: Date

@@ -5,6 +5,7 @@ import databaseConfig from 'config/database/config'
 
 import ConfidenceReportModule from './confidence-report'
 import KeyResultModule from './key-result'
+import KeyResultViewModule from './key-result-view'
 import ObjectiveModule from './objective'
 import ProgressReportModule from './progress-report'
 import TeamModule from './team'
@@ -19,6 +20,7 @@ import UserModule from './user'
     TeamModule,
     ProgressReportModule,
     ConfidenceReportModule,
+    KeyResultViewModule,
   ],
   exports: [
     KeyResultModule,
@@ -27,6 +29,7 @@ import UserModule from './user'
     TeamModule,
     ProgressReportModule,
     ConfidenceReportModule,
+    KeyResultViewModule,
   ],
 })
 class DomainModule {}
