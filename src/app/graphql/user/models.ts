@@ -1,6 +1,6 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql'
 
-import { KeyResult } from 'app/key-result/models'
+import { KeyResult } from 'app/graphql/key-result/models'
 
 @ObjectType()
 export class User {
@@ -10,7 +10,7 @@ export class User {
   @Field()
   authzSub: string
 
-  @Field()
+  @Field({ nullable: true })
   role: string
 
   @Field({ nullable: true })

@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
+import { ObjectiveDTO } from 'domain/objective/dto'
 import { UserDTO } from 'domain/user/dto'
 
 import { KeyResultDTO } from './dto'
@@ -39,4 +40,10 @@ export class KeyResult implements KeyResultDTO {
 
   @ManyToOne('User', 'keyResults')
   public owner: UserDTO
+
+  @Column({ nullable: true })
+  public objectiveId: UserDTO['id']
+
+  @ManyToOne('Objective', 'keyResults')
+  public objective: ObjectiveDTO
 }

@@ -1,3 +1,4 @@
+import { ObjectiveDTO } from 'domain/objective/dto'
 import { UserDTO } from 'domain/user/dto'
 
 export class KeyResultDTO {
@@ -9,4 +10,5 @@ export class KeyResultDTO {
   createdAt: Date
   updatedAt: Date
   ownerId: UserDTO['id']
+  objectiveId: ObjectiveDTO['id']
 }

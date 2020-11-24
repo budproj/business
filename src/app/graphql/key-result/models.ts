@@ -1,6 +1,7 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql'
 
-import { User } from 'app/user/models'
+import { Objective } from 'app/graphql/objective/models'
+import { User } from 'app/graphql/user/models'
 
 @ObjectType()
 export class KeyResult {
@@ -27,4 +28,7 @@ export class KeyResult {
 
   @Field(() => User)
   owner: User
+
+  @Field(() => Objective)
+  objective: Objective
 }

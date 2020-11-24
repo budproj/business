@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common'
 
+import { ObjectiveDTO } from 'domain/objective/dto'
+import { UserDTO } from 'domain/user/dto'
+
 import { KeyResult } from './entities'
 import KeyResultRepository from './repository'
 
@@ -11,8 +14,12 @@ class KeyResultService {
     return this.repository.findOne({ where: { id } })
   }
 
-  async getManyWithIDS(ids: Array<KeyResult['id']>): Promise<KeyResult[]> {
-    return this.repository.findByIds(ids)
+  async getOwnedBy(ownerId: UserDTO['id']): Promise<KeyResult[]> {
+    return this.repository.find({ ownerId })
+  }
+
+  async getFromObjective(objectiveId: ObjectiveDTO['id']): Promise<KeyResult[]> {
+    return this.repository.find({ objectiveId })
   }
 }
 
