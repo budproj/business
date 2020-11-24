@@ -20,6 +20,13 @@ class KeyResultViewService {
   ): Promise<KeyResultView | null> {
     return this.repository.findOne({ id, userId: user.id })
   }
+
+  async getOneByBindingIfUserOwnsIt(
+    binding: KeyResultViewDTO['binding'],
+    user: UserDTO,
+  ): Promise<KeyResultView | null> {
+    return this.repository.findOne({ binding, userId: user.id })
+  }
 }
 
 export default KeyResultViewService

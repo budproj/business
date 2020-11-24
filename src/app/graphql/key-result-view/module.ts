@@ -2,12 +2,13 @@ import { Module } from '@nestjs/common'
 
 import DomainModule from 'domain/module'
 
-import UserResolver from './resolver'
+import KeyResultViewResolver from './resolver'
+import KeyResultViewService from './service'
 
 @Module({
   imports: [DomainModule],
-  providers: [UserResolver],
+  providers: [KeyResultViewResolver, KeyResultViewService],
 })
-class UsersModule {}
+class KeyResultViewsModule {}
 
-export default UsersModule
+export default KeyResultViewsModule

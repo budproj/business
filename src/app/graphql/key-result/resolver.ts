@@ -93,6 +93,26 @@ class KeyResultResolver {
 
     return this.confidenceReportService.getFromKeyResult(keyResult.id)
   }
+
+  @ResolveField()
+  async latestProgressReport(@Parent() keyResult: KeyResultDTO) {
+    this.logger.log({
+      keyResult,
+      message: 'Fetching latest progress report for key result',
+    })
+
+    return this.progressReportService.getLatestFromKeyResult(keyResult.id)
+  }
+
+  @ResolveField()
+  async latestConfidenceReport(@Parent() keyResult: KeyResultDTO) {
+    this.logger.log({
+      keyResult,
+      message: 'Fetching latest confidence report for key result',
+    })
+
+    return this.confidenceReportService.getLatestFromKeyResult(keyResult.id)
+  }
 }
 
 export default KeyResultResolver

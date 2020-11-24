@@ -41,6 +41,12 @@ export class KeyResult {
   @Field(() => [ProgressReport])
   progressReports: ProgressReport[]
 
+  @Field(() => ProgressReport)
+  latestProgressReport: ProgressReport
+
   @Field(() => [ConfidenceReport])
   confidenceReports: ConfidenceReport[]
+
+  @Field(() => ConfidenceReport)
+  latestConfidenceReport: ConfidenceReport
 }

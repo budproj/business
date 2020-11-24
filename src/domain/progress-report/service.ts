@@ -45,6 +45,10 @@ class ProgressReportService {
 
     return data
   }
+
+  async getLatestFromKeyResult(keyResultId: KeyResultDTO['id']): Promise<ProgressReport> {
+    return this.repository.findOne({ where: { keyResultId }, order: { createdAt: 'DESC' } })
+  }
 }
 
 export default ProgressReportService

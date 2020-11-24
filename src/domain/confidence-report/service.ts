@@ -45,6 +45,10 @@ class ConfidenceReportService {
 
     return data
   }
+
+  async getLatestFromKeyResult(keyResultId: KeyResultDTO['id']): Promise<ConfidenceReport> {
+    return this.repository.findOne({ where: { keyResultId }, order: { createdAt: 'DESC' } })
+  }
 }
 
 export default ConfidenceReportService
