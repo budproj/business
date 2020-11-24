@@ -2,7 +2,7 @@ import { Logger, NotFoundException, UseGuards } from '@nestjs/common'
 import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { Permissions } from 'app/authz/decorators'
-import { GraphQLAuthGuard, PermissionsGuard } from 'app/authz/guards'
+import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { CompanyDTO } from 'domain/company/dto'
 import CompanyService from 'domain/company/service'
 import CycleService from 'domain/cycle/service'
@@ -10,7 +10,7 @@ import TeamService from 'domain/team/service'
 
 import { Company } from './models'
 
-@UseGuards(GraphQLAuthGuard, PermissionsGuard)
+@UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @Resolver(() => Company)
 class CompanyResolver {
   private readonly logger = new Logger(CompanyResolver.name)

@@ -23,8 +23,8 @@ export class GraphQLAuthGuard extends AuthGuard('jwt') {
 }
 
 @Injectable()
-export class PermissionsGuard implements CanActivate {
-  private readonly logger = new Logger(PermissionsGuard.name)
+export class GraphQLPermissionsGuard implements CanActivate {
+  private readonly logger = new Logger(GraphQLPermissionsGuard.name)
 
   constructor(private readonly reflector: Reflector) {}
 
@@ -33,7 +33,7 @@ export class PermissionsGuard implements CanActivate {
     const request = gqlContext.getContext().req
 
     const routePermissions = this.reflector.get<string[]>('permissions', gqlContext.getHandler())
-    const userPermissions = request.user.permissions ?? []
+    const userPermissions = request.user.token.permissions ?? []
 
     this.logger.debug({
       routePermissions,

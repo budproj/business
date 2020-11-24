@@ -2,7 +2,7 @@ import { Logger, NotFoundException, UseGuards } from '@nestjs/common'
 import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { Permissions } from 'app/authz/decorators'
-import { GraphQLAuthGuard, PermissionsGuard } from 'app/authz/guards'
+import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import KeyResultService from 'domain/key-result/service'
 import { ProgressReportDTO } from 'domain/progress-report/dto'
 import ProgressReportService from 'domain/progress-report/service'
@@ -10,7 +10,7 @@ import UserService from 'domain/user/service'
 
 import { ProgressReport } from './models'
 
-@UseGuards(GraphQLAuthGuard, PermissionsGuard)
+@UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @Resolver(() => ProgressReport)
 class ProgressReportResolver {
   private readonly logger = new Logger(ProgressReportResolver.name)

@@ -1,4 +1,6 @@
-import { FastifyRequest } from 'fastify'
+import { CompanyDTO } from 'domain/company/dto'
+import { TeamDTO } from 'domain/team/dto'
+import { UserDTO } from 'domain/user/dto'
 
 export interface AuthzToken {
   iss: string
@@ -11,6 +13,8 @@ export interface AuthzToken {
   permissions: string[]
 }
 
-export interface AuthzRequest extends FastifyRequest {
-  user: AuthzToken
+export interface AuthzUser extends UserDTO {
+  token: AuthzToken
+  companies: Array<CompanyDTO['id']>
+  teams: TeamDTO[]
 }

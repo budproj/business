@@ -2,7 +2,7 @@ import { Logger, NotFoundException, UseGuards } from '@nestjs/common'
 import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { Permissions } from 'app/authz/decorators'
-import { GraphQLAuthGuard, PermissionsGuard } from 'app/authz/guards'
+import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { ConfidenceReportDTO } from 'domain/confidence-report/dto'
 import ConfidenceReportService from 'domain/confidence-report/service'
 import KeyResultService from 'domain/key-result/service'
@@ -10,7 +10,7 @@ import UserService from 'domain/user/service'
 
 import { ConfidenceReport } from './models'
 
-@UseGuards(GraphQLAuthGuard, PermissionsGuard)
+@UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @Resolver(() => ConfidenceReport)
 class ConfidenceReportResolver {
   private readonly logger = new Logger(ConfidenceReportResolver.name)

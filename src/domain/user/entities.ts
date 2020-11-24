@@ -45,5 +45,5 @@ export class User implements UserDTO {
   public progressReports: ProgressReportDTO[]
 
   @ManyToMany('Team', 'users', { lazy: true })
-  public teams: TeamDTO[]
+  public teams: Promise<TeamDTO[]>
 }

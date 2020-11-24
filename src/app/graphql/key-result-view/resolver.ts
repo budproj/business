@@ -1,8 +1,9 @@
-import { Logger, NotFoundException, UseGuards } from '@nestjs/common'
+import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { Permissions } from 'app/authz/decorators'
-import { GraphQLAuthGuard, PermissionsGuard } from 'app/authz/guards'
+import { Permissions, GraphQLUser } from 'app/authz/decorators'
+import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
+import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { KeyResultViewDTO } from 'domain/key-result-view/dto'
 import KeyResultViewService from 'domain/key-result-view/service'
 import KeyResultService from 'domain/key-result/service'
@@ -10,7 +11,8 @@ import UserService from 'domain/user/service'
 
 import { KeyResultView } from './models'
 
-@UseGuards(GraphQLAuthGuard, PermissionsGuard)
+@UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
+@UseInterceptors(EnhanceWithBudUser)
 @Resolver(() => KeyResultView)
 class KeyResultViewResolver {
   private readonly logger = new Logger(KeyResultViewResolver.name)
@@ -23,8 +25,13 @@ class KeyResultViewResolver {
 
   @Permissions('read:key-result-views')
   @Query(() => KeyResultView)
-  async keyResultView(@Args('id', { type: () => Int }) id: KeyResultViewDTO['id']) {
+  async keyResultView(
+    @Args('id', { type: () => Int }) id: KeyResultViewDTO['id'],
+    @GraphQLUser() user,
+  ) {
     this.logger.log(`Fetching key result view with id ${id.toString()}`)
+
+    console.log(user)
 
     const keyResultView = await this.keyResultViewService.getOneById(id)
     if (!keyResultView)

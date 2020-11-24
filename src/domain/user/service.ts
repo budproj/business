@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
+import { UserDTO } from 'domain/user/dto'
+
 import { User } from './entities'
 import UserRepository from './repository'
 
@@ -7,8 +9,12 @@ import UserRepository from './repository'
 class UserService {
   constructor(private readonly repository: UserRepository) {}
 
-  async getOneById(id: User['id']): Promise<User> {
+  async getOneById(id: UserDTO['id']): Promise<User> {
     return this.repository.findOne({ id })
+  }
+
+  async getUserFromSubjectWithTeamRelation(authzSub: UserDTO['authzSub']): Promise<User> {
+    return this.repository.findOne({ authzSub }, { relations: ['teams'] })
   }
 }
 

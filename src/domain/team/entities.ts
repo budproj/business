@@ -43,5 +43,5 @@ export class Team implements TeamDTO {
 
   @ManyToMany('User', 'teams', { lazy: true })
   @JoinTable()
-  public users: UserDTO[]
+  public users: Promise<UserDTO[]>
 }
