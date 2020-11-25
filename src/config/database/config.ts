@@ -6,8 +6,8 @@ const { TYPEORM_HOST, TYPEORM_PORT, TYPEORM_USER, TYPEORM_PASSWORD, TYPEORM_LOGG
 const config: TypeOrmModuleOptions = {
   type: 'postgres',
   database: 'business',
-  migrations: ['src/migrations/**/*.js'],
-  entities: ['src/domain/**/entities.js'],
+  migrations: ['dist/src/migrations/**/*.js'],
+  entities: ['dist/src/domain/**/entities.js'],
   host: TYPEORM_HOST,
   port: Number.parseInt(TYPEORM_PORT, 10) || 5432,
   username: TYPEORM_USER,

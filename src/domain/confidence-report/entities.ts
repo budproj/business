@@ -17,10 +17,10 @@ export class ConfidenceReport implements ConfidenceReportDTO {
   @PrimaryGeneratedColumn()
   public id: number
 
-  @Column({ type: 'numeric', nullable: true })
+  @Column({ nullable: true })
   public valuePrevious?: number
 
-  @Column('numeric')
+  @Column()
   public valueNew: number
 
   @Column({ type: 'text', nullable: true })

@@ -5,6 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   RelationId,
+  Unique,
 } from 'typeorm'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
@@ -13,14 +14,15 @@ import { UserDTO } from 'domain/user/dto'
 import { ProgressReportDTO } from './dto'
 
 @Entity()
+@Unique(['valuePrevious', 'valueNew', 'keyResultId'])
 export class ProgressReport implements ProgressReportDTO {
   @PrimaryGeneratedColumn()
   public id: number
 
-  @Column({ type: 'numeric', nullable: true })
+  @Column({ type: 'real', nullable: true })
   public valuePrevious?: number
 
-  @Column('numeric')
+  @Column('real')
   public valueNew: number
 
   @Column({ type: 'text', nullable: true })

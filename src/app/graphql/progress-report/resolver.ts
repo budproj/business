@@ -1,12 +1,23 @@
-import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import {
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+  PreconditionFailedException,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common'
+import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
+import { RailwayError } from 'app/errors'
+import { Railway } from 'app/providers'
+import { KeyResultDTO } from 'domain/key-result/dto'
 import KeyResultService from 'domain/key-result/service'
 import { ProgressReportDTO } from 'domain/progress-report/dto'
+import { ProgressReport as ProgressReportEntity } from 'domain/progress-report/entities'
 import ProgressReportService from 'domain/progress-report/service'
 import UserService from 'domain/user/service'
 
@@ -22,6 +33,7 @@ class ProgressReportResolver {
     private readonly keyResultService: KeyResultService,
     private readonly progressReportService: ProgressReportService,
     private readonly userService: UserService,
+    private readonly railway: Railway,
   ) {}
 
   @Permissions('read:progress-reports')
@@ -57,6 +69,40 @@ class ProgressReportResolver {
     })
 
     return this.userService.getOneById(progressReport.userId)
+  }
+
+  @Mutation(() => ProgressReport)
+  async createProgressReport(
+    @GraphQLUser() user: AuthzUser,
+    @Args('value', { type: () => Int }) value: ProgressReportDTO['valueNew'],
+    @Args('keyResultID', { type: () => Int }) keyResultId: KeyResultDTO['id'],
+    @Args('comment', { type: () => String, nullable: true }) comment?: ProgressReportDTO['comment'],
+  ) {
+    this.logger.log({
+      user,
+      value,
+      keyResultId,
+      comment,
+      message: 'Creating a new progress report',
+    })
+
+    const progressReport: Partial<ProgressReportDTO> = {
+      keyResultId,
+      comment,
+      valueNew: value,
+      userId: user.id,
+    }
+
+    const creationPromise = this.progressReportService.create(progressReport)
+    const [error, createdProgressReport] = await this.railway.handleRailwayPromise<
+      RailwayError,
+      ProgressReportEntity[]
+    >(creationPromise)
+    if (error) throw new InternalServerErrorException('Unknown error')
+    if (!createdProgressReport)
+      throw new PreconditionFailedException('You have already created that report')
+
+    return createdProgressReport[0]
   }
 }
 

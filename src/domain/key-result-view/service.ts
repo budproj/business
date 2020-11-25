@@ -45,7 +45,7 @@ class KeyResultViewService {
   }
 
   async create(
-    keyResultViews: Partial<KeyResultView> | Array<Partial<KeyResultView>>,
+    keyResultViews: Partial<KeyResultViewDTO> | Array<Partial<KeyResultViewDTO>>,
   ): Promise<KeyResultView[]> {
     const data = await this.repository.insert(keyResultViews)
 

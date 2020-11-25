@@ -14,7 +14,8 @@
     "compile": "tsc",
     "lint": "eslint '{src,lib}/**/*.ts'",
     "lint:fix": "npm run lint -- --fix",
-    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/.bin/typeorm --config src/config/database/config",
+    "typeorm": "run-s clean compile && npm run typeorm:run --",
+    "typeorm:run": "ts-node -r tsconfig-paths/register ./node_modules/.bin/typeorm --config src/config/database/config",
     "migration:generate": "npm run typeorm migration:generate -- -n",
     "migration:run": "npm run typeorm migration:run",
     "clean": "rimraf -rf dist"

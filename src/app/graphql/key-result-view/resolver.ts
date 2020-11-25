@@ -122,11 +122,11 @@ class KeyResultViewResolver {
 
   @Mutation(() => KeyResultView)
   async createKeyResultView(
-    @Args('title', { type: () => String, nullable: true }) title: KeyResultViewDTO['title'],
-    @Args('binding', { type: () => KeyResultViewBinding, nullable: true })
-    binding: KeyResultViewBinding,
-    @Args('rank', { type: () => [Int] }) rank: KeyResultViewDTO['rank'],
     @GraphQLUser() user: AuthzUser,
+    @Args('rank', { type: () => [Int] }) rank: KeyResultViewDTO['rank'],
+    @Args('title', { type: () => String, nullable: true }) title?: KeyResultViewDTO['title'],
+    @Args('binding', { type: () => KeyResultViewBinding, nullable: true })
+    binding?: KeyResultViewBinding,
   ) {
     this.logger.log({
       title,
@@ -149,8 +149,8 @@ class KeyResultViewResolver {
       KeyResultViewEntity[]
     >(creationPromise)
     if (error?.code === '23505')
-      return new PreconditionFailedException('View bindings must be unique')
-    if (error) return new InternalServerErrorException('Unknown error')
+      throw new PreconditionFailedException('View bindings must be unique')
+    if (error) throw new InternalServerErrorException('Unknown error')
 
     return createdKeyResultView[0]
   }
