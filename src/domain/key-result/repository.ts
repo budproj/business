@@ -1,4 +1,4 @@
-import { EntityRepository, Repository } from 'typeorm'
+import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
@@ -22,9 +22,25 @@ class KeyResultRepository extends Repository<KeyResult> {
     return rankSortColumn
   }
 
-  async findByIdsRanked(ids: Array<KeyResultDTO['id']>, rank: string): Promise<KeyResult[]> {
-    const query = this.createQueryBuilder()
-    const filteredQuery = query.where('id IN (:...ids)', { ids })
+  createCompanyConstrainedQueryBuilder(
+    allowedCompanies: Array<CompanyDTO['id']>,
+  ): SelectQueryBuilder<KeyResult> {
+    const query = super.createQueryBuilder()
+    const joinedQuery = query.leftJoinAndSelect(`${KeyResult.name}.team`, 'team')
+    const companyConstrainedQuery = joinedQuery.where('team.companyId IN (:...companies)', {
+      companies: allowedCompanies,
+    })
+
+    return companyConstrainedQuery
+  }
+
+  async findByIdsRankedWithCompanyConstraint(
+    ids: Array<KeyResultDTO['id']>,
+    rank: string,
+    allowedCompanies: Array<CompanyDTO['id']>,
+  ): Promise<KeyResult[]> {
+    const query = this.createCompanyConstrainedQueryBuilder(allowedCompanies)
+    const filteredQuery = query.andWhere(`${KeyResult.name}.id IN (:...ids)`, { ids })
     const orderedQuery = filteredQuery.orderBy(rank)
 
     return orderedQuery.getMany()
@@ -34,14 +50,10 @@ class KeyResultRepository extends Repository<KeyResult> {
     id: KeyResultDTO['id'],
     allowedCompanies: Array<CompanyDTO['id']>,
   ): Promise<KeyResult | null> {
-    const query = this.createQueryBuilder()
-    const filteredQuery = query.where({ id })
-    const joinedQuery = filteredQuery.leftJoinAndSelect(`${KeyResult.name}.team`, 'team')
-    const companyConstrainedQuery = joinedQuery.andWhere('team.companyId IN (:...companies)', {
-      companies: allowedCompanies,
-    })
+    const query = this.createCompanyConstrainedQueryBuilder(allowedCompanies)
+    const filteredQuery = query.andWhere(`${KeyResult.name}.id = (:id)`, { id })
 
-    return companyConstrainedQuery.getOne()
+    return filteredQuery.getOne()
   }
 }
 

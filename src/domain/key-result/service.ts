@@ -34,9 +34,24 @@ class KeyResultService {
     return this.repository.find({ teamId })
   }
 
-  async getManyByIdsPreservingOrder(ids: Array<KeyResultDTO['id']>): Promise<KeyResult[]> {
+  async getManyByIdsPreservingOrderIfUserIsInCompany(
+    ids: Array<KeyResultDTO['id']>,
+    user: UserDTO,
+  ): Promise<KeyResult[]> {
+    const userCompanies = await this.userService.parseRequestUserCompanies(user)
+
+    this.logger.debug({
+      userCompanies,
+      user,
+      message: `Reduced companies for user`,
+    })
+
     const rankSortColumn = this.repository.buildRankSortColumn(ids)
-    const data = this.repository.findByIdsRanked(ids, rankSortColumn)
+    const data = this.repository.findByIdsRankedWithCompanyConstraint(
+      ids,
+      rankSortColumn,
+      userCompanies,
+    )
 
     return data
   }

@@ -86,13 +86,16 @@ class KeyResultViewResolver {
   }
 
   @ResolveField()
-  async keyResults(@Parent() keyResultView: KeyResultViewDTO) {
+  async keyResults(@Parent() keyResultView: KeyResultViewDTO, @GraphQLUser() user: AuthzUser) {
     this.logger.log({
       keyResultView,
       message: 'Fetching key results for key result view',
     })
 
-    return this.keyResultService.getManyByIdsPreservingOrder(keyResultView.rank)
+    return this.keyResultService.getManyByIdsPreservingOrderIfUserIsInCompany(
+      keyResultView.rank,
+      user,
+    )
   }
 
   @Mutation(() => KeyResultView)
