@@ -1,5 +1,14 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Int, Parent, Query, registerEnumType, ResolveField, Resolver } from '@nestjs/graphql'
+import {
+  Args,
+  Int,
+  Mutation,
+  Parent,
+  Query,
+  registerEnumType,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql'
 
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
@@ -9,6 +18,7 @@ import KeyResultViewResolverService, {
   KeyResultViewResolverRequest,
 } from 'app/graphql/key-result-view/service'
 import { KeyResultViewBinding, KeyResultViewDTO } from 'domain/key-result-view/dto'
+import KeyResultViewService from 'domain/key-result-view/service'
 import KeyResultService from 'domain/key-result/service'
 import UserService from 'domain/user/service'
 
@@ -29,6 +39,7 @@ class KeyResultViewResolver {
     private readonly keyResultService: KeyResultService,
     private readonly userService: UserService,
     private readonly service: KeyResultViewResolverService,
+    private readonly keyResultViewService: KeyResultViewService,
   ) {}
 
   @Permissions('read:key-result-views')
@@ -71,6 +82,28 @@ class KeyResultViewResolver {
     })
 
     return this.keyResultService.getManyByIdsPreservingOrder(keyResultView.rank)
+  }
+
+  @Mutation(() => KeyResultView)
+  async updateRank(
+    @Args('id', { type: () => Int }) id: KeyResultViewDTO['id'],
+    @Args('rank', { type: () => [Int] }) rank: KeyResultViewDTO['rank'],
+    @GraphQLUser() user: AuthzUser,
+  ) {
+    this.logger.log({
+      rank,
+      message: `Updating rank for key result view of id ${id}`,
+    })
+
+    const updatedKeyResultView = await this.keyResultViewService.updateRankIfUserOwnsIt(
+      id,
+      rank,
+      user,
+    )
+    if (!updatedKeyResultView)
+      throw new NotFoundException(`We could not found a key result view for id ${id}`)
+
+    return updatedKeyResultView
   }
 }
 

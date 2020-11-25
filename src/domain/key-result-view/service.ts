@@ -27,6 +27,22 @@ class KeyResultViewService {
   ): Promise<KeyResultView | null> {
     return this.repository.findOne({ binding, userId: user.id })
   }
+
+  async updateRankIfUserOwnsIt(
+    id: KeyResultViewDTO['id'],
+    newRank: KeyResultViewDTO['rank'],
+    user: UserDTO,
+  ): Promise<KeyResultView | null> {
+    const newData = {
+      rank: newRank,
+    }
+    const conditions = {
+      id,
+      userId: user.id,
+    }
+
+    return this.repository.updateWithConditions(newData, conditions)
+  }
 }
 
 export default KeyResultViewService
