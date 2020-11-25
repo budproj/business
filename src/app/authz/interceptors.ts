@@ -1,25 +1,35 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Logger } from '@nestjs/common'
+import { GqlExecutionContext } from '@nestjs/graphql'
 import { Observable } from 'rxjs'
 
-import UserAggregateService from 'domain/user-aggregate/service'
-import { User } from 'domain/user-aggregate/user/entities'
+import { AppRequest } from 'app/types'
+import { User } from 'domain/user/entities'
+import UserService from 'domain/user/service'
 
 @Injectable()
-export class AuthzInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(AuthzInterceptor.name)
+export class EnhanceWithBudUser implements NestInterceptor {
+  private readonly logger = new Logger(EnhanceWithBudUser.name)
 
-  constructor(private readonly userAggregateService: UserAggregateService) {}
+  constructor(private readonly userService: UserService) {}
 
-  async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<unknown>> {
-    const request = context.switchToHttp().getRequest()
+  async intercept(rawContext: ExecutionContext, next: CallHandler): Promise<Observable<unknown>> {
+    const gqlContext = GqlExecutionContext.create(rawContext)
+    const request: AppRequest = gqlContext.getContext().req
 
-    const user: User = await this.userAggregateService.getUserForRequest(request)
+    const { teams, ...user }: User = await this.userService.getUserFromSubjectWithTeamRelation(
+      request.user.token.sub,
+    )
+
+    request.user = {
+      ...request.user,
+      ...user,
+      teams,
+    }
+
     this.logger.debug({
-      user,
-      message: `Selected user with ID ${user.id} for current request. Selected data:`,
+      requestUser: request.user,
+      message: `Selected user with ID ${user.id} for current request`,
     })
-
-    request._budUser = user
 
     return next.handle()
   }

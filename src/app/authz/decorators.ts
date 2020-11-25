@@ -1,10 +1,13 @@
 import { createParamDecorator, ExecutionContext, SetMetadata } from '@nestjs/common'
+import { GqlExecutionContext } from '@nestjs/graphql'
 
-import { User as UserEntity } from 'domain/user-aggregate/user/entities'
+import { UserDTO } from 'domain/user/dto'
 
 export const Permissions = (...permissions: string[]) => SetMetadata('permissions', permissions)
 
-export const User = createParamDecorator<UserEntity>((_, context: ExecutionContext) => {
-  const request = context.switchToHttp().getRequest()
-  return request._budUser
+export const GraphQLUser = createParamDecorator<UserDTO>((_, rawContext: ExecutionContext) => {
+  const gqlContext = GqlExecutionContext.create(rawContext)
+  const request = gqlContext.getContext().req
+
+  return request.user
 })

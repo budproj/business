@@ -4,7 +4,7 @@ import { PassportStrategy } from '@nestjs/passport'
 import { passportJwtSecret } from 'jwks-rsa'
 import { ExtractJwt, Strategy } from 'passport-jwt'
 
-import { AuthzToken } from './types'
+import { AuthzToken, AuthzUser } from './types'
 
 @Injectable()
 class AuthzStrategy extends PassportStrategy(Strategy) {
@@ -23,9 +23,9 @@ class AuthzStrategy extends PassportStrategy(Strategy) {
     })
   }
 
-  validate(token: AuthzToken): AuthzToken {
+  validate(token: AuthzToken): Partial<AuthzUser> {
     this.logger.debug({ message: 'Received request to guarded endpoint with token', token })
-    return token
+    return { token }
   }
 }
 

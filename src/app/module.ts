@@ -1,21 +1,13 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 
+import AuthzModule from 'app/authz'
 import appConfig from 'config/app'
 
-import AuthzModule from './authz'
-import KeyResultViewModule from './key-result-views'
-import KeyResultsModule from './key-results'
-import ProgressReportsModule from './progress-reports'
+import GraphQLModule from './graphql'
 
 @Module({
-  imports: [
-    ConfigModule.forFeature(appConfig),
-    AuthzModule,
-    KeyResultsModule,
-    KeyResultViewModule,
-    ProgressReportsModule,
-  ],
+  imports: [ConfigModule.forFeature(appConfig), AuthzModule, GraphQLModule],
 })
 class AppModule {}
 

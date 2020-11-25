@@ -1,0 +1,16 @@
+import { ObjectiveDTO } from 'domain/objective/dto'
+import { TeamDTO } from 'domain/team/dto'
+import { UserDTO } from 'domain/user/dto'
+
+export class KeyResultDTO {
+  id: number
+  title: string
+  description?: string
+  initialValue: number
+  goal: number
+  createdAt: Date
+  updatedAt: Date
+  ownerId: UserDTO['id']
+  objectiveId: ObjectiveDTO['id']
+  teamId: TeamDTO['id']
+}
