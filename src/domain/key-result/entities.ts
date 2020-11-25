@@ -12,7 +12,7 @@ import { ObjectiveDTO } from 'domain/objective/dto'
 import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
 
-import { KeyResultDTO } from './dto'
+import { KeyResultDTO, KeyResultFormat } from './dto'
 
 @Entity()
 export class KeyResult implements KeyResultDTO {
@@ -30,6 +30,9 @@ export class KeyResult implements KeyResultDTO {
 
   @Column('numeric')
   public goal: number
+
+  @Column({ type: 'enum', enum: KeyResultFormat, default: KeyResultFormat.NUMBER })
+  public format: KeyResultFormat
 
   @CreateDateColumn()
   public createdAt: Date

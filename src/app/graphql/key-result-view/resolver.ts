@@ -6,16 +6,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common'
-import {
-  Args,
-  Int,
-  Mutation,
-  Parent,
-  Query,
-  registerEnumType,
-  ResolveField,
-  Resolver,
-} from '@nestjs/graphql'
+import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
@@ -33,11 +24,6 @@ import KeyResultService from 'domain/key-result/service'
 import UserService from 'domain/user/service'
 
 import { KeyResultView } from './models'
-
-registerEnumType(KeyResultViewBinding, {
-  name: 'KeyResultViewBinding',
-  description: 'Each binding represents a given view in our applications',
-})
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)

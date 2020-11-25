@@ -1,8 +1,13 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql'
+import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { KeyResult } from 'app/graphql/key-result/models'
 import { User } from 'app/graphql/user/models'
 import { KeyResultViewBinding } from 'domain/key-result-view/dto'
+
+registerEnumType(KeyResultViewBinding, {
+  name: 'KeyResultViewBinding',
+  description: 'Each binding represents a given view in our applications',
+})
 
 @ObjectType()
 export class KeyResultView {
