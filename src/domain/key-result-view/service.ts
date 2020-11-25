@@ -43,6 +43,14 @@ class KeyResultViewService {
 
     return this.repository.updateWithConditions(newData, conditions)
   }
+
+  async create(
+    keyResultViews: Partial<KeyResultView> | Array<Partial<KeyResultView>>,
+  ): Promise<KeyResultView[]> {
+    const data = await this.repository.insert(keyResultViews)
+
+    return data.raw
+  }
 }
 
 export default KeyResultViewService

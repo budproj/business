@@ -1,4 +1,11 @@
-import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
+import {
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+  PreconditionFailedException,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common'
 import {
   Args,
   Int,
@@ -14,10 +21,13 @@ import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
+import { RailwayError } from 'app/errors'
 import KeyResultViewResolverService, {
   KeyResultViewResolverRequest,
 } from 'app/graphql/key-result-view/service'
+import { Railway } from 'app/providers'
 import { KeyResultViewBinding, KeyResultViewDTO } from 'domain/key-result-view/dto'
+import { KeyResultView as KeyResultViewEntity } from 'domain/key-result-view/entities'
 import KeyResultViewService from 'domain/key-result-view/service'
 import KeyResultService from 'domain/key-result/service'
 import UserService from 'domain/user/service'
@@ -40,6 +50,7 @@ class KeyResultViewResolver {
     private readonly userService: UserService,
     private readonly service: KeyResultViewResolverService,
     private readonly keyResultViewService: KeyResultViewService,
+    private readonly railway: Railway,
   ) {}
 
   @Permissions('read:key-result-views')
@@ -104,6 +115,41 @@ class KeyResultViewResolver {
       throw new NotFoundException(`We could not found a key result view for id ${id}`)
 
     return updatedKeyResultView
+  }
+
+  @Mutation(() => KeyResultView)
+  async createKeyResultView(
+    @Args('title', { type: () => String, nullable: true }) title: KeyResultViewDTO['title'],
+    @Args('binding', { type: () => KeyResultViewBinding, nullable: true })
+    binding: KeyResultViewBinding,
+    @Args('rank', { type: () => [Int] }) rank: KeyResultViewDTO['rank'],
+    @GraphQLUser() user: AuthzUser,
+  ) {
+    this.logger.log({
+      title,
+      binding,
+      rank,
+      user,
+      message: 'Creating a new key result view',
+    })
+
+    const keyResultView: Partial<KeyResultViewDTO> = {
+      title,
+      binding,
+      rank,
+      userId: user.id,
+    }
+
+    const creationPromise = this.keyResultViewService.create(keyResultView)
+    const [error, createdKeyResultView] = await this.railway.handleRailwayPromise<
+      RailwayError,
+      KeyResultViewEntity[]
+    >(creationPromise)
+    if (error?.code === '23505')
+      return new PreconditionFailedException('View bindings must be unique')
+    if (error) return new InternalServerErrorException('Unknown error')
+
+    return createdKeyResultView[0]
   }
 }
 

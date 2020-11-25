@@ -14,8 +14,8 @@ class KeyResultViewRepository extends Repository<KeyResultView> {
     const updateQuery = query.update(KeyResultView)
     const setQuery = updateQuery.set(newData)
     const filteredQuery = setQuery.where(conditions)
-    const data = await filteredQuery.execute()
 
+    await filteredQuery.execute()
     const updatedData = await this.findOne({ where: conditions })
 
     return updatedData
