@@ -75,9 +75,13 @@ class KeyResultResolver {
   }
 
   @ResolveField()
-  async progressReports(@Parent() keyResult: KeyResultDTO) {
+  async progressReports(
+    @Parent() keyResult: KeyResultDTO,
+    @Args('limit', { type: () => Int, nullable: true }) limit?: number,
+  ) {
     this.logger.log({
       keyResult,
+      limit,
       message: 'Fetching progress reports for key result',
     })
 
@@ -92,26 +96,6 @@ class KeyResultResolver {
     })
 
     return this.confidenceReportService.getFromKeyResult(keyResult.id)
-  }
-
-  @ResolveField()
-  async latestProgressReport(@Parent() keyResult: KeyResultDTO) {
-    this.logger.log({
-      keyResult,
-      message: 'Fetching latest progress report for key result',
-    })
-
-    return this.progressReportService.getLatestFromKeyResult(keyResult.id)
-  }
-
-  @ResolveField()
-  async latestConfidenceReport(@Parent() keyResult: KeyResultDTO) {
-    this.logger.log({
-      keyResult,
-      message: 'Fetching latest confidence report for key result',
-    })
-
-    return this.confidenceReportService.getLatestFromKeyResult(keyResult.id)
   }
 }
 

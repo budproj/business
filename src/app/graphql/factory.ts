@@ -9,7 +9,7 @@ const graphQLFactory: GqlModuleAsyncOptions = {
   useFactory: async (configService: ConfigService) => ({
     debug: configService.get('debug'),
     playground: configService.get('playground'),
-    autoSchemaFile: true,
+    autoSchemaFile: configService.get('schemaFile'),
   }),
 }
 

@@ -23,7 +23,7 @@ class ProgressReportService {
   }
 
   async getFromKeyResult(keyResultId: KeyResultDTO['id']): Promise<ProgressReport[]> {
-    return this.repository.find({ keyResultId })
+    return this.repository.find({ where: { keyResultId }, order: { createdAt: 'DESC' } })
   }
 
   async getFromUser(userId: UserDTO['id']): Promise<ProgressReport[]> {

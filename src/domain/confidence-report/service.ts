@@ -22,7 +22,7 @@ class ConfidenceReportService {
   }
 
   async getFromKeyResult(keyResultId: KeyResultDTO['id']): Promise<ConfidenceReport[]> {
-    return this.repository.find({ keyResultId })
+    return this.repository.find({ where: { keyResultId }, order: { createdAt: 'DESC' } })
   }
 
   async getFromUser(userId: UserDTO['id']): Promise<ConfidenceReport[]> {

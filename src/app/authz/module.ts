@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { PassportModule } from '@nestjs/passport'
 
+import { GraphQLAuthGuard } from 'app/authz/guards'
 import appConfig from 'config/app'
 
 import AuthzStrategy from './strategy'
@@ -11,8 +12,8 @@ import AuthzStrategy from './strategy'
     PassportModule.register({ defaultStrategy: 'jwt' }),
     ConfigModule.forFeature(appConfig),
   ],
-  providers: [AuthzStrategy],
-  exports: [PassportModule],
+  providers: [AuthzStrategy, GraphQLAuthGuard],
+  exports: [PassportModule, GraphQLAuthGuard],
 })
 class AuthzModule {}
 
