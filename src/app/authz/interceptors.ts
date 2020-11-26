@@ -55,6 +55,7 @@ export class EnhanceWithBudUser implements NestInterceptor {
     const user = {
       teams: await teamsPromise,
       id: this.godUser.id,
+      name: this.godUser.name,
       authzSub: this.godUser.authzSub,
       role: this.godUser.role,
       token: this.godUser.token,

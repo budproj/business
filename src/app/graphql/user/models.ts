@@ -11,6 +11,9 @@ export class User {
   id: number
 
   @Field()
+  name: string
+
+  @Field()
   authzSub: string
 
   @Field({ nullable: true })

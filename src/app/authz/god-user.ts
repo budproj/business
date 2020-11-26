@@ -2,6 +2,7 @@ import { AuthzUser } from 'app/authz/types'
 
 class GodUser implements AuthzUser {
   public readonly id: AuthzUser['id']
+  public readonly name: AuthzUser['name']
   public readonly authzSub: AuthzUser['authzSub']
   public readonly role: AuthzUser['role']
   public readonly picture: AuthzUser['picture']
@@ -12,6 +13,7 @@ class GodUser implements AuthzUser {
 
   constructor() {
     this.id = 9999999999
+    this.name = 'GOD'
     this.authzSub = 'GOD'
     this.role = 'GOD'
     this.picture =
