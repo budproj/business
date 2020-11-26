@@ -1,7 +1,7 @@
 import { createParamDecorator, ExecutionContext, SetMetadata } from '@nestjs/common'
 import { GqlExecutionContext } from '@nestjs/graphql'
 
-  import { UserDTO } from 'domain/user/dto'
+import { UserDTO } from 'domain/user/dto'
 
 export const Permissions = (...permissions: string[]) => SetMetadata('permissions', permissions)
 
