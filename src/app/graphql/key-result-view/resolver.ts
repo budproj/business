@@ -6,7 +6,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common'
-import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, ID, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
@@ -86,7 +86,7 @@ class KeyResultViewResolver {
 
   @Mutation(() => KeyResultView)
   async updateRank(
-    @Args('id', { type: () => Int }) id: KeyResultViewDTO['id'],
+    @Args('id', { type: () => ID }) id: KeyResultViewDTO['id'],
     @Args('keyResultViewRankInput', { type: () => KeyResultViewRankInput })
     keyResultViewRankInput: Partial<KeyResultViewDTO>,
     @GraphQLUser() user: AuthzUser,
