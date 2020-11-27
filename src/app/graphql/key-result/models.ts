@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { Field, Float, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { ConfidenceReport } from 'app/graphql/confidence-report/models'
 import { Objective } from 'app/graphql/objective/models'
@@ -23,10 +23,10 @@ export class KeyResult {
   @Field({ nullable: true })
   description?: string
 
-  @Field(() => Int)
+  @Field(() => Float)
   initialValue: number
 
-  @Field(() => Int)
+  @Field(() => Float)
   goal: number
 
   @Field()
