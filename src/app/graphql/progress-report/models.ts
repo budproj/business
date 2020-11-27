@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql'
+import { Field, InputType, Int, ObjectType } from '@nestjs/graphql'
 
 import { KeyResult } from 'app/graphql/key-result/models'
 import { User } from 'app/graphql/user/models'
@@ -25,4 +25,16 @@ export class ProgressReport {
 
   @Field(() => User)
   user: User
+}
+
+@InputType()
+export class ProgressReportInput {
+  @Field()
+  value: number
+
+  @Field({ nullable: true })
+  comment?: string
+
+  @Field(() => Int)
+  keyResultID: KeyResult['id']
 }

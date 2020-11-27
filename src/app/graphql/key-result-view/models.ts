@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { Field, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { KeyResult } from 'app/graphql/key-result/models'
 import { User } from 'app/graphql/user/models'
@@ -34,4 +34,22 @@ export class KeyResultView {
 
   @Field(() => User)
   user: User
+}
+
+@InputType()
+export class KeyResultViewInput {
+  @Field({ nullable: true })
+  title?: string
+
+  @Field({ nullable: true })
+  binding?: KeyResultViewBinding
+
+  @Field(() => [Int])
+  rank: Array<KeyResult['id']>
+}
+
+@InputType()
+export class KeyResultViewRankInput {
+  @Field(() => [Int])
+  rank: Array<KeyResult['id']>
 }

@@ -14,14 +14,13 @@ import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import { RailwayError } from 'app/errors'
 import { Railway } from 'app/providers'
-import { KeyResultDTO } from 'domain/key-result/dto'
 import KeyResultService from 'domain/key-result/service'
 import { ProgressReportDTO } from 'domain/progress-report/dto'
 import { ProgressReport as ProgressReportEntity } from 'domain/progress-report/entities'
 import ProgressReportService from 'domain/progress-report/service'
 import UserService from 'domain/user/service'
 
-import { ProgressReport } from './models'
+import { ProgressReport, ProgressReportInput } from './models'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -74,26 +73,21 @@ class ProgressReportResolver {
   @Mutation(() => ProgressReport)
   async createProgressReport(
     @GraphQLUser() user: AuthzUser,
-    @Args('value', { type: () => Int }) value: ProgressReportDTO['valueNew'],
-    @Args('keyResultID', { type: () => Int }) keyResultId: KeyResultDTO['id'],
-    @Args('comment', { type: () => String, nullable: true }) comment?: ProgressReportDTO['comment'],
+    @Args('progressReportInput', { type: () => ProgressReportInput })
+    progressReportInput: Partial<ProgressReportDTO>,
   ) {
     this.logger.log({
       user,
-      value,
-      keyResultId,
-      comment,
+      progressReportInput,
       message: 'Creating a new progress report',
     })
 
-    const progressReport: Partial<ProgressReportDTO> = {
-      keyResultId,
-      comment,
-      valueNew: value,
+    const enhancedWithUserID = {
+      ...progressReportInput,
       userId: user.id,
     }
 
-    const creationPromise = this.progressReportService.create(progressReport)
+    const creationPromise = this.progressReportService.create(enhancedWithUserID)
     const [error, createdProgressReport] = await this.railway.handleRailwayPromise<
       RailwayError,
       ProgressReportEntity[]

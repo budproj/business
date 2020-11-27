@@ -23,7 +23,7 @@ import KeyResultViewService from 'domain/key-result-view/service'
 import KeyResultService from 'domain/key-result/service'
 import UserService from 'domain/user/service'
 
-import { KeyResultView } from './models'
+import { KeyResultView, KeyResultViewInput, KeyResultViewRankInput } from './models'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -87,17 +87,18 @@ class KeyResultViewResolver {
   @Mutation(() => KeyResultView)
   async updateRank(
     @Args('id', { type: () => Int }) id: KeyResultViewDTO['id'],
-    @Args('rank', { type: () => [Int] }) rank: KeyResultViewDTO['rank'],
+    @Args('keyResultViewRankInput', { type: () => KeyResultViewRankInput })
+    keyResultViewRankInput: Partial<KeyResultViewDTO>,
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log({
-      rank,
+      keyResultViewRankInput,
       message: `Updating rank for key result view of id ${id}`,
     })
 
     const updatedKeyResultView = await this.keyResultViewService.updateRankIfUserOwnsIt(
       id,
-      rank,
+      keyResultViewRankInput.rank,
       user,
     )
     if (!updatedKeyResultView)
@@ -109,27 +110,21 @@ class KeyResultViewResolver {
   @Mutation(() => KeyResultView)
   async createKeyResultView(
     @GraphQLUser() user: AuthzUser,
-    @Args('rank', { type: () => [Int] }) rank: KeyResultViewDTO['rank'],
-    @Args('title', { type: () => String, nullable: true }) title?: KeyResultViewDTO['title'],
-    @Args('binding', { type: () => KeyResultViewBinding, nullable: true })
-    binding?: KeyResultViewBinding,
+    @Args('keyResultViewInput', { type: () => KeyResultViewInput })
+    keyResultViewInput: Partial<KeyResultViewDTO>,
   ) {
     this.logger.log({
-      title,
-      binding,
-      rank,
       user,
+      keyResultViewInput,
       message: 'Creating a new key result view',
     })
 
-    const keyResultView: Partial<KeyResultViewDTO> = {
-      title,
-      binding,
-      rank,
+    const enhancedWithUserID = {
+      ...keyResultViewInput,
       userId: user.id,
     }
 
-    const creationPromise = this.keyResultViewService.create(keyResultView)
+    const creationPromise = this.keyResultViewService.create(enhancedWithUserID)
     const [error, createdKeyResultView] = await this.railway.handleRailwayPromise<
       RailwayError,
       KeyResultViewEntity[]
