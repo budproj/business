@@ -17,6 +17,10 @@ class TeamService {
     private readonly userService: UserService,
   ) {}
 
+  async getAll(): Promise<Team[]> {
+    return this.repository.find()
+  }
+
   async getOneById(id: Team['id']): Promise<Team> {
     return this.repository.findOne({ id })
   }

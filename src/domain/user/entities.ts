@@ -21,6 +21,9 @@ export class User implements UserDTO {
   public id: number
 
   @Column()
+  public name: string
+
+  @Column()
   public authzSub: string
 
   @Column({ nullable: true })

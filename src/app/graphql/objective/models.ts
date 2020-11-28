@@ -21,5 +21,5 @@ export class Objective {
   keyResults: KeyResult[]
 
   @Field(() => Cycle)
-  cycle: Cycle[]
+  cycle: Cycle
 }

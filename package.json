@@ -18,6 +18,7 @@
     "typeorm:run": "ts-node -r tsconfig-paths/register ./node_modules/.bin/typeorm --config src/config/database/config",
     "migration:generate": "npm run typeorm migration:generate -- -n",
     "migration:run": "npm run typeorm migration:run",
+    "migration:format": "prettier --write 'src/migrations/*.ts'",
     "clean": "rimraf -rf dist"
   },
   "author": "delucca <delucca@pm.me>",
@@ -79,6 +80,7 @@
     "@typescript-eslint/parser": "^4.7.0",
     "eslint": "^7.13.0",
     "husky": "^4.3.0",
+    "lint-staged": "^10.5.2",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.1.2",
     "rimraf": "^3.0.2",
@@ -89,7 +91,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "run-s lint"
+      "pre-commit": "lint-staged"
     }
   }
 }
