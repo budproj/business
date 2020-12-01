@@ -12,7 +12,7 @@ class GodUser implements AuthzUser {
   public readonly teams: AuthzUser['teams']
 
   constructor() {
-    this.id = 9999999999
+    this.id = 1
     this.name = 'GOD'
     this.authzSub = 'GOD'
     this.role = 'GOD'

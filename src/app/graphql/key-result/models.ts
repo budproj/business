@@ -1,4 +1,4 @@
-import { Field, Float, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { Field, Float, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { ConfidenceReport } from 'app/graphql/confidence-report/models'
 import { Objective } from 'app/graphql/objective/models'
@@ -52,4 +52,28 @@ export class KeyResult {
 
   @Field(() => [ConfidenceReport])
   confidenceReports: ConfidenceReport[]
+}
+
+@InputType()
+export class CheckInInput {
+  @Field(() => Int)
+  keyResultId: KeyResult['id']
+
+  @Field(() => Float)
+  progress: ProgressReport['valueNew']
+
+  @Field(() => Int, { nullable: true })
+  confidence?: ConfidenceReport['valueNew']
+
+  @Field({ nullable: true })
+  comment?: string
+}
+
+@ObjectType()
+export class Report {
+  @Field(() => Int)
+  id: ProgressReport['id'] | ConfidenceReport['id']
+
+  @Field(() => Date)
+  createdAt: ProgressReport['createdAt'] | ProgressReport['createdAt']
 }

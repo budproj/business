@@ -4,12 +4,11 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import databaseConfig from 'config/database/config'
 
 import CompanyModule from './company'
-import ConfidenceReportModule from './confidence-report'
 import CycleModule from './cycle'
 import KeyResultModule from './key-result'
+import KeyResultReportModule from './key-result-report'
 import KeyResultViewModule from './key-result-view'
 import ObjectiveModule from './objective'
-import ProgressReportModule from './progress-report'
 import TeamModule from './team'
 import UserModule from './user'
 
@@ -20,9 +19,8 @@ import UserModule from './user'
     UserModule,
     ObjectiveModule,
     TeamModule,
-    ProgressReportModule,
-    ConfidenceReportModule,
     KeyResultViewModule,
+    KeyResultReportModule,
     CompanyModule,
     CycleModule,
   ],
@@ -31,9 +29,8 @@ import UserModule from './user'
     UserModule,
     ObjectiveModule,
     TeamModule,
-    ProgressReportModule,
-    ConfidenceReportModule,
     KeyResultViewModule,
+    KeyResultReportModule,
     CompanyModule,
     CycleModule,
   ],
