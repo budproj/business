@@ -29,12 +29,12 @@ export class ProgressReport {
 
 @InputType()
 export class ProgressReportInput {
-  @Field()
+  @Field(() => Float)
   value: number
 
   @Field({ nullable: true })
   comment?: string
 
   @Field(() => Int)
-  keyResultID: KeyResult['id']
+  keyResultId: KeyResult['id']
 }

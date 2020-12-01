@@ -5,8 +5,8 @@ import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
-import { ConfidenceReportDTO } from 'domain/confidence-report/dto'
-import ConfidenceReportService from 'domain/confidence-report/service'
+import { ConfidenceReportDTO } from 'domain/key-result-report/confidence/dto'
+import KeyResultReportService from 'domain/key-result-report/service'
 import KeyResultService from 'domain/key-result/service'
 import UserService from 'domain/user/service'
 
@@ -20,7 +20,7 @@ class ConfidenceReportResolver {
 
   constructor(
     private readonly keyResultService: KeyResultService,
-    private readonly confidenceReportService: ConfidenceReportService,
+    private readonly keyResultReportService: KeyResultReportService,
     private readonly userService: UserService,
   ) {}
 
@@ -32,7 +32,7 @@ class ConfidenceReportResolver {
   ) {
     this.logger.log(`Fetching confidence report with id ${id.toString()}`)
 
-    const confidenceReport = await this.confidenceReportService.getOneByIdIfUserIsInCompany(
+    const confidenceReport = await this.keyResultReportService.confidenceReportService.getOneByIdIfUserIsInCompany(
       id,
       user,
     )

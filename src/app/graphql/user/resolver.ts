@@ -5,9 +5,8 @@ import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
-import ConfidenceReportService from 'domain/confidence-report/service'
+import KeyResultReportService from 'domain/key-result-report/service'
 import KeyResultService from 'domain/key-result/service'
-import ProgressReportService from 'domain/progress-report/service'
 import { UserDTO } from 'domain/user/dto'
 import UserService from 'domain/user/service'
 
@@ -22,8 +21,7 @@ class UserResolver {
   constructor(
     private readonly keyResultService: KeyResultService,
     private readonly userService: UserService,
-    private readonly progressReportService: ProgressReportService,
-    private readonly confidenceReportService: ConfidenceReportService,
+    private readonly keyResultReportService: KeyResultReportService,
   ) {}
 
   @Permissions('read:users')
@@ -57,7 +55,7 @@ class UserResolver {
       message: 'Fetching progress reports for user',
     })
 
-    return this.progressReportService.getFromUser(user.id)
+    return this.keyResultReportService.progressReportService.getFromUser(user.id)
   }
 
   @ResolveField()
@@ -67,7 +65,7 @@ class UserResolver {
       message: 'Fetching confidence reports for user',
     })
 
-    return this.confidenceReportService.getFromUser(user.id)
+    return this.keyResultReportService.confidenceReportService.getFromUser(user.id)
   }
 }
 

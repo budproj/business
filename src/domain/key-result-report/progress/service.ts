@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { remove } from 'lodash'
 
+import { ProgressReportDTO } from 'domain/key-result-report/progress/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
-import { ProgressReportDTO } from 'domain/progress-report/dto'
 import { UserDTO } from 'domain/user/dto'
 import UserService from 'domain/user/service'
 
@@ -60,20 +60,28 @@ class ProgressReportService {
     return this.repository.findOne({ where: { keyResultId }, order: { createdAt: 'DESC' } })
   }
 
-  async create(
+  async buildProgressReports(
     progressReports: Partial<ProgressReportDTO> | Array<Partial<ProgressReportDTO>>,
-  ): Promise<ProgressReport[]> {
+  ): Promise<Array<Partial<ProgressReportDTO>>> {
     const enhancementPromises = Array.isArray(progressReports)
       ? progressReports.map(this.enhanceWithPreviousValue)
       : [this.enhanceWithPreviousValue(progressReports)]
     const progressReportsWithPreviousValues = remove(await Promise.all(enhancementPromises))
 
+    return progressReportsWithPreviousValues
+  }
+
+  async create(
+    rawProgressReports: Partial<ProgressReportDTO> | Array<Partial<ProgressReportDTO>>,
+  ): Promise<ProgressReport[]> {
+    const progressReports = await this.buildProgressReports(rawProgressReports)
+
     this.logger.debug({
-      progressReportsWithPreviousValues,
+      progressReports,
       message: 'Creating new progress report',
     })
 
-    const data = await this.repository.insert(progressReportsWithPreviousValues)
+    const data = await this.repository.insert(progressReports)
     const createdProgressReports = data.raw
 
     return createdProgressReports
