@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   InternalServerErrorException,
   Logger,
   NotFoundException,
@@ -70,12 +71,32 @@ class GraphQLProgressReportResolver {
     return this.userService.getOneById(progressReport.userId)
   }
 
+  @Permissions('create:progress-reports')
   @Mutation(() => ProgressReportObject)
   async createProgressReport(
     @GraphQLUser() user: AuthzUser,
     @Args('progressReportInput', { type: () => ProgressReportInput })
     progressReportInput: ProgressReportInput,
   ) {
+    this.logger.log({
+      user,
+      progressReportInput,
+      message: 'Checking if the user owns the given key result',
+    })
+
+    const keyResult = await this.keyResultService.getOneById(progressReportInput.keyResultId)
+    if (keyResult.ownerId !== user.id) {
+      this.logger.log({
+        user,
+        progressReportInput,
+        keyResult,
+        message: 'User is not the owner of key result. Dispatching error',
+      })
+      throw new ForbiddenException(
+        'You must be the owner of the key result to create a new progress report',
+      )
+    }
+
     this.logger.log({
       user,
       progressReportInput,

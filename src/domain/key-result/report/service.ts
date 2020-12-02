@@ -24,13 +24,15 @@ class DomainKeyResultReportService {
   ): Promise<Array<ProgressReport | ConfidenceReport>> {
     const createdProgressReports = await this.progress.create(progressReportData)
     this.logger.log({
-      message: 'Created progress report. Now, moving to confidence report',
+      message: 'Handled progress report. Now, moving to confidence report',
       createdProgressReports,
     })
 
-    const createdConfidenceReports = await this.confidence.create(confidenceReportData)
+    const createdConfidenceReports = confidenceReportData.valueNew
+      ? await this.confidence.create(confidenceReportData)
+      : []
     this.logger.log({
-      message: 'Created confidence report. Now, returning them both',
+      message: 'Handled confidence report. Now, returning them both',
       createdConfidenceReports,
     })
 

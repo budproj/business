@@ -1,7 +1,13 @@
-import { InternalServerErrorException, Logger, UseGuards, UseInterceptors } from '@nestjs/common'
+import {
+  ForbiddenException,
+  InternalServerErrorException,
+  Logger,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common'
 import { Args, Mutation, Resolver } from '@nestjs/graphql'
 
-import { GraphQLUser } from 'app/authz/decorators'
+import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
@@ -25,12 +31,32 @@ class GraphQLKeyResultReportResolver {
     private readonly railway: Railway,
   ) {}
 
+  @Permissions('create:progress-reports', 'create:confidence-reports')
   @Mutation(() => [ReportObject])
   async checkIn(
     @GraphQLUser() user: AuthzUser,
     @Args('checkInInput', { type: () => CheckInInput })
     checkInInput: CheckInInput,
   ) {
+    this.logger.log({
+      user,
+      checkInInput,
+      message: 'Checking if the user owns the given key result',
+    })
+
+    const keyResult = await this.keyResultService.getOneById(checkInInput.keyResultId)
+    if (keyResult.ownerId !== user.id) {
+      this.logger.log({
+        user,
+        checkInInput,
+        keyResult,
+        message: 'User is not the owner of key result. Dispatching error',
+      })
+      throw new ForbiddenException(
+        'You must be the owner of the key result to create a new check-in',
+      )
+    }
+
     this.logger.log({
       user,
       checkInInput,
