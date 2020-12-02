@@ -1,4 +1,4 @@
-import { ProgressReportDTO } from 'domain/key-result-report/progress/dto'
+import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
 
 export interface ProgressReport {
   value: ProgressReportDTO['valueNew']

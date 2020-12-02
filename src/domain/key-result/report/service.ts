@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { remove } from 'lodash'
 
-import { ConfidenceReportDTO } from 'domain/key-result-report/confidence/dto'
-import { ConfidenceReport } from 'domain/key-result-report/confidence/entities'
-import { ProgressReportDTO } from 'domain/key-result-report/progress/dto'
-import { ProgressReport } from 'domain/key-result-report/progress/entities'
+import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
+import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
+import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
+import { ProgressReport } from 'domain/key-result/report/progress/entities'
 
 import ConfidenceReportService from './confidence/service'
 import ProgressReportService from './progress/service'
@@ -14,21 +14,21 @@ class KeyResultReportService {
   private readonly logger = new Logger(KeyResultReportService.name)
 
   constructor(
-    public readonly progressReportService: ProgressReportService,
-    public readonly confidenceReportService: ConfidenceReportService,
+    public readonly progress: ProgressReportService,
+    public readonly confidence: ConfidenceReportService,
   ) {}
 
   async checkIn(
     progressReportData: Partial<ProgressReportDTO>,
     confidenceReportData: Partial<ConfidenceReportDTO>,
   ): Promise<Array<ProgressReport | ConfidenceReport>> {
-    const createdProgressReports = await this.progressReportService.create(progressReportData)
+    const createdProgressReports = await this.progress.create(progressReportData)
     this.logger.log({
       message: 'Created progress report. Now, moving to confidence report',
       createdProgressReports,
     })
 
-    const createdConfidenceReports = await this.confidenceReportService.create(confidenceReportData)
+    const createdConfidenceReports = await this.confidence.create(confidenceReportData)
     this.logger.log({
       message: 'Created confidence report. Now, returning them both',
       createdConfidenceReports,

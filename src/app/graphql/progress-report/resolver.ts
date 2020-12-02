@@ -14,9 +14,8 @@ import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import { RailwayError } from 'app/errors'
 import { Railway } from 'app/providers'
-import { ProgressReportDTO } from 'domain/key-result-report/progress/dto'
-import { ProgressReport as ProgressReportEntity } from 'domain/key-result-report/progress/entities'
-import KeyResultReportService from 'domain/key-result-report/service'
+import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
+import { ProgressReport as ProgressReportEntity } from 'domain/key-result/report/progress/entities'
 import KeyResultService from 'domain/key-result/service'
 import UserService from 'domain/user/service'
 
@@ -31,7 +30,6 @@ class ProgressReportResolver {
 
   constructor(
     private readonly keyResultService: KeyResultService,
-    private readonly keyResultReportService: KeyResultReportService,
     private readonly userService: UserService,
     private readonly railway: Railway,
   ) {}
@@ -44,7 +42,7 @@ class ProgressReportResolver {
   ) {
     this.logger.log(`Fetching progress report with id ${id.toString()}`)
 
-    const progressReport = await this.keyResultReportService.progressReportService.getOneByIdIfUserIsInCompany(
+    const progressReport = await this.keyResultService.report.progress.getOneByIdIfUserIsInCompany(
       id,
       user,
     )
@@ -93,9 +91,7 @@ class ProgressReportResolver {
       valueNew: progressReportInput.value,
     }
 
-    const creationPromise = this.keyResultReportService.progressReportService.create(
-      enhancedWithUserID,
-    )
+    const creationPromise = this.keyResultService.report.progress.create(enhancedWithUserID)
     const [error, createdProgressReport] = await this.railway.handleRailwayPromise<
       RailwayError,
       ProgressReportEntity[]

@@ -17,17 +17,17 @@ import KeyResultViewResolverService, {
   KeyResultViewResolverRequest,
 } from 'app/graphql/key-result-view/service'
 import { Railway } from 'app/providers'
-import { KeyResultViewBinding, KeyResultViewDTO } from 'domain/key-result-view/dto'
-import { KeyResultView as KeyResultViewEntity } from 'domain/key-result-view/entities'
-import KeyResultViewService from 'domain/key-result-view/service'
 import KeyResultService from 'domain/key-result/service'
 import UserService from 'domain/user/service'
+import { KeyResultViewDTO } from 'domain/user/view/key-result/dto'
+import { KeyResultView } from 'domain/user/view/key-result/entities'
+import { KeyResultViewBinding } from 'domain/user/view/key-result/types'
 
-import { KeyResultView, KeyResultViewInput, KeyResultViewRankInput } from './models'
+import { KeyResultViewObject, KeyResultViewInput, KeyResultViewRankInput } from './models'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
-@Resolver(() => KeyResultView)
+@Resolver(() => KeyResultViewObject)
 class KeyResultViewResolver {
   private readonly logger = new Logger(KeyResultViewResolver.name)
 
@@ -35,12 +35,11 @@ class KeyResultViewResolver {
     private readonly keyResultService: KeyResultService,
     private readonly userService: UserService,
     private readonly service: KeyResultViewResolverService,
-    private readonly keyResultViewService: KeyResultViewService,
     private readonly railway: Railway,
   ) {}
 
   @Permissions('read:key-result-views')
-  @Query(() => KeyResultView)
+  @Query(() => KeyResultViewObject)
   async keyResultView(
     @GraphQLUser() user: AuthzUser,
     @Args('id', { type: () => Int, nullable: true }) id?: KeyResultViewDTO['id'],
@@ -84,7 +83,7 @@ class KeyResultViewResolver {
     )
   }
 
-  @Mutation(() => KeyResultView)
+  @Mutation(() => KeyResultViewObject)
   async updateRank(
     @Args('id', { type: () => ID }) id: KeyResultViewDTO['id'],
     @Args('keyResultViewRankInput', { type: () => KeyResultViewRankInput })
@@ -96,7 +95,7 @@ class KeyResultViewResolver {
       message: `Updating rank for key result view of id ${id}`,
     })
 
-    const updatedKeyResultView = await this.keyResultViewService.updateRankIfUserOwnsIt(
+    const updatedKeyResultView = await this.userService.view.keyResult.updateRankIfUserOwnsIt(
       id,
       keyResultViewRankInput.rank,
       user,
@@ -107,7 +106,7 @@ class KeyResultViewResolver {
     return updatedKeyResultView
   }
 
-  @Mutation(() => KeyResultView)
+  @Mutation(() => KeyResultViewObject)
   async createKeyResultView(
     @GraphQLUser() user: AuthzUser,
     @Args('keyResultViewInput', { type: () => KeyResultViewInput })
@@ -124,10 +123,10 @@ class KeyResultViewResolver {
       userId: user.id,
     }
 
-    const creationPromise = this.keyResultViewService.create(enhancedWithUserID)
+    const creationPromise = this.userService.view.keyResult.create(enhancedWithUserID)
     const [error, createdKeyResultView] = await this.railway.handleRailwayPromise<
       RailwayError,
-      KeyResultViewEntity[]
+      KeyResultView[]
     >(creationPromise)
     if (error?.code === '23505')
       throw new PreconditionFailedException('View bindings must be unique')

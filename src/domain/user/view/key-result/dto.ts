@@ -1,9 +1,7 @@
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { UserDTO } from 'domain/user/dto'
 
-export enum KeyResultViewBinding {
-  MINE = 'MINE',
-}
+import { KeyResultViewBinding } from './types'
 
 export class KeyResultViewDTO {
   id: number

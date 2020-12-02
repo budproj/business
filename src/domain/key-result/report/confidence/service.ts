@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { remove } from 'lodash'
 
-import { ConfidenceReportDTO } from 'domain/key-result-report/confidence/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
+import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
 import { UserDTO } from 'domain/user/dto'
 import UserService from 'domain/user/service'
 

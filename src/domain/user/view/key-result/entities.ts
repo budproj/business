@@ -11,7 +11,8 @@ import {
 
 import { UserDTO } from 'domain/user/dto'
 
-import { KeyResultViewDTO, KeyResultViewBinding } from './dto'
+import { KeyResultViewDTO } from './dto'
+import { KeyResultViewBinding } from './types'
 
 @Entity()
 @Unique(['user', 'binding'])

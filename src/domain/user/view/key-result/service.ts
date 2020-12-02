@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
 
-import { KeyResultViewDTO } from 'domain/key-result-view/dto'
 import { UserDTO } from 'domain/user/dto'
 
+import { KeyResultViewDTO } from './dto'
 import { KeyResultView } from './entities'
 import KeyResultViewRepository from './repository'
 

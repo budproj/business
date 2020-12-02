@@ -2,7 +2,7 @@ import { Field, InputType, Int, ObjectType, registerEnumType } from '@nestjs/gra
 
 import { KeyResult } from 'app/graphql/key-result/models'
 import { User } from 'app/graphql/user/models'
-import { KeyResultViewBinding } from 'domain/key-result-view/dto'
+import { KeyResultViewBinding } from 'domain/user/view/key-result/types'
 
 registerEnumType(KeyResultViewBinding, {
   name: 'KeyResultViewBinding',
@@ -10,7 +10,7 @@ registerEnumType(KeyResultViewBinding, {
 })
 
 @ObjectType()
-export class KeyResultView {
+export class KeyResultViewObject {
   @Field(() => Int)
   id: number
 

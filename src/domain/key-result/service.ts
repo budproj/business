@@ -7,6 +7,7 @@ import { UserDTO } from 'domain/user/dto'
 import UserService from 'domain/user/service'
 
 import { KeyResult } from './entities'
+import KeyResultReportService from './report/service'
 import KeyResultRepository from './repository'
 
 @Injectable()
@@ -14,6 +15,7 @@ class KeyResultService {
   private readonly logger = new Logger(KeyResultService.name)
 
   constructor(
+    public readonly report: KeyResultReportService,
     private readonly repository: KeyResultRepository,
     private readonly userService: UserService,
   ) {}

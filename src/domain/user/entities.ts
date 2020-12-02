@@ -8,9 +8,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { ConfidenceReportDTO } from 'domain/key-result-report/confidence/dto'
-import { ProgressReportDTO } from 'domain/key-result-report/progress/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
+import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
+import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
 import { TeamDTO } from 'domain/team/dto'
 
 import { UserDTO } from './dto'

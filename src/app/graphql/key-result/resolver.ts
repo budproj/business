@@ -13,10 +13,9 @@ import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import { RailwayError } from 'app/errors'
 import { Railway } from 'app/providers'
-import { ConfidenceReport as ConfidenceReportEntity } from 'domain/key-result-report/confidence/entities'
-import { ProgressReport as ProgressReportEntity } from 'domain/key-result-report/progress/entities'
-import KeyResultReportService from 'domain/key-result-report/service'
 import { KeyResultDTO } from 'domain/key-result/dto'
+import { ConfidenceReport as ConfidenceReportEntity } from 'domain/key-result/report/confidence/entities'
+import { ProgressReport as ProgressReportEntity } from 'domain/key-result/report/progress/entities'
 import KeyResultService from 'domain/key-result/service'
 import ObjectiveService from 'domain/objective/service'
 import TeamService from 'domain/team/service'
@@ -36,7 +35,6 @@ class KeyResultResolver {
     private readonly userService: UserService,
     private readonly objectiveService: ObjectiveService,
     private readonly teamService: TeamService,
-    private readonly keyResultReportService: KeyResultReportService,
     private readonly railway: Railway,
   ) {}
 
@@ -95,7 +93,7 @@ class KeyResultResolver {
       message: 'Fetching progress reports for key result',
     })
 
-    return this.keyResultReportService.progressReportService.getFromKeyResult(keyResult.id, {
+    return this.keyResultService.report.progress.getFromKeyResult(keyResult.id, {
       limit,
     })
   }
@@ -111,7 +109,7 @@ class KeyResultResolver {
       message: 'Fetching confidence reports for key result',
     })
 
-    return this.keyResultReportService.confidenceReportService.getFromKeyResult(keyResult.id, {
+    return this.keyResultService.report.confidence.getFromKeyResult(keyResult.id, {
       limit,
     })
   }
@@ -141,7 +139,7 @@ class KeyResultResolver {
       comment: checkInInput.comment,
     }
 
-    const creationPromise = this.keyResultReportService.checkIn(progressReport, confidenceReport)
+    const creationPromise = this.keyResultService.report.checkIn(progressReport, confidenceReport)
     const [error, createdReports] = await this.railway.handleRailwayPromise<
       RailwayError,
       Array<ProgressReportEntity | ConfidenceReportEntity>

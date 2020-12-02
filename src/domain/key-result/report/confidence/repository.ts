@@ -1,20 +1,20 @@
 import { EntityRepository, Repository } from 'typeorm'
 
 import { CompanyDTO } from 'domain/company/dto'
-import { ProgressReportDTO } from 'domain/key-result-report/progress/dto'
+import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
 
-import { ProgressReport } from './entities'
+import { ConfidenceReport } from './entities'
 
-@EntityRepository(ProgressReport)
-class ProgressReportRepository extends Repository<ProgressReport> {
+@EntityRepository(ConfidenceReport)
+class ConfidenceReportRepository extends Repository<ConfidenceReport> {
   async findByIDWithCompanyConstraint(
-    id: ProgressReportDTO['id'],
+    id: ConfidenceReportDTO['id'],
     allowedCompanies: Array<CompanyDTO['id']>,
-  ): Promise<ProgressReport | null> {
+  ): Promise<ConfidenceReport | null> {
     const query = this.createQueryBuilder()
     const filteredQuery = query.where({ id })
     const keyResultJoinedQuery = filteredQuery.leftJoinAndSelect(
-      `${ProgressReport.name}.keyResult`,
+      `${ConfidenceReport.name}.keyResult`,
       'keyResult',
     )
     const teamJoinedQuery = keyResultJoinedQuery.leftJoinAndSelect('keyResult.team', 'team')
@@ -26,4 +26,4 @@ class ProgressReportRepository extends Repository<ProgressReport> {
   }
 }
 
-export default ProgressReportRepository
+export default ConfidenceReportRepository

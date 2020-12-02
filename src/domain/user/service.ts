@@ -6,12 +6,13 @@ import { UserDTO } from 'domain/user/dto'
 
 import { User } from './entities'
 import UserRepository from './repository'
+import UserViewService from './view/service'
 
 @Injectable()
 class UserService {
   private readonly logger = new Logger(UserService.name)
 
-  constructor(private readonly repository: UserRepository) {}
+  constructor(public readonly view: UserViewService, private readonly repository: UserRepository) {}
 
   async getOneById(id: UserDTO['id']): Promise<User> {
     return this.repository.findOne({ id })
