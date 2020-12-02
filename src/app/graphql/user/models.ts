@@ -5,38 +5,49 @@ import { ConfidenceReportObject } from 'app/graphql/key-result/report/confidence
 import { ProgressReportObject } from 'app/graphql/key-result/report/progress/models'
 import { TeamObject } from 'app/graphql/team/models'
 
-@ObjectType()
+@ObjectType('User', {
+  description:
+    'User is an entity inside a given company. It is associated with many teams, progress reports, and others.',
+})
 export class UserObject {
-  @Field(() => ID)
+  @Field(() => ID, { description: 'The ID of the user' })
   id: number
 
-  @Field()
+  @Field({ description: 'The name of the user' })
   name: string
 
-  @Field()
+  @Field({ description: 'The sub field in Auth0 (their ID)' })
   authzSub: string
 
-  @Field({ nullable: true })
+  @Field({ nullable: true, description: 'The user role in the company' })
   role?: string
 
-  @Field({ nullable: true })
+  @Field({ nullable: true, description: 'The picture of the user' })
   picture?: string
 
-  @Field()
+  @Field({ description: 'The creation date of the user' })
   createdAt: Date
 
-  @Field()
+  @Field({ description: 'The last update date of this user' })
   updatedAt: Date
 
-  @Field(() => [KeyResultObject])
+  @Field(() => [KeyResultObject], {
+    description: 'The creation date ordered list of key results that this user owns',
+  })
   keyResults: KeyResultObject[]
 
-  @Field(() => [ProgressReportObject])
+  @Field(() => [ProgressReportObject], {
+    description: 'The creation date ordered list of progress reports created by this user',
+  })
   progressReports: ProgressReportObject[]
 
-  @Field(() => [ConfidenceReportObject])
+  @Field(() => [ConfidenceReportObject], {
+    description: 'The creation date ordered list of confidence reports created by this user',
+  })
   confidenceReports: ConfidenceReportObject[]
 
-  @Field(() => [TeamObject])
+  @Field(() => [TeamObject], {
+    description: 'The creation date ordered list of teams that this user is part of',
+  })
   teams: Promise<TeamObject[]>
 }
