@@ -1,3 +1,3 @@
-import CompanyModule from './module'
+import DomainCompanyModule from './module'
 
-export default CompanyModule
+export default DomainCompanyModule

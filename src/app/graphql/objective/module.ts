@@ -4,12 +4,12 @@ import { ConfigModule } from '@nestjs/config'
 import appConfig from 'config/app'
 import DomainModule from 'domain/module'
 
-import ObjectiveResolver from './resolver'
+import GraphQLObjectiveResolver from './resolver'
 
 @Module({
   imports: [ConfigModule.forFeature(appConfig), DomainModule],
-  providers: [ObjectiveResolver],
+  providers: [GraphQLObjectiveResolver],
 })
-class ObjectivesModule {}
+class GraphQLObjectivesModule {}
 
-export default ObjectivesModule
+export default GraphQLObjectivesModule

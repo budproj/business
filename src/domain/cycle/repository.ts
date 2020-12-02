@@ -6,7 +6,7 @@ import { CycleDTO } from 'domain/cycle/dto'
 import { Cycle } from './entities'
 
 @EntityRepository(Cycle)
-class CycleRepository extends Repository<Cycle> {
+class DomainCycleRepository extends Repository<Cycle> {
   async findByIDWithCompanyConstraint(
     id: CycleDTO['id'],
     allowedCompanies: Array<CompanyDTO['id']>,
@@ -24,4 +24,4 @@ class CycleRepository extends Repository<Cycle> {
   }
 }
 
-export default CycleRepository
+export default DomainCycleRepository

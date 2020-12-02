@@ -12,7 +12,8 @@ import { ObjectiveDTO } from 'domain/objective/dto'
 import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
 
-import { KeyResultDTO, KeyResultFormat } from './dto'
+import { KeyResultDTO } from './dto'
+import { KeyResultFormat } from './types'
 
 @Entity()
 export class KeyResult implements KeyResultDTO {

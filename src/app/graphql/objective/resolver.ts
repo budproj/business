@@ -5,29 +5,28 @@ import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
-import CycleService from 'domain/cycle/service'
-import KeyResultService from 'domain/key-result/service'
-import { ObjectiveDTO } from 'domain/objective/dto'
-import ObjectiveService from 'domain/objective/service'
+import DomainCycleService from 'domain/cycle/service'
+import DomainKeyResultService from 'domain/key-result/service'
+import DomainObjectiveService from 'domain/objective/service'
 
-import { Objective } from './models'
+import { ObjectiveObject } from './models'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
-@Resolver(() => Objective)
-class ObjectiveResolver {
-  private readonly logger = new Logger(ObjectiveResolver.name)
+@Resolver(() => ObjectiveObject)
+class GraphQLObjectiveResolver {
+  private readonly logger = new Logger(GraphQLObjectiveResolver.name)
 
   constructor(
-    private readonly keyResultService: KeyResultService,
-    private readonly objectiveService: ObjectiveService,
-    private readonly cycleService: CycleService,
+    private readonly keyResultService: DomainKeyResultService,
+    private readonly objectiveService: DomainObjectiveService,
+    private readonly cycleService: DomainCycleService,
   ) {}
 
   @Permissions('read:objectives')
-  @Query(() => Objective)
+  @Query(() => ObjectiveObject)
   async objective(
-    @Args('id', { type: () => Int }) id: ObjectiveDTO['id'],
+    @Args('id', { type: () => Int }) id: ObjectiveObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log(`Fetching objective with id ${id.toString()}`)
@@ -39,7 +38,7 @@ class ObjectiveResolver {
   }
 
   @ResolveField()
-  async keyResults(@Parent() objective: ObjectiveDTO) {
+  async keyResults(@Parent() objective: ObjectiveObject) {
     this.logger.log({
       objective,
       message: 'Fetching key results for objective',
@@ -49,7 +48,7 @@ class ObjectiveResolver {
   }
 
   @ResolveField()
-  async cycle(@Parent() objective: ObjectiveDTO) {
+  async cycle(@Parent() objective: ObjectiveObject) {
     this.logger.log({
       objective,
       message: 'Fetching cycke for objective',
@@ -59,4 +58,4 @@ class ObjectiveResolver {
   }
 }
 
-export default ObjectiveResolver
+export default GraphQLObjectiveResolver

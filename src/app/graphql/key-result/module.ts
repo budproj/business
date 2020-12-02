@@ -5,12 +5,13 @@ import { Railway } from 'app/providers'
 import appConfig from 'config/app'
 import DomainModule from 'domain/module'
 
-import KeyResultResolver from './resolver'
+import GraphQLKeyResultReportModule from './report'
+import GraphQLKeyResultResolver from './resolver'
 
 @Module({
-  imports: [ConfigModule.forFeature(appConfig), DomainModule],
-  providers: [KeyResultResolver, Railway],
+  imports: [ConfigModule.forFeature(appConfig), DomainModule, GraphQLKeyResultReportModule],
+  providers: [GraphQLKeyResultResolver, Railway],
 })
-class KeyResultsModule {}
+class GraphQLKeyResultsModule {}
 
-export default KeyResultsModule
+export default GraphQLKeyResultsModule

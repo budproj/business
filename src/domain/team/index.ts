@@ -1,3 +1,3 @@
-import TeamModule from './module'
+import DomainTeamModule from './module'
 
-export default TeamModule
+export default DomainTeamModule

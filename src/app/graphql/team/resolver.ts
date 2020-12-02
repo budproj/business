@@ -5,28 +5,30 @@ import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
-import CompanyService from 'domain/company/service'
-import KeyResultService from 'domain/key-result/service'
-import { TeamDTO } from 'domain/team/dto'
-import TeamService from 'domain/team/service'
+import DomainCompanyService from 'domain/company/service'
+import DomainKeyResultService from 'domain/key-result/service'
+import DomainTeamService from 'domain/team/service'
 
-import { Team } from './models'
+import { TeamObject } from './models'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
-@Resolver(() => Team)
-class TeamResolver {
-  private readonly logger = new Logger(TeamResolver.name)
+@Resolver(() => TeamObject)
+class GraphQLTeamResolver {
+  private readonly logger = new Logger(GraphQLTeamResolver.name)
 
   constructor(
-    private readonly keyResultService: KeyResultService,
-    private readonly teamService: TeamService,
-    private readonly companyService: CompanyService,
+    private readonly keyResultService: DomainKeyResultService,
+    private readonly teamService: DomainTeamService,
+    private readonly companyService: DomainCompanyService,
   ) {}
 
   @Permissions('read:teams')
-  @Query(() => Team)
-  async team(@Args('id', { type: () => Int }) id: TeamDTO['id'], @GraphQLUser() user: AuthzUser) {
+  @Query(() => TeamObject)
+  async team(
+    @Args('id', { type: () => Int }) id: TeamObject['id'],
+    @GraphQLUser() user: AuthzUser,
+  ) {
     this.logger.log(`Fetching team with id ${id.toString()}`)
 
     const team = await this.teamService.getOneByIdIfUserShareCompany(id, user)
@@ -36,7 +38,7 @@ class TeamResolver {
   }
 
   @ResolveField()
-  async keyResults(@Parent() team: TeamDTO) {
+  async keyResults(@Parent() team: TeamObject) {
     this.logger.log({
       team,
       message: 'Fetching key results for team',
@@ -46,7 +48,7 @@ class TeamResolver {
   }
 
   @ResolveField()
-  async company(@Parent() team: TeamDTO) {
+  async company(@Parent() team: TeamObject) {
     this.logger.log({
       team,
       message: 'Fetching company for team',
@@ -56,4 +58,4 @@ class TeamResolver {
   }
 }
 
-export default TeamResolver
+export default GraphQLTeamResolver

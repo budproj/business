@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import UserModule from 'domain/user'
+import DomainUserModule from 'domain/user'
 
-import ObjectiveRepository from './repository'
-import ObjectiveService from './service'
+import DomainObjectiveRepository from './repository'
+import DomainObjectiveService from './service'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ObjectiveRepository]), UserModule],
-  providers: [ObjectiveService],
-  exports: [ObjectiveService],
+  imports: [TypeOrmModule.forFeature([DomainObjectiveRepository]), DomainUserModule],
+  providers: [DomainObjectiveService],
+  exports: [DomainObjectiveService],
 })
-class ObjectiveModule {}
+class DomainObjectiveModule {}
 
-export default ObjectiveModule
+export default DomainObjectiveModule

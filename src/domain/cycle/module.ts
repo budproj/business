@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import UserModule from 'domain/user'
+import DomainUserModule from 'domain/user'
 
-import CycleRepository from './repository'
-import CycleService from './service'
+import DomainCycleRepository from './repository'
+import DomainCycleService from './service'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CycleRepository]), UserModule],
-  providers: [CycleService],
-  exports: [CycleService],
+  imports: [TypeOrmModule.forFeature([DomainCycleRepository]), DomainUserModule],
+  providers: [DomainCycleService],
+  exports: [DomainCycleService],
 })
-class CycleModule {}
+class DomainCycleModule {}
 
-export default CycleModule
+export default DomainCycleModule

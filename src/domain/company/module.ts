@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import CompanyRepository from './repository'
-import CompanyService from './service'
+import DomainCompanyRepository from './repository'
+import DomainCompanyService from './service'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CompanyRepository])],
-  providers: [CompanyService],
-  exports: [CompanyService],
+  imports: [TypeOrmModule.forFeature([DomainCompanyRepository])],
+  providers: [DomainCompanyService],
+  exports: [DomainCompanyService],
 })
-class CompanyModule {}
+class DomainCompanyModule {}
 
-export default CompanyModule
+export default DomainCompanyModule

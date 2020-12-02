@@ -2,19 +2,19 @@ import { Injectable, Logger } from '@nestjs/common'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { UserDTO } from 'domain/user/dto'
-import UserService from 'domain/user/service'
+import DomainUserService from 'domain/user/service'
 
 import { TeamDTO } from './dto'
 import { Team } from './entities'
-import TeamRepository from './repository'
+import DomainTeamRepository from './repository'
 
 @Injectable()
-class TeamService {
-  private readonly logger = new Logger(TeamService.name)
+class DomainTeamService {
+  private readonly logger = new Logger(DomainTeamService.name)
 
   constructor(
-    private readonly repository: TeamRepository,
-    private readonly userService: UserService,
+    private readonly repository: DomainTeamRepository,
+    private readonly userService: DomainUserService,
   ) {}
 
   async getAll(): Promise<Team[]> {
@@ -44,4 +44,4 @@ class TeamService {
   }
 }
 
-export default TeamService
+export default DomainTeamService

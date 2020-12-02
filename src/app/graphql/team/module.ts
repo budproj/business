@@ -4,12 +4,12 @@ import { ConfigModule } from '@nestjs/config'
 import appConfig from 'config/app'
 import DomainModule from 'domain/module'
 
-import TeamResolver from './resolver'
+import GraphQLTeamResolver from './resolver'
 
 @Module({
   imports: [ConfigModule.forFeature(appConfig), DomainModule],
-  providers: [TeamResolver],
+  providers: [GraphQLTeamResolver],
 })
-class TeamsModule {}
+class GraphQLTeamModule {}
 
-export default TeamsModule
+export default GraphQLTeamModule

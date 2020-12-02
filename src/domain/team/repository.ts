@@ -6,7 +6,7 @@ import { TeamDTO } from 'domain/team/dto'
 import { Team } from './entities'
 
 @EntityRepository(Team)
-class TeamRepository extends Repository<Team> {
+class DomainTeamRepository extends Repository<Team> {
   async findByIDWithCompanyConstraint(
     id: TeamDTO['id'],
     allowedCompanies: Array<CompanyDTO['id']>,
@@ -24,4 +24,4 @@ class TeamRepository extends Repository<Team> {
   }
 }
 
-export default TeamRepository
+export default DomainTeamRepository

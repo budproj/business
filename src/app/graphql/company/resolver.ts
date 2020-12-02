@@ -5,31 +5,30 @@ import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
-import { CompanyDTO } from 'domain/company/dto'
-import CompanyService from 'domain/company/service'
-import CycleService from 'domain/cycle/service'
-import TeamService from 'domain/team/service'
-import UserService from 'domain/user/service'
+import DomainCompanyService from 'domain/company/service'
+import DomainCycleService from 'domain/cycle/service'
+import DomainTeamService from 'domain/team/service'
+import DomainUserService from 'domain/user/service'
 
-import { Company } from './models'
+import { CompanyObject } from './models'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
-@Resolver(() => Company)
-class CompanyResolver {
-  private readonly logger = new Logger(CompanyResolver.name)
+@Resolver(() => CompanyObject)
+class GraphQLCompanyResolver {
+  private readonly logger = new Logger(GraphQLCompanyResolver.name)
 
   constructor(
-    private readonly companyService: CompanyService,
-    private readonly teamService: TeamService,
-    private readonly cycleService: CycleService,
-    private readonly userService: UserService,
+    private readonly companyService: DomainCompanyService,
+    private readonly teamService: DomainTeamService,
+    private readonly cycleService: DomainCycleService,
+    private readonly userService: DomainUserService,
   ) {}
 
   @Permissions('read:companies')
-  @Query(() => Company)
+  @Query(() => CompanyObject)
   async company(
-    @Args('id', { type: () => Int }) id: CompanyDTO['id'],
+    @Args('id', { type: () => Int }) id: CompanyObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
     const userCompanies = await this.userService.parseRequestUserCompanies(user)
@@ -45,7 +44,7 @@ class CompanyResolver {
   }
 
   @ResolveField()
-  async teams(@Parent() company: CompanyDTO) {
+  async teams(@Parent() company: CompanyObject) {
     this.logger.log({
       company,
       message: 'Fetching teams for company',
@@ -55,7 +54,7 @@ class CompanyResolver {
   }
 
   @ResolveField()
-  async cycles(@Parent() company: CompanyDTO) {
+  async cycles(@Parent() company: CompanyObject) {
     this.logger.log({
       company,
       message: 'Fetching cycles for company',
@@ -65,4 +64,4 @@ class CompanyResolver {
   }
 }
 
-export default CompanyResolver
+export default GraphQLCompanyResolver

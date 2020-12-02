@@ -6,7 +6,7 @@ import { KeyResultDTO } from 'domain/key-result/dto'
 import { KeyResult } from './entities'
 
 @EntityRepository(KeyResult)
-class KeyResultRepository extends Repository<KeyResult> {
+class DomainKeyResultRepository extends Repository<KeyResult> {
   buildRankSortColumn(rank: Array<KeyResultDTO['id']>): string {
     if (rank.length === 0) return ''
 
@@ -57,4 +57,4 @@ class KeyResultRepository extends Repository<KeyResult> {
   }
 }
 
-export default KeyResultRepository
+export default DomainKeyResultRepository

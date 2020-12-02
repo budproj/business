@@ -1,16 +1,21 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import UserModule from 'domain/user'
+import DomainUserModule from 'domain/user'
 
-import KeyResultRepository from './repository'
-import KeyResultService from './service'
+import DomainKeyResultReportModule from './report'
+import DomainKeyResultRepository from './repository'
+import DomainKeyResultService from './service'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([KeyResultRepository]), UserModule],
-  providers: [KeyResultService],
-  exports: [KeyResultService],
+  imports: [
+    TypeOrmModule.forFeature([DomainKeyResultRepository]),
+    DomainUserModule,
+    DomainKeyResultReportModule,
+  ],
+  providers: [DomainKeyResultService],
+  exports: [DomainKeyResultService],
 })
-class KeyResultModule {}
+class DomainKeyResultModule {}
 
-export default KeyResultModule
+export default DomainKeyResultModule

@@ -1,11 +1,12 @@
-import { Field, Float, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { Field, Float, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
-import { ConfidenceReport } from 'app/graphql/confidence-report/models'
-import { Objective } from 'app/graphql/objective/models'
-import { ProgressReport } from 'app/graphql/progress-report/models'
-import { Team } from 'app/graphql/team/models'
-import { User } from 'app/graphql/user/models'
-import { KeyResultFormat } from 'domain/key-result/dto'
+import { ObjectiveObject } from 'app/graphql/objective/models'
+import { TeamObject } from 'app/graphql/team/models'
+import { UserObject } from 'app/graphql/user/models'
+import { KeyResultFormat } from 'domain/key-result/types'
+
+import { ConfidenceReportObject } from './report/confidence/models'
+import { ProgressReportObject } from './report/progress/models'
 
 registerEnumType(KeyResultFormat, {
   name: 'KeyResultFormat',
@@ -13,8 +14,8 @@ registerEnumType(KeyResultFormat, {
 })
 
 @ObjectType()
-export class KeyResult {
-  @Field(() => Int)
+export class KeyResultObject {
+  @Field(() => ID)
   id: number
 
   @Field()
@@ -38,42 +39,27 @@ export class KeyResult {
   @Field()
   updatedAt: Date
 
-  @Field(() => User)
-  owner: User
+  @Field(() => ID)
+  ownerId: UserObject['id']
 
-  @Field(() => Objective)
-  objective: Objective
+  @Field(() => UserObject)
+  owner: UserObject
 
-  @Field(() => Team)
-  team: Team
+  @Field(() => ID)
+  objectiveId: ObjectiveObject['id']
 
-  @Field(() => [ProgressReport])
-  progressReports: ProgressReport[]
+  @Field(() => ObjectiveObject)
+  objective: ObjectiveObject
 
-  @Field(() => [ConfidenceReport])
-  confidenceReports: ConfidenceReport[]
-}
+  @Field(() => ID)
+  teamId: TeamObject['id']
 
-@InputType()
-export class CheckInInput {
-  @Field(() => Int)
-  keyResultId: KeyResult['id']
+  @Field(() => TeamObject)
+  team: TeamObject
 
-  @Field(() => Float)
-  progress: ProgressReport['valueNew']
+  @Field(() => [ProgressReportObject])
+  progressReports: ProgressReportObject[]
 
-  @Field(() => Int, { nullable: true })
-  confidence?: ConfidenceReport['valueNew']
-
-  @Field({ nullable: true })
-  comment?: string
-}
-
-@ObjectType()
-export class Report {
-  @Field(() => Int)
-  id: ProgressReport['id'] | ConfidenceReport['id']
-
-  @Field(() => Date)
-  createdAt: ProgressReport['createdAt'] | ProgressReport['createdAt']
+  @Field(() => [ConfidenceReportObject])
+  confidenceReports: ConfidenceReportObject[]
 }
