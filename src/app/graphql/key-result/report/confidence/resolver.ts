@@ -5,7 +5,6 @@ import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
-import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
 import DomainKeyResultService from 'domain/key-result/service'
 import DomainUserService from 'domain/user/service'
 
@@ -25,7 +24,7 @@ class GraphQLConfidenceReportResolver {
   @Permissions('read:confidence-reports')
   @Query(() => ConfidenceReportObject)
   async confidenceReport(
-    @Args('id', { type: () => Int }) id: ConfidenceReportDTO['id'],
+    @Args('id', { type: () => Int }) id: ConfidenceReportObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log(`Fetching confidence report with id ${id.toString()}`)
@@ -41,7 +40,7 @@ class GraphQLConfidenceReportResolver {
   }
 
   @ResolveField()
-  async keyResult(@Parent() confidenceReport: ConfidenceReportDTO) {
+  async keyResult(@Parent() confidenceReport: ConfidenceReportObject) {
     this.logger.log({
       confidenceReport,
       message: 'Fetching key result for confidence report',
@@ -51,7 +50,7 @@ class GraphQLConfidenceReportResolver {
   }
 
   @ResolveField()
-  async user(@Parent() confidenceReport: ConfidenceReportDTO) {
+  async user(@Parent() confidenceReport: ConfidenceReportObject) {
     this.logger.log({
       confidenceReport,
       message: 'Fetching user for confidence report',

@@ -6,7 +6,6 @@ import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import DomainCompanyService from 'domain/company/service'
-import { CycleDTO } from 'domain/cycle/dto'
 import DomainCycleService from 'domain/cycle/service'
 import DomainObjectiveService from 'domain/objective/service'
 
@@ -26,7 +25,10 @@ class GraphQLCycleResolver {
 
   @Permissions('read:cycles')
   @Query(() => CycleObject)
-  async cycle(@Args('id', { type: () => Int }) id: CycleDTO['id'], @GraphQLUser() user: AuthzUser) {
+  async cycle(
+    @Args('id', { type: () => Int }) id: CycleObject['id'],
+    @GraphQLUser() user: AuthzUser,
+  ) {
     this.logger.log(`Fetching cycle with id ${id.toString()}`)
 
     const cycle = await this.cycleService.getOneByIdIfUserIsInCompany(id, user)
@@ -36,7 +38,7 @@ class GraphQLCycleResolver {
   }
 
   @ResolveField()
-  async company(@Parent() cycle: CycleDTO) {
+  async company(@Parent() cycle: CycleObject) {
     this.logger.log({
       cycle,
       message: 'Fetching company for cycle',
@@ -46,7 +48,7 @@ class GraphQLCycleResolver {
   }
 
   @ResolveField()
-  async objectives(@Parent() cycle: CycleDTO) {
+  async objectives(@Parent() cycle: CycleObject) {
     this.logger.log({
       cycle,
       message: 'Fetching objectives for cycle',

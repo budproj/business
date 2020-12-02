@@ -5,7 +5,6 @@ import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
-import { CompanyDTO } from 'domain/company/dto'
 import DomainCompanyService from 'domain/company/service'
 import DomainCycleService from 'domain/cycle/service'
 import DomainTeamService from 'domain/team/service'
@@ -29,7 +28,7 @@ class GraphQLCompanyResolver {
   @Permissions('read:companies')
   @Query(() => CompanyObject)
   async company(
-    @Args('id', { type: () => Int }) id: CompanyDTO['id'],
+    @Args('id', { type: () => Int }) id: CompanyObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
     const userCompanies = await this.userService.parseRequestUserCompanies(user)
@@ -45,7 +44,7 @@ class GraphQLCompanyResolver {
   }
 
   @ResolveField()
-  async teams(@Parent() company: CompanyDTO) {
+  async teams(@Parent() company: CompanyObject) {
     this.logger.log({
       company,
       message: 'Fetching teams for company',
@@ -55,7 +54,7 @@ class GraphQLCompanyResolver {
   }
 
   @ResolveField()
-  async cycles(@Parent() company: CompanyDTO) {
+  async cycles(@Parent() company: CompanyObject) {
     this.logger.log({
       company,
       message: 'Fetching cycles for company',

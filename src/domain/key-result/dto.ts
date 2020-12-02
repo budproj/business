@@ -1,12 +1,7 @@
+import { KeyResultFormat } from 'domain/key-result/types'
 import { ObjectiveDTO } from 'domain/objective/dto'
 import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
-
-export enum KeyResultFormat {
-  NUMBER = 'NUMBER',
-  PERCENTAGE = 'PERCENTAGE',
-  COIN_BRL = 'COIN_BRL',
-}
 
 export class KeyResultDTO {
   id: number

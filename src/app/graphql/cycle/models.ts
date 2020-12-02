@@ -1,11 +1,11 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql'
+import { Field, ID, ObjectType } from '@nestjs/graphql'
 
 import { CompanyObject } from 'app/graphql/company/models'
 import { ObjectiveObject } from 'app/graphql/objective/models'
 
 @ObjectType()
 export class CycleObject {
-  @Field(() => Int)
+  @Field(() => ID)
   id: number
 
   @Field()
@@ -19,6 +19,9 @@ export class CycleObject {
 
   @Field()
   updatedAt: Date
+
+  @Field(() => ID)
+  companyId: CompanyObject['id']
 
   @Field(() => CompanyObject)
   company: CompanyObject

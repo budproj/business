@@ -14,7 +14,6 @@ import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import { RailwayError } from 'app/errors'
 import { Railway } from 'app/providers'
-import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
 import { ProgressReport } from 'domain/key-result/report/progress/entities'
 import DomainKeyResultService from 'domain/key-result/service'
 import DomainUserService from 'domain/user/service'
@@ -36,7 +35,7 @@ class GraphQLProgressReportResolver {
   @Permissions('read:progress-reports')
   @Query(() => ProgressReportObject)
   async progressReport(
-    @Args('id', { type: () => Int }) id: ProgressReportDTO['id'],
+    @Args('id', { type: () => Int }) id: ProgressReportObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log(`Fetching progress report with id ${id.toString()}`)
@@ -52,7 +51,7 @@ class GraphQLProgressReportResolver {
   }
 
   @ResolveField()
-  async keyResult(@Parent() progressReport: ProgressReportDTO) {
+  async keyResult(@Parent() progressReport: ProgressReportObject) {
     this.logger.log({
       progressReport,
       message: 'Fetching key result for progress report',
@@ -62,7 +61,7 @@ class GraphQLProgressReportResolver {
   }
 
   @ResolveField()
-  async user(@Parent() progressReport: ProgressReportDTO) {
+  async user(@Parent() progressReport: ProgressReportObject) {
     this.logger.log({
       progressReport,
       message: 'Fetching user for progress report',

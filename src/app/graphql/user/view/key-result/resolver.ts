@@ -16,7 +16,6 @@ import { RailwayError } from 'app/errors'
 import { Railway } from 'app/providers'
 import DomainKeyResultService from 'domain/key-result/service'
 import DomainUserService from 'domain/user/service'
-import { KeyResultViewDTO } from 'domain/user/view/key-result/dto'
 import { KeyResultView } from 'domain/user/view/key-result/entities'
 import { KeyResultViewBinding } from 'domain/user/view/key-result/types'
 
@@ -42,9 +41,9 @@ class GraphQLKeyResultViewResolver {
   @Query(() => KeyResultViewObject)
   async keyResultView(
     @GraphQLUser() user: AuthzUser,
-    @Args('id', { type: () => Int, nullable: true }) id?: KeyResultViewDTO['id'],
+    @Args('id', { type: () => Int, nullable: true }) id?: KeyResultViewObject['id'],
     @Args('binding', { type: () => KeyResultViewBinding, nullable: true })
-    binding?: KeyResultViewBinding,
+    binding?: KeyResultViewObject['binding'],
   ) {
     this.logger.log('Fetching key result view')
     const requestOptions: GraphQLKeyResultViewHandleQueryRequestProperties = {
@@ -61,7 +60,7 @@ class GraphQLKeyResultViewResolver {
   }
 
   @ResolveField()
-  async user(@Parent() keyResultView: KeyResultViewDTO) {
+  async user(@Parent() keyResultView: KeyResultViewObject) {
     this.logger.log({
       keyResultView,
       message: 'Fetching user for key result view',
@@ -71,7 +70,7 @@ class GraphQLKeyResultViewResolver {
   }
 
   @ResolveField()
-  async keyResults(@Parent() keyResultView: KeyResultViewDTO, @GraphQLUser() user: AuthzUser) {
+  async keyResults(@Parent() keyResultView: KeyResultViewObject, @GraphQLUser() user: AuthzUser) {
     this.logger.log({
       keyResultView,
       message: 'Fetching key results for key result view',
@@ -85,9 +84,9 @@ class GraphQLKeyResultViewResolver {
 
   @Mutation(() => KeyResultViewObject)
   async updateRank(
-    @Args('id', { type: () => ID }) id: KeyResultViewDTO['id'],
+    @Args('id', { type: () => ID }) id: KeyResultViewObject['id'],
     @Args('keyResultViewRankInput', { type: () => KeyResultViewRankInput })
-    keyResultViewRankInput: Partial<KeyResultViewDTO>,
+    keyResultViewRankInput: KeyResultViewRankInput,
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log({
@@ -110,7 +109,7 @@ class GraphQLKeyResultViewResolver {
   async createKeyResultView(
     @GraphQLUser() user: AuthzUser,
     @Args('keyResultViewInput', { type: () => KeyResultViewInput })
-    keyResultViewInput: Partial<KeyResultViewDTO>,
+    keyResultViewInput: KeyResultViewInput,
   ) {
     this.logger.log({
       user,

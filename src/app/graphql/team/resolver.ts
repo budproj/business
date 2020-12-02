@@ -7,7 +7,6 @@ import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import DomainCompanyService from 'domain/company/service'
 import DomainKeyResultService from 'domain/key-result/service'
-import { TeamDTO } from 'domain/team/dto'
 import DomainTeamService from 'domain/team/service'
 
 import { TeamObject } from './models'
@@ -26,7 +25,10 @@ class GraphQLTeamResolver {
 
   @Permissions('read:teams')
   @Query(() => TeamObject)
-  async team(@Args('id', { type: () => Int }) id: TeamDTO['id'], @GraphQLUser() user: AuthzUser) {
+  async team(
+    @Args('id', { type: () => Int }) id: TeamObject['id'],
+    @GraphQLUser() user: AuthzUser,
+  ) {
     this.logger.log(`Fetching team with id ${id.toString()}`)
 
     const team = await this.teamService.getOneByIdIfUserShareCompany(id, user)
@@ -36,7 +38,7 @@ class GraphQLTeamResolver {
   }
 
   @ResolveField()
-  async keyResults(@Parent() team: TeamDTO) {
+  async keyResults(@Parent() team: TeamObject) {
     this.logger.log({
       team,
       message: 'Fetching key results for team',
@@ -46,7 +48,7 @@ class GraphQLTeamResolver {
   }
 
   @ResolveField()
-  async company(@Parent() team: TeamDTO) {
+  async company(@Parent() team: TeamObject) {
     this.logger.log({
       team,
       message: 'Fetching company for team',

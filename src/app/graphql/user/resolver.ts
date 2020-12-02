@@ -6,7 +6,6 @@ import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import DomainKeyResultService from 'domain/key-result/service'
-import { UserDTO } from 'domain/user/dto'
 import DomainUserService from 'domain/user/service'
 
 import { UserObject } from './models'
@@ -25,7 +24,7 @@ class GraphQLUserResolver {
   @Permissions('read:users')
   @Query(() => UserObject)
   async user(
-    @Args('id', { type: () => Int }) id: UserDTO['id'],
+    @Args('id', { type: () => Int }) id: UserObject['id'],
     @GraphQLUser() authzUser: AuthzUser,
   ) {
     this.logger.log(`Fetching user with id ${id.toString()}`)

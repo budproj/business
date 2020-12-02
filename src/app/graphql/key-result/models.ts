@@ -1,9 +1,9 @@
-import { Field, Float, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { Field, Float, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { ObjectiveObject } from 'app/graphql/objective/models'
 import { TeamObject } from 'app/graphql/team/models'
 import { UserObject } from 'app/graphql/user/models'
-import { KeyResultFormat } from 'domain/key-result/dto'
+import { KeyResultFormat } from 'domain/key-result/types'
 
 import { ConfidenceReportObject } from './report/confidence/models'
 import { ProgressReportObject } from './report/progress/models'
@@ -15,7 +15,7 @@ registerEnumType(KeyResultFormat, {
 
 @ObjectType()
 export class KeyResultObject {
-  @Field(() => Int)
+  @Field(() => ID)
   id: number
 
   @Field()
@@ -39,11 +39,20 @@ export class KeyResultObject {
   @Field()
   updatedAt: Date
 
+  @Field(() => ID)
+  ownerId: UserObject['id']
+
   @Field(() => UserObject)
   owner: UserObject
 
+  @Field(() => ID)
+  objectiveId: ObjectiveObject['id']
+
   @Field(() => ObjectiveObject)
   objective: ObjectiveObject
+
+  @Field(() => ID)
+  teamId: TeamObject['id']
 
   @Field(() => TeamObject)
   team: TeamObject

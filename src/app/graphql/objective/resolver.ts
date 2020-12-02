@@ -7,7 +7,6 @@ import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import DomainCycleService from 'domain/cycle/service'
 import DomainKeyResultService from 'domain/key-result/service'
-import { ObjectiveDTO } from 'domain/objective/dto'
 import DomainObjectiveService from 'domain/objective/service'
 
 import { ObjectiveObject } from './models'
@@ -27,7 +26,7 @@ class GraphQLObjectiveResolver {
   @Permissions('read:objectives')
   @Query(() => ObjectiveObject)
   async objective(
-    @Args('id', { type: () => Int }) id: ObjectiveDTO['id'],
+    @Args('id', { type: () => Int }) id: ObjectiveObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log(`Fetching objective with id ${id.toString()}`)
@@ -39,7 +38,7 @@ class GraphQLObjectiveResolver {
   }
 
   @ResolveField()
-  async keyResults(@Parent() objective: ObjectiveDTO) {
+  async keyResults(@Parent() objective: ObjectiveObject) {
     this.logger.log({
       objective,
       message: 'Fetching key results for objective',
@@ -49,7 +48,7 @@ class GraphQLObjectiveResolver {
   }
 
   @ResolveField()
-  async cycle(@Parent() objective: ObjectiveDTO) {
+  async cycle(@Parent() objective: ObjectiveObject) {
     this.logger.log({
       objective,
       message: 'Fetching cycke for objective',

@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql'
+import { Field, ID, ObjectType } from '@nestjs/graphql'
 
 import { KeyResultObject } from 'app/graphql/key-result/models'
 import { ConfidenceReportObject } from 'app/graphql/key-result/report/confidence/models'
@@ -7,7 +7,7 @@ import { TeamObject } from 'app/graphql/team/models'
 
 @ObjectType()
 export class UserObject {
-  @Field(() => Int)
+  @Field(() => ID)
   id: number
 
   @Field()

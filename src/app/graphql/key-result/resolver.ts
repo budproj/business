@@ -5,7 +5,6 @@ import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
-import { KeyResultDTO } from 'domain/key-result/dto'
 import DomainKeyResultService from 'domain/key-result/service'
 import DomainObjectiveService from 'domain/objective/service'
 import DomainTeamService from 'domain/team/service'
@@ -29,7 +28,7 @@ class GraphQLKeyResultResolver {
   @Permissions('read:key-results')
   @Query(() => KeyResultObject)
   async keyResult(
-    @Args('id', { type: () => Int }) id: KeyResultDTO['id'],
+    @Args('id', { type: () => Int }) id: KeyResultObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log(`Fetching key result with id ${id.toString()}`)
@@ -41,7 +40,7 @@ class GraphQLKeyResultResolver {
   }
 
   @ResolveField()
-  async owner(@Parent() keyResult: KeyResultDTO) {
+  async owner(@Parent() keyResult: KeyResultObject) {
     this.logger.log({
       keyResult,
       message: 'Fetching owner for key result',
@@ -51,7 +50,7 @@ class GraphQLKeyResultResolver {
   }
 
   @ResolveField()
-  async objective(@Parent() keyResult: KeyResultDTO) {
+  async objective(@Parent() keyResult: KeyResultObject) {
     this.logger.log({
       keyResult,
       message: 'Fetching objective for key result',
@@ -61,7 +60,7 @@ class GraphQLKeyResultResolver {
   }
 
   @ResolveField()
-  async team(@Parent() keyResult: KeyResultDTO) {
+  async team(@Parent() keyResult: KeyResultObject) {
     this.logger.log({
       keyResult,
       message: 'Fetching team for key result',
@@ -72,7 +71,7 @@ class GraphQLKeyResultResolver {
 
   @ResolveField()
   async progressReports(
-    @Parent() keyResult: KeyResultDTO,
+    @Parent() keyResult: KeyResultObject,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
   ) {
     this.logger.log({
@@ -88,7 +87,7 @@ class GraphQLKeyResultResolver {
 
   @ResolveField()
   async confidenceReports(
-    @Parent() keyResult: KeyResultDTO,
+    @Parent() keyResult: KeyResultObject,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
   ) {
     this.logger.log({
