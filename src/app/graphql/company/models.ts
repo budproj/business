@@ -3,23 +3,23 @@ import { Field, ID, ObjectType } from '@nestjs/graphql'
 import { CycleObject } from 'app/graphql/cycle/models'
 import { TeamObject } from 'app/graphql/team/models'
 
-@ObjectType()
+@ObjectType('Company', { description: 'A group of teams that has a given stakeholder' })
 export class CompanyObject {
-  @Field(() => ID)
+  @Field(() => ID, { description: 'The ID of the company' })
   id: number
 
-  @Field()
+  @Field({ description: 'The name of the company' })
   name: string
 
-  @Field()
+  @Field({ description: 'The creation date of the company' })
   createdAt: Date
 
-  @Field()
+  @Field({ description: 'The last update date of the company' })
   updatedAt: Date
 
-  @Field(() => [TeamObject])
+  @Field(() => [TeamObject], { description: 'The teams that belongs to this company' })
   teams: TeamObject[]
 
-  @Field(() => [CycleObject])
+  @Field(() => [CycleObject], { description: 'The cycles that belongs to this company' })
   cycles: CycleObject[]
 }

@@ -4,29 +4,33 @@ import { CompanyObject } from 'app/graphql/company/models'
 import { KeyResultObject } from 'app/graphql/key-result/models'
 import { UserObject } from 'app/graphql/user/models'
 
-@ObjectType()
+@ObjectType('Team', { description: 'A collection of users for a given company' })
 export class TeamObject {
-  @Field(() => ID)
+  @Field(() => ID, { description: 'The ID of the team' })
   id: number
 
-  @Field()
+  @Field({ description: 'The name of the team' })
   name: string
 
-  @Field()
+  @Field({ description: 'The creation date of the team' })
   createdAt: Date
 
-  @Field()
+  @Field({ description: 'The last update date of the team' })
   updatedAt: Date
 
-  @Field(() => [KeyResultObject])
+  @Field(() => [KeyResultObject], {
+    description: 'The creation date ordered list of key results that belongs to that team',
+  })
   keyResults: KeyResultObject[]
 
-  @Field(() => ID)
+  @Field(() => ID, { description: 'The company ID that owns this team' })
   companyId: CompanyObject['id']
 
-  @Field(() => CompanyObject)
+  @Field(() => CompanyObject, { description: 'The company that owns this team' })
   company: CompanyObject
 
-  @Field(() => [UserObject])
+  @Field(() => [UserObject], {
+    description: 'A creation date ordered list of users that are members of this team',
+  })
   users: Promise<UserObject[]>
 }
