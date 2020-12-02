@@ -1,3 +1,3 @@
-import TeamModule from './module'
+import GraphQLTeamModule from './module'
 
-export default TeamModule
+export default GraphQLTeamModule

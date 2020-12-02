@@ -1,3 +1,3 @@
-import ObjectiveModule from './module'
+import DomainObjectiveModule from './module'
 
-export default ObjectiveModule
+export default DomainObjectiveModule

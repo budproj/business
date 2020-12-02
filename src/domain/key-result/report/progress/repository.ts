@@ -6,7 +6,7 @@ import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
 import { ProgressReport } from './entities'
 
 @EntityRepository(ProgressReport)
-class ProgressReportRepository extends Repository<ProgressReport> {
+class DomainProgressReportRepository extends Repository<ProgressReport> {
   async findByIDWithCompanyConstraint(
     id: ProgressReportDTO['id'],
     allowedCompanies: Array<CompanyDTO['id']>,
@@ -26,4 +26,4 @@ class ProgressReportRepository extends Repository<ProgressReport> {
   }
 }
 
-export default ProgressReportRepository
+export default DomainProgressReportRepository

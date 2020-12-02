@@ -1,45 +1,33 @@
-import {
-  InternalServerErrorException,
-  Logger,
-  NotFoundException,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common'
-import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
+import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
-import { RailwayError } from 'app/errors'
-import { Railway } from 'app/providers'
 import { KeyResultDTO } from 'domain/key-result/dto'
-import { ConfidenceReport as ConfidenceReportEntity } from 'domain/key-result/report/confidence/entities'
-import { ProgressReport as ProgressReportEntity } from 'domain/key-result/report/progress/entities'
-import KeyResultService from 'domain/key-result/service'
-import ObjectiveService from 'domain/objective/service'
-import TeamService from 'domain/team/service'
-import UserService from 'domain/user/service'
+import DomainKeyResultService from 'domain/key-result/service'
+import DomainObjectiveService from 'domain/objective/service'
+import DomainTeamService from 'domain/team/service'
+import DomainUserService from 'domain/user/service'
 
-import { CheckInInput, KeyResult, Report } from './models'
-import { CheckIn } from './types'
+import { KeyResultObject } from './models'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
-@Resolver(() => KeyResult)
-class KeyResultResolver {
-  private readonly logger = new Logger(KeyResultResolver.name)
+@Resolver(() => KeyResultObject)
+class GraphQLKeyResultResolver {
+  private readonly logger = new Logger(GraphQLKeyResultResolver.name)
 
   constructor(
-    private readonly keyResultService: KeyResultService,
-    private readonly userService: UserService,
-    private readonly objectiveService: ObjectiveService,
-    private readonly teamService: TeamService,
-    private readonly railway: Railway,
+    private readonly keyResultService: DomainKeyResultService,
+    private readonly userService: DomainUserService,
+    private readonly objectiveService: DomainObjectiveService,
+    private readonly teamService: DomainTeamService,
   ) {}
 
   @Permissions('read:key-results')
-  @Query(() => KeyResult)
+  @Query(() => KeyResultObject)
   async keyResult(
     @Args('id', { type: () => Int }) id: KeyResultDTO['id'],
     @GraphQLUser() user: AuthzUser,
@@ -113,41 +101,6 @@ class KeyResultResolver {
       limit,
     })
   }
-
-  @Mutation(() => [Report])
-  async checkIn(
-    @GraphQLUser() user: AuthzUser,
-    @Args('checkInInput', { type: () => CheckInInput })
-    checkInInput: CheckIn,
-  ) {
-    this.logger.log({
-      user,
-      checkInInput,
-      message: 'Creating a new check-in',
-    })
-
-    const progressReport = {
-      valueNew: checkInInput.progress,
-      userId: user.id,
-      keyResultId: checkInInput.keyResultId,
-      comment: checkInInput.comment,
-    }
-    const confidenceReport = {
-      valueNew: checkInInput.confidence,
-      userId: user.id,
-      keyResultId: checkInInput.keyResultId,
-      comment: checkInInput.comment,
-    }
-
-    const creationPromise = this.keyResultService.report.checkIn(progressReport, confidenceReport)
-    const [error, createdReports] = await this.railway.handleRailwayPromise<
-      RailwayError,
-      Array<ProgressReportEntity | ConfidenceReportEntity>
-    >(creationPromise)
-    if (error) throw new InternalServerErrorException('Unknown error')
-
-    return createdReports
-  }
 }
 
-export default KeyResultResolver
+export default GraphQLKeyResultResolver

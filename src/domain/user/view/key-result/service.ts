@@ -4,11 +4,11 @@ import { UserDTO } from 'domain/user/dto'
 
 import { KeyResultViewDTO } from './dto'
 import { KeyResultView } from './entities'
-import KeyResultViewRepository from './repository'
+import DomainKeyResultViewRepository from './repository'
 
 @Injectable()
-class KeyResultViewService {
-  constructor(private readonly repository: KeyResultViewRepository) {}
+class DomainKeyResultViewService {
+  constructor(private readonly repository: DomainKeyResultViewRepository) {}
 
   async getOneById(id: KeyResultViewDTO['id']): Promise<KeyResultView> {
     return this.repository.findOne({ id })
@@ -53,4 +53,4 @@ class KeyResultViewService {
   }
 }
 
-export default KeyResultViewService
+export default DomainKeyResultViewService

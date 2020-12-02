@@ -1,3 +1,3 @@
-import ObjectiveModule from './module'
+import GraphQLObjectiveModule from './module'
 
-export default ObjectiveModule
+export default GraphQLObjectiveModule

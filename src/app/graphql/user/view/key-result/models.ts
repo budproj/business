@@ -1,7 +1,7 @@
 import { Field, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
 
-import { KeyResult } from 'app/graphql/key-result/models'
-import { User } from 'app/graphql/user/models'
+import { KeyResultObject } from 'app/graphql/key-result/models'
+import { UserObject } from 'app/graphql/user/models'
 import { KeyResultViewBinding } from 'domain/user/view/key-result/types'
 
 registerEnumType(KeyResultViewBinding, {
@@ -21,10 +21,10 @@ export class KeyResultViewObject {
   binding?: KeyResultViewBinding
 
   @Field(() => [Int])
-  rank: Array<KeyResult['id']>
+  rank: Array<KeyResultObject['id']>
 
-  @Field(() => [KeyResult])
-  keyResults: KeyResult[]
+  @Field(() => [KeyResultObject])
+  keyResults: KeyResultObject[]
 
   @Field()
   createdAt: Date
@@ -32,8 +32,8 @@ export class KeyResultViewObject {
   @Field()
   updatedAt: Date
 
-  @Field(() => User)
-  user: User
+  @Field(() => UserObject)
+  user: UserObject
 }
 
 @InputType()
@@ -45,11 +45,11 @@ export class KeyResultViewInput {
   binding?: KeyResultViewBinding
 
   @Field(() => [Int])
-  rank: Array<KeyResult['id']>
+  rank: Array<KeyResultObject['id']>
 }
 
 @InputType()
 export class KeyResultViewRankInput {
   @Field(() => [Int])
-  rank: Array<KeyResult['id']>
+  rank: Array<KeyResultObject['id']>
 }

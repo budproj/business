@@ -1,25 +1,25 @@
 import { Injectable } from '@nestjs/common'
 
 import { AuthzUser } from 'app/authz/types'
-import UserService from 'domain/user/service'
+import DomainUserService from 'domain/user/service'
 import { KeyResultViewDTO } from 'domain/user/view/key-result/dto'
 import { KeyResultView } from 'domain/user/view/key-result/entities'
 
-export interface KeyResultViewResolverRequest {
+export interface GraphQLKeyResultViewHandleQueryRequestProperties {
   user: AuthzUser
   id?: KeyResultViewDTO['id']
   binding?: KeyResultViewDTO['binding']
 }
 
 @Injectable()
-class KeyResultViewResolverService {
-  constructor(private readonly userService: UserService) {}
+class GraphQLKeyResultViewResolverService {
+  constructor(private readonly userService: DomainUserService) {}
 
   async handleQueryRequest({
     user,
     id,
     binding,
-  }: KeyResultViewResolverRequest): Promise<KeyResultView> {
+  }: GraphQLKeyResultViewHandleQueryRequestProperties): Promise<KeyResultView> {
     const keyResultView = id
       ? await this.userService.view.keyResult.getOneByIDIfUserOwnsIt(id, user)
       : await this.userService.view.keyResult.getOneByBindingIfUserOwnsIt(binding, user)
@@ -28,4 +28,4 @@ class KeyResultViewResolverService {
   }
 }
 
-export default KeyResultViewResolverService
+export default GraphQLKeyResultViewResolverService

@@ -4,18 +4,18 @@ import { remove } from 'lodash'
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
 import { UserDTO } from 'domain/user/dto'
-import UserService from 'domain/user/service'
+import DomainUserService from 'domain/user/service'
 
 import { ConfidenceReport } from './entities'
-import ConfidenceReportRepository from './repository'
+import DomainConfidenceReportRepository from './repository'
 
 @Injectable()
-class ConfidenceReportService {
-  private readonly logger = new Logger(ConfidenceReportService.name)
+class DomainConfidenceReportService {
+  private readonly logger = new Logger(DomainConfidenceReportService.name)
 
   constructor(
-    private readonly repository: ConfidenceReportRepository,
-    private readonly userService: UserService,
+    private readonly repository: DomainConfidenceReportRepository,
+    private readonly userService: DomainUserService,
   ) {}
 
   async getOneById(id: ConfidenceReportDTO['id']): Promise<ConfidenceReport> {
@@ -106,4 +106,4 @@ class ConfidenceReportService {
   }
 }
 
-export default ConfidenceReportService
+export default DomainConfidenceReportService

@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common'
 
-import ConfidenceReportModule from './confidence'
-import ProgressReportModule from './progress'
-import KeyResultReportService from './service'
+import DomainConfidenceReportModule from './confidence'
+import DomainProgressReportModule from './progress'
+import DomainKeyResultReportService from './service'
 
 @Module({
-  imports: [ProgressReportModule, ConfidenceReportModule],
-  providers: [KeyResultReportService],
-  exports: [KeyResultReportService],
+  imports: [DomainProgressReportModule, DomainConfidenceReportModule],
+  providers: [DomainKeyResultReportService],
+  exports: [DomainKeyResultReportService],
 })
-class KeyResultViewModule {}
+class DomainKeyResultViewModule {}
 
-export default KeyResultViewModule
+export default DomainKeyResultViewModule

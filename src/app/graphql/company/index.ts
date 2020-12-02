@@ -1,3 +1,3 @@
-import CompanyModule from './module'
+import GraphQLCompanyModule from './module'
 
-export default CompanyModule
+export default GraphQLCompanyModule

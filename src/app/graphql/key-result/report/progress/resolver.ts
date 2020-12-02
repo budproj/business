@@ -15,22 +15,21 @@ import { AuthzUser } from 'app/authz/types'
 import { RailwayError } from 'app/errors'
 import { Railway } from 'app/providers'
 import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
-import { ProgressReport as ProgressReportEntity } from 'domain/key-result/report/progress/entities'
-import KeyResultService from 'domain/key-result/service'
-import UserService from 'domain/user/service'
+import { ProgressReport } from 'domain/key-result/report/progress/entities'
+import DomainKeyResultService from 'domain/key-result/service'
+import DomainUserService from 'domain/user/service'
 
-import { ProgressReport as ProgressReportObject, ProgressReportInput } from './models'
-import { ProgressReport } from './types'
+import { ProgressReportObject, ProgressReportInput } from './models'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
 @Resolver(() => ProgressReportObject)
-class ProgressReportResolver {
-  private readonly logger = new Logger(ProgressReportResolver.name)
+class GraphQLProgressReportResolver {
+  private readonly logger = new Logger(GraphQLProgressReportResolver.name)
 
   constructor(
-    private readonly keyResultService: KeyResultService,
-    private readonly userService: UserService,
+    private readonly keyResultService: DomainKeyResultService,
+    private readonly userService: DomainUserService,
     private readonly railway: Railway,
   ) {}
 
@@ -76,7 +75,7 @@ class ProgressReportResolver {
   async createProgressReport(
     @GraphQLUser() user: AuthzUser,
     @Args('progressReportInput', { type: () => ProgressReportInput })
-    progressReportInput: ProgressReport,
+    progressReportInput: ProgressReportInput,
   ) {
     this.logger.log({
       user,
@@ -94,7 +93,7 @@ class ProgressReportResolver {
     const creationPromise = this.keyResultService.report.progress.create(enhancedWithUserID)
     const [error, createdProgressReport] = await this.railway.handleRailwayPromise<
       RailwayError,
-      ProgressReportEntity[]
+      ProgressReport[]
     >(creationPromise)
     if (error) throw new InternalServerErrorException('Unknown error')
     if (!createdProgressReport)
@@ -104,4 +103,4 @@ class ProgressReportResolver {
   }
 }
 
-export default ProgressReportResolver
+export default GraphQLProgressReportResolver

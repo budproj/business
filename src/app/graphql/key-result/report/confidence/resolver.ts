@@ -6,24 +6,24 @@ import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
-import KeyResultService from 'domain/key-result/service'
-import UserService from 'domain/user/service'
+import DomainKeyResultService from 'domain/key-result/service'
+import DomainUserService from 'domain/user/service'
 
-import { ConfidenceReport } from './models'
+import { ConfidenceReportObject } from './models'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
-@Resolver(() => ConfidenceReport)
-class ConfidenceReportResolver {
-  private readonly logger = new Logger(ConfidenceReportResolver.name)
+@Resolver(() => ConfidenceReportObject)
+class GraphQLConfidenceReportResolver {
+  private readonly logger = new Logger(GraphQLConfidenceReportResolver.name)
 
   constructor(
-    private readonly keyResultService: KeyResultService,
-    private readonly userService: UserService,
+    private readonly keyResultService: DomainKeyResultService,
+    private readonly userService: DomainUserService,
   ) {}
 
   @Permissions('read:confidence-reports')
-  @Query(() => ConfidenceReport)
+  @Query(() => ConfidenceReportObject)
   async confidenceReport(
     @Args('id', { type: () => Int }) id: ConfidenceReportDTO['id'],
     @GraphQLUser() user: AuthzUser,
@@ -61,4 +61,4 @@ class ConfidenceReportResolver {
   }
 }
 
-export default ConfidenceReportResolver
+export default GraphQLConfidenceReportResolver

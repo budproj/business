@@ -13,27 +13,27 @@ import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import { RailwayError } from 'app/errors'
-import KeyResultViewResolverService, {
-  KeyResultViewResolverRequest,
-} from 'app/graphql/key-result-view/service'
 import { Railway } from 'app/providers'
-import KeyResultService from 'domain/key-result/service'
-import UserService from 'domain/user/service'
+import DomainKeyResultService from 'domain/key-result/service'
+import DomainUserService from 'domain/user/service'
 import { KeyResultViewDTO } from 'domain/user/view/key-result/dto'
 import { KeyResultView } from 'domain/user/view/key-result/entities'
 import { KeyResultViewBinding } from 'domain/user/view/key-result/types'
 
 import { KeyResultViewObject, KeyResultViewInput, KeyResultViewRankInput } from './models'
+import KeyResultViewResolverService, {
+  GraphQLKeyResultViewHandleQueryRequestProperties,
+} from './service'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
 @Resolver(() => KeyResultViewObject)
-class KeyResultViewResolver {
-  private readonly logger = new Logger(KeyResultViewResolver.name)
+class GraphQLKeyResultViewResolver {
+  private readonly logger = new Logger(GraphQLKeyResultViewResolver.name)
 
   constructor(
-    private readonly keyResultService: KeyResultService,
-    private readonly userService: UserService,
+    private readonly keyResultService: DomainKeyResultService,
+    private readonly userService: DomainUserService,
     private readonly service: KeyResultViewResolverService,
     private readonly railway: Railway,
   ) {}
@@ -47,7 +47,7 @@ class KeyResultViewResolver {
     binding?: KeyResultViewBinding,
   ) {
     this.logger.log('Fetching key result view')
-    const requestOptions: KeyResultViewResolverRequest = {
+    const requestOptions: GraphQLKeyResultViewHandleQueryRequestProperties = {
       id,
       user,
       binding,
@@ -136,4 +136,4 @@ class KeyResultViewResolver {
   }
 }
 
-export default KeyResultViewResolver
+export default GraphQLKeyResultViewResolver

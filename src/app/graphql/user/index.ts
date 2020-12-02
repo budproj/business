@@ -1,3 +1,3 @@
-import UserModule from './module'
+import GraphQLUserModule from './module'
 
-export default UserModule
+export default GraphQLUserModule

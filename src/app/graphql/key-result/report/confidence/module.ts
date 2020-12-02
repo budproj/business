@@ -4,12 +4,12 @@ import { ConfigModule } from '@nestjs/config'
 import appConfig from 'config/app'
 import DomainModule from 'domain/module'
 
-import ConfidenceReportResolver from './resolver'
+import GraphQLConfidenceReportResolver from './resolver'
 
 @Module({
   imports: [ConfigModule.forFeature(appConfig), DomainModule],
-  providers: [ConfidenceReportResolver],
+  providers: [GraphQLConfidenceReportResolver],
 })
-class ConfidenceReportsModule {}
+class GraphQLConfidenceReportsModule {}
 
-export default ConfidenceReportsModule
+export default GraphQLConfidenceReportsModule

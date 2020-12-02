@@ -1,3 +1,3 @@
-import KeyResultModule from './module'
+import GraphQLKeyResultModule from './module'
 
-export default KeyResultModule
+export default GraphQLKeyResultModule

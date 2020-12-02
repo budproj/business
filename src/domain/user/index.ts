@@ -1,3 +1,3 @@
-import UserModule from './module'
+import DomainUserModule from './module'
 
-export default UserModule
+export default DomainUserModule

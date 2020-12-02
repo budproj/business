@@ -6,7 +6,7 @@ import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
 import { ConfidenceReport } from './entities'
 
 @EntityRepository(ConfidenceReport)
-class ConfidenceReportRepository extends Repository<ConfidenceReport> {
+class DomainConfidenceReportRepository extends Repository<ConfidenceReport> {
   async findByIDWithCompanyConstraint(
     id: ConfidenceReportDTO['id'],
     allowedCompanies: Array<CompanyDTO['id']>,
@@ -26,4 +26,4 @@ class ConfidenceReportRepository extends Repository<ConfidenceReport> {
   }
 }
 
-export default ConfidenceReportRepository
+export default DomainConfidenceReportRepository

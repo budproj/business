@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common'
 
 import { Company } from './entities'
-import CompanyRepository from './repository'
+import DomainCompanyRepository from './repository'
 
 @Injectable()
-class CompanyService {
-  constructor(private readonly repository: CompanyRepository) {}
+class DomainCompanyService {
+  constructor(private readonly repository: DomainCompanyRepository) {}
 
   async getOneById(id: Company['id']): Promise<Company> {
     return this.repository.findOne({ id })
   }
 }
 
-export default CompanyService
+export default DomainCompanyService

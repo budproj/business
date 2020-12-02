@@ -1,11 +1,11 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql'
 
-import { Company } from 'app/graphql/company/models'
-import { KeyResult } from 'app/graphql/key-result/models'
-import { User } from 'app/graphql/user/models'
+import { CompanyObject } from 'app/graphql/company/models'
+import { KeyResultObject } from 'app/graphql/key-result/models'
+import { UserObject } from 'app/graphql/user/models'
 
 @ObjectType()
-export class Team {
+export class TeamObject {
   @Field(() => Int)
   id: number
 
@@ -18,12 +18,12 @@ export class Team {
   @Field()
   updatedAt: Date
 
-  @Field(() => [KeyResult])
-  keyResults: KeyResult[]
+  @Field(() => [KeyResultObject])
+  keyResults: KeyResultObject[]
 
-  @Field(() => Company)
-  company: Company
+  @Field(() => CompanyObject)
+  company: CompanyObject
 
-  @Field(() => [User])
-  users: Promise<User[]>
+  @Field(() => [UserObject])
+  users: Promise<UserObject[]>
 }

@@ -4,12 +4,12 @@ import { ConfigModule } from '@nestjs/config'
 import appConfig from 'config/app'
 import DomainModule from 'domain/module'
 
-import CycleResolver from './resolver'
+import GraphQLCycleResolver from './resolver'
 
 @Module({
   imports: [ConfigModule.forFeature(appConfig), DomainModule],
-  providers: [CycleResolver],
+  providers: [GraphQLCycleResolver],
 })
-class CyclesModule {}
+class GraphQLCyclesModule {}
 
-export default CyclesModule
+export default GraphQLCyclesModule

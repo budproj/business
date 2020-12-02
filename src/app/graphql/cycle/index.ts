@@ -1,3 +1,3 @@
-import CycleModule from './module'
+import GraphQLCycleModule from './module'
 
-export default CycleModule
+export default GraphQLCycleModule

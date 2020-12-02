@@ -1,10 +1,10 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql'
 
-import { KeyResult } from 'app/graphql/key-result/models'
-import { User } from 'app/graphql/user/models'
+import { KeyResultObject } from 'app/graphql/key-result/models'
+import { UserObject } from 'app/graphql/user/models'
 
 @ObjectType()
-export class ConfidenceReport {
+export class ConfidenceReportObject {
   @Field(() => Int)
   id: number
 
@@ -20,9 +20,9 @@ export class ConfidenceReport {
   @Field()
   createdAt: Date
 
-  @Field(() => KeyResult)
-  keyResult: KeyResult
+  @Field(() => KeyResultObject)
+  keyResult: KeyResultObject
 
-  @Field(() => User)
-  user: User
+  @Field(() => UserObject)
+  user: UserObject
 }

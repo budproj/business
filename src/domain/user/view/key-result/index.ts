@@ -1,3 +1,3 @@
-import KeyResultViewModule from './module'
+import DomainKeyResultViewModule from './module'
 
-export default KeyResultViewModule
+export default DomainKeyResultViewModule

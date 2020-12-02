@@ -5,12 +5,12 @@ import { Railway } from 'app/providers'
 import appConfig from 'config/app'
 import DomainModule from 'domain/module'
 
-import ProgressReportResolver from './resolver'
+import GraphQLProgressReportResolver from './resolver'
 
 @Module({
   imports: [ConfigModule.forFeature(appConfig), DomainModule],
-  providers: [ProgressReportResolver, Railway],
+  providers: [GraphQLProgressReportResolver, Railway],
 })
-class ProgressReportsModule {}
+class GraphQLProgressReportsModule {}
 
-export default ProgressReportsModule
+export default GraphQLProgressReportsModule

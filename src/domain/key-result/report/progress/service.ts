@@ -4,18 +4,18 @@ import { remove } from 'lodash'
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
 import { UserDTO } from 'domain/user/dto'
-import UserService from 'domain/user/service'
+import DomainUserService from 'domain/user/service'
 
 import { ProgressReport } from './entities'
-import ProgressReportRepository from './repository'
+import DomainProgressReportRepository from './repository'
 
 @Injectable()
-class ProgressReportService {
-  private readonly logger = new Logger(ProgressReportService.name)
+class DomainProgressReportService {
+  private readonly logger = new Logger(DomainProgressReportService.name)
 
   constructor(
-    private readonly repository: ProgressReportRepository,
-    private readonly userService: UserService,
+    private readonly repository: DomainProgressReportRepository,
+    private readonly userService: DomainUserService,
   ) {}
 
   async getOneById(id: ProgressReportDTO['id']): Promise<ProgressReport> {
@@ -108,4 +108,4 @@ class ProgressReportService {
   }
 }
 
-export default ProgressReportService
+export default DomainProgressReportService

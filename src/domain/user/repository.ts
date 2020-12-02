@@ -6,7 +6,7 @@ import { UserDTO } from 'domain/user/dto'
 import { User } from './entities'
 
 @EntityRepository(User)
-class UserRepository extends Repository<User> {
+class DomainUserRepository extends Repository<User> {
   async findByIDWithCompanyConstraint(
     id: UserDTO['id'],
     allowedCompanies: Array<CompanyDTO['id']>,
@@ -22,4 +22,4 @@ class UserRepository extends Repository<User> {
   }
 }
 
-export default UserRepository
+export default DomainUserRepository

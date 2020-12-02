@@ -6,7 +6,7 @@ import { ObjectiveDTO } from 'domain/objective/dto'
 import { Objective } from './entities'
 
 @EntityRepository(Objective)
-class ObjectiveRepository extends Repository<Objective> {
+class DomainObjectiveRepository extends Repository<Objective> {
   async findByIDWithCompanyConstraint(
     id: ObjectiveDTO['id'],
     allowedCompanies: Array<CompanyDTO['id']>,
@@ -22,4 +22,4 @@ class ObjectiveRepository extends Repository<Objective> {
   }
 }
 
-export default ObjectiveRepository
+export default DomainObjectiveRepository

@@ -5,7 +5,7 @@ import { KeyResultView } from './entities'
 export type UpdateWithConditionsOptions = Partial<Record<keyof KeyResultView, unknown>>
 
 @EntityRepository(KeyResultView)
-class KeyResultViewRepository extends Repository<KeyResultView> {
+class DomainKeyResultViewRepository extends Repository<KeyResultView> {
   async updateWithConditions(
     newData: Partial<KeyResultView>,
     conditions: UpdateWithConditionsOptions,
@@ -22,4 +22,4 @@ class KeyResultViewRepository extends Repository<KeyResultView> {
   }
 }
 
-export default KeyResultViewRepository
+export default DomainKeyResultViewRepository

@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import KeyResultViewRepository from './repository'
-import KeyResultViewService from './service'
+import DomainKeyResultViewRepository from './repository'
+import DomainKeyResultViewService from './service'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([KeyResultViewRepository])],
-  providers: [KeyResultViewService],
-  exports: [KeyResultViewService],
+  imports: [TypeOrmModule.forFeature([DomainKeyResultViewRepository])],
+  providers: [DomainKeyResultViewService],
+  exports: [DomainKeyResultViewService],
 })
-class KeyResultViewModule {}
+class DomainKeyResultViewModule {}
 
-export default KeyResultViewModule
+export default DomainKeyResultViewModule

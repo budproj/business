@@ -4,20 +4,20 @@ import { KeyResultDTO } from 'domain/key-result/dto'
 import { ObjectiveDTO } from 'domain/objective/dto'
 import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
-import UserService from 'domain/user/service'
+import DomainUserService from 'domain/user/service'
 
 import { KeyResult } from './entities'
-import KeyResultReportService from './report/service'
-import KeyResultRepository from './repository'
+import DomainKeyResultReportService from './report/service'
+import DomainKeyResultRepository from './repository'
 
 @Injectable()
-class KeyResultService {
-  private readonly logger = new Logger(KeyResultService.name)
+class DomainKeyResultService {
+  private readonly logger = new Logger(DomainKeyResultService.name)
 
   constructor(
-    public readonly report: KeyResultReportService,
-    private readonly repository: KeyResultRepository,
-    private readonly userService: UserService,
+    public readonly report: DomainKeyResultReportService,
+    private readonly repository: DomainKeyResultRepository,
+    private readonly userService: DomainUserService,
   ) {}
 
   async getOneById(id: KeyResultDTO['id']): Promise<KeyResult> {
@@ -76,4 +76,4 @@ class KeyResultService {
   }
 }
 
-export default KeyResultService
+export default DomainKeyResultService

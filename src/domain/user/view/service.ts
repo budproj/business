@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common'
 
-import KeyResultViewService from './key-result/service'
+import DomainKeyResultViewService from './key-result/service'
 
 @Injectable()
-class UserViewService {
-  constructor(public readonly keyResult: KeyResultViewService) {}
+class DomainUserViewService {
+  constructor(public readonly keyResult: DomainKeyResultViewService) {}
 }
 
-export default UserViewService
+export default DomainUserViewService

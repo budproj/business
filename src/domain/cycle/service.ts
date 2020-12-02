@@ -3,18 +3,18 @@ import { Injectable, Logger } from '@nestjs/common'
 import { CompanyDTO } from 'domain/company/dto'
 import { CycleDTO } from 'domain/cycle/dto'
 import { UserDTO } from 'domain/user/dto'
-import UserService from 'domain/user/service'
+import DomainUserService from 'domain/user/service'
 
 import { Cycle } from './entities'
-import CycleRepository from './repository'
+import DomainCycleRepository from './repository'
 
 @Injectable()
-class CycleService {
-  private readonly logger = new Logger(CycleService.name)
+class DomainCycleService {
+  private readonly logger = new Logger(DomainCycleService.name)
 
   constructor(
-    private readonly repository: CycleRepository,
-    private readonly userService: UserService,
+    private readonly repository: DomainCycleRepository,
+    private readonly userService: DomainUserService,
   ) {}
 
   async getOneById(id: CycleDTO['id']): Promise<Cycle> {
@@ -40,4 +40,4 @@ class CycleService {
   }
 }
 
-export default CycleService
+export default DomainCycleService

@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common'
 
-import KeyResultViewModule from './key-result'
-import UserViewService from './service'
+import DomainKeyResultViewModule from './key-result'
+import DomainUserViewService from './service'
 
 @Module({
-  imports: [KeyResultViewModule],
-  providers: [UserViewService],
-  exports: [UserViewService],
+  imports: [DomainKeyResultViewModule],
+  providers: [DomainUserViewService],
+  exports: [DomainUserViewService],
 })
-class UserViewModule {}
+class DomainUserViewModule {}
 
-export default UserViewModule
+export default DomainUserViewModule

@@ -3,24 +3,31 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 
 import databaseConfig from 'config/database/config'
 
-import CompanyModule from './company'
-import CycleModule from './cycle'
-import KeyResultModule from './key-result'
-import ObjectiveModule from './objective'
-import TeamModule from './team'
-import UserModule from './user'
+import DomainCompanyModule from './company'
+import DomainCycleModule from './cycle'
+import DomainKeyResultModule from './key-result'
+import DomainObjectiveModule from './objective'
+import DomainTeamModule from './team'
+import DomainUserModule from './user'
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(databaseConfig),
-    KeyResultModule,
-    UserModule,
-    ObjectiveModule,
-    TeamModule,
-    CompanyModule,
-    CycleModule,
+    DomainKeyResultModule,
+    DomainUserModule,
+    DomainObjectiveModule,
+    DomainTeamModule,
+    DomainCompanyModule,
+    DomainCycleModule,
   ],
-  exports: [KeyResultModule, UserModule, ObjectiveModule, TeamModule, CompanyModule, CycleModule],
+  exports: [
+    DomainKeyResultModule,
+    DomainUserModule,
+    DomainObjectiveModule,
+    DomainTeamModule,
+    DomainCompanyModule,
+    DomainCycleModule,
+  ],
 })
 class DomainModule {}
 

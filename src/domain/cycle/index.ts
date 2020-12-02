@@ -1,3 +1,3 @@
-import CycleModule from './module'
+import DomainCycleModule from './module'
 
-export default CycleModule
+export default DomainCycleModule

@@ -5,14 +5,17 @@ import { CompanyDTO } from 'domain/company/dto'
 import { UserDTO } from 'domain/user/dto'
 
 import { User } from './entities'
-import UserRepository from './repository'
-import UserViewService from './view/service'
+import DomainUserRepository from './repository'
+import DomainUserViewService from './view/service'
 
 @Injectable()
-class UserService {
-  private readonly logger = new Logger(UserService.name)
+class DomainUserService {
+  private readonly logger = new Logger(DomainUserService.name)
 
-  constructor(public readonly view: UserViewService, private readonly repository: UserRepository) {}
+  constructor(
+    public readonly view: DomainUserViewService,
+    private readonly repository: DomainUserRepository,
+  ) {}
 
   async getOneById(id: UserDTO['id']): Promise<User> {
     return this.repository.findOne({ id })
@@ -44,4 +47,4 @@ class UserService {
   }
 }
 
-export default UserService
+export default DomainUserService

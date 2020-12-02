@@ -1,3 +1,3 @@
-import ProgressReportModule from './module'
+import DomainProgressReportModule from './module'
 
-export default ProgressReportModule
+export default DomainProgressReportModule

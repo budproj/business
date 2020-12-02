@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import UserModule from 'domain/user'
+import DomainUserModule from 'domain/user'
 
-import ProgressReportRepository from './repository'
-import ProgressReportService from './service'
+import DomainProgressReportRepository from './repository'
+import DomainProgressReportService from './service'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ProgressReportRepository]), UserModule],
-  providers: [ProgressReportService],
-  exports: [ProgressReportService],
+  imports: [TypeOrmModule.forFeature([DomainProgressReportRepository]), DomainUserModule],
+  providers: [DomainProgressReportService],
+  exports: [DomainProgressReportService],
 })
 class ProgressReportModule {}
 

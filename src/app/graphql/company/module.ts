@@ -4,12 +4,12 @@ import { ConfigModule } from '@nestjs/config'
 import appConfig from 'config/app'
 import DomainModule from 'domain/module'
 
-import CompanyResolver from './resolver'
+import GraphQLCompanyResolver from './resolver'
 
 @Module({
   imports: [ConfigModule.forFeature(appConfig), DomainModule],
-  providers: [CompanyResolver],
+  providers: [GraphQLCompanyResolver],
 })
-class CompanysModule {}
+class GraphQLCompanysModule {}
 
-export default CompanysModule
+export default GraphQLCompanysModule

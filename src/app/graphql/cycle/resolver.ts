@@ -5,27 +5,27 @@ import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
-import CompanyService from 'domain/company/service'
+import DomainCompanyService from 'domain/company/service'
 import { CycleDTO } from 'domain/cycle/dto'
-import CycleService from 'domain/cycle/service'
-import ObjectiveService from 'domain/objective/service'
+import DomainCycleService from 'domain/cycle/service'
+import DomainObjectiveService from 'domain/objective/service'
 
-import { Cycle } from './models'
+import { CycleObject } from './models'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
-@Resolver(() => Cycle)
-class CycleResolver {
-  private readonly logger = new Logger(CycleResolver.name)
+@Resolver(() => CycleObject)
+class GraphQLCycleResolver {
+  private readonly logger = new Logger(GraphQLCycleResolver.name)
 
   constructor(
-    private readonly cycleService: CycleService,
-    private readonly companyService: CompanyService,
-    private readonly objectiveService: ObjectiveService,
+    private readonly cycleService: DomainCycleService,
+    private readonly companyService: DomainCompanyService,
+    private readonly objectiveService: DomainObjectiveService,
   ) {}
 
   @Permissions('read:cycles')
-  @Query(() => Cycle)
+  @Query(() => CycleObject)
   async cycle(@Args('id', { type: () => Int }) id: CycleDTO['id'], @GraphQLUser() user: AuthzUser) {
     this.logger.log(`Fetching cycle with id ${id.toString()}`)
 
@@ -56,4 +56,4 @@ class CycleResolver {
   }
 }
 
-export default CycleResolver
+export default GraphQLCycleResolver

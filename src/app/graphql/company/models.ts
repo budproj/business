@@ -1,10 +1,10 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql'
 
-import { Cycle } from 'app/graphql/cycle/models'
-import { Team } from 'app/graphql/team/models'
+import { CycleObject } from 'app/graphql/cycle/models'
+import { TeamObject } from 'app/graphql/team/models'
 
 @ObjectType()
-export class Company {
+export class CompanyObject {
   @Field(() => Int)
   id: number
 
@@ -17,9 +17,9 @@ export class Company {
   @Field()
   updatedAt: Date
 
-  @Field(() => [Team])
-  teams: Team[]
+  @Field(() => [TeamObject])
+  teams: TeamObject[]
 
-  @Field(() => [Cycle])
-  cycles: Cycle[]
+  @Field(() => [CycleObject])
+  cycles: CycleObject[]
 }

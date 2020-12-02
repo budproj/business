@@ -1,3 +1,3 @@
-import ConfidenceReportModule from './module'
+import DomainConfidenceReportModule from './module'
 
-export default ConfidenceReportModule
+export default DomainConfidenceReportModule

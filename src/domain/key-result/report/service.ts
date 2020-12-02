@@ -6,16 +6,16 @@ import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
 import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
 import { ProgressReport } from 'domain/key-result/report/progress/entities'
 
-import ConfidenceReportService from './confidence/service'
-import ProgressReportService from './progress/service'
+import DomainConfidenceReportService from './confidence/service'
+import DomainProgressReportService from './progress/service'
 
 @Injectable()
-class KeyResultReportService {
-  private readonly logger = new Logger(KeyResultReportService.name)
+class DomainKeyResultReportService {
+  private readonly logger = new Logger(DomainKeyResultReportService.name)
 
   constructor(
-    public readonly progress: ProgressReportService,
-    public readonly confidence: ConfidenceReportService,
+    public readonly progress: DomainProgressReportService,
+    public readonly confidence: DomainConfidenceReportService,
   ) {}
 
   async checkIn(
@@ -43,4 +43,4 @@ class KeyResultReportService {
   }
 }
 
-export default KeyResultReportService
+export default DomainKeyResultReportService

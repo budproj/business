@@ -5,25 +5,25 @@ import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
-import KeyResultService from 'domain/key-result/service'
+import DomainKeyResultService from 'domain/key-result/service'
 import { UserDTO } from 'domain/user/dto'
-import UserService from 'domain/user/service'
+import DomainUserService from 'domain/user/service'
 
-import { User } from './models'
+import { UserObject } from './models'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
-@Resolver(() => User)
-class UserResolver {
-  private readonly logger = new Logger(UserResolver.name)
+@Resolver(() => UserObject)
+class GraphQLUserResolver {
+  private readonly logger = new Logger(GraphQLUserResolver.name)
 
   constructor(
-    private readonly keyResultService: KeyResultService,
-    private readonly userService: UserService,
+    private readonly keyResultService: DomainKeyResultService,
+    private readonly userService: DomainUserService,
   ) {}
 
   @Permissions('read:users')
-  @Query(() => User)
+  @Query(() => UserObject)
   async user(
     @Args('id', { type: () => Int }) id: UserDTO['id'],
     @GraphQLUser() authzUser: AuthzUser,
@@ -37,7 +37,7 @@ class UserResolver {
   }
 
   @ResolveField()
-  async keyResults(@Parent() user: User) {
+  async keyResults(@Parent() user: UserObject) {
     this.logger.log({
       user,
       message: 'Fetching key results for user',
@@ -47,7 +47,7 @@ class UserResolver {
   }
 
   @ResolveField()
-  async progressReports(@Parent() user: User) {
+  async progressReports(@Parent() user: UserObject) {
     this.logger.log({
       user,
       message: 'Fetching progress reports for user',
@@ -57,7 +57,7 @@ class UserResolver {
   }
 
   @ResolveField()
-  async confidenceReports(@Parent() user: User) {
+  async confidenceReports(@Parent() user: UserObject) {
     this.logger.log({
       user,
       message: 'Fetching confidence reports for user',
@@ -67,4 +67,4 @@ class UserResolver {
   }
 }
 
-export default UserResolver
+export default GraphQLUserResolver

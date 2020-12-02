@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import UserModule from 'domain/user'
+import DomainUserModule from 'domain/user'
 
-import ConfidenceReportRepository from './repository'
-import ConfidenceReportService from './service'
+import DomainConfidenceReportRepository from './repository'
+import DomainConfidenceReportService from './service'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ConfidenceReportRepository]), UserModule],
-  providers: [ConfidenceReportService],
-  exports: [ConfidenceReportService],
+  imports: [TypeOrmModule.forFeature([DomainConfidenceReportRepository]), DomainUserModule],
+  providers: [DomainConfidenceReportService],
+  exports: [DomainConfidenceReportService],
 })
-class ConfidenceReportModule {}
+class DomainConfidenceReportModule {}
 
-export default ConfidenceReportModule
+export default DomainConfidenceReportModule

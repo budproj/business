@@ -1,12 +1,12 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql'
 
-import { ConfidenceReport } from 'app/graphql/confidence-report/models'
-import { KeyResult } from 'app/graphql/key-result/models'
-import { ProgressReport } from 'app/graphql/progress-report/models'
-import { Team } from 'app/graphql/team/models'
+import { KeyResultObject } from 'app/graphql/key-result/models'
+import { ConfidenceReportObject } from 'app/graphql/key-result/report/confidence/models'
+import { ProgressReportObject } from 'app/graphql/key-result/report/progress/models'
+import { TeamObject } from 'app/graphql/team/models'
 
 @ObjectType()
-export class User {
+export class UserObject {
   @Field(() => Int)
   id: number
 
@@ -28,15 +28,15 @@ export class User {
   @Field()
   updatedAt: Date
 
-  @Field(() => [KeyResult])
-  keyResults: KeyResult[]
+  @Field(() => [KeyResultObject])
+  keyResults: KeyResultObject[]
 
-  @Field(() => [ProgressReport])
-  progressReports: ProgressReport[]
+  @Field(() => [ProgressReportObject])
+  progressReports: ProgressReportObject[]
 
-  @Field(() => [ConfidenceReport])
-  confidenceReports: ConfidenceReport[]
+  @Field(() => [ConfidenceReportObject])
+  confidenceReports: ConfidenceReportObject[]
 
-  @Field(() => [Team])
-  teams: Promise<Team[]>
+  @Field(() => [TeamObject])
+  teams: Promise<TeamObject[]>
 }

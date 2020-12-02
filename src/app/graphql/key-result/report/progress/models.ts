@@ -1,10 +1,10 @@
 import { Field, Float, InputType, Int, ObjectType } from '@nestjs/graphql'
 
-import { KeyResult } from 'app/graphql/key-result/models'
-import { User } from 'app/graphql/user/models'
+import { KeyResultObject } from 'app/graphql/key-result/models'
+import { UserObject } from 'app/graphql/user/models'
 
 @ObjectType()
-export class ProgressReport {
+export class ProgressReportObject {
   @Field(() => Int)
   id: number
 
@@ -20,11 +20,11 @@ export class ProgressReport {
   @Field()
   createdAt: Date
 
-  @Field(() => KeyResult)
-  keyResult: KeyResult
+  @Field(() => KeyResultObject)
+  keyResult: KeyResultObject
 
-  @Field(() => User)
-  user: User
+  @Field(() => UserObject)
+  user: UserObject
 }
 
 @InputType()
@@ -36,5 +36,5 @@ export class ProgressReportInput {
   comment?: string
 
   @Field(() => Int)
-  keyResultId: KeyResult['id']
+  keyResultId: KeyResultObject['id']
 }

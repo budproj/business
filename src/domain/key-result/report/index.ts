@@ -1,3 +1,3 @@
-import KeyResultReportModule from './module'
+import DomainKeyResultReportModule from './module'
 
-export default KeyResultReportModule
+export default DomainKeyResultReportModule
