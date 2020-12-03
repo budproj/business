@@ -33,7 +33,7 @@ class GraphQLKeyResultReportResolver {
 
   @Permissions('create:progress-reports', 'create:confidence-reports')
   @Mutation(() => [ReportObject])
-  async checkIn(
+  async createCheckIn(
     @GraphQLUser() user: AuthzUser,
     @Args('checkInInput', { type: () => CheckInInput })
     checkInInput: CheckInInput,
