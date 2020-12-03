@@ -6,7 +6,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common'
-import { Args, ID, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, ID, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
@@ -41,7 +41,7 @@ class GraphQLKeyResultViewResolver {
   @Query(() => KeyResultViewObject)
   async keyResultView(
     @GraphQLUser() user: AuthzUser,
-    @Args('id', { type: () => Int, nullable: true }) id?: KeyResultViewObject['id'],
+    @Args('id', { type: () => ID, nullable: true }) id?: KeyResultViewObject['id'],
     @Args('binding', { type: () => KeyResultViewBinding, nullable: true })
     binding?: KeyResultViewObject['binding'],
   ) {

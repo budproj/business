@@ -1,5 +1,5 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
@@ -24,7 +24,7 @@ class GraphQLConfidenceReportResolver {
   @Permissions('read:confidence-reports')
   @Query(() => ConfidenceReportObject)
   async confidenceReport(
-    @Args('id', { type: () => Int }) id: ConfidenceReportObject['id'],
+    @Args('id', { type: () => ID }) id: ConfidenceReportObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log(`Fetching confidence report with id ${id.toString()}`)

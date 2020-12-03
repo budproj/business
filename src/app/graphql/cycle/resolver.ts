@@ -1,5 +1,5 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
@@ -26,7 +26,7 @@ class GraphQLCycleResolver {
   @Permissions('read:cycles')
   @Query(() => CycleObject)
   async cycle(
-    @Args('id', { type: () => Int }) id: CycleObject['id'],
+    @Args('id', { type: () => ID }) id: CycleObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log(`Fetching cycle with id ${id.toString()}`)

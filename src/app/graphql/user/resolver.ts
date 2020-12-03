@@ -1,5 +1,5 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
@@ -24,7 +24,7 @@ class GraphQLUserResolver {
   @Permissions('read:users')
   @Query(() => UserObject)
   async user(
-    @Args('id', { type: () => Int }) id: UserObject['id'],
+    @Args('id', { type: () => ID }) id: UserObject['id'],
     @GraphQLUser() authzUser: AuthzUser,
   ) {
     this.logger.log(`Fetching user with id ${id.toString()}`)

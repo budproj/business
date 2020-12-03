@@ -7,7 +7,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common'
-import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, ID, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
@@ -36,7 +36,7 @@ class GraphQLProgressReportResolver {
   @Permissions('read:progress-reports')
   @Query(() => ProgressReportObject)
   async progressReport(
-    @Args('id', { type: () => Int }) id: ProgressReportObject['id'],
+    @Args('id', { type: () => ID }) id: ProgressReportObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log(`Fetching progress report with id ${id.toString()}`)

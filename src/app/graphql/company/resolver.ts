@@ -1,5 +1,5 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
@@ -28,7 +28,7 @@ class GraphQLCompanyResolver {
   @Permissions('read:companies')
   @Query(() => CompanyObject)
   async company(
-    @Args('id', { type: () => Int }) id: CompanyObject['id'],
+    @Args('id', { type: () => ID }) id: CompanyObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
     const userCompanies = await this.userService.parseRequestUserCompanies(user)

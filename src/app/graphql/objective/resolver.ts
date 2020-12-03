@@ -1,5 +1,5 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
@@ -26,7 +26,7 @@ class GraphQLObjectiveResolver {
   @Permissions('read:objectives')
   @Query(() => ObjectiveObject)
   async objective(
-    @Args('id', { type: () => Int }) id: ObjectiveObject['id'],
+    @Args('id', { type: () => ID }) id: ObjectiveObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log(`Fetching objective with id ${id.toString()}`)
