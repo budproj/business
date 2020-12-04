@@ -1,7 +1,7 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { ACTION, PERMISSION } from 'app/authz/constants'
+import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
@@ -36,11 +36,7 @@ class GraphQLUserResolver {
   ) {
     this.logger.log(`Fetching user with id ${id.toString()}`)
 
-    const user = await this.resolverService.getOneByIDWithActionScopeConstraint(
-      id,
-      authzUser,
-      ACTION.READ,
-    )
+    const user = await this.resolverService.getOneByIDWithActionScopeConstraint(id, authzUser)
     if (!user) throw new NotFoundException(`We could not found an user with id ${id}`)
 
     return user

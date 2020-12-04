@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common'
 import { Args, ID, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { ACTION, PERMISSION } from 'app/authz/constants'
+import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
@@ -47,8 +47,8 @@ class GraphQLKeyResultViewResolver {
     this.logger.log('Fetching key result view')
 
     const keyResultView = binding
-      ? await this.resolverService.getOneByBindingWithScopeConstraint(binding, user, ACTION.READ)
-      : await this.resolverService.getOneByIDWithActionScopeConstraint(id, user, ACTION.READ)
+      ? await this.resolverService.getOneByBindingWithScopeConstraint(binding, user)
+      : await this.resolverService.getOneByIDWithActionScopeConstraint(id, user)
     if (!keyResultView)
       throw new NotFoundException('We could not found a key result view with given args')
 
@@ -95,7 +95,6 @@ class GraphQLKeyResultViewResolver {
       id,
       keyResultViewRankInput,
       user,
-      ACTION.UPDATE,
     )
     if (!updatedKeyResultView)
       throw new NotFoundException(`We could not found a key result view for id ${id}`)

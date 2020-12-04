@@ -1,7 +1,7 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { ACTION, PERMISSION } from 'app/authz/constants'
+import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
@@ -35,7 +35,6 @@ class GraphQLConfidenceReportResolver {
     const confidenceReport = await this.resolverService.getOneByIDWithActionScopeConstraint(
       id,
       user,
-      ACTION.READ,
     )
     if (!confidenceReport)
       throw new NotFoundException(`We could not found a confidence report with id ${id}`)

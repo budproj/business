@@ -1,7 +1,7 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { ACTION, PERMISSION } from 'app/authz/constants'
+import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
@@ -36,11 +36,7 @@ class GraphQLKeyResultResolver {
   ) {
     this.logger.log(`Fetching key result with id ${id.toString()}`)
 
-    const keyResult = await this.resolverService.getOneByIDWithActionScopeConstraint(
-      id,
-      user,
-      ACTION.READ,
-    )
+    const keyResult = await this.resolverService.getOneByIDWithActionScopeConstraint(id, user)
     if (!keyResult) throw new NotFoundException(`We could not found a key result with id ${id}`)
 
     return keyResult

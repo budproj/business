@@ -49,7 +49,11 @@ abstract class GraphQLEntityService<
     this.entityService = domainEntityService
   }
 
-  async getOneByIDWithActionScopeConstraint(id: UserDTO['id'], user: AuthzUser, action: ACTION) {
+  async getOneByIDWithActionScopeConstraint(
+    id: UserDTO['id'],
+    user: AuthzUser,
+    action: ACTION = ACTION.READ,
+  ) {
     const scopedConstrainedSelectors = {
       [SCOPE.ANY]: async () => this.entityService.getOneByID(id),
       [SCOPE.COMPANY]: async () => this.entityService.getOneByIDIfUserIsInCompany(id, user),
@@ -66,7 +70,7 @@ abstract class GraphQLEntityService<
     id: D['id'],
     newData: Partial<D>,
     user: AuthzUser,
-    action: ACTION,
+    action: ACTION = ACTION.UPDATE,
   ) {
     const scopedConstrainedSetters = {
       [SCOPE.ANY]: async () => this.entityService.updateOneByID(id, newData),

@@ -43,11 +43,7 @@ class GraphQLProgressReportResolver {
   ) {
     this.logger.log(`Fetching progress report with id ${id.toString()}`)
 
-    const progressReport = await this.resolverService.getOneByIDWithActionScopeConstraint(
-      id,
-      user,
-      ACTION.READ,
-    )
+    const progressReport = await this.resolverService.getOneByIDWithActionScopeConstraint(id, user)
     if (!progressReport)
       throw new NotFoundException(`We could not found a progress report with id ${id}`)
 

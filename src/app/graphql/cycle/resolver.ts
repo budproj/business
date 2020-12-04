@@ -1,7 +1,7 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { ACTION, PERMISSION } from 'app/authz/constants'
+import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
@@ -32,11 +32,7 @@ class GraphQLCycleResolver {
   ) {
     this.logger.log(`Fetching cycle with id ${id.toString()}`)
 
-    const cycle = await this.resolverService.getOneByIDWithActionScopeConstraint(
-      id,
-      user,
-      ACTION.READ,
-    )
+    const cycle = await this.resolverService.getOneByIDWithActionScopeConstraint(id, user)
     if (!cycle) throw new NotFoundException(`We could not found a cycle with id ${id}`)
 
     return cycle

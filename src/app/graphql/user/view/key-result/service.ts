@@ -16,11 +16,7 @@ class GraphQLKeyResultViewService extends GraphQLEntityService<
     super(RESOURCE.KEY_RESULT_VIEW, keyResultViewDomain)
   }
 
-  async getOneByBindingWithScopeConstraint(
-    binding: KeyResultViewBinding,
-    user: AuthzUser,
-    action: ACTION,
-  ) {
+  async getOneByBindingWithScopeConstraint(binding: KeyResultViewBinding, user: AuthzUser) {
     const scopedConstrainedSelectors = {
       [SCOPE.ANY]: async () => this.entityService.getOneByBinding(binding),
       [SCOPE.COMPANY]: async () =>
@@ -28,7 +24,7 @@ class GraphQLKeyResultViewService extends GraphQLEntityService<
       [SCOPE.TEAM]: async () => this.entityService.getOneByBindingIfUserIsInTeam(binding, user),
       [SCOPE.OWNS]: async () => this.entityService.getOneByBindingIfUserOwnsIt(binding, user),
     }
-    const scopeConstraint = user.scopes[RESOURCE.KEY_RESULT_VIEW][action]
+    const scopeConstraint = user.scopes[RESOURCE.KEY_RESULT_VIEW][ACTION.READ]
     const constrainedSelector = scopedConstrainedSelectors[scopeConstraint]
 
     return constrainedSelector()
