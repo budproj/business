@@ -1,15 +1,15 @@
 import { RESOURCE, SCOPE } from 'app/authz/constants'
 import { AuthzUser } from 'app/authz/types'
-import { UserObject } from 'app/graphql/user'
-import { DomainCompanyService } from 'domain/company'
-import { DomainCycleService } from 'domain/cycle'
-import { DomainKeyResultService } from 'domain/key-result'
-import { DomainConfidenceReportService } from 'domain/key-result/report/confidence'
-import { DomainProgressReportService } from 'domain/key-result/report/progress'
-import { DomainObjectiveService } from 'domain/objective'
-import { DomainTeamService } from 'domain/team'
-import { DomainUserService } from 'domain/user'
-import { DomainKeyResultViewService } from 'domain/user/view/key-result'
+import DomainCompanyService from 'domain/company/service'
+import DomainCycleService from 'domain/cycle/service'
+import DomainKeyResultService from 'domain/key-result/service'
+import DomainConfidenceReportService from 'domain/key-result/report/confidence/service'
+import DomainProgressReportService from 'domain/key-result/report/progress/service'
+import DomainObjectiveService from 'domain/objective/service'
+import DomainTeamService from 'domain/team/service'
+import DomainUserService from 'domain/user/service'
+import DomainKeyResultViewService from 'domain/user/view/key-result/service'
+import { UserDTO } from 'domain/user'
 
 abstract class GraphQLEntityService<
   S extends
@@ -31,7 +31,7 @@ abstract class GraphQLEntityService<
     this.entityService = domainEntityService
   }
 
-  async getOneByIDWithScopeConstraint(id: UserObject['id'], user: AuthzUser) {
+  async getOneByIDWithScopeConstraint(id: UserDTO['id'], user: AuthzUser) {
     const scopedConstrainedSelectors = {
       [SCOPE.ANY]: async () => this.entityService.getOneByID(id),
       [SCOPE.COMPANY]: async () => this.entityService.getOneByIDIfUserIsInCompany(id, user),
