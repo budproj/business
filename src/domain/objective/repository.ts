@@ -58,7 +58,7 @@ class DomainObjectiveRepository extends Repository<Objective> {
   ): Promise<Objective | null> {
     console.log(id, newData, allowedCompanies)
 
-    // Not implemented yet
+    return null // eslint-disable-line unicorn/no-null
   }
 
   async updateByIDWithTeamConstraint(
@@ -68,7 +68,7 @@ class DomainObjectiveRepository extends Repository<Objective> {
   ): Promise<Objective | null> {
     console.log(id, newData, allowedTeams)
 
-    // Not implemented yet
+    return null // eslint-disable-line unicorn/no-null
   }
 
   async updateByIDWithOwnsConstraint(
@@ -78,7 +78,7 @@ class DomainObjectiveRepository extends Repository<Objective> {
   ): Promise<Objective | null> {
     console.log(id, newData, userID)
 
-    // Not implemented yet
+    return null // eslint-disable-line unicorn/no-null
   }
 }
 

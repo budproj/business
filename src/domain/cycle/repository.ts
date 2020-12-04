@@ -66,7 +66,7 @@ class DomainCycleRepository extends Repository<Cycle> {
   ): Promise<Cycle | null> {
     console.log(id, newData, allowedCompanies)
 
-    // Not implemented yet
+    return null // eslint-disable-line unicorn/no-null
   }
 
   async updateByIDWithTeamConstraint(
@@ -76,7 +76,7 @@ class DomainCycleRepository extends Repository<Cycle> {
   ): Promise<Cycle | null> {
     console.log(id, newData, allowedTeams)
 
-    // Not implemented yet
+    return null // eslint-disable-line unicorn/no-null
   }
 
   async updateByIDWithOwnsConstraint(
@@ -86,7 +86,7 @@ class DomainCycleRepository extends Repository<Cycle> {
   ): Promise<Cycle | null> {
     console.log(id, newData, userID)
 
-    // Not implemented yet
+    return null // eslint-disable-line unicorn/no-null
   }
 }
 
