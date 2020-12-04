@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common'
 import { Args, ID, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { PERMISSIONS } from 'app/authz/constants'
+import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
@@ -34,7 +34,7 @@ class GraphQLProgressReportResolver {
     private readonly railway: Railway,
   ) {}
 
-  @Permissions(PERMISSIONS['PROGRESS_REPORT:READ'])
+  @Permissions(PERMISSION['PROGRESS_REPORT:READ'])
   @Query(() => ProgressReportObject)
   async progressReport(
     @Args('id', { type: () => ID }) id: ProgressReportObject['id'],
@@ -72,7 +72,7 @@ class GraphQLProgressReportResolver {
     return this.userService.getOneById(progressReport.userId)
   }
 
-  @Permissions(PERMISSIONS['PROGRESS_REPORT:CREATE'])
+  @Permissions(PERMISSION['PROGRESS_REPORT:CREATE'])
   @Mutation(() => ProgressReportObject)
   async createProgressReport(
     @GraphQLUser() user: AuthzUser,

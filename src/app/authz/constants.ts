@@ -1,4 +1,23 @@
-export enum PERMISSIONS {
+export enum RESOURCE {
+  KEY_RESULT = 'key-result',
+  PROGRESS_REPORT = 'progress-report',
+  CONFIDENCE_REPORT = 'confidence-report',
+  COMPANY = 'company',
+  CYCLE = 'cycle',
+  OBJECTIVE = 'objective',
+  TEAM = 'team',
+  USER = 'user',
+  KEY_RESULT_VIEW = 'key-result-view',
+}
+
+export enum SCOPE {
+  ANY = 'any',
+  COMPANY = 'company',
+  TEAM = 'team',
+  OWNS = 'owns',
+}
+
+export enum PERMISSION {
   'KEY_RESULT:CREATE' = 'key-result:create',
   'KEY_RESULT:UPDATE' = 'key-result:update',
   'KEY_RESULT:READ' = 'key-result:read',
@@ -37,7 +56,7 @@ export enum PERMISSIONS {
   'KEY_RESULT_VIEW:DELETE' = 'key-result-view:delete',
 }
 
-export enum SCOPES {
+export enum SCOPED_PERMISSION {
   'KEY_RESULT:CREATE:ANY' = 'key-result:create:any',
   'KEY_RESULT:CREATE:COMPANY' = 'key-result:create:company',
   'KEY_RESULT:CREATE:TEAM' = 'key-result:create:team',

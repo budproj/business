@@ -1,15 +1,15 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { PERMISSIONS } from 'app/authz/constants'
+import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import DomainKeyResultService from 'domain/key-result/service'
-import DomainUserService from 'domain/user/service'
 
 import { UserObject } from './models'
+import GraphQLUserService from './service'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -18,11 +18,11 @@ class GraphQLUserResolver {
   private readonly logger = new Logger(GraphQLUserResolver.name)
 
   constructor(
+    private readonly userService: GraphQLUserService,
     private readonly keyResultService: DomainKeyResultService,
-    private readonly userService: DomainUserService,
   ) {}
 
-  @Permissions(PERMISSIONS['USER:READ'])
+  @Permissions(PERMISSION['USER:READ'])
   @Query(() => UserObject)
   async user(
     @Args('id', { type: () => ID }) id: UserObject['id'],
@@ -30,7 +30,7 @@ class GraphQLUserResolver {
   ) {
     this.logger.log(`Fetching user with id ${id.toString()}`)
 
-    const user = await this.userService.getOneByIdIfUserShareCompany(id, authzUser)
+    const user = await this.userService.getOneByIdWithScopeConstraint(id, authzUser)
     if (!user) throw new NotFoundException(`We could not found an user with id ${id}`)
 
     return user

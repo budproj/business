@@ -1,7 +1,7 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { PERMISSIONS } from 'app/authz/constants'
+import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
@@ -24,7 +24,7 @@ class GraphQLTeamResolver {
     private readonly companyService: DomainCompanyService,
   ) {}
 
-  @Permissions(PERMISSIONS['TEAM:READ'])
+  @Permissions(PERMISSION['TEAM:READ'])
   @Query(() => TeamObject)
   async team(@Args('id', { type: () => ID }) id: TeamObject['id'], @GraphQLUser() user: AuthzUser) {
     this.logger.log(`Fetching team with id ${id.toString()}`)

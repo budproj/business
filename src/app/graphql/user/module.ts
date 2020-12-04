@@ -5,11 +5,12 @@ import appConfig from 'config/app'
 import DomainModule from 'domain/module'
 
 import GraphQLUserResolver from './resolver'
+import GraphQLUserService from './service'
 import GraphQLUserViewModule from './view'
 
 @Module({
   imports: [ConfigModule.forFeature(appConfig), DomainModule, GraphQLUserViewModule],
-  providers: [GraphQLUserResolver],
+  providers: [GraphQLUserResolver, GraphQLUserService],
 })
 class UsersModule {}
 

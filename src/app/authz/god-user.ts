@@ -1,3 +1,4 @@
+import { PERMISSION, RESOURCE, SCOPE } from 'app/authz/constants'
 import { AuthzUser } from 'app/authz/types'
 
 class GodUser implements AuthzUser {
@@ -10,6 +11,7 @@ class GodUser implements AuthzUser {
   public readonly updatedAt: AuthzUser['updatedAt']
   public readonly token: AuthzUser['token']
   public readonly teams: AuthzUser['teams']
+  public readonly scopes: AuthzUser['scopes']
 
   constructor() {
     this.id = 1
@@ -28,7 +30,18 @@ class GodUser implements AuthzUser {
       exp: 99999999,
       azp: 'GOD',
       scope: 'GOD',
-      permissions: ['ALL'],
+      permissions: Object.values(PERMISSION),
+    }
+    this.scopes = {
+      [RESOURCE.KEY_RESULT]: SCOPE.ANY,
+      [RESOURCE.PROGRESS_REPORT]: SCOPE.ANY,
+      [RESOURCE.CONFIDENCE_REPORT]: SCOPE.ANY,
+      [RESOURCE.COMPANY]: SCOPE.ANY,
+      [RESOURCE.CYCLE]: SCOPE.ANY,
+      [RESOURCE.OBJECTIVE]: SCOPE.ANY,
+      [RESOURCE.TEAM]: SCOPE.ANY,
+      [RESOURCE.USER]: SCOPE.ANY,
+      [RESOURCE.KEY_RESULT_VIEW]: SCOPE.ANY,
     }
   }
 }

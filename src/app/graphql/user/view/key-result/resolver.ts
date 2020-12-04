@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common'
 import { Args, ID, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { PERMISSIONS } from 'app/authz/constants'
+import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
@@ -38,7 +38,7 @@ class GraphQLKeyResultViewResolver {
     private readonly railway: Railway,
   ) {}
 
-  @Permissions(PERMISSIONS['KEY_RESULT_VIEW:READ'])
+  @Permissions(PERMISSION['KEY_RESULT_VIEW:READ'])
   @Query(() => KeyResultViewObject)
   async keyResultView(
     @GraphQLUser() user: AuthzUser,
@@ -83,7 +83,7 @@ class GraphQLKeyResultViewResolver {
     )
   }
 
-  @Permissions(PERMISSIONS['KEY_RESULT_VIEW:UPDATE'])
+  @Permissions(PERMISSION['KEY_RESULT_VIEW:UPDATE'])
   @Mutation(() => KeyResultViewObject)
   async updateRank(
     @Args('id', { type: () => ID }) id: KeyResultViewObject['id'],
@@ -107,7 +107,7 @@ class GraphQLKeyResultViewResolver {
     return updatedKeyResultView
   }
 
-  @Permissions(PERMISSIONS['KEY_RESULT_VIEW:CREATE'])
+  @Permissions(PERMISSION['KEY_RESULT_VIEW:CREATE'])
   @Mutation(() => KeyResultViewObject)
   async createKeyResultView(
     @GraphQLUser() user: AuthzUser,
