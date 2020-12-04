@@ -1,4 +1,5 @@
 import { CompanyDTO } from 'domain/company/dto'
+import { UserDTO } from 'domain/user/dto'
 
 export class TeamDTO {
   id: number
@@ -6,4 +7,5 @@ export class TeamDTO {
   createdAt: Date
   updatedAt: Date
   companyId: CompanyDTO['id']
+  ownerId: UserDTO['id']
 }

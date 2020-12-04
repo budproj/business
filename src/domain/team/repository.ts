@@ -38,7 +38,13 @@ class DomainTeamRepository extends Repository<Team> {
   }
 
   async findByIDWithOwnsConstraint(id: TeamDTO['id'], userID: UserDTO['id']): Promise<Team | null> {
-    throw Error // TODO
+    const query = this.createQueryBuilder()
+    const filteredQuery = query.where({ id })
+    const ownerConstrainedQuery = filteredQuery.andWhere('ownerID = :userID', {
+      userID,
+    })
+
+    return ownerConstrainedQuery.getOne()
   }
 }
 

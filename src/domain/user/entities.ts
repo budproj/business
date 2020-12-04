@@ -11,10 +11,10 @@ import {
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
 import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
+import { ObjectiveDTO } from 'domain/objective/dto'
 import { TeamDTO } from 'domain/team/dto'
 
 import { UserDTO } from './dto'
-import { ObjectiveDTO } from 'domain/objective/dto'
 
 @Entity()
 export class User implements UserDTO {
@@ -53,4 +53,7 @@ export class User implements UserDTO {
 
   @ManyToMany('Team', 'users', { lazy: true })
   public teams: Promise<TeamDTO[]>
+
+  @OneToMany('Team', 'owner')
+  public ownedTeams: TeamDTO[]
 }

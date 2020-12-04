@@ -56,4 +56,9 @@ export class UserObject {
     description: 'The creation date ordered list of teams that this user is part of',
   })
   teams: Promise<TeamObject[]>
+
+  @Field(() => [TeamObject], {
+    description: 'The creation date ordered list of teams that this user owns',
+  })
+  ownedTeams: TeamObject[]
 }

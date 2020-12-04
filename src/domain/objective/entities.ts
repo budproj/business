@@ -11,9 +11,9 @@ import {
 
 import { CycleDTO } from 'domain/cycle/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
+import { UserDTO } from 'domain/user'
 
 import { ObjectiveDTO } from './dto'
-import { UserDTO } from 'domain/user'
 
 @Entity()
 export class Objective implements ObjectiveDTO {

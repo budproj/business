@@ -8,6 +8,7 @@ import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import DomainKeyResultService from 'domain/key-result/service'
 import { DomainObjectiveService } from 'domain/objective'
+import { DomainTeamService } from 'domain/team'
 
 import { UserObject } from './models'
 import GraphQLUserService from './service'
@@ -22,6 +23,7 @@ class GraphQLUserResolver {
     private readonly resolverService: GraphQLUserService,
     private readonly keyResultDomain: DomainKeyResultService,
     private readonly objectiveDomain: DomainObjectiveService,
+    private readonly teamDomain: DomainTeamService,
   ) {}
 
   @Permissions(PERMISSION['USER:READ'])
@@ -76,6 +78,16 @@ class GraphQLUserResolver {
     })
 
     return this.keyResultDomain.report.confidence.getFromUser(user.id)
+  }
+
+  @ResolveField()
+  async ownedTeams(@Parent() user: UserObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching owned teams for user',
+    })
+
+    return this.teamDomain.getFromOwner(user.id)
   }
 }
 
