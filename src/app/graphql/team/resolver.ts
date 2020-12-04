@@ -1,7 +1,7 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { PERMISSION } from 'app/authz/constants'
+import { ACTION, PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
@@ -31,7 +31,11 @@ class GraphQLTeamResolver {
   async team(@Args('id', { type: () => ID }) id: TeamObject['id'], @GraphQLUser() user: AuthzUser) {
     this.logger.log(`Fetching team with id ${id.toString()}`)
 
-    const team = await this.resolverService.getOneByIDWithScopeConstraint(id, user)
+    const team = await this.resolverService.getOneByIDWithActionScopeConstraint(
+      id,
+      user,
+      ACTION.READ,
+    )
     if (!team) throw new NotFoundException(`We could not found a team with id ${id}`)
 
     return team

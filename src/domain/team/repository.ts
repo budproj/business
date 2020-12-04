@@ -40,7 +40,7 @@ class DomainTeamRepository extends Repository<Team> {
   async findByIDWithOwnsConstraint(id: TeamDTO['id'], userID: UserDTO['id']): Promise<Team | null> {
     const query = this.createQueryBuilder()
     const filteredQuery = query.where({ id })
-    const ownerConstrainedQuery = filteredQuery.andWhere('ownerID = :userID', {
+    const ownerConstrainedQuery = filteredQuery.andWhere('owner_id = :userID', {
       userID,
     })
 

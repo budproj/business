@@ -1,7 +1,7 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { PERMISSION } from 'app/authz/constants'
+import { ACTION, PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
@@ -32,7 +32,11 @@ class GraphQLCompanyResolver {
     @Args('id', { type: () => ID }) id: CompanyObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
-    const company = await this.resolverService.getOneByIDWithScopeConstraint(id, user)
+    const company = await this.resolverService.getOneByIDWithActionScopeConstraint(
+      id,
+      user,
+      ACTION.READ,
+    )
     if (!company) throw new NotFoundException(`We could not found a company with id ${id}`)
 
     return company

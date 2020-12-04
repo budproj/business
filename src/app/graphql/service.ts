@@ -1,4 +1,4 @@
-import { RESOURCE, SCOPE } from 'app/authz/constants'
+import { ACTION, RESOURCE, SCOPE } from 'app/authz/constants'
 import { AuthzUser } from 'app/authz/types'
 import DomainCompanyService from 'domain/company/service'
 import DomainCycleService from 'domain/cycle/service'
@@ -31,14 +31,14 @@ abstract class GraphQLEntityService<
     this.entityService = domainEntityService
   }
 
-  async getOneByIDWithScopeConstraint(id: UserDTO['id'], user: AuthzUser) {
+  async getOneByIDWithActionScopeConstraint(id: UserDTO['id'], user: AuthzUser, action: ACTION) {
     const scopedConstrainedSelectors = {
       [SCOPE.ANY]: async () => this.entityService.getOneByID(id),
       [SCOPE.COMPANY]: async () => this.entityService.getOneByIDIfUserIsInCompany(id, user),
       [SCOPE.TEAM]: async () => this.entityService.getOneByIDIfUserIsInTeam(id, user),
       [SCOPE.OWNS]: async () => this.entityService.getOneByIDIfUserOwnsIt(id, user),
     }
-    const scopeConstraint = user.scopes[this.resource]
+    const scopeConstraint = user.scopes[this.resource][action]
     const constrainedSelector = scopedConstrainedSelectors[scopeConstraint]
 
     return constrainedSelector()

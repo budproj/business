@@ -51,7 +51,7 @@ class DomainCycleRepository extends Repository<Cycle> {
     const query = this.createQueryBuilder()
     const filteredQuery = query.where({ id })
     const joinedQuery = filteredQuery.leftJoinAndSelect(`${Cycle.name}.company`, 'company')
-    const teamConstrainedQuery = joinedQuery.andWhere('company.ownerId = :userID', {
+    const teamConstrainedQuery = joinedQuery.andWhere('company.owner_id = :userID', {
       userID,
     })
 

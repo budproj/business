@@ -9,7 +9,7 @@ import TeamService from 'domain/team/service'
 import { User } from 'domain/user/entities'
 import UserService from 'domain/user/service'
 
-import { RESOURCE, SCOPE, SCOPED_PERMISSION } from './constants'
+import { ACTION, RESOURCE, SCOPE, SCOPED_PERMISSION, SCOPE_GROUP } from './constants'
 import GodUser from './god-user'
 import { AuthzUser } from './types'
 
@@ -36,7 +36,7 @@ export class EnhanceWithBudUser implements NestInterceptor {
     const { teams, ...user }: User = await this.userService.getUserFromSubjectWithTeamRelation(
       request.user.token.sub,
     )
-    const scopes = this.parseScopesFromUserPermissions(
+    const scopes = this.parseActionScopesFromUserPermissions(
       request.user.token.permissions as SCOPED_PERMISSION[],
     )
 
@@ -76,36 +76,63 @@ export class EnhanceWithBudUser implements NestInterceptor {
     return next.handle()
   }
 
-  parseScopesFromUserPermissions(permissions: SCOPED_PERMISSION[]): any {
-    const keyResultScope = this.parseScopeForResource(RESOURCE.KEY_RESULT, permissions)
-    const progressReportScope = this.parseScopeForResource(RESOURCE.PROGRESS_REPORT, permissions)
-    const confidenceReportScope = this.parseScopeForResource(
+  parseActionScopesFromUserPermissions(permissions: SCOPED_PERMISSION[]): any {
+    const keyResultActionScopes = this.parseActionScopesForResource(
+      RESOURCE.KEY_RESULT,
+      permissions,
+    )
+    const progressReportActionScopes = this.parseActionScopesForResource(
+      RESOURCE.PROGRESS_REPORT,
+      permissions,
+    )
+    const confidenceReportActionScopes = this.parseActionScopesForResource(
       RESOURCE.CONFIDENCE_REPORT,
       permissions,
     )
-    const companyScope = this.parseScopeForResource(RESOURCE.COMPANY, permissions)
-    const cycleScope = this.parseScopeForResource(RESOURCE.CYCLE, permissions)
-    const objectiveScope = this.parseScopeForResource(RESOURCE.OBJECTIVE, permissions)
-    const teamScope = this.parseScopeForResource(RESOURCE.TEAM, permissions)
-    const userScope = this.parseScopeForResource(RESOURCE.USER, permissions)
-    const keyResultViewScope = this.parseScopeForResource(RESOURCE.KEY_RESULT_VIEW, permissions)
+    const companyActionScopes = this.parseActionScopesForResource(RESOURCE.COMPANY, permissions)
+    const cycleActionScopes = this.parseActionScopesForResource(RESOURCE.CYCLE, permissions)
+    const objectiveActionScopes = this.parseActionScopesForResource(RESOURCE.OBJECTIVE, permissions)
+    const teamActionScopes = this.parseActionScopesForResource(RESOURCE.TEAM, permissions)
+    const userActionScopes = this.parseActionScopesForResource(RESOURCE.USER, permissions)
+    const keyResultViewActionScopes = this.parseActionScopesForResource(
+      RESOURCE.KEY_RESULT_VIEW,
+      permissions,
+    )
 
     return {
-      [RESOURCE.KEY_RESULT]: keyResultScope,
-      [RESOURCE.PROGRESS_REPORT]: progressReportScope,
-      [RESOURCE.CONFIDENCE_REPORT]: confidenceReportScope,
-      [RESOURCE.COMPANY]: companyScope,
-      [RESOURCE.CYCLE]: cycleScope,
-      [RESOURCE.OBJECTIVE]: objectiveScope,
-      [RESOURCE.TEAM]: teamScope,
-      [RESOURCE.USER]: userScope,
-      [RESOURCE.KEY_RESULT_VIEW]: keyResultViewScope,
+      [RESOURCE.KEY_RESULT]: keyResultActionScopes,
+      [RESOURCE.PROGRESS_REPORT]: progressReportActionScopes,
+      [RESOURCE.CONFIDENCE_REPORT]: confidenceReportActionScopes,
+      [RESOURCE.COMPANY]: companyActionScopes,
+      [RESOURCE.CYCLE]: cycleActionScopes,
+      [RESOURCE.OBJECTIVE]: objectiveActionScopes,
+      [RESOURCE.TEAM]: teamActionScopes,
+      [RESOURCE.USER]: userActionScopes,
+      [RESOURCE.KEY_RESULT_VIEW]: keyResultViewActionScopes,
     }
   }
 
-  parseScopeForResource(resource: RESOURCE, permissions: SCOPED_PERMISSION[]): SCOPE {
+  parseActionScopesForResource(resource: RESOURCE, permissions: SCOPED_PERMISSION[]): SCOPE_GROUP {
+    const createScope = this.parseActionScopeForResource(ACTION.CREATE, resource, permissions)
+    const readScope = this.parseActionScopeForResource(ACTION.READ, resource, permissions)
+    const updateScope = this.parseActionScopeForResource(ACTION.UPDATE, resource, permissions)
+    const deleteScope = this.parseActionScopeForResource(ACTION.DELETE, resource, permissions)
+
+    return {
+      [ACTION.CREATE]: createScope,
+      [ACTION.READ]: readScope,
+      [ACTION.UPDATE]: updateScope,
+      [ACTION.DELETE]: deleteScope,
+    }
+  }
+
+  parseActionScopeForResource(
+    action: ACTION,
+    resource: RESOURCE,
+    permissions: SCOPED_PERMISSION[],
+  ): SCOPE {
     const resourcePermissions = permissions.filter((permission) =>
-      permission.includes(`${resource}:`),
+      permission.includes(`${resource}:${action}`),
     )
     const highestScope = this.getHighestScopeForPermissions(resourcePermissions)
 

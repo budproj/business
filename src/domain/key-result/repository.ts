@@ -38,7 +38,7 @@ class DomainKeyResultRepository extends Repository<KeyResult> {
   ): Promise<KeyResult | null> {
     const query = this.createQueryBuilder()
     const filteredQuery = query.where({ id })
-    const ownerConstrainedQuery = filteredQuery.andWhere('ownerID = :userID', {
+    const ownerConstrainedQuery = filteredQuery.andWhere('owner_id = :userID', {
       userID,
     })
 

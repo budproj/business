@@ -43,7 +43,7 @@ class DomainObjectiveRepository extends Repository<Objective> {
   ): Promise<Objective | null> {
     const query = this.createQueryBuilder()
     const filteredQuery = query.where({ id })
-    const ownerConstrainedQuery = filteredQuery.andWhere('ownerID = :userID', {
+    const ownerConstrainedQuery = filteredQuery.andWhere('owner_id = :userID', {
       userID,
     })
 

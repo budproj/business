@@ -1,7 +1,7 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { PERMISSION } from 'app/authz/constants'
+import { ACTION, PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
@@ -34,7 +34,11 @@ class GraphQLObjectiveResolver {
   ) {
     this.logger.log(`Fetching objective with id ${id.toString()}`)
 
-    const objective = await this.resolverService.getOneByIDWithScopeConstraint(id, user)
+    const objective = await this.resolverService.getOneByIDWithActionScopeConstraint(
+      id,
+      user,
+      ACTION.READ,
+    )
     if (!objective) throw new NotFoundException(`We could not found an objective with id ${id}`)
 
     return objective
