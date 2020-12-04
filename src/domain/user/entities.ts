@@ -14,6 +14,7 @@ import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
 import { TeamDTO } from 'domain/team/dto'
 
 import { UserDTO } from './dto'
+import { ObjectiveDTO } from 'domain/objective/dto'
 
 @Entity()
 export class User implements UserDTO {
@@ -40,6 +41,9 @@ export class User implements UserDTO {
 
   @OneToMany('KeyResult', 'owner')
   public keyResults: KeyResultDTO[]
+
+  @OneToMany('Objective', 'owner')
+  public objectives: ObjectiveDTO[]
 
   @OneToMany('ConfidenceReport', 'user')
   public confidenceReports: ConfidenceReportDTO[]

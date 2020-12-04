@@ -7,6 +7,7 @@ import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import DomainKeyResultService from 'domain/key-result/service'
+import { DomainObjectiveService } from 'domain/objective'
 
 import { UserObject } from './models'
 import GraphQLUserService from './service'
@@ -20,6 +21,7 @@ class GraphQLUserResolver {
   constructor(
     private readonly resolverService: GraphQLUserService,
     private readonly keyResultDomain: DomainKeyResultService,
+    private readonly objectiveDomain: DomainObjectiveService,
   ) {}
 
   @Permissions(PERMISSION['USER:READ'])
@@ -44,6 +46,16 @@ class GraphQLUserResolver {
     })
 
     return this.keyResultDomain.getFromOwner(user.id)
+  }
+
+  @ResolveField()
+  async objectives(@Parent() user: UserObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching objectives for user',
+    })
+
+    return this.objectiveDomain.getFromOwner(user.id)
   }
 
   @ResolveField()

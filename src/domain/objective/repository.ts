@@ -27,14 +27,27 @@ class DomainObjectiveRepository extends Repository<Objective> {
     id: ObjectiveDTO['id'],
     allowedTeams: Array<TeamDTO['id']>,
   ): Promise<Objective | null> {
-    throw Error // TODO
+    const query = this.createQueryBuilder()
+    const filteredQuery = query.where({ id })
+    const joinedQuery = filteredQuery.leftJoinAndSelect(`${Objective.name}.owner`, 'owner')
+    const teamConstrainedQuery = joinedQuery.andWhere('owner.teamId IN (:...teams)', {
+      teams: allowedTeams,
+    })
+
+    return teamConstrainedQuery.getOne()
   }
 
   async findByIDWithOwnsConstraint(
     id: ObjectiveDTO['id'],
     userID: UserDTO['id'],
   ): Promise<Objective | null> {
-    throw Error // TODO
+    const query = this.createQueryBuilder()
+    const filteredQuery = query.where({ id })
+    const ownerConstrainedQuery = filteredQuery.andWhere('ownerID = :userID', {
+      userID,
+    })
+
+    return ownerConstrainedQuery.getOne()
   }
 }
 

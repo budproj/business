@@ -13,6 +13,7 @@ import { CycleDTO } from 'domain/cycle/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
 
 import { ObjectiveDTO } from './dto'
+import { UserDTO } from 'domain/user'
 
 @Entity()
 export class Objective implements ObjectiveDTO {
@@ -37,4 +38,11 @@ export class Objective implements ObjectiveDTO {
   @Column()
   @RelationId((objective: Objective) => objective.cycle)
   public cycleId: CycleDTO['id']
+
+  @ManyToOne('User', 'objectives')
+  public owner: UserDTO
+
+  @Column()
+  @RelationId((objective: Objective) => objective.owner)
+  public ownerId: UserDTO['id']
 }

@@ -8,6 +8,7 @@ import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import DomainCycleService from 'domain/cycle/service'
 import DomainKeyResultService from 'domain/key-result/service'
+import { DomainUserService } from 'domain/user'
 
 import { ObjectiveObject } from './models'
 import GraphQLObjectiveService from './service'
@@ -22,6 +23,7 @@ class GraphQLObjectiveResolver {
     private readonly resolverService: GraphQLObjectiveService,
     private readonly keyResultDomain: DomainKeyResultService,
     private readonly cycleDomain: DomainCycleService,
+    private readonly userDomain: DomainUserService,
   ) {}
 
   @Permissions(PERMISSION['OBJECTIVE:READ'])
@@ -52,10 +54,20 @@ class GraphQLObjectiveResolver {
   async cycle(@Parent() objective: ObjectiveObject) {
     this.logger.log({
       objective,
-      message: 'Fetching cycke for objective',
+      message: 'Fetching cycle for objective',
     })
 
     return this.cycleDomain.getOneByID(objective.cycleId)
+  }
+
+  @ResolveField()
+  async owner(@Parent() objective: ObjectiveObject) {
+    this.logger.log({
+      objective,
+      message: 'Fetching owner for objective',
+    })
+
+    return this.userDomain.getOneByID(objective.ownerId)
   }
 }
 
