@@ -3,9 +3,9 @@ import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm'
 import { CompanyDTO } from 'domain/company/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { TeamDTO } from 'domain/team'
+import { UserDTO } from 'domain/user'
 
 import { KeyResult } from './entities'
-import { UserDTO } from 'domain/user'
 
 @EntityRepository(KeyResult)
 class DomainKeyResultRepository extends Repository<KeyResult> {

@@ -2,9 +2,9 @@ import { EntityRepository, Repository } from 'typeorm'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { TeamDTO } from 'domain/team/dto'
+import { UserDTO } from 'domain/user'
 
 import { Team } from './entities'
-import { UserDTO } from 'domain/user'
 
 @EntityRepository(Team)
 class DomainTeamRepository extends Repository<Team> {

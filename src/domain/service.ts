@@ -12,7 +12,7 @@ import { Team, TeamDTO } from './team'
 import { User, UserDTO } from './user'
 import { KeyResultView, KeyResultViewDTO } from './user/view/key-result'
 
-abstract class DomainService<
+abstract class DomainEntityService<
   E extends
     | User
     | KeyResultView
@@ -40,7 +40,7 @@ abstract class DomainService<
     public readonly repository: DomainRepository<E, D>,
     public readonly loggerName: string,
   ) {
-    this.logger = new Logger(loggerName ?? DomainService.name)
+    this.logger = new Logger(loggerName ?? DomainEntityService.name)
   }
 
   async parseUserCompanies(user: UserDTO): Promise<Array<CompanyDTO['id']>> {
@@ -57,11 +57,11 @@ abstract class DomainService<
     return userTeamIDs
   }
 
-  async getOneById(id: D['id']): Promise<E | null> {
+  async getOneByID(id: D['id']): Promise<E | null> {
     return this.repository.findOne(id)
   }
 
-  async getOneByIdIfUserIsInCompany(id: D['id'], user: UserDTO): Promise<E | null> {
+  async getOneByIDIfUserIsInCompany(id: D['id'], user: UserDTO): Promise<E | null> {
     const userCompanies = await this.parseUserCompanies(user)
 
     this.logger.debug({
@@ -75,7 +75,7 @@ abstract class DomainService<
     return data
   }
 
-  async getOneByIdIfUserIsInTeam(id: D['id'], user: UserDTO): Promise<E | null> {
+  async getOneByIDIfUserIsInTeam(id: D['id'], user: UserDTO): Promise<E | null> {
     const userTeams = await this.parseUserTeams(user)
 
     this.logger.debug({
@@ -100,4 +100,4 @@ abstract class DomainService<
   }
 }
 
-export default DomainService
+export default DomainEntityService

@@ -32,7 +32,7 @@ class GraphQLObjectiveResolver {
   ) {
     this.logger.log(`Fetching objective with id ${id.toString()}`)
 
-    const objective = await this.objectiveService.getOneByIdIfUserIsInCompany(id, user)
+    const objective = await this.objectiveService.getOneByIDIfUserIsInCompany(id, user)
     if (!objective) throw new NotFoundException(`We could not found an objective with id ${id}`)
 
     return objective
@@ -55,7 +55,7 @@ class GraphQLObjectiveResolver {
       message: 'Fetching cycke for objective',
     })
 
-    return this.cycleService.getOneById(objective.cycleId)
+    return this.cycleService.getOneByID(objective.cycleId)
   }
 }
 

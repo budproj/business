@@ -3,14 +3,14 @@ import { remove } from 'lodash'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
-import DomainService from 'domain/service'
+import DomainEntityService from 'domain/service'
 import { UserDTO } from 'domain/user/dto'
 
 import { ProgressReport } from './entities'
 import DomainProgressReportRepository from './repository'
 
 @Injectable()
-class DomainProgressReportService extends DomainService<ProgressReport, ProgressReportDTO> {
+class DomainProgressReportService extends DomainEntityService<ProgressReport, ProgressReportDTO> {
   constructor(public readonly repository: DomainProgressReportRepository) {
     super(repository, DomainProgressReportService.name)
   }

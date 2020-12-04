@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common'
 
 import { CompanyDTO } from 'domain/company/dto'
-import DomainService from 'domain/service'
-import { UserDTO } from 'domain/user/dto'
+import DomainEntityService from 'domain/service'
 
 import { TeamDTO } from './dto'
 import { Team } from './entities'
 import DomainTeamRepository from './repository'
 
 @Injectable()
-class DomainTeamService extends DomainService<Team, TeamDTO> {
+class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
   constructor(public readonly repository: DomainTeamRepository) {
     super(repository, DomainTeamService.name)
   }

@@ -30,7 +30,7 @@ class GraphQLConfidenceReportResolver {
   ) {
     this.logger.log(`Fetching confidence report with id ${id.toString()}`)
 
-    const confidenceReport = await this.keyResultService.report.confidence.getOneByIdIfUserIsInCompany(
+    const confidenceReport = await this.keyResultService.report.confidence.getOneByIDIfUserIsInCompany(
       id,
       user,
     )
@@ -47,7 +47,7 @@ class GraphQLConfidenceReportResolver {
       message: 'Fetching key result for confidence report',
     })
 
-    return this.keyResultService.getOneById(confidenceReport.keyResultId)
+    return this.keyResultService.getOneByID(confidenceReport.keyResultId)
   }
 
   @ResolveField()
@@ -57,7 +57,7 @@ class GraphQLConfidenceReportResolver {
       message: 'Fetching user for confidence report',
     })
 
-    return this.userService.getOneById(confidenceReport.userId)
+    return this.userService.getOneByID(confidenceReport.userId)
   }
 }
 

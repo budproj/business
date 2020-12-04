@@ -2,9 +2,9 @@ import { EntityRepository, Repository } from 'typeorm'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
+import { UserDTO } from 'domain/user'
 
 import { ConfidenceReport } from './entities'
-import { UserDTO } from 'domain/user'
 
 @EntityRepository(ConfidenceReport)
 class DomainConfidenceReportRepository extends Repository<ConfidenceReport> {

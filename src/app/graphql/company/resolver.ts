@@ -38,7 +38,7 @@ class GraphQLCompanyResolver {
       throw new NotFoundException(`We could not found a company with id ${id}`)
     this.logger.log(`Fetching company with id ${id.toString()}`)
 
-    const company = await this.companyService.getOneById(id)
+    const company = await this.companyService.getOneByID(id)
     if (!company) throw new NotFoundException(`We could not found a company with id ${id}`)
 
     return company

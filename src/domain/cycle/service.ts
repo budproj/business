@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { CycleDTO } from 'domain/cycle/dto'
-import DomainService from 'domain/service'
+import DomainEntityService from 'domain/service'
 
 import { Cycle } from './entities'
 import DomainCycleRepository from './repository'
 
 @Injectable()
-class DomainCycleService extends DomainService<Cycle, CycleDTO> {
+class DomainCycleService extends DomainEntityService<Cycle, CycleDTO> {
   constructor(public readonly repository: DomainCycleRepository) {
     super(repository, DomainCycleService.name)
   }

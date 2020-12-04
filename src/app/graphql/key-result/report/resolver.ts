@@ -45,7 +45,7 @@ class GraphQLKeyResultReportResolver {
       message: 'Checking if the user owns the given key result',
     })
 
-    const keyResult = await this.keyResultService.getOneById(checkInInput.keyResultId)
+    const keyResult = await this.keyResultService.getOneByID(checkInInput.keyResultId)
     if (keyResult.ownerId !== user.id) {
       this.logger.log({
         user,

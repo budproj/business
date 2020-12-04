@@ -3,14 +3,17 @@ import { remove } from 'lodash'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
-import DomainService from 'domain/service'
+import DomainEntityService from 'domain/service'
 import { UserDTO } from 'domain/user/dto'
 
 import { ConfidenceReport } from './entities'
 import DomainConfidenceReportRepository from './repository'
 
 @Injectable()
-class DomainConfidenceReportService extends DomainService<ConfidenceReport, ConfidenceReportDTO> {
+class DomainConfidenceReportService extends DomainEntityService<
+  ConfidenceReport,
+  ConfidenceReportDTO
+> {
   constructor(public readonly repository: DomainConfidenceReportRepository) {
     super(repository, DomainConfidenceReportService.name)
   }

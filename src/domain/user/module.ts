@@ -8,7 +8,7 @@ import DomainUserViewModule from './view'
 @Module({
   imports: [TypeOrmModule.forFeature([DomainUserRepository]), DomainUserViewModule],
   providers: [DomainUserService],
-  exports: [DomainUserService],
+  exports: [DomainUserService, DomainUserViewModule],
 })
 class UserModule {}
 

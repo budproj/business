@@ -1,31 +1,30 @@
 import { Injectable } from '@nestjs/common'
 
+import { RESOURCE, SCOPE } from 'app/authz/constants'
 import { AuthzUser } from 'app/authz/types'
-import { KeyResultViewObject } from 'app/graphql/user/view/key-result/models'
-import DomainUserService from 'domain/user/service'
-import { KeyResultView } from 'domain/user/view/key-result/entities'
-
-export interface GraphQLKeyResultViewHandleQueryRequestProperties {
-  user: AuthzUser
-  id?: KeyResultViewObject['id']
-  binding?: KeyResultViewObject['binding']
-}
+import GraphQLEntityService from 'app/graphql/service'
+import DomainKeyResultViewService from 'domain/user/view/key-result/service'
+import { KeyResultViewBinding } from 'domain/user/view/key-result/types'
 
 @Injectable()
-class GraphQLKeyResultViewResolverService {
-  constructor(private readonly userService: DomainUserService) {}
+class GraphQLKeyResultViewService extends GraphQLEntityService<DomainKeyResultViewService> {
+  constructor(public readonly keyResultViewService: DomainKeyResultViewService) {
+    super(RESOURCE.KEY_RESULT_VIEW, keyResultViewService)
+  }
 
-  async handleQueryRequest({
-    user,
-    id,
-    binding,
-  }: GraphQLKeyResultViewHandleQueryRequestProperties): Promise<KeyResultView> {
-    const keyResultView = id
-      ? await this.userService.view.keyResult.getOneByIDIfUserOwnsIt(id, user)
-      : await this.userService.view.keyResult.getOneByBindingIfUserOwnsIt(binding, user)
+  async getOneByBindingWithScopeConstraint(binding: KeyResultViewBinding, user: AuthzUser) {
+    const scopedConstrainedSelectors = {
+      [SCOPE.ANY]: async () => this.entityService.getOneByBinding(binding),
+      [SCOPE.COMPANY]: async () =>
+        this.entityService.getOneByBindingIfUserIsInCompany(binding, user),
+      [SCOPE.TEAM]: async () => this.entityService.getOneByBindingIfUserIsInTeam(binding, user),
+      [SCOPE.OWNS]: async () => this.entityService.getOneByBindingIfUserOwnsIt(binding, user),
+    }
+    const scopeConstraint = user.scopes[RESOURCE.KEY_RESULT_VIEW]
+    const constrainedSelector = scopedConstrainedSelectors[scopeConstraint]
 
-    return keyResultView
+    return constrainedSelector()
   }
 }
 
-export default GraphQLKeyResultViewResolverService
+export default GraphQLKeyResultViewService

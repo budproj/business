@@ -42,7 +42,7 @@ class GraphQLProgressReportResolver {
   ) {
     this.logger.log(`Fetching progress report with id ${id.toString()}`)
 
-    const progressReport = await this.keyResultService.report.progress.getOneByIdIfUserIsInCompany(
+    const progressReport = await this.keyResultService.report.progress.getOneByIDIfUserIsInCompany(
       id,
       user,
     )
@@ -59,7 +59,7 @@ class GraphQLProgressReportResolver {
       message: 'Fetching key result for progress report',
     })
 
-    return this.keyResultService.getOneById(progressReport.keyResultId)
+    return this.keyResultService.getOneByID(progressReport.keyResultId)
   }
 
   @ResolveField()
@@ -69,7 +69,7 @@ class GraphQLProgressReportResolver {
       message: 'Fetching user for progress report',
     })
 
-    return this.userService.getOneById(progressReport.userId)
+    return this.userService.getOneByID(progressReport.userId)
   }
 
   @Permissions(PERMISSION['PROGRESS_REPORT:CREATE'])
@@ -85,7 +85,7 @@ class GraphQLProgressReportResolver {
       message: 'Checking if the user owns the given key result',
     })
 
-    const keyResult = await this.keyResultService.getOneById(progressReportInput.keyResultId)
+    const keyResult = await this.keyResultService.getOneByID(progressReportInput.keyResultId)
     if (keyResult.ownerId !== user.id) {
       this.logger.log({
         user,

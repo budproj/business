@@ -11,7 +11,8 @@ import GraphQLUserViewModule from './view'
 @Module({
   imports: [ConfigModule.forFeature(appConfig), DomainModule, GraphQLUserViewModule],
   providers: [GraphQLUserResolver, GraphQLUserService],
+  exports: [GraphQLUserViewModule],
 })
-class UsersModule {}
+class GraphQLUsersModule {}
 
-export default UsersModule
+export default GraphQLUsersModule

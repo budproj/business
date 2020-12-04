@@ -1,27 +1,64 @@
 import { Injectable } from '@nestjs/common'
 
-import DomainService from 'domain/service'
+import DomainEntityService from 'domain/service'
 import { UserDTO } from 'domain/user/dto'
+import { KeyResultViewBinding } from 'domain/user/view/key-result/types'
 
 import { KeyResultViewDTO } from './dto'
 import { KeyResultView } from './entities'
 import DomainKeyResultViewRepository from './repository'
 
 @Injectable()
-class DomainKeyResultViewService extends DomainService<KeyResultView, KeyResultViewDTO> {
+class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyResultViewDTO> {
   constructor(public readonly repository: DomainKeyResultViewRepository) {
     super(repository, DomainKeyResultViewService.name)
   }
 
-  async getOneById(id: KeyResultViewDTO['id']): Promise<KeyResultView> {
-    return this.repository.findOne({ id })
+  async getOneByBinding(binding: KeyResultViewBinding): Promise<KeyResultView[] | null> {
+    return this.repository.find({ binding })
+  }
+
+  async getOneByBindingIfUserIsInCompany(
+    binding: KeyResultViewBinding,
+    user: UserDTO,
+  ): Promise<KeyResultView[] | null> {
+    const userCompanies = await this.parseUserCompanies(user)
+
+    this.logger.debug({
+      userCompanies,
+      user,
+      message: `Reduced companies for user`,
+    })
+
+    const data = await this.repository.findByBindingWithCompanyConstraint(binding, userCompanies)
+
+    return data
+  }
+
+  async getOneByBindingIfUserIsInTeam(
+    binding: KeyResultViewBinding,
+    user: UserDTO,
+  ): Promise<KeyResultView[] | null> {
+    const userTeams = await this.parseUserTeams(user)
+
+    this.logger.debug({
+      userTeams,
+      user,
+      message: `Reduced teams for user`,
+    })
+
+    const data = await this.repository.findByBindingWithTeamConstraint(binding, userTeams)
+
+    return data
   }
 
   async getOneByBindingIfUserOwnsIt(
-    binding: KeyResultViewDTO['binding'],
+    binding: KeyResultViewBinding,
     user: UserDTO,
   ): Promise<KeyResultView | null> {
-    return this.repository.findOne({ binding, userId: user.id })
+    const data = await this.repository.findByBindingWithOwnsConstraint(binding, user.id)
+
+    return data
   }
 
   async updateRankIfUserOwnsIt(

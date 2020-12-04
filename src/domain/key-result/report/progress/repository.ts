@@ -2,9 +2,9 @@ import { EntityRepository, Repository } from 'typeorm'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
+import { UserDTO } from 'domain/user'
 
 import { ProgressReport } from './entities'
-import { UserDTO } from 'domain/user'
 
 @EntityRepository(ProgressReport)
 class DomainProgressReportRepository extends Repository<ProgressReport> {

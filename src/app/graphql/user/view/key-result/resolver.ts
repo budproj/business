@@ -21,9 +21,7 @@ import { KeyResultView } from 'domain/user/view/key-result/entities'
 import { KeyResultViewBinding } from 'domain/user/view/key-result/types'
 
 import { KeyResultViewObject, KeyResultViewInput, KeyResultViewRankInput } from './models'
-import KeyResultViewResolverService, {
-  GraphQLKeyResultViewHandleQueryRequestProperties,
-} from './service'
+import GraphQLKeyResultViewService from './service'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -34,12 +32,12 @@ class GraphQLKeyResultViewResolver {
   constructor(
     private readonly keyResultService: DomainKeyResultService,
     private readonly userService: DomainUserService,
-    private readonly service: KeyResultViewResolverService,
+    private readonly keyResultViewService: GraphQLKeyResultViewService,
     private readonly railway: Railway,
   ) {}
 
   @Permissions(PERMISSION['KEY_RESULT_VIEW:READ'])
-  @Query(() => KeyResultViewObject)
+  @Query(() => new Array(KeyResultViewObject))
   async keyResultView(
     @GraphQLUser() user: AuthzUser,
     @Args('id', { type: () => ID, nullable: true }) id?: KeyResultViewObject['id'],
@@ -47,13 +45,10 @@ class GraphQLKeyResultViewResolver {
     binding?: KeyResultViewObject['binding'],
   ) {
     this.logger.log('Fetching key result view')
-    const requestOptions: GraphQLKeyResultViewHandleQueryRequestProperties = {
-      id,
-      user,
-      binding,
-    }
 
-    const keyResultView = await this.service.handleQueryRequest(requestOptions)
+    const keyResultView = binding
+      ? await this.keyResultViewService.getOneByBindingWithScopeConstraint(binding, user)
+      : await this.keyResultViewService.getOneByIDWithScopeConstraint(id, user)
     if (!keyResultView)
       throw new NotFoundException('We could not found a key result view with given args')
 
@@ -67,7 +62,7 @@ class GraphQLKeyResultViewResolver {
       message: 'Fetching user for key result view',
     })
 
-    return this.userService.getOneById(keyResultView.userId)
+    return this.userService.getOneByID(keyResultView.userId)
   }
 
   @ResolveField()

@@ -34,7 +34,7 @@ class GraphQLKeyResultResolver {
   ) {
     this.logger.log(`Fetching key result with id ${id.toString()}`)
 
-    const keyResult = await this.keyResultService.getOneByIdIfUserIsInCompany(id, user)
+    const keyResult = await this.keyResultService.getOneByIDIfUserIsInCompany(id, user)
     if (!keyResult) throw new NotFoundException(`We could not found a key result with id ${id}`)
 
     return keyResult
@@ -47,7 +47,7 @@ class GraphQLKeyResultResolver {
       message: 'Fetching owner for key result',
     })
 
-    return this.userService.getOneById(keyResult.ownerId)
+    return this.userService.getOneByID(keyResult.ownerId)
   }
 
   @ResolveField()
@@ -57,7 +57,7 @@ class GraphQLKeyResultResolver {
       message: 'Fetching objective for key result',
     })
 
-    return this.objectiveService.getOneById(keyResult.objectiveId)
+    return this.objectiveService.getOneByID(keyResult.objectiveId)
   }
 
   @ResolveField()
@@ -67,7 +67,7 @@ class GraphQLKeyResultResolver {
       message: 'Fetching team for key result',
     })
 
-    return this.teamService.getOneById(keyResult.teamId)
+    return this.teamService.getOneByID(keyResult.teamId)
   }
 
   @ResolveField()

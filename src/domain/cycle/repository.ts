@@ -3,9 +3,9 @@ import { EntityRepository, Repository } from 'typeorm'
 import { CompanyDTO } from 'domain/company/dto'
 import { CycleDTO } from 'domain/cycle/dto'
 import { TeamDTO } from 'domain/team'
+import { UserDTO } from 'domain/user'
 
 import { Cycle } from './entities'
-import { UserDTO } from 'domain/user'
 
 @EntityRepository(Cycle)
 class DomainCycleRepository extends Repository<Cycle> {

@@ -3,9 +3,9 @@ import { EntityRepository, Repository } from 'typeorm'
 import { CompanyDTO } from 'domain/company/dto'
 import { ObjectiveDTO } from 'domain/objective/dto'
 import { TeamDTO } from 'domain/team'
+import { UserDTO } from 'domain/user'
 
 import { Objective } from './entities'
-import { UserDTO } from 'domain/user'
 
 @EntityRepository(Objective)
 class DomainObjectiveRepository extends Repository<Objective> {

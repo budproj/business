@@ -32,7 +32,7 @@ class GraphQLCycleResolver {
   ) {
     this.logger.log(`Fetching cycle with id ${id.toString()}`)
 
-    const cycle = await this.cycleService.getOneByIdIfUserIsInCompany(id, user)
+    const cycle = await this.cycleService.getOneByIDIfUserIsInCompany(id, user)
     if (!cycle) throw new NotFoundException(`We could not found a cycle with id ${id}`)
 
     return cycle
@@ -45,7 +45,7 @@ class GraphQLCycleResolver {
       message: 'Fetching company for cycle',
     })
 
-    return this.companyService.getOneById(cycle.companyId)
+    return this.companyService.getOneByID(cycle.companyId)
   }
 
   @ResolveField()

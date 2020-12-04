@@ -8,6 +8,7 @@ import GraphQLKeyResultViewModule from './key-result'
 
 @Module({
   imports: [ConfigModule.forFeature(appConfig), DomainModule, GraphQLKeyResultViewModule],
+  exports: [GraphQLKeyResultViewModule],
 })
 class GraphQLUserViewModule {}
 

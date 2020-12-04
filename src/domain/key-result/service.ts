@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ObjectiveDTO } from 'domain/objective/dto'
-import DomainService from 'domain/service'
+import DomainEntityService from 'domain/service'
 import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
 
@@ -11,7 +11,7 @@ import DomainKeyResultReportService from './report/service'
 import DomainKeyResultRepository from './repository'
 
 @Injectable()
-class DomainKeyResultService extends DomainService<KeyResult, KeyResultDTO> {
+class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO> {
   constructor(
     public readonly report: DomainKeyResultReportService,
     public readonly repository: DomainKeyResultRepository,
