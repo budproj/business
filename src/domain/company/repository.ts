@@ -27,15 +27,19 @@ class DomainCompanyRepository extends Repository<Company> {
   async findByIDWithTeamConstraint(
     id: CompanyDTO['id'],
     allowedTeams: Array<TeamDTO['id']>,
-  ): Promise<Company | null> {
+  ): Promise<any | null> {
     const query = this.createQueryBuilder()
     const filteredQuery = query.where({ id })
-    const joinedQuery = filteredQuery.leftJoinAndSelect(`${Company.name}.teams`, 'teams')
-    const teamConstrainedQuery = joinedQuery.andWhere('teams.id IN (:...teams)', {
-      teams: allowedTeams,
-    })
+    const joinedQuery = filteredQuery.innerJoin(
+      `${Company.name}.teams`,
+      'team',
+      `team.id IN (:...teams)`,
+      {
+        teams: allowedTeams,
+      },
+    )
 
-    return teamConstrainedQuery.getOne()
+    return joinedQuery.getOne()
   }
 
   async findByIDWithOwnsConstraint(

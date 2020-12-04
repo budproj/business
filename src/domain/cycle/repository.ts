@@ -36,7 +36,14 @@ class DomainCycleRepository extends Repository<Cycle> {
     id: CycleDTO['id'],
     userID: UserDTO['id'],
   ): Promise<Cycle | null> {
-    throw Error // TODO
+    const query = this.createQueryBuilder()
+    const filteredQuery = query.where({ id })
+    const joinedQuery = filteredQuery.leftJoinAndSelect(`${Cycle.name}.company`, 'company')
+    const teamConstrainedQuery = joinedQuery.andWhere('company.ownerId = :userID', {
+      userID,
+    })
+
+    return teamConstrainedQuery.getOne()
   }
 }
 
