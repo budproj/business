@@ -61,22 +61,6 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
     return data
   }
 
-  async updateRankIfUserOwnsIt(
-    id: KeyResultViewDTO['id'],
-    newRank: KeyResultViewDTO['rank'],
-    user: UserDTO,
-  ): Promise<KeyResultView | null> {
-    const newData = {
-      rank: newRank,
-    }
-    const conditions = {
-      id,
-      userId: user.id,
-    }
-
-    return this.repository.updateWithConditions(newData, conditions)
-  }
-
   async create(
     keyResultViews: Partial<KeyResultViewDTO> | Array<Partial<KeyResultViewDTO>>,
   ): Promise<KeyResultView[]> {

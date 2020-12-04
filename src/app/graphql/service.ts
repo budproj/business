@@ -1,14 +1,22 @@
 import { ACTION, RESOURCE, SCOPE } from 'app/authz/constants'
 import { AuthzUser } from 'app/authz/types'
+import { CompanyDTO } from 'domain/company/dto'
 import DomainCompanyService from 'domain/company/service'
+import { CycleDTO } from 'domain/cycle/dto'
 import DomainCycleService from 'domain/cycle/service'
+import { KeyResultDTO } from 'domain/key-result/dto'
+import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
 import DomainConfidenceReportService from 'domain/key-result/report/confidence/service'
+import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
 import DomainProgressReportService from 'domain/key-result/report/progress/service'
 import DomainKeyResultService from 'domain/key-result/service'
+import { ObjectiveDTO } from 'domain/objective/dto'
 import DomainObjectiveService from 'domain/objective/service'
+import { TeamDTO } from 'domain/team/dto'
 import DomainTeamService from 'domain/team/service'
-import { UserDTO } from 'domain/user'
+import { UserDTO } from 'domain/user/dto'
 import DomainUserService from 'domain/user/service'
+import { KeyResultViewDTO } from 'domain/user/view/key-result/dto'
 import DomainKeyResultViewService from 'domain/user/view/key-result/service'
 
 abstract class GraphQLEntityService<
@@ -21,7 +29,17 @@ abstract class GraphQLEntityService<
     | DomainProgressReportService
     | DomainConfidenceReportService
     | DomainCycleService
-    | DomainCompanyService
+    | DomainCompanyService,
+  D extends
+    | UserDTO
+    | KeyResultViewDTO
+    | TeamDTO
+    | ObjectiveDTO
+    | KeyResultDTO
+    | ProgressReportDTO
+    | ConfidenceReportDTO
+    | CycleDTO
+    | CompanyDTO
 > {
   public readonly entityService: S
   public readonly resource: RESOURCE
@@ -40,6 +58,25 @@ abstract class GraphQLEntityService<
     }
     const scopeConstraint = user.scopes[this.resource][action]
     const constrainedSelector = scopedConstrainedSelectors[scopeConstraint]
+
+    return constrainedSelector()
+  }
+
+  async updateByIDWithScopeConstraint(
+    id: D['id'],
+    newData: Partial<D>,
+    user: AuthzUser,
+    action: ACTION,
+  ) {
+    const scopedConstrainedSetters = {
+      [SCOPE.ANY]: async () => this.entityService.updateOneByID(id, newData),
+      [SCOPE.COMPANY]: async () =>
+        this.entityService.updateOneByIDIfUserIsInCompany(id, newData, user),
+      [SCOPE.TEAM]: async () => this.entityService.updateOneByIDIfUserIsInTeam(id, newData, user),
+      [SCOPE.OWNS]: async () => this.entityService.updateOneByIDIfUserOwnsIt(id, newData, user),
+    }
+    const scopeConstraint = user.scopes[this.resource][action]
+    const constrainedSelector = scopedConstrainedSetters[scopeConstraint]
 
     return constrainedSelector()
   }

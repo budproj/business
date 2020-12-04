@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common'
 import { uniq } from 'lodash'
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
 import { Company, CompanyDTO } from './company'
 import { Cycle, CycleDTO } from './cycle'
@@ -97,6 +98,58 @@ abstract class DomainEntityService<
 
   async getAll(): Promise<E[]> {
     return this.repository.find()
+  }
+
+  async updateOneByID(id: D['id'], newData: QueryDeepPartialEntity<E>): Promise<E | null> {
+    await this.repository.update(id, newData)
+
+    return this.getOneByID(id)
+  }
+
+  async updateOneByIDIfUserIsInCompany(
+    id: D['id'],
+    newData: QueryDeepPartialEntity<E>,
+    user: UserDTO,
+  ): Promise<E | null> {
+    const userCompanies = await this.parseUserCompanies(user)
+
+    this.logger.debug({
+      userCompanies,
+      user,
+      message: `Reduced companies for user`,
+    })
+
+    const data = await this.repository.updateByIDWithCompanyConstraint(id, newData, userCompanies)
+
+    return data
+  }
+
+  async updateOneByIDIfUserIsInTeam(
+    id: D['id'],
+    newData: QueryDeepPartialEntity<E>,
+    user: UserDTO,
+  ): Promise<E | null> {
+    const userTeams = await this.parseUserTeams(user)
+
+    this.logger.debug({
+      userTeams,
+      user,
+      message: `Reduced teams for user`,
+    })
+
+    const data = await this.repository.updateByIDWithTeamConstraint(id, newData, userTeams)
+
+    return data
+  }
+
+  async updateOneByIDIfUserOwnsIt(
+    id: D['id'],
+    newData: QueryDeepPartialEntity<E>,
+    user: UserDTO,
+  ): Promise<E | null> {
+    const data = await this.repository.updateByIDWithOwnsConstraint(id, newData, user.id)
+
+    return data
   }
 }
 

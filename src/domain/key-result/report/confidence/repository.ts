@@ -1,7 +1,9 @@
 import { EntityRepository, Repository } from 'typeorm'
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
+import { TeamDTO } from 'domain/team'
 import { UserDTO } from 'domain/user'
 
 import { ConfidenceReport } from './entities'
@@ -28,7 +30,7 @@ class DomainConfidenceReportRepository extends Repository<ConfidenceReport> {
 
   async findByIDWithTeamConstraint(
     id: ConfidenceReportDTO['id'],
-    allowedTeams: Array<ConfidenceReportDTO['id']>,
+    allowedTeams: Array<TeamDTO['id']>,
   ): Promise<ConfidenceReport | null> {
     const query = this.createQueryBuilder()
     const filteredQuery = query.where({ id })
@@ -55,6 +57,36 @@ class DomainConfidenceReportRepository extends Repository<ConfidenceReport> {
     })
 
     return ownerConstrainedQuery.getOne()
+  }
+
+  async updateByIDWithCompanyConstraint(
+    id: ConfidenceReportDTO['id'],
+    newData: QueryDeepPartialEntity<ConfidenceReport>,
+    allowedCompanies: Array<CompanyDTO['id']>,
+  ): Promise<ConfidenceReport | null> {
+    console.log(id, newData, allowedCompanies)
+
+    // Not implemented yet
+  }
+
+  async updateByIDWithTeamConstraint(
+    id: ConfidenceReportDTO['id'],
+    newData: QueryDeepPartialEntity<ConfidenceReport>,
+    allowedTeams: Array<TeamDTO['id']>,
+  ): Promise<ConfidenceReport | null> {
+    console.log(id, newData, allowedTeams)
+
+    // Not implemented yet
+  }
+
+  async updateByIDWithOwnsConstraint(
+    id: ConfidenceReportDTO['id'],
+    newData: QueryDeepPartialEntity<ConfidenceReport>,
+    userID: UserDTO['id'],
+  ): Promise<ConfidenceReport | null> {
+    console.log(id, newData, userID)
+
+    // Not implemented yet
   }
 }
 

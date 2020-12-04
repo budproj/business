@@ -1,5 +1,4 @@
 import {
-  ForbiddenException,
   InternalServerErrorException,
   Logger,
   NotFoundException,
@@ -88,16 +87,21 @@ class GraphQLProgressReportResolver {
       message: 'Checking if the user owns the given key result',
     })
 
-    const keyResult = await this.keyResultDomain.getOneByID(progressReportInput.keyResultId)
-    if (keyResult.ownerId !== user.id) {
+    const keyResult = await this.resolverService.getOneByIDWithActionScopeConstraint(
+      progressReportInput.keyResultId,
+      user,
+      ACTION.CREATE,
+    )
+    if (keyResult) {
       this.logger.log({
         user,
         progressReportInput,
         keyResult,
-        message: 'User is not the owner of key result. Dispatching error',
+        message:
+          'User tried to create a check-in in a key resultat that he/she can not see. Either it does not exist, or the user has no permission to see it',
       })
-      throw new ForbiddenException(
-        'You must be the owner of the key result to create a new progress report',
+      throw new NotFoundException(
+        `We could not found an Key Result with ID ${progressReportInput.keyResultId}`,
       )
     }
 

@@ -91,10 +91,11 @@ class GraphQLKeyResultViewResolver {
       message: `Updating rank for key result view of id ${id}`,
     })
 
-    const updatedKeyResultView = await this.userDomain.view.keyResult.updateRankIfUserOwnsIt(
+    const updatedKeyResultView = await this.resolverService.updateByIDWithScopeConstraint(
       id,
-      keyResultViewRankInput.rank,
+      keyResultViewRankInput,
       user,
+      ACTION.UPDATE,
     )
     if (!updatedKeyResultView)
       throw new NotFoundException(`We could not found a key result view for id ${id}`)

@@ -1,4 +1,5 @@
 import { EntityRepository, Repository } from 'typeorm'
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { TeamDTO } from 'domain/team/dto'
@@ -43,6 +44,36 @@ class DomainUserRepository extends Repository<User> {
     })
 
     return selfConstrainedQuery.getOne()
+  }
+
+  async updateByIDWithCompanyConstraint(
+    id: UserDTO['id'],
+    newData: QueryDeepPartialEntity<User>,
+    allowedCompanies: Array<CompanyDTO['id']>,
+  ): Promise<User | null> {
+    console.log(id, newData, allowedCompanies)
+
+    // Not implemented yet
+  }
+
+  async updateByIDWithTeamConstraint(
+    id: UserDTO['id'],
+    newData: QueryDeepPartialEntity<User>,
+    allowedTeams: Array<TeamDTO['id']>,
+  ): Promise<User | null> {
+    console.log(id, newData, allowedTeams)
+
+    // Not implemented yet
+  }
+
+  async updateByIDWithOwnsConstraint(
+    id: UserDTO['id'],
+    newData: QueryDeepPartialEntity<User>,
+    userID: UserDTO['id'],
+  ): Promise<User | null> {
+    console.log(id, newData, userID)
+
+    // Not implemented yet
   }
 }
 

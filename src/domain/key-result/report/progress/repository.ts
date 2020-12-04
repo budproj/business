@@ -1,7 +1,9 @@
 import { EntityRepository, Repository } from 'typeorm'
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
+import { TeamDTO } from 'domain/team'
 import { UserDTO } from 'domain/user'
 
 import { ProgressReport } from './entities'
@@ -28,7 +30,7 @@ class DomainProgressReportRepository extends Repository<ProgressReport> {
 
   async findByIDWithTeamConstraint(
     id: ProgressReportDTO['id'],
-    allowedTeams: Array<ProgressReportDTO['id']>,
+    allowedTeams: Array<TeamDTO['id']>,
   ): Promise<ProgressReport | null> {
     const query = this.createQueryBuilder()
     const filteredQuery = query.where({ id })
@@ -55,6 +57,36 @@ class DomainProgressReportRepository extends Repository<ProgressReport> {
     })
 
     return ownerConstrainedQuery.getOne()
+  }
+
+  async updateByIDWithCompanyConstraint(
+    id: ProgressReportDTO['id'],
+    newData: QueryDeepPartialEntity<ProgressReport>,
+    allowedCompanies: Array<CompanyDTO['id']>,
+  ): Promise<ProgressReport | null> {
+    console.log(id, newData, allowedCompanies)
+
+    // Not implemented yet
+  }
+
+  async updateByIDWithTeamConstraint(
+    id: ProgressReportDTO['id'],
+    newData: QueryDeepPartialEntity<ProgressReport>,
+    allowedTeams: Array<TeamDTO['id']>,
+  ): Promise<ProgressReport | null> {
+    console.log(id, newData, allowedTeams)
+
+    // Not implemented yet
+  }
+
+  async updateByIDWithOwnsConstraint(
+    id: ProgressReportDTO['id'],
+    newData: QueryDeepPartialEntity<ProgressReport>,
+    userID: UserDTO['id'],
+  ): Promise<ProgressReport | null> {
+    console.log(id, newData, userID)
+
+    // Not implemented yet
   }
 }
 

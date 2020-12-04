@@ -1,4 +1,5 @@
 import { Repository } from 'typeorm'
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
 import { Company, CompanyDTO } from './company'
 import { Cycle, CycleDTO } from './cycle'
@@ -43,6 +44,24 @@ abstract class DomainRepository<
   ) => Promise<E | null>
 
   public findByIDWithOwnsConstraint: (id: D['id'], userID: UserDTO['id']) => Promise<E | null>
+
+  public updateByIDWithCompanyConstraint: (
+    id: D['id'],
+    newData: QueryDeepPartialEntity<E>,
+    userCompanies: Array<CompanyDTO['id']>,
+  ) => Promise<E | null>
+
+  public updateByIDWithTeamConstraint: (
+    id: D['id'],
+    newData: QueryDeepPartialEntity<E>,
+    userTeams: Array<TeamDTO['id']>,
+  ) => Promise<E | null>
+
+  public updateByIDWithOwnsConstraint: (
+    id: D['id'],
+    newData: QueryDeepPartialEntity<E>,
+    userID: UserDTO['id'],
+  ) => Promise<E | null>
 }
 
 export default DomainRepository
