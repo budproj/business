@@ -1,6 +1,7 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
+import { PERMISSIONS } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
@@ -25,7 +26,7 @@ class GraphQLKeyResultResolver {
     private readonly teamService: DomainTeamService,
   ) {}
 
-  @Permissions('read:key-results')
+  @Permissions(PERMISSIONS['KEY_RESULT:READ'])
   @Query(() => KeyResultObject)
   async keyResult(
     @Args('id', { type: () => ID }) id: KeyResultObject['id'],

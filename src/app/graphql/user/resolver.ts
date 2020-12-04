@@ -1,6 +1,7 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
+import { PERMISSIONS } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
@@ -21,7 +22,7 @@ class GraphQLUserResolver {
     private readonly userService: DomainUserService,
   ) {}
 
-  @Permissions('read:users')
+  @Permissions(PERMISSIONS['USER:READ'])
   @Query(() => UserObject)
   async user(
     @Args('id', { type: () => ID }) id: UserObject['id'],

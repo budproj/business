@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common'
 import { Args, Mutation, Resolver } from '@nestjs/graphql'
 
+import { PERMISSIONS } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
@@ -31,7 +32,7 @@ class GraphQLKeyResultReportResolver {
     private readonly railway: Railway,
   ) {}
 
-  @Permissions('create:progress-reports', 'create:confidence-reports')
+  @Permissions(PERMISSIONS['PROGRESS_REPORT:CREATE'], PERMISSIONS['CONFIDENCE_REPORT:CREATE'])
   @Mutation(() => [ReportObject])
   async createCheckIn(
     @GraphQLUser() user: AuthzUser,
