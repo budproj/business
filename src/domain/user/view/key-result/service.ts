@@ -17,13 +17,6 @@ class DomainKeyResultViewService extends DomainService<KeyResultView, KeyResultV
     return this.repository.findOne({ id })
   }
 
-  async getOneByIDIfUserOwnsIt(
-    id: KeyResultViewDTO['id'],
-    user: UserDTO,
-  ): Promise<KeyResultView | null> {
-    return this.repository.findOne({ id, userId: user.id })
-  }
-
   async getOneByBindingIfUserOwnsIt(
     binding: KeyResultViewDTO['binding'],
     user: UserDTO,

@@ -11,10 +11,6 @@ class DomainCompanyService extends DomainService<Company, CompanyDTO> {
   constructor(public readonly repository: DomainCompanyRepository) {
     super(repository, DomainCompanyService.name)
   }
-
-  async getOneById(id: Company['id']): Promise<Company> {
-    return this.repository.findOne({ id })
-  }
 }
 
 export default DomainCompanyService

@@ -14,30 +14,8 @@ class DomainTeamService extends DomainService<Team, TeamDTO> {
     super(repository, DomainTeamService.name)
   }
 
-  async getAll(): Promise<Team[]> {
-    return this.repository.find()
-  }
-
-  async getOneById(id: Team['id']): Promise<Team> {
-    return this.repository.findOne({ id })
-  }
-
   async getFromCompany(companyId: CompanyDTO['id']): Promise<Team[]> {
     return this.repository.find({ companyId })
-  }
-
-  async getOneByIdIfUserShareCompany(id: TeamDTO['id'], user: UserDTO): Promise<Team | null> {
-    const userCompanies = await this.parseUserCompanies(user)
-
-    this.logger.debug({
-      userCompanies,
-      user,
-      message: `Reduced companies for user`,
-    })
-
-    const data = await this.repository.findByIDWithCompanyConstraint(id, userCompanies)
-
-    return data
   }
 }
 

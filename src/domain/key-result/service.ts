@@ -19,10 +19,6 @@ class DomainKeyResultService extends DomainService<KeyResult, KeyResultDTO> {
     super(repository, DomainKeyResultService.name)
   }
 
-  async getOneById(id: KeyResultDTO['id']): Promise<KeyResult> {
-    return this.repository.findOne({ id })
-  }
-
   async getFromOwner(ownerId: UserDTO['id']): Promise<KeyResult[]> {
     return this.repository.find({ ownerId })
   }
@@ -53,23 +49,6 @@ class DomainKeyResultService extends DomainService<KeyResult, KeyResultDTO> {
       rankSortColumn,
       userCompanies,
     )
-
-    return data
-  }
-
-  async getOneByIdIfUserIsInCompany(
-    id: KeyResultDTO['id'],
-    user: UserDTO,
-  ): Promise<KeyResult | null> {
-    const userCompanies = await this.parseUserCompanies(user)
-
-    this.logger.debug({
-      userCompanies,
-      user,
-      message: `Reduced companies for user`,
-    })
-
-    const data = await this.repository.findByIDWithCompanyConstraint(id, userCompanies)
 
     return data
   }

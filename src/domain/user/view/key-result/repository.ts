@@ -55,7 +55,7 @@ class DomainKeyResultViewRepository extends Repository<KeyResultView> {
     return teamConstrainedQuery.getOne()
   }
 
-  async findByIDWithOwnerConstraint(
+  async findByIDWithOwnsConstraint(
     id: KeyResultViewDTO['id'],
     userID: UserDTO['id'],
   ): Promise<KeyResultView | null> {

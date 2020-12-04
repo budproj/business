@@ -5,6 +5,7 @@ import { ObjectiveDTO } from 'domain/objective/dto'
 import { TeamDTO } from 'domain/team'
 
 import { Objective } from './entities'
+import { UserDTO } from 'domain/user'
 
 @EntityRepository(Objective)
 class DomainObjectiveRepository extends Repository<Objective> {
@@ -25,6 +26,13 @@ class DomainObjectiveRepository extends Repository<Objective> {
   async findByIDWithTeamConstraint(
     id: ObjectiveDTO['id'],
     allowedTeams: Array<TeamDTO['id']>,
+  ): Promise<Objective | null> {
+    throw Error // TODO
+  }
+
+  async findByIDWithOwnsConstraint(
+    id: ObjectiveDTO['id'],
+    userID: UserDTO['id'],
   ): Promise<Objective | null> {
     throw Error // TODO
   }

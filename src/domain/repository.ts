@@ -41,6 +41,8 @@ abstract class DomainRepository<
     id: D['id'],
     userTeams: Array<TeamDTO['id']>,
   ) => Promise<E | null>
+
+  public findByIDWithOwnsConstraint: (id: D['id'], userID: UserDTO['id']) => Promise<E | null>
 }
 
 export default DomainRepository

@@ -3,6 +3,7 @@ import { EntityRepository, Repository } from 'typeorm'
 import { CompanyDTO } from 'domain/company/dto'
 
 import { Company } from './entities'
+import { UserDTO } from 'domain/user'
 
 @EntityRepository(Company)
 class DomainCompanyRepository extends Repository<Company> {
@@ -16,6 +17,13 @@ class DomainCompanyRepository extends Repository<Company> {
   async findByIDWithTeamConstraint(
     id: CompanyDTO['id'],
     allowedTeams: Array<CompanyDTO['id']>,
+  ): Promise<Company | null> {
+    throw Error // TODO
+  }
+
+  async findByIDWithOwnsConstraint(
+    id: CompanyDTO['id'],
+    userID: UserDTO['id'],
   ): Promise<Company | null> {
     throw Error // TODO
   }

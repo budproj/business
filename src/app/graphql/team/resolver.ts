@@ -29,7 +29,7 @@ class GraphQLTeamResolver {
   async team(@Args('id', { type: () => ID }) id: TeamObject['id'], @GraphQLUser() user: AuthzUser) {
     this.logger.log(`Fetching team with id ${id.toString()}`)
 
-    const team = await this.teamService.getOneByIdIfUserShareCompany(id, user)
+    const team = await this.teamService.getOneByIdIfUserIsInCompany(id, user)
     if (!team) throw new NotFoundException(`We could not found a team with id ${id}`)
 
     return team

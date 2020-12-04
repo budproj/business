@@ -35,7 +35,7 @@ class DomainUserRepository extends Repository<User> {
     return teamConstrainedQuery.getOne()
   }
 
-  async findByIDWithSelfConstraint(id: UserDTO['id'], userID: UserDTO['id']): Promise<User | null> {
+  async findByIDWithOwnsConstraint(id: UserDTO['id'], userID: UserDTO['id']): Promise<User | null> {
     const query = this.createQueryBuilder()
     const filteredQuery = query.where({ id })
     const selfConstrainedQuery = filteredQuery.andWhere('id = :userID', {

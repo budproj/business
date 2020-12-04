@@ -5,9 +5,46 @@ import { KeyResultDTO } from 'domain/key-result/dto'
 import { TeamDTO } from 'domain/team'
 
 import { KeyResult } from './entities'
+import { UserDTO } from 'domain/user'
 
 @EntityRepository(KeyResult)
 class DomainKeyResultRepository extends Repository<KeyResult> {
+  async findByIDWithCompanyConstraint(
+    id: KeyResultDTO['id'],
+    allowedCompanies: Array<CompanyDTO['id']>,
+  ): Promise<KeyResult | null> {
+    const query = this.createCompanyConstrainedQueryBuilder(allowedCompanies)
+    const filteredQuery = query.andWhere(`${KeyResult.name}.id = (:id)`, { id })
+
+    return filteredQuery.getOne()
+  }
+
+  async findByIDWithTeamConstraint(
+    id: KeyResultDTO['id'],
+    allowedTeams: Array<TeamDTO['id']>,
+  ): Promise<KeyResult | null> {
+    const query = this.createQueryBuilder()
+    const filteredQuery = query.where({ id })
+    const teamConstrainedQuery = filteredQuery.andWhere(`${KeyResult.name}.teamId IN (:...teams)`, {
+      teams: allowedTeams,
+    })
+
+    return teamConstrainedQuery.getOne()
+  }
+
+  async findByIDWithOwnsConstraint(
+    id: KeyResultDTO['id'],
+    userID: UserDTO['id'],
+  ): Promise<KeyResult | null> {
+    const query = this.createQueryBuilder()
+    const filteredQuery = query.where({ id })
+    const ownerConstrainedQuery = filteredQuery.andWhere('ownerID = :userID', {
+      userID,
+    })
+
+    return ownerConstrainedQuery.getOne()
+  }
+
   buildRankSortColumn(rank: Array<KeyResultDTO['id']>): string {
     if (rank.length === 0) return ''
 
@@ -45,29 +82,6 @@ class DomainKeyResultRepository extends Repository<KeyResult> {
     const orderedQuery = filteredQuery.orderBy(rank)
 
     return orderedQuery.getMany()
-  }
-
-  async findByIDWithCompanyConstraint(
-    id: KeyResultDTO['id'],
-    allowedCompanies: Array<CompanyDTO['id']>,
-  ): Promise<KeyResult | null> {
-    const query = this.createCompanyConstrainedQueryBuilder(allowedCompanies)
-    const filteredQuery = query.andWhere(`${KeyResult.name}.id = (:id)`, { id })
-
-    return filteredQuery.getOne()
-  }
-
-  async findByIDWithTeamConstraint(
-    id: KeyResultDTO['id'],
-    allowedTeams: Array<TeamDTO['id']>,
-  ): Promise<KeyResult | null> {
-    const query = this.createQueryBuilder()
-    const filteredQuery = query.where({ id })
-    const teamConstrainedQuery = filteredQuery.andWhere(`${KeyResult.name}.teamId IN (:...teams)`, {
-      teams: allowedTeams,
-    })
-
-    return teamConstrainedQuery.getOne()
   }
 }
 

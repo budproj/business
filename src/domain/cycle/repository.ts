@@ -5,6 +5,7 @@ import { CycleDTO } from 'domain/cycle/dto'
 import { TeamDTO } from 'domain/team'
 
 import { Cycle } from './entities'
+import { UserDTO } from 'domain/user'
 
 @EntityRepository(Cycle)
 class DomainCycleRepository extends Repository<Cycle> {
@@ -27,6 +28,13 @@ class DomainCycleRepository extends Repository<Cycle> {
   async findByIDWithTeamConstraint(
     id: CycleDTO['id'],
     allowedTeams: Array<TeamDTO['id']>,
+  ): Promise<Cycle | null> {
+    throw Error // TODO
+  }
+
+  async findByIDWithOwnsConstraint(
+    id: CycleDTO['id'],
+    userID: UserDTO['id'],
   ): Promise<Cycle | null> {
     throw Error // TODO
   }

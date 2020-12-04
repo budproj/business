@@ -15,10 +15,6 @@ class DomainConfidenceReportService extends DomainService<ConfidenceReport, Conf
     super(repository, DomainConfidenceReportService.name)
   }
 
-  async getOneById(id: ConfidenceReportDTO['id']): Promise<ConfidenceReport> {
-    return this.repository.findOne({ id })
-  }
-
   async getFromKeyResult(
     keyResultId: KeyResultDTO['id'],
     options?: { limit?: number },
@@ -32,23 +28,6 @@ class DomainConfidenceReportService extends DomainService<ConfidenceReport, Conf
 
   async getFromUser(userId: UserDTO['id']): Promise<ConfidenceReport[]> {
     return this.repository.find({ userId })
-  }
-
-  async getOneByIdIfUserIsInCompany(
-    id: ConfidenceReportDTO['id'],
-    user: UserDTO,
-  ): Promise<ConfidenceReport | null> {
-    const userCompanies = await this.parseUserCompanies(user)
-
-    this.logger.debug({
-      userCompanies,
-      user,
-      message: `Reduced companies for user`,
-    })
-
-    const data = await this.repository.findByIDWithCompanyConstraint(id, userCompanies)
-
-    return data
   }
 
   async getLatestFromKeyResult(keyResultId: KeyResultDTO['id']): Promise<ConfidenceReport> {

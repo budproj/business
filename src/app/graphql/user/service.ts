@@ -13,9 +13,9 @@ class GraphQLUserService {
   async getOneByIdWithScopeConstraint(id: UserObject['id'], user: AuthzUser) {
     const scopedConstrainedSelectors = {
       [SCOPE.ANY]: async () => this.userService.getOneById(id),
-      [SCOPE.COMPANY]: async () => this.userService.getOneByIdIfUserShareCompany(id, user),
-      [SCOPE.TEAM]: async () => this.userService.getOneByIdIfUserShareTeam(id, user),
-      [SCOPE.OWNS]: async () => this.userService.getOneByIdIfIsSelf(id, user),
+      [SCOPE.COMPANY]: async () => this.userService.getOneByIdIfUserIsInCompany(id, user),
+      [SCOPE.TEAM]: async () => this.userService.getOneByIdIfUserIsInTeam(id, user),
+      [SCOPE.OWNS]: async () => this.userService.getOneByIDIfUserOwnsIt(id, user),
     }
     const scopeConstraint = user.scopes[RESOURCE.USER]
     const constrainedSelector = scopedConstrainedSelectors[scopeConstraint]

@@ -4,6 +4,7 @@ import { CompanyDTO } from 'domain/company/dto'
 import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
 
 import { ProgressReport } from './entities'
+import { UserDTO } from 'domain/user'
 
 @EntityRepository(ProgressReport)
 class DomainProgressReportRepository extends Repository<ProgressReport> {
@@ -41,6 +42,19 @@ class DomainProgressReportRepository extends Repository<ProgressReport> {
     })
 
     return teamConstrainedQuery.getOne()
+  }
+
+  async findByIDWithOwnsConstraint(
+    id: ProgressReportDTO['id'],
+    userID: UserDTO['id'],
+  ): Promise<ProgressReport | null> {
+    const query = this.createQueryBuilder()
+    const filteredQuery = query.where({ id })
+    const ownerConstrainedQuery = filteredQuery.andWhere('userId = :userID', {
+      userID,
+    })
+
+    return ownerConstrainedQuery.getOne()
   }
 }
 

@@ -15,10 +15,6 @@ class DomainProgressReportService extends DomainService<ProgressReport, Progress
     super(repository, DomainProgressReportService.name)
   }
 
-  async getOneById(id: ProgressReportDTO['id']): Promise<ProgressReport> {
-    return this.repository.findOne({ id })
-  }
-
   async getFromKeyResult(
     keyResultId: KeyResultDTO['id'],
     options?: { limit?: number },
@@ -32,23 +28,6 @@ class DomainProgressReportService extends DomainService<ProgressReport, Progress
 
   async getFromUser(userId: UserDTO['id']): Promise<ProgressReport[]> {
     return this.repository.find({ userId })
-  }
-
-  async getOneByIdIfUserIsInCompany(
-    id: ProgressReportDTO['id'],
-    user: UserDTO,
-  ): Promise<ProgressReport | null> {
-    const userCompanies = await this.parseUserCompanies(user)
-
-    this.logger.debug({
-      userCompanies,
-      user,
-      message: `Reduced companies for user`,
-    })
-
-    const data = await this.repository.findByIDWithCompanyConstraint(id, userCompanies)
-
-    return data
   }
 
   async getLatestFromKeyResult(

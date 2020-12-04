@@ -4,6 +4,7 @@ import { CompanyDTO } from 'domain/company/dto'
 import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
 
 import { ConfidenceReport } from './entities'
+import { UserDTO } from 'domain/user'
 
 @EntityRepository(ConfidenceReport)
 class DomainConfidenceReportRepository extends Repository<ConfidenceReport> {
@@ -41,6 +42,19 @@ class DomainConfidenceReportRepository extends Repository<ConfidenceReport> {
     })
 
     return teamConstrainedQuery.getOne()
+  }
+
+  async findByIDWithOwnsConstraint(
+    id: ConfidenceReportDTO['id'],
+    userID: UserDTO['id'],
+  ): Promise<ConfidenceReport | null> {
+    const query = this.createQueryBuilder()
+    const filteredQuery = query.where({ id })
+    const ownerConstrainedQuery = filteredQuery.andWhere('userId = :userID', {
+      userID,
+    })
+
+    return ownerConstrainedQuery.getOne()
   }
 }
 

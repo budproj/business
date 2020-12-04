@@ -4,6 +4,7 @@ import { CompanyDTO } from 'domain/company/dto'
 import { TeamDTO } from 'domain/team/dto'
 
 import { Team } from './entities'
+import { UserDTO } from 'domain/user'
 
 @EntityRepository(Team)
 class DomainTeamRepository extends Repository<Team> {
@@ -34,6 +35,10 @@ class DomainTeamRepository extends Repository<Team> {
     })
 
     return teamConstrainedQuery.getOne()
+  }
+
+  async findByIDWithOwnsConstraint(id: TeamDTO['id'], userID: UserDTO['id']): Promise<Team | null> {
+    throw Error // TODO
   }
 }
 

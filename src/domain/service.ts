@@ -61,7 +61,7 @@ abstract class DomainService<
     return this.repository.findOne(id)
   }
 
-  async getOneByIdIfUserShareCompany(id: D['id'], user: UserDTO): Promise<E | null> {
+  async getOneByIdIfUserIsInCompany(id: D['id'], user: UserDTO): Promise<E | null> {
     const userCompanies = await this.parseUserCompanies(user)
 
     this.logger.debug({
@@ -75,7 +75,7 @@ abstract class DomainService<
     return data
   }
 
-  async getOneByIdIfUserShareTeam(id: D['id'], user: UserDTO): Promise<E | null> {
+  async getOneByIdIfUserIsInTeam(id: D['id'], user: UserDTO): Promise<E | null> {
     const userTeams = await this.parseUserTeams(user)
 
     this.logger.debug({
@@ -87,6 +87,16 @@ abstract class DomainService<
     const data = await this.repository.findByIDWithTeamConstraint(id, userTeams)
 
     return data
+  }
+
+  async getOneByIDIfUserOwnsIt(id: D['id'], user: UserDTO): Promise<E | null> {
+    const data = await this.repository.findByIDWithOwnsConstraint(id, user.id)
+
+    return data
+  }
+
+  async getAll(): Promise<E[]> {
+    return this.repository.find()
   }
 }
 
