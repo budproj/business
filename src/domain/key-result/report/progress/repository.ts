@@ -24,6 +24,24 @@ class DomainProgressReportRepository extends Repository<ProgressReport> {
 
     return companyConstrainedQuery.getOne()
   }
+
+  async findByIDWithTeamConstraint(
+    id: ProgressReportDTO['id'],
+    allowedTeams: Array<ProgressReportDTO['id']>,
+  ): Promise<ProgressReport | null> {
+    const query = this.createQueryBuilder()
+    const filteredQuery = query.where({ id })
+    const keyResultJoinedQuery = filteredQuery.leftJoinAndSelect(
+      `${ProgressReport.name}.keyResult`,
+      'keyResult',
+    )
+    const teamJoinedQuery = keyResultJoinedQuery.leftJoinAndSelect('keyResult.teamId', 'team')
+    const teamConstrainedQuery = teamJoinedQuery.andWhere('teamId = :teams', {
+      teams: allowedTeams,
+    })
+
+    return teamConstrainedQuery.getOne()
+  }
 }
 
 export default DomainProgressReportRepository

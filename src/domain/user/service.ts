@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 
 import DomainService from 'domain/service'
 import { UserDTO } from 'domain/user/dto'
@@ -8,14 +8,12 @@ import DomainUserRepository from './repository'
 import DomainUserViewService from './view/service'
 
 @Injectable()
-class DomainUserService extends DomainService {
-  private readonly logger = new Logger(DomainUserService.name)
-
+class DomainUserService extends DomainService<User, UserDTO> {
   constructor(
     public readonly view: DomainUserViewService,
-    private readonly repository: DomainUserRepository,
+    public readonly repository: DomainUserRepository,
   ) {
-    super()
+    super(repository, DomainUserService.name)
   }
 
   async getOneById(id: UserDTO['id']): Promise<User> {

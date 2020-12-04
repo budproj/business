@@ -22,6 +22,19 @@ class DomainTeamRepository extends Repository<Team> {
 
     return companyConstrainedQuery.getOne()
   }
+
+  async findByIDWithTeamConstraint(
+    id: TeamDTO['id'],
+    allowedTeams: Array<TeamDTO['id']>,
+  ): Promise<Team | null> {
+    const query = this.createQueryBuilder()
+    const filteredQuery = query.where({ id })
+    const teamConstrainedQuery = filteredQuery.andWhere('id IN (:...teams)', {
+      teams: allowedTeams,
+    })
+
+    return teamConstrainedQuery.getOne()
+  }
 }
 
 export default DomainTeamRepository

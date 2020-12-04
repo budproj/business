@@ -2,6 +2,7 @@ import { EntityRepository, Repository } from 'typeorm'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { CycleDTO } from 'domain/cycle/dto'
+import { TeamDTO } from 'domain/team'
 
 import { Cycle } from './entities'
 
@@ -21,6 +22,13 @@ class DomainCycleRepository extends Repository<Cycle> {
     )
 
     return companyConstrainedQuery.getOne()
+  }
+
+  async findByIDWithTeamConstraint(
+    id: CycleDTO['id'],
+    allowedTeams: Array<TeamDTO['id']>,
+  ): Promise<Cycle | null> {
+    throw Error // TODO
   }
 }
 

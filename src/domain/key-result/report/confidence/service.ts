@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { remove } from 'lodash'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
@@ -10,11 +10,9 @@ import { ConfidenceReport } from './entities'
 import DomainConfidenceReportRepository from './repository'
 
 @Injectable()
-class DomainConfidenceReportService extends DomainService {
-  private readonly logger = new Logger(DomainConfidenceReportService.name)
-
-  constructor(private readonly repository: DomainConfidenceReportRepository) {
-    super()
+class DomainConfidenceReportService extends DomainService<ConfidenceReport, ConfidenceReportDTO> {
+  constructor(public readonly repository: DomainConfidenceReportRepository) {
+    super(repository, DomainConfidenceReportService.name)
   }
 
   async getOneById(id: ConfidenceReportDTO['id']): Promise<ConfidenceReport> {

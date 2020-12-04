@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 
 import { CompanyDTO } from 'domain/company/dto'
 import DomainService from 'domain/service'
@@ -9,11 +9,9 @@ import { Team } from './entities'
 import DomainTeamRepository from './repository'
 
 @Injectable()
-class DomainTeamService extends DomainService {
-  private readonly logger = new Logger(DomainTeamService.name)
-
-  constructor(private readonly repository: DomainTeamRepository) {
-    super()
+class DomainTeamService extends DomainService<Team, TeamDTO> {
+  constructor(public readonly repository: DomainTeamRepository) {
+    super(repository, DomainTeamService.name)
   }
 
   async getAll(): Promise<Team[]> {

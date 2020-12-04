@@ -2,6 +2,7 @@ import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
+import { TeamDTO } from 'domain/team'
 
 import { KeyResult } from './entities'
 
@@ -54,6 +55,19 @@ class DomainKeyResultRepository extends Repository<KeyResult> {
     const filteredQuery = query.andWhere(`${KeyResult.name}.id = (:id)`, { id })
 
     return filteredQuery.getOne()
+  }
+
+  async findByIDWithTeamConstraint(
+    id: KeyResultDTO['id'],
+    allowedTeams: Array<TeamDTO['id']>,
+  ): Promise<KeyResult | null> {
+    const query = this.createQueryBuilder()
+    const filteredQuery = query.where({ id })
+    const teamConstrainedQuery = filteredQuery.andWhere(`${KeyResult.name}.teamId IN (:...teams)`, {
+      teams: allowedTeams,
+    })
+
+    return teamConstrainedQuery.getOne()
   }
 }
 

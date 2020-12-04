@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { CycleDTO } from 'domain/cycle/dto'
@@ -9,11 +9,9 @@ import { Cycle } from './entities'
 import DomainCycleRepository from './repository'
 
 @Injectable()
-class DomainCycleService extends DomainService {
-  private readonly logger = new Logger(DomainCycleService.name)
-
-  constructor(private readonly repository: DomainCycleRepository) {
-    super()
+class DomainCycleService extends DomainService<Cycle, CycleDTO> {
+  constructor(public readonly repository: DomainCycleRepository) {
+    super(repository, DomainCycleService.name)
   }
 
   async getOneById(id: CycleDTO['id']): Promise<Cycle> {

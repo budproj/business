@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { remove } from 'lodash'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
@@ -10,11 +10,9 @@ import { ProgressReport } from './entities'
 import DomainProgressReportRepository from './repository'
 
 @Injectable()
-class DomainProgressReportService extends DomainService {
-  private readonly logger = new Logger(DomainProgressReportService.name)
-
-  constructor(private readonly repository: DomainProgressReportRepository) {
-    super()
+class DomainProgressReportService extends DomainService<ProgressReport, ProgressReportDTO> {
+  constructor(public readonly repository: DomainProgressReportRepository) {
+    super(repository, DomainProgressReportService.name)
   }
 
   async getOneById(id: ProgressReportDTO['id']): Promise<ProgressReport> {

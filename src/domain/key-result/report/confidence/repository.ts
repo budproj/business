@@ -24,6 +24,24 @@ class DomainConfidenceReportRepository extends Repository<ConfidenceReport> {
 
     return companyConstrainedQuery.getOne()
   }
+
+  async findByIDWithTeamConstraint(
+    id: ConfidenceReportDTO['id'],
+    allowedTeams: Array<ConfidenceReportDTO['id']>,
+  ): Promise<ConfidenceReport | null> {
+    const query = this.createQueryBuilder()
+    const filteredQuery = query.where({ id })
+    const keyResultJoinedQuery = filteredQuery.leftJoinAndSelect(
+      `${ConfidenceReport.name}.keyResult`,
+      'keyResult',
+    )
+    const teamJoinedQuery = keyResultJoinedQuery.leftJoinAndSelect('keyResult.teamId', 'team')
+    const teamConstrainedQuery = teamJoinedQuery.andWhere('teamId = :teams', {
+      teams: allowedTeams,
+    })
+
+    return teamConstrainedQuery.getOne()
+  }
 }
 
 export default DomainConfidenceReportRepository

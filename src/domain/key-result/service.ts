@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ObjectiveDTO } from 'domain/objective/dto'
@@ -11,14 +11,12 @@ import DomainKeyResultReportService from './report/service'
 import DomainKeyResultRepository from './repository'
 
 @Injectable()
-class DomainKeyResultService extends DomainService {
-  private readonly logger = new Logger(DomainKeyResultService.name)
-
+class DomainKeyResultService extends DomainService<KeyResult, KeyResultDTO> {
   constructor(
     public readonly report: DomainKeyResultReportService,
-    private readonly repository: DomainKeyResultRepository,
+    public readonly repository: DomainKeyResultRepository,
   ) {
-    super()
+    super(repository, DomainKeyResultService.name)
   }
 
   async getOneById(id: KeyResultDTO['id']): Promise<KeyResult> {

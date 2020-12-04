@@ -1,5 +1,10 @@
 import { EntityRepository, Repository } from 'typeorm'
 
+import { CompanyDTO } from 'domain/company/dto'
+import { TeamDTO } from 'domain/team/dto'
+import { UserDTO } from 'domain/user/dto'
+import { KeyResultViewDTO } from 'domain/user/view/key-result/dto'
+
 import { KeyResultView } from './entities'
 
 export type UpdateWithConditionsOptions = Partial<Record<keyof KeyResultView, unknown>>
@@ -19,6 +24,48 @@ class DomainKeyResultViewRepository extends Repository<KeyResultView> {
     const updatedData = await this.findOne({ where: conditions })
 
     return updatedData
+  }
+
+  async findByIDWithCompanyConstraint(
+    id: KeyResultViewDTO['id'],
+    allowedCompanies: Array<CompanyDTO['id']>,
+  ): Promise<KeyResultView | null> {
+    const query = this.createQueryBuilder()
+    const filteredQuery = query.where({ id })
+    const joinedUserQuery = filteredQuery.leftJoinAndSelect(`${KeyResultView.name}.user`, 'user')
+    const joinedTeamQuery = joinedUserQuery.leftJoinAndSelect('user.teams', 'teams')
+    const companyConstrainedQuery = joinedTeamQuery.andWhere('teams.companyId IN (:...companies)', {
+      companies: allowedCompanies,
+    })
+
+    return companyConstrainedQuery.getOne()
+  }
+
+  async findByIDWithTeamConstraint(
+    id: KeyResultViewDTO['id'],
+    allowedTeams: Array<TeamDTO['id']>,
+  ): Promise<KeyResultView | null> {
+    const query = this.createQueryBuilder()
+    const filteredQuery = query.where({ id })
+    const joinedUserQuery = filteredQuery.leftJoinAndSelect(`${KeyResultView.name}.user`, 'user')
+    const teamConstrainedQuery = joinedUserQuery.andWhere('user.teams IN (:...teams)', {
+      teams: allowedTeams,
+    })
+
+    return teamConstrainedQuery.getOne()
+  }
+
+  async findByIDWithOwnerConstraint(
+    id: KeyResultViewDTO['id'],
+    userID: UserDTO['id'],
+  ): Promise<KeyResultView | null> {
+    const query = this.createQueryBuilder()
+    const filteredQuery = query.where({ id })
+    const ownerConstrainedQuery = filteredQuery.andWhere(`${KeyResultView.name}.userId = :userID`, {
+      userID,
+    })
+
+    return ownerConstrainedQuery.getOne()
   }
 }
 
