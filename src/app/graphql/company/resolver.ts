@@ -8,6 +8,7 @@ import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import DomainCycleService from 'domain/cycle/service'
 import DomainTeamService from 'domain/team/service'
+import { DomainUserService } from 'domain/user'
 
 import { CompanyObject } from './models'
 import GraphQLCompanyService from './service'
@@ -22,6 +23,7 @@ class GraphQLCompanyResolver {
     private readonly resolverService: GraphQLCompanyService,
     private readonly teamDomain: DomainTeamService,
     private readonly cycleDomain: DomainCycleService,
+    private readonly userDomain: DomainUserService,
   ) {}
 
   @Permissions(PERMISSION['COMPANY:READ'])
@@ -54,6 +56,16 @@ class GraphQLCompanyResolver {
     })
 
     return this.cycleDomain.getFromCompany(company.id)
+  }
+
+  @ResolveField()
+  async owner(@Parent() company: CompanyObject) {
+    this.logger.log({
+      company,
+      message: 'Fetching owner for company',
+    })
+
+    return this.userDomain.getOneByID(company.ownerId)
   }
 }
 

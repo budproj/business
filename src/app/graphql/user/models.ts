@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql'
 
+import { CompanyObject } from 'app/graphql/company/models'
 import { KeyResultObject } from 'app/graphql/key-result/models'
 import { ConfidenceReportObject } from 'app/graphql/key-result/report/confidence/models'
 import { ProgressReportObject } from 'app/graphql/key-result/report/progress/models'
@@ -61,4 +62,9 @@ export class UserObject {
     description: 'The creation date ordered list of teams that this user owns',
   })
   ownedTeams: TeamObject[]
+
+  @Field(() => [CompanyObject], {
+    description: 'The creation date ordered list of companies that this user owns',
+  })
+  ownedCompanies: CompanyObject[]
 }

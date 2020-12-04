@@ -6,6 +6,7 @@ import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
+import { DomainCompanyService } from 'domain/company'
 import DomainKeyResultService from 'domain/key-result/service'
 import { DomainObjectiveService } from 'domain/objective'
 import { DomainTeamService } from 'domain/team'
@@ -24,6 +25,7 @@ class GraphQLUserResolver {
     private readonly keyResultDomain: DomainKeyResultService,
     private readonly objectiveDomain: DomainObjectiveService,
     private readonly teamDomain: DomainTeamService,
+    private readonly companyDomain: DomainCompanyService,
   ) {}
 
   @Permissions(PERMISSION['USER:READ'])
@@ -88,6 +90,16 @@ class GraphQLUserResolver {
     })
 
     return this.teamDomain.getFromOwner(user.id)
+  }
+
+  @ResolveField()
+  async ownedCompanies(@Parent() user: UserObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching owned companies for user',
+    })
+
+    return this.companyDomain.getFromOwner(user.id)
   }
 }
 
