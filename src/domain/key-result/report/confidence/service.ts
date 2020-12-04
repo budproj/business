@@ -3,20 +3,19 @@ import { remove } from 'lodash'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
+import DomainService from 'domain/service'
 import { UserDTO } from 'domain/user/dto'
-import DomainUserService from 'domain/user/service'
 
 import { ConfidenceReport } from './entities'
 import DomainConfidenceReportRepository from './repository'
 
 @Injectable()
-class DomainConfidenceReportService {
+class DomainConfidenceReportService extends DomainService {
   private readonly logger = new Logger(DomainConfidenceReportService.name)
 
-  constructor(
-    private readonly repository: DomainConfidenceReportRepository,
-    private readonly userService: DomainUserService,
-  ) {}
+  constructor(private readonly repository: DomainConfidenceReportRepository) {
+    super()
+  }
 
   async getOneById(id: ConfidenceReportDTO['id']): Promise<ConfidenceReport> {
     return this.repository.findOne({ id })
@@ -41,7 +40,7 @@ class DomainConfidenceReportService {
     id: ConfidenceReportDTO['id'],
     user: UserDTO,
   ): Promise<ConfidenceReport | null> {
-    const userCompanies = await this.userService.parseRequestUserCompanies(user)
+    const userCompanies = await this.parseUserCompanies(user)
 
     this.logger.debug({
       userCompanies,

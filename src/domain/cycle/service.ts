@@ -2,20 +2,19 @@ import { Injectable, Logger } from '@nestjs/common'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { CycleDTO } from 'domain/cycle/dto'
+import DomainService from 'domain/service'
 import { UserDTO } from 'domain/user/dto'
-import DomainUserService from 'domain/user/service'
 
 import { Cycle } from './entities'
 import DomainCycleRepository from './repository'
 
 @Injectable()
-class DomainCycleService {
+class DomainCycleService extends DomainService {
   private readonly logger = new Logger(DomainCycleService.name)
 
-  constructor(
-    private readonly repository: DomainCycleRepository,
-    private readonly userService: DomainUserService,
-  ) {}
+  constructor(private readonly repository: DomainCycleRepository) {
+    super()
+  }
 
   async getOneById(id: CycleDTO['id']): Promise<Cycle> {
     return this.repository.findOne({ id })
@@ -26,7 +25,7 @@ class DomainCycleService {
   }
 
   async getOneByIdIfUserIsInCompany(id: CycleDTO['id'], user: UserDTO): Promise<Cycle | null> {
-    const userCompanies = await this.userService.parseRequestUserCompanies(user)
+    const userCompanies = await this.parseUserCompanies(user)
 
     this.logger.debug({
       userCompanies,

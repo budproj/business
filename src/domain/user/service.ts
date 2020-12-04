@@ -1,8 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { uniq } from 'lodash'
 
-import { CompanyDTO } from 'domain/company/dto'
-import { TeamDTO } from 'domain/team/dto'
+import DomainService from 'domain/service'
 import { UserDTO } from 'domain/user/dto'
 
 import { User } from './entities'
@@ -10,20 +8,22 @@ import DomainUserRepository from './repository'
 import DomainUserViewService from './view/service'
 
 @Injectable()
-class DomainUserService {
+class DomainUserService extends DomainService {
   private readonly logger = new Logger(DomainUserService.name)
 
   constructor(
     public readonly view: DomainUserViewService,
     private readonly repository: DomainUserRepository,
-  ) {}
+  ) {
+    super()
+  }
 
   async getOneById(id: UserDTO['id']): Promise<User> {
     return this.repository.findOne({ id })
   }
 
   async getOneByIdIfUserShareCompany(id: UserDTO['id'], user: UserDTO): Promise<User | null> {
-    const userCompanies = await this.parseRequestUserCompanies(user)
+    const userCompanies = await this.parseUserCompanies(user)
 
     this.logger.debug({
       userCompanies,
@@ -37,7 +37,7 @@ class DomainUserService {
   }
 
   async getOneByIdIfUserShareTeam(id: UserDTO['id'], user: UserDTO): Promise<User | null> {
-    const userTeams = await this.parseRequestUserTeams(user)
+    const userTeams = await this.parseUserTeams(user)
 
     this.logger.debug({
       userTeams,
@@ -58,20 +58,6 @@ class DomainUserService {
 
   async getUserFromSubjectWithTeamRelation(authzSub: UserDTO['authzSub']): Promise<User> {
     return this.repository.findOne({ authzSub }, { relations: ['teams'] })
-  }
-
-  async parseRequestUserCompanies(user: UserDTO): Promise<Array<CompanyDTO['id']>> {
-    const userTeams = await user.teams
-    const userCompanies = uniq(userTeams.map((team) => team.companyId))
-
-    return userCompanies
-  }
-
-  async parseRequestUserTeams(user: UserDTO): Promise<Array<TeamDTO['id']>> {
-    const userTeams = await user.teams
-    const userTeamIDs = uniq(userTeams.map((team) => team.id))
-
-    return userTeamIDs
   }
 }
 

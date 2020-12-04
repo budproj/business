@@ -2,23 +2,24 @@ import { Injectable, Logger } from '@nestjs/common'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ObjectiveDTO } from 'domain/objective/dto'
+import DomainService from 'domain/service'
 import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
-import DomainUserService from 'domain/user/service'
 
 import { KeyResult } from './entities'
 import DomainKeyResultReportService from './report/service'
 import DomainKeyResultRepository from './repository'
 
 @Injectable()
-class DomainKeyResultService {
+class DomainKeyResultService extends DomainService {
   private readonly logger = new Logger(DomainKeyResultService.name)
 
   constructor(
     public readonly report: DomainKeyResultReportService,
     private readonly repository: DomainKeyResultRepository,
-    private readonly userService: DomainUserService,
-  ) {}
+  ) {
+    super()
+  }
 
   async getOneById(id: KeyResultDTO['id']): Promise<KeyResult> {
     return this.repository.findOne({ id })
@@ -40,7 +41,7 @@ class DomainKeyResultService {
     ids: Array<KeyResultDTO['id']>,
     user: UserDTO,
   ): Promise<KeyResult[]> {
-    const userCompanies = await this.userService.parseRequestUserCompanies(user)
+    const userCompanies = await this.parseUserCompanies(user)
 
     this.logger.debug({
       userCompanies,
@@ -62,7 +63,7 @@ class DomainKeyResultService {
     id: KeyResultDTO['id'],
     user: UserDTO,
   ): Promise<KeyResult | null> {
-    const userCompanies = await this.userService.parseRequestUserCompanies(user)
+    const userCompanies = await this.parseUserCompanies(user)
 
     this.logger.debug({
       userCompanies,

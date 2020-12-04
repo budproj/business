@@ -3,20 +3,19 @@ import { remove } from 'lodash'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
+import DomainService from 'domain/service'
 import { UserDTO } from 'domain/user/dto'
-import DomainUserService from 'domain/user/service'
 
 import { ProgressReport } from './entities'
 import DomainProgressReportRepository from './repository'
 
 @Injectable()
-class DomainProgressReportService {
+class DomainProgressReportService extends DomainService {
   private readonly logger = new Logger(DomainProgressReportService.name)
 
-  constructor(
-    private readonly repository: DomainProgressReportRepository,
-    private readonly userService: DomainUserService,
-  ) {}
+  constructor(private readonly repository: DomainProgressReportRepository) {
+    super()
+  }
 
   async getOneById(id: ProgressReportDTO['id']): Promise<ProgressReport> {
     return this.repository.findOne({ id })
@@ -41,7 +40,7 @@ class DomainProgressReportService {
     id: ProgressReportDTO['id'],
     user: UserDTO,
   ): Promise<ProgressReport | null> {
-    const userCompanies = await this.userService.parseRequestUserCompanies(user)
+    const userCompanies = await this.parseUserCompanies(user)
 
     this.logger.debug({
       userCompanies,

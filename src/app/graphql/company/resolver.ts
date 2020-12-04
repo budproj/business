@@ -32,7 +32,7 @@ class GraphQLCompanyResolver {
     @Args('id', { type: () => ID }) id: CompanyObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
-    const userCompanies = await this.userService.parseRequestUserCompanies(user)
+    const userCompanies = await this.userService.parseUserCompanies(user)
 
     if (!userCompanies.includes(id))
       throw new NotFoundException(`We could not found a company with id ${id}`)
