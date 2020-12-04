@@ -29,7 +29,19 @@ class DomainCycleRepository extends Repository<Cycle> {
     id: CycleDTO['id'],
     allowedTeams: Array<TeamDTO['id']>,
   ): Promise<Cycle | null> {
-    throw Error // TODO
+    const query = this.createQueryBuilder()
+    const filteredQuery = query.where({ id })
+    const joinedCompanyQuery = filteredQuery.leftJoinAndSelect(`${Cycle.name}.company`, 'company')
+    const joinedTeamQuery = joinedCompanyQuery.innerJoin(
+      'company.teams',
+      'team',
+      `team.id IN (:...teams)`,
+      {
+        teams: allowedTeams,
+      },
+    )
+
+    return joinedTeamQuery.getOne()
   }
 
   async findByIDWithOwnsConstraint(
