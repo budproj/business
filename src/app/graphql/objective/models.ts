@@ -2,7 +2,7 @@ import { Field, ID, ObjectType } from '@nestjs/graphql'
 
 import { CycleObject } from 'app/graphql/cycle/models'
 import { KeyResultObject } from 'app/graphql/key-result/models'
-import { UserObject } from 'app/graphql/user'
+import { UserObject } from 'app/graphql/user/models'
 
 @ObjectType('Objective', { description: 'A group of key results that has the same focus' })
 export class ObjectiveObject {
