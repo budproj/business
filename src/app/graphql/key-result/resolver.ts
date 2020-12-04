@@ -6,12 +6,13 @@ import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
-import DomainKeyResultService from 'domain/key-result/service'
+import { DomainKeyResultService } from 'domain/key-result'
 import DomainObjectiveService from 'domain/objective/service'
 import DomainTeamService from 'domain/team/service'
 import DomainUserService from 'domain/user/service'
 
 import { KeyResultObject } from './models'
+import GraphQLKeyResultService from './service'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -20,10 +21,11 @@ class GraphQLKeyResultResolver {
   private readonly logger = new Logger(GraphQLKeyResultResolver.name)
 
   constructor(
-    private readonly keyResultService: DomainKeyResultService,
-    private readonly userService: DomainUserService,
-    private readonly objectiveService: DomainObjectiveService,
-    private readonly teamService: DomainTeamService,
+    private readonly resolverService: GraphQLKeyResultService,
+    private readonly keyResultDomain: DomainKeyResultService,
+    private readonly userDomain: DomainUserService,
+    private readonly objectiveDomain: DomainObjectiveService,
+    private readonly teamDomain: DomainTeamService,
   ) {}
 
   @Permissions(PERMISSION['KEY_RESULT:READ'])
@@ -34,7 +36,7 @@ class GraphQLKeyResultResolver {
   ) {
     this.logger.log(`Fetching key result with id ${id.toString()}`)
 
-    const keyResult = await this.keyResultService.getOneByIDIfUserIsInCompany(id, user)
+    const keyResult = await this.resolverService.getOneByIDWithScopeConstraint(id, user)
     if (!keyResult) throw new NotFoundException(`We could not found a key result with id ${id}`)
 
     return keyResult
@@ -47,7 +49,7 @@ class GraphQLKeyResultResolver {
       message: 'Fetching owner for key result',
     })
 
-    return this.userService.getOneByID(keyResult.ownerId)
+    return this.userDomain.getOneByID(keyResult.ownerId)
   }
 
   @ResolveField()
@@ -57,7 +59,7 @@ class GraphQLKeyResultResolver {
       message: 'Fetching objective for key result',
     })
 
-    return this.objectiveService.getOneByID(keyResult.objectiveId)
+    return this.objectiveDomain.getOneByID(keyResult.objectiveId)
   }
 
   @ResolveField()
@@ -67,7 +69,7 @@ class GraphQLKeyResultResolver {
       message: 'Fetching team for key result',
     })
 
-    return this.teamService.getOneByID(keyResult.teamId)
+    return this.teamDomain.getOneByID(keyResult.teamId)
   }
 
   @ResolveField()
@@ -81,7 +83,7 @@ class GraphQLKeyResultResolver {
       message: 'Fetching progress reports for key result',
     })
 
-    return this.keyResultService.report.progress.getFromKeyResult(keyResult.id, {
+    return this.keyResultDomain.report.progress.getFromKeyResult(keyResult.id, {
       limit,
     })
   }
@@ -97,7 +99,7 @@ class GraphQLKeyResultResolver {
       message: 'Fetching confidence reports for key result',
     })
 
-    return this.keyResultService.report.confidence.getFromKeyResult(keyResult.id, {
+    return this.keyResultDomain.report.confidence.getFromKeyResult(keyResult.id, {
       limit,
     })
   }

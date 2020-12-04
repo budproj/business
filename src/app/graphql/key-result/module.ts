@@ -7,10 +7,11 @@ import DomainModule from 'domain/module'
 
 import GraphQLKeyResultReportModule from './report'
 import GraphQLKeyResultResolver from './resolver'
+import GraphQLKeyResultService from './service'
 
 @Module({
   imports: [ConfigModule.forFeature(appConfig), DomainModule, GraphQLKeyResultReportModule],
-  providers: [GraphQLKeyResultResolver, Railway],
+  providers: [GraphQLKeyResultResolver, GraphQLKeyResultService, Railway],
 })
 class GraphQLKeyResultsModule {}
 

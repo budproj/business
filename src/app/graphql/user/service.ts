@@ -6,8 +6,8 @@ import DomainUserService from 'domain/user/service'
 
 @Injectable()
 class GraphQLUserService extends GraphQLEntityService<DomainUserService> {
-  constructor(public readonly userService: DomainUserService) {
-    super(RESOURCE.USER, userService)
+  constructor(public readonly userDomain: DomainUserService) {
+    super(RESOURCE.USER, userDomain)
   }
 }
 

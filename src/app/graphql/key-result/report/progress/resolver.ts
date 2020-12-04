@@ -21,6 +21,7 @@ import DomainKeyResultService from 'domain/key-result/service'
 import DomainUserService from 'domain/user/service'
 
 import { ProgressReportObject, ProgressReportInput } from './models'
+import GraphQLProgressReportService from './service'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -29,8 +30,9 @@ class GraphQLProgressReportResolver {
   private readonly logger = new Logger(GraphQLProgressReportResolver.name)
 
   constructor(
-    private readonly keyResultService: DomainKeyResultService,
-    private readonly userService: DomainUserService,
+    private readonly resolverService: GraphQLProgressReportService,
+    private readonly keyResultDomain: DomainKeyResultService,
+    private readonly userDomain: DomainUserService,
     private readonly railway: Railway,
   ) {}
 
@@ -42,10 +44,7 @@ class GraphQLProgressReportResolver {
   ) {
     this.logger.log(`Fetching progress report with id ${id.toString()}`)
 
-    const progressReport = await this.keyResultService.report.progress.getOneByIDIfUserIsInCompany(
-      id,
-      user,
-    )
+    const progressReport = await this.resolverService.getOneByIDWithScopeConstraint(id, user)
     if (!progressReport)
       throw new NotFoundException(`We could not found a progress report with id ${id}`)
 
@@ -59,7 +58,7 @@ class GraphQLProgressReportResolver {
       message: 'Fetching key result for progress report',
     })
 
-    return this.keyResultService.getOneByID(progressReport.keyResultId)
+    return this.keyResultDomain.getOneByID(progressReport.keyResultId)
   }
 
   @ResolveField()
@@ -69,7 +68,7 @@ class GraphQLProgressReportResolver {
       message: 'Fetching user for progress report',
     })
 
-    return this.userService.getOneByID(progressReport.userId)
+    return this.userDomain.getOneByID(progressReport.userId)
   }
 
   @Permissions(PERMISSION['PROGRESS_REPORT:CREATE'])
@@ -85,7 +84,7 @@ class GraphQLProgressReportResolver {
       message: 'Checking if the user owns the given key result',
     })
 
-    const keyResult = await this.keyResultService.getOneByID(progressReportInput.keyResultId)
+    const keyResult = await this.keyResultDomain.getOneByID(progressReportInput.keyResultId)
     if (keyResult.ownerId !== user.id) {
       this.logger.log({
         user,
@@ -111,7 +110,7 @@ class GraphQLProgressReportResolver {
       valueNew: progressReportInput.value,
     }
 
-    const creationPromise = this.keyResultService.report.progress.create(enhancedWithUserID)
+    const creationPromise = this.keyResultDomain.report.progress.create(enhancedWithUserID)
     const [error, createdProgressReport] = await this.railway.handleRailwayPromise<
       RailwayError,
       ProgressReport[]

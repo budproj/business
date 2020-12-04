@@ -30,9 +30,9 @@ class GraphQLKeyResultViewResolver {
   private readonly logger = new Logger(GraphQLKeyResultViewResolver.name)
 
   constructor(
-    private readonly keyResultService: DomainKeyResultService,
-    private readonly userService: DomainUserService,
-    private readonly keyResultViewService: GraphQLKeyResultViewService,
+    private readonly resolverService: GraphQLKeyResultViewService,
+    private readonly keyResultDomain: DomainKeyResultService,
+    private readonly userDomain: DomainUserService,
     private readonly railway: Railway,
   ) {}
 
@@ -47,8 +47,8 @@ class GraphQLKeyResultViewResolver {
     this.logger.log('Fetching key result view')
 
     const keyResultView = binding
-      ? await this.keyResultViewService.getOneByBindingWithScopeConstraint(binding, user)
-      : await this.keyResultViewService.getOneByIDWithScopeConstraint(id, user)
+      ? await this.resolverService.getOneByBindingWithScopeConstraint(binding, user)
+      : await this.resolverService.getOneByIDWithScopeConstraint(id, user)
     if (!keyResultView)
       throw new NotFoundException('We could not found a key result view with given args')
 
@@ -62,7 +62,7 @@ class GraphQLKeyResultViewResolver {
       message: 'Fetching user for key result view',
     })
 
-    return this.userService.getOneByID(keyResultView.userId)
+    return this.userDomain.getOneByID(keyResultView.userId)
   }
 
   @ResolveField()
@@ -72,7 +72,7 @@ class GraphQLKeyResultViewResolver {
       message: 'Fetching key results for key result view',
     })
 
-    return this.keyResultService.getManyByIdsPreservingOrderIfUserIsInCompany(
+    return this.keyResultDomain.getManyByIdsPreservingOrderIfUserIsInCompany(
       keyResultView.rank,
       user,
     )
@@ -91,7 +91,7 @@ class GraphQLKeyResultViewResolver {
       message: `Updating rank for key result view of id ${id}`,
     })
 
-    const updatedKeyResultView = await this.userService.view.keyResult.updateRankIfUserOwnsIt(
+    const updatedKeyResultView = await this.userDomain.view.keyResult.updateRankIfUserOwnsIt(
       id,
       keyResultViewRankInput.rank,
       user,
@@ -120,7 +120,7 @@ class GraphQLKeyResultViewResolver {
       userId: user.id,
     }
 
-    const creationPromise = this.userService.view.keyResult.create(enhancedWithUserID)
+    const creationPromise = this.userDomain.view.keyResult.create(enhancedWithUserID)
     const [error, createdKeyResultView] = await this.railway.handleRailwayPromise<
       RailwayError,
       KeyResultView[]

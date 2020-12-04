@@ -18,8 +18,8 @@ class GraphQLUserResolver {
   private readonly logger = new Logger(GraphQLUserResolver.name)
 
   constructor(
-    private readonly userService: GraphQLUserService,
-    private readonly keyResultService: DomainKeyResultService,
+    private readonly resolverService: GraphQLUserService,
+    private readonly keyResultDomain: DomainKeyResultService,
   ) {}
 
   @Permissions(PERMISSION['USER:READ'])
@@ -30,7 +30,7 @@ class GraphQLUserResolver {
   ) {
     this.logger.log(`Fetching user with id ${id.toString()}`)
 
-    const user = await this.userService.getOneByIDWithScopeConstraint(id, authzUser)
+    const user = await this.resolverService.getOneByIDWithScopeConstraint(id, authzUser)
     if (!user) throw new NotFoundException(`We could not found an user with id ${id}`)
 
     return user
@@ -43,7 +43,7 @@ class GraphQLUserResolver {
       message: 'Fetching key results for user',
     })
 
-    return this.keyResultService.getFromOwner(user.id)
+    return this.keyResultDomain.getFromOwner(user.id)
   }
 
   @ResolveField()
@@ -53,7 +53,7 @@ class GraphQLUserResolver {
       message: 'Fetching progress reports for user',
     })
 
-    return this.keyResultService.report.progress.getFromUser(user.id)
+    return this.keyResultDomain.report.progress.getFromUser(user.id)
   }
 
   @ResolveField()
@@ -63,7 +63,7 @@ class GraphQLUserResolver {
       message: 'Fetching confidence reports for user',
     })
 
-    return this.keyResultService.report.confidence.getFromUser(user.id)
+    return this.keyResultDomain.report.confidence.getFromUser(user.id)
   }
 }
 

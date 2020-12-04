@@ -8,8 +8,8 @@ import { KeyResultViewBinding } from 'domain/user/view/key-result/types'
 
 @Injectable()
 class GraphQLKeyResultViewService extends GraphQLEntityService<DomainKeyResultViewService> {
-  constructor(public readonly keyResultViewService: DomainKeyResultViewService) {
-    super(RESOURCE.KEY_RESULT_VIEW, keyResultViewService)
+  constructor(public readonly keyResultViewDomain: DomainKeyResultViewService) {
+    super(RESOURCE.KEY_RESULT_VIEW, keyResultViewDomain)
   }
 
   async getOneByBindingWithScopeConstraint(binding: KeyResultViewBinding, user: AuthzUser) {

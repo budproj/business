@@ -10,6 +10,7 @@ import DomainKeyResultService from 'domain/key-result/service'
 import DomainUserService from 'domain/user/service'
 
 import { ConfidenceReportObject } from './models'
+import GraphQLConfidenceReportService from './service'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -18,8 +19,9 @@ class GraphQLConfidenceReportResolver {
   private readonly logger = new Logger(GraphQLConfidenceReportResolver.name)
 
   constructor(
-    private readonly keyResultService: DomainKeyResultService,
-    private readonly userService: DomainUserService,
+    private readonly resolverService: GraphQLConfidenceReportService,
+    private readonly keyResultDomain: DomainKeyResultService,
+    private readonly userDomain: DomainUserService,
   ) {}
 
   @Permissions(PERMISSION['CONFIDENCE_REPORT:READ'])
@@ -30,10 +32,7 @@ class GraphQLConfidenceReportResolver {
   ) {
     this.logger.log(`Fetching confidence report with id ${id.toString()}`)
 
-    const confidenceReport = await this.keyResultService.report.confidence.getOneByIDIfUserIsInCompany(
-      id,
-      user,
-    )
+    const confidenceReport = await this.resolverService.getOneByIDWithScopeConstraint(id, user)
     if (!confidenceReport)
       throw new NotFoundException(`We could not found a confidence report with id ${id}`)
 
@@ -47,7 +46,7 @@ class GraphQLConfidenceReportResolver {
       message: 'Fetching key result for confidence report',
     })
 
-    return this.keyResultService.getOneByID(confidenceReport.keyResultId)
+    return this.keyResultDomain.getOneByID(confidenceReport.keyResultId)
   }
 
   @ResolveField()
@@ -57,7 +56,7 @@ class GraphQLConfidenceReportResolver {
       message: 'Fetching user for confidence report',
     })
 
-    return this.userService.getOneByID(confidenceReport.userId)
+    return this.userDomain.getOneByID(confidenceReport.userId)
   }
 }
 

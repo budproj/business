@@ -7,7 +7,7 @@ import DomainTeamService from 'domain/team/service'
 @Injectable()
 class GraphQLTeamService extends GraphQLEntityService<DomainTeamService> {
   constructor(public readonly teamDomain: DomainTeamService) {
-    super(RESOURCE.USER, teamDomain)
+    super(RESOURCE.TEAM, teamDomain)
   }
 }
 

@@ -8,9 +8,9 @@ import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import DomainCycleService from 'domain/cycle/service'
 import DomainKeyResultService from 'domain/key-result/service'
-import DomainObjectiveService from 'domain/objective/service'
 
 import { ObjectiveObject } from './models'
+import GraphQLObjectiveService from './service'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -19,9 +19,9 @@ class GraphQLObjectiveResolver {
   private readonly logger = new Logger(GraphQLObjectiveResolver.name)
 
   constructor(
-    private readonly keyResultService: DomainKeyResultService,
-    private readonly objectiveService: DomainObjectiveService,
-    private readonly cycleService: DomainCycleService,
+    private readonly resolverService: GraphQLObjectiveService,
+    private readonly keyResultDomain: DomainKeyResultService,
+    private readonly cycleDomain: DomainCycleService,
   ) {}
 
   @Permissions(PERMISSION['OBJECTIVE:READ'])
@@ -32,7 +32,7 @@ class GraphQLObjectiveResolver {
   ) {
     this.logger.log(`Fetching objective with id ${id.toString()}`)
 
-    const objective = await this.objectiveService.getOneByIDIfUserIsInCompany(id, user)
+    const objective = await this.resolverService.getOneByIDWithScopeConstraint(id, user)
     if (!objective) throw new NotFoundException(`We could not found an objective with id ${id}`)
 
     return objective
@@ -45,7 +45,7 @@ class GraphQLObjectiveResolver {
       message: 'Fetching key results for objective',
     })
 
-    return this.keyResultService.getFromObjective(objective.id)
+    return this.keyResultDomain.getFromObjective(objective.id)
   }
 
   @ResolveField()
@@ -55,7 +55,7 @@ class GraphQLObjectiveResolver {
       message: 'Fetching cycke for objective',
     })
 
-    return this.cycleService.getOneByID(objective.cycleId)
+    return this.cycleDomain.getOneByID(objective.cycleId)
   }
 }
 

@@ -2,14 +2,14 @@ import { RESOURCE, SCOPE } from 'app/authz/constants'
 import { AuthzUser } from 'app/authz/types'
 import DomainCompanyService from 'domain/company/service'
 import DomainCycleService from 'domain/cycle/service'
-import DomainKeyResultService from 'domain/key-result/service'
 import DomainConfidenceReportService from 'domain/key-result/report/confidence/service'
 import DomainProgressReportService from 'domain/key-result/report/progress/service'
+import DomainKeyResultService from 'domain/key-result/service'
 import DomainObjectiveService from 'domain/objective/service'
 import DomainTeamService from 'domain/team/service'
+import { UserDTO } from 'domain/user'
 import DomainUserService from 'domain/user/service'
 import DomainKeyResultViewService from 'domain/user/view/key-result/service'
-import { UserDTO } from 'domain/user'
 
 abstract class GraphQLEntityService<
   S extends
