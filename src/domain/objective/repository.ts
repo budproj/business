@@ -1,53 +1,54 @@
-import { EntityRepository, Repository } from 'typeorm'
+import { Logger } from '@nestjs/common'
+import { EntityRepository, FindConditions, Repository } from 'typeorm'
 
-import { CompanyDTO } from 'domain/company/dto'
-import { ObjectiveDTO } from 'domain/objective/dto'
-import { TeamDTO } from 'domain/team/dto'
-import { UserDTO } from 'domain/user/dto'
+import { Company } from 'domain/company/entities'
+import { Team } from 'domain/team/entities'
 
 import { Objective } from './entities'
 
 @EntityRepository(Objective)
 class DomainObjectiveRepository extends Repository<Objective> {
-  async findByIDWithCompanyConstraint(
-    id: ObjectiveDTO['id'],
-    allowedCompanies: Array<CompanyDTO['id']>,
-  ): Promise<Objective | null> {
+  private readonly logger = new Logger(DomainObjectiveRepository.name)
+
+  async findRelatedCompanies(
+    selector: FindConditions<Objective>,
+  ): Promise<Array<Partial<Company>> | null> {
     const query = this.createQueryBuilder()
-    const filteredQuery = query.where({ id })
-    const joinedQuery = filteredQuery.leftJoinAndSelect(`${Objective.name}.cycle`, 'cycle')
-    const companyConstrainedQuery = joinedQuery.andWhere('cycle.companyId IN (:...companies)', {
-      companies: allowedCompanies,
+      .where(selector)
+      .leftJoinAndSelect(`${Objective.name}.cycle`, 'cycle')
+      .select('cycle.companyId AS "id"')
+      .execute()
+
+    const companies: Company[] = await query
+
+    this.logger.debug({
+      companies,
+      selector,
+      message: 'Found related companies for selector',
     })
 
-    return companyConstrainedQuery.getOne()
+    return companies
   }
 
-  async findByIDWithTeamConstraint(
-    id: ObjectiveDTO['id'],
-    allowedTeams: Array<TeamDTO['id']>,
-  ): Promise<Objective | null> {
+  async findRelatedTeams(
+    selector: FindConditions<Objective>,
+  ): Promise<Array<Partial<Team>> | null> {
     const query = this.createQueryBuilder()
-    const filteredQuery = query.where({ id })
-    const joinedQuery = filteredQuery.leftJoinAndSelect(`${Objective.name}.owner`, 'owner')
-    const teamConstrainedQuery = joinedQuery.andWhere('owner.teamId IN (:...teams)', {
-      teams: allowedTeams,
+      .where(selector)
+      .leftJoinAndSelect(`${Objective.name}.owner`, 'user')
+      .leftJoinAndSelect('user.teams', 'teams')
+      .select('teams.id as "id"')
+      .execute()
+
+    const teams: Team[] = await query
+
+    this.logger.debug({
+      teams,
+      selector,
+      message: 'Found related teams for selector',
     })
 
-    return teamConstrainedQuery.getOne()
-  }
-
-  async findByIDWithOwnsConstraint(
-    id: ObjectiveDTO['id'],
-    userID: UserDTO['id'],
-  ): Promise<Objective | null> {
-    const query = this.createQueryBuilder()
-    const filteredQuery = query.where({ id })
-    const ownerConstrainedQuery = filteredQuery.andWhere('owner_id = :userID', {
-      userID,
-    })
-
-    return ownerConstrainedQuery.getOne()
+    return teams
   }
 }
 

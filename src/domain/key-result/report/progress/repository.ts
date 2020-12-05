@@ -1,61 +1,33 @@
-import { EntityRepository, Repository } from 'typeorm'
+import { Logger } from '@nestjs/common'
+import { EntityRepository, FindConditions, Repository } from 'typeorm'
 
-import { CompanyDTO } from 'domain/company/dto'
-import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
-import { TeamDTO } from 'domain/team/dto'
-import { UserDTO } from 'domain/user/dto'
+import { Team } from 'domain/team/entities'
 
 import { ProgressReport } from './entities'
 
 @EntityRepository(ProgressReport)
 class DomainProgressReportRepository extends Repository<ProgressReport> {
-  async findByIDWithCompanyConstraint(
-    id: ProgressReportDTO['id'],
-    allowedCompanies: Array<CompanyDTO['id']>,
-  ): Promise<ProgressReport | null> {
+  private readonly logger = new Logger(DomainProgressReportRepository.name)
+
+  async findRelatedTeams(
+    selector: FindConditions<ProgressReport>,
+  ): Promise<Array<Partial<Team>> | null> {
     const query = this.createQueryBuilder()
-    const filteredQuery = query.where({ id })
-    const keyResultJoinedQuery = filteredQuery.leftJoinAndSelect(
-      `${ProgressReport.name}.keyResult`,
-      'keyResult',
-    )
-    const teamJoinedQuery = keyResultJoinedQuery.leftJoinAndSelect('keyResult.team', 'team')
-    const companyConstrainedQuery = teamJoinedQuery.andWhere('team.companyId IN (:...companies)', {
-      companies: allowedCompanies,
+      .where(selector)
+      .leftJoinAndSelect(`${ProgressReport.name}.keyResult`, 'keyResult')
+      .leftJoinAndSelect('keyResult.team', 'team')
+      .select('teams.companyId AS "companyId", teams.id as "id"')
+      .execute()
+
+    const teams: Team[] = await query
+
+    this.logger.debug({
+      teams,
+      selector,
+      message: 'Found related teams for selector',
     })
 
-    return companyConstrainedQuery.getOne()
-  }
-
-  async findByIDWithTeamConstraint(
-    id: ProgressReportDTO['id'],
-    allowedTeams: Array<TeamDTO['id']>,
-  ): Promise<ProgressReport | null> {
-    const query = this.createQueryBuilder()
-    const filteredQuery = query.where({ id })
-    const keyResultJoinedQuery = filteredQuery.leftJoinAndSelect(
-      `${ProgressReport.name}.keyResult`,
-      'keyResult',
-    )
-    const teamJoinedQuery = keyResultJoinedQuery.leftJoinAndSelect('keyResult.teamId', 'team')
-    const teamConstrainedQuery = teamJoinedQuery.andWhere('teamId = :teams', {
-      teams: allowedTeams,
-    })
-
-    return teamConstrainedQuery.getOne()
-  }
-
-  async findByIDWithOwnsConstraint(
-    id: ProgressReportDTO['id'],
-    userID: UserDTO['id'],
-  ): Promise<ProgressReport | null> {
-    const query = this.createQueryBuilder()
-    const filteredQuery = query.where({ id })
-    const ownerConstrainedQuery = filteredQuery.andWhere('userId = :userID', {
-      userID,
-    })
-
-    return ownerConstrainedQuery.getOne()
+    return teams
   }
 }
 

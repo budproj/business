@@ -1,58 +1,30 @@
-import { EntityRepository, Repository } from 'typeorm'
+import { Logger } from '@nestjs/common'
+import { EntityRepository, FindConditions, Repository } from 'typeorm'
 
-import { CompanyDTO } from 'domain/company/dto'
-import { TeamDTO } from 'domain/team/dto'
-import { UserDTO } from 'domain/user/dto'
+import { Team } from 'domain/team/entities'
 
 import { Company } from './entities'
 
 @EntityRepository(Company)
 class DomainCompanyRepository extends Repository<Company> {
-  async findByIDWithCompanyConstraint(
-    id: CompanyDTO['id'],
-    allowedCompanies: Array<CompanyDTO['id']>,
-  ): Promise<Company | null> {
+  private readonly logger = new Logger(DomainCompanyRepository.name)
+
+  async findRelatedTeams(selector: FindConditions<Company>): Promise<Array<Partial<Team>> | null> {
     const query = this.createQueryBuilder()
-    const filteredQuery = query.where({ id })
-    const companyConstrainedQuery = filteredQuery.andWhere(
-      `${Company.name}.id IN (:...companies)`,
-      {
-        companies: allowedCompanies,
-      },
-    )
+      .where(selector)
+      .leftJoinAndSelect(`${Company.name}.teams`, 'teams')
+      .select('teams.id as "id"')
+      .execute()
 
-    return companyConstrainedQuery.getOne()
-  }
+    const teams: Team[] = await query
 
-  async findByIDWithTeamConstraint(
-    id: CompanyDTO['id'],
-    allowedTeams: Array<TeamDTO['id']>,
-  ): Promise<any | null> {
-    const query = this.createQueryBuilder()
-    const filteredQuery = query.where({ id })
-    const joinedQuery = filteredQuery.innerJoin(
-      `${Company.name}.teams`,
-      'team',
-      `team.id IN (:...teams)`,
-      {
-        teams: allowedTeams,
-      },
-    )
-
-    return joinedQuery.getOne()
-  }
-
-  async findByIDWithOwnsConstraint(
-    id: CompanyDTO['id'],
-    userID: UserDTO['id'],
-  ): Promise<Company | null> {
-    const query = this.createQueryBuilder()
-    const filteredQuery = query.where({ id })
-    const ownerConstrainedQuery = filteredQuery.andWhere('owner_id = :userID', {
-      userID,
+    this.logger.debug({
+      teams,
+      selector,
+      message: 'Found related teams for selector',
     })
 
-    return ownerConstrainedQuery.getOne()
+    return teams
   }
 }
 

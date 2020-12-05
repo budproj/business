@@ -19,17 +19,13 @@ class DomainUserService extends DomainEntityService<User, UserDTO> {
     super(repository, DomainUserService.name)
   }
 
-  async getUserFromSubjectWithTeamRelation(authzSub: UserDTO['authzSub']): Promise<User> {
-    return this.repository.findOne({ authzSub }, { relations: ['teams'] })
-  }
-
   async canUserReadForCompany(
     selector: FindConditions<User>,
     userCompanies: Array<CompanyDTO['id']>,
   ): Promise<boolean> {
     const relatedTeams = await this.repository.findRelatedTeams(selector)
-    const relatedCompanies = new Set(relatedTeams.map((team) => team.companyId))
-    const canUserRead = userCompanies.some((company) => relatedCompanies.has(company))
+    const relatedCompanies = relatedTeams.map((team) => team.companyId)
+    const canUserRead = relatedCompanies.every((company) => userCompanies.includes(company))
 
     return canUserRead
   }
@@ -39,14 +35,18 @@ class DomainUserService extends DomainEntityService<User, UserDTO> {
     userTeams: Array<TeamDTO['id']>,
   ): Promise<boolean> {
     const relatedTeams = await this.repository.findRelatedTeams(selector)
-    const relatedTeamIDs = new Set(relatedTeams.map((team) => team.id))
-    const canUserRead = userTeams.some((team) => relatedTeamIDs.has(team))
+    const relatedTeamIDs = relatedTeams.map((team) => team.id)
+    const canUserRead = relatedTeamIDs.every((team) => userTeams.includes(team))
 
     return canUserRead
   }
 
   async canUserReadForSelf(selector: FindConditions<User>, user: UserDTO): Promise<boolean> {
     return user.id === selector.id
+  }
+
+  async getUserFromSubjectWithTeamRelation(authzSub: UserDTO['authzSub']): Promise<User> {
+    return this.repository.findOne({ authzSub }, { relations: ['teams'] })
   }
 }
 

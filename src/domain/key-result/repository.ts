@@ -1,48 +1,34 @@
-import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm'
+import { Logger } from '@nestjs/common'
+import { EntityRepository, FindConditions, Repository, SelectQueryBuilder } from 'typeorm'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
-import { TeamDTO } from 'domain/team/dto'
-import { UserDTO } from 'domain/user/dto'
+import { Team } from 'domain/team/entities'
 
 import { KeyResult } from './entities'
 
 @EntityRepository(KeyResult)
 class DomainKeyResultRepository extends Repository<KeyResult> {
-  async findByIDWithCompanyConstraint(
-    id: KeyResultDTO['id'],
-    allowedCompanies: Array<CompanyDTO['id']>,
-  ): Promise<KeyResult | null> {
-    const query = this.createCompanyConstrainedQueryBuilder(allowedCompanies)
-    const filteredQuery = query.andWhere(`${KeyResult.name}.id = (:id)`, { id })
+  private readonly logger = new Logger(DomainKeyResultRepository.name)
 
-    return filteredQuery.getOne()
-  }
-
-  async findByIDWithTeamConstraint(
-    id: KeyResultDTO['id'],
-    allowedTeams: Array<TeamDTO['id']>,
-  ): Promise<KeyResult | null> {
+  async findRelatedTeams(
+    selector: FindConditions<KeyResult>,
+  ): Promise<Array<Partial<Team>> | null> {
     const query = this.createQueryBuilder()
-    const filteredQuery = query.where({ id })
-    const teamConstrainedQuery = filteredQuery.andWhere(`${KeyResult.name}.teamId IN (:...teams)`, {
-      teams: allowedTeams,
+      .where(selector)
+      .leftJoinAndSelect(`${KeyResult.name}.teams`, 'teams')
+      .select('teams.companyId AS "companyId", teams.id as "id"')
+      .execute()
+
+    const teams: Team[] = await query
+
+    this.logger.debug({
+      teams,
+      selector,
+      message: 'Found related teams for selector',
     })
 
-    return teamConstrainedQuery.getOne()
-  }
-
-  async findByIDWithOwnsConstraint(
-    id: KeyResultDTO['id'],
-    userID: UserDTO['id'],
-  ): Promise<KeyResult | null> {
-    const query = this.createQueryBuilder()
-    const filteredQuery = query.where({ id })
-    const ownerConstrainedQuery = filteredQuery.andWhere('owner_id = :userID', {
-      userID,
-    })
-
-    return ownerConstrainedQuery.getOne()
+    return teams
   }
 
   buildRankSortColumn(rank: Array<KeyResultDTO['id']>): string {
