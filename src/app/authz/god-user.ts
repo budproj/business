@@ -59,7 +59,7 @@ class GodUser implements AuthzUser {
       },
       [RESOURCE.CYCLE]: {
         [ACTION.CREATE]: SCOPE.ANY,
-        [ACTION.READ]: SCOPE.ANY,
+        [ACTION.READ]: SCOPE.COMPANY,
         [ACTION.UPDATE]: SCOPE.ANY,
         [ACTION.DELETE]: SCOPE.ANY,
       },

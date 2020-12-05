@@ -1,51 +1,53 @@
-import { Logger } from '@nestjs/common'
-import { EntityRepository, FindConditions } from 'typeorm'
+import { EntityRepository, SelectQueryBuilder } from 'typeorm'
 
+import { CompanyDTO } from 'domain/company/dto'
 import DomainEntityRepository from 'domain/repository'
-import { Team } from 'domain/team/entities'
-import { User } from 'domain/user/entities'
+import { TeamDTO } from 'domain/team/dto'
+import { UserDTO } from 'domain/user/dto'
 
 import { Cycle } from './entities'
 
 @EntityRepository(Cycle)
 class DomainCycleRepository extends DomainEntityRepository<Cycle> {
-  private readonly logger = new Logger(DomainCycleRepository.name)
+  constraintQueryToCompany(allowedCompanies: Array<CompanyDTO['id']>) {
+    const addContraintToQuery = (query?: SelectQueryBuilder<Cycle>) => {
+      const baseQuery = query ?? this.createQueryBuilder()
+      const constrainedQuery = baseQuery.andWhere(
+        `${Cycle.name}.companyId IN (:...allowedCompanies)`,
+        { allowedCompanies },
+      )
 
-  async findRelatedTeams(selector: FindConditions<Cycle>): Promise<Array<Partial<Team>> | null> {
-    const query = this.createQueryBuilder()
-      .where(selector)
-      .leftJoinAndSelect(`${Cycle.name}.company`, 'company')
-      .leftJoinAndSelect('company.teams', 'teams')
-      .select('teams.id as "id"')
-      .execute()
+      return constrainedQuery
+    }
 
-    const teams: Team[] = await query
-
-    this.logger.debug({
-      teams,
-      selector,
-      message: 'Found related teams for selector',
-    })
-
-    return teams
+    return addContraintToQuery
   }
 
-  async findRelatedOwners(selector: FindConditions<Cycle>): Promise<Array<Partial<User>> | null> {
-    const query = this.createQueryBuilder()
-      .where(selector)
-      .leftJoinAndSelect(`${Cycle.name}.company`, 'company')
-      .select('company.ownerId as "id"')
-      .execute()
+  constraintQueryToTeam(allowedTeams: Array<TeamDTO['id']>) {
+    const addContraintToQuery = (query?: SelectQueryBuilder<Cycle>) => {
+      const baseQuery = query ?? this.createQueryBuilder()
+      const constrainedQuery = baseQuery
+        .leftJoinAndSelect(`${Cycle.name}.company`, 'company')
+        .leftJoinAndSelect('company.teams', 'teams')
+        .andWhere('teams.id IN (:...allowedTeams)', { allowedTeams })
 
-    const owners: User[] = await query
+      return constrainedQuery
+    }
 
-    this.logger.debug({
-      owners,
-      selector,
-      message: 'Found related owners for selector',
-    })
+    return addContraintToQuery
+  }
 
-    return owners
+  constraintQueryToOwns(user: UserDTO) {
+    const addContraintToQuery = (query?: SelectQueryBuilder<Cycle>) => {
+      const baseQuery = query ?? this.createQueryBuilder()
+      const constrainedQuery = baseQuery
+        .leftJoinAndSelect(`${Cycle.name}.company`, 'company')
+        .andWhere('company.ownerId = :userID', { userID: user.id })
+
+      return constrainedQuery
+    }
+
+    return addContraintToQuery
   }
 }
 
