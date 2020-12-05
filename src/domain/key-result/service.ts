@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { FindConditions } from 'typeorm'
 
-import { CompanyDTO } from 'domain/company/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ObjectiveDTO } from 'domain/objective/dto'
 import DomainEntityService from 'domain/service'
@@ -19,34 +17,6 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     public readonly repository: DomainKeyResultRepository,
   ) {
     super(repository, DomainKeyResultService.name)
-  }
-
-  async canUserReadForCompany(
-    selector: FindConditions<KeyResult>,
-    userCompanies: Array<CompanyDTO['id']>,
-  ): Promise<boolean> {
-    const relatedTeams = await this.repository.findRelatedTeams(selector)
-    const relatedCompanyIDs = relatedTeams.map((team) => team.companyId)
-    const canUserRead = relatedCompanyIDs.every((companyID) => userCompanies.includes(companyID))
-
-    return canUserRead
-  }
-
-  async canUserReadForTeam(
-    selector: FindConditions<KeyResult>,
-    userTeams: Array<TeamDTO['id']>,
-  ): Promise<boolean> {
-    const relatedTeams = await this.repository.findRelatedTeams(selector)
-    const canUserRead = relatedTeams.every((team) => userTeams.includes(team.id))
-
-    return canUserRead
-  }
-
-  async canUserReadForSelf(selector: FindConditions<KeyResult>, user: UserDTO): Promise<boolean> {
-    const selectedKeyResults = await this.repository.find(selector)
-    const canUserRead = selectedKeyResults.every((keyResult) => keyResult.ownerId === user.id)
-
-    return canUserRead
   }
 
   async getFromOwner(ownerId: UserDTO['id']): Promise<KeyResult[]> {

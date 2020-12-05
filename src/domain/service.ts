@@ -55,47 +55,6 @@ abstract class DomainEntityService<
     this.logger = new Logger(loggerName ?? DomainEntityService.name)
   }
 
-  //* **** ABSTRACT PERMISSION HANDLERS *****//
-  async canUserCreateForCompany(
-    _selector: Partial<D>,
-    _userCompanies: Array<CompanyDTO['id']>,
-    _user: UserDTO,
-  ): Promise<boolean> {
-    throw new Error('You must implement canUserCreateForCompany method')
-  }
-
-  async canUserCreateForTeam(
-    _selector: Partial<D>,
-    _userTeams: Array<TeamDTO['id']>,
-    _user: UserDTO,
-  ): Promise<boolean> {
-    throw new Error('You must implement canUserCreateForTeam method')
-  }
-
-  async canUserCreateForSelf(_selector: Partial<D>, _user: UserDTO): Promise<boolean> {
-    throw new Error('You must implement canUserCreateForSelf method')
-  }
-
-  async canUserDeleteForCompany(
-    _selector: FindConditions<E>,
-    _userCompanies: Array<CompanyDTO['id']>,
-    _user: UserDTO,
-  ): Promise<boolean> {
-    throw new Error('You must implement canUserDeleteForCompany method')
-  }
-
-  async canUserDeleteForTeam(
-    _selector: FindConditions<E>,
-    _userTeams: Array<TeamDTO['id']>,
-    _user: UserDTO,
-  ): Promise<boolean> {
-    throw new Error('You must implement canUserDeleteForTeam method')
-  }
-
-  async canUserDeleteForSelf(_selector: FindConditions<E>, _user: UserDTO): Promise<boolean> {
-    throw new Error('You must implement canUserDeleteForSelf method')
-  }
-
   //* **** HELPERS *****//
   async parseUserCompanies(user: UserDTO): Promise<Array<CompanyDTO['id']>> {
     const userTeams = await user.teams
@@ -118,7 +77,11 @@ abstract class DomainEntityService<
     return result.raw
   }
 
-  async createIfUserIsInCompany(data: Partial<D>, user: UserDTO): Promise<E[] | null> {
+  async createIfUserIsInCompany(
+    selector: FindConditions<E>,
+    data: Partial<D>,
+    user: UserDTO,
+  ): Promise<E[] | null> {
     const userCompanies = await this.parseUserCompanies(user)
 
     this.logger.debug({
@@ -127,12 +90,21 @@ abstract class DomainEntityService<
       message: `Reduced companies for user`,
     })
 
-    const isUserAllowedToCreate = await this.canUserCreateForCompany(data, userCompanies, user)
+    const constrainQuery = this.repository.constraintQueryToCompany(userCompanies)
+    const selectionQuery = this.repository.createQueryBuilder().where(selector)
+    const constrainedSelectionQuery = constrainQuery(selectionQuery)
 
-    return isUserAllowedToCreate ? this.create(data) : undefined
+    const allowedData = await constrainedSelectionQuery.getMany()
+    if (allowedData.length === 0) return
+
+    return this.create(data)
   }
 
-  async createIfUserIsInTeam(data: Partial<D>, user: UserDTO): Promise<E[] | null> {
+  async createIfUserIsInTeam(
+    selector: FindConditions<E>,
+    data: Partial<D>,
+    user: UserDTO,
+  ): Promise<E[] | null> {
     const userTeams = await this.parseUserTeams(user)
 
     this.logger.debug({
@@ -141,15 +113,29 @@ abstract class DomainEntityService<
       message: `Reduced teams for user`,
     })
 
-    const isUserAllowedToCreate = await this.canUserCreateForTeam(data, userTeams, user)
+    const constrainQuery = this.repository.constraintQueryToTeam(userTeams)
+    const selectionQuery = this.repository.createQueryBuilder().where(selector)
+    const constrainedSelectionQuery = constrainQuery(selectionQuery)
 
-    return isUserAllowedToCreate ? this.create(data) : undefined
+    const allowedData = await constrainedSelectionQuery.getMany()
+    if (allowedData.length === 0) return
+
+    return this.create(data)
   }
 
-  async createIfUserOwnsIt(data: Partial<D>, user: UserDTO): Promise<E[] | null> {
-    const isUserAllowedToCreate = await this.canUserCreateForSelf(data, user)
+  async createIfUserOwnsIt(
+    selector: FindConditions<E>,
+    data: Partial<D>,
+    user: UserDTO,
+  ): Promise<E[] | null> {
+    const constrainQuery = this.repository.constraintQueryToOwns(user)
+    const selectionQuery = this.repository.createQueryBuilder().where(selector)
+    const constrainedSelectionQuery = constrainQuery(selectionQuery)
 
-    return isUserAllowedToCreate ? this.create(data) : undefined
+    const allowedData = await constrainedSelectionQuery.getMany()
+    if (allowedData.length === 0) return
+
+    return this.create(data)
   }
 
   //* **** READ *****/
@@ -282,9 +268,14 @@ abstract class DomainEntityService<
       message: `Reduced companies for user`,
     })
 
-    const isUserAllowedToDelete = await this.canUserDeleteForCompany(selector, userCompanies, user)
+    const constrainQuery = this.repository.constraintQueryToCompany(userCompanies)
+    const selectionQuery = this.repository.createQueryBuilder().where(selector)
+    const constrainedSelectionQuery = constrainQuery(selectionQuery)
 
-    return isUserAllowedToDelete ? this.delete(selector) : undefined
+    const allowedData = await constrainedSelectionQuery.getMany()
+    if (allowedData.length === 0) return
+
+    return this.delete(selector)
   }
 
   async deleteIfUserIsInTeam(selector: FindConditions<E>, user: UserDTO): Promise<DeleteResult> {
@@ -296,15 +287,25 @@ abstract class DomainEntityService<
       message: `Reduced teams for user`,
     })
 
-    const isUserAllowedToDelete = await this.canUserDeleteForTeam(selector, userTeams, user)
+    const constrainQuery = this.repository.constraintQueryToTeam(userTeams)
+    const selectionQuery = this.repository.createQueryBuilder().where(selector)
+    const constrainedSelectionQuery = constrainQuery(selectionQuery)
 
-    return isUserAllowedToDelete ? this.delete(selector) : undefined
+    const allowedData = await constrainedSelectionQuery.getMany()
+    if (allowedData.length === 0) return
+
+    return this.delete(selector)
   }
 
   async deleteIfUserOwnsIt(selector: FindConditions<E>, user: UserDTO): Promise<DeleteResult> {
-    const isUserAllowedToDelete = await this.canUserDeleteForSelf(selector, user)
+    const constrainQuery = this.repository.constraintQueryToOwns(user)
+    const selectionQuery = this.repository.createQueryBuilder().where(selector)
+    const constrainedSelectionQuery = constrainQuery(selectionQuery)
 
-    return isUserAllowedToDelete ? this.delete(selector) : undefined
+    const allowedData = await constrainedSelectionQuery.getMany()
+    if (allowedData.length === 0) return
+
+    return this.delete(selector)
   }
 }
 

@@ -1,34 +1,53 @@
-import { Logger } from '@nestjs/common'
-import { EntityRepository, FindConditions } from 'typeorm'
+import { EntityRepository, SelectQueryBuilder } from 'typeorm'
 
+import { CompanyDTO } from 'domain/company/dto'
 import DomainEntityRepository from 'domain/repository'
-import { Team } from 'domain/team/entities'
+import { TeamDTO } from 'domain/team/dto'
+import { UserDTO } from 'domain/user/dto'
 
 import { ConfidenceReport } from './entities'
 
 @EntityRepository(ConfidenceReport)
 class DomainConfidenceReportRepository extends DomainEntityRepository<ConfidenceReport> {
-  private readonly logger = new Logger(DomainConfidenceReportRepository.name)
+  constraintQueryToCompany(allowedCompanies: Array<CompanyDTO['id']>) {
+    const addContraintToQuery = (query?: SelectQueryBuilder<ConfidenceReport>) => {
+      const baseQuery = query ?? this.createQueryBuilder()
+      const constrainedQuery = baseQuery
+        .leftJoinAndSelect(`${ConfidenceReport.name}.keyResult`, 'keyResult')
+        .leftJoinAndSelect('keyResult.team', 'team')
+        .andWhere('team.companyId IN (:...allowedCompanies)', { allowedCompanies })
 
-  async findRelatedTeams(
-    selector: FindConditions<ConfidenceReport>,
-  ): Promise<Array<Partial<Team>> | null> {
-    const query = this.createQueryBuilder()
-      .where(selector)
-      .leftJoinAndSelect(`${ConfidenceReport.name}.keyResult`, 'keyResult')
-      .leftJoinAndSelect('keyResult.team', 'team')
-      .select('teams.companyId AS "companyId", teams.id as "id"')
-      .execute()
+      return constrainedQuery
+    }
 
-    const teams: Team[] = await query
+    return addContraintToQuery
+  }
 
-    this.logger.debug({
-      teams,
-      selector,
-      message: 'Found related teams for selector',
-    })
+  constraintQueryToTeam(allowedTeams: Array<TeamDTO['id']>) {
+    const addContraintToQuery = (query?: SelectQueryBuilder<ConfidenceReport>) => {
+      const baseQuery = query ?? this.createQueryBuilder()
+      const constrainedQuery = baseQuery
+        .leftJoinAndSelect(`${ConfidenceReport.name}.keyResult`, 'keyResult')
+        .leftJoinAndSelect('keyResult.team', 'team')
+        .andWhere('team.id IN (:...allowedTeams)', { allowedTeams })
 
-    return teams
+      return constrainedQuery
+    }
+
+    return addContraintToQuery
+  }
+
+  constraintQueryToOwns(user: UserDTO) {
+    const addContraintToQuery = (query?: SelectQueryBuilder<ConfidenceReport>) => {
+      const baseQuery = query ?? this.createQueryBuilder()
+      const constrainedQuery = baseQuery.andWhere(`${ConfidenceReport.name}.userId = :userID`, {
+        userID: user.id,
+      })
+
+      return constrainedQuery
+    }
+
+    return addContraintToQuery
   }
 }
 

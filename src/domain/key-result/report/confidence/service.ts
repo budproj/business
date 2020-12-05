@@ -1,12 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { remove } from 'lodash'
-import { FindConditions } from 'typeorm'
 
-import { CompanyDTO } from 'domain/company/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
 import DomainEntityService from 'domain/service'
-import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
 
 import { ConfidenceReport } from './entities'
@@ -19,39 +16,6 @@ class DomainConfidenceReportService extends DomainEntityService<
 > {
   constructor(public readonly repository: DomainConfidenceReportRepository) {
     super(repository, DomainConfidenceReportService.name)
-  }
-
-  async canUserReadForCompany(
-    selector: FindConditions<ConfidenceReport>,
-    userCompanies: Array<CompanyDTO['id']>,
-  ): Promise<boolean> {
-    const relatedTeams = await this.repository.findRelatedTeams(selector)
-    const relatedCompanyIDs = relatedTeams.map((team) => team.companyId)
-    const canUserRead = relatedCompanyIDs.every((companyID) => userCompanies.includes(companyID))
-
-    return canUserRead
-  }
-
-  async canUserReadForTeam(
-    selector: FindConditions<ConfidenceReport>,
-    userTeams: Array<TeamDTO['id']>,
-  ): Promise<boolean> {
-    const relatedTeams = await this.repository.findRelatedTeams(selector)
-    const canUserRead = relatedTeams.every((team) => userTeams.includes(team.id))
-
-    return canUserRead
-  }
-
-  async canUserReadForSelf(
-    selector: FindConditions<ConfidenceReport>,
-    user: UserDTO,
-  ): Promise<boolean> {
-    const selectedConfidenceReports = await this.repository.find(selector)
-    const canUserRead = selectedConfidenceReports.every(
-      (confidenceReport) => confidenceReport.userId === user.id,
-    )
-
-    return canUserRead
   }
 
   async getFromKeyResult(
