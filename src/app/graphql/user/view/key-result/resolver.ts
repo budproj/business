@@ -7,6 +7,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common'
 import { Args, ID, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { pickBy, identity } from 'lodash'
 
 import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
@@ -37,7 +38,7 @@ class GraphQLKeyResultViewResolver {
   ) {}
 
   @Permissions(PERMISSION['KEY_RESULT_VIEW:READ'])
-  @Query(() => new Array(KeyResultViewObject))
+  @Query(() => KeyResultViewObject)
   async keyResultView(
     @GraphQLUser() user: AuthzUser,
     @Args('id', { type: () => ID, nullable: true }) id?: KeyResultViewObject['id'],
@@ -46,10 +47,14 @@ class GraphQLKeyResultViewResolver {
   ) {
     this.logger.log('Fetching key result view')
 
-    const keyResultView = await this.resolverService.getOneWithActionScopeConstraint(
-      { id, binding, userId: user.id },
-      user,
+    const selector = pickBy(
+      {
+        id,
+        binding,
+      },
+      identity,
     )
+    const keyResultView = await this.resolverService.getOneWithActionScopeConstraint(selector, user)
     if (!keyResultView)
       throw new NotFoundException('We could not found a key result view with given args')
 

@@ -1,33 +1,53 @@
-import { Logger } from '@nestjs/common'
-import { EntityRepository, FindConditions } from 'typeorm'
+import { EntityRepository, SelectQueryBuilder } from 'typeorm'
 
+import { CompanyDTO } from 'domain/company/dto'
 import DomainEntityRepository from 'domain/repository'
-import { Team } from 'domain/team/entities'
+import { TeamDTO } from 'domain/team/dto'
+import { UserDTO } from 'domain/user/dto'
 
 import { KeyResultView } from './entities'
 
 @EntityRepository(KeyResultView)
 class DomainKeyResultViewRepository extends DomainEntityRepository<KeyResultView> {
-  private readonly logger = new Logger(DomainKeyResultViewRepository.name)
+  constraintQueryToCompany(allowedCompanies: Array<CompanyDTO['id']>) {
+    const addContraintToQuery = (query?: SelectQueryBuilder<KeyResultView>) => {
+      const baseQuery = query ?? this.createQueryBuilder()
+      const constrainedQuery = baseQuery
+        .leftJoinAndSelect(`${KeyResultView.name}.user`, 'user')
+        .leftJoinAndSelect('user.teams', 'teams')
+        .andWhere('teams.companyId IN (:...allowedCompanies)', { allowedCompanies })
 
-  async findRelatedTeams(
-    selector: FindConditions<KeyResultView>,
-  ): Promise<Array<Partial<Team>> | null> {
-    const query = this.createQueryBuilder()
-      .where(selector)
-      .leftJoinAndSelect(`${KeyResultView.name}.teams`, 'teams')
-      .select('teams.companyId AS "companyId", teams.id as "id"')
-      .execute()
+      return constrainedQuery
+    }
 
-    const teams: Team[] = await query
+    return addContraintToQuery
+  }
 
-    this.logger.debug({
-      teams,
-      selector,
-      message: 'Found related teams for selector',
-    })
+  constraintQueryToTeam(allowedTeams: Array<TeamDTO['id']>) {
+    const addContraintToQuery = (query?: SelectQueryBuilder<KeyResultView>) => {
+      const baseQuery = query ?? this.createQueryBuilder()
+      const constrainedQuery = baseQuery
+        .leftJoinAndSelect(`${KeyResultView.name}.user`, 'user')
+        .leftJoinAndSelect('user.teams', 'teams')
+        .andWhere('teams.id IN (:...allowedTeams)', { allowedTeams })
 
-    return teams
+      return constrainedQuery
+    }
+
+    return addContraintToQuery
+  }
+
+  constraintQueryToOwns(user: UserDTO) {
+    const addContraintToQuery = (query?: SelectQueryBuilder<KeyResultView>) => {
+      const baseQuery = query ?? this.createQueryBuilder()
+      const constrainedQuery = baseQuery.andWhere(`${KeyResultView.name}.userId = :userID`, {
+        userID: user.id,
+      })
+
+      return constrainedQuery
+    }
+
+    return addContraintToQuery
   }
 }
 

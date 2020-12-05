@@ -76,46 +76,6 @@ abstract class DomainEntityService<
     throw new Error('You must implement canUserCreateForSelf method')
   }
 
-  async canUserReadForCompany(
-    _selector: FindConditions<E>,
-    _userCompanies: Array<CompanyDTO['id']>,
-    _user: UserDTO,
-  ): Promise<boolean> {
-    throw new Error('You must implement canUserReadForCompany method')
-  }
-
-  async canUserReadForTeam(
-    _selector: FindConditions<E>,
-    _userTeams: Array<TeamDTO['id']>,
-    _user: UserDTO,
-  ): Promise<boolean> {
-    throw new Error('You must implement canUserReadForTeam method')
-  }
-
-  async canUserReadForSelf(_selector: FindConditions<E>, _user: UserDTO): Promise<boolean> {
-    throw new Error('You must implement canUserReadForSelf method')
-  }
-
-  async canUserUpdateForCompany(
-    _selector: FindConditions<E>,
-    _userCompanies: Array<CompanyDTO['id']>,
-    _user: UserDTO,
-  ): Promise<boolean> {
-    throw new Error('You must implement canUserUpdateForCompany method')
-  }
-
-  async canUserUpdateForTeam(
-    _selector: FindConditions<E>,
-    _userTeams: Array<TeamDTO['id']>,
-    _user: UserDTO,
-  ): Promise<boolean> {
-    throw new Error('You must implement canUserUpdateForTeam method')
-  }
-
-  async canUserUpdateForSelf(_selector: FindConditions<E>, _user: UserDTO): Promise<boolean> {
-    throw new Error('You must implement canUserUpdateForSelf method')
-  }
-
   async canUserDeleteForCompany(
     _selector: FindConditions<E>,
     _userCompanies: Array<CompanyDTO['id']>,
@@ -229,15 +189,15 @@ abstract class DomainEntityService<
       message: `Reduced teams for user`,
     })
 
-    const isUserAllowedToRead = await this.canUserReadForTeam(selector, userTeams, user)
+    const constrainQuery = this.repository.constraintQueryToTeam(userTeams)
 
-    return isUserAllowedToRead ? this.getOne(selector) : undefined
+    return this.getOne(selector, constrainQuery)
   }
 
   async getOneIfUserOwnsIt(selector: FindConditions<E>, user: UserDTO): Promise<E | null> {
-    const isUserAllowedToRead = await this.canUserReadForSelf(selector, user)
+    const constrainQuery = this.repository.constraintQueryToOwns(user)
 
-    return isUserAllowedToRead ? this.getOne(selector) : undefined
+    return this.getOne(selector, constrainQuery)
   }
 
   //* **** UPDATE *****//
@@ -260,9 +220,14 @@ abstract class DomainEntityService<
       message: `Reduced companies for user`,
     })
 
-    const isUserAllowedToUpdate = await this.canUserUpdateForCompany(selector, userCompanies, user)
+    const constrainQuery = this.repository.constraintQueryToCompany(userCompanies)
+    const selectionQuery = this.repository.createQueryBuilder().where(selector)
+    const constrainedSelectionQuery = constrainQuery(selectionQuery)
 
-    return isUserAllowedToUpdate ? this.update(selector, newData) : undefined
+    const allowedData = await constrainedSelectionQuery.getMany()
+    if (allowedData.length === 0) return
+
+    return this.update(selector, newData)
   }
 
   async updateIfUserIsInTeam(
@@ -278,9 +243,14 @@ abstract class DomainEntityService<
       message: `Reduced teams for user`,
     })
 
-    const isUserAllowedToUpdate = await this.canUserUpdateForTeam(selector, userTeams, user)
+    const constrainQuery = this.repository.constraintQueryToTeam(userTeams)
+    const selectionQuery = this.repository.createQueryBuilder().where(selector)
+    const constrainedSelectionQuery = constrainQuery(selectionQuery)
 
-    return isUserAllowedToUpdate ? this.update(selector, newData) : undefined
+    const allowedData = await constrainedSelectionQuery.getMany()
+    if (allowedData.length === 0) return
+
+    return this.update(selector, newData)
   }
 
   async updateIfUserOwnsIt(
@@ -288,9 +258,14 @@ abstract class DomainEntityService<
     newData: QueryDeepPartialEntity<E>,
     user: UserDTO,
   ): Promise<E | null> {
-    const isUserAllowedToUpdate = await this.canUserUpdateForSelf(selector, user)
+    const constrainQuery = this.repository.constraintQueryToOwns(user)
+    const selectionQuery = this.repository.createQueryBuilder().where(selector)
+    const constrainedSelectionQuery = constrainQuery(selectionQuery)
 
-    return isUserAllowedToUpdate ? this.update(selector, newData) : undefined
+    const allowedData = await constrainedSelectionQuery.getMany()
+    if (allowedData.length === 0) return
+
+    return this.update(selector, newData)
   }
 
   //* **** DELETE *****//

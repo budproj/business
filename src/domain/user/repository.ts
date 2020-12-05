@@ -1,16 +1,14 @@
-import { Logger } from '@nestjs/common'
-import { EntityRepository, FindConditions, SelectQueryBuilder } from 'typeorm'
+import { EntityRepository, SelectQueryBuilder } from 'typeorm'
 
 import { CompanyDTO } from 'domain/company/dto'
 import DomainEntityRepository from 'domain/repository'
-import { Team } from 'domain/team/entities'
+import { TeamDTO } from 'domain/team/dto'
+import { UserDTO } from 'domain/user/dto'
 
 import { User } from './entities'
 
 @EntityRepository(User)
 class DomainUserRepository extends DomainEntityRepository<User> {
-  private readonly logger = new Logger(DomainUserRepository.name)
-
   constraintQueryToCompany(allowedCompanies: Array<CompanyDTO['id']>) {
     const addContraintToQuery = (query?: SelectQueryBuilder<User>) => {
       const baseQuery = query ?? this.createQueryBuilder()
@@ -24,22 +22,28 @@ class DomainUserRepository extends DomainEntityRepository<User> {
     return addContraintToQuery
   }
 
-  async findRelatedTeams(selector: FindConditions<User>): Promise<Array<Partial<Team>> | null> {
-    const query = this.createQueryBuilder()
-      .where(selector)
-      .leftJoinAndSelect(`${User.name}.teams`, 'teams')
-      .select('teams.companyId AS "companyId", teams.id as "id"')
-      .execute()
+  constraintQueryToTeam(allowedTeams: Array<TeamDTO['id']>) {
+    const addContraintToQuery = (query?: SelectQueryBuilder<User>) => {
+      const baseQuery = query ?? this.createQueryBuilder()
+      const constrainedQuery = baseQuery
+        .leftJoinAndSelect(`${User.name}.teams`, 'teams')
+        .andWhere('teams.id IN (:...allowedTeams)', { allowedTeams })
 
-    const teams: Team[] = await query
+      return constrainedQuery
+    }
 
-    this.logger.debug({
-      teams,
-      selector,
-      message: 'Found related teams for selector',
-    })
+    return addContraintToQuery
+  }
 
-    return teams
+  constraintQueryToOwns(user: UserDTO) {
+    const addContraintToQuery = (query?: SelectQueryBuilder<User>) => {
+      const baseQuery = query ?? this.createQueryBuilder()
+      const constrainedQuery = baseQuery.andWhere(`${User.name}.id = :userID`, { userID: user.id })
+
+      return constrainedQuery
+    }
+
+    return addContraintToQuery
   }
 }
 
