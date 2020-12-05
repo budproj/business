@@ -1,12 +1,13 @@
 import { Logger } from '@nestjs/common'
-import { EntityRepository, FindConditions, Repository } from 'typeorm'
+import { EntityRepository, FindConditions } from 'typeorm'
 
+import DomainEntityRepository from 'domain/repository'
 import { Team } from 'domain/team/entities'
 
 import { ConfidenceReport } from './entities'
 
 @EntityRepository(ConfidenceReport)
-class DomainConfidenceReportRepository extends Repository<ConfidenceReport> {
+class DomainConfidenceReportRepository extends DomainEntityRepository<ConfidenceReport> {
   private readonly logger = new Logger(DomainConfidenceReportRepository.name)
 
   async findRelatedTeams(

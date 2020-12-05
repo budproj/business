@@ -1,12 +1,13 @@
 import { Logger } from '@nestjs/common'
-import { EntityRepository, FindConditions, Repository } from 'typeorm'
+import { EntityRepository, FindConditions } from 'typeorm'
 
+import DomainEntityRepository from 'domain/repository'
 import { Team } from 'domain/team/entities'
 
 import { Company } from './entities'
 
 @EntityRepository(Company)
-class DomainCompanyRepository extends Repository<Company> {
+class DomainCompanyRepository extends DomainEntityRepository<Company> {
   private readonly logger = new Logger(DomainCompanyRepository.name)
 
   async findRelatedTeams(selector: FindConditions<Company>): Promise<Array<Partial<Team>> | null> {

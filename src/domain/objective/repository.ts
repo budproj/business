@@ -1,13 +1,14 @@
 import { Logger } from '@nestjs/common'
-import { EntityRepository, FindConditions, Repository } from 'typeorm'
+import { EntityRepository, FindConditions } from 'typeorm'
 
 import { Company } from 'domain/company/entities'
+import DomainEntityRepository from 'domain/repository'
 import { Team } from 'domain/team/entities'
 
 import { Objective } from './entities'
 
 @EntityRepository(Objective)
-class DomainObjectiveRepository extends Repository<Objective> {
+class DomainObjectiveRepository extends DomainEntityRepository<Objective> {
   private readonly logger = new Logger(DomainObjectiveRepository.name)
 
   async findRelatedCompanies(

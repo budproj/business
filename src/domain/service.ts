@@ -1,7 +1,9 @@
 import { Logger } from '@nestjs/common'
 import { uniq } from 'lodash'
-import { DeleteResult, FindConditions, Repository } from 'typeorm'
+import { DeleteResult, FindConditions } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
+
+import DomainEntityRepository, { SelectionQueryConstrain } from 'domain/repository'
 
 import { CompanyDTO } from './company/dto'
 import { Company } from './company/entities'
@@ -46,7 +48,10 @@ abstract class DomainEntityService<
 > {
   public readonly logger: Logger
 
-  constructor(public readonly repository: Repository<E>, public readonly loggerName: string) {
+  constructor(
+    public readonly repository: DomainEntityRepository<E>,
+    public readonly loggerName: string,
+  ) {
     this.logger = new Logger(loggerName ?? DomainEntityService.name)
   }
 
@@ -192,8 +197,13 @@ abstract class DomainEntityService<
     return this.repository.find()
   }
 
-  async getOne(selector: FindConditions<E>): Promise<E | null> {
-    return this.repository.findOne(selector)
+  async getOne(
+    selector: FindConditions<E>,
+    constrainQuery?: SelectionQueryConstrain<E>,
+  ): Promise<E | null> {
+    const query = this.repository.createQueryBuilder().where(selector)
+
+    return constrainQuery ? constrainQuery(query).getOne() : query.getOne()
   }
 
   async getOneIfUserIsInCompany(selector: FindConditions<E>, user: UserDTO): Promise<E | null> {
@@ -205,9 +215,9 @@ abstract class DomainEntityService<
       message: `Reduced companies for user`,
     })
 
-    const isUserAllowedToRead = await this.canUserReadForCompany(selector, userCompanies, user)
+    const constrainQuery = this.repository.constraintQueryToCompany(userCompanies)
 
-    return isUserAllowedToRead ? this.getOne(selector) : undefined
+    return this.getOne(selector, constrainQuery)
   }
 
   async getOneIfUserIsInTeam(selector: FindConditions<E>, user: UserDTO): Promise<E | null> {

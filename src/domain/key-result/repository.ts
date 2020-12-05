@@ -1,14 +1,15 @@
 import { Logger } from '@nestjs/common'
-import { EntityRepository, FindConditions, Repository, SelectQueryBuilder } from 'typeorm'
+import { EntityRepository, FindConditions, SelectQueryBuilder } from 'typeorm'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
+import DomainEntityRepository from 'domain/repository'
 import { Team } from 'domain/team/entities'
 
 import { KeyResult } from './entities'
 
 @EntityRepository(KeyResult)
-class DomainKeyResultRepository extends Repository<KeyResult> {
+class DomainKeyResultRepository extends DomainEntityRepository<KeyResult> {
   private readonly logger = new Logger(DomainKeyResultRepository.name)
 
   async findRelatedTeams(
