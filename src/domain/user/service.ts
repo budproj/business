@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { FindConditions } from 'typeorm'
 
 import { CompanyDTO } from 'domain/company/dto'
 import DomainEntityService from 'domain/service'
@@ -23,7 +24,7 @@ class DomainUserService extends DomainEntityService<User, UserDTO> {
   }
 
   async canUserReadForCompany(
-    selector: Partial<UserDTO>,
+    selector: FindConditions<User>,
     userCompanies: Array<CompanyDTO['id']>,
   ): Promise<boolean> {
     const relatedTeams = await this.repository.findRelatedTeams(selector)
@@ -34,7 +35,7 @@ class DomainUserService extends DomainEntityService<User, UserDTO> {
   }
 
   async canUserReadForTeam(
-    selector: Partial<UserDTO>,
+    selector: FindConditions<User>,
     userTeams: Array<TeamDTO['id']>,
   ): Promise<boolean> {
     const relatedTeams = await this.repository.findRelatedTeams(selector)
@@ -44,7 +45,7 @@ class DomainUserService extends DomainEntityService<User, UserDTO> {
     return canUserRead
   }
 
-  async canUserReadForSelf(selector: Partial<UserDTO>, user: UserDTO): Promise<boolean> {
+  async canUserReadForSelf(selector: FindConditions<User>, user: UserDTO): Promise<boolean> {
     return user.id === selector.id
   }
 }

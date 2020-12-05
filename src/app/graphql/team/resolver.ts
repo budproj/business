@@ -31,7 +31,7 @@ class GraphQLTeamResolver {
   async team(@Args('id', { type: () => ID }) id: TeamObject['id'], @GraphQLUser() user: AuthzUser) {
     this.logger.log(`Fetching team with id ${id.toString()}`)
 
-    const team = await this.resolverService.getOneByIDWithActionScopeConstraint(id, user)
+    const team = await this.resolverService.getOneWithActionScopeConstraint({ id }, user)
     if (!team) throw new NotFoundException(`We could not found a team with id ${id}`)
 
     return team
@@ -54,7 +54,7 @@ class GraphQLTeamResolver {
       message: 'Fetching company for team',
     })
 
-    return this.companyDomain.getOneByID(team.companyId)
+    return this.companyDomain.getOne({ id: team.companyId })
   }
 
   @ResolveField()
@@ -64,7 +64,7 @@ class GraphQLTeamResolver {
       message: 'Fetching owner for team',
     })
 
-    return this.userDomain.getOneByID(team.ownerId)
+    return this.userDomain.getOne({ id: team.ownerId })
   }
 }
 

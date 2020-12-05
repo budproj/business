@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common'
 import { uniq } from 'lodash'
-import { DeleteResult, Repository } from 'typeorm'
+import { DeleteResult, FindConditions, Repository } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
 import { CompanyDTO } from './company/dto'
@@ -72,7 +72,7 @@ abstract class DomainEntityService<
   }
 
   async canUserReadForCompany(
-    _selector: Partial<D>,
+    _selector: FindConditions<E>,
     _userCompanies: Array<CompanyDTO['id']>,
     _user: UserDTO,
   ): Promise<boolean> {
@@ -80,19 +80,19 @@ abstract class DomainEntityService<
   }
 
   async canUserReadForTeam(
-    _selector: Partial<D>,
+    _selector: FindConditions<E>,
     _userTeams: Array<TeamDTO['id']>,
     _user: UserDTO,
   ): Promise<boolean> {
     throw new Error('You must implement canUserReadForTeam method')
   }
 
-  async canUserReadForSelf(_selector: Partial<D>, _user: UserDTO): Promise<boolean> {
+  async canUserReadForSelf(_selector: FindConditions<E>, _user: UserDTO): Promise<boolean> {
     throw new Error('You must implement canUserReadForSelf method')
   }
 
   async canUserUpdateForCompany(
-    _selector: Partial<D>,
+    _selector: FindConditions<E>,
     _userCompanies: Array<CompanyDTO['id']>,
     _user: UserDTO,
   ): Promise<boolean> {
@@ -100,19 +100,19 @@ abstract class DomainEntityService<
   }
 
   async canUserUpdateForTeam(
-    _selector: Partial<D>,
+    _selector: FindConditions<E>,
     _userTeams: Array<TeamDTO['id']>,
     _user: UserDTO,
   ): Promise<boolean> {
     throw new Error('You must implement canUserUpdateForTeam method')
   }
 
-  async canUserUpdateForSelf(_selector: Partial<D>, _user: UserDTO): Promise<boolean> {
+  async canUserUpdateForSelf(_selector: FindConditions<E>, _user: UserDTO): Promise<boolean> {
     throw new Error('You must implement canUserUpdateForSelf method')
   }
 
   async canUserDeleteForCompany(
-    _selector: Partial<D>,
+    _selector: FindConditions<E>,
     _userCompanies: Array<CompanyDTO['id']>,
     _user: UserDTO,
   ): Promise<boolean> {
@@ -120,14 +120,14 @@ abstract class DomainEntityService<
   }
 
   async canUserDeleteForTeam(
-    _selector: Partial<D>,
+    _selector: FindConditions<E>,
     _userTeams: Array<TeamDTO['id']>,
     _user: UserDTO,
   ): Promise<boolean> {
     throw new Error('You must implement canUserDeleteForTeam method')
   }
 
-  async canUserDeleteForSelf(_selector: Partial<D>, _user: UserDTO): Promise<boolean> {
+  async canUserDeleteForSelf(_selector: FindConditions<E>, _user: UserDTO): Promise<boolean> {
     throw new Error('You must implement canUserDeleteForSelf method')
   }
 
@@ -192,11 +192,11 @@ abstract class DomainEntityService<
     return this.repository.find()
   }
 
-  async getOneByID(id: D['id']): Promise<E | null> {
-    return this.repository.findOne(id)
+  async getOne(selector: FindConditions<E>): Promise<E | null> {
+    return this.repository.findOne(selector)
   }
 
-  async getOneByIDIfUserIsInCompany(id: D['id'], user: UserDTO): Promise<E | null> {
+  async getOneIfUserIsInCompany(selector: FindConditions<E>, user: UserDTO): Promise<E | null> {
     const userCompanies = await this.parseUserCompanies(user)
 
     this.logger.debug({
@@ -205,16 +205,12 @@ abstract class DomainEntityService<
       message: `Reduced companies for user`,
     })
 
-    const isUserAllowedToRead = await this.canUserReadForCompany(
-      { id } as Partial<D>,
-      userCompanies,
-      user,
-    )
+    const isUserAllowedToRead = await this.canUserReadForCompany(selector, userCompanies, user)
 
-    return isUserAllowedToRead ? this.getOneByID(id) : undefined
+    return isUserAllowedToRead ? this.getOne(selector) : undefined
   }
 
-  async getOneByIDIfUserIsInTeam(id: D['id'], user: UserDTO): Promise<E | null> {
+  async getOneIfUserIsInTeam(selector: FindConditions<E>, user: UserDTO): Promise<E | null> {
     const userTeams = await this.parseUserTeams(user)
 
     this.logger.debug({
@@ -223,26 +219,26 @@ abstract class DomainEntityService<
       message: `Reduced teams for user`,
     })
 
-    const isUserAllowedToRead = await this.canUserReadForTeam({ id } as Partial<D>, userTeams, user)
+    const isUserAllowedToRead = await this.canUserReadForTeam(selector, userTeams, user)
 
-    return isUserAllowedToRead ? this.getOneByID(id) : undefined
+    return isUserAllowedToRead ? this.getOne(selector) : undefined
   }
 
-  async getOneByIDIfUserOwnsIt(id: D['id'], user: UserDTO): Promise<E | null> {
-    const isUserAllowedToRead = await this.canUserReadForSelf({ id } as Partial<D>, user)
+  async getOneIfUserOwnsIt(selector: FindConditions<E>, user: UserDTO): Promise<E | null> {
+    const isUserAllowedToRead = await this.canUserReadForSelf(selector, user)
 
-    return isUserAllowedToRead ? this.getOneByID(id) : undefined
+    return isUserAllowedToRead ? this.getOne(selector) : undefined
   }
 
   //* **** UPDATE *****//
-  async updateOneByID(id: D['id'], newData: QueryDeepPartialEntity<E>): Promise<E | null> {
-    await this.repository.update(id, newData)
+  async update(selector: FindConditions<E>, newData: QueryDeepPartialEntity<E>): Promise<E | null> {
+    await this.repository.update(selector, newData)
 
-    return this.getOneByID(id)
+    return this.getOne(selector)
   }
 
-  async updateOneByIDIfUserIsInCompany(
-    id: D['id'],
+  async updateIfUserIsInCompany(
+    selector: FindConditions<E>,
     newData: QueryDeepPartialEntity<E>,
     user: UserDTO,
   ): Promise<E | null> {
@@ -254,17 +250,13 @@ abstract class DomainEntityService<
       message: `Reduced companies for user`,
     })
 
-    const isUserAllowedToUpdate = await this.canUserUpdateForCompany(
-      { id } as Partial<D>,
-      userCompanies,
-      user,
-    )
+    const isUserAllowedToUpdate = await this.canUserUpdateForCompany(selector, userCompanies, user)
 
-    return isUserAllowedToUpdate ? this.updateOneByID(id, newData) : undefined
+    return isUserAllowedToUpdate ? this.update(selector, newData) : undefined
   }
 
-  async updateOneByIDIfUserIsInTeam(
-    id: D['id'],
+  async updateIfUserIsInTeam(
+    selector: FindConditions<E>,
     newData: QueryDeepPartialEntity<E>,
     user: UserDTO,
   ): Promise<E | null> {
@@ -276,31 +268,27 @@ abstract class DomainEntityService<
       message: `Reduced teams for user`,
     })
 
-    const isUserAllowedToUpdate = await this.canUserUpdateForTeam(
-      { id } as Partial<D>,
-      userTeams,
-      user,
-    )
+    const isUserAllowedToUpdate = await this.canUserUpdateForTeam(selector, userTeams, user)
 
-    return isUserAllowedToUpdate ? this.updateOneByID(id, newData) : undefined
+    return isUserAllowedToUpdate ? this.update(selector, newData) : undefined
   }
 
-  async updateOneByIDIfUserOwnsIt(
-    id: D['id'],
+  async updateIfUserOwnsIt(
+    selector: FindConditions<E>,
     newData: QueryDeepPartialEntity<E>,
     user: UserDTO,
   ): Promise<E | null> {
-    const isUserAllowedToUpdate = await this.canUserUpdateForSelf({ id } as Partial<D>, user)
+    const isUserAllowedToUpdate = await this.canUserUpdateForSelf(selector, user)
 
-    return isUserAllowedToUpdate ? this.updateOneByID(id, newData) : undefined
+    return isUserAllowedToUpdate ? this.update(selector, newData) : undefined
   }
 
   //* **** DELETE *****//
-  async deleteOneByID(id: D['id']): Promise<DeleteResult> {
-    return this.repository.delete(id)
+  async delete(selector: FindConditions<E>): Promise<DeleteResult> {
+    return this.repository.delete(selector)
   }
 
-  async deleteOneByIDIfUserIsInCompany(id: D['id'], user: UserDTO): Promise<DeleteResult> {
+  async deleteIfUserIsInCompany(selector: FindConditions<E>, user: UserDTO): Promise<DeleteResult> {
     const userCompanies = await this.parseUserCompanies(user)
 
     this.logger.debug({
@@ -309,16 +297,12 @@ abstract class DomainEntityService<
       message: `Reduced companies for user`,
     })
 
-    const isUserAllowedToDelete = await this.canUserDeleteForCompany(
-      { id } as Partial<D>,
-      userCompanies,
-      user,
-    )
+    const isUserAllowedToDelete = await this.canUserDeleteForCompany(selector, userCompanies, user)
 
-    return isUserAllowedToDelete ? this.deleteOneByID(id) : undefined
+    return isUserAllowedToDelete ? this.delete(selector) : undefined
   }
 
-  async deleteOneByIDIfUserIsInTeam(id: D['id'], user: UserDTO): Promise<DeleteResult> {
+  async deleteIfUserIsInTeam(selector: FindConditions<E>, user: UserDTO): Promise<DeleteResult> {
     const userTeams = await this.parseUserTeams(user)
 
     this.logger.debug({
@@ -327,19 +311,15 @@ abstract class DomainEntityService<
       message: `Reduced teams for user`,
     })
 
-    const isUserAllowedToDelete = await this.canUserDeleteForTeam(
-      { id } as Partial<D>,
-      userTeams,
-      user,
-    )
+    const isUserAllowedToDelete = await this.canUserDeleteForTeam(selector, userTeams, user)
 
-    return isUserAllowedToDelete ? this.deleteOneByID(id) : undefined
+    return isUserAllowedToDelete ? this.delete(selector) : undefined
   }
 
-  async deleteOneByIDIfUserOwnsIt(id: D['id'], user: UserDTO): Promise<DeleteResult> {
-    const isUserAllowedToDelete = await this.canUserDeleteForSelf({ id } as Partial<D>, user)
+  async deleteIfUserOwnsIt(selector: FindConditions<E>, user: UserDTO): Promise<DeleteResult> {
+    const isUserAllowedToDelete = await this.canUserDeleteForSelf(selector, user)
 
-    return isUserAllowedToDelete ? this.deleteOneByID(id) : undefined
+    return isUserAllowedToDelete ? this.delete(selector) : undefined
   }
 }
 

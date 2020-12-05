@@ -32,7 +32,7 @@ class GraphQLCompanyResolver {
     @Args('id', { type: () => ID }) id: CompanyObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
-    const company = await this.resolverService.getOneByIDWithActionScopeConstraint(id, user)
+    const company = await this.resolverService.getOneWithActionScopeConstraint({ id }, user)
     if (!company) throw new NotFoundException(`We could not found a company with id ${id}`)
 
     return company
@@ -65,7 +65,7 @@ class GraphQLCompanyResolver {
       message: 'Fetching owner for company',
     })
 
-    return this.userDomain.getOneByID(company.ownerId)
+    return this.userDomain.getOne({ id: company.ownerId })
   }
 }
 

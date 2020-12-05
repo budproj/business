@@ -34,7 +34,7 @@ class GraphQLObjectiveResolver {
   ) {
     this.logger.log(`Fetching objective with id ${id.toString()}`)
 
-    const objective = await this.resolverService.getOneByIDWithActionScopeConstraint(id, user)
+    const objective = await this.resolverService.getOneWithActionScopeConstraint({ id }, user)
     if (!objective) throw new NotFoundException(`We could not found an objective with id ${id}`)
 
     return objective
@@ -57,7 +57,7 @@ class GraphQLObjectiveResolver {
       message: 'Fetching cycle for objective',
     })
 
-    return this.cycleDomain.getOneByID(objective.cycleId)
+    return this.cycleDomain.getOne({ id: objective.cycleId })
   }
 
   @ResolveField()
@@ -67,7 +67,7 @@ class GraphQLObjectiveResolver {
       message: 'Fetching owner for objective',
     })
 
-    return this.userDomain.getOneByID(objective.ownerId)
+    return this.userDomain.getOne({ id: objective.ownerId })
   }
 }
 

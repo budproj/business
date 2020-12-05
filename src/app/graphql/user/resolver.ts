@@ -36,7 +36,7 @@ class GraphQLUserResolver {
   ) {
     this.logger.log(`Fetching user with id ${id.toString()}`)
 
-    const user = await this.resolverService.getOneByIDWithActionScopeConstraint(id, authzUser)
+    const user = await this.resolverService.getOneWithActionScopeConstraint({ id }, authzUser)
     if (!user) throw new NotFoundException(`We could not found an user with id ${id}`)
 
     return user

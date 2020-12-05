@@ -47,8 +47,8 @@ class GraphQLKeyResultReportResolver {
       message: 'Checking if the user owns the given key result',
     })
 
-    const keyResult = await this.resolverService.getOneByIDWithActionScopeConstraint(
-      checkInInput.keyResultId,
+    const keyResult = await this.resolverService.getOneWithActionScopeConstraint(
+      { id: checkInInput.keyResultId },
       user,
       ACTION.CREATE,
     )

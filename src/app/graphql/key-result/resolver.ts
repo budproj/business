@@ -36,7 +36,7 @@ class GraphQLKeyResultResolver {
   ) {
     this.logger.log(`Fetching key result with id ${id.toString()}`)
 
-    const keyResult = await this.resolverService.getOneByIDWithActionScopeConstraint(id, user)
+    const keyResult = await this.resolverService.getOneWithActionScopeConstraint({ id }, user)
     if (!keyResult) throw new NotFoundException(`We could not found a key result with id ${id}`)
 
     return keyResult
@@ -49,7 +49,7 @@ class GraphQLKeyResultResolver {
       message: 'Fetching owner for key result',
     })
 
-    return this.userDomain.getOneByID(keyResult.ownerId)
+    return this.userDomain.getOne({ id: keyResult.ownerId })
   }
 
   @ResolveField()
@@ -59,7 +59,7 @@ class GraphQLKeyResultResolver {
       message: 'Fetching objective for key result',
     })
 
-    return this.objectiveDomain.getOneByID(keyResult.objectiveId)
+    return this.objectiveDomain.getOne({ id: keyResult.objectiveId })
   }
 
   @ResolveField()
@@ -69,7 +69,7 @@ class GraphQLKeyResultResolver {
       message: 'Fetching team for key result',
     })
 
-    return this.teamDomain.getOneByID(keyResult.teamId)
+    return this.teamDomain.getOne({ id: keyResult.teamId })
   }
 
   @ResolveField()

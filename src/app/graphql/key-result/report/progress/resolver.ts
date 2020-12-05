@@ -43,7 +43,7 @@ class GraphQLProgressReportResolver {
   ) {
     this.logger.log(`Fetching progress report with id ${id.toString()}`)
 
-    const progressReport = await this.resolverService.getOneByIDWithActionScopeConstraint(id, user)
+    const progressReport = await this.resolverService.getOneWithActionScopeConstraint({ id }, user)
     if (!progressReport)
       throw new NotFoundException(`We could not found a progress report with id ${id}`)
 
@@ -57,7 +57,7 @@ class GraphQLProgressReportResolver {
       message: 'Fetching key result for progress report',
     })
 
-    return this.keyResultDomain.getOneByID(progressReport.keyResultId)
+    return this.keyResultDomain.getOne({ id: progressReport.keyResultId })
   }
 
   @ResolveField()
@@ -67,7 +67,7 @@ class GraphQLProgressReportResolver {
       message: 'Fetching user for progress report',
     })
 
-    return this.userDomain.getOneByID(progressReport.userId)
+    return this.userDomain.getOne({ id: progressReport.userId })
   }
 
   @Permissions(PERMISSION['PROGRESS_REPORT:CREATE'])
@@ -83,8 +83,8 @@ class GraphQLProgressReportResolver {
       message: 'Checking if the user owns the given key result',
     })
 
-    const keyResult = await this.resolverService.getOneByIDWithActionScopeConstraint(
-      progressReportInput.keyResultId,
+    const keyResult = await this.resolverService.getOneWithActionScopeConstraint(
+      { id: progressReportInput.keyResultId },
       user,
       ACTION.CREATE,
     )

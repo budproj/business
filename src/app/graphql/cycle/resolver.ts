@@ -32,7 +32,7 @@ class GraphQLCycleResolver {
   ) {
     this.logger.log(`Fetching cycle with id ${id.toString()}`)
 
-    const cycle = await this.resolverService.getOneByIDWithActionScopeConstraint(id, user)
+    const cycle = await this.resolverService.getOneWithActionScopeConstraint({ id }, user)
     if (!cycle) throw new NotFoundException(`We could not found a cycle with id ${id}`)
 
     return cycle
@@ -45,7 +45,7 @@ class GraphQLCycleResolver {
       message: 'Fetching company for cycle',
     })
 
-    return this.companyDomain.getOneByID(cycle.companyId)
+    return this.companyDomain.getOne({ id: cycle.companyId })
   }
 
   @ResolveField()

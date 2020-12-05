@@ -32,8 +32,8 @@ class GraphQLConfidenceReportResolver {
   ) {
     this.logger.log(`Fetching confidence report with id ${id.toString()}`)
 
-    const confidenceReport = await this.resolverService.getOneByIDWithActionScopeConstraint(
-      id,
+    const confidenceReport = await this.resolverService.getOneWithActionScopeConstraint(
+      { id },
       user,
     )
     if (!confidenceReport)
@@ -49,7 +49,7 @@ class GraphQLConfidenceReportResolver {
       message: 'Fetching key result for confidence report',
     })
 
-    return this.keyResultDomain.getOneByID(confidenceReport.keyResultId)
+    return this.keyResultDomain.getOne({ id: confidenceReport.keyResultId })
   }
 
   @ResolveField()
@@ -59,7 +59,7 @@ class GraphQLConfidenceReportResolver {
       message: 'Fetching user for confidence report',
     })
 
-    return this.userDomain.getOneByID(confidenceReport.userId)
+    return this.userDomain.getOne({ id: confidenceReport.userId })
   }
 }
 

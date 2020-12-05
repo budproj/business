@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common'
-import { EntityRepository, ObjectLiteral, Repository } from 'typeorm'
+import { EntityRepository, FindConditions, Repository } from 'typeorm'
 
 import { Team } from 'domain/team/entities'
 
@@ -9,7 +9,7 @@ import { User } from './entities'
 class DomainUserRepository extends Repository<User> {
   private readonly logger = new Logger(DomainUserRepository.name)
 
-  async findRelatedTeams(selector: ObjectLiteral): Promise<Array<Partial<Team>> | null> {
+  async findRelatedTeams(selector: FindConditions<User>): Promise<Array<Partial<Team>> | null> {
     const query = this.createQueryBuilder()
       .where(selector)
       .leftJoinAndSelect(`${User.name}.teams`, 'teams')

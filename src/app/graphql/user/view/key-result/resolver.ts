@@ -46,9 +46,10 @@ class GraphQLKeyResultViewResolver {
   ) {
     this.logger.log('Fetching key result view')
 
-    const keyResultView = binding
-      ? await this.resolverService.getOneByBindingWithScopeConstraint(binding, user)
-      : await this.resolverService.getOneByIDWithActionScopeConstraint(id, user)
+    const keyResultView = await this.resolverService.getOneWithActionScopeConstraint(
+      { id, binding, userId: user.id },
+      user,
+    )
     if (!keyResultView)
       throw new NotFoundException('We could not found a key result view with given args')
 
@@ -62,7 +63,7 @@ class GraphQLKeyResultViewResolver {
       message: 'Fetching user for key result view',
     })
 
-    return this.userDomain.getOneByID(keyResultView.userId)
+    return this.userDomain.getOne({ id: keyResultView.userId })
   }
 
   @ResolveField()
@@ -91,8 +92,8 @@ class GraphQLKeyResultViewResolver {
       message: `Updating rank for key result view of id ${id}`,
     })
 
-    const updatedKeyResultView = await this.resolverService.updateByIDWithScopeConstraint(
-      id,
+    const updatedKeyResultView = await this.resolverService.updateWithScopeConstraint(
+      { id },
       keyResultViewRankInput,
       user,
     )
