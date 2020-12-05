@@ -8,7 +8,7 @@ import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import DomainCompanyService from 'domain/company/service'
 import DomainKeyResultService from 'domain/key-result/service'
-import { DomainUserService } from 'domain/user'
+import DomainUserService from 'domain/user/service'
 
 import { TeamObject } from './models'
 import GraphQLTeamService from './service'

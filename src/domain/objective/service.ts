@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common'
 import { CycleDTO } from 'domain/cycle/dto'
 import { ObjectiveDTO } from 'domain/objective/dto'
 import DomainEntityService from 'domain/service'
-import { UserDTO } from 'domain/user'
+import { UserDTO } from 'domain/user/dto'
 
 import { Objective } from './entities'
 import DomainObjectiveRepository from './repository'

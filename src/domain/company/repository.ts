@@ -3,7 +3,7 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 
 import { CompanyDTO } from 'domain/company/dto'
 import { TeamDTO } from 'domain/team/dto'
-import { UserDTO } from 'domain/user'
+import { UserDTO } from 'domain/user/dto'
 
 import { Company } from './entities'
 

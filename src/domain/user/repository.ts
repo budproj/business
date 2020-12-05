@@ -1,49 +1,34 @@
-import { EntityRepository, Repository } from 'typeorm'
+import { Logger } from '@nestjs/common'
+import { EntityRepository, ObjectLiteral, Repository } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { TeamDTO } from 'domain/team/dto'
+import { Team } from 'domain/team/entities'
 import { UserDTO } from 'domain/user/dto'
 
 import { User } from './entities'
 
 @EntityRepository(User)
 class DomainUserRepository extends Repository<User> {
-  async findByIDWithCompanyConstraint(
-    id: UserDTO['id'],
-    allowedCompanies: Array<CompanyDTO['id']>,
-  ): Promise<User | null> {
+  private readonly logger = new Logger(DomainUserRepository.name)
+
+  async findRelatedTeams(selector: ObjectLiteral): Promise<Array<Partial<Team>> | null> {
     const query = this.createQueryBuilder()
-    const filteredQuery = query.where({ id })
-    const joinedQuery = filteredQuery.leftJoinAndSelect(`${User.name}.teams`, 'teams')
-    const companyConstrainedQuery = joinedQuery.andWhere('teams.companyId IN (:...companies)', {
-      companies: allowedCompanies,
+      .where(selector)
+      .leftJoinAndSelect(`${User.name}.teams`, 'teams')
+      .select('teams.companyId AS "companyId", teams.id as "id"')
+      .execute()
+
+    const teams: Team[] = await query
+
+    this.logger.debug({
+      teams,
+      selector,
+      message: 'Found related teams for selector',
     })
 
-    return companyConstrainedQuery.getOne()
-  }
-
-  async findByIDWithTeamConstraint(
-    id: UserDTO['id'],
-    allowedTeams: Array<TeamDTO['id']>,
-  ): Promise<User | null> {
-    const query = this.createQueryBuilder()
-    const filteredQuery = query.where({ id })
-    const teamConstrainedQuery = filteredQuery.andWhere('teamsId IN (:...teams)', {
-      teams: allowedTeams,
-    })
-
-    return teamConstrainedQuery.getOne()
-  }
-
-  async findByIDWithOwnsConstraint(id: UserDTO['id'], userID: UserDTO['id']): Promise<User | null> {
-    const query = this.createQueryBuilder()
-    const filteredQuery = query.where({ id })
-    const selfConstrainedQuery = filteredQuery.andWhere('id = :userID', {
-      userID,
-    })
-
-    return selfConstrainedQuery.getOne()
+    return teams
   }
 
   async updateByIDWithCompanyConstraint(

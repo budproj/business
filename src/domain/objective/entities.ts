@@ -11,7 +11,7 @@ import {
 
 import { CycleDTO } from 'domain/cycle/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
-import { UserDTO } from 'domain/user'
+import { UserDTO } from 'domain/user/dto'
 
 import { ObjectiveDTO } from './dto'
 

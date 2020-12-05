@@ -84,6 +84,23 @@ abstract class GraphQLEntityService<
 
     return constrainedSelector()
   }
+
+  async createWithScopeConstraint(
+    data: Partial<D>,
+    user: AuthzUser,
+    action: ACTION = ACTION.CREATE,
+  ) {
+    const scopedConstrainedCreators = {
+      [SCOPE.ANY]: async () => this.entityService.create(data),
+      [SCOPE.COMPANY]: async () => this.entityService.createIfUserIsInCompany(data, user),
+      [SCOPE.TEAM]: async () => this.entityService.createIfUserIsInTeam(data, user),
+      [SCOPE.OWNS]: async () => this.entityService.createIfUserOwnsIt(data, user),
+    }
+    const scopeConstraint = user.scopes[this.resource][action]
+    const constrainedSelector = scopedConstrainedCreators[scopeConstraint]
+
+    return constrainedSelector()
+  }
 }
 
 export default GraphQLEntityService

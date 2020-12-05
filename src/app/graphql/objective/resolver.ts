@@ -8,7 +8,7 @@ import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import DomainCycleService from 'domain/cycle/service'
 import DomainKeyResultService from 'domain/key-result/service'
-import { DomainUserService } from 'domain/user'
+import DomainUserService from 'domain/user/service'
 
 import { ObjectiveObject } from './models'
 import GraphQLObjectiveService from './service'

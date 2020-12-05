@@ -60,14 +60,6 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
 
     return data
   }
-
-  async create(
-    keyResultViews: Partial<KeyResultViewDTO> | Array<Partial<KeyResultViewDTO>>,
-  ): Promise<KeyResultView[]> {
-    const data = await this.repository.insert(keyResultViews)
-
-    return data.raw
-  }
 }
 
 export default DomainKeyResultViewService

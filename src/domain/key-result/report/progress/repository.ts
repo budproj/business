@@ -3,8 +3,8 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 
 import { CompanyDTO } from 'domain/company/dto'
 import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
-import { TeamDTO } from 'domain/team'
-import { UserDTO } from 'domain/user'
+import { TeamDTO } from 'domain/team/dto'
+import { UserDTO } from 'domain/user/dto'
 
 import { ProgressReport } from './entities'
 
