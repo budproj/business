@@ -1,5 +1,4 @@
 import { EntityRepository, Repository } from 'typeorm'
-import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
@@ -57,36 +56,6 @@ class DomainConfidenceReportRepository extends Repository<ConfidenceReport> {
     })
 
     return ownerConstrainedQuery.getOne()
-  }
-
-  async updateByIDWithCompanyConstraint(
-    id: ConfidenceReportDTO['id'],
-    newData: QueryDeepPartialEntity<ConfidenceReport>,
-    allowedCompanies: Array<CompanyDTO['id']>,
-  ): Promise<ConfidenceReport | null> {
-    console.log(id, newData, allowedCompanies)
-
-    return null // eslint-disable-line unicorn/no-null
-  }
-
-  async updateByIDWithTeamConstraint(
-    id: ConfidenceReportDTO['id'],
-    newData: QueryDeepPartialEntity<ConfidenceReport>,
-    allowedTeams: Array<TeamDTO['id']>,
-  ): Promise<ConfidenceReport | null> {
-    console.log(id, newData, allowedTeams)
-
-    return null // eslint-disable-line unicorn/no-null
-  }
-
-  async updateByIDWithOwnsConstraint(
-    id: ConfidenceReportDTO['id'],
-    newData: QueryDeepPartialEntity<ConfidenceReport>,
-    userID: UserDTO['id'],
-  ): Promise<ConfidenceReport | null> {
-    console.log(id, newData, userID)
-
-    return null // eslint-disable-line unicorn/no-null
   }
 }
 

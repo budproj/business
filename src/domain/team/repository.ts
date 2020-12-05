@@ -1,5 +1,4 @@
 import { EntityRepository, Repository } from 'typeorm'
-import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { TeamDTO } from 'domain/team/dto'
@@ -46,36 +45,6 @@ class DomainTeamRepository extends Repository<Team> {
     })
 
     return ownerConstrainedQuery.getOne()
-  }
-
-  async updateByIDWithCompanyConstraint(
-    id: TeamDTO['id'],
-    newData: QueryDeepPartialEntity<Team>,
-    allowedCompanies: Array<CompanyDTO['id']>,
-  ): Promise<Team | null> {
-    console.log(id, newData, allowedCompanies)
-
-    return null // eslint-disable-line unicorn/no-null
-  }
-
-  async updateByIDWithTeamConstraint(
-    id: TeamDTO['id'],
-    newData: QueryDeepPartialEntity<Team>,
-    allowedTeams: Array<TeamDTO['id']>,
-  ): Promise<Team | null> {
-    console.log(id, newData, allowedTeams)
-
-    return null // eslint-disable-line unicorn/no-null
-  }
-
-  async updateByIDWithOwnsConstraint(
-    id: TeamDTO['id'],
-    newData: QueryDeepPartialEntity<Team>,
-    userID: UserDTO['id'],
-  ): Promise<Team | null> {
-    console.log(id, newData, userID)
-
-    return null // eslint-disable-line unicorn/no-null
   }
 }
 

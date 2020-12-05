@@ -1,5 +1,4 @@
 import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm'
-import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
@@ -83,36 +82,6 @@ class DomainKeyResultRepository extends Repository<KeyResult> {
     const orderedQuery = filteredQuery.orderBy(rank)
 
     return orderedQuery.getMany()
-  }
-
-  async updateByIDWithCompanyConstraint(
-    id: KeyResultDTO['id'],
-    newData: QueryDeepPartialEntity<KeyResult>,
-    allowedCompanies: Array<CompanyDTO['id']>,
-  ): Promise<KeyResult | null> {
-    console.log(id, newData, allowedCompanies)
-
-    return null // eslint-disable-line unicorn/no-null
-  }
-
-  async updateByIDWithTeamConstraint(
-    id: KeyResultDTO['id'],
-    newData: QueryDeepPartialEntity<KeyResult>,
-    allowedTeams: Array<TeamDTO['id']>,
-  ): Promise<KeyResult | null> {
-    console.log(id, newData, allowedTeams)
-
-    return null // eslint-disable-line unicorn/no-null
-  }
-
-  async updateByIDWithOwnsConstraint(
-    id: KeyResultDTO['id'],
-    newData: QueryDeepPartialEntity<KeyResult>,
-    userID: UserDTO['id'],
-  ): Promise<KeyResult | null> {
-    console.log(id, newData, userID)
-
-    return null // eslint-disable-line unicorn/no-null
   }
 }
 
