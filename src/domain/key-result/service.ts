@@ -32,24 +32,9 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     return this.repository.find({ teamId })
   }
 
-  async getManyByIdsPreservingOrderIfUserIsInCompany(
-    ids: Array<KeyResultDTO['id']>,
-    user: UserDTO,
-  ): Promise<KeyResult[]> {
-    const userCompanies = await this.parseUserCompanies(user)
-
-    this.logger.debug({
-      userCompanies,
-      user,
-      message: `Reduced companies for user`,
-    })
-
+  async getManyByIdsPreservingOrder(ids: Array<KeyResultDTO['id']>): Promise<KeyResult[]> {
     const rankSortColumn = this.repository.buildRankSortColumn(ids)
-    const data = this.repository.findByIdsRankedWithCompanyConstraint(
-      ids,
-      rankSortColumn,
-      userCompanies,
-    )
+    const data = this.repository.findByIdsRanked(ids, rankSortColumn)
 
     return data
   }

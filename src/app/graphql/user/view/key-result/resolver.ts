@@ -72,16 +72,13 @@ class GraphQLKeyResultViewResolver {
   }
 
   @ResolveField()
-  async keyResults(@Parent() keyResultView: KeyResultViewObject, @GraphQLUser() user: AuthzUser) {
+  async keyResults(@Parent() keyResultView: KeyResultViewObject) {
     this.logger.log({
       keyResultView,
       message: 'Fetching key results for key result view',
     })
 
-    return this.keyResultDomain.getManyByIdsPreservingOrderIfUserIsInCompany(
-      keyResultView.rank,
-      user,
-    )
+    return this.keyResultDomain.getManyByIdsPreservingOrder(keyResultView.rank)
   }
 
   @Permissions(PERMISSION['KEY_RESULT_VIEW:UPDATE'])

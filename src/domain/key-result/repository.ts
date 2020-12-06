@@ -64,25 +64,9 @@ class DomainKeyResultRepository extends DomainEntityRepository<KeyResult> {
     return rankSortColumn
   }
 
-  createCompanyConstrainedQueryBuilder(
-    allowedCompanies: Array<CompanyDTO['id']>,
-  ): SelectQueryBuilder<KeyResult> {
-    const query = super.createQueryBuilder()
-    const joinedQuery = query.leftJoinAndSelect(`${KeyResult.name}.team`, 'team')
-    const companyConstrainedQuery = joinedQuery.where('team.companyId IN (:...companies)', {
-      companies: allowedCompanies,
-    })
-
-    return companyConstrainedQuery
-  }
-
-  async findByIdsRankedWithCompanyConstraint(
-    ids: Array<KeyResultDTO['id']>,
-    rank: string,
-    allowedCompanies: Array<CompanyDTO['id']>,
-  ): Promise<KeyResult[]> {
-    const query = this.createCompanyConstrainedQueryBuilder(allowedCompanies)
-    const filteredQuery = query.andWhere(`${KeyResult.name}.id IN (:...ids)`, { ids })
+  async findByIdsRanked(ids: Array<KeyResultDTO['id']>, rank: string): Promise<KeyResult[]> {
+    const query = this.createQueryBuilder()
+    const filteredQuery = query.where(`${KeyResult.name}.id IN (:...ids)`, { ids })
     const orderedQuery = filteredQuery.orderBy(rank)
 
     return orderedQuery.getMany()
