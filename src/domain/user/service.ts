@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 
 import DomainEntityService from 'domain/service'
 import { UserDTO } from 'domain/user/dto'
@@ -10,6 +10,7 @@ import DomainUserViewService from './view/service'
 @Injectable()
 class DomainUserService extends DomainEntityService<User, UserDTO> {
   constructor(
+    @Inject(forwardRef(() => DomainUserViewService))
     public readonly view: DomainUserViewService,
     public readonly repository: DomainUserRepository,
   ) {

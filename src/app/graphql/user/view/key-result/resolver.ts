@@ -122,11 +122,11 @@ class GraphQLKeyResultViewResolver {
     })
 
     const enhancedWithUserID = {
-      ...keyResultViewInput,
       userId: user.id,
+      ...keyResultViewInput,
     }
 
-    const creationPromise = this.userDomain.view.keyResult.create(enhancedWithUserID)
+    const creationPromise = this.resolverService.createWithScopeConstraint(enhancedWithUserID, user)
     const [error, createdKeyResultView] = await this.railway.handleRailwayPromise<
       RailwayError,
       KeyResultView[]
@@ -134,6 +134,10 @@ class GraphQLKeyResultViewResolver {
     if (error?.code === '23505')
       throw new PreconditionFailedException('View bindings must be unique')
     if (error) throw new InternalServerErrorException('Unknown error')
+    if (!createdKeyResultView)
+      throw new NotFoundException(
+        `We could not found an user with ID ${enhancedWithUserID.userId} to create your view`,
+      )
 
     return createdKeyResultView[0]
   }

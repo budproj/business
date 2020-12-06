@@ -60,6 +60,12 @@ export class KeyResultViewInput {
 
   @Field(() => [ID], { description: 'Ordered list of key result IDs' })
   rank: Array<KeyResultObject['id']>
+
+  @Field(() => ID, {
+    description: 'The ID of the user that you are creating a view to',
+    nullable: true,
+  })
+  userId?: UserObject['id']
 }
 
 @InputType({ description: 'Required data to update a given key result view rank' })
