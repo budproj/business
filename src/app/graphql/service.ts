@@ -1,56 +1,24 @@
+import { FindConditions } from 'typeorm'
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
+
 import { ACTION, RESOURCE, SCOPE } from 'app/authz/constants'
 import { AuthzUser } from 'app/authz/types'
-import { CompanyDTO } from 'domain/company/dto'
-import DomainCompanyService from 'domain/company/service'
-import { CycleDTO } from 'domain/cycle/dto'
-import DomainCycleService from 'domain/cycle/service'
-import { KeyResultDTO } from 'domain/key-result/dto'
-import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
-import DomainConfidenceReportService from 'domain/key-result/report/confidence/service'
-import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
-import DomainProgressReportService from 'domain/key-result/report/progress/service'
-import DomainKeyResultService from 'domain/key-result/service'
-import { ObjectiveDTO } from 'domain/objective/dto'
-import DomainObjectiveService from 'domain/objective/service'
-import { TeamDTO } from 'domain/team/dto'
-import DomainTeamService from 'domain/team/service'
-import { UserDTO } from 'domain/user/dto'
-import DomainUserService from 'domain/user/service'
-import { KeyResultViewDTO } from 'domain/user/view/key-result/dto'
-import DomainKeyResultViewService from 'domain/user/view/key-result/service'
+import DomainEntityService from 'domain/service'
 
-abstract class GraphQLEntityService<
-  S extends
-    | DomainUserService
-    | DomainKeyResultViewService
-    | DomainTeamService
-    | DomainObjectiveService
-    | DomainKeyResultService
-    | DomainProgressReportService
-    | DomainConfidenceReportService
-    | DomainCycleService
-    | DomainCompanyService,
-  D extends
-    | UserDTO
-    | KeyResultViewDTO
-    | TeamDTO
-    | ObjectiveDTO
-    | KeyResultDTO
-    | ProgressReportDTO
-    | ConfidenceReportDTO
-    | CycleDTO
-    | CompanyDTO
-> {
-  public readonly entityService: S
+abstract class GraphQLEntityService<E, D> {
+  public readonly entityService: DomainEntityService<E, D>
   public readonly resource: RESOURCE
 
-  constructor(public readonly serviceResource: RESOURCE, public readonly domainEntityService: S) {
+  constructor(
+    public readonly serviceResource: RESOURCE,
+    public readonly domainEntityService: DomainEntityService<E, D>,
+  ) {
     this.resource = serviceResource
     this.entityService = domainEntityService
   }
 
   async getOneWithActionScopeConstraint(
-    selector: Partial<D>,
+    selector: FindConditions<E>,
     user: AuthzUser,
     action: ACTION = ACTION.READ,
   ) {
@@ -67,8 +35,8 @@ abstract class GraphQLEntityService<
   }
 
   async updateWithScopeConstraint(
-    selector: Partial<D>,
-    newData: Partial<D>,
+    selector: FindConditions<E>,
+    newData: QueryDeepPartialEntity<E>,
     user: AuthzUser,
     action: ACTION = ACTION.UPDATE,
   ) {
@@ -86,16 +54,15 @@ abstract class GraphQLEntityService<
   }
 
   async createWithScopeConstraint(
-    selector: Partial<D>,
     data: Partial<D>,
     user: AuthzUser,
     action: ACTION = ACTION.CREATE,
   ) {
     const scopedConstrainedCreators = {
       [SCOPE.ANY]: async () => this.entityService.create(data),
-      [SCOPE.COMPANY]: async () => this.entityService.createIfUserIsInCompany(selector, data, user),
-      [SCOPE.TEAM]: async () => this.entityService.createIfUserIsInTeam(selector, data, user),
-      [SCOPE.OWNS]: async () => this.entityService.createIfUserOwnsIt(selector, data, user),
+      [SCOPE.COMPANY]: async () => this.entityService.createIfUserIsInCompany(data, user),
+      [SCOPE.TEAM]: async () => this.entityService.createIfUserIsInTeam(data, user),
+      [SCOPE.OWNS]: async () => this.entityService.createIfUserOwnsIt(data, user),
     }
     const scopeConstraint = user.scopes[this.resource][action]
     const constrainedSelector = scopedConstrainedCreators[scopeConstraint]
@@ -104,7 +71,7 @@ abstract class GraphQLEntityService<
   }
 
   async deleteWithScopeConstraint(
-    selector: Partial<D>,
+    selector: FindConditions<E>,
     user: AuthzUser,
     action: ACTION = ACTION.CREATE,
   ) {

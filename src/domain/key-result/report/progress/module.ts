@@ -1,13 +1,16 @@
-import { Module } from '@nestjs/common'
+import { forwardRef, Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import DomainUserModule from 'domain/user'
+import DomainKeyResultModule from 'domain/key-result/module'
 
 import DomainProgressReportRepository from './repository'
 import DomainProgressReportService from './service'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([DomainProgressReportRepository]), DomainUserModule],
+  imports: [
+    TypeOrmModule.forFeature([DomainProgressReportRepository]),
+    forwardRef(() => DomainKeyResultModule),
+  ],
   providers: [DomainProgressReportService],
   exports: [DomainProgressReportService],
 })

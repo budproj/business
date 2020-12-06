@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ObjectiveDTO } from 'domain/objective/dto'
@@ -13,6 +13,7 @@ import DomainKeyResultRepository from './repository'
 @Injectable()
 class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO> {
   constructor(
+    @Inject(forwardRef(() => DomainKeyResultReportService))
     public readonly report: DomainKeyResultReportService,
     public readonly repository: DomainKeyResultRepository,
   ) {

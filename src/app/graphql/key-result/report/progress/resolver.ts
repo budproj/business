@@ -8,16 +8,16 @@ import {
 } from '@nestjs/common'
 import { Args, ID, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { ACTION, PERMISSION } from 'app/authz/constants'
+import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
-import { RailwayError } from 'app/errors'
 import { Railway } from 'app/providers'
 import { ProgressReport } from 'domain/key-result/report/progress/entities'
 import DomainKeyResultService from 'domain/key-result/service'
 import DomainUserService from 'domain/user/service'
+import { DuplicateEntityError, RailwayError } from 'errors'
 
 import { ProgressReportObject, ProgressReportInput } from './models'
 import GraphQLProgressReportService from './service'
@@ -80,30 +80,6 @@ class GraphQLProgressReportResolver {
     this.logger.log({
       user,
       progressReportInput,
-      message: 'Checking if the user owns the given key result',
-    })
-
-    const keyResult = await this.resolverService.getOneWithActionScopeConstraint(
-      { id: progressReportInput.keyResultId },
-      user,
-      ACTION.CREATE,
-    )
-    if (keyResult) {
-      this.logger.log({
-        user,
-        progressReportInput,
-        keyResult,
-        message:
-          'User tried to create a check-in in a key resultat that he/she can not see. Either it does not exist, or the user has no permission to see it',
-      })
-      throw new NotFoundException(
-        `We could not found an Key Result with ID ${progressReportInput.keyResultId}`,
-      )
-    }
-
-    this.logger.log({
-      user,
-      progressReportInput,
       message: 'Creating a new progress report',
     })
 
@@ -114,14 +90,19 @@ class GraphQLProgressReportResolver {
       valueNew: progressReportInput.value,
     }
 
-    const creationPromise = this.keyResultDomain.report.progress.create(enhancedWithUserID)
+    const creationPromise = this.resolverService.createWithScopeConstraint(enhancedWithUserID, user)
     const [error, createdProgressReport] = await this.railway.handleRailwayPromise<
       RailwayError,
       ProgressReport[]
     >(creationPromise)
+    console.log(error)
+    if (error.code === DuplicateEntityError.code)
+      throw new PreconditionFailedException('You have already created that report')
     if (error) throw new InternalServerErrorException('Unknown error')
     if (!createdProgressReport)
-      throw new PreconditionFailedException('You have already created that report')
+      throw new NotFoundException(
+        `We could not found a key result with ID ${progressReportInput.keyResultId} to add your report`,
+      )
 
     return createdProgressReport[0]
   }

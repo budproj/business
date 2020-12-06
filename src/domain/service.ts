@@ -6,46 +6,10 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 import DomainEntityRepository, { SelectionQueryConstrain } from 'domain/repository'
 
 import { CompanyDTO } from './company/dto'
-import { Company } from './company/entities'
-import { CycleDTO } from './cycle/dto'
-import { Cycle } from './cycle/entities'
-import { KeyResultDTO } from './key-result/dto'
-import { KeyResult } from './key-result/entities'
-import { ConfidenceReportDTO } from './key-result/report/confidence/dto'
-import { ConfidenceReport } from './key-result/report/confidence/entities'
-import { ProgressReportDTO } from './key-result/report/progress/dto'
-import { ProgressReport } from './key-result/report/progress/entities'
-import { ObjectiveDTO } from './objective/dto'
-import { Objective } from './objective/entities'
 import { TeamDTO } from './team/dto'
-import { Team } from './team/entities'
 import { UserDTO } from './user/dto'
-import { User } from './user/entities'
-import { KeyResultViewDTO } from './user/view/key-result/dto'
-import { KeyResultView } from './user/view/key-result/entities'
 
-abstract class DomainEntityService<
-  E extends
-    | User
-    | KeyResultView
-    | Team
-    | Objective
-    | KeyResult
-    | ProgressReport
-    | ConfidenceReport
-    | Cycle
-    | Company,
-  D extends
-    | UserDTO
-    | KeyResultViewDTO
-    | TeamDTO
-    | ObjectiveDTO
-    | KeyResultDTO
-    | ProgressReportDTO
-    | ConfidenceReportDTO
-    | CycleDTO
-    | CompanyDTO
-> {
+abstract class DomainEntityService<E, D> {
   public readonly logger: Logger
 
   constructor(
@@ -53,6 +17,46 @@ abstract class DomainEntityService<
     public readonly loggerName: string,
   ) {
     this.logger = new Logger(loggerName ?? DomainEntityService.name)
+  }
+
+  //* **** ABSTRACT METHODS *****//
+  async createIfUserIsInCompany(_data: Partial<D>, _user: UserDTO): Promise<E[] | null> {
+    // Since creation does not have a selector, we can not apply our constraint structure to it.
+    // To solve it, each entity service must implement its own method that will decide if the user
+    // is allowed to create that given resource.
+    //
+    // The suggested implementation is the following:
+    // 1. You fetch the user teams or companies (you can check other contraint methods and copy their implementation)
+    // 2. You run a read query for a given resource using a constraint (usually you will run a query from a different domain seervice)
+    // 3. You evaluate if the user is allowed to create the resource (usually by checking if something returned from the query)
+    // 4. You run the `this.create` method, by passing the provided data
+    throw new Error('You need to implement the createIfUserIsInCompany method')
+  }
+
+  async createIfUserIsInTeam(_data: Partial<D>, _user: UserDTO): Promise<E[] | null> {
+    // Since creation does not have a selector, we can not apply our constraint structure to it.
+    // To solve it, each entity service must implement its own method that will decide if the user
+    // is allowed to create that given resource.
+    //
+    // The suggested implementation is the following:
+    // 1. You fetch the user teams or companies (you can check other contraint methods and copy their implementation)
+    // 2. You run a read query for a given resource using a constraint (usually you will run a query from a different domain seervice)
+    // 3. You evaluate if the user is allowed to create the resource (usually by checking if something returned from the query)
+    // 4. You run the `this.create` method, by passing the provided data
+    throw new Error('You need to implement the createIfUserIsInTeam method')
+  }
+
+  async createIfUserOwnsIt(_data: Partial<D>, _user: UserDTO): Promise<E[] | null> {
+    // Since creation does not have a selector, we can not apply our constraint structure to it.
+    // To solve it, each entity service must implement its own method that will decide if the user
+    // is allowed to create that given resource.
+    //
+    // The suggested implementation is the following:
+    // 1. You parse user data
+    // 2. You run a read query for a given resource using a constraint (usually you will run a query from a different domain seervice)
+    // 3. You evaluate if the user is allowed to create the resource (usually by checking if something returned from the query)
+    // 4. You run the `this.create` method, by passing the provided data
+    throw new Error('You need to implement the createIfUserIsOwnsIt method')
   }
 
   //* **** HELPERS *****//
@@ -75,67 +79,6 @@ abstract class DomainEntityService<
     const result = await this.repository.insert(data as QueryDeepPartialEntity<E>)
 
     return result.raw
-  }
-
-  async createIfUserIsInCompany(
-    selector: FindConditions<E>,
-    data: Partial<D>,
-    user: UserDTO,
-  ): Promise<E[] | null> {
-    const userCompanies = await this.parseUserCompanies(user)
-
-    this.logger.debug({
-      userCompanies,
-      user,
-      message: `Reduced companies for user`,
-    })
-
-    const constrainQuery = this.repository.constraintQueryToCompany(userCompanies)
-    const selectionQuery = this.repository.createQueryBuilder().where(selector)
-    const constrainedSelectionQuery = constrainQuery(selectionQuery)
-
-    const allowedData = await constrainedSelectionQuery.getMany()
-    if (allowedData.length === 0) return
-
-    return this.create(data)
-  }
-
-  async createIfUserIsInTeam(
-    selector: FindConditions<E>,
-    data: Partial<D>,
-    user: UserDTO,
-  ): Promise<E[] | null> {
-    const userTeams = await this.parseUserTeams(user)
-
-    this.logger.debug({
-      userTeams,
-      user,
-      message: `Reduced teams for user`,
-    })
-
-    const constrainQuery = this.repository.constraintQueryToTeam(userTeams)
-    const selectionQuery = this.repository.createQueryBuilder().where(selector)
-    const constrainedSelectionQuery = constrainQuery(selectionQuery)
-
-    const allowedData = await constrainedSelectionQuery.getMany()
-    if (allowedData.length === 0) return
-
-    return this.create(data)
-  }
-
-  async createIfUserOwnsIt(
-    selector: FindConditions<E>,
-    data: Partial<D>,
-    user: UserDTO,
-  ): Promise<E[] | null> {
-    const constrainQuery = this.repository.constraintQueryToOwns(user)
-    const selectionQuery = this.repository.createQueryBuilder().where(selector)
-    const constrainedSelectionQuery = constrainQuery(selectionQuery)
-
-    const allowedData = await constrainedSelectionQuery.getMany()
-    if (allowedData.length === 0) return
-
-    return this.create(data)
   }
 
   //* **** READ *****/

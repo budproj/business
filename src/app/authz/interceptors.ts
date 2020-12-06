@@ -5,6 +5,7 @@ import { uniq } from 'lodash'
 import { Observable } from 'rxjs'
 
 import { AppRequest } from 'app/types'
+import { TeamDTO } from 'domain/team/dto'
 import TeamService from 'domain/team/service'
 import { User } from 'domain/user/entities'
 import UserService from 'domain/user/service'
@@ -59,7 +60,7 @@ export class EnhanceWithBudUser implements NestInterceptor {
     const teamsPromise = this.teamService.getAll()
 
     const user = {
-      teams: await teamsPromise,
+      teams: [{ id: 3, companyId: 3 }] as TeamDTO[], // Await teamsPromise,
       id: this.godUser.id,
       name: this.godUser.name,
       authzSub: this.godUser.authzSub,
