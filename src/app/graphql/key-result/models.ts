@@ -1,4 +1,4 @@
-import { Field, Float, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { Field, Float, ID, InputType, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { ObjectiveObject } from 'app/graphql/objective/models'
 import { TeamObject } from 'app/graphql/team/models'
@@ -69,6 +69,38 @@ export class KeyResultObject {
   })
   confidenceReports: ConfidenceReportObject[]
 
-  @Field(() => PoliciesObject)
+  @Field(() => PoliciesObject, {
+    description:
+      'Group of policies regarding given key result. Those policies decribe actions that your user can perform with that given resource',
+  })
   policies: PoliciesObject
+}
+
+@InputType('KeyResultInput', {
+  description: 'Partial key result data you can send to update a given key result',
+})
+export class KeyResultInput {
+  @Field({ nullable: true, description: 'The title(name) of the key result' })
+  title?: string
+
+  @Field({ nullable: true, description: 'The description explaining the key result' })
+  description?: string
+
+  @Field(() => Float, { nullable: true, description: 'The initial value of the key result' })
+  initialValue?: number
+
+  @Field(() => Float, { nullable: true, description: 'The goal of the key result' })
+  goal?: number
+
+  @Field({ nullable: true, description: 'The format of the key result' })
+  format?: KeyResultFormat
+
+  @Field(() => ID, { nullable: true, description: 'The owner ID of the key result' })
+  ownerId?: UserObject['id']
+
+  @Field(() => ID, { nullable: true, description: 'The object ID that this key result belongs to' })
+  objectiveId?: ObjectiveObject['id']
+
+  @Field(() => ID, { nullable: true, description: 'The team ID that this key result belongs to' })
+  teamId?: TeamObject['id']
 }

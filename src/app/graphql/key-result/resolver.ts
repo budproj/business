@@ -1,5 +1,5 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, ID, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
@@ -11,7 +11,7 @@ import DomainObjectiveService from 'domain/objective/service'
 import DomainTeamService from 'domain/team/service'
 import DomainUserService from 'domain/user/service'
 
-import { KeyResultObject } from './models'
+import { KeyResultInput, KeyResultObject } from './models'
 import GraphQLKeyResultService from './service'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
@@ -114,6 +114,30 @@ class GraphQLKeyResultResolver {
     const selector = { id: keyResult.id }
 
     return this.resolverService.getUserPolicies(selector, user)
+  }
+
+  @Permissions(PERMISSION['KEY_RESULT:UPDATE'])
+  @Mutation(() => KeyResultObject)
+  async updateKeyResult(
+    @Args('id', { type: () => ID }) id: KeyResultObject['id'],
+    @Args('keyResultInput', { type: () => KeyResultInput })
+    keyResultInput: KeyResultInput,
+    @GraphQLUser() user: AuthzUser,
+  ) {
+    this.logger.log({
+      keyResultInput,
+      message: `Updating key result of id ${id}`,
+    })
+
+    const updatedKeyResult = await this.resolverService.updateWithScopeConstraint(
+      { id },
+      keyResultInput,
+      user,
+    )
+    if (!updatedKeyResult)
+      throw new NotFoundException(`We could not found a key result for id ${id}`)
+
+    return updatedKeyResult
   }
 }
 
