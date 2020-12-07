@@ -105,15 +105,15 @@ class GraphQLKeyResultResolver {
   }
 
   @ResolveField()
-  async allowances(@Parent() keyResult: KeyResultObject, @GraphQLUser() user: AuthzUser) {
+  async policies(@Parent() keyResult: KeyResultObject, @GraphQLUser() user: AuthzUser) {
     this.logger.log({
       keyResult,
       user,
-      message: 'Deciding allowances for user regarding key result',
+      message: 'Deciding policies for user regarding key result',
     })
     const selector = { id: keyResult.id }
 
-    return this.resolverService.getUserAllowances(selector, user)
+    return this.resolverService.getUserPolicies(selector, user)
   }
 }
 

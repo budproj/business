@@ -6,7 +6,7 @@ import { ConfidenceReportObject } from 'app/graphql/key-result/report/confidence
 import { ProgressReportObject } from 'app/graphql/key-result/report/progress/models'
 import { ObjectiveObject } from 'app/graphql/objective/models'
 import { TeamObject } from 'app/graphql/team/models'
-import { UserAllowance } from 'app/graphql/user/types'
+import { UserPolicy } from 'app/graphql/user/types'
 
 @ObjectType('User', {
   description:
@@ -70,25 +70,25 @@ export class UserObject {
   ownedCompanies: CompanyObject[]
 }
 
-@ObjectType('Allowances', {
+@ObjectType('Policies', {
   description:
-    'Defines the current user allowances regarding a given resource. You can use it to display read/create/update/delete controls on your application',
+    'Defines the current user policies regarding a given resource. You can use it to display read/create/update/delete controls on your application',
 })
-export class AllowancesObject {
-  @Field(() => UserAllowance, { defaultValue: UserAllowance.DENY })
-  create: UserAllowance
+export class PoliciesObject {
+  @Field(() => UserPolicy, { defaultValue: UserPolicy.DENY })
+  create: UserPolicy
 
-  @Field(() => UserAllowance, { defaultValue: UserAllowance.DENY })
-  read: UserAllowance
+  @Field(() => UserPolicy, { defaultValue: UserPolicy.DENY })
+  read: UserPolicy
 
-  @Field(() => UserAllowance, { defaultValue: UserAllowance.DENY })
-  update: UserAllowance
+  @Field(() => UserPolicy, { defaultValue: UserPolicy.DENY })
+  update: UserPolicy
 
-  @Field(() => UserAllowance, { defaultValue: UserAllowance.DENY })
-  delete: UserAllowance
+  @Field(() => UserPolicy, { defaultValue: UserPolicy.DENY })
+  delete: UserPolicy
 }
 
-registerEnumType(UserAllowance, {
-  name: 'UserAllowance',
+registerEnumType(UserPolicy, {
+  name: 'UserPolicy',
   description: 'Defines if the user has the allowance for a given action regarding the resource',
 })

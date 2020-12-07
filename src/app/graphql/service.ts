@@ -4,7 +4,7 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 
 import { ACTION, RESOURCE, SCOPE } from 'app/authz/constants'
 import { AuthzUser } from 'app/authz/types'
-import { UserActionAllowances, UserAllowance } from 'app/graphql/user/types'
+import { UserActionPolicies, UserPolicy } from 'app/graphql/user/types'
 import DomainEntityService from 'domain/service'
 
 abstract class GraphQLEntityService<E, D> {
@@ -89,12 +89,9 @@ abstract class GraphQLEntityService<E, D> {
     return constrainedSelector()
   }
 
-  async getUserAllowances(
-    selector: FindConditions<E>,
-    user: AuthzUser,
-  ): Promise<UserActionAllowances> {
+  async getUserPolicies(selector: FindConditions<E>, user: AuthzUser): Promise<UserActionPolicies> {
     const scopedConstrainedSelectors = {
-      [SCOPE.ANY]: () => UserAllowance.ALLOW,
+      [SCOPE.ANY]: () => UserPolicy.ALLOW,
       [SCOPE.COMPANY]: async () => this.entityService.getOneIfUserIsInCompany(selector, user),
       [SCOPE.TEAM]: async () => this.entityService.getOneIfUserIsInTeam(selector, user),
       [SCOPE.OWNS]: async () => this.entityService.getOneIfUserOwnsIt(selector, user),
@@ -108,16 +105,16 @@ abstract class GraphQLEntityService<E, D> {
 
     console.log(this.resource)
 
-    const allowances = mapValues(
+    const policies = mapValues(
       actionSelectors,
-      async (function_): Promise<UserAllowance> => {
+      async (function_): Promise<UserPolicy> => {
         const foundData = await function_()
 
-        return foundData ? UserAllowance.ALLOW : UserAllowance.DENY
+        return foundData ? UserPolicy.ALLOW : UserPolicy.DENY
       },
     )
 
-    return allowances
+    return policies
   }
 }
 
