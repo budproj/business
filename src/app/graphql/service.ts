@@ -1,8 +1,10 @@
+import { mapValues } from 'lodash'
 import { FindConditions } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
 import { ACTION, RESOURCE, SCOPE } from 'app/authz/constants'
 import { AuthzUser } from 'app/authz/types'
+import { UserActionAllowances, UserAllowance } from 'app/graphql/user/types'
 import DomainEntityService from 'domain/service'
 
 abstract class GraphQLEntityService<E, D> {
@@ -85,6 +87,37 @@ abstract class GraphQLEntityService<E, D> {
     const constrainedSelector = scopedConstrainedCreators[scopeConstraint]
 
     return constrainedSelector()
+  }
+
+  async getUserAllowances(
+    selector: FindConditions<E>,
+    user: AuthzUser,
+  ): Promise<UserActionAllowances> {
+    const scopedConstrainedSelectors = {
+      [SCOPE.ANY]: () => UserAllowance.ALLOW,
+      [SCOPE.COMPANY]: async () => this.entityService.getOneIfUserIsInCompany(selector, user),
+      [SCOPE.TEAM]: async () => this.entityService.getOneIfUserIsInTeam(selector, user),
+      [SCOPE.OWNS]: async () => this.entityService.getOneIfUserOwnsIt(selector, user),
+    }
+    const actionSelectors = {
+      [ACTION.CREATE]: scopedConstrainedSelectors[user.scopes[this.resource][ACTION.CREATE]],
+      [ACTION.READ]: scopedConstrainedSelectors[user.scopes[this.resource][ACTION.READ]],
+      [ACTION.UPDATE]: scopedConstrainedSelectors[user.scopes[this.resource][ACTION.UPDATE]],
+      [ACTION.DELETE]: scopedConstrainedSelectors[user.scopes[this.resource][ACTION.DELETE]],
+    }
+
+    console.log(this.resource)
+
+    const allowances = mapValues(
+      actionSelectors,
+      async (function_): Promise<UserAllowance> => {
+        const foundData = await function_()
+
+        return foundData ? UserAllowance.ALLOW : UserAllowance.DENY
+      },
+    )
+
+    return allowances
   }
 }
 

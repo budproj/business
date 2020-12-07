@@ -103,6 +103,18 @@ class GraphQLKeyResultResolver {
       limit,
     })
   }
+
+  @ResolveField()
+  async allowances(@Parent() keyResult: KeyResultObject, @GraphQLUser() user: AuthzUser) {
+    this.logger.log({
+      keyResult,
+      user,
+      message: 'Deciding allowances for user regarding key result',
+    })
+    const selector = { id: keyResult.id }
+
+    return this.resolverService.getUserAllowances(selector, user)
+  }
 }
 
 export default GraphQLKeyResultResolver

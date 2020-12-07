@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql'
+import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { CompanyObject } from 'app/graphql/company/models'
 import { KeyResultObject } from 'app/graphql/key-result/models'
@@ -6,6 +6,7 @@ import { ConfidenceReportObject } from 'app/graphql/key-result/report/confidence
 import { ProgressReportObject } from 'app/graphql/key-result/report/progress/models'
 import { ObjectiveObject } from 'app/graphql/objective/models'
 import { TeamObject } from 'app/graphql/team/models'
+import { UserAllowance } from 'app/graphql/user/types'
 
 @ObjectType('User', {
   description:
@@ -68,3 +69,26 @@ export class UserObject {
   })
   ownedCompanies: CompanyObject[]
 }
+
+@ObjectType('Allowances', {
+  description:
+    'Defines the current user allowances regarding a given resource. You can use it to display read/create/update/delete controls on your application',
+})
+export class AllowancesObject {
+  @Field(() => UserAllowance, { defaultValue: UserAllowance.DENY })
+  create: UserAllowance
+
+  @Field(() => UserAllowance, { defaultValue: UserAllowance.DENY })
+  read: UserAllowance
+
+  @Field(() => UserAllowance, { defaultValue: UserAllowance.DENY })
+  update: UserAllowance
+
+  @Field(() => UserAllowance, { defaultValue: UserAllowance.DENY })
+  delete: UserAllowance
+}
+
+registerEnumType(UserAllowance, {
+  name: 'UserAllowance',
+  description: 'Defines if the user has the allowance for a given action regarding the resource',
+})

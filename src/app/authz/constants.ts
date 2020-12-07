@@ -17,8 +17,6 @@ export enum SCOPE {
   OWNS = 'owns',
 }
 
-export type SCOPE_GROUP = Record<ACTION, SCOPE>
-
 export enum ACTION {
   CREATE = 'create',
   READ = 'read',

@@ -2,7 +2,7 @@ import { Field, Float, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { ObjectiveObject } from 'app/graphql/objective/models'
 import { TeamObject } from 'app/graphql/team/models'
-import { UserObject } from 'app/graphql/user/models'
+import { AllowancesObject, UserObject } from 'app/graphql/user/models'
 import { KeyResultFormat } from 'domain/key-result/types'
 
 import { ConfidenceReportObject } from './report/confidence/models'
@@ -68,4 +68,7 @@ export class KeyResultObject {
     description: 'The creation date ordered list of confidence reports for this key result',
   })
   confidenceReports: ConfidenceReportObject[]
+
+  @Field(() => AllowancesObject)
+  allowances: AllowancesObject
 }

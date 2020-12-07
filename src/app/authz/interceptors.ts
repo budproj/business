@@ -9,9 +9,9 @@ import TeamService from 'domain/team/service'
 import { User } from 'domain/user/entities'
 import UserService from 'domain/user/service'
 
-import { ACTION, RESOURCE, SCOPE, SCOPED_PERMISSION, SCOPE_GROUP } from './constants'
+import { ACTION, RESOURCE, SCOPE, SCOPED_PERMISSION } from './constants'
 import GodUser from './god-user'
-import { AuthzUser } from './types'
+import { AuthzScopeGroup, AuthzUser } from './types'
 
 @Injectable()
 export class EnhanceWithBudUser implements NestInterceptor {
@@ -112,7 +112,10 @@ export class EnhanceWithBudUser implements NestInterceptor {
     }
   }
 
-  parseActionScopesForResource(resource: RESOURCE, permissions: SCOPED_PERMISSION[]): SCOPE_GROUP {
+  parseActionScopesForResource(
+    resource: RESOURCE,
+    permissions: SCOPED_PERMISSION[],
+  ): AuthzScopeGroup {
     const createScope = this.parseActionScopeForResource(ACTION.CREATE, resource, permissions)
     const readScope = this.parseActionScopeForResource(ACTION.READ, resource, permissions)
     const updateScope = this.parseActionScopeForResource(ACTION.UPDATE, resource, permissions)
