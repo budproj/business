@@ -1,6 +1,7 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, ID, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
+import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
@@ -10,7 +11,8 @@ import DomainObjectiveService from 'domain/objective/service'
 import DomainTeamService from 'domain/team/service'
 import DomainUserService from 'domain/user/service'
 
-import { KeyResultObject } from './models'
+import { KeyResultInput, KeyResultObject } from './models'
+import GraphQLKeyResultService from './service'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -19,21 +21,22 @@ class GraphQLKeyResultResolver {
   private readonly logger = new Logger(GraphQLKeyResultResolver.name)
 
   constructor(
-    private readonly keyResultService: DomainKeyResultService,
-    private readonly userService: DomainUserService,
-    private readonly objectiveService: DomainObjectiveService,
-    private readonly teamService: DomainTeamService,
+    private readonly resolverService: GraphQLKeyResultService,
+    private readonly keyResultDomain: DomainKeyResultService,
+    private readonly userDomain: DomainUserService,
+    private readonly objectiveDomain: DomainObjectiveService,
+    private readonly teamDomain: DomainTeamService,
   ) {}
 
-  @Permissions('read:key-results')
+  @Permissions(PERMISSION['KEY_RESULT:READ'])
   @Query(() => KeyResultObject)
   async keyResult(
-    @Args('id', { type: () => Int }) id: KeyResultObject['id'],
+    @Args('id', { type: () => ID }) id: KeyResultObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log(`Fetching key result with id ${id.toString()}`)
 
-    const keyResult = await this.keyResultService.getOneByIdIfUserIsInCompany(id, user)
+    const keyResult = await this.resolverService.getOneWithActionScopeConstraint({ id }, user)
     if (!keyResult) throw new NotFoundException(`We could not found a key result with id ${id}`)
 
     return keyResult
@@ -46,7 +49,7 @@ class GraphQLKeyResultResolver {
       message: 'Fetching owner for key result',
     })
 
-    return this.userService.getOneById(keyResult.ownerId)
+    return this.userDomain.getOne({ id: keyResult.ownerId })
   }
 
   @ResolveField()
@@ -56,7 +59,7 @@ class GraphQLKeyResultResolver {
       message: 'Fetching objective for key result',
     })
 
-    return this.objectiveService.getOneById(keyResult.objectiveId)
+    return this.objectiveDomain.getOne({ id: keyResult.objectiveId })
   }
 
   @ResolveField()
@@ -66,7 +69,7 @@ class GraphQLKeyResultResolver {
       message: 'Fetching team for key result',
     })
 
-    return this.teamService.getOneById(keyResult.teamId)
+    return this.teamDomain.getOne({ id: keyResult.teamId })
   }
 
   @ResolveField()
@@ -80,7 +83,7 @@ class GraphQLKeyResultResolver {
       message: 'Fetching progress reports for key result',
     })
 
-    return this.keyResultService.report.progress.getFromKeyResult(keyResult.id, {
+    return this.keyResultDomain.report.progress.getFromKeyResult(keyResult.id, {
       limit,
     })
   }
@@ -96,9 +99,45 @@ class GraphQLKeyResultResolver {
       message: 'Fetching confidence reports for key result',
     })
 
-    return this.keyResultService.report.confidence.getFromKeyResult(keyResult.id, {
+    return this.keyResultDomain.report.confidence.getFromKeyResult(keyResult.id, {
       limit,
     })
+  }
+
+  @ResolveField()
+  async policies(@Parent() keyResult: KeyResultObject, @GraphQLUser() user: AuthzUser) {
+    this.logger.log({
+      keyResult,
+      user,
+      message: 'Deciding policies for user regarding key result',
+    })
+    const selector = { id: keyResult.id }
+
+    return this.resolverService.getUserPolicies(selector, user)
+  }
+
+  @Permissions(PERMISSION['KEY_RESULT:UPDATE'])
+  @Mutation(() => KeyResultObject)
+  async updateKeyResult(
+    @Args('id', { type: () => ID }) id: KeyResultObject['id'],
+    @Args('keyResultInput', { type: () => KeyResultInput })
+    keyResultInput: KeyResultInput,
+    @GraphQLUser() user: AuthzUser,
+  ) {
+    this.logger.log({
+      keyResultInput,
+      message: `Updating key result of id ${id}`,
+    })
+
+    const updatedKeyResult = await this.resolverService.updateWithScopeConstraint(
+      { id },
+      keyResultInput,
+      user,
+    )
+    if (!updatedKeyResult)
+      throw new NotFoundException(`We could not found a key result for id ${id}`)
+
+    return updatedKeyResult
   }
 }
 

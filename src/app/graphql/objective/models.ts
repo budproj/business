@@ -2,6 +2,7 @@ import { Field, ID, ObjectType } from '@nestjs/graphql'
 
 import { CycleObject } from 'app/graphql/cycle/models'
 import { KeyResultObject } from 'app/graphql/key-result/models'
+import { UserObject } from 'app/graphql/user/models'
 
 @ObjectType('Objective', { description: 'A group of key results that has the same focus' })
 export class ObjectiveObject {
@@ -27,4 +28,10 @@ export class ObjectiveObject {
 
   @Field(() => CycleObject, { description: 'The cycle that owns this objective' })
   cycle: CycleObject
+
+  @Field(() => ID, { description: 'The user ID that owns this objective' })
+  ownerId: UserObject['id']
+
+  @Field(() => UserObject, { description: 'The user that owns this objective' })
+  owner: UserObject
 }

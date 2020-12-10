@@ -1,11 +1,11 @@
-import { Module } from '@nestjs/common'
+import { forwardRef, Module } from '@nestjs/common'
 
 import DomainConfidenceReportModule from './confidence'
 import DomainProgressReportModule from './progress'
 import DomainKeyResultReportService from './service'
 
 @Module({
-  imports: [DomainProgressReportModule, DomainConfidenceReportModule],
+  imports: [forwardRef(() => DomainProgressReportModule), DomainConfidenceReportModule],
   providers: [DomainKeyResultReportService],
   exports: [DomainKeyResultReportService],
 })

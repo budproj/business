@@ -1,15 +1,17 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
+import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import DomainCycleService from 'domain/cycle/service'
 import DomainKeyResultService from 'domain/key-result/service'
-import DomainObjectiveService from 'domain/objective/service'
+import DomainUserService from 'domain/user/service'
 
 import { ObjectiveObject } from './models'
+import GraphQLObjectiveService from './service'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -18,20 +20,21 @@ class GraphQLObjectiveResolver {
   private readonly logger = new Logger(GraphQLObjectiveResolver.name)
 
   constructor(
-    private readonly keyResultService: DomainKeyResultService,
-    private readonly objectiveService: DomainObjectiveService,
-    private readonly cycleService: DomainCycleService,
+    private readonly resolverService: GraphQLObjectiveService,
+    private readonly keyResultDomain: DomainKeyResultService,
+    private readonly cycleDomain: DomainCycleService,
+    private readonly userDomain: DomainUserService,
   ) {}
 
-  @Permissions('read:objectives')
+  @Permissions(PERMISSION['OBJECTIVE:READ'])
   @Query(() => ObjectiveObject)
   async objective(
-    @Args('id', { type: () => Int }) id: ObjectiveObject['id'],
+    @Args('id', { type: () => ID }) id: ObjectiveObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log(`Fetching objective with id ${id.toString()}`)
 
-    const objective = await this.objectiveService.getOneByIdIfUserIsInCompany(id, user)
+    const objective = await this.resolverService.getOneWithActionScopeConstraint({ id }, user)
     if (!objective) throw new NotFoundException(`We could not found an objective with id ${id}`)
 
     return objective
@@ -44,17 +47,27 @@ class GraphQLObjectiveResolver {
       message: 'Fetching key results for objective',
     })
 
-    return this.keyResultService.getFromObjective(objective.id)
+    return this.keyResultDomain.getFromObjective(objective.id)
   }
 
   @ResolveField()
   async cycle(@Parent() objective: ObjectiveObject) {
     this.logger.log({
       objective,
-      message: 'Fetching cycke for objective',
+      message: 'Fetching cycle for objective',
     })
 
-    return this.cycleService.getOneById(objective.cycleId)
+    return this.cycleDomain.getOne({ id: objective.cycleId })
+  }
+
+  @ResolveField()
+  async owner(@Parent() objective: ObjectiveObject) {
+    this.logger.log({
+      objective,
+      message: 'Fetching owner for objective',
+    })
+
+    return this.userDomain.getOne({ id: objective.ownerId })
   }
 }
 

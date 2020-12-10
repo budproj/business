@@ -8,6 +8,7 @@ import DomainModule from 'domain/module'
 import GraphQLConfidenceReportModule from './confidence'
 import GraphQLProgressReportModule from './progress'
 import GraphQLKeyResultReportResolver from './resolver'
+import GraphQLKeyResultReportService from './service'
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import GraphQLKeyResultReportResolver from './resolver'
     GraphQLConfidenceReportModule,
     GraphQLProgressReportModule,
   ],
-  providers: [GraphQLKeyResultReportResolver, Railway],
+  providers: [GraphQLKeyResultReportResolver, GraphQLKeyResultReportService, Railway],
 })
 class GraphQLKeyResultReportModule {}
 

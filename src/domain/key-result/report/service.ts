@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
 import { remove } from 'lodash'
 
 import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
@@ -14,6 +14,7 @@ class DomainKeyResultReportService {
   private readonly logger = new Logger(DomainKeyResultReportService.name)
 
   constructor(
+    @Inject(forwardRef(() => DomainProgressReportService))
     public readonly progress: DomainProgressReportService,
     public readonly confidence: DomainConfidenceReportService,
   ) {}

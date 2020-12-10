@@ -64,7 +64,9 @@ export class GraphQLPermissionsGuard implements CanActivate {
     }
 
     const hasPermission = () =>
-      routePermissions.every((routePermission) => userPermissions.includes(routePermission))
+      routePermissions.every((routePermission) =>
+        userPermissions.some((userPermission) => userPermission.includes(routePermission)),
+      )
 
     return hasPermission()
   }

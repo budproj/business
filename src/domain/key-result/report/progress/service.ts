@@ -1,25 +1,24 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { remove } from 'lodash'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
+import DomainKeyResultService from 'domain/key-result/service'
+import DomainEntityService from 'domain/service'
 import { UserDTO } from 'domain/user/dto'
-import DomainUserService from 'domain/user/service'
+import { DuplicateEntityError } from 'errors'
 
 import { ProgressReport } from './entities'
 import DomainProgressReportRepository from './repository'
 
 @Injectable()
-class DomainProgressReportService {
-  private readonly logger = new Logger(DomainProgressReportService.name)
-
+class DomainProgressReportService extends DomainEntityService<ProgressReport, ProgressReportDTO> {
   constructor(
-    private readonly repository: DomainProgressReportRepository,
-    private readonly userService: DomainUserService,
-  ) {}
-
-  async getOneById(id: ProgressReportDTO['id']): Promise<ProgressReport> {
-    return this.repository.findOne({ id })
+    public readonly repository: DomainProgressReportRepository,
+    @Inject(forwardRef(() => DomainKeyResultService))
+    private readonly keyResultService: DomainKeyResultService,
+  ) {
+    super(repository, DomainProgressReportService.name)
   }
 
   async getFromKeyResult(
@@ -35,23 +34,6 @@ class DomainProgressReportService {
 
   async getFromUser(userId: UserDTO['id']): Promise<ProgressReport[]> {
     return this.repository.find({ userId })
-  }
-
-  async getOneByIdIfUserIsInCompany(
-    id: ProgressReportDTO['id'],
-    user: UserDTO,
-  ): Promise<ProgressReport | null> {
-    const userCompanies = await this.userService.parseRequestUserCompanies(user)
-
-    this.logger.debug({
-      userCompanies,
-      user,
-      message: `Reduced companies for user`,
-    })
-
-    const data = await this.repository.findByIDWithCompanyConstraint(id, userCompanies)
-
-    return data
   }
 
   async getLatestFromKeyResult(
@@ -103,8 +85,42 @@ class DomainProgressReportService {
       message: 'Enhancing progress report with latest report value',
     })
 
-    if (enhancedProgressReport.valuePrevious === enhancedProgressReport.valueNew) return
+    if (enhancedProgressReport.valuePrevious === enhancedProgressReport.valueNew)
+      throw new DuplicateEntityError('This progress report is duplicated from latest')
     return enhancedProgressReport
+  }
+
+  async createIfUserIsInCompany(
+    data: Partial<ProgressReport>,
+    user: UserDTO,
+  ): Promise<ProgressReport[] | null> {
+    const selector = { id: data.keyResultId }
+    const keyResult = await this.keyResultService.getOneIfUserIsInCompany(selector, user)
+    if (!keyResult) return
+
+    return this.create(data)
+  }
+
+  async createIfUserIsInTeam(
+    data: Partial<ProgressReport>,
+    user: UserDTO,
+  ): Promise<ProgressReport[] | null> {
+    const selector = { id: data.keyResultId }
+    const keyResult = await this.keyResultService.getOneIfUserIsInTeam(selector, user)
+    if (!keyResult) return
+
+    return this.create(data)
+  }
+
+  async createIfUserOwnsIt(
+    data: Partial<ProgressReport>,
+    user: UserDTO,
+  ): Promise<ProgressReport[] | null> {
+    const selector = { id: data.keyResultId }
+    const keyResult = await this.keyResultService.getOneIfUserOwnsIt(selector, user)
+    if (!keyResult) return
+
+    return this.create(data)
   }
 }
 

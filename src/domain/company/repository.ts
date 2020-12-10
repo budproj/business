@@ -1,8 +1,52 @@
-import { EntityRepository, Repository } from 'typeorm'
+import { EntityRepository, SelectQueryBuilder } from 'typeorm'
+
+import { CompanyDTO } from 'domain/company/dto'
+import DomainEntityRepository from 'domain/repository'
+import { TeamDTO } from 'domain/team/dto'
+import { UserDTO } from 'domain/user/dto'
 
 import { Company } from './entities'
 
 @EntityRepository(Company)
-class DomainCompanyRepository extends Repository<Company> {}
+class DomainCompanyRepository extends DomainEntityRepository<Company> {
+  constraintQueryToCompany(allowedCompanies: Array<CompanyDTO['id']>) {
+    const addContraintToQuery = (query?: SelectQueryBuilder<Company>) => {
+      const baseQuery = query ?? this.createQueryBuilder()
+      const constrainedQuery = baseQuery.andWhere(`${Company.name}.id IN (:...allowedCompanies)`, {
+        allowedCompanies,
+      })
+
+      return constrainedQuery
+    }
+
+    return addContraintToQuery
+  }
+
+  constraintQueryToTeam(allowedTeams: Array<TeamDTO['id']>) {
+    const addContraintToQuery = (query?: SelectQueryBuilder<Company>) => {
+      const baseQuery = query ?? this.createQueryBuilder()
+      const constrainedQuery = baseQuery
+        .leftJoinAndSelect(`${Company.name}.teams`, 'teams')
+        .andWhere('teams.id IN (:...allowedTeams)', { allowedTeams })
+
+      return constrainedQuery
+    }
+
+    return addContraintToQuery
+  }
+
+  constraintQueryToOwns(user: UserDTO) {
+    const addContraintToQuery = (query?: SelectQueryBuilder<Company>) => {
+      const baseQuery = query ?? this.createQueryBuilder()
+      const constrainedQuery = baseQuery.andWhere(`${Company.name}.ownerId = :userID`, {
+        userID: user.id,
+      })
+
+      return constrainedQuery
+    }
+
+    return addContraintToQuery
+  }
+}
 
 export default DomainCompanyRepository

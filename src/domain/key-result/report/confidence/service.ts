@@ -1,25 +1,21 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { remove } from 'lodash'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
+import DomainEntityService from 'domain/service'
 import { UserDTO } from 'domain/user/dto'
-import DomainUserService from 'domain/user/service'
 
 import { ConfidenceReport } from './entities'
 import DomainConfidenceReportRepository from './repository'
 
 @Injectable()
-class DomainConfidenceReportService {
-  private readonly logger = new Logger(DomainConfidenceReportService.name)
-
-  constructor(
-    private readonly repository: DomainConfidenceReportRepository,
-    private readonly userService: DomainUserService,
-  ) {}
-
-  async getOneById(id: ConfidenceReportDTO['id']): Promise<ConfidenceReport> {
-    return this.repository.findOne({ id })
+class DomainConfidenceReportService extends DomainEntityService<
+  ConfidenceReport,
+  ConfidenceReportDTO
+> {
+  constructor(public readonly repository: DomainConfidenceReportRepository) {
+    super(repository, DomainConfidenceReportService.name)
   }
 
   async getFromKeyResult(
@@ -35,23 +31,6 @@ class DomainConfidenceReportService {
 
   async getFromUser(userId: UserDTO['id']): Promise<ConfidenceReport[]> {
     return this.repository.find({ userId })
-  }
-
-  async getOneByIdIfUserIsInCompany(
-    id: ConfidenceReportDTO['id'],
-    user: UserDTO,
-  ): Promise<ConfidenceReport | null> {
-    const userCompanies = await this.userService.parseRequestUserCompanies(user)
-
-    this.logger.debug({
-      userCompanies,
-      user,
-      message: `Reduced companies for user`,
-    })
-
-    const data = await this.repository.findByIDWithCompanyConstraint(id, userCompanies)
-
-    return data
   }
 
   async getLatestFromKeyResult(keyResultId: KeyResultDTO['id']): Promise<ConfidenceReport> {

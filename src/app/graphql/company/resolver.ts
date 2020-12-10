@@ -1,16 +1,17 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
+import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
-import DomainCompanyService from 'domain/company/service'
 import DomainCycleService from 'domain/cycle/service'
 import DomainTeamService from 'domain/team/service'
 import DomainUserService from 'domain/user/service'
 
 import { CompanyObject } from './models'
+import GraphQLCompanyService from './service'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -19,25 +20,19 @@ class GraphQLCompanyResolver {
   private readonly logger = new Logger(GraphQLCompanyResolver.name)
 
   constructor(
-    private readonly companyService: DomainCompanyService,
-    private readonly teamService: DomainTeamService,
-    private readonly cycleService: DomainCycleService,
-    private readonly userService: DomainUserService,
+    private readonly resolverService: GraphQLCompanyService,
+    private readonly teamDomain: DomainTeamService,
+    private readonly cycleDomain: DomainCycleService,
+    private readonly userDomain: DomainUserService,
   ) {}
 
-  @Permissions('read:companies')
+  @Permissions(PERMISSION['COMPANY:READ'])
   @Query(() => CompanyObject)
   async company(
-    @Args('id', { type: () => Int }) id: CompanyObject['id'],
+    @Args('id', { type: () => ID }) id: CompanyObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
-    const userCompanies = await this.userService.parseRequestUserCompanies(user)
-
-    if (!userCompanies.includes(id))
-      throw new NotFoundException(`We could not found a company with id ${id}`)
-    this.logger.log(`Fetching company with id ${id.toString()}`)
-
-    const company = await this.companyService.getOneById(id)
+    const company = await this.resolverService.getOneWithActionScopeConstraint({ id }, user)
     if (!company) throw new NotFoundException(`We could not found a company with id ${id}`)
 
     return company
@@ -50,7 +45,7 @@ class GraphQLCompanyResolver {
       message: 'Fetching teams for company',
     })
 
-    return this.teamService.getFromCompany(company.id)
+    return this.teamDomain.getFromCompany(company.id)
   }
 
   @ResolveField()
@@ -60,7 +55,17 @@ class GraphQLCompanyResolver {
       message: 'Fetching cycles for company',
     })
 
-    return this.cycleService.getFromCompany(company.id)
+    return this.cycleDomain.getFromCompany(company.id)
+  }
+
+  @ResolveField()
+  async owner(@Parent() company: CompanyObject) {
+    this.logger.log({
+      company,
+      message: 'Fetching owner for company',
+    })
+
+    return this.userDomain.getOne({ id: company.ownerId })
   }
 }
 

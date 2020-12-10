@@ -1,6 +1,7 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
+import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
@@ -9,6 +10,7 @@ import DomainKeyResultService from 'domain/key-result/service'
 import DomainUserService from 'domain/user/service'
 
 import { ConfidenceReportObject } from './models'
+import GraphQLConfidenceReportService from './service'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -17,20 +19,21 @@ class GraphQLConfidenceReportResolver {
   private readonly logger = new Logger(GraphQLConfidenceReportResolver.name)
 
   constructor(
-    private readonly keyResultService: DomainKeyResultService,
-    private readonly userService: DomainUserService,
+    private readonly resolverService: GraphQLConfidenceReportService,
+    private readonly keyResultDomain: DomainKeyResultService,
+    private readonly userDomain: DomainUserService,
   ) {}
 
-  @Permissions('read:confidence-reports')
+  @Permissions(PERMISSION['CONFIDENCE_REPORT:READ'])
   @Query(() => ConfidenceReportObject)
   async confidenceReport(
-    @Args('id', { type: () => Int }) id: ConfidenceReportObject['id'],
+    @Args('id', { type: () => ID }) id: ConfidenceReportObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log(`Fetching confidence report with id ${id.toString()}`)
 
-    const confidenceReport = await this.keyResultService.report.confidence.getOneByIdIfUserIsInCompany(
-      id,
+    const confidenceReport = await this.resolverService.getOneWithActionScopeConstraint(
+      { id },
       user,
     )
     if (!confidenceReport)
@@ -46,7 +49,7 @@ class GraphQLConfidenceReportResolver {
       message: 'Fetching key result for confidence report',
     })
 
-    return this.keyResultService.getOneById(confidenceReport.keyResultId)
+    return this.keyResultDomain.getOne({ id: confidenceReport.keyResultId })
   }
 
   @ResolveField()
@@ -56,7 +59,7 @@ class GraphQLConfidenceReportResolver {
       message: 'Fetching user for confidence report',
     })
 
-    return this.userService.getOneById(confidenceReport.userId)
+    return this.userDomain.getOne({ id: confidenceReport.userId })
   }
 }
 

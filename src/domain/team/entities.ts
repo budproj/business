@@ -44,4 +44,11 @@ export class Team implements TeamDTO {
   @ManyToMany('User', 'teams', { lazy: true })
   @JoinTable()
   public users: Promise<UserDTO[]>
+
+  @ManyToOne('User', 'ownedTeams')
+  public owner: UserDTO
+
+  @Column()
+  @RelationId((team: Team) => team.owner)
+  public ownerId: UserDTO['id']
 }

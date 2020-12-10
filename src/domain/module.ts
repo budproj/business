@@ -6,9 +6,14 @@ import databaseConfig from 'config/database/config'
 import DomainCompanyModule from './company'
 import DomainCycleModule from './cycle'
 import DomainKeyResultModule from './key-result'
+import DomainKeyResultReportModule from './key-result/report'
+import DomainConfidenceReportModule from './key-result/report/confidence'
+import DomainProgressReportModule from './key-result/report/progress'
 import DomainObjectiveModule from './objective'
 import DomainTeamModule from './team'
 import DomainUserModule from './user'
+import DomainUserViewModule from './user/view'
+import DomainKeyResultViewModule from './user/view/key-result'
 
 @Module({
   imports: [
@@ -19,6 +24,11 @@ import DomainUserModule from './user'
     DomainTeamModule,
     DomainCompanyModule,
     DomainCycleModule,
+    DomainUserViewModule,
+    DomainKeyResultViewModule,
+    DomainKeyResultReportModule,
+    DomainProgressReportModule,
+    DomainConfidenceReportModule,
   ],
   exports: [
     DomainKeyResultModule,
@@ -27,6 +37,11 @@ import DomainUserModule from './user'
     DomainTeamModule,
     DomainCompanyModule,
     DomainCycleModule,
+    DomainUserViewModule,
+    DomainKeyResultViewModule,
+    DomainKeyResultReportModule,
+    DomainProgressReportModule,
+    DomainConfidenceReportModule,
   ],
 })
 class DomainModule {}

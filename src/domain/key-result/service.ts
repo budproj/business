@@ -1,27 +1,23 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ObjectiveDTO } from 'domain/objective/dto'
+import DomainEntityService from 'domain/service'
 import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
-import DomainUserService from 'domain/user/service'
 
 import { KeyResult } from './entities'
 import DomainKeyResultReportService from './report/service'
 import DomainKeyResultRepository from './repository'
 
 @Injectable()
-class DomainKeyResultService {
-  private readonly logger = new Logger(DomainKeyResultService.name)
-
+class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO> {
   constructor(
+    @Inject(forwardRef(() => DomainKeyResultReportService))
     public readonly report: DomainKeyResultReportService,
-    private readonly repository: DomainKeyResultRepository,
-    private readonly userService: DomainUserService,
-  ) {}
-
-  async getOneById(id: KeyResultDTO['id']): Promise<KeyResult> {
-    return this.repository.findOne({ id })
+    public readonly repository: DomainKeyResultRepository,
+  ) {
+    super(repository, DomainKeyResultService.name)
   }
 
   async getFromOwner(ownerId: UserDTO['id']): Promise<KeyResult[]> {
@@ -36,41 +32,9 @@ class DomainKeyResultService {
     return this.repository.find({ teamId })
   }
 
-  async getManyByIdsPreservingOrderIfUserIsInCompany(
-    ids: Array<KeyResultDTO['id']>,
-    user: UserDTO,
-  ): Promise<KeyResult[]> {
-    const userCompanies = await this.userService.parseRequestUserCompanies(user)
-
-    this.logger.debug({
-      userCompanies,
-      user,
-      message: `Reduced companies for user`,
-    })
-
+  async getManyByIdsPreservingOrder(ids: Array<KeyResultDTO['id']>): Promise<KeyResult[]> {
     const rankSortColumn = this.repository.buildRankSortColumn(ids)
-    const data = this.repository.findByIdsRankedWithCompanyConstraint(
-      ids,
-      rankSortColumn,
-      userCompanies,
-    )
-
-    return data
-  }
-
-  async getOneByIdIfUserIsInCompany(
-    id: KeyResultDTO['id'],
-    user: UserDTO,
-  ): Promise<KeyResult | null> {
-    const userCompanies = await this.userService.parseRequestUserCompanies(user)
-
-    this.logger.debug({
-      userCompanies,
-      user,
-      message: `Reduced companies for user`,
-    })
-
-    const data = await this.repository.findByIDWithCompanyConstraint(id, userCompanies)
+    const data = this.repository.findByIdsRanked(ids, rankSortColumn)
 
     return data
   }

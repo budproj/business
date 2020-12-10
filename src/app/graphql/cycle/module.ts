@@ -5,10 +5,11 @@ import appConfig from 'config/app'
 import DomainModule from 'domain/module'
 
 import GraphQLCycleResolver from './resolver'
+import GraphQLCycleService from './service'
 
 @Module({
   imports: [ConfigModule.forFeature(appConfig), DomainModule],
-  providers: [GraphQLCycleResolver],
+  providers: [GraphQLCycleResolver, GraphQLCycleService],
 })
 class GraphQLCyclesModule {}
 

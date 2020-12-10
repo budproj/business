@@ -1,10 +1,10 @@
-import { Module } from '@nestjs/common'
+import { forwardRef, Module } from '@nestjs/common'
 
 import DomainKeyResultViewModule from './key-result'
 import DomainUserViewService from './service'
 
 @Module({
-  imports: [DomainKeyResultViewModule],
+  imports: [forwardRef(() => DomainKeyResultViewModule)],
   providers: [DomainUserViewService],
   exports: [DomainUserViewService],
 })

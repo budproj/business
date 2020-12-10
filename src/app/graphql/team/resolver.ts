@@ -1,15 +1,17 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
+import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import DomainCompanyService from 'domain/company/service'
 import DomainKeyResultService from 'domain/key-result/service'
-import DomainTeamService from 'domain/team/service'
+import DomainUserService from 'domain/user/service'
 
 import { TeamObject } from './models'
+import GraphQLTeamService from './service'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -18,20 +20,18 @@ class GraphQLTeamResolver {
   private readonly logger = new Logger(GraphQLTeamResolver.name)
 
   constructor(
-    private readonly keyResultService: DomainKeyResultService,
-    private readonly teamService: DomainTeamService,
-    private readonly companyService: DomainCompanyService,
+    private readonly resolverService: GraphQLTeamService,
+    private readonly keyResultDomain: DomainKeyResultService,
+    private readonly companyDomain: DomainCompanyService,
+    private readonly userDomain: DomainUserService,
   ) {}
 
-  @Permissions('read:teams')
+  @Permissions(PERMISSION['TEAM:READ'])
   @Query(() => TeamObject)
-  async team(
-    @Args('id', { type: () => Int }) id: TeamObject['id'],
-    @GraphQLUser() user: AuthzUser,
-  ) {
+  async team(@Args('id', { type: () => ID }) id: TeamObject['id'], @GraphQLUser() user: AuthzUser) {
     this.logger.log(`Fetching team with id ${id.toString()}`)
 
-    const team = await this.teamService.getOneByIdIfUserShareCompany(id, user)
+    const team = await this.resolverService.getOneWithActionScopeConstraint({ id }, user)
     if (!team) throw new NotFoundException(`We could not found a team with id ${id}`)
 
     return team
@@ -44,7 +44,7 @@ class GraphQLTeamResolver {
       message: 'Fetching key results for team',
     })
 
-    return this.keyResultService.getFromTeam(team.id)
+    return this.keyResultDomain.getFromTeam(team.id)
   }
 
   @ResolveField()
@@ -54,7 +54,17 @@ class GraphQLTeamResolver {
       message: 'Fetching company for team',
     })
 
-    return this.companyService.getOneById(team.companyId)
+    return this.companyDomain.getOne({ id: team.companyId })
+  }
+
+  @ResolveField()
+  async owner(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching owner for team',
+    })
+
+    return this.userDomain.getOne({ id: team.ownerId })
   }
 }
 

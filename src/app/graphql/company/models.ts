@@ -2,6 +2,7 @@ import { Field, ID, ObjectType } from '@nestjs/graphql'
 
 import { CycleObject } from 'app/graphql/cycle/models'
 import { TeamObject } from 'app/graphql/team/models'
+import { UserObject } from 'app/graphql/user/models'
 
 @ObjectType('Company', { description: 'A group of teams that has a given stakeholder' })
 export class CompanyObject {
@@ -22,4 +23,10 @@ export class CompanyObject {
 
   @Field(() => [CycleObject], { description: 'The cycles that belongs to this company' })
   cycles: CycleObject[]
+
+  @Field(() => ID, { description: 'The user ID that this company belongs to' })
+  ownerId: UserObject['id']
+
+  @Field(() => UserObject, { description: 'The user that this company belongs to' })
+  owner: UserObject
 }

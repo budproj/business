@@ -1,24 +1,26 @@
 import {
-  ForbiddenException,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common'
 import { Args, Mutation, Resolver } from '@nestjs/graphql'
 
+import { ACTION, PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
-import { RailwayError } from 'app/errors'
 import { KeyResultObject } from 'app/graphql/key-result/models'
 import { Railway } from 'app/providers'
 import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
 import { ProgressReport } from 'domain/key-result/report/progress/entities'
 import DomainKeyResultService from 'domain/key-result/service'
+import { RailwayError } from 'errors'
 
 import { CheckInInput, ReportObject } from './models'
+import GraphQLKeyResultReportService from './service'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -27,11 +29,12 @@ class GraphQLKeyResultReportResolver {
   private readonly logger = new Logger(GraphQLKeyResultReportResolver.name)
 
   constructor(
+    private readonly resolverService: GraphQLKeyResultReportService,
     private readonly keyResultService: DomainKeyResultService,
     private readonly railway: Railway,
   ) {}
 
-  @Permissions('create:progress-reports', 'create:confidence-reports')
+  @Permissions(PERMISSION['PROGRESS_REPORT:CREATE'], PERMISSION['CONFIDENCE_REPORT:CREATE'])
   @Mutation(() => [ReportObject])
   async createCheckIn(
     @GraphQLUser() user: AuthzUser,
@@ -44,16 +47,21 @@ class GraphQLKeyResultReportResolver {
       message: 'Checking if the user owns the given key result',
     })
 
-    const keyResult = await this.keyResultService.getOneById(checkInInput.keyResultId)
-    if (keyResult.ownerId !== user.id) {
+    const keyResult = await this.resolverService.getOneWithActionScopeConstraint(
+      { id: checkInInput.keyResultId },
+      user,
+      ACTION.CREATE,
+    )
+    if (!keyResult) {
       this.logger.log({
         user,
         checkInInput,
         keyResult,
-        message: 'User is not the owner of key result. Dispatching error',
+        message:
+          'User tried to create a check-in in a key resultat that he/she can not see. Either it does not exist, or the user has no permission to see it',
       })
-      throw new ForbiddenException(
-        'You must be the owner of the key result to create a new check-in',
+      throw new NotFoundException(
+        `We could not found an Key Result with ID ${checkInInput.keyResultId}`,
       )
     }
 

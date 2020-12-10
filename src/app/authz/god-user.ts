@@ -1,3 +1,4 @@
+import { ACTION, PERMISSION, RESOURCE, SCOPE } from 'app/authz/constants'
 import { AuthzUser } from 'app/authz/types'
 
 class GodUser implements AuthzUser {
@@ -10,6 +11,7 @@ class GodUser implements AuthzUser {
   public readonly updatedAt: AuthzUser['updatedAt']
   public readonly token: AuthzUser['token']
   public readonly teams: AuthzUser['teams']
+  public readonly scopes: AuthzUser['scopes']
 
   constructor() {
     this.id = 1
@@ -28,7 +30,63 @@ class GodUser implements AuthzUser {
       exp: 99999999,
       azp: 'GOD',
       scope: 'GOD',
-      permissions: ['ALL'],
+      permissions: Object.values(PERMISSION),
+    }
+    this.scopes = {
+      [RESOURCE.KEY_RESULT]: {
+        [ACTION.CREATE]: SCOPE.ANY,
+        [ACTION.READ]: SCOPE.ANY,
+        [ACTION.UPDATE]: SCOPE.ANY,
+        [ACTION.DELETE]: SCOPE.ANY,
+      },
+      [RESOURCE.PROGRESS_REPORT]: {
+        [ACTION.CREATE]: SCOPE.ANY,
+        [ACTION.READ]: SCOPE.ANY,
+        [ACTION.UPDATE]: SCOPE.ANY,
+        [ACTION.DELETE]: SCOPE.ANY,
+      },
+      [RESOURCE.CONFIDENCE_REPORT]: {
+        [ACTION.CREATE]: SCOPE.ANY,
+        [ACTION.READ]: SCOPE.ANY,
+        [ACTION.UPDATE]: SCOPE.ANY,
+        [ACTION.DELETE]: SCOPE.ANY,
+      },
+      [RESOURCE.COMPANY]: {
+        [ACTION.CREATE]: SCOPE.ANY,
+        [ACTION.READ]: SCOPE.ANY,
+        [ACTION.UPDATE]: SCOPE.ANY,
+        [ACTION.DELETE]: SCOPE.ANY,
+      },
+      [RESOURCE.CYCLE]: {
+        [ACTION.CREATE]: SCOPE.ANY,
+        [ACTION.READ]: SCOPE.COMPANY,
+        [ACTION.UPDATE]: SCOPE.ANY,
+        [ACTION.DELETE]: SCOPE.ANY,
+      },
+      [RESOURCE.OBJECTIVE]: {
+        [ACTION.CREATE]: SCOPE.ANY,
+        [ACTION.READ]: SCOPE.ANY,
+        [ACTION.UPDATE]: SCOPE.ANY,
+        [ACTION.DELETE]: SCOPE.ANY,
+      },
+      [RESOURCE.TEAM]: {
+        [ACTION.CREATE]: SCOPE.ANY,
+        [ACTION.READ]: SCOPE.ANY,
+        [ACTION.UPDATE]: SCOPE.ANY,
+        [ACTION.DELETE]: SCOPE.ANY,
+      },
+      [RESOURCE.USER]: {
+        [ACTION.CREATE]: SCOPE.ANY,
+        [ACTION.READ]: SCOPE.ANY,
+        [ACTION.UPDATE]: SCOPE.ANY,
+        [ACTION.DELETE]: SCOPE.ANY,
+      },
+      [RESOURCE.KEY_RESULT_VIEW]: {
+        [ACTION.CREATE]: SCOPE.ANY,
+        [ACTION.READ]: SCOPE.ANY,
+        [ACTION.UPDATE]: SCOPE.ANY,
+        [ACTION.DELETE]: SCOPE.ANY,
+      },
     }
   }
 }

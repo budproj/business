@@ -33,4 +33,10 @@ export class TeamObject {
     description: 'A creation date ordered list of users that are members of this team',
   })
   users: Promise<UserObject[]>
+
+  @Field(() => ID, { description: 'The user ID that owns this team' })
+  ownerId: UserObject['id']
+
+  @Field(() => CompanyObject, { description: 'The user that owns this team' })
+  owner: UserObject
 }

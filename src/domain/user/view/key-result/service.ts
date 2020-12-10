@@ -1,55 +1,53 @@
-import { Injectable } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 
+import DomainEntityService from 'domain/service'
 import { UserDTO } from 'domain/user/dto'
+import DomainUserService from 'domain/user/service'
 
 import { KeyResultViewDTO } from './dto'
 import { KeyResultView } from './entities'
 import DomainKeyResultViewRepository from './repository'
 
 @Injectable()
-class DomainKeyResultViewService {
-  constructor(private readonly repository: DomainKeyResultViewRepository) {}
-
-  async getOneById(id: KeyResultViewDTO['id']): Promise<KeyResultView> {
-    return this.repository.findOne({ id })
+class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyResultViewDTO> {
+  constructor(
+    public readonly repository: DomainKeyResultViewRepository,
+    @Inject(forwardRef(() => DomainUserService)) private readonly userService: DomainUserService,
+  ) {
+    super(repository, DomainKeyResultViewService.name)
   }
 
-  async getOneByIDIfUserOwnsIt(
-    id: KeyResultViewDTO['id'],
+  async createIfUserIsInCompany(
+    data: Partial<KeyResultView>,
     user: UserDTO,
-  ): Promise<KeyResultView | null> {
-    return this.repository.findOne({ id, userId: user.id })
+  ): Promise<KeyResultView[] | null> {
+    const selector = { id: data.userId }
+    const keyResult = await this.userService.getOneIfUserIsInCompany(selector, user)
+    if (!keyResult) return
+
+    return this.create(data)
   }
 
-  async getOneByBindingIfUserOwnsIt(
-    binding: KeyResultViewDTO['binding'],
+  async createIfUserIsInTeam(
+    data: Partial<KeyResultView>,
     user: UserDTO,
-  ): Promise<KeyResultView | null> {
-    return this.repository.findOne({ binding, userId: user.id })
+  ): Promise<KeyResultView[] | null> {
+    const selector = { id: data.userId }
+    const keyResult = await this.userService.getOneIfUserIsInTeam(selector, user)
+    if (!keyResult) return
+
+    return this.create(data)
   }
 
-  async updateRankIfUserOwnsIt(
-    id: KeyResultViewDTO['id'],
-    newRank: KeyResultViewDTO['rank'],
+  async createIfUserOwnsIt(
+    data: Partial<KeyResultView>,
     user: UserDTO,
-  ): Promise<KeyResultView | null> {
-    const newData = {
-      rank: newRank,
-    }
-    const conditions = {
-      id,
-      userId: user.id,
-    }
+  ): Promise<KeyResultView[] | null> {
+    const selector = { id: data.userId }
+    const keyResult = await this.userService.getOneIfUserOwnsIt(selector, user)
+    if (!keyResult) return
 
-    return this.repository.updateWithConditions(newData, conditions)
-  }
-
-  async create(
-    keyResultViews: Partial<KeyResultViewDTO> | Array<Partial<KeyResultViewDTO>>,
-  ): Promise<KeyResultView[]> {
-    const data = await this.repository.insert(keyResultViews)
-
-    return data.raw
+    return this.create(data)
   }
 }
 

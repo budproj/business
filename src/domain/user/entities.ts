@@ -8,9 +8,11 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
+import { CompanyDTO } from 'domain/company/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
 import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
+import { ObjectiveDTO } from 'domain/objective/dto'
 import { TeamDTO } from 'domain/team/dto'
 
 import { UserDTO } from './dto'
@@ -41,6 +43,9 @@ export class User implements UserDTO {
   @OneToMany('KeyResult', 'owner')
   public keyResults: KeyResultDTO[]
 
+  @OneToMany('Objective', 'owner')
+  public objectives: ObjectiveDTO[]
+
   @OneToMany('ConfidenceReport', 'user')
   public confidenceReports: ConfidenceReportDTO[]
 
@@ -49,4 +54,10 @@ export class User implements UserDTO {
 
   @ManyToMany('Team', 'users', { lazy: true })
   public teams: Promise<TeamDTO[]>
+
+  @OneToMany('Team', 'owner')
+  public ownedTeams: TeamDTO[]
+
+  @OneToMany('Company', 'owner')
+  public ownedCompanies: CompanyDTO[]
 }
