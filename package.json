@@ -68,7 +68,7 @@
     "@budproj/eslint-config-base-ts": "^0.0.12",
     "@budproj/eslint-config-prettier-ts": "^0.0.12",
     "@budproj/prettier-config": "^0.0.12",
-    "@nestjs/cli": "^7.5.2",
+    "@nestjs/cli": "^7.5.3",
     "@nestjs/schematics": "^7.2.1",
     "@types/eslint": "^7",
     "@types/eslint-config-prettier": "^6",
