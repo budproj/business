@@ -1,11 +1,18 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm'
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies/snake-naming.strategy'
 
-const { TYPEORM_HOST, TYPEORM_PORT, TYPEORM_USER, TYPEORM_PASSWORD, TYPEORM_LOGGING } = process.env
+const {
+  TYPEORM_HOST,
+  TYPEORM_PORT,
+  TYPEORM_DATABASE,
+  TYPEORM_USER,
+  TYPEORM_PASSWORD,
+  TYPEORM_LOGGING,
+} = process.env
 
 const config: TypeOrmModuleOptions = {
   type: 'postgres',
-  database: 'business',
+  database: TYPEORM_DATABASE,
   migrations: ['dist/src/migrations/**/*.js'],
   entities: ['dist/src/domain/**/entities.js'],
   host: TYPEORM_HOST,

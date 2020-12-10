@@ -2,7 +2,10 @@ project = "business"
 
 app "app" {
   build {
-    use "pack" {}
+    use "pack" {
+      builder = "gcr.io/buildpacks/builder:v1"  
+    }
+
     registry {
       use "aws-ecr" {
         region = "sa-east-1"

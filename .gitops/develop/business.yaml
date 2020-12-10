@@ -24,6 +24,40 @@ spec:
       containers:
         - name: business-app
           image: 904333181156.dkr.ecr.sa-east-1.amazonaws.com/business:$ECR_TAG
+          env:
+            - name: APP_ENV
+              value: develop
+            - name: PORT
+              value: 80
+            - name: TYPEORM_HOST
+              value: postgresql.postgresql.traefik.mesh
+            - name: TYPEORM_POST
+              value: 5432
+            - name: TYPEORM_DATABASE
+              value: business_develop
+            - name: TYPEORM_USER
+              valueFrom:
+                secretKeyRef:
+                  name: business-app
+                  key: typeorm-user
+            - name: TYPEORM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: business-app
+                  key: typeorm-password
+            - name: AUTH0_NAMESPACE
+              value: https://api.getbud.co
+            - name: AUTH_CLIENT_ID
+              value: sC2t6uIvHC2wCN8creSkJ7npjZdkv4W9
+            - name: AUTH0_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: business-app
+                  key: auth0-client-secret
+            - name: AUTH0_ISSUER
+              value: https://getbud.us.auth0.com/
+            - name: AUTH0_AUDIENCE
+              value: https://api.getbud.co/business
           ports:
             - containerPort: 80
 ---
