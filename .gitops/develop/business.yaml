@@ -1,0 +1,63 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: business-app
+  labels:
+    app.kubernetes.io/name: business-app
+    app.kubernetes.io/version: 1.0.0
+    app.kubernetes.io/component: business
+    app.kubernetes.io/part-of: application-layer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: business-app
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: business-app
+        app.kubernetes.io/version: 1.0.0
+        app.kubernetes.io/component: business
+        app.kubernetes.io/part-of: application-layer
+    spec:
+      containers:
+        - name: business-app
+          image: 904333181156.dkr.ecr.sa-east-1.amazonaws.com/business:$ECR_TAG
+          ports:
+            - containerPort: 80
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: business-app
+spec:
+  selector:
+    app.kubernetes.io/name: business-app
+  ports:
+    - name: web
+      protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: business-app
+  labels:
+    app.kubernetes.io/name: business-app
+    app.kubernetes.io/version: 1.0.0
+    app.kubernetes.io/component: business
+    app.kubernetes.io/part-of: application-layer
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`api.getbud.co`) Path(`/business`)
+      kind: Rule
+      services:
+        - name: business-app
+          port: 80
+  tls:
+    certResolver: letsencrypt
+    options: {}
