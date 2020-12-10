@@ -15,6 +15,7 @@ _TAG="latest"
 _ENV="develop"
 _GITOPS_DIR=$(cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)
 _APP_DIR=$(git rev-parse --show-toplevel)
+_APP_NAME=$(basename $_APP_DIR)
 
 # Helpers
 # -------------------------------------------------------------------------------------------------
@@ -139,7 +140,8 @@ clone_required_manifests() {
 }
 
 ensure_environment() {
-  mkdir -p $_TMP_DIR/manifests/applications/$_ENV
+  mkdir -p $_TMP_DIR/manifests/applications/$_APP_NAME
+  mkdir -p $_TMP_DIR/manifests/applications/$_APP_NAME/$_ENV
 }
 
 update_manifest() {
@@ -148,13 +150,12 @@ update_manifest() {
 
   for file in $files; do
     filename=$(basename $file)
-    envsubst < $file > $_TMP_DIR/manifests/applications/$_ENV/$filename
+    envsubst < $file > $_TMP_DIR/manifests/applications/_APP_NAME/$_ENV/$filename
   done
 }
 
 commit_updates() {
-  app_dir_name=$(basename $_APP_DIR)
-  message="(automatic) deploys \"${app_dir_name}\" application in ${_ENV} environment"
+  message="(automatic) deploys \"${_APP_NAME}\" application in ${_ENV} environment"
 
   pushd $_TMP_DIR "$@">/dev/null
 
