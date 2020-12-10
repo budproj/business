@@ -3,7 +3,7 @@ project = "business"
 app "app" {
   build {
     use "pack" {
-      builder = "gcr.io/buildpacks/builder:v1"  
+      builder = "gcr.io/buildpacks/builder:v1"
     }
 
     registry {
@@ -17,7 +17,8 @@ app "app" {
 
   deploy{
     use "exec" {
-      command = ["./.gitops/deploy.sh -e develop -t ${gitrefpretty()}"]
+      dir = "./.gitops"
+      command = ["bash", "./deploy.sh", "-e", "develop", "-t", gitrefpretty()]
     }
   }
 }
