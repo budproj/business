@@ -1,0 +1,13 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: business-app
+spec:
+  selector:
+    app.kubernetes.io/name: business-app
+  ports:
+    - name: web
+      protocol: TCP
+      port: 80
+      targetPort: 80

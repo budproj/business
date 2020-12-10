@@ -1,0 +1,22 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: business-app
+  labels:
+    app.kubernetes.io/name: business-app
+    app.kubernetes.io/version: 1.0.0
+    app.kubernetes.io/component: business
+    app.kubernetes.io/part-of: application-layer
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`api.develop.getbud.co`) Path(`/business`)
+      kind: Rule
+      services:
+        - name: business-app
+          port: 80
+  tls:
+    certResolver: letsencrypt
+    options: {}
