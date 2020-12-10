@@ -28,11 +28,11 @@ spec:
             - name: APP_ENV
               value: develop
             - name: PORT
-              value: 80
+              value: '80'
             - name: TYPEORM_HOST
               value: postgresql.postgresql.traefik.mesh
             - name: TYPEORM_POST
-              value: 5432
+              value: '5432'
             - name: TYPEORM_DATABASE
               value: business_develop
             - name: TYPEORM_USER

@@ -1,6 +1,5 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-set -o nounset
 set -o errexit
 set -o errtrace
 set -o pipefail
@@ -12,7 +11,7 @@ _ME="$(basename "${0}")"
 _TMP_DIR=$(mktemp -u)
 _GIT_REPO="git@github.com:budproj/k8s-manifests.git"
 _TAG="latest"
-_ENV="develop"
+_STAGE="develop"
 _GITOPS_DIR=$(cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)
 _APP_DIR=$(git rev-parse --show-toplevel)
 _APP_NAME=$(basename $_APP_DIR)
@@ -33,12 +32,12 @@ Deploys this application using our Gitops structure.
 Usage:
   ${_ME} [<arguments>]
   ${_ME} -t | --tag
-  ${_ME} -e | --environment
+  ${_ME} -s | --stage
   ${_ME} -h | --help
 Options:
-  -t --tag           Tag for your image for this deployment (default: latest)
-  -e --environment   The enviornment you are deploying. It must be \x1B[36mdevelop\x1B[0m or \x1B[36mproduction\x1B[0m (default: develop)
-  -h --help          Show this screen.
+  -t --tag     Tag for your image for this deployment (default: latest)
+  -s --stage   The stage you are deploying. It must be \x1B[36mdevelop\x1B[0m or \x1B[36mproduction\x1B[0m (default: develop)
+  -h --help    Show this screen.
 EOM
 )"
 }
@@ -84,8 +83,8 @@ parse_options() {
   while [[ $1 = -?* ]]; do
     case $1 in
       -h|--help) usage >&2; exit 0;;
-      -t|--tag) add_tag $2; break;;
-      -e|--environment) add_environement $2; break;;
+      -t|--tag) add_tag $2; shift;;
+      -s|--stage) add_stage $2; shift;;
       --endopts) shift; break;;
       *) die "invalid option: $1";;
     esac
@@ -98,6 +97,7 @@ wait_with_spinner() {
   pid=$1
   message=$2
   spin='⣾⣽⣻⢿⡿⣟⣯⣷'
+  echo
 
   i=0
   while kill -0 $pid 2>/dev/null
@@ -114,11 +114,11 @@ add_tag() {
   _TAG=$1
 }
 
-add_environement() {
+add_stage() {
   allowed_environments='develop production'
 
   if [[ $allowed_environments == *"$1"* ]]; then
-    _ENV=$1
+    _STAGE=$1
   fi
 }
 
@@ -141,21 +141,21 @@ clone_required_manifests() {
 
 ensure_environment() {
   mkdir -p $_TMP_DIR/manifests/applications/$_APP_NAME
-  mkdir -p $_TMP_DIR/manifests/applications/$_APP_NAME/$_ENV
+  mkdir -p $_TMP_DIR/manifests/applications/$_APP_NAME/$_STAGE
 }
 
 update_manifest() {
-  export ECR_TAG=$_ENV
-  files=$(find "${_GITOPS_DIR}/${_ENV}" -regex '.*\.ya*ml')
+  export ECR_TAG=$_TAG
+  files=$(find "${_GITOPS_DIR}/${_STAGE}" -regex '.*\.ya*ml')
 
   for file in $files; do
     filename=$(basename $file)
-    envsubst < $file > $_TMP_DIR/manifests/applications/_APP_NAME/$_ENV/$filename
+    envsubst < $file > $_TMP_DIR/manifests/applications/$_APP_NAME/$_STAGE/$filename
   done
 }
 
 commit_updates() {
-  message="(automatic) deploys \"${_APP_NAME}\" application in ${_ENV} environment"
+  message="(automatic) deploys \"${_APP_NAME}\" application in ${_STAGE} environment"
 
   pushd $_TMP_DIR "$@">/dev/null
 
@@ -166,8 +166,6 @@ commit_updates() {
   wait_with_spinner "${pid}" "Commiting new manifests"
 
   git push --quiet
-  pid=$!
-  wait_with_spinner "${pid}" "Pushing new manifests"
 
   popd "$@">/dev/null
 }
