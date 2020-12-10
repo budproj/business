@@ -17,8 +17,7 @@ app "app" {
 
   deploy{
     use "exec" {
-      dir = "./.gitops"
-      command = ["bash", "./deploy.sh", "-e", "develop", "-t", gitrefpretty()]
+      command = ["bash", "./.gitops/deploy.sh", "-e", "develop", "-t", gitrefpretty()]
     }
   }
 }

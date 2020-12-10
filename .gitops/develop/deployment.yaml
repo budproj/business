@@ -28,10 +28,10 @@ spec:
             - name: APP_ENV
               value: develop
             - name: PORT
-              value: '80'
+              value: '8080'
             - name: TYPEORM_HOST
-              value: postgresql.postgresql.traefik.mesh
-            - name: TYPEORM_POST
+              value: postgresql-headless.postgresql.traefik.mesh
+            - name: TYPEORM_PORT
               value: '5432'
             - name: TYPEORM_DATABASE
               value: business_develop
@@ -47,7 +47,7 @@ spec:
                   key: typeorm-password
             - name: AUTH0_NAMESPACE
               value: https://api.getbud.co
-            - name: AUTH_CLIENT_ID
+            - name: AUTH0_CLIENT_ID
               value: sC2t6uIvHC2wCN8creSkJ7npjZdkv4W9
             - name: AUTH0_CLIENT_SECRET
               valueFrom:
@@ -58,5 +58,11 @@ spec:
               value: https://getbud.us.auth0.com/
             - name: AUTH0_AUDIENCE
               value: https://api.getbud.co/business
+            - name: GRAPHQL_SCHEMA_FILE_PATH
+              value: './dist/src/app/graphql/schema.gql'
+            - name: LOGGING_LEVEL
+              value: debug
+            - name: LOGGING_SERVICE_NAME
+              value: business@develop
           ports:
             - containerPort: 80
