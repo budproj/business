@@ -10,6 +10,7 @@ const graphQLFactory: GqlModuleAsyncOptions = {
     debug: configService.get('debug'),
     playground: configService.get('playground'),
     autoSchemaFile: configService.get('schemaFile'),
+    useGlobalPrefix: true,
   }),
 }
 

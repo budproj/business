@@ -29,7 +29,7 @@ async function bootstrap() {
     }),
   )
 
-  await app.listen(appConfig.port, '0.0.0.0')
+  await app.listen(configService.get('port'), '0.0.0.0')
   logger.log(`Started server listening to port ${appConfig.port.toString()}`)
 }
 
