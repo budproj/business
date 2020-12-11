@@ -30,7 +30,7 @@ spec:
             - name: PORT
               value: '8080'
             - name: TYPEORM_HOST
-              value: postgresql-headless.postgresql.traefik.mesh
+              value: '172.20.139.201'
             - name: TYPEORM_PORT
               value: '5432'
             - name: TYPEORM_DATABASE
