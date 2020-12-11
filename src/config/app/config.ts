@@ -7,6 +7,7 @@ const {
   AUTH0_ISSUER,
   AUTH0_AUDIENCE,
   AUTH0_NAMESPACE,
+  GLOBAL_PREFIX,
   LOGGING_LEVEL,
   LOGGING_SERVICE_NAME,
   GOD_MODE_ENABLED,
@@ -27,6 +28,7 @@ export interface AuthzConfigOptions {
 
 export interface AppConfigOptions {
   port: number
+  globalPrefix: string
   godMode: boolean
   authz: AuthzConfigOptions
   logging: LoggingConfigOptions
@@ -34,6 +36,7 @@ export interface AppConfigOptions {
 
 const config: AppConfigOptions = {
   port: Number.parseInt(PORT, 10) || 3000,
+  globalPrefix: GLOBAL_PREFIX || '',
   godMode: GOD_MODE_ENABLED === 'true',
 
   authz: {

@@ -66,3 +66,5 @@ spec:
               value: debug
             - name: LOGGING_SERVICE_NAME
               value: business@develop
+            - name: GLOBAL_PREFIX
+              value: business

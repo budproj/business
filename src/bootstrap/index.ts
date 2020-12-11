@@ -21,6 +21,7 @@ async function bootstrap() {
     configService.get('logging.serviceName'),
   )
 
+  app.setGlobalPrefix(configService.get('globalPrefix'))
   app.useLogger(logger)
   app.useGlobalPipes(
     new ValidationPipe({
