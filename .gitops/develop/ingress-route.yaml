@@ -12,7 +12,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`api.develop.getbud.co`) Path(`/business`)
+    - match: Host(`api.develop.getbud.co`) && Path(`/business`)
       kind: Rule
       services:
         - name: business-app
