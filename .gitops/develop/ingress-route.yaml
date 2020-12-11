@@ -12,11 +12,11 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`api.develop.getbud.co`) && Path(`/business`)
+    - match: Host(`api.develop.getbud.co`)
       kind: Rule
       services:
         - name: business-app
-          port: 80
+          port: 8080
   tls:
     certResolver: letsencrypt
     options: {}

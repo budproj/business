@@ -64,5 +64,3 @@ spec:
               value: debug
             - name: LOGGING_SERVICE_NAME
               value: business@develop
-          ports:
-            - containerPort: 80
