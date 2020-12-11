@@ -7,10 +7,9 @@ const {
   AUTH0_ISSUER,
   AUTH0_AUDIENCE,
   AUTH0_NAMESPACE,
+  GLOBAL_PREFIX,
   LOGGING_LEVEL,
   LOGGING_SERVICE_NAME,
-  HTTPS_KEY,
-  HTTPS_CERT,
   GOD_MODE_ENABLED,
 } = process.env
 
@@ -27,26 +26,17 @@ export interface AuthzConfigOptions {
   namespace: string
 }
 
-export interface HttpsConfigOptions {
-  port: number
-  credentials: HttpsCredentialsConfigOptions
-}
-
-export interface HttpsCredentialsConfigOptions {
-  key: string
-  cert: string
-}
-
 export interface AppConfigOptions {
   port: number
+  globalPrefix: string
   godMode: boolean
   authz: AuthzConfigOptions
   logging: LoggingConfigOptions
-  https: HttpsConfigOptions
 }
 
 const config: AppConfigOptions = {
   port: Number.parseInt(PORT, 10) || 3000,
+  globalPrefix: GLOBAL_PREFIX || '',
   godMode: GOD_MODE_ENABLED === 'true',
 
   authz: {
@@ -60,14 +50,6 @@ const config: AppConfigOptions = {
   logging: {
     level: LOGGING_LEVEL as LogLevel,
     serviceName: LOGGING_SERVICE_NAME,
-  },
-
-  https: {
-    port: Number.parseInt(PORT, 10) || 443,
-    credentials: {
-      key: HTTPS_KEY,
-      cert: HTTPS_CERT,
-    },
   },
 }
 
