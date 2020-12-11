@@ -26,8 +26,6 @@ spec:
           image: 904333181156.dkr.ecr.sa-east-1.amazonaws.com/business:$ECR_TAG
           ports:
             - containerPort: 8080
-              name: web
-              protocol: TCP
           env:
             - name: APP_ENV
               value: develop
