@@ -11,7 +11,7 @@ import BootstrapModule from './module'
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     BootstrapModule,
-    new FastifyAdapter({ http2: true }),
+    new FastifyAdapter(),
   )
 
   const configService: ConfigService = app.get(ConfigService)

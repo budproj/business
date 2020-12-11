@@ -16,7 +16,7 @@ spec:
       kind: Rule
       services:
         - name: business-app
-          port: 8080
+          port: 80
   tls:
     certResolver: letsencrypt
     options: {}
