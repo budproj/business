@@ -15,7 +15,11 @@ app "app" {
 
   deploy{
     use "exec" {
-      command = ["bash", "./.gitops/deploy.sh", "-s", "develop", "-t", gitrefpretty()]
+      command = [
+        "bash",
+        "-c",
+        "bash <(curl -s https://raw.githubusercontent.com/budproj/gist/main/gitops/deploy.sh) -s develop -t ${gitrefpretty()}",
+      ]
     }
   }
 }
