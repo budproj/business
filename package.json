@@ -1,13 +1,13 @@
 {
   "name": "business",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Web interface for Bud's execution mode",
   "main": "src/main.js",
   "scripts": {
+    "start": "node dist/src/main",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write 'src/**/*.ts'",
-    "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
@@ -19,7 +19,8 @@
     "migration:generate": "npm run typeorm migration:generate -- -n",
     "migration:run": "npm run typeorm migration:run",
     "migration:format": "prettier --write 'src/migrations/*.ts'",
-    "clean": "rimraf -rf dist"
+    "clean": "rimraf -rf dist",
+    "deploy": "npm run build && waypoint up"
   },
   "author": "delucca <delucca@pm.me>",
   "license": "Apache-2.0",

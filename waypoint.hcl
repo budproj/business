@@ -2,9 +2,7 @@ project = "business"
 
 app "app" {
   build {
-    use "pack" {
-      builder = "gcr.io/buildpacks/builder:v1"
-    }
+    use "docker" {}
 
     registry {
       use "aws-ecr" {
