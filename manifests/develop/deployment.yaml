@@ -48,18 +48,18 @@ spec:
                   name: business-app
                   key: typeorm-password
             - name: AUTH0_NAMESPACE
-              value: https://api.getbud.co
+              value: https://api.develop.getbud.co
             - name: AUTH0_CLIENT_ID
-              value: sC2t6uIvHC2wCN8creSkJ7npjZdkv4W9
+              value: zkWUYnKV1KDqoGw3nPMbLgs89xjLO5c4
             - name: AUTH0_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: business-app
                   key: auth0-client-secret
             - name: AUTH0_ISSUER
-              value: https://getbud.us.auth0.com/
+              value: https://getbud-develop.us.auth0.com/
             - name: AUTH0_AUDIENCE
-              value: https://api.getbud.co/business
+              value: https://api.develop.getbud.co/business
             - name: GRAPHQL_SCHEMA_FILE_PATH
               value: './dist/src/app/graphql/schema.gql'
             - name: LOGGING_LEVEL
