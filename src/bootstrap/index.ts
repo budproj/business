@@ -40,6 +40,8 @@ async function bootstrap() {
     origin: allowedOrigins,
   })
 
+  console.log(allowedOrigins)
+
   await app.listen(configService.get('port'), '0.0.0.0')
   logger.log(`Started server listening to port ${appConfig.port.toString()}`)
 }
