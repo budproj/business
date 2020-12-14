@@ -57,7 +57,7 @@ spec:
                   name: business-app
                   key: auth0-client-secret
             - name: AUTH0_ISSUER
-              value: https://getbud.us.auth0.com/
+              value: https://getbud-develop.us.auth0.com/
             - name: AUTH0_AUDIENCE
               value: https://api.develop.getbud.co/business
             - name: GRAPHQL_SCHEMA_FILE_PATH
