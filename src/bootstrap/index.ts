@@ -1,5 +1,3 @@
-import { existsSync, readFileSync } from 'fs'
-
 import { ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
@@ -11,10 +9,9 @@ import buildLogger from 'lib/logger'
 import BootstrapModule from './module'
 
 async function bootstrap() {
-  const https = buildHttpsConfig()
   const app = await NestFactory.create<NestFastifyApplication>(
     BootstrapModule,
-    new FastifyAdapter({ https }),
+    new FastifyAdapter(),
   )
 
   const configService: ConfigService = app.get(ConfigService)
@@ -23,9 +20,9 @@ async function bootstrap() {
     configService.get('logging.level'),
     configService.get('logging.serviceName'),
   )
-  app.useLogger(logger)
 
   app.setGlobalPrefix(configService.get('globalPrefix'))
+  app.useLogger(logger)
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -40,20 +37,6 @@ async function bootstrap() {
 
   await app.listen(configService.get('port'), '0.0.0.0')
   logger.log(`Started server listening to port ${appConfig.port.toString()}`)
-}
-
-const buildHttpsConfig = () => {
-  const isHttps =
-    existsSync(appConfig.https.credentials.key) && existsSync(appConfig.https.credentials.cert)
-
-  const httpsConfig = isHttps
-    ? {
-        key: readFileSync(appConfig.https.credentials.key),
-        cert: readFileSync(appConfig.https.credentials.cert),
-      }
-    : {}
-
-  return httpsConfig
 }
 
 export default bootstrap
