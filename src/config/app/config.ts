@@ -1,5 +1,7 @@
 import { LogLevel } from 'lib/logger'
 
+import { AppConfigOptions } from './types'
+
 const {
   PORT,
   AUTH0_CLIENT_ID,
@@ -11,28 +13,9 @@ const {
   LOGGING_LEVEL,
   LOGGING_SERVICE_NAME,
   GOD_MODE_ENABLED,
+  HTTPS_CERT,
+  HTTPS_KEY,
 } = process.env
-
-export interface LoggingConfigOptions {
-  level: LogLevel
-  serviceName: string
-}
-
-export interface AuthzConfigOptions {
-  clientID: string
-  clientSecret: string
-  issuer: string
-  audience: string
-  namespace: string
-}
-
-export interface AppConfigOptions {
-  port: number
-  globalPrefix: string
-  godMode: boolean
-  authz: AuthzConfigOptions
-  logging: LoggingConfigOptions
-}
 
 const config: AppConfigOptions = {
   port: Number.parseInt(PORT, 10) || 3000,
@@ -50,6 +33,13 @@ const config: AppConfigOptions = {
   logging: {
     level: LOGGING_LEVEL as LogLevel,
     serviceName: LOGGING_SERVICE_NAME,
+  },
+
+  https: {
+    credentials: {
+      key: HTTPS_KEY,
+      cert: HTTPS_CERT,
+    },
   },
 }
 

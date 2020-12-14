@@ -1,4 +1,5 @@
-import config, { AppConfigOptions } from './config'
+import config from './config'
+import { AppConfigOptions } from './types'
 
 export * from './config'
 
