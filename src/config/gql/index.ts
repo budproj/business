@@ -1,4 +1,5 @@
-import config, { GqlConfigOptions } from './config'
+import config from './config'
+import { GqlConfigOptions } from './types'
 
 export * from './config'
 
