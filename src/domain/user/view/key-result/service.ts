@@ -28,12 +28,12 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
     context: DomainServiceContext,
   ): Promise<KeyResultView | null> {
     const view = await query.getOne()
-    const updatedView = await this.mergeViewWithNewKeyResults(view, context)
+    const refreshedView = await this.refreshView(view, context)
 
-    return updatedView as KeyResultView
+    return refreshedView as KeyResultView
   }
 
-  async mergeViewWithNewKeyResults(view: KeyResultView, context: DomainServiceContext) {
+  async refreshView(view: KeyResultView, context?: DomainServiceContext) {
     const availableKeyResults = await this.keyResultService.getManyWithConstraint(
       context.constraint,
       context.user,
