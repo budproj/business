@@ -71,6 +71,7 @@ abstract class GraphQLEntityService<E, D> {
     const policies = mapValues(
       actionSelectors,
       async (constraint): Promise<UserPolicy> => {
+        if (!constraint) return UserPolicy.DENY
         const foundData = await this.entityService.getOneWithConstraint(constraint, selector, user)
 
         return foundData ? UserPolicy.ALLOW : UserPolicy.DENY
