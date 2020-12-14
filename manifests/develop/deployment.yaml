@@ -68,3 +68,5 @@ spec:
               value: business@develop
             - name: GLOBAL_PREFIX
               value: business
+            - name: CORS_ALLOWED_ORIGINS
+              value: https://app.develop.getbud.co
