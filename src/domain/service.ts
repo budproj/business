@@ -1,12 +1,14 @@
 import { Logger } from '@nestjs/common'
 import { uniq } from 'lodash'
-import { DeleteResult, FindConditions } from 'typeorm'
+import { DeleteResult, FindConditions, SelectQueryBuilder } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
 import DomainEntityRepository, { SelectionQueryConstrain } from 'domain/repository'
 
 import { CompanyDTO } from './company/dto'
+import { CONSTRAINT } from './constants'
 import { TeamDTO } from './team/dto'
+import { DomainServiceContext } from './types'
 import { UserDTO } from './user/dto'
 
 abstract class DomainEntityService<E, D> {
@@ -20,13 +22,25 @@ abstract class DomainEntityService<E, D> {
   }
 
   //* **** ABSTRACT METHODS *****//
+  async createWithConstraint(constraint: CONSTRAINT, data: Partial<D>, user: UserDTO) {
+    const availableSelectors = {
+      [CONSTRAINT.ANY]: async () => this.create(data),
+      [CONSTRAINT.COMPANY]: async () => this.createIfUserIsInCompany(data, user),
+      [CONSTRAINT.TEAM]: async () => this.createIfUserIsInTeam(data, user),
+      [CONSTRAINT.OWNS]: async () => this.createIfUserOwnsIt(data, user),
+    }
+    const constrainedSelector = availableSelectors[constraint]
+
+    return constrainedSelector()
+  }
+
   async createIfUserIsInCompany(_data: Partial<D>, _user: UserDTO): Promise<E[] | null> {
     // Since creation does not have a selector, we can not apply our constraint structure to it.
     // To solve it, each entity service must implement its own method that will decide if the user
     // is allowed to create that given resource.
     //
     // The suggested implementation is the following:
-    // 1. You fetch the user teams or companies (you can check other contraint methods and copy their implementation)
+    // 1. You fetch the user teams or companies (you can check other constraint methods and copy their implementation)
     // 2. You run a read query for a given resource using a constraint (usually you will run a query from a different domain seervice)
     // 3. You evaluate if the user is allowed to create the resource (usually by checking if something returned from the query)
     // 4. You run the `this.create` method, by passing the provided data
@@ -39,7 +53,7 @@ abstract class DomainEntityService<E, D> {
     // is allowed to create that given resource.
     //
     // The suggested implementation is the following:
-    // 1. You fetch the user teams or companies (you can check other contraint methods and copy their implementation)
+    // 1. You fetch the user teams or companies (you can check other constraint methods and copy their implementation)
     // 2. You run a read query for a given resource using a constraint (usually you will run a query from a different domain seervice)
     // 3. You evaluate if the user is allowed to create the resource (usually by checking if something returned from the query)
     // 4. You run the `this.create` method, by passing the provided data
@@ -82,34 +96,68 @@ abstract class DomainEntityService<E, D> {
   }
 
   //* **** READ *****/
-  async getAll(): Promise<E[]> {
-    return this.repository.find()
+  async getOneWithConstraint(constraint: CONSTRAINT, selector: FindConditions<E>, user: UserDTO) {
+    const query = await this.getWithConstraint(constraint, selector, user)
+    const context: DomainServiceContext = {
+      user,
+      constraint,
+    }
+
+    const data = this.getOneInQuery(query, context)
+
+    return data
   }
 
-  async getOne(
-    selector: FindConditions<E>,
-    constrainQuery?: SelectionQueryConstrain<E>,
-  ): Promise<E | null> {
+  async getManyWithConstraint(constraint: CONSTRAINT, user: UserDTO, selector?: FindConditions<E>) {
+    const query = await this.getWithConstraint(constraint, selector, user)
+    const context: DomainServiceContext = {
+      user,
+      constraint,
+    }
+
+    const data = this.getManyInQuery(query, context)
+
+    return data
+  }
+
+  async getWithConstraint(constraint: CONSTRAINT, selector: FindConditions<E>, user: UserDTO) {
+    const availableSelectors = {
+      [CONSTRAINT.ANY]: async () => this.get(selector),
+      [CONSTRAINT.COMPANY]: async () => this.getIfUserIsInCompany(selector, user),
+      [CONSTRAINT.TEAM]: async () => this.getIfUserIsInTeam(selector, user),
+      [CONSTRAINT.OWNS]: async () => this.getIfUserOwnsIt(selector, user),
+    }
+    const constrainedSelector = availableSelectors[constraint]
+
+    return constrainedSelector()
+  }
+
+  get(selector: FindConditions<E>, constrainQuery?: SelectionQueryConstrain<E>) {
     const query = this.repository.createQueryBuilder().where(selector)
 
-    return constrainQuery ? constrainQuery(query).getOne() : query.getOne()
+    return constrainQuery ? constrainQuery(query) : query
   }
 
-  async getOneIfUserIsInCompany(selector: FindConditions<E>, user: UserDTO): Promise<E | null> {
+  async getIfUserIsInCompany(
+    selector: FindConditions<E>,
+    user: UserDTO,
+    context?: DomainServiceContext,
+  ) {
     const userCompanies = await this.parseUserCompanies(user)
 
     this.logger.debug({
       userCompanies,
       user,
+      context,
       message: `Reduced companies for user`,
     })
 
     const constrainQuery = this.repository.constraintQueryToCompany(userCompanies)
 
-    return this.getOne(selector, constrainQuery)
+    return this.get(selector, constrainQuery)
   }
 
-  async getOneIfUserIsInTeam(selector: FindConditions<E>, user: UserDTO): Promise<E | null> {
+  async getIfUserIsInTeam(selector: FindConditions<E>, user: UserDTO) {
     const userTeams = await this.parseUserTeams(user)
 
     this.logger.debug({
@@ -120,13 +168,43 @@ abstract class DomainEntityService<E, D> {
 
     const constrainQuery = this.repository.constraintQueryToTeam(userTeams)
 
-    return this.getOne(selector, constrainQuery)
+    return this.get(selector, constrainQuery)
   }
 
-  async getOneIfUserOwnsIt(selector: FindConditions<E>, user: UserDTO): Promise<E | null> {
+  async getIfUserOwnsIt(selector: FindConditions<E>, user: UserDTO) {
     const constrainQuery = this.repository.constraintQueryToOwns(user)
 
-    return this.getOne(selector, constrainQuery)
+    return this.get(selector, constrainQuery)
+  }
+
+  async getOneInQuery(query: SelectQueryBuilder<E>, context?: DomainServiceContext) {
+    this.logger.debug({
+      context,
+      message: `Getting one for request`,
+    })
+
+    return query.getOne()
+  }
+
+  async getManyInQuery(query: SelectQueryBuilder<E>, context?: DomainServiceContext) {
+    this.logger.debug({
+      context,
+      message: `Getting one for request`,
+    })
+
+    return query.getMany()
+  }
+
+  async getOne(selector: FindConditions<E>) {
+    const query = this.get(selector)
+
+    return query.getOne()
+  }
+
+  async getMany(selector: FindConditions<E>) {
+    const query = this.get(selector)
+
+    return query.getMany()
   }
 
   //* **** UPDATE *****//
@@ -134,6 +212,23 @@ abstract class DomainEntityService<E, D> {
     await this.repository.update(selector, newData)
 
     return this.getOne(selector)
+  }
+
+  async updateWithConstraint(
+    constraint: CONSTRAINT,
+    selector: FindConditions<E>,
+    newData: QueryDeepPartialEntity<E>,
+    user: UserDTO,
+  ) {
+    const availableSelectors = {
+      [CONSTRAINT.ANY]: async () => this.update(selector, newData),
+      [CONSTRAINT.COMPANY]: async () => this.updateIfUserIsInCompany(selector, newData, user),
+      [CONSTRAINT.TEAM]: async () => this.updateIfUserIsInTeam(selector, newData, user),
+      [CONSTRAINT.OWNS]: async () => this.updateIfUserOwnsIt(selector, newData, user),
+    }
+    const constrainedSelector = availableSelectors[constraint]
+
+    return constrainedSelector()
   }
 
   async updateIfUserIsInCompany(
@@ -200,6 +295,18 @@ abstract class DomainEntityService<E, D> {
   //* **** DELETE *****//
   async delete(selector: FindConditions<E>): Promise<DeleteResult> {
     return this.repository.delete(selector)
+  }
+
+  async deleteWithConstraint(constraint: CONSTRAINT, selector: FindConditions<E>, user: UserDTO) {
+    const availableSelectors = {
+      [CONSTRAINT.ANY]: async () => this.delete(selector),
+      [CONSTRAINT.COMPANY]: async () => this.deleteIfUserIsInCompany(selector, user),
+      [CONSTRAINT.TEAM]: async () => this.deleteIfUserIsInTeam(selector, user),
+      [CONSTRAINT.OWNS]: async () => this.deleteIfUserOwnsIt(selector, user),
+    }
+    const constrainedSelector = availableSelectors[constraint]
+
+    return constrainedSelector()
   }
 
   async deleteIfUserIsInCompany(selector: FindConditions<E>, user: UserDTO): Promise<DeleteResult> {

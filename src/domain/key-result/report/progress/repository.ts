@@ -10,7 +10,7 @@ import { ProgressReport } from './entities'
 @EntityRepository(ProgressReport)
 class DomainProgressReportRepository extends DomainEntityRepository<ProgressReport> {
   constraintQueryToCompany(allowedCompanies: Array<CompanyDTO['id']>) {
-    const addContraintToQuery = (query?: SelectQueryBuilder<ProgressReport>) => {
+    const addConstraintToQuery = (query?: SelectQueryBuilder<ProgressReport>) => {
       const baseQuery = query ?? this.createQueryBuilder()
       const constrainedQuery = baseQuery
         .leftJoinAndSelect(`${ProgressReport.name}.keyResult`, 'keyResult')
@@ -20,11 +20,11 @@ class DomainProgressReportRepository extends DomainEntityRepository<ProgressRepo
       return constrainedQuery
     }
 
-    return addContraintToQuery
+    return addConstraintToQuery
   }
 
   constraintQueryToTeam(allowedTeams: Array<TeamDTO['id']>) {
-    const addContraintToQuery = (query?: SelectQueryBuilder<ProgressReport>) => {
+    const addConstraintToQuery = (query?: SelectQueryBuilder<ProgressReport>) => {
       const baseQuery = query ?? this.createQueryBuilder()
       const constrainedQuery = baseQuery
         .leftJoinAndSelect(`${ProgressReport.name}.keyResult`, 'keyResult')
@@ -34,11 +34,11 @@ class DomainProgressReportRepository extends DomainEntityRepository<ProgressRepo
       return constrainedQuery
     }
 
-    return addContraintToQuery
+    return addConstraintToQuery
   }
 
   constraintQueryToOwns(user: UserDTO) {
-    const addContraintToQuery = (query?: SelectQueryBuilder<ProgressReport>) => {
+    const addConstraintToQuery = (query?: SelectQueryBuilder<ProgressReport>) => {
       const baseQuery = query ?? this.createQueryBuilder()
       const constrainedQuery = baseQuery.andWhere(`${ProgressReport.name}.userId = :userID`, {
         userID: user.id,
@@ -47,7 +47,7 @@ class DomainProgressReportRepository extends DomainEntityRepository<ProgressRepo
       return constrainedQuery
     }
 
-    return addContraintToQuery
+    return addConstraintToQuery
   }
 }
 

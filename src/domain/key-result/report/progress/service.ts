@@ -1,6 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { remove } from 'lodash'
 
+import { CONSTRAINT } from 'domain/constants'
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
 import DomainKeyResultService from 'domain/key-result/service'
@@ -95,7 +96,11 @@ class DomainProgressReportService extends DomainEntityService<ProgressReport, Pr
     user: UserDTO,
   ): Promise<ProgressReport[] | null> {
     const selector = { id: data.keyResultId }
-    const keyResult = await this.keyResultService.getOneIfUserIsInCompany(selector, user)
+    const keyResult = await this.keyResultService.getOneWithConstraint(
+      CONSTRAINT.COMPANY,
+      selector,
+      user,
+    )
     if (!keyResult) return
 
     return this.create(data)
@@ -106,7 +111,11 @@ class DomainProgressReportService extends DomainEntityService<ProgressReport, Pr
     user: UserDTO,
   ): Promise<ProgressReport[] | null> {
     const selector = { id: data.keyResultId }
-    const keyResult = await this.keyResultService.getOneIfUserIsInTeam(selector, user)
+    const keyResult = await this.keyResultService.getOneWithConstraint(
+      CONSTRAINT.TEAM,
+      selector,
+      user,
+    )
     if (!keyResult) return
 
     return this.create(data)
@@ -117,7 +126,11 @@ class DomainProgressReportService extends DomainEntityService<ProgressReport, Pr
     user: UserDTO,
   ): Promise<ProgressReport[] | null> {
     const selector = { id: data.keyResultId }
-    const keyResult = await this.keyResultService.getOneIfUserOwnsIt(selector, user)
+    const keyResult = await this.keyResultService.getOneWithConstraint(
+      CONSTRAINT.OWNS,
+      selector,
+      user,
+    )
     if (!keyResult) return
 
     return this.create(data)

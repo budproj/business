@@ -2,7 +2,7 @@ import { mapValues } from 'lodash'
 import { FindConditions } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
-import { ACTION, RESOURCE, SCOPE } from 'app/authz/constants'
+import { ACTION, RESOURCE } from 'app/authz/constants'
 import { AuthzUser } from 'app/authz/types'
 import { UserActionPolicies, UserPolicy } from 'app/graphql/user/types'
 import DomainEntityService from 'domain/service'
@@ -24,16 +24,9 @@ abstract class GraphQLEntityService<E, D> {
     user: AuthzUser,
     action: ACTION = ACTION.READ,
   ) {
-    const scopedConstrainedSelectors = {
-      [SCOPE.ANY]: async () => this.entityService.getOne(selector),
-      [SCOPE.COMPANY]: async () => this.entityService.getOneIfUserIsInCompany(selector, user),
-      [SCOPE.TEAM]: async () => this.entityService.getOneIfUserIsInTeam(selector, user),
-      [SCOPE.OWNS]: async () => this.entityService.getOneIfUserOwnsIt(selector, user),
-    }
     const scopeConstraint = user.scopes[this.resource][action]
-    const constrainedSelector = scopedConstrainedSelectors[scopeConstraint]
 
-    return constrainedSelector()
+    return this.entityService.getOneWithConstraint(scopeConstraint, selector, user)
   }
 
   async updateWithScopeConstraint(
@@ -42,17 +35,9 @@ abstract class GraphQLEntityService<E, D> {
     user: AuthzUser,
     action: ACTION = ACTION.UPDATE,
   ) {
-    const scopedConstrainedSetters = {
-      [SCOPE.ANY]: async () => this.entityService.update(selector, newData),
-      [SCOPE.COMPANY]: async () =>
-        this.entityService.updateIfUserIsInCompany(selector, newData, user),
-      [SCOPE.TEAM]: async () => this.entityService.updateIfUserIsInTeam(selector, newData, user),
-      [SCOPE.OWNS]: async () => this.entityService.updateIfUserOwnsIt(selector, newData, user),
-    }
     const scopeConstraint = user.scopes[this.resource][action]
-    const constrainedSelector = scopedConstrainedSetters[scopeConstraint]
 
-    return constrainedSelector()
+    return this.entityService.updateWithConstraint(scopeConstraint, selector, newData, user)
   }
 
   async createWithScopeConstraint(
@@ -60,16 +45,9 @@ abstract class GraphQLEntityService<E, D> {
     user: AuthzUser,
     action: ACTION = ACTION.CREATE,
   ) {
-    const scopedConstrainedCreators = {
-      [SCOPE.ANY]: async () => this.entityService.create(data),
-      [SCOPE.COMPANY]: async () => this.entityService.createIfUserIsInCompany(data, user),
-      [SCOPE.TEAM]: async () => this.entityService.createIfUserIsInTeam(data, user),
-      [SCOPE.OWNS]: async () => this.entityService.createIfUserOwnsIt(data, user),
-    }
     const scopeConstraint = user.scopes[this.resource][action]
-    const constrainedSelector = scopedConstrainedCreators[scopeConstraint]
 
-    return constrainedSelector()
+    return this.entityService.createWithConstraint(scopeConstraint, data, user)
   }
 
   async deleteWithScopeConstraint(
@@ -77,38 +55,23 @@ abstract class GraphQLEntityService<E, D> {
     user: AuthzUser,
     action: ACTION = ACTION.CREATE,
   ) {
-    const scopedConstrainedCreators = {
-      [SCOPE.ANY]: async () => this.entityService.delete(selector),
-      [SCOPE.COMPANY]: async () => this.entityService.deleteIfUserIsInCompany(selector, user),
-      [SCOPE.TEAM]: async () => this.entityService.deleteIfUserIsInTeam(selector, user),
-      [SCOPE.OWNS]: async () => this.entityService.deleteIfUserOwnsIt(selector, user),
-    }
     const scopeConstraint = user.scopes[this.resource][action]
-    const constrainedSelector = scopedConstrainedCreators[scopeConstraint]
 
-    return constrainedSelector()
+    return this.entityService.deleteWithConstraint(scopeConstraint, selector, user)
   }
 
   async getUserPolicies(selector: FindConditions<E>, user: AuthzUser): Promise<UserActionPolicies> {
-    const scopedConstrainedSelectors = {
-      [SCOPE.ANY]: () => UserPolicy.ALLOW,
-      [SCOPE.COMPANY]: async () => this.entityService.getOneIfUserIsInCompany(selector, user),
-      [SCOPE.TEAM]: async () => this.entityService.getOneIfUserIsInTeam(selector, user),
-      [SCOPE.OWNS]: async () => this.entityService.getOneIfUserOwnsIt(selector, user),
-    }
     const actionSelectors = {
-      [ACTION.CREATE]: scopedConstrainedSelectors[user.scopes[this.resource][ACTION.CREATE]],
-      [ACTION.READ]: scopedConstrainedSelectors[user.scopes[this.resource][ACTION.READ]],
-      [ACTION.UPDATE]: scopedConstrainedSelectors[user.scopes[this.resource][ACTION.UPDATE]],
-      [ACTION.DELETE]: scopedConstrainedSelectors[user.scopes[this.resource][ACTION.DELETE]],
+      [ACTION.CREATE]: user.scopes[this.resource][ACTION.CREATE],
+      [ACTION.READ]: user.scopes[this.resource][ACTION.READ],
+      [ACTION.UPDATE]: user.scopes[this.resource][ACTION.UPDATE],
+      [ACTION.DELETE]: user.scopes[this.resource][ACTION.DELETE],
     }
-
-    console.log(this.resource)
 
     const policies = mapValues(
       actionSelectors,
-      async (function_): Promise<UserPolicy> => {
-        const foundData = await function_()
+      async (constraint): Promise<UserPolicy> => {
+        const foundData = await this.entityService.getOneWithConstraint(constraint, selector, user)
 
         return foundData ? UserPolicy.ALLOW : UserPolicy.DENY
       },

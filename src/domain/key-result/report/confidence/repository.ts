@@ -10,7 +10,7 @@ import { ConfidenceReport } from './entities'
 @EntityRepository(ConfidenceReport)
 class DomainConfidenceReportRepository extends DomainEntityRepository<ConfidenceReport> {
   constraintQueryToCompany(allowedCompanies: Array<CompanyDTO['id']>) {
-    const addContraintToQuery = (query?: SelectQueryBuilder<ConfidenceReport>) => {
+    const addConstraintToQuery = (query?: SelectQueryBuilder<ConfidenceReport>) => {
       const baseQuery = query ?? this.createQueryBuilder()
       const constrainedQuery = baseQuery
         .leftJoinAndSelect(`${ConfidenceReport.name}.keyResult`, 'keyResult')
@@ -20,11 +20,11 @@ class DomainConfidenceReportRepository extends DomainEntityRepository<Confidence
       return constrainedQuery
     }
 
-    return addContraintToQuery
+    return addConstraintToQuery
   }
 
   constraintQueryToTeam(allowedTeams: Array<TeamDTO['id']>) {
-    const addContraintToQuery = (query?: SelectQueryBuilder<ConfidenceReport>) => {
+    const addConstraintToQuery = (query?: SelectQueryBuilder<ConfidenceReport>) => {
       const baseQuery = query ?? this.createQueryBuilder()
       const constrainedQuery = baseQuery
         .leftJoinAndSelect(`${ConfidenceReport.name}.keyResult`, 'keyResult')
@@ -34,11 +34,11 @@ class DomainConfidenceReportRepository extends DomainEntityRepository<Confidence
       return constrainedQuery
     }
 
-    return addContraintToQuery
+    return addConstraintToQuery
   }
 
   constraintQueryToOwns(user: UserDTO) {
-    const addContraintToQuery = (query?: SelectQueryBuilder<ConfidenceReport>) => {
+    const addConstraintToQuery = (query?: SelectQueryBuilder<ConfidenceReport>) => {
       const baseQuery = query ?? this.createQueryBuilder()
       const constrainedQuery = baseQuery.andWhere(`${ConfidenceReport.name}.userId = :userID`, {
         userID: user.id,
@@ -47,7 +47,7 @@ class DomainConfidenceReportRepository extends DomainEntityRepository<Confidence
       return constrainedQuery
     }
 
-    return addContraintToQuery
+    return addConstraintToQuery
   }
 }
 
