@@ -13,8 +13,6 @@ import BootstrapModule from './module'
 async function bootstrap() {
   const httpsConfig = buildHttpsConfig()
   const options = httpsConfig ? { https: httpsConfig } : undefined
-  console.log(options)
-  console.log(httpsConfig)
 
   const app = await NestFactory.create<NestFastifyApplication>(
     BootstrapModule,
