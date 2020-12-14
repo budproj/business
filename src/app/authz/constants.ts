@@ -10,13 +10,6 @@ export enum RESOURCE {
   KEY_RESULT_VIEW = 'key-result-view',
 }
 
-export enum SCOPE {
-  ANY = 'any',
-  COMPANY = 'company',
-  TEAM = 'team',
-  OWNS = 'owns',
-}
-
 export enum ACTION {
   CREATE = 'create',
   READ = 'read',

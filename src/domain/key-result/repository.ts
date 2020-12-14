@@ -11,7 +11,7 @@ import { KeyResult } from './entities'
 @EntityRepository(KeyResult)
 class DomainKeyResultRepository extends DomainEntityRepository<KeyResult> {
   constraintQueryToCompany(allowedCompanies: Array<CompanyDTO['id']>) {
-    const addContraintToQuery = (query?: SelectQueryBuilder<KeyResult>) => {
+    const addConstraintToQuery = (query?: SelectQueryBuilder<KeyResult>) => {
       const baseQuery = query ?? this.createQueryBuilder()
       const constrainedQuery = baseQuery
         .leftJoinAndSelect(`${KeyResult.name}.team`, 'team')
@@ -20,11 +20,11 @@ class DomainKeyResultRepository extends DomainEntityRepository<KeyResult> {
       return constrainedQuery
     }
 
-    return addContraintToQuery
+    return addConstraintToQuery
   }
 
   constraintQueryToTeam(allowedTeams: Array<TeamDTO['id']>) {
-    const addContraintToQuery = (query?: SelectQueryBuilder<KeyResult>) => {
+    const addConstraintToQuery = (query?: SelectQueryBuilder<KeyResult>) => {
       const baseQuery = query ?? this.createQueryBuilder()
       const constrainedQuery = baseQuery
         .leftJoinAndSelect(`${KeyResult.name}.team`, 'team')
@@ -33,11 +33,11 @@ class DomainKeyResultRepository extends DomainEntityRepository<KeyResult> {
       return constrainedQuery
     }
 
-    return addContraintToQuery
+    return addConstraintToQuery
   }
 
   constraintQueryToOwns(user: UserDTO) {
-    const addContraintToQuery = (query?: SelectQueryBuilder<KeyResult>) => {
+    const addConstraintToQuery = (query?: SelectQueryBuilder<KeyResult>) => {
       const baseQuery = query ?? this.createQueryBuilder()
       const constrainedQuery = baseQuery.andWhere(`${KeyResult.name}.ownerId = :userID`, {
         userID: user.id,
@@ -46,7 +46,7 @@ class DomainKeyResultRepository extends DomainEntityRepository<KeyResult> {
       return constrainedQuery
     }
 
-    return addContraintToQuery
+    return addConstraintToQuery
   }
 
   buildRankSortColumn(rank: Array<KeyResultDTO['id']>): string {

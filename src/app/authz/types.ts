@@ -1,4 +1,5 @@
-import { ACTION, RESOURCE, SCOPE } from 'app/authz/constants'
+import { ACTION, RESOURCE } from 'app/authz/constants'
+import { CONSTRAINT } from 'domain/constants'
 import { UserDTO } from 'domain/user/dto'
 
 export interface AuthzToken {
@@ -19,4 +20,4 @@ export interface AuthzUser extends UserDTO {
 
 export type AuthzScopes = Record<RESOURCE, AuthzScopeGroup>
 
-export type AuthzScopeGroup = Record<ACTION, SCOPE>
+export type AuthzScopeGroup = Record<ACTION, CONSTRAINT>

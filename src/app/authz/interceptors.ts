@@ -5,11 +5,12 @@ import { uniq } from 'lodash'
 import { Observable } from 'rxjs'
 
 import { AppRequest } from 'app/types'
+import { CONSTRAINT } from 'domain/constants'
 import TeamService from 'domain/team/service'
 import { User } from 'domain/user/entities'
 import UserService from 'domain/user/service'
 
-import { ACTION, RESOURCE, SCOPE, SCOPED_PERMISSION } from './constants'
+import { ACTION, RESOURCE, SCOPED_PERMISSION } from './constants'
 import GodUser from './god-user'
 import { AuthzScopeGroup, AuthzUser } from './types'
 
@@ -56,7 +57,7 @@ export class EnhanceWithBudUser implements NestInterceptor {
   }
 
   async godBypass(request: AppRequest, next: CallHandler): Promise<Observable<unknown>> {
-    const teamsPromise = this.teamService.getAll()
+    const teamsPromise = this.teamService.getMany({ id: 2 })
 
     const user = {
       teams: await teamsPromise,
@@ -133,7 +134,7 @@ export class EnhanceWithBudUser implements NestInterceptor {
     action: ACTION,
     resource: RESOURCE,
     permissions: SCOPED_PERMISSION[],
-  ): SCOPE {
+  ): CONSTRAINT {
     const resourcePermissions = permissions.filter((permission) =>
       permission.includes(`${resource}:${action}`),
     )
@@ -142,14 +143,16 @@ export class EnhanceWithBudUser implements NestInterceptor {
     return highestScope
   }
 
-  getHighestScopeForPermissions(permissions: SCOPED_PERMISSION[]): SCOPE {
+  getHighestScopeForPermissions(permissions: SCOPED_PERMISSION[]): CONSTRAINT {
     const scopeWeights = {
-      [SCOPE.ANY]: 4,
-      [SCOPE.COMPANY]: 3,
-      [SCOPE.TEAM]: 2,
-      [SCOPE.OWNS]: 1,
+      [CONSTRAINT.ANY]: 4,
+      [CONSTRAINT.COMPANY]: 3,
+      [CONSTRAINT.TEAM]: 2,
+      [CONSTRAINT.OWNS]: 1,
     }
-    const scopeList = permissions.map((permission) => permission.split(':').slice(-1)[0] as SCOPE)
+    const scopeList = permissions.map(
+      (permission) => permission.split(':').slice(-1)[0] as CONSTRAINT,
+    )
     const uniqueScopeList = uniq(scopeList)
     const weightedScopeList = uniqueScopeList.map((scope) => ({
       scope,
