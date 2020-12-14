@@ -15,6 +15,7 @@ const {
   GOD_MODE_ENABLED,
   HTTPS_CERT,
   HTTPS_KEY,
+  CORS_ALLOWED_ORIGINS,
 } = process.env
 
 const config: AppConfigOptions = {
@@ -40,6 +41,10 @@ const config: AppConfigOptions = {
       key: HTTPS_KEY,
       cert: HTTPS_CERT,
     },
+  },
+
+  cors: {
+    allowedOrigins: CORS_ALLOWED_ORIGINS?.split(',') ?? [],
   },
 }
 

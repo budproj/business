@@ -23,14 +23,20 @@ async function bootstrap() {
     configService.get('logging.level'),
     configService.get('logging.serviceName'),
   )
+  app.useLogger(logger)
 
   app.setGlobalPrefix(configService.get('globalPrefix'))
-  app.useLogger(logger)
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
     }),
   )
+
+  const allowedOrigins = configService.get('cors.allowedOrigins')
+  app.enableCors({
+    credentials: true,
+    origin: allowedOrigins,
+  })
 
   await app.listen(configService.get('port'), '0.0.0.0')
   logger.log(`Started server listening to port ${appConfig.port.toString()}`)

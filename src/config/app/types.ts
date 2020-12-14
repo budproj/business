@@ -1,5 +1,15 @@
 import { LogLevel } from 'lib/logger'
 
+export interface AppConfigOptions {
+  port: number
+  globalPrefix: string
+  godMode: boolean
+  authz: AuthzConfigOptions
+  logging: LoggingConfigOptions
+  https: HttpsConfigOptions
+  cors: CorsConfigOptions
+}
+
 export interface LoggingConfigOptions {
   level: LogLevel
   serviceName: string
@@ -13,15 +23,6 @@ export interface AuthzConfigOptions {
   namespace: string
 }
 
-export interface AppConfigOptions {
-  port: number
-  globalPrefix: string
-  godMode: boolean
-  authz: AuthzConfigOptions
-  logging: LoggingConfigOptions
-  https: HttpsConfigOptions
-}
-
 export interface HttpsConfigOptions {
   credentials: HttpsCredentialsConfigOptions
 }
@@ -29,4 +30,8 @@ export interface HttpsConfigOptions {
 export interface HttpsCredentialsConfigOptions {
   key?: string
   cert?: string
+}
+
+export interface CorsConfigOptions {
+  allowedOrigins: string | string[]
 }
