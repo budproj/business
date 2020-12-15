@@ -70,3 +70,5 @@ spec:
               value: business
             - name: CORS_ALLOWED_ORIGINS
               value: https://app.develop.getbud.co
+            - name: TYPEORM_LOGGING
+              value: 'true'
