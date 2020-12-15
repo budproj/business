@@ -42,6 +42,20 @@ class GraphQLUserResolver {
     return user
   }
 
+  @Permissions(PERMISSION['USER:READ'])
+  @Query(() => UserObject)
+  async me(@GraphQLUser() authzUser: AuthzUser) {
+    const { id } = authzUser
+    this.logger.log(
+      `Fetching data about the user that is executing the request. Provided user ID: ${id.toString()}`,
+    )
+
+    const user = await this.resolverService.getOneWithActionScopeConstraint({ id }, authzUser)
+    if (!user) throw new NotFoundException(`We could not found an user with ID ${id}`)
+
+    return user
+  }
+
   @ResolveField()
   async keyResults(@Parent() user: UserObject) {
     this.logger.log({
