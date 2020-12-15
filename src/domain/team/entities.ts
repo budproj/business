@@ -51,4 +51,10 @@ export class Team implements TeamDTO {
   @Column()
   @RelationId((team: Team) => team.owner)
   public ownerId: UserDTO['id']
+
+  @ManyToOne('Team', 'teams')
+  public parentTeam: TeamDTO['id']
+
+  @OneToMany('Team', 'parentTeam')
+  public teams: TeamDTO[]
 }
