@@ -66,6 +66,16 @@ class GraphQLTeamResolver {
 
     return this.userDomain.getOne({ id: team.ownerId })
   }
+
+  @ResolveField()
+  async teams(@Parent() team: TeamObject, @GraphQLUser() user: AuthzUser) {
+    this.logger.log({
+      team,
+      message: 'Fetching child teams for team',
+    })
+
+    return this.resolverService.getManyWithActionScopeConstraint({ parentTeam: team.id }, user)
+  }
 }
 
 export default GraphQLTeamResolver

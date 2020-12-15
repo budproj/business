@@ -39,4 +39,10 @@ export class TeamObject {
 
   @Field(() => CompanyObject, { description: 'The user that owns this team' })
   owner: UserObject
+
+  @Field(() => ID, { description: 'The ID of the team that owns this team', nullable: true })
+  parentTeam: TeamObject['id']
+
+  @Field(() => [TeamObject], { description: 'A list of teams that belongs to this team' })
+  teams: TeamObject[]
 }

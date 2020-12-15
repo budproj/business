@@ -29,6 +29,16 @@ abstract class GraphQLEntityService<E, D> {
     return this.entityService.getOneWithConstraint(scopeConstraint, selector, user)
   }
 
+  async getManyWithActionScopeConstraint(
+    selector: FindConditions<E>,
+    user: AuthzUser,
+    action: ACTION = ACTION.READ,
+  ) {
+    const scopeConstraint = user.scopes[this.resource][action]
+
+    return this.entityService.getManyWithConstraint(scopeConstraint, user, selector)
+  }
+
   async updateWithScopeConstraint(
     selector: FindConditions<E>,
     newData: QueryDeepPartialEntity<E>,
