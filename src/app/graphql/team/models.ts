@@ -12,6 +12,9 @@ export class TeamObject {
   @Field({ description: 'The name of the team' })
   name: string
 
+  @Field({ nullable: true, description: 'The description about the team' })
+  description?: string
+
   @Field({ description: 'The creation date of the team' })
   createdAt: Date
 

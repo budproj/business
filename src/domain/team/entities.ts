@@ -25,6 +25,9 @@ export class Team implements TeamDTO {
   @Column()
   public name: string
 
+  @Column({ type: 'text', nullable: true })
+  public description?: string | null
+
   @CreateDateColumn()
   public createdAt: Date
 
