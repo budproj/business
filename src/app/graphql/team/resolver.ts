@@ -1,5 +1,6 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { omitBy, isUndefined } from 'lodash'
 
 import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
@@ -37,6 +38,27 @@ class GraphQLTeamResolver {
     return team
   }
 
+  @Permissions(PERMISSION['TEAM:READ'])
+  @Query(() => [TeamObject], { nullable: true })
+  async teams(
+    @Args('parentTeam', { type: () => ID, nullable: true }) parentTeam: TeamObject['id'],
+    @GraphQLUser() user: AuthzUser,
+  ) {
+    const filters = {
+      parentTeam,
+    }
+    const cleanedFilters = omitBy(filters, isUndefined)
+
+    this.logger.log({
+      cleanedFilters,
+      message: 'Fetching teams with args',
+    })
+
+    const teams = await this.resolverService.getManyWithActionScopeConstraint(cleanedFilters, user)
+
+    return teams
+  }
+
   @ResolveField()
   async keyResults(@Parent() team: TeamObject) {
     this.logger.log({
@@ -67,8 +89,8 @@ class GraphQLTeamResolver {
     return this.userDomain.getOne({ id: team.ownerId })
   }
 
-  @ResolveField()
-  async teams(@Parent() team: TeamObject, @GraphQLUser() user: AuthzUser) {
+  @ResolveField(() => [TeamObject], { name: 'teams' })
+  async getTeams(@Parent() team: TeamObject, @GraphQLUser() user: AuthzUser) {
     this.logger.log({
       team,
       message: 'Fetching child teams for team',
