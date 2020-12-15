@@ -41,7 +41,7 @@ class GraphQLTeamResolver {
   @Permissions(PERMISSION['TEAM:READ'])
   @Query(() => [TeamObject], { nullable: true })
   async teams(
-    @Args('parentTeam', { type: () => ID, nullable: true }) parentTeam: TeamObject['id'],
+    @Args('parentTeamId', { type: () => ID, nullable: true }) parentTeam: TeamObject['parentTeam'],
     @GraphQLUser() user: AuthzUser,
   ) {
     const filters = {
