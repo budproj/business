@@ -41,11 +41,12 @@ class GraphQLTeamResolver {
   @Permissions(PERMISSION['TEAM:READ'])
   @Query(() => [TeamObject], { nullable: true })
   async teams(
-    @Args('parentTeamId', { type: () => ID, nullable: true }) parentTeam: TeamObject['parentTeam'],
+    @Args('parentTeamId', { type: () => ID, nullable: true })
+    parentTeamId: TeamObject['parentTeamId'],
     @GraphQLUser() user: AuthzUser,
   ) {
     const filters = {
-      parentTeam,
+      parentTeamId,
     }
     const cleanedFilters = omitBy(filters, isUndefined)
 
@@ -96,7 +97,7 @@ class GraphQLTeamResolver {
       message: 'Fetching child teams for team',
     })
 
-    return this.resolverService.getManyWithActionScopeConstraint({ parentTeam: team.id }, user)
+    return this.resolverService.getManyWithActionScopeConstraint({ parentTeamId: team.id }, user)
   }
 }
 

@@ -9,5 +9,5 @@ export class TeamDTO {
   updatedAt: Date
   companyId: CompanyDTO['id']
   ownerId: UserDTO['id']
-  parentTeam: TeamDTO['id']
+  parentTeamId?: TeamDTO['id']
 }
