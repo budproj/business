@@ -64,6 +64,7 @@ class DomainProgressReportService extends DomainEntityService<ProgressReport, Pr
       message: 'Creating new progress report',
     })
 
+    console.log(progressReports)
     const data = await this.repository.insert(progressReports)
     console.log(data)
     const createdProgressReports = data.raw
