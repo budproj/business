@@ -12,6 +12,9 @@ export class CompanyObject {
   @Field({ description: 'The name of the company' })
   name: string
 
+  @Field({ description: 'The description of the company', nullable: true })
+  description?: string
+
   @Field({ description: 'The creation date of the company' })
   createdAt: Date
 
