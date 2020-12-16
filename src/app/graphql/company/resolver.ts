@@ -38,6 +38,16 @@ class GraphQLCompanyResolver {
     return company
   }
 
+  @Permissions(PERMISSION['TEAM:READ'])
+  @Query(() => [CompanyObject], { nullable: true })
+  async companies(@GraphQLUser() user: AuthzUser) {
+    this.logger.log('Fetching user companies')
+
+    const companies = await this.resolverService.getManyWithActionScopeConstraint({}, user)
+
+    return companies
+  }
+
   @ResolveField()
   async teams(@Parent() company: CompanyObject) {
     this.logger.log({
