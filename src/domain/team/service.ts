@@ -21,8 +21,13 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     super(repository, DomainTeamService.name)
   }
 
-  async getFromCompany(companyId: CompanyDTO['id']): Promise<Team[]> {
-    return this.repository.find({ companyId })
+  async getFromCompany(companyId: CompanyDTO['id'], filter?: Array<keyof Team>): Promise<Team[]> {
+    const teams = await this.repository.find({
+      select: filter,
+      where: { companyId },
+    })
+
+    return teams
   }
 
   async getFromOwner(ownerId: UserDTO['id']): Promise<Team[]> {
