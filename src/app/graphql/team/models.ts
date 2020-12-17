@@ -60,6 +60,6 @@ export class TeamObject {
   })
   currentProgress: ProgressReportObject['valueNew']
 
-  @Field(() => Int, { description: 'The computed current confidence of this team' })
+  @Field(() => Int, { description: 'The computed current confidence of this team', nullable: true })
   currentConfidence: ConfidenceReportObject['valueNew']
 }

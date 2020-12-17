@@ -111,6 +111,16 @@ class GraphQLTeamResolver {
 
     return this.teamDomain.getCurrentProgress(team.id)
   }
+
+  @ResolveField()
+  async currentConfidence(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching current confidence for team',
+    })
+
+    return this.teamDomain.getCurrentConfidence(team.id)
+  }
 }
 
 export default GraphQLTeamResolver

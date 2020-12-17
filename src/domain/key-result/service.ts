@@ -1,7 +1,8 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
-import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
+import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
+import { ProgressReport } from 'domain/key-result/report/progress/entities'
 import { ObjectiveDTO } from 'domain/objective/dto'
 import DomainEntityService from 'domain/service'
 import { TeamDTO } from 'domain/team/dto'
@@ -46,12 +47,28 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     return data
   }
 
-  async getCurrentProgress(id: KeyResultDTO['id']): Promise<ProgressReportDTO['valueNew']> {
+  async getCurrentProgress(id: KeyResultDTO['id']): Promise<ProgressReport['valueNew']> {
+    const defaultProgress = 0
+
     const { goal } = await this.repository.findOne({ id })
     const latestProgressReport = await this.report.progress.getLatestFromKeyResult(id)
+    if (!latestProgressReport) return defaultProgress
+
     const currentProgress = (latestProgressReport.valueNew / goal) * 100
 
     return currentProgress
+  }
+
+  async getCurrentConfidence(id: KeyResultDTO['id']): Promise<ConfidenceReport['valueNew']> {
+    const defaultConfidence = 51
+
+    const { goal } = await this.repository.findOne({ id })
+    const latestConfidenceReport = await this.report.confidence.getLatestFromKeyResult(id)
+    if (!latestConfidenceReport) return defaultConfidence
+
+    const currentConfidence = (latestConfidenceReport.valueNew / goal) * 100
+
+    return currentConfidence
   }
 }
 
