@@ -1,6 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
+import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
 import { ObjectiveDTO } from 'domain/objective/dto'
 import DomainEntityService from 'domain/service'
 import { TeamDTO } from 'domain/team/dto'
@@ -28,8 +29,14 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     return this.repository.find({ objectiveId })
   }
 
-  async getFromTeam(teamId: TeamDTO['id']): Promise<KeyResult[]> {
-    return this.repository.find({ teamId })
+  async getFromTeam(teamIds: TeamDTO['id'] | Array<TeamDTO['id']>): Promise<KeyResult[]> {
+    const isEmptyArray = Array.isArray(teamIds) ? teamIds.length === 0 : false
+    if (!teamIds || isEmptyArray) return
+
+    const buildSelector = (teamId: TeamDTO['id']) => ({ teamId })
+    const selector = Array.isArray(teamIds) ? teamIds.map(buildSelector) : buildSelector(teamIds)
+
+    return this.repository.find({ where: selector })
   }
 
   async getManyByIdsPreservingOrder(ids: Array<KeyResultDTO['id']>): Promise<KeyResult[]> {
@@ -37,6 +44,14 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     const data = this.repository.findByIdsRanked(ids, rankSortColumn)
 
     return data
+  }
+
+  async getCurrentProgress(id: KeyResultDTO['id']): Promise<ProgressReportDTO['valueNew']> {
+    const { goal } = await this.repository.findOne({ id })
+    const latestProgressReport = await this.report.progress.getLatestFromKeyResult(id)
+    const currentProgress = (latestProgressReport.valueNew / goal) * 100
+
+    return currentProgress
   }
 }
 

@@ -9,6 +9,7 @@ import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import DomainCompanyService from 'domain/company/service'
 import DomainKeyResultService from 'domain/key-result/service'
+import DomainTeamService from 'domain/team/service'
 import DomainUserService from 'domain/user/service'
 
 import { TeamObject } from './models'
@@ -25,6 +26,7 @@ class GraphQLTeamResolver {
     private readonly keyResultDomain: DomainKeyResultService,
     private readonly companyDomain: DomainCompanyService,
     private readonly userDomain: DomainUserService,
+    private readonly teamDomain: DomainTeamService,
   ) {}
 
   @Permissions(PERMISSION['TEAM:READ'])
@@ -98,6 +100,16 @@ class GraphQLTeamResolver {
     })
 
     return this.resolverService.getManyWithActionScopeConstraint({ parentTeamId: team.id }, user)
+  }
+
+  @ResolveField()
+  async currentProgress(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching current progress for team',
+    })
+
+    return this.teamDomain.getCurrentProgress(team.id)
   }
 }
 
