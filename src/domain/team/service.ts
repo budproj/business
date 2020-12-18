@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { flatten, isEqual, sum, uniqBy } from 'lodash'
+import { flatten, isEqual, uniqBy } from 'lodash'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
@@ -46,10 +46,7 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     const keyResults = await this.keyResultService.getFromTeam(childTeamIds)
     if (!keyResults) return
 
-    const currentProgressList = await Promise.all(
-      keyResults.map(async ({ id }) => this.keyResultService.getCurrentProgress(id)),
-    )
-    const teamCurrentProgress = sum(currentProgressList) / currentProgressList.length
+    const teamCurrentProgress = this.keyResultService.calculateCurrentProgressFromList(keyResults)
 
     return teamCurrentProgress
   }
@@ -61,10 +58,9 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     const keyResults = await this.keyResultService.getFromTeam(childTeamIds)
     if (!keyResults) return
 
-    const currentConfidenceList = await Promise.all(
-      keyResults.map(async ({ id }) => this.keyResultService.getCurrentConfidence(id)),
+    const teamCurrentConfidence = this.keyResultService.calculateCurrentConfidenceFromList(
+      keyResults,
     )
-    const teamCurrentConfidence = sum(currentConfidenceList) / currentConfidenceList.length
 
     return teamCurrentConfidence
   }

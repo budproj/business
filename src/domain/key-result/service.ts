@@ -1,4 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
+import { sum } from 'lodash'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
@@ -69,6 +70,24 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     const currentConfidence = (latestConfidenceReport.valueNew / goal) * 100
 
     return currentConfidence
+  }
+
+  async calculateCurrentProgressFromList(keyResults: KeyResult[]) {
+    const currentProgressList = await Promise.all(
+      keyResults.map(async ({ id }) => this.getCurrentProgress(id)),
+    )
+    const calculatedCurrentProgress = sum(currentProgressList) / currentProgressList.length
+
+    return calculatedCurrentProgress
+  }
+
+  async calculateCurrentConfidenceFromList(keyResults: KeyResult[]) {
+    const currentConfidenceList = await Promise.all(
+      keyResults.map(async ({ id }) => this.getCurrentConfidence(id)),
+    )
+    const calculatedCurrentConfidence = sum(currentConfidenceList) / currentConfidenceList.length
+
+    return calculatedCurrentConfidence
   }
 }
 

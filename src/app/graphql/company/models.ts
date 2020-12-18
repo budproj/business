@@ -1,4 +1,4 @@
-import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql'
+import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
 
 import { CycleObject } from 'app/graphql/cycle/models'
 import { ConfidenceReportObject } from 'app/graphql/key-result/report/confidence'
@@ -41,7 +41,7 @@ export class CompanyObject {
   })
   currentProgress: ProgressReportObject['valueNew']
 
-  @Field(() => Int, {
+  @Field(() => Float, {
     description: 'The computed current confidence of this company',
     nullable: true,
   })

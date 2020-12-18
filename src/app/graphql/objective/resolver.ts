@@ -8,6 +8,7 @@ import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import DomainCycleService from 'domain/cycle/service'
 import DomainKeyResultService from 'domain/key-result/service'
+import DomainObjectiveService from 'domain/objective/service'
 import DomainUserService from 'domain/user/service'
 
 import { ObjectiveObject } from './models'
@@ -24,6 +25,7 @@ class GraphQLObjectiveResolver {
     private readonly keyResultDomain: DomainKeyResultService,
     private readonly cycleDomain: DomainCycleService,
     private readonly userDomain: DomainUserService,
+    private readonly objectiveDomain: DomainObjectiveService,
   ) {}
 
   @Permissions(PERMISSION['OBJECTIVE:READ'])
@@ -68,6 +70,26 @@ class GraphQLObjectiveResolver {
     })
 
     return this.userDomain.getOne({ id: objective.ownerId })
+  }
+
+  @ResolveField()
+  async currentProgress(@Parent() objective: ObjectiveObject) {
+    this.logger.log({
+      objective,
+      message: 'Fetching current progress for objective',
+    })
+
+    return this.objectiveDomain.getCurrentProgress(objective.id)
+  }
+
+  @ResolveField()
+  async currentConfidence(@Parent() objective: ObjectiveObject) {
+    this.logger.log({
+      objective,
+      message: 'Fetching current confidence for objective',
+    })
+
+    return this.objectiveDomain.getCurrentConfidence(objective.id)
   }
 }
 
