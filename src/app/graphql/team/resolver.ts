@@ -121,6 +121,16 @@ class GraphQLTeamResolver {
 
     return this.teamDomain.getCurrentConfidence(team.id)
   }
+
+  @ResolveField()
+  async users(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching users for team',
+    })
+
+    return this.teamDomain.getUsersInTeam(team.id)
+  }
 }
 
 export default GraphQLTeamResolver
