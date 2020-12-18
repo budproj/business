@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common'
+import { Any } from 'typeorm'
 
 import { CycleDTO } from 'domain/cycle/dto'
 import { ProgressReport } from 'domain/key-result/report/progress/entities'
 import DomainKeyResultService from 'domain/key-result/service'
 import { ObjectiveDTO } from 'domain/objective/dto'
 import DomainEntityService from 'domain/service'
+import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
 
 import { Objective } from './entities'
@@ -47,6 +49,18 @@ class DomainObjectiveService extends DomainEntityService<Objective, ObjectiveDTO
     )
 
     return objectiveCurrentConfidence
+  }
+
+  async getFromTeam(teamId: TeamDTO['id']) {
+    const keyResults = await this.keyResultService.getFromTeam(teamId, ['objectiveId'])
+    if (!keyResults) return []
+
+    const objectiveIds = keyResults.map((keyResult) => keyResult.objectiveId)
+    if (objectiveIds.length === 0) return []
+
+    const objectives = await this.repository.find({ where: { id: Any(objectiveIds) } })
+
+    return objectives
   }
 }
 

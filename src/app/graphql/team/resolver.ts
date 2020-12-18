@@ -9,6 +9,7 @@ import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import DomainCompanyService from 'domain/company/service'
 import DomainKeyResultService from 'domain/key-result/service'
+import DomainObjectiveService from 'domain/objective/service'
 import DomainTeamService from 'domain/team/service'
 import DomainUserService from 'domain/user/service'
 
@@ -27,6 +28,7 @@ class GraphQLTeamResolver {
     private readonly companyDomain: DomainCompanyService,
     private readonly userDomain: DomainUserService,
     private readonly teamDomain: DomainTeamService,
+    private readonly objectiveDomain: DomainObjectiveService,
   ) {}
 
   @Permissions(PERMISSION['TEAM:READ'])
@@ -130,6 +132,16 @@ class GraphQLTeamResolver {
     })
 
     return this.teamDomain.getUsersInTeam(team.id)
+  }
+
+  @ResolveField()
+  async objectives(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching objectives for team',
+    })
+
+    return this.objectiveDomain.getFromTeam(team.id)
   }
 }
 

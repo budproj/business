@@ -4,6 +4,7 @@ import { CompanyObject } from 'app/graphql/company/models'
 import { KeyResultObject } from 'app/graphql/key-result/models'
 import { ConfidenceReportObject } from 'app/graphql/key-result/report/confidence'
 import { ProgressReportObject } from 'app/graphql/key-result/report/progress'
+import { ObjectiveObject } from 'app/graphql/objective'
 import { UserObject } from 'app/graphql/user/models'
 
 @ObjectType('Team', { description: 'A collection of users for a given company' })
@@ -65,4 +66,10 @@ export class TeamObject {
     nullable: true,
   })
   currentConfidence: ConfidenceReportObject['valueNew']
+
+  @Field(() => [ObjectiveObject], {
+    nullable: true,
+    description: 'The created ordered list of objectives in this team',
+  })
+  objectives: ObjectiveObject[]
 }

@@ -31,14 +31,17 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     return this.repository.find({ objectiveId })
   }
 
-  async getFromTeam(teamIds: TeamDTO['id'] | Array<TeamDTO['id']>): Promise<KeyResult[]> {
+  async getFromTeam(
+    teamIds: TeamDTO['id'] | Array<TeamDTO['id']>,
+    filter?: Array<keyof KeyResult>,
+  ): Promise<KeyResult[]> {
     const isEmptyArray = Array.isArray(teamIds) ? teamIds.length === 0 : false
     if (!teamIds || isEmptyArray) return
 
     const buildSelector = (teamId: TeamDTO['id']) => ({ teamId })
     const selector = Array.isArray(teamIds) ? teamIds.map(buildSelector) : buildSelector(teamIds)
 
-    return this.repository.find({ where: selector })
+    return this.repository.find({ where: selector, select: filter })
   }
 
   async getManyByIdsPreservingOrder(ids: Array<KeyResultDTO['id']>): Promise<KeyResult[]> {
