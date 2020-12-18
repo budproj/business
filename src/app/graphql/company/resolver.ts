@@ -99,6 +99,16 @@ class GraphQLCompanyResolver {
 
     return this.companyDomain.getCurrentConfidence(company.id)
   }
+
+  @ResolveField()
+  async users(@Parent() company: CompanyObject) {
+    this.logger.log({
+      company,
+      message: 'Fetching users for company',
+    })
+
+    return this.companyDomain.getUsersInCompany(company.id)
+  }
 }
 
 export default GraphQLCompanyResolver

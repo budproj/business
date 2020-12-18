@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { sum } from 'lodash'
+import { flatten, isEqual, sum, uniqWith } from 'lodash'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
@@ -54,6 +54,18 @@ class DomainCompanyService extends DomainEntityService<Company, CompanyDTO> {
     const companyCurrentConfidence = sum(currentConfidenceList) / currentConfidenceList.length
 
     return companyCurrentConfidence
+  }
+
+  async getUsersInCompany(companyId: CompanyDTO['id']): Promise<UserDTO[]> {
+    const childTeams = await this.teamService.getFromCompany(companyId, ['id'])
+    const childTeamsUsers = await Promise.all(
+      childTeams.map(async (team) => this.teamService.getUsersInTeam(team.id)),
+    )
+
+    const companyUsers = flatten(childTeamsUsers)
+    const uniqCompanyUsers = uniqWith(companyUsers, isEqual)
+
+    return uniqCompanyUsers
   }
 }
 

@@ -46,4 +46,9 @@ export class CompanyObject {
     nullable: true,
   })
   currentConfidence: ConfidenceReportObject['valueNew']
+
+  @Field(() => [UserObject], {
+    description: 'A creation date ordered list of users that are members of this company',
+  })
+  users: UserObject[]
 }
