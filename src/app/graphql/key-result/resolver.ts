@@ -139,6 +139,26 @@ class GraphQLKeyResultResolver {
 
     return updatedKeyResult
   }
+
+  @ResolveField()
+  async currentProgress(@Parent() keyResult: KeyResultObject) {
+    this.logger.log({
+      keyResult,
+      message: 'Fetching current progress for key result',
+    })
+
+    return this.keyResultDomain.getCurrentProgress(keyResult.id)
+  }
+
+  @ResolveField()
+  async currentConfidence(@Parent() keyResult: KeyResultObject) {
+    this.logger.log({
+      keyResult,
+      message: 'Fetching current confidence for key result',
+    })
+
+    return this.keyResultDomain.getCurrentConfidence(keyResult.id)
+  }
 }
 
 export default GraphQLKeyResultResolver
