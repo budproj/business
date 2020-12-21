@@ -4,7 +4,7 @@ import { CompanyObject } from 'app/graphql/company/models'
 import { KeyResultObject } from 'app/graphql/key-result/models'
 import { ConfidenceReportObject } from 'app/graphql/key-result/report/confidence'
 import { ProgressReportObject } from 'app/graphql/key-result/report/progress'
-import { ObjectiveObject } from 'app/graphql/objective'
+import { ObjectiveObject } from 'app/graphql/objective/models'
 import { UserObject } from 'app/graphql/user/models'
 
 @ObjectType('Team', { description: 'A collection of users for a given company' })
