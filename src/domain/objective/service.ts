@@ -33,7 +33,7 @@ class DomainObjectiveService extends DomainEntityService<Objective, ObjectiveDTO
     const keyResults = await this.keyResultService.getFromObjective(objectiveId)
     if (!keyResults) return
 
-    const objectiveCurrentProgress = this.keyResultService.calculateCurrentProgressFromList(
+    const objectiveCurrentProgress = this.keyResultService.calculateAverageCurrentProgressFromList(
       keyResults,
     )
 
@@ -44,7 +44,7 @@ class DomainObjectiveService extends DomainEntityService<Objective, ObjectiveDTO
     const keyResults = await this.keyResultService.getFromObjective(objectiveId)
     if (!keyResults) return
 
-    const objectiveCurrentConfidence = this.keyResultService.calculateCurrentConfidenceFromList(
+    const objectiveCurrentConfidence = this.keyResultService.calculateAverageCurrentConfidenceFromList(
       keyResults,
     )
 

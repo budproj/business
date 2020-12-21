@@ -46,7 +46,9 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     const keyResults = await this.keyResultService.getFromTeam(childTeamIds)
     if (!keyResults) return
 
-    const teamCurrentProgress = this.keyResultService.calculateCurrentProgressFromList(keyResults)
+    const teamCurrentProgress = this.keyResultService.calculateAverageCurrentProgressFromList(
+      keyResults,
+    )
 
     return teamCurrentProgress
   }
@@ -58,7 +60,7 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     const keyResults = await this.keyResultService.getFromTeam(childTeamIds)
     if (!keyResults) return
 
-    const teamCurrentConfidence = this.keyResultService.calculateCurrentConfidenceFromList(
+    const teamCurrentConfidence = this.keyResultService.calculateAverageCurrentConfidenceFromList(
       keyResults,
     )
 

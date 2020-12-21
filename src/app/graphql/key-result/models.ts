@@ -76,13 +76,13 @@ export class KeyResultObject {
   policies: PoliciesObject
 
   @Field(() => Float, {
-    description: 'The computed percentage current progress of this key result',
+    description: 'The latest reported current progress of this key result',
     nullable: true,
   })
   currentProgress: ProgressReportObject['valueNew']
 
   @Field(() => Float, {
-    description: 'The computed current confidence of this key result',
+    description: 'The latest reported current confidence of this key result',
     nullable: true,
   })
   currentConfidence: ConfidenceReportObject['valueNew']

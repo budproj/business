@@ -51,40 +51,48 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     return data
   }
 
+  async getCurrentProgressInPercentage(
+    id: KeyResultDTO['id'],
+  ): Promise<ProgressReport['valueNew']> {
+    const defaultProgress = 0
+
+    const currentProgress = await this.getCurrentProgress(id)
+    if (!currentProgress) return defaultProgress
+
+    const { goal } = await this.repository.findOne({ id })
+    const currentProgressInPercentage = (currentProgress / goal) * 100
+
+    return currentProgressInPercentage
+  }
+
   async getCurrentProgress(id: KeyResultDTO['id']): Promise<ProgressReport['valueNew']> {
     const defaultProgress = 0
 
-    const { goal } = await this.repository.findOne({ id })
     const latestProgressReport = await this.report.progress.getLatestFromKeyResult(id)
     if (!latestProgressReport) return defaultProgress
 
-    const currentProgress = (latestProgressReport.valueNew / goal) * 100
-
-    return currentProgress
+    return latestProgressReport.valueNew
   }
 
   async getCurrentConfidence(id: KeyResultDTO['id']): Promise<ConfidenceReport['valueNew']> {
     const defaultConfidence = 51
 
-    const { goal } = await this.repository.findOne({ id })
     const latestConfidenceReport = await this.report.confidence.getLatestFromKeyResult(id)
     if (!latestConfidenceReport) return defaultConfidence
 
-    const currentConfidence = (latestConfidenceReport.valueNew / goal) * 100
-
-    return currentConfidence
+    return latestConfidenceReport.valueNew
   }
 
-  async calculateCurrentProgressFromList(keyResults: KeyResult[]) {
+  async calculateAverageCurrentProgressFromList(keyResults: KeyResult[]) {
     const currentProgressList = await Promise.all(
-      keyResults.map(async ({ id }) => this.getCurrentProgress(id)),
+      keyResults.map(async ({ id }) => this.getCurrentProgressInPercentage(id)),
     )
     const calculatedCurrentProgress = sum(currentProgressList) / currentProgressList.length
 
     return calculatedCurrentProgress
   }
 
-  async calculateCurrentConfidenceFromList(keyResults: KeyResult[]) {
+  async calculateAverageCurrentConfidenceFromList(keyResults: KeyResult[]) {
     const currentConfidenceList = await Promise.all(
       keyResults.map(async ({ id }) => this.getCurrentConfidence(id)),
     )
