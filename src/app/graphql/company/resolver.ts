@@ -40,7 +40,7 @@ class GraphQLCompanyResolver {
     return company
   }
 
-  @Permissions(PERMISSION['TEAM:READ'])
+  @Permissions(PERMISSION['COMPANY:READ'])
   @Query(() => [CompanyObject], { nullable: true })
   async companies(@GraphQLUser() user: AuthzUser) {
     this.logger.log('Fetching user companies')
