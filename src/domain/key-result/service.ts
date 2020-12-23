@@ -59,8 +59,9 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     const currentProgress = await this.getCurrentProgress(id)
     if (!currentProgress) return defaultProgress
 
-    const { goal } = await this.repository.findOne({ id })
-    const currentProgressInPercentage = (currentProgress / goal) * 100
+    const { goal, initialValue } = await this.repository.findOne({ id })
+    const currentProgressInPercentage =
+      ((currentProgress - initialValue) * 100) / (goal - initialValue)
 
     return currentProgressInPercentage
   }

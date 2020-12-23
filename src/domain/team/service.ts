@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { flatten, isEqual, uniqBy } from 'lodash'
+import { flatten, isEqual, remove, uniqBy } from 'lodash'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
@@ -43,7 +43,9 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     const childTeams = await this.getChildTeams(teamId, ['id'])
     const childTeamIds = childTeams.map((childTeam) => childTeam.id)
 
-    const keyResults = await this.keyResultService.getFromTeam(childTeamIds)
+    const rootKeyResults = (await this.keyResultService.getFromTeam(teamId)) ?? []
+    const childKeyResults = (await this.keyResultService.getFromTeam(childTeamIds)) ?? []
+    const keyResults = remove([...rootKeyResults, ...childKeyResults])
     if (!keyResults) return
 
     const teamCurrentProgress = this.keyResultService.calculateAverageCurrentProgressFromList(
