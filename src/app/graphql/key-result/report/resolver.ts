@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   InternalServerErrorException,
   Logger,
   NotFoundException,
@@ -17,7 +18,7 @@ import { Railway } from 'app/providers'
 import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
 import { ProgressReport } from 'domain/key-result/report/progress/entities'
 import DomainKeyResultService from 'domain/key-result/service'
-import { RailwayError } from 'errors'
+import { DuplicateEntityError, RailwayError } from 'errors'
 
 import { CheckInInput, ReportObject } from './models'
 import GraphQLKeyResultReportService from './service'
@@ -89,6 +90,10 @@ class GraphQLKeyResultReportResolver {
       RailwayError,
       Array<ProgressReport | ConfidenceReport>
     >(creationPromise)
+    if (error instanceof DuplicateEntityError)
+      throw new BadRequestException(
+        'You have tried to create a duplicate check-in. Please, only create check-ins with new values',
+      )
     if (error) throw new InternalServerErrorException('Unknown error')
 
     return createdReports
