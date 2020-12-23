@@ -25,6 +25,9 @@ export class Team implements TeamDTO {
   @Column()
   public name: string
 
+  @Column({ type: 'text', nullable: true })
+  public description?: string | null
+
   @CreateDateColumn()
   public createdAt: Date
 
@@ -51,4 +54,14 @@ export class Team implements TeamDTO {
   @Column()
   @RelationId((team: Team) => team.owner)
   public ownerId: UserDTO['id']
+
+  @Column({ nullable: true })
+  @RelationId((team: Team) => team.parentTeam)
+  public parentTeamId: TeamDTO['id']
+
+  @ManyToOne('Team', 'teams')
+  public parentTeam: TeamDTO
+
+  @OneToMany('Team', 'parentTeam')
+  public teams: TeamDTO[]
 }

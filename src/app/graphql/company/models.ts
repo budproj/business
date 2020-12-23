@@ -1,6 +1,8 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql'
+import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
 
 import { CycleObject } from 'app/graphql/cycle/models'
+import { ConfidenceReportObject } from 'app/graphql/key-result/report/confidence'
+import { ProgressReportObject } from 'app/graphql/key-result/report/progress'
 import { TeamObject } from 'app/graphql/team/models'
 import { UserObject } from 'app/graphql/user/models'
 
@@ -11,6 +13,9 @@ export class CompanyObject {
 
   @Field({ description: 'The name of the company' })
   name: string
+
+  @Field({ description: 'The description of the company', nullable: true })
+  description?: string
 
   @Field({ description: 'The creation date of the company' })
   createdAt: Date
@@ -29,4 +34,21 @@ export class CompanyObject {
 
   @Field(() => UserObject, { description: 'The user that this company belongs to' })
   owner: UserObject
+
+  @Field(() => Float, {
+    description: 'The computed percentage current progress of this company',
+    nullable: true,
+  })
+  currentProgress: ProgressReportObject['valueNew']
+
+  @Field(() => Float, {
+    description: 'The computed current confidence of this company',
+    nullable: true,
+  })
+  currentConfidence: ConfidenceReportObject['valueNew']
+
+  @Field(() => [UserObject], {
+    description: 'A creation date ordered list of users that are members of this company',
+  })
+  users: UserObject[]
 }

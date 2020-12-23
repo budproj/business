@@ -177,19 +177,19 @@ abstract class DomainEntityService<E, D> {
     return this.get(selector, constrainQuery)
   }
 
-  async getOneInQuery(query: SelectQueryBuilder<E>, context?: DomainServiceContext) {
+  async getOneInQuery(query: SelectQueryBuilder<E>, serviceContext?: DomainServiceContext) {
     this.logger.debug({
-      context,
+      serviceContext,
       message: `Getting one for request`,
     })
 
     return query.getOne()
   }
 
-  async getManyInQuery(query: SelectQueryBuilder<E>, context?: DomainServiceContext) {
+  async getManyInQuery(query: SelectQueryBuilder<E>, serviceContext?: DomainServiceContext) {
     this.logger.debug({
-      context,
-      message: `Getting one for request`,
+      serviceContext,
+      message: `Getting many for request`,
     })
 
     return query.getMany()

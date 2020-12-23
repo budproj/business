@@ -74,6 +74,18 @@ export class KeyResultObject {
       'Group of policies regarding given key result. Those policies decribe actions that your user can perform with that given resource',
   })
   policies: PoliciesObject
+
+  @Field(() => Float, {
+    description: 'The latest reported current progress of this key result',
+    nullable: true,
+  })
+  currentProgress: ProgressReportObject['valueNew']
+
+  @Field(() => Float, {
+    description: 'The latest reported current confidence of this key result',
+    nullable: true,
+  })
+  currentConfidence: ConfidenceReportObject['valueNew']
 }
 
 @InputType('KeyResultInput', {

@@ -1,5 +1,6 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { omitBy, isUndefined } from 'lodash'
 
 import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
@@ -8,6 +9,8 @@ import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
 import DomainCompanyService from 'domain/company/service'
 import DomainKeyResultService from 'domain/key-result/service'
+import DomainObjectiveService from 'domain/objective/service'
+import DomainTeamService from 'domain/team/service'
 import DomainUserService from 'domain/user/service'
 
 import { TeamObject } from './models'
@@ -24,6 +27,8 @@ class GraphQLTeamResolver {
     private readonly keyResultDomain: DomainKeyResultService,
     private readonly companyDomain: DomainCompanyService,
     private readonly userDomain: DomainUserService,
+    private readonly teamDomain: DomainTeamService,
+    private readonly objectiveDomain: DomainObjectiveService,
   ) {}
 
   @Permissions(PERMISSION['TEAM:READ'])
@@ -35,6 +40,28 @@ class GraphQLTeamResolver {
     if (!team) throw new NotFoundException(`We could not found a team with id ${id}`)
 
     return team
+  }
+
+  @Permissions(PERMISSION['TEAM:READ'])
+  @Query(() => [TeamObject], { nullable: true })
+  async teams(
+    @Args('parentTeamId', { type: () => ID, nullable: true })
+    parentTeamId: TeamObject['parentTeamId'],
+    @GraphQLUser() user: AuthzUser,
+  ) {
+    const filters = {
+      parentTeamId,
+    }
+    const cleanedFilters = omitBy(filters, isUndefined)
+
+    this.logger.log({
+      cleanedFilters,
+      message: 'Fetching teams with args',
+    })
+
+    const teams = await this.resolverService.getManyWithActionScopeConstraint(cleanedFilters, user)
+
+    return teams
   }
 
   @ResolveField()
@@ -65,6 +92,56 @@ class GraphQLTeamResolver {
     })
 
     return this.userDomain.getOne({ id: team.ownerId })
+  }
+
+  @ResolveField(() => [TeamObject], { name: 'teams' })
+  async getTeams(@Parent() team: TeamObject, @GraphQLUser() user: AuthzUser) {
+    this.logger.log({
+      team,
+      message: 'Fetching child teams for team',
+    })
+
+    return this.resolverService.getManyWithActionScopeConstraint({ parentTeamId: team.id }, user)
+  }
+
+  @ResolveField()
+  async currentProgress(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching current progress for team',
+    })
+
+    return this.teamDomain.getCurrentProgress(team.id)
+  }
+
+  @ResolveField()
+  async currentConfidence(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching current confidence for team',
+    })
+
+    return this.teamDomain.getCurrentConfidence(team.id)
+  }
+
+  @ResolveField()
+  async users(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching users for team',
+    })
+
+    return this.teamDomain.getUsersInTeam(team.id)
+  }
+
+  @ResolveField()
+  async objectives(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching objectives for team',
+    })
+
+    return this.objectiveDomain.getFromTeam(team.id)
   }
 }
 

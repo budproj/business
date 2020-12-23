@@ -8,7 +8,8 @@
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write 'src/**/*.ts'",
-    "start:dev": "nest start --watch",
+    "start:dev": "run-s db:up start:watch",
+    "start:watch": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "compile": "tsc",
@@ -20,7 +21,10 @@
     "migration:run": "npm run typeorm migration:run",
     "migration:format": "prettier --write 'src/migrations/*.ts'",
     "clean": "rimraf -rf dist",
-    "deploy": "npm run build && waypoint up"
+    "deploy": "npm run build && waypoint up",
+    "db:up": "docker start business-postgres-database",
+    "db:init": "run-s db:container:new migration:run",
+    "db:container:new": "docker run -d --name business-postgres-database -e POSTGRES_PASSWORD=Pass2020! -e POSTGRES_DB=business_local -v /var/lib/postgresql/data:/var/lib/postgresql/data -p 5432:5432 postgres"
   },
   "author": "delucca <delucca@pm.me>",
   "license": "Apache-2.0",

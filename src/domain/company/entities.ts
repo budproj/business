@@ -23,6 +23,9 @@ export class Company implements CompanyDTO {
   @Column()
   public name: string
 
+  @Column({ type: 'text', nullable: true })
+  public description?: string | null
+
   @CreateDateColumn()
   public createdAt: Date
 

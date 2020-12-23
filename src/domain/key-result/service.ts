@@ -1,6 +1,9 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
+import { sum } from 'lodash'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
+import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
+import { ProgressReport } from 'domain/key-result/report/progress/entities'
 import { ObjectiveDTO } from 'domain/objective/dto'
 import DomainEntityService from 'domain/service'
 import { TeamDTO } from 'domain/team/dto'
@@ -28,8 +31,17 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     return this.repository.find({ objectiveId })
   }
 
-  async getFromTeam(teamId: TeamDTO['id']): Promise<KeyResult[]> {
-    return this.repository.find({ teamId })
+  async getFromTeam(
+    teamIds: TeamDTO['id'] | Array<TeamDTO['id']>,
+    filter?: Array<keyof KeyResult>,
+  ): Promise<KeyResult[]> {
+    const isEmptyArray = Array.isArray(teamIds) ? teamIds.length === 0 : false
+    if (!teamIds || isEmptyArray) return
+
+    const buildSelector = (teamId: TeamDTO['id']) => ({ teamId })
+    const selector = Array.isArray(teamIds) ? teamIds.map(buildSelector) : buildSelector(teamIds)
+
+    return this.repository.find({ where: selector, select: filter })
   }
 
   async getManyByIdsPreservingOrder(ids: Array<KeyResultDTO['id']>): Promise<KeyResult[]> {
@@ -37,6 +49,56 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     const data = this.repository.findByIdsRanked(ids, rankSortColumn)
 
     return data
+  }
+
+  async getCurrentProgressInPercentage(
+    id: KeyResultDTO['id'],
+  ): Promise<ProgressReport['valueNew']> {
+    const defaultProgress = 0
+
+    const currentProgress = await this.getCurrentProgress(id)
+    if (!currentProgress) return defaultProgress
+
+    const { goal } = await this.repository.findOne({ id })
+    const currentProgressInPercentage = (currentProgress / goal) * 100
+
+    return currentProgressInPercentage
+  }
+
+  async getCurrentProgress(id: KeyResultDTO['id']): Promise<ProgressReport['valueNew']> {
+    const defaultProgress = 0
+
+    const latestProgressReport = await this.report.progress.getLatestFromKeyResult(id)
+    if (!latestProgressReport) return defaultProgress
+
+    return latestProgressReport.valueNew
+  }
+
+  async getCurrentConfidence(id: KeyResultDTO['id']): Promise<ConfidenceReport['valueNew']> {
+    const defaultConfidence = 51
+
+    const latestConfidenceReport = await this.report.confidence.getLatestFromKeyResult(id)
+    if (!latestConfidenceReport) return defaultConfidence
+
+    return latestConfidenceReport.valueNew
+  }
+
+  async calculateAverageCurrentProgressFromList(keyResults: KeyResult[]) {
+    const currentProgressList = await Promise.all(
+      keyResults.map(async ({ id }) => this.getCurrentProgressInPercentage(id)),
+    )
+    const calculatedCurrentProgress = sum(currentProgressList) / currentProgressList.length
+
+    return calculatedCurrentProgress
+  }
+
+  async calculateAverageCurrentConfidenceFromList(keyResults: KeyResult[]) {
+    const currentConfidenceList = await Promise.all(
+      keyResults.map(async ({ id }) => this.getCurrentConfidence(id)),
+    )
+    const calculatedCurrentConfidence = sum(currentConfidenceList) / currentConfidenceList.length
+
+    return calculatedCurrentConfidence
   }
 }
 
