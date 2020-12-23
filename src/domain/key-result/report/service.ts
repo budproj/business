@@ -23,7 +23,9 @@ class DomainKeyResultReportService {
     progressReportData: Partial<ProgressReportDTO>,
     confidenceReportData: Partial<ConfidenceReportDTO>,
   ): Promise<Array<ProgressReport | ConfidenceReport>> {
-    const createdProgressReports = await this.progress.create(progressReportData)
+    const createdProgressReports = progressReportData.valueNew
+      ? await this.progress.create(progressReportData)
+      : []
     this.logger.log({
       message: 'Handled progress report. Now, moving to confidence report',
       createdProgressReports,

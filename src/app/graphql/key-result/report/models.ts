@@ -10,8 +10,8 @@ export class CheckInInput {
   @Field(() => ID, { description: 'The key result ID that you are reporting updated to' })
   keyResultId: KeyResultObject['id']
 
-  @Field(() => Float, { description: 'The new progress in the report' })
-  progress: ProgressReportObject['valueNew']
+  @Field(() => Float, { nullable: true, description: 'The new progress in the report' })
+  progress?: ProgressReportObject['valueNew']
 
   @Field(() => Int, { nullable: true, description: 'The new confidence in the report' })
   confidence?: ConfidenceReportObject['valueNew']
