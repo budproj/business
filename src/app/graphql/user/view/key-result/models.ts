@@ -15,7 +15,7 @@ registerEnumType(KeyResultViewBinding, {
 })
 export class KeyResultViewObject {
   @Field(() => ID, { description: 'The ID of the key result view' })
-  id: number
+  id: string
 
   @Field({ nullable: true, description: 'The title(name) of the key result view' })
   title?: string

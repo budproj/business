@@ -4,7 +4,7 @@ import { UserDTO } from 'domain/user/dto'
 import { KeyResultViewBinding } from './types'
 
 export class KeyResultViewDTO {
-  id: number
+  id: string
   user: UserDTO
   title?: string
   binding?: KeyResultViewBinding

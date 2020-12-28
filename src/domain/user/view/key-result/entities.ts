@@ -18,8 +18,8 @@ import { KeyResultViewBinding } from './types'
 @Entity()
 @Unique(['user', 'binding'])
 export class KeyResultView implements KeyResultViewDTO {
-  @PrimaryGeneratedColumn()
-  public id: number
+  @PrimaryGeneratedColumn('uuid')
+  public id: string
 
   @Column({ nullable: true })
   public title?: string
