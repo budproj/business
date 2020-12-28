@@ -3,13 +3,13 @@ import { Field, Float, ID, InputType, ObjectType, registerEnumType } from '@nest
 import { ObjectiveObject } from 'app/graphql/objective/models'
 import { TeamObject } from 'app/graphql/team/models'
 import { PoliciesObject, UserObject } from 'app/graphql/user/models'
-import { KeyResultFormat } from 'domain/key-result/types'
+import { KEY_RESULT_FORMAT } from 'domain/key-result/constants'
 
 import { ConfidenceReportObject } from './report/confidence/models'
 import { ProgressReportObject } from './report/progress/models'
 
-registerEnumType(KeyResultFormat, {
-  name: 'KeyResultFormat',
+registerEnumType(KEY_RESULT_FORMAT, {
+  name: 'KEY_RESULT_FORMAT',
   description: 'Each format represents how our user wants to see the metrics of the key result',
 })
 
@@ -33,7 +33,7 @@ export class KeyResultObject {
   goal: number
 
   @Field({ description: 'The format of the key result' })
-  format: KeyResultFormat
+  format: KEY_RESULT_FORMAT
 
   @Field({ description: 'The creation date of the key result' })
   createdAt: Date
@@ -105,7 +105,7 @@ export class KeyResultInput {
   goal?: number
 
   @Field({ nullable: true, description: 'The format of the key result' })
-  format?: KeyResultFormat
+  format?: KEY_RESULT_FORMAT
 
   @Field(() => ID, { nullable: true, description: 'The owner ID of the key result' })
   ownerId?: UserObject['id']

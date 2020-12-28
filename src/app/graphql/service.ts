@@ -4,7 +4,8 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 
 import { ACTION, RESOURCE } from 'app/authz/constants'
 import { AuthzUser } from 'app/authz/types'
-import { UserActionPolicies, UserPolicy } from 'app/graphql/user/types'
+import { USER_POLICY } from 'app/graphql/user/constants'
+import { UserActionPolicies } from 'app/graphql/user/types'
 import DomainEntityService from 'domain/service'
 
 abstract class GraphQLEntityService<E, D> {
@@ -80,11 +81,11 @@ abstract class GraphQLEntityService<E, D> {
 
     const policies = mapValues(
       actionSelectors,
-      async (constraint): Promise<UserPolicy> => {
-        if (!constraint) return UserPolicy.DENY
+      async (constraint): Promise<USER_POLICY> => {
+        if (!constraint) return USER_POLICY.DENY
         const foundData = await this.entityService.getOneWithConstraint(constraint, selector, user)
 
-        return foundData ? UserPolicy.ALLOW : UserPolicy.DENY
+        return foundData ? USER_POLICY.ALLOW : USER_POLICY.DENY
       },
     )
 

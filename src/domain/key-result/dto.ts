@@ -1,4 +1,4 @@
-import { KeyResultFormat } from 'domain/key-result/types'
+import { KEY_RESULT_FORMAT } from 'domain/key-result/constants'
 import { ObjectiveDTO } from 'domain/objective/dto'
 import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
@@ -9,7 +9,7 @@ export class KeyResultDTO {
   description?: string
   initialValue: number
   goal: number
-  format: KeyResultFormat
+  format: KEY_RESULT_FORMAT
   createdAt: Date
   updatedAt: Date
   ownerId: UserDTO['id']

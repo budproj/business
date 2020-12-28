@@ -14,6 +14,7 @@ import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
 import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
 import { ObjectiveDTO } from 'domain/objective/dto'
 import { TeamDTO } from 'domain/team/dto'
+import { USER_GENDER } from 'domain/user/constants'
 
 import { UserDTO } from './dto'
 
@@ -27,6 +28,9 @@ export class User implements UserDTO {
 
   @Column()
   public authzSub: string
+
+  @Column({ type: 'enum', enum: USER_GENDER, nullable: true })
+  public gender?: USER_GENDER
 
   @Column({ nullable: true })
   public role?: string

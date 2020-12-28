@@ -12,8 +12,8 @@ import { ObjectiveDTO } from 'domain/objective/dto'
 import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
 
+import { KEY_RESULT_FORMAT } from './constants'
 import { KeyResultDTO } from './dto'
-import { KeyResultFormat } from './types'
 
 @Entity()
 export class KeyResult implements KeyResultDTO {
@@ -32,8 +32,8 @@ export class KeyResult implements KeyResultDTO {
   @Column('numeric')
   public goal: number
 
-  @Column({ type: 'enum', enum: KeyResultFormat, default: KeyResultFormat.NUMBER })
-  public format: KeyResultFormat
+  @Column({ type: 'enum', enum: KEY_RESULT_FORMAT, default: KEY_RESULT_FORMAT.NUMBER })
+  public format: KEY_RESULT_FORMAT
 
   @CreateDateColumn()
   public createdAt: Date

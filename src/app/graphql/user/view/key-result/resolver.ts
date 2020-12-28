@@ -17,8 +17,8 @@ import { AuthzUser } from 'app/authz/types'
 import { Railway } from 'app/providers'
 import DomainKeyResultService from 'domain/key-result/service'
 import DomainUserService from 'domain/user/service'
+import { KEY_RESULT_VIEW_BINDING } from 'domain/user/view/key-result/constants'
 import { KeyResultView } from 'domain/user/view/key-result/entities'
-import { KeyResultViewBinding } from 'domain/user/view/key-result/types'
 import { RailwayError } from 'errors'
 
 import { KeyResultViewObject, KeyResultViewInput, KeyResultViewRankInput } from './models'
@@ -42,7 +42,7 @@ class GraphQLKeyResultViewResolver {
   async keyResultView(
     @GraphQLUser() user: AuthzUser,
     @Args('id', { type: () => ID, nullable: true }) id?: KeyResultViewObject['id'],
-    @Args('binding', { type: () => KeyResultViewBinding, nullable: true })
+    @Args('binding', { type: () => KEY_RESULT_VIEW_BINDING, nullable: true })
     binding?: KeyResultViewObject['binding'],
   ) {
     this.logger.log('Fetching key result view')
