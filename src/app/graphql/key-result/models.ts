@@ -18,7 +18,7 @@ registerEnumType(KeyResultFormat, {
 })
 export class KeyResultObject {
   @Field(() => ID, { description: 'The ID of the key result' })
-  id: number
+  id: string
 
   @Field({ description: 'The title(name) of the key result' })
   title: string

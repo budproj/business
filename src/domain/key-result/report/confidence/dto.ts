@@ -2,7 +2,7 @@ import { KeyResultDTO } from 'domain/key-result/dto'
 import { UserDTO } from 'domain/user/dto'
 
 export class ConfidenceReportDTO {
-  id: number
+  id: string
   valuePrevious?: number
   valueNew: number
   comment?: string

@@ -9,7 +9,7 @@ import { ObjectiveObject } from 'app/graphql/objective/models'
 })
 export class CycleObject {
   @Field(() => ID, { description: 'The ID of the cycle' })
-  id: number
+  id: string
 
   @Field({ description: 'The date that this cycle starts' })
   dateStart: Date

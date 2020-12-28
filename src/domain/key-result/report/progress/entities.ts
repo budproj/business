@@ -14,8 +14,8 @@ import { ProgressReportDTO } from './dto'
 
 @Entity()
 export class ProgressReport implements ProgressReportDTO {
-  @PrimaryGeneratedColumn()
-  public id: number
+  @PrimaryGeneratedColumn('uuid')
+  public id: string
 
   @Column({ type: 'real', nullable: true })
   public valuePrevious?: number

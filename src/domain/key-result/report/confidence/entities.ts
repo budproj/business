@@ -14,8 +14,8 @@ import { ConfidenceReportDTO } from './dto'
 
 @Entity()
 export class ConfidenceReport implements ConfidenceReportDTO {
-  @PrimaryGeneratedColumn()
-  public id: number
+  @PrimaryGeneratedColumn('uuid')
+  public id: string
 
   @Column({ nullable: true })
   public valuePrevious?: number

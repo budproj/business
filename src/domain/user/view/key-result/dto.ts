@@ -4,11 +4,11 @@ import { UserDTO } from 'domain/user/dto'
 import { KeyResultViewBinding } from './types'
 
 export class KeyResultViewDTO {
-  id: number
+  id: string
   user: UserDTO
   title?: string
   binding?: KeyResultViewBinding
-  rank: Array<KeyResultDTO['id']>
+  rank?: Array<KeyResultDTO['id']>
   createdAt: Date
   updatedAt: Date
   userId: UserDTO['id']

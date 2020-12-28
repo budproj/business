@@ -17,8 +17,8 @@ import { CompanyDTO } from './dto'
 
 @Entity()
 export class Company implements CompanyDTO {
-  @PrimaryGeneratedColumn()
-  public id: number
+  @PrimaryGeneratedColumn('uuid')
+  public id: string
 
   @Column()
   public name: string

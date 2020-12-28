@@ -8,7 +8,7 @@ import { UserObject } from 'app/graphql/user/models'
 })
 export class ProgressReportObject {
   @Field(() => ID, { description: 'The ID of your report' })
-  id: number
+  id: string
 
   @Field(() => Float, { nullable: true, description: 'The value of the latest previous report' })
   valuePrevious?: number

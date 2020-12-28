@@ -17,8 +17,8 @@ import { ObjectiveDTO } from './dto'
 
 @Entity()
 export class Objective implements ObjectiveDTO {
-  @PrimaryGeneratedColumn()
-  public id: number
+  @PrimaryGeneratedColumn('uuid')
+  public id: string
 
   @Column()
   public title: string

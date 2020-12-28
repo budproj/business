@@ -10,7 +10,7 @@ import { UserObject } from 'app/graphql/user/models'
 @ObjectType('Team', { description: 'A collection of users for a given company' })
 export class TeamObject {
   @Field(() => ID, { description: 'The ID of the team' })
-  id: number
+  id: string
 
   @Field({ description: 'The name of the team' })
   name: string

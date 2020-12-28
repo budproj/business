@@ -14,7 +14,7 @@ import { UserPolicy } from 'app/graphql/user/types'
 })
 export class UserObject {
   @Field(() => ID, { description: 'The ID of the user' })
-  id: number
+  id: string
 
   @Field({ description: 'The name of the user' })
   name: string

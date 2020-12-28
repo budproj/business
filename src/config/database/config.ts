@@ -1,4 +1,4 @@
-import { TypeOrmModuleOptions } from '@nestjs/typeorm'
+import { ConnectionOptions } from 'typeorm'
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies/snake-naming.strategy'
 
 const {
@@ -10,10 +10,10 @@ const {
   TYPEORM_LOGGING,
 } = process.env
 
-const config: TypeOrmModuleOptions = {
+const config: ConnectionOptions = {
   type: 'postgres',
   database: TYPEORM_DATABASE,
-  migrations: ['dist/src/migrations/**/*.js'],
+  migrations: ['dist/src/database/migrations/**/*.js'],
   entities: ['dist/src/domain/**/entities.js'],
   host: TYPEORM_HOST,
   port: Number.parseInt(TYPEORM_PORT, 10) || 5432,
@@ -22,7 +22,7 @@ const config: TypeOrmModuleOptions = {
   logging: Boolean(TYPEORM_LOGGING),
   namingStrategy: new SnakeNamingStrategy(),
   cli: {
-    migrationsDir: 'src/migrations/',
+    migrationsDir: 'src/database/migrations/',
   },
 }
 

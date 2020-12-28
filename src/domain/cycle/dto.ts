@@ -1,7 +1,7 @@
 import { CompanyDTO } from 'domain/company/dto'
 
 export class CycleDTO {
-  id: number
+  id: string
   dateStart: Date
   dateEnd: Date
   createdAt: Date

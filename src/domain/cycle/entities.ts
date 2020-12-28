@@ -16,8 +16,8 @@ import { CycleDTO } from './dto'
 
 @Entity()
 export class Cycle implements CycleDTO {
-  @PrimaryGeneratedColumn()
-  public id: number
+  @PrimaryGeneratedColumn('uuid')
+  public id: string
 
   @Column()
   public dateStart: Date

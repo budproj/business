@@ -39,8 +39,9 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
       context.user,
     )
     const availableKeyResultIDs = availableKeyResults.map((keyResult) => keyResult.id.toString())
-    const mergedRank = uniq([...view.rank, ...availableKeyResultIDs])
+    const userRank = view?.rank ?? []
 
+    const mergedRank = uniq([...userRank, ...availableKeyResultIDs])
     const newView = {
       ...view,
       rank: mergedRank,
@@ -48,7 +49,7 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
 
     const selector = { id: view.id }
     const newData = { rank: mergedRank }
-    await this.update(selector, newData as KeyResultView)
+    await this.update(selector, newData)
 
     return newView
   }
