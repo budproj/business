@@ -1,7 +1,7 @@
 import { TeamDTO } from 'domain/team/dto'
 
 export class UserDTO {
-  id: number
+  id: string
   name: string
   authzSub: string
   role?: string
