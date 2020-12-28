@@ -9,7 +9,7 @@ import { UserObject } from 'app/graphql/user/models'
 @ObjectType('Objective', { description: 'A group of key results that has the same focus' })
 export class ObjectiveObject {
   @Field(() => ID, { description: 'The ID of the objective' })
-  id: number
+  id: string
 
   @Field({ description: 'The title(name) of the objective' })
   title: string
