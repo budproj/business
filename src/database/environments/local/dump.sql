@@ -148,7 +148,7 @@ INSERT INTO
   SELECT
     'Earn money',
     100000,
-    759099,
+    75999,
     'We need money to buy stuff',
     'COIN_BRL',
     (SELECT id FROM objective WHERE title='Rule the galaxy'),
