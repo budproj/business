@@ -19,8 +19,8 @@ import { TeamDTO } from './dto'
 
 @Entity()
 export class Team implements TeamDTO {
-  @PrimaryGeneratedColumn()
-  public id: number
+  @PrimaryGeneratedColumn('uuid')
+  public id: string
 
   @Column()
   public name: string
