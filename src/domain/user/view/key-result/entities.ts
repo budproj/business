@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
+import { KeyResultDTO } from 'domain/key-result/dto'
 import { UserDTO } from 'domain/user/dto'
 
 import { KeyResultViewDTO } from './dto'
@@ -27,7 +28,7 @@ export class KeyResultView implements KeyResultViewDTO {
   public binding?: KeyResultViewBinding
 
   @Column({ type: 'simple-array', default: [] })
-  public rank: number[]
+  public rank: Array<KeyResultDTO['id']>
 
   @CreateDateColumn()
   public createdAt: Date

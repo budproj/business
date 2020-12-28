@@ -17,8 +17,8 @@ import { KeyResultFormat } from './types'
 
 @Entity()
 export class KeyResult implements KeyResultDTO {
-  @PrimaryGeneratedColumn()
-  public id: number
+  @PrimaryGeneratedColumn('uuid')
+  public id: string
 
   @Column()
   public title: string
