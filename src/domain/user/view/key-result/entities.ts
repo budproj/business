@@ -27,8 +27,8 @@ export class KeyResultView implements KeyResultViewDTO {
   @Column({ type: 'enum', enum: KeyResultViewBinding, nullable: true })
   public binding?: KeyResultViewBinding
 
-  @Column({ type: 'simple-array', default: [] })
-  public rank: Array<KeyResultDTO['id']>
+  @Column('uuid', { array: true, nullable: true })
+  public rank?: Array<KeyResultDTO['id']>
 
   @CreateDateColumn()
   public createdAt: Date

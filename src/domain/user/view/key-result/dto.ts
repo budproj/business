@@ -8,7 +8,7 @@ export class KeyResultViewDTO {
   user: UserDTO
   title?: string
   binding?: KeyResultViewBinding
-  rank: Array<KeyResultDTO['id']>
+  rank?: Array<KeyResultDTO['id']>
   createdAt: Date
   updatedAt: Date
   userId: UserDTO['id']

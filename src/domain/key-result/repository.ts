@@ -55,7 +55,7 @@ class DomainKeyResultRepository extends DomainEntityRepository<KeyResult> {
     const prefix = '(CASE'
     const parts = rank.map(
       (keyResultID: KeyResultDTO['id'], index: number) =>
-        `WHEN ${KeyResult.name}.id=${keyResultID} THEN ${index}`,
+        `WHEN ${KeyResult.name}.id='${keyResultID}' THEN ${index}`,
     )
     const suffix = 'ELSE null END)'
 
