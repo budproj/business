@@ -8,7 +8,7 @@ import DomainEntityRepository, { SelectionQueryConstrain } from 'domain/reposito
 import { CompanyDTO } from './company/dto'
 import { CONSTRAINT } from './constants'
 import { TeamDTO } from './team/dto'
-import { DomainServiceContext } from './types'
+import { DomainServiceContext, DomainServiceGetOptions } from './types'
 import { UserDTO } from './user/dto'
 
 abstract class DomainEntityService<E, D> {
@@ -132,8 +132,15 @@ abstract class DomainEntityService<E, D> {
     return constrainedSelector()
   }
 
-  get(selector: FindConditions<E>, constrainQuery?: SelectionQueryConstrain<E>) {
-    const query = this.repository.createQueryBuilder().where(selector)
+  get(
+    selector: FindConditions<E>,
+    constrainQuery?: SelectionQueryConstrain<E>,
+    options?: DomainServiceGetOptions,
+  ) {
+    const query = this.repository
+      .createQueryBuilder()
+      .where(selector)
+      .take(options?.limit ?? 0)
 
     return constrainQuery ? constrainQuery(query) : query
   }
@@ -195,14 +202,14 @@ abstract class DomainEntityService<E, D> {
     return query.getMany()
   }
 
-  async getOne(selector: FindConditions<E>) {
-    const query = this.get(selector)
+  async getOne(selector: FindConditions<E>, options?: DomainServiceGetOptions) {
+    const query = this.get(selector, undefined, options)
 
     return query.getOne()
   }
 
-  async getMany(selector: FindConditions<E>) {
-    const query = this.get(selector)
+  async getMany(selector: FindConditions<E>, options?: DomainServiceGetOptions) {
+    const query = this.get(selector, undefined, options)
 
     return query.getMany()
   }

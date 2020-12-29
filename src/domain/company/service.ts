@@ -65,6 +65,12 @@ class DomainCompanyService extends DomainEntityService<Company, CompanyDTO> {
 
     return uniqCompanyUsers
   }
+
+  async getFromIDs(companyIDs: Array<CompanyDTO['id']>, options?: { limit?: number }) {
+    const companies = this.repository.selectManyInIDs(companyIDs, options)
+
+    return companies
+  }
 }
 
 export default DomainCompanyService

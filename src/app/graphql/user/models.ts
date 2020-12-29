@@ -14,6 +14,11 @@ registerEnumType(USER_GENDER, {
   description: 'Each gender represents a possible gender option for our users',
 })
 
+registerEnumType(USER_POLICY, {
+  name: 'USER_POLICY',
+  description: 'Defines if the user has the allowance for a given action regarding the resource',
+})
+
 @ObjectType('User', {
   description:
     'User is an entity inside a given company. It is associated with many teams, progress reports, and others.',
@@ -77,6 +82,11 @@ export class UserObject {
     description: 'The creation date ordered list of companies that this user owns',
   })
   ownedCompanies: CompanyObject[]
+
+  @Field(() => [CompanyObject], {
+    description: 'The creation date ordered list of companies that this user is a part of',
+  })
+  companies: CompanyObject[]
 }
 
 @ObjectType('Policies', {
@@ -96,8 +106,3 @@ export class PoliciesObject {
   @Field(() => USER_POLICY, { defaultValue: USER_POLICY.DENY })
   delete: USER_POLICY
 }
-
-registerEnumType(USER_POLICY, {
-  name: 'USER_POLICY',
-  description: 'Defines if the user has the allowance for a given action regarding the resource',
-})

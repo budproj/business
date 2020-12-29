@@ -15,7 +15,7 @@ class GodUser implements AuthzUser {
   public readonly scopes: AuthzUser['scopes']
 
   constructor() {
-    this.id = 'ccb91ace-f107-4331-8a67-37332fb34e21' // Replace with your local desired user ID
+    this.id = '00425f38-6b03-4fdb-960a-20349116d714' // Replace with your local desired user ID
     this.name = 'GOD'
     this.authzSub = 'GOD'
     this.role = 'GOD'
