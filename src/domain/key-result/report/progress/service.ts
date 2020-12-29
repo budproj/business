@@ -37,6 +37,10 @@ class DomainProgressReportService extends DomainEntityService<ProgressReport, Pr
     return this.repository.find({ userId })
   }
 
+  async getFromUsers(userIDs: Array<UserDTO['id']>) {
+    return this.repository.selectManyInUserIDs(userIDs)
+  }
+
   async getLatestFromKeyResult(
     keyResultId: KeyResultDTO['id'],
   ): Promise<ProgressReport | undefined> {

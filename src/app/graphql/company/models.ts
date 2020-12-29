@@ -60,4 +60,10 @@ export class CompanyObject {
     description: 'A creation date ordered list of users that are members of this company',
   })
   users: UserObject[]
+
+  @Field(() => ProgressReportObject, {
+    description: 'The latest report for this company',
+    nullable: true,
+  })
+  latestReport: ProgressReportObject
 }

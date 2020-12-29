@@ -49,6 +49,12 @@ class DomainConfidenceReportRepository extends DomainEntityRepository<Confidence
 
     return addConstraintToQuery
   }
+
+  async selectManyInUserIDs(userIDs: Array<UserDTO['id']>) {
+    const query = this.createQueryBuilder().where('user_id IN(:...userIDs)', { userIDs })
+
+    return query.getMany()
+  }
 }
 
 export default DomainConfidenceReportRepository

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { flatten, isEqual, uniqWith } from 'lodash'
+import { flatten, isEqual, orderBy, uniqWith } from 'lodash'
 
 import { CompanyDTO } from 'domain/company/dto'
 import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
@@ -70,6 +70,18 @@ class DomainCompanyService extends DomainEntityService<Company, CompanyDTO> {
     const companies = this.repository.selectManyInIDs(companyIDs, options)
 
     return companies
+  }
+
+  async getLatestReport(companyID: CompanyDTO['id']) {
+    const users = await this.getUsersInCompany(companyID)
+    const userIDs = users.map((user) => user.id)
+
+    const reports = await this.keyResultService.report.getFromUsers(userIDs)
+    const orderedReports = orderBy(reports, ['createdAt'], ['desc'])
+
+    const latestReport = orderedReports[0]
+
+    return latestReport
   }
 }
 

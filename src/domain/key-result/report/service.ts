@@ -5,6 +5,7 @@ import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
 import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
 import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
 import { ProgressReport } from 'domain/key-result/report/progress/entities'
+import { UserDTO } from 'domain/user/dto'
 
 import DomainConfidenceReportService from './confidence/service'
 import DomainProgressReportService from './progress/service'
@@ -45,6 +46,16 @@ class DomainKeyResultReportService {
     const createdReports = remove([progressReport, confidenceReport])
 
     return createdReports
+  }
+
+  async getFromUsers(userIDs: Array<UserDTO['id']>) {
+    const progressReports = await this.progress.getFromUsers(userIDs)
+    const confidenceReports = await this.confidence.getFromUsers(userIDs)
+
+    const reports = [...progressReports, ...confidenceReports]
+    const clearedReports = remove(reports)
+
+    return clearedReports
   }
 }
 
