@@ -1,5 +1,6 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common'
+import { forwardRef, Inject, Injectable, Scope } from '@nestjs/common'
 import { remove } from 'lodash'
+import { LessThanOrEqual } from 'typeorm'
 
 import { CONSTRAINT } from 'domain/constants'
 import { KeyResultDTO } from 'domain/key-result/dto'
@@ -12,8 +13,10 @@ import { DuplicateEntityError } from 'errors'
 import { ProgressReport } from './entities'
 import DomainProgressReportRepository from './repository'
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 class DomainProgressReportService extends DomainEntityService<ProgressReport, ProgressReportDTO> {
+  public snapshotDate: Date
+
   constructor(
     public readonly repository: DomainProgressReportRepository,
     @Inject(forwardRef(() => DomainKeyResultService))
@@ -41,10 +44,27 @@ class DomainProgressReportService extends DomainEntityService<ProgressReport, Pr
     return this.repository.selectManyInUserIDs(userIDs)
   }
 
-  async getLatestFromKeyResult(
-    keyResultId: KeyResultDTO['id'],
-  ): Promise<ProgressReport | undefined> {
-    return this.repository.findOne({ where: { keyResultId }, order: { createdAt: 'DESC' } })
+  async getLatestFromKeyResult(keyResultID: KeyResultDTO['id']) {
+    const date = new Date()
+    const progress = await this.getLatestFromDateForKeyResult(keyResultID, date)
+
+    return progress
+  }
+
+  async getLatestFromSnapshotForKeyResult(keyResultID: KeyResultDTO['id']) {
+    const progress = await this.getLatestFromDateForKeyResult(keyResultID, this.snapshotDate)
+
+    return progress
+  }
+
+  async getLatestFromDateForKeyResult(keyResultId: KeyResultDTO['id'], date: Date) {
+    const isoDate = date.toISOString()
+    const progress = await this.repository.findOne({
+      where: { keyResultId, createdAt: LessThanOrEqual(isoDate) },
+      order: { createdAt: 'DESC' },
+    })
+
+    return progress
   }
 
   async buildProgressReports(

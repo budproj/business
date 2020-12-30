@@ -69,7 +69,7 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
   async getCurrentProgress(id: KeyResultDTO['id']): Promise<ProgressReport['valueNew']> {
     const defaultProgress = 0
 
-    const latestProgressReport = await this.report.progress.getLatestFromKeyResult(id)
+    const latestProgressReport = await this.report.progress.getLatestFromSnapshotForKeyResult(id)
     if (!latestProgressReport) return defaultProgress
 
     return latestProgressReport.valueNew

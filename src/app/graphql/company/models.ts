@@ -66,4 +66,9 @@ export class CompanyObject {
     nullable: true,
   })
   latestReport: ProgressReportObject
+
+  @Field(() => Float, {
+    description: 'The percentage progress increase since last monday',
+  })
+  percentageProgressIncrease: number
 }
