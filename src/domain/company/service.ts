@@ -51,7 +51,7 @@ class DomainCompanyService extends DomainEntityService<Company, CompanyDTO> {
     const previousSnapshotDate = this.keyResultService.report.progress.snapshotDate
     this.keyResultService.report.progress.snapshotDate = date
 
-    const companyProgress = this.keyResultService.calculateAverageCurrentProgressFromList(
+    const companyProgress = this.keyResultService.calculateSnapshotAverageProgressFromList(
       keyResults,
     )
 

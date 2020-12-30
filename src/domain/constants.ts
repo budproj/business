@@ -4,3 +4,8 @@ export enum CONSTRAINT {
   TEAM = 'team',
   OWNS = 'owns',
 }
+
+export enum TIMEFRAME_SCOPE {
+  CURRENT = 'CURRENT',
+  SNAPSHOT = 'SNAPSHOT',
+}
