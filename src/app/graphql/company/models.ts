@@ -1,10 +1,16 @@
-import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
+import { Field, Float, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { CycleObject } from 'app/graphql/cycle/models'
 import { ConfidenceReportObject } from 'app/graphql/key-result/report/confidence'
 import { ProgressReportObject } from 'app/graphql/key-result/report/progress'
 import { TeamObject } from 'app/graphql/team/models'
 import { UserObject } from 'app/graphql/user/models'
+import { COMPANY_GENDER } from 'domain/company/constants'
+
+registerEnumType(COMPANY_GENDER, {
+  name: 'COMPANY_GENDER',
+  description: 'Each gender represents a possible gender option for our companies',
+})
 
 @ObjectType('Company', { description: 'A group of teams that has a given stakeholder' })
 export class CompanyObject {
@@ -13,6 +19,9 @@ export class CompanyObject {
 
   @Field({ description: 'The name of the company' })
   name: string
+
+  @Field({ nullable: true, description: 'The gender of the company' })
+  gender?: COMPANY_GENDER
 
   @Field({ description: 'The description of the company', nullable: true })
   description?: string
@@ -51,4 +60,15 @@ export class CompanyObject {
     description: 'A creation date ordered list of users that are members of this company',
   })
   users: UserObject[]
+
+  @Field(() => ProgressReportObject, {
+    description: 'The latest report for this company',
+    nullable: true,
+  })
+  latestReport: ProgressReportObject
+
+  @Field(() => Float, {
+    description: 'The percentage progress increase since last monday',
+  })
+  percentageProgressIncrease: number
 }

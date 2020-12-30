@@ -33,6 +33,10 @@ class DomainConfidenceReportService extends DomainEntityService<
     return this.repository.find({ userId })
   }
 
+  async getFromUsers(userIDs: Array<UserDTO['id']>) {
+    return this.repository.selectManyInUserIDs(userIDs)
+  }
+
   async getLatestFromKeyResult(keyResultId: KeyResultDTO['id']): Promise<ConfidenceReport> {
     return this.repository.findOne({ where: { keyResultId }, order: { createdAt: 'DESC' } })
   }

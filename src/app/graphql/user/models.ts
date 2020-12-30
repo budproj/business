@@ -6,7 +6,18 @@ import { ConfidenceReportObject } from 'app/graphql/key-result/report/confidence
 import { ProgressReportObject } from 'app/graphql/key-result/report/progress/models'
 import { ObjectiveObject } from 'app/graphql/objective/models'
 import { TeamObject } from 'app/graphql/team/models'
-import { UserPolicy } from 'app/graphql/user/types'
+import { USER_POLICY } from 'app/graphql/user/constants'
+import { USER_GENDER } from 'domain/user/constants'
+
+registerEnumType(USER_GENDER, {
+  name: 'USER_GENDER',
+  description: 'Each gender represents a possible gender option for our users',
+})
+
+registerEnumType(USER_POLICY, {
+  name: 'USER_POLICY',
+  description: 'Defines if the user has the allowance for a given action regarding the resource',
+})
 
 @ObjectType('User', {
   description:
@@ -21,6 +32,9 @@ export class UserObject {
 
   @Field({ description: 'The sub field in Auth0 (their ID)' })
   authzSub: string
+
+  @Field({ nullable: true, description: 'The gender of the user' })
+  gender?: USER_GENDER
 
   @Field({ nullable: true, description: 'The user role in the company' })
   role?: string
@@ -68,6 +82,11 @@ export class UserObject {
     description: 'The creation date ordered list of companies that this user owns',
   })
   ownedCompanies: CompanyObject[]
+
+  @Field(() => [CompanyObject], {
+    description: 'The creation date ordered list of companies that this user is a part of',
+  })
+  companies: CompanyObject[]
 }
 
 @ObjectType('Policies', {
@@ -75,20 +94,15 @@ export class UserObject {
     'Defines the current user policies regarding a given resource. You can use it to display read/create/update/delete controls on your application',
 })
 export class PoliciesObject {
-  @Field(() => UserPolicy, { defaultValue: UserPolicy.DENY })
-  create: UserPolicy
+  @Field(() => USER_POLICY, { defaultValue: USER_POLICY.DENY })
+  create: USER_POLICY
 
-  @Field(() => UserPolicy, { defaultValue: UserPolicy.DENY })
-  read: UserPolicy
+  @Field(() => USER_POLICY, { defaultValue: USER_POLICY.DENY })
+  read: USER_POLICY
 
-  @Field(() => UserPolicy, { defaultValue: UserPolicy.DENY })
-  update: UserPolicy
+  @Field(() => USER_POLICY, { defaultValue: USER_POLICY.DENY })
+  update: USER_POLICY
 
-  @Field(() => UserPolicy, { defaultValue: UserPolicy.DENY })
-  delete: UserPolicy
+  @Field(() => USER_POLICY, { defaultValue: USER_POLICY.DENY })
+  delete: USER_POLICY
 }
-
-registerEnumType(UserPolicy, {
-  name: 'UserPolicy',
-  description: 'Defines if the user has the allowance for a given action regarding the resource',
-})

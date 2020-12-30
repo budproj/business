@@ -2,10 +2,10 @@ import { Field, ID, InputType, ObjectType, registerEnumType } from '@nestjs/grap
 
 import { KeyResultObject } from 'app/graphql/key-result/models'
 import { UserObject } from 'app/graphql/user/models'
-import { KeyResultViewBinding } from 'domain/user/view/key-result/types'
+import { KEY_RESULT_VIEW_BINDING } from 'domain/user/view/key-result/constants'
 
-registerEnumType(KeyResultViewBinding, {
-  name: 'KeyResultViewBinding',
+registerEnumType(KEY_RESULT_VIEW_BINDING, {
+  name: 'KEY_RESULT_VIEW_BINDING',
   description: 'Each binding represents a given view in our applications',
 })
 
@@ -24,7 +24,7 @@ export class KeyResultViewObject {
     nullable: true,
     description: 'An anchor between this view and a fixed tab in our applications',
   })
-  binding?: KeyResultViewBinding
+  binding?: KEY_RESULT_VIEW_BINDING
 
   @Field(() => [ID], { description: 'Ordered list of key result IDs' })
   rank: Array<KeyResultObject['id']>
@@ -56,7 +56,7 @@ export class KeyResultViewInput {
     nullable: true,
     description: 'An anchor between this view and a fixed tab in our applications',
   })
-  binding?: KeyResultViewBinding
+  binding?: KEY_RESULT_VIEW_BINDING
 
   @Field(() => [ID], { description: 'Ordered list of key result IDs' })
   rank: Array<KeyResultObject['id']>

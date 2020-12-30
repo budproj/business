@@ -3,6 +3,7 @@ import { EntityRepository, SelectQueryBuilder } from 'typeorm'
 import { CompanyDTO } from 'domain/company/dto'
 import DomainEntityRepository from 'domain/repository'
 import { TeamDTO } from 'domain/team/dto'
+import { DomainServiceGetOptions } from 'domain/types'
 import { UserDTO } from 'domain/user/dto'
 
 import { Company } from './entities'
@@ -46,6 +47,14 @@ class DomainCompanyRepository extends DomainEntityRepository<Company> {
     }
 
     return addConstraintToQuery
+  }
+
+  async selectManyInIDs(companyIDs: Array<CompanyDTO['id']>, options?: DomainServiceGetOptions) {
+    const query = this.createQueryBuilder()
+      .where('id IN(:...ids)', { ids: companyIDs })
+      .take(options?.limit ?? 0)
+
+    return query.getMany()
   }
 }
 

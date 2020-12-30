@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
+import { COMPANY_GENDER } from 'domain/company/constants'
 import { CycleDTO } from 'domain/cycle/dto'
 import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
@@ -22,6 +23,9 @@ export class Company implements CompanyDTO {
 
   @Column()
   public name: string
+
+  @Column({ type: 'enum', enum: COMPANY_GENDER, nullable: true })
+  public gender?: COMPANY_GENDER
 
   @Column({ type: 'text', nullable: true })
   public description?: string | null

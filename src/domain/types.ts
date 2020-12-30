@@ -5,3 +5,7 @@ export interface DomainServiceContext {
   constraint: CONSTRAINT
   user: UserDTO
 }
+
+export interface DomainServiceGetOptions {
+  limit?: number
+}

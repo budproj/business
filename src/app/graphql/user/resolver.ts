@@ -1,5 +1,5 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { PERMISSION } from 'app/authz/constants'
 import { GraphQLUser, Permissions } from 'app/authz/decorators'
@@ -114,6 +114,24 @@ class GraphQLUserResolver {
     })
 
     return this.companyDomain.getFromOwner(user.id)
+  }
+
+  @ResolveField()
+  async companies(
+    @Parent() user: UserObject,
+    @Args('limit', { type: () => Int, nullable: true }) limit?: number,
+  ) {
+    this.logger.log({
+      user,
+      limit,
+      message: 'Fetching companies for user',
+    })
+    const teams = await user.teams
+    const companyIDs = teams.map((team) => team.companyId)
+
+    return this.companyDomain.getFromIDs(companyIDs, {
+      limit,
+    })
   }
 }
 

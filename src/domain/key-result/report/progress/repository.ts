@@ -49,6 +49,12 @@ class DomainProgressReportRepository extends DomainEntityRepository<ProgressRepo
 
     return addConstraintToQuery
   }
+
+  async selectManyInUserIDs(userIDs: Array<UserDTO['id']>) {
+    const query = this.createQueryBuilder().where('user_id IN(:...userIDs)', { userIDs })
+
+    return query.getMany()
+  }
 }
 
 export default DomainProgressReportRepository

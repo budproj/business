@@ -1,13 +1,9 @@
 import { ACTION } from 'app/authz/constants'
-
-export enum UserPolicy {
-  ALLOW = 'ALLOW',
-  DENY = 'DENY',
-}
+import { USER_POLICY } from 'app/graphql/user/constants'
 
 export interface UserActionPolicies {
-  [ACTION.CREATE]: UserPolicy | Promise<UserPolicy>
-  [ACTION.READ]: UserPolicy | Promise<UserPolicy>
-  [ACTION.UPDATE]: UserPolicy | Promise<UserPolicy>
-  [ACTION.DELETE]: UserPolicy | Promise<UserPolicy>
+  [ACTION.CREATE]: USER_POLICY | Promise<USER_POLICY>
+  [ACTION.READ]: USER_POLICY | Promise<USER_POLICY>
+  [ACTION.UPDATE]: USER_POLICY | Promise<USER_POLICY>
+  [ACTION.DELETE]: USER_POLICY | Promise<USER_POLICY>
 }

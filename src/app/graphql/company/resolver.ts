@@ -109,6 +109,26 @@ class GraphQLCompanyResolver {
 
     return this.companyDomain.getUsersInCompany(company.id)
   }
+
+  @ResolveField()
+  async latestReport(@Parent() company: CompanyObject) {
+    this.logger.log({
+      company,
+      message: 'Fetching latest report for company',
+    })
+
+    return this.companyDomain.getLatestReport(company.id)
+  }
+
+  @ResolveField()
+  async percentageProgressIncrease(@Parent() company: CompanyObject) {
+    this.logger.log({
+      company,
+      message: 'Fetching percentage progress increase',
+    })
+
+    return this.companyDomain.getPercentageProgressIncrease(company.id)
+  }
 }
 
 export default GraphQLCompanyResolver
