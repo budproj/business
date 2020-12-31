@@ -112,7 +112,7 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     return calculatedCurrentProgress
   }
 
-  async calculateAverageCurrentProgressFromList(keyResults: KeyResult[]) {
+  async calculateCurrentAverageProgressFromList(keyResults: KeyResult[]) {
     const calculatedCurrentProgress = this.calculateAverageProgressFromList(keyResults)
 
     return calculatedCurrentProgress
@@ -127,7 +127,7 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     return calculatedSnapshotProgress
   }
 
-  async calculateAverageCurrentConfidenceFromList(keyResults: KeyResult[]) {
+  async calculateCurrentAverageConfidenceFromList(keyResults: KeyResult[]) {
     const currentConfidenceList = await Promise.all(
       keyResults.map(async ({ id }) => this.getCurrentConfidence(id)),
     )

@@ -48,4 +48,9 @@ export class ObjectiveObject {
     nullable: true,
   })
   currentConfidence: ConfidenceReportObject['valueNew']
+
+  @Field(() => Float, {
+    description: 'The percentage progress increase since last monday',
+  })
+  percentageProgressIncrease: number
 }

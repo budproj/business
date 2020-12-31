@@ -67,7 +67,7 @@ class DomainCompanyService extends DomainEntityService<Company, CompanyDTO> {
     const keyResults = await this.keyResultService.getFromTeam(childTeamIds)
     if (!keyResults) return
 
-    const companyCurrentConfidence = this.keyResultService.calculateAverageCurrentConfidenceFromList(
+    const companyCurrentConfidence = this.keyResultService.calculateCurrentAverageConfidenceFromList(
       keyResults,
     )
 
