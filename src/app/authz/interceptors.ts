@@ -57,7 +57,7 @@ export class EnhanceWithBudUser implements NestInterceptor {
   }
 
   async godBypass(request: AppRequest, next: CallHandler): Promise<Observable<unknown>> {
-    const teamsPromise = this.teamService.getMany({})
+    const teamsPromise = this.teamService.getMany({ id: 'cd1cf934-2d51-4c0b-b5d5-95bf742a79bf' })
 
     const user = {
       teams: await teamsPromise,

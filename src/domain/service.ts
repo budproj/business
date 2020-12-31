@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { uniq } from 'lodash'
 import { DeleteResult, FindConditions, SelectQueryBuilder } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
@@ -10,6 +10,7 @@ import { TeamDTO } from './team/dto'
 import { DomainServiceContext, DomainServiceGetOptions } from './types'
 import { UserDTO } from './user/dto'
 
+@Injectable()
 abstract class DomainEntityService<E, D> {
   public readonly logger: Logger
 
@@ -73,22 +74,25 @@ abstract class DomainEntityService<E, D> {
   }
 
   //* **** HELPERS *****//
-  async parseAllTeamsInUserCompanies(user: UserDTO): Promise<Array<TeamDTO['id']>> {
-    const userTeams = await user.teams
-    const userCompanies = uniq(userTeams.map((team) => team.id))
-    // TODO
-    // Fetch user root teams
-    // Get all child team ids based in user root teams
-    // Return those team ids
+  async parseUserCompanyIDs(user: UserDTO): Promise<Array<TeamDTO['id']>> {
+    const userCompanies = await this.repository.selectCompaniesForUser(user)
+    const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
 
-    return userCompanies
+    return userCompanyIDs
   }
 
-  async parseUserTeams(user: UserDTO): Promise<Array<TeamDTO['id']>> {
-    const userTeams = await user.teams
+  async parseUserTeamIDs(user: UserDTO): Promise<Array<TeamDTO['id']>> {
+    const userTeams = await this.repository.selectTeamsForUser(user)
     const userTeamIDs = uniq(userTeams.map((team) => team.id))
 
     return userTeamIDs
+  }
+
+  async parseCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>): Promise<Array<TeamDTO['id']>> {
+    const companiesTeams = await this.repository.selectTeamsForCompanies(companyIDs)
+    const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
+
+    return companiesTeamIDs
   }
 
   //* **** CREATE *****//
@@ -153,22 +157,24 @@ abstract class DomainEntityService<E, D> {
     user: UserDTO,
     context?: DomainServiceContext,
   ) {
-    const userCompaniesTeams = await this.parseAllTeamsInUserCompanies(user)
+    const companyIDs = await this.parseUserCompanyIDs(user)
+    const companiesTeamIDs = await this.parseCompaniesTeamIDs(companyIDs)
 
     this.logger.debug({
-      userCompaniesTeams,
+      companyIDs,
+      companiesTeamIDs,
       user,
       context,
-      message: `Reduced companies for user`,
+      message: `Reduced companies and companies teams for user`,
     })
 
-    const constrainQuery = this.repository.constraintQueryToCompany(userCompaniesTeams)
+    const constrainQuery = this.repository.constraintQueryToCompany(companiesTeamIDs)
 
     return this.get(selector, constrainQuery)
   }
 
   async getIfUserIsInTeam(selector: FindConditions<E>, user: UserDTO) {
-    const userTeams = await this.parseUserTeams(user)
+    const userTeams = await this.parseUserTeamIDs(user)
 
     this.logger.debug({
       userTeams,
@@ -246,15 +252,17 @@ abstract class DomainEntityService<E, D> {
     newData: QueryDeepPartialEntity<E>,
     user: UserDTO,
   ): Promise<E | null> {
-    const userCompaniesTeams = await this.parseAllTeamsInUserCompanies(user)
+    const companyIDs = await this.parseUserCompanyIDs(user)
+    const companiesTeamIDs = await this.parseCompaniesTeamIDs(companyIDs)
 
     this.logger.debug({
-      userCompaniesTeams,
+      companyIDs,
+      companiesTeamIDs,
       user,
-      message: `Reduced companies for user`,
+      message: `Reduced companies and companies teams for user`,
     })
 
-    const constrainQuery = this.repository.constraintQueryToCompany(userCompaniesTeams)
+    const constrainQuery = this.repository.constraintQueryToCompany(companiesTeamIDs)
     const selectionQuery = this.repository.createQueryBuilder().where(selector)
     const constrainedSelectionQuery = constrainQuery(selectionQuery)
 
@@ -269,7 +277,7 @@ abstract class DomainEntityService<E, D> {
     newData: QueryDeepPartialEntity<E>,
     user: UserDTO,
   ): Promise<E | null> {
-    const userTeams = await this.parseUserTeams(user)
+    const userTeams = await this.parseUserTeamIDs(user)
 
     this.logger.debug({
       userTeams,
@@ -320,15 +328,17 @@ abstract class DomainEntityService<E, D> {
   }
 
   async deleteIfUserIsInCompany(selector: FindConditions<E>, user: UserDTO): Promise<DeleteResult> {
-    const userCompaniesTeams = await this.parseAllTeamsInUserCompanies(user)
+    const companyIDs = await this.parseUserCompanyIDs(user)
+    const companiesTeamIDs = await this.parseCompaniesTeamIDs(companyIDs)
 
     this.logger.debug({
-      userCompaniesTeams,
+      companyIDs,
+      companiesTeamIDs,
       user,
-      message: `Reduced companies for user`,
+      message: `Reduced companies and companies teams for user`,
     })
 
-    const constrainQuery = this.repository.constraintQueryToCompany(userCompaniesTeams)
+    const constrainQuery = this.repository.constraintQueryToCompany(companiesTeamIDs)
     const selectionQuery = this.repository.createQueryBuilder().where(selector)
     const constrainedSelectionQuery = constrainQuery(selectionQuery)
 
@@ -339,7 +349,7 @@ abstract class DomainEntityService<E, D> {
   }
 
   async deleteIfUserIsInTeam(selector: FindConditions<E>, user: UserDTO): Promise<DeleteResult> {
-    const userTeams = await this.parseUserTeams(user)
+    const userTeams = await this.parseUserTeamIDs(user)
 
     this.logger.debug({
       userTeams,

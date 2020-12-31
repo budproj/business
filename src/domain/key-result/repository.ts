@@ -12,9 +12,12 @@ class DomainKeyResultRepository extends DomainEntityRepository<KeyResult> {
   constraintQueryToCompany(teamIDsInCompany: Array<TeamDTO['id']>) {
     const addConstraintToQuery = (query?: SelectQueryBuilder<KeyResult>) => {
       const baseQuery = query ?? this.createQueryBuilder()
-      const constrainedQuery = baseQuery.andWhere('keyResult.teamId IN (:...teamIDsInCompany)', {
-        teamIDsInCompany,
-      })
+      const constrainedQuery = baseQuery.andWhere(
+        `${KeyResult.name}.teamId IN (:...teamIDsInCompany)`,
+        {
+          teamIDsInCompany,
+        },
+      )
 
       return constrainedQuery
     }

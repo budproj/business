@@ -36,7 +36,7 @@ class GodUser implements AuthzUser {
     this.scopes = {
       [RESOURCE.KEY_RESULT]: {
         [ACTION.CREATE]: CONSTRAINT.ANY,
-        [ACTION.READ]: CONSTRAINT.ANY,
+        [ACTION.READ]: CONSTRAINT.COMPANY,
         [ACTION.UPDATE]: CONSTRAINT.ANY,
         [ACTION.DELETE]: CONSTRAINT.ANY,
       },
