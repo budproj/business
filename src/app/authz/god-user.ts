@@ -15,12 +15,12 @@ class GodUser implements AuthzUser {
   public readonly scopes: AuthzUser['scopes']
 
   constructor() {
-    this.id = '00425f38-6b03-4fdb-960a-20349116d714' // Replace with your local desired user ID
+    this.id = '7755b577-99cc-4de7-b3a4-5f34e1ab780c' // Replace with your local desired user ID
     this.name = 'GOD'
     this.authzSub = 'GOD'
     this.role = 'GOD'
     this.picture =
-      'https://vignette.wikia.nocookie.net/rickemorty/images/d/dc/4469093-screen_shot_2015-03-25_at_5.13.24_pm_copy.jpg/revision/latest?cb=20170918192423&path-prefix=pt-br'
+      'https://static.wikia.nocookie.net/rickandmorty/images/a/a6/Rick_Sanchez.png/revision/latest/scale-to-width-down/310?cb=20160923150728'
     this.createdAt = new Date('1970-01-01T00:00:00.000Z')
     this.updatedAt = new Date('1970-01-01T00:00:00.000Z')
     this.token = {
