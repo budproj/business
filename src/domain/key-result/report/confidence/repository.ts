@@ -1,6 +1,5 @@
 import { EntityRepository, SelectQueryBuilder } from 'typeorm'
 
-import { CompanyDTO } from 'domain/company/dto'
 import DomainEntityRepository from 'domain/repository'
 import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
@@ -9,13 +8,12 @@ import { ConfidenceReport } from './entities'
 
 @EntityRepository(ConfidenceReport)
 class DomainConfidenceReportRepository extends DomainEntityRepository<ConfidenceReport> {
-  constraintQueryToCompany(allowedCompanies: Array<CompanyDTO['id']>) {
+  constraintQueryToCompany(teamIDsInCompany: Array<TeamDTO['id']>) {
     const addConstraintToQuery = (query?: SelectQueryBuilder<ConfidenceReport>) => {
       const baseQuery = query ?? this.createQueryBuilder()
       const constrainedQuery = baseQuery
         .leftJoinAndSelect(`${ConfidenceReport.name}.keyResult`, 'keyResult')
-        .leftJoinAndSelect('keyResult.team', 'team')
-        .andWhere('team.companyId IN (:...allowedCompanies)', { allowedCompanies })
+        .andWhere('keyResult.teamId IN (:...teamIDsInCompany)', { teamIDsInCompany })
 
       return constrainedQuery
     }

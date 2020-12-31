@@ -6,8 +6,8 @@ import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
-import DomainCompanyService from 'domain/company/service'
 import DomainObjectiveService from 'domain/objective/service'
+import DomainTeamService from 'domain/team/service'
 
 import { CycleObject } from './models'
 import GraphQLCycleService from './service'
@@ -20,7 +20,7 @@ class GraphQLCycleResolver {
 
   constructor(
     private readonly resolverService: GraphQLCycleService,
-    private readonly companyDomain: DomainCompanyService,
+    private readonly teamDomain: DomainTeamService,
     private readonly objectiveDomain: DomainObjectiveService,
   ) {}
 
@@ -39,13 +39,13 @@ class GraphQLCycleResolver {
   }
 
   @ResolveField()
-  async company(@Parent() cycle: CycleObject) {
+  async team(@Parent() cycle: CycleObject) {
     this.logger.log({
       cycle,
-      message: 'Fetching company for cycle',
+      message: 'Fetching team for cycle',
     })
 
-    return this.companyDomain.getOne({ id: cycle.companyId })
+    return this.teamDomain.getOne({ id: cycle.teamId })
   }
 
   @ResolveField()

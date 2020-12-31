@@ -1,6 +1,5 @@
 import { EntityRepository, SelectQueryBuilder } from 'typeorm'
 
-import { CompanyDTO } from 'domain/company/dto'
 import DomainEntityRepository from 'domain/repository'
 import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
@@ -9,12 +8,14 @@ import { Cycle } from './entities'
 
 @EntityRepository(Cycle)
 class DomainCycleRepository extends DomainEntityRepository<Cycle> {
-  constraintQueryToCompany(allowedCompanies: Array<CompanyDTO['id']>) {
+  constraintQueryToCompany(teamIDsInCompany: Array<TeamDTO['id']>) {
     const addConstraintToQuery = (query?: SelectQueryBuilder<Cycle>) => {
       const baseQuery = query ?? this.createQueryBuilder()
       const constrainedQuery = baseQuery.andWhere(
-        `${Cycle.name}.companyId IN (:...allowedCompanies)`,
-        { allowedCompanies },
+        `${Cycle.name}.teamId IN (:...teamIDsInCompany)`,
+        {
+          teamIDsInCompany,
+        },
       )
 
       return constrainedQuery

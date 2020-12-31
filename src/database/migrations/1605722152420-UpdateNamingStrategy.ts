@@ -4,7 +4,6 @@ export class UpdateNamingStrategy1605722152420 implements MigrationInterface {
   name = 'UpdateNamingStrategy1605722152420'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "team" DROP CONSTRAINT "FK_f621d803ce9f3284a559f68fbc5"`)
     await queryRunner.query(
       `ALTER TABLE "confidence_report" DROP CONSTRAINT "FK_77abd95d6700ac3b4bb291fd0da"`,
     )
@@ -20,8 +19,6 @@ export class UpdateNamingStrategy1605722152420 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "objective" DROP CONSTRAINT "FK_bd6054d696adbee34dbb5bc7687"`,
     )
-    await queryRunner.query(`ALTER TABLE "cycle" DROP CONSTRAINT "FK_917072384ce255f37d62264fcdb"`)
-    await queryRunner.query(`ALTER TABLE "team" DROP COLUMN "companyId"`)
     await queryRunner.query(`ALTER TABLE "team" DROP COLUMN "createdAt"`)
     await queryRunner.query(`ALTER TABLE "team" DROP COLUMN "updatedAt"`)
     await queryRunner.query(`ALTER TABLE "confidence_report" DROP COLUMN "valuePrevious"`)
@@ -42,14 +39,10 @@ export class UpdateNamingStrategy1605722152420 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "objective" DROP COLUMN "updatedAt"`)
     await queryRunner.query(`ALTER TABLE "cycle" DROP COLUMN "dateStart"`)
     await queryRunner.query(`ALTER TABLE "cycle" DROP COLUMN "dateEnd"`)
-    await queryRunner.query(`ALTER TABLE "cycle" DROP COLUMN "companyId"`)
     await queryRunner.query(`ALTER TABLE "cycle" DROP COLUMN "createdAt"`)
     await queryRunner.query(`ALTER TABLE "cycle" DROP COLUMN "updatedAt"`)
-    await queryRunner.query(`ALTER TABLE "company" DROP COLUMN "createdAt"`)
-    await queryRunner.query(`ALTER TABLE "company" DROP COLUMN "updatedAt"`)
     await queryRunner.query(`ALTER TABLE "team" ADD "created_at" TIMESTAMP NOT NULL DEFAULT now()`)
     await queryRunner.query(`ALTER TABLE "team" ADD "updated_at" TIMESTAMP NOT NULL DEFAULT now()`)
-    await queryRunner.query(`ALTER TABLE "team" ADD "company_id" integer`)
     await queryRunner.query(`ALTER TABLE "confidence_report" ADD "value_previous" numeric NOT NULL`)
     await queryRunner.query(`ALTER TABLE "confidence_report" ADD "value_new" numeric NOT NULL`)
     await queryRunner.query(
@@ -82,16 +75,6 @@ export class UpdateNamingStrategy1605722152420 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "cycle" ADD "date_end" TIMESTAMP NOT NULL`)
     await queryRunner.query(`ALTER TABLE "cycle" ADD "created_at" TIMESTAMP NOT NULL DEFAULT now()`)
     await queryRunner.query(`ALTER TABLE "cycle" ADD "updated_at" TIMESTAMP NOT NULL DEFAULT now()`)
-    await queryRunner.query(`ALTER TABLE "cycle" ADD "company_id" integer`)
-    await queryRunner.query(
-      `ALTER TABLE "company" ADD "created_at" TIMESTAMP NOT NULL DEFAULT now()`,
-    )
-    await queryRunner.query(
-      `ALTER TABLE "company" ADD "updated_at" TIMESTAMP NOT NULL DEFAULT now()`,
-    )
-    await queryRunner.query(
-      `ALTER TABLE "team" ADD CONSTRAINT "FK_b36ca3769370f1fe4f5519e85f9" FOREIGN KEY ("company_id") REFERENCES "company"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    )
     await queryRunner.query(
       `ALTER TABLE "confidence_report" ADD CONSTRAINT "FK_91d4c5e94a9a8c4aff1e001b03d" FOREIGN KEY ("key_result_id") REFERENCES "key_result"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     )
@@ -106,9 +89,6 @@ export class UpdateNamingStrategy1605722152420 implements MigrationInterface {
     )
     await queryRunner.query(
       `ALTER TABLE "objective" ADD CONSTRAINT "FK_4134e15532a8beb1f20417cb14f" FOREIGN KEY ("cycle_id") REFERENCES "cycle"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    )
-    await queryRunner.query(
-      `ALTER TABLE "cycle" ADD CONSTRAINT "FK_c2a1e5c86d5a9157810191147b4" FOREIGN KEY ("company_id") REFERENCES "company"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     )
   }
 
@@ -130,9 +110,6 @@ export class UpdateNamingStrategy1605722152420 implements MigrationInterface {
       `ALTER TABLE "confidence_report" DROP CONSTRAINT "FK_91d4c5e94a9a8c4aff1e001b03d"`,
     )
     await queryRunner.query(`ALTER TABLE "team" DROP CONSTRAINT "FK_b36ca3769370f1fe4f5519e85f9"`)
-    await queryRunner.query(`ALTER TABLE "company" DROP COLUMN "updated_at"`)
-    await queryRunner.query(`ALTER TABLE "company" DROP COLUMN "created_at"`)
-    await queryRunner.query(`ALTER TABLE "cycle" DROP COLUMN "company_id"`)
     await queryRunner.query(`ALTER TABLE "cycle" DROP COLUMN "updated_at"`)
     await queryRunner.query(`ALTER TABLE "cycle" DROP COLUMN "created_at"`)
     await queryRunner.query(`ALTER TABLE "cycle" DROP COLUMN "date_end"`)
@@ -153,18 +130,10 @@ export class UpdateNamingStrategy1605722152420 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "confidence_report" DROP COLUMN "created_at"`)
     await queryRunner.query(`ALTER TABLE "confidence_report" DROP COLUMN "value_new"`)
     await queryRunner.query(`ALTER TABLE "confidence_report" DROP COLUMN "value_previous"`)
-    await queryRunner.query(`ALTER TABLE "team" DROP COLUMN "company_id"`)
     await queryRunner.query(`ALTER TABLE "team" DROP COLUMN "updated_at"`)
     await queryRunner.query(`ALTER TABLE "team" DROP COLUMN "created_at"`)
-    await queryRunner.query(
-      `ALTER TABLE "company" ADD "updatedAt" TIMESTAMP NOT NULL DEFAULT now()`,
-    )
-    await queryRunner.query(
-      `ALTER TABLE "company" ADD "createdAt" TIMESTAMP NOT NULL DEFAULT now()`,
-    )
     await queryRunner.query(`ALTER TABLE "cycle" ADD "updatedAt" TIMESTAMP NOT NULL DEFAULT now()`)
     await queryRunner.query(`ALTER TABLE "cycle" ADD "createdAt" TIMESTAMP NOT NULL DEFAULT now()`)
-    await queryRunner.query(`ALTER TABLE "cycle" ADD "companyId" integer`)
     await queryRunner.query(`ALTER TABLE "cycle" ADD "dateEnd" TIMESTAMP NOT NULL`)
     await queryRunner.query(`ALTER TABLE "cycle" ADD "dateStart" TIMESTAMP NOT NULL`)
     await queryRunner.query(
@@ -197,10 +166,6 @@ export class UpdateNamingStrategy1605722152420 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "confidence_report" ADD "valuePrevious" numeric NOT NULL`)
     await queryRunner.query(`ALTER TABLE "team" ADD "updatedAt" TIMESTAMP NOT NULL DEFAULT now()`)
     await queryRunner.query(`ALTER TABLE "team" ADD "createdAt" TIMESTAMP NOT NULL DEFAULT now()`)
-    await queryRunner.query(`ALTER TABLE "team" ADD "companyId" integer`)
-    await queryRunner.query(
-      `ALTER TABLE "cycle" ADD CONSTRAINT "FK_917072384ce255f37d62264fcdb" FOREIGN KEY ("companyId") REFERENCES "company"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    )
     await queryRunner.query(
       `ALTER TABLE "objective" ADD CONSTRAINT "FK_bd6054d696adbee34dbb5bc7687" FOREIGN KEY ("cycleId") REFERENCES "cycle"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     )
@@ -215,9 +180,6 @@ export class UpdateNamingStrategy1605722152420 implements MigrationInterface {
     )
     await queryRunner.query(
       `ALTER TABLE "confidence_report" ADD CONSTRAINT "FK_77abd95d6700ac3b4bb291fd0da" FOREIGN KEY ("keyResultId") REFERENCES "key_result"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    )
-    await queryRunner.query(
-      `ALTER TABLE "team" ADD CONSTRAINT "FK_f621d803ce9f3284a559f68fbc5" FOREIGN KEY ("companyId") REFERENCES "company"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     )
   }
 }

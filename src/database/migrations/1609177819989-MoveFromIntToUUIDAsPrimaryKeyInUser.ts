@@ -5,11 +5,6 @@ export class MoveFromIntToUUIDAsPrimaryKeyInUser1609177819989 implements Migrati
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `ALTER TABLE "company" DROP CONSTRAINT "FK_0c6ea8a32565efcb512e572d61d"`,
-    )
-    await queryRunner.query(`ALTER TABLE "company" DROP COLUMN "owner_id"`)
-    await queryRunner.query(`ALTER TABLE "company" ADD "owner_id" uuid NOT NULL`)
-    await queryRunner.query(
       `ALTER TABLE "key_result" DROP CONSTRAINT "FK_467fb7f46035c6aa81790e6c9f2"`,
     )
     await queryRunner.query(`ALTER TABLE "key_result" DROP COLUMN "owner_id"`)
@@ -71,9 +66,6 @@ export class MoveFromIntToUUIDAsPrimaryKeyInUser1609177819989 implements Migrati
       `ALTER TABLE "key_result_view" ADD CONSTRAINT "UQ_1afc6f58de1c96d96bdbb441472" UNIQUE ("user_id", "binding")`,
     )
     await queryRunner.query(
-      `ALTER TABLE "company" ADD CONSTRAINT "FK_0c6ea8a32565efcb512e572d61d" FOREIGN KEY ("owner_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    )
-    await queryRunner.query(
       `ALTER TABLE "key_result" ADD CONSTRAINT "FK_467fb7f46035c6aa81790e6c9f2" FOREIGN KEY ("owner_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     )
     await queryRunner.query(
@@ -115,9 +107,6 @@ export class MoveFromIntToUUIDAsPrimaryKeyInUser1609177819989 implements Migrati
     )
     await queryRunner.query(
       `ALTER TABLE "key_result" DROP CONSTRAINT "FK_467fb7f46035c6aa81790e6c9f2"`,
-    )
-    await queryRunner.query(
-      `ALTER TABLE "company" DROP CONSTRAINT "FK_0c6ea8a32565efcb512e572d61d"`,
     )
     await queryRunner.query(
       `ALTER TABLE "key_result_view" DROP CONSTRAINT "UQ_1afc6f58de1c96d96bdbb441472"`,
@@ -181,11 +170,6 @@ export class MoveFromIntToUUIDAsPrimaryKeyInUser1609177819989 implements Migrati
     await queryRunner.query(`ALTER TABLE "key_result" ADD "owner_id" integer NOT NULL`)
     await queryRunner.query(
       `ALTER TABLE "key_result" ADD CONSTRAINT "FK_467fb7f46035c6aa81790e6c9f2" FOREIGN KEY ("owner_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
-    )
-    await queryRunner.query(`ALTER TABLE "company" DROP COLUMN "owner_id"`)
-    await queryRunner.query(`ALTER TABLE "company" ADD "owner_id" integer NOT NULL`)
-    await queryRunner.query(
-      `ALTER TABLE "company" ADD CONSTRAINT "FK_0c6ea8a32565efcb512e572d61d" FOREIGN KEY ("owner_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     )
   }
 }

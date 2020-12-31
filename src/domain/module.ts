@@ -3,7 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 
 import databaseConfig from 'config/database/config'
 
-import DomainCompanyModule from './company'
 import DomainCycleModule from './cycle'
 import DomainKeyResultModule from './key-result'
 import DomainKeyResultReportModule from './key-result/report'
@@ -22,7 +21,6 @@ import DomainKeyResultViewModule from './user/view/key-result'
     DomainUserModule,
     DomainObjectiveModule,
     DomainTeamModule,
-    DomainCompanyModule,
     DomainCycleModule,
     DomainUserViewModule,
     DomainKeyResultViewModule,
@@ -35,7 +33,6 @@ import DomainKeyResultViewModule from './user/view/key-result'
     DomainUserModule,
     DomainObjectiveModule,
     DomainTeamModule,
-    DomainCompanyModule,
     DomainCycleModule,
     DomainUserViewModule,
     DomainKeyResultViewModule,

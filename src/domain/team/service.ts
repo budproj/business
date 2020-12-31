@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { flatten, isEqual, remove, uniqBy } from 'lodash'
 
-import { CompanyDTO } from 'domain/company/dto'
 import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
 import { ProgressReport } from 'domain/key-result/report/progress/entities'
 import DomainKeyResultService from 'domain/key-result/service'
@@ -19,20 +18,6 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     private readonly keyResultService: DomainKeyResultService,
   ) {
     super(repository, DomainTeamService.name)
-  }
-
-  async getFromCompany(
-    companyId: CompanyDTO['id'],
-    filter?: Array<keyof Team>,
-    relations?: Array<keyof Team>,
-  ): Promise<Team[]> {
-    const teams = await this.repository.find({
-      relations,
-      select: filter,
-      where: { companyId },
-    })
-
-    return teams
   }
 
   async getFromOwner(ownerId: UserDTO['id']): Promise<Team[]> {
@@ -99,6 +84,10 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     const uniqTeamUsers = uniqBy(teamUsers, isEqual)
 
     return uniqTeamUsers
+  }
+
+  async getCompanyTeam(teamId: TeamDTO['id']) {
+    console.log(teamId)
   }
 }
 

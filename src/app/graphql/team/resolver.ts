@@ -7,7 +7,6 @@ import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
-import DomainCompanyService from 'domain/company/service'
 import DomainKeyResultService from 'domain/key-result/service'
 import DomainObjectiveService from 'domain/objective/service'
 import DomainTeamService from 'domain/team/service'
@@ -25,7 +24,6 @@ class GraphQLTeamResolver {
   constructor(
     private readonly resolverService: GraphQLTeamService,
     private readonly keyResultDomain: DomainKeyResultService,
-    private readonly companyDomain: DomainCompanyService,
     private readonly userDomain: DomainUserService,
     private readonly teamDomain: DomainTeamService,
     private readonly objectiveDomain: DomainObjectiveService,
@@ -72,16 +70,6 @@ class GraphQLTeamResolver {
     })
 
     return this.keyResultDomain.getFromTeam(team.id)
-  }
-
-  @ResolveField()
-  async company(@Parent() team: TeamObject) {
-    this.logger.log({
-      team,
-      message: 'Fetching company for team',
-    })
-
-    return this.companyDomain.getOne({ id: team.companyId })
   }
 
   @ResolveField()

@@ -17,17 +17,9 @@ export class AddsCreateAndUpdateDateToEntities1605554787852 implements Migration
     )
     await queryRunner.query(`ALTER TABLE "team" ADD "createdAt" TIMESTAMP NOT NULL DEFAULT now()`)
     await queryRunner.query(`ALTER TABLE "team" ADD "updatedAt" TIMESTAMP NOT NULL DEFAULT now()`)
-    await queryRunner.query(
-      `ALTER TABLE "company" ADD "createdAt" TIMESTAMP NOT NULL DEFAULT now()`,
-    )
-    await queryRunner.query(
-      `ALTER TABLE "company" ADD "updatedAt" TIMESTAMP NOT NULL DEFAULT now()`,
-    )
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "company" DROP COLUMN "updatedAt"`)
-    await queryRunner.query(`ALTER TABLE "company" DROP COLUMN "createdAt"`)
     await queryRunner.query(`ALTER TABLE "team" DROP COLUMN "updatedAt"`)
     await queryRunner.query(`ALTER TABLE "team" DROP COLUMN "createdAt"`)
     await queryRunner.query(`ALTER TABLE "key_result" DROP COLUMN "updatedAt"`)

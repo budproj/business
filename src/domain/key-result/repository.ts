@@ -1,6 +1,5 @@
 import { EntityRepository, SelectQueryBuilder } from 'typeorm'
 
-import { CompanyDTO } from 'domain/company/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
 import DomainEntityRepository from 'domain/repository'
 import { TeamDTO } from 'domain/team/dto'
@@ -10,12 +9,12 @@ import { KeyResult } from './entities'
 
 @EntityRepository(KeyResult)
 class DomainKeyResultRepository extends DomainEntityRepository<KeyResult> {
-  constraintQueryToCompany(allowedCompanies: Array<CompanyDTO['id']>) {
+  constraintQueryToCompany(teamIDsInCompany: Array<TeamDTO['id']>) {
     const addConstraintToQuery = (query?: SelectQueryBuilder<KeyResult>) => {
       const baseQuery = query ?? this.createQueryBuilder()
-      const constrainedQuery = baseQuery
-        .leftJoinAndSelect(`${KeyResult.name}.team`, 'team')
-        .andWhere('team.companyId IN (:...allowedCompanies)', { allowedCompanies })
+      const constrainedQuery = baseQuery.andWhere('keyResult.teamId IN (:...teamIDsInCompany)', {
+        teamIDsInCompany,
+      })
 
       return constrainedQuery
     }

@@ -1,11 +1,17 @@
-import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
+import { Field, Float, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
-import { CompanyObject } from 'app/graphql/company/models'
+import { CycleObject } from 'app/graphql/cycle/models'
 import { KeyResultObject } from 'app/graphql/key-result/models'
 import { ConfidenceReportObject } from 'app/graphql/key-result/report/confidence'
 import { ProgressReportObject } from 'app/graphql/key-result/report/progress'
 import { ObjectiveObject } from 'app/graphql/objective/models'
 import { UserObject } from 'app/graphql/user/models'
+import { TEAM_GENDER } from 'domain/team/constants'
+
+registerEnumType(TEAM_GENDER, {
+  name: 'TEAM_GENDER',
+  description: 'Each gender represents a possible gender option for our teams',
+})
 
 @ObjectType('Team', { description: 'A collection of users for a given company' })
 export class TeamObject {
@@ -18,6 +24,9 @@ export class TeamObject {
   @Field({ nullable: true, description: 'The description about the team' })
   description?: string
 
+  @Field({ nullable: true, description: 'The gender of the team' })
+  gender?: TEAM_GENDER
+
   @Field({ description: 'The creation date of the team' })
   createdAt: Date
 
@@ -29,12 +38,6 @@ export class TeamObject {
   })
   keyResults: KeyResultObject[]
 
-  @Field(() => ID, { description: 'The company ID that owns this team' })
-  companyId: CompanyObject['id']
-
-  @Field(() => CompanyObject, { description: 'The company that owns this team' })
-  company: CompanyObject
-
   @Field(() => [UserObject], {
     description: 'A creation date ordered list of users that are members of this team',
   })
@@ -43,7 +46,7 @@ export class TeamObject {
   @Field(() => ID, { description: 'The user ID that owns this team' })
   ownerId: UserObject['id']
 
-  @Field(() => CompanyObject, { description: 'The user that owns this team' })
+  @Field(() => UserObject, { description: 'The user that owns this team' })
   owner: UserObject
 
   @Field(() => ID, { description: 'The ID of the team that owns this team', nullable: true })
@@ -72,4 +75,12 @@ export class TeamObject {
     description: 'The created ordered list of objectives in this team',
   })
   objectives: ObjectiveObject[]
+
+  @Field(() => [CycleObject], { description: 'The cycles that belongs to this team' })
+  cycles: CycleObject[]
+
+  @Field(() => TeamObject, {
+    description: 'The team that is the company of this team. This is also known as "rootTeam"',
+  })
+  company: TeamObject
 }

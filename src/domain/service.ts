@@ -5,7 +5,6 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 
 import DomainEntityRepository, { SelectionQueryConstrain } from 'domain/repository'
 
-import { CompanyDTO } from './company/dto'
 import { CONSTRAINT } from './constants'
 import { TeamDTO } from './team/dto'
 import { DomainServiceContext, DomainServiceGetOptions } from './types'
@@ -74,9 +73,13 @@ abstract class DomainEntityService<E, D> {
   }
 
   //* **** HELPERS *****//
-  async parseUserCompanies(user: UserDTO): Promise<Array<CompanyDTO['id']>> {
+  async parseAllTeamsInUserCompanies(user: UserDTO): Promise<Array<TeamDTO['id']>> {
     const userTeams = await user.teams
-    const userCompanies = uniq(userTeams.map((team) => team.companyId))
+    const userCompanies = uniq(userTeams.map((team) => team.id))
+    // TODO
+    // Fetch user root teams
+    // Get all child team ids based in user root teams
+    // Return those team ids
 
     return userCompanies
   }
@@ -150,16 +153,16 @@ abstract class DomainEntityService<E, D> {
     user: UserDTO,
     context?: DomainServiceContext,
   ) {
-    const userCompanies = await this.parseUserCompanies(user)
+    const userCompaniesTeams = await this.parseAllTeamsInUserCompanies(user)
 
     this.logger.debug({
-      userCompanies,
+      userCompaniesTeams,
       user,
       context,
       message: `Reduced companies for user`,
     })
 
-    const constrainQuery = this.repository.constraintQueryToCompany(userCompanies)
+    const constrainQuery = this.repository.constraintQueryToCompany(userCompaniesTeams)
 
     return this.get(selector, constrainQuery)
   }
@@ -243,15 +246,15 @@ abstract class DomainEntityService<E, D> {
     newData: QueryDeepPartialEntity<E>,
     user: UserDTO,
   ): Promise<E | null> {
-    const userCompanies = await this.parseUserCompanies(user)
+    const userCompaniesTeams = await this.parseAllTeamsInUserCompanies(user)
 
     this.logger.debug({
-      userCompanies,
+      userCompaniesTeams,
       user,
       message: `Reduced companies for user`,
     })
 
-    const constrainQuery = this.repository.constraintQueryToCompany(userCompanies)
+    const constrainQuery = this.repository.constraintQueryToCompany(userCompaniesTeams)
     const selectionQuery = this.repository.createQueryBuilder().where(selector)
     const constrainedSelectionQuery = constrainQuery(selectionQuery)
 
@@ -317,15 +320,15 @@ abstract class DomainEntityService<E, D> {
   }
 
   async deleteIfUserIsInCompany(selector: FindConditions<E>, user: UserDTO): Promise<DeleteResult> {
-    const userCompanies = await this.parseUserCompanies(user)
+    const userCompaniesTeams = await this.parseAllTeamsInUserCompanies(user)
 
     this.logger.debug({
-      userCompanies,
+      userCompaniesTeams,
       user,
       message: `Reduced companies for user`,
     })
 
-    const constrainQuery = this.repository.constraintQueryToCompany(userCompanies)
+    const constrainQuery = this.repository.constraintQueryToCompany(userCompaniesTeams)
     const selectionQuery = this.repository.createQueryBuilder().where(selector)
     const constrainedSelectionQuery = constrainQuery(selectionQuery)
 

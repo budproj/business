@@ -11,10 +11,11 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { CompanyDTO } from 'domain/company/dto'
+import { CycleDTO } from 'domain/cycle/dto'
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { UserDTO } from 'domain/user/dto'
 
+import { TEAM_GENDER } from './constants'
 import { TeamDTO } from './dto'
 
 @Entity()
@@ -28,6 +29,9 @@ export class Team implements TeamDTO {
   @Column({ type: 'text', nullable: true })
   public description?: string | null
 
+  @Column({ type: 'enum', enum: TEAM_GENDER, nullable: true })
+  public gender?: TEAM_GENDER
+
   @CreateDateColumn()
   public createdAt: Date
 
@@ -36,13 +40,6 @@ export class Team implements TeamDTO {
 
   @OneToMany('KeyResult', 'team')
   public keyResults: KeyResultDTO[]
-
-  @ManyToOne('Company', 'teams')
-  public company: CompanyDTO
-
-  @Column()
-  @RelationId((team: Team) => team.company)
-  public companyId: CompanyDTO['id']
 
   @ManyToMany('User', 'teams', { lazy: true })
   @JoinTable()
@@ -64,4 +61,7 @@ export class Team implements TeamDTO {
 
   @OneToMany('Team', 'parentTeam')
   public teams: TeamDTO[]
+
+  @OneToMany('Cycle', 'team')
+  public cycles: CycleDTO[]
 }
