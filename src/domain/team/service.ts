@@ -1,11 +1,14 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { startOfWeek } from 'date-fns'
-import { flatten, isEqual, remove, uniq, uniqBy } from 'lodash'
+import { flatten, isEqual, omit, remove, uniq, uniqBy, isUndefined, omitBy } from 'lodash'
+import { IsNull } from 'typeorm'
 
 import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
 import DomainKeyResultService from 'domain/key-result/service'
+import { SelectionQueryConstrain } from 'domain/repository'
 import DomainEntityService from 'domain/service'
-import { TeamEntityFilter, TeamEntityRelation } from 'domain/team/types'
+import { TeamEntityFilter, TeamEntityRelation, TeamSelector } from 'domain/team/types'
+import { DomainServiceGetOptions } from 'domain/types'
 import { UserDTO } from 'domain/user/dto'
 
 import { TeamDTO } from './dto'
@@ -157,8 +160,12 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     filter?: TeamEntityFilter[],
     relations?: TeamEntityRelation[],
   ) {
-    let teams: Array<Partial<TeamDTO>> = []
-    let nextIterationTeams = Array.isArray(nodes) ? nodes : [nodes]
+    const nodesAsArray = Array.isArray(nodes) ? nodes : [nodes]
+
+    let teams: Array<Partial<TeamDTO>> = await Promise.all(
+      nodesAsArray.map(async (id) => this.getOne({ id })),
+    )
+    let nextIterationTeams = nodesAsArray
 
     while (nextIterationTeams.length > 0) {
       // Since we're dealing with a linked list, where we need to evaluate each step before trying the next one,
@@ -183,6 +190,31 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     const deltaProgress = currentProgress - lastWeekProgress
 
     return deltaProgress
+  }
+
+  get(
+    teamSelector: TeamSelector,
+    constrainQuery?: SelectionQueryConstrain<Team>,
+    options?: DomainServiceGetOptions,
+  ) {
+    const buildParentTeamFilter = () => {
+      if (teamSelector.onlyCompanies) return IsNull()
+      if (teamSelector?.parentTeamId) return teamSelector.parentTeamId
+    }
+
+    const selector = {
+      ...omit(teamSelector, ['onlyCompanies']),
+      parentTeamId: buildParentTeamFilter(),
+    }
+
+    const cleanedSelectors = omitBy(selector, isUndefined)
+
+    const query = this.repository
+      .createQueryBuilder()
+      .where(cleanedSelectors)
+      .take(options?.limit ?? 0)
+
+    return constrainQuery ? constrainQuery(query) : query
   }
 }
 

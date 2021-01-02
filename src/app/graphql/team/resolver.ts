@@ -47,15 +47,19 @@ class GraphQLTeamResolver {
   async teams(
     @Args('parentTeamId', { type: () => ID, nullable: true })
     parentTeamId: TeamObject['parentTeamId'],
+    @Args('onlyCompanies', { type: () => Boolean, nullable: true })
+    onlyCompanies: boolean,
     @GraphQLUser() user: AuthzUser,
   ) {
     const filters = {
       parentTeamId,
+      onlyCompanies,
     }
     const cleanedFilters = omitBy(filters, isUndefined)
 
     this.logger.log({
       cleanedFilters,
+      onlyCompanies,
       message: 'Fetching teams with args',
     })
 
