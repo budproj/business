@@ -26,7 +26,7 @@ INSERT INTO
   )
   SELECT
     'Rick Sanchez',
-    'https://static.wikia.nocookie.net/rickandmorty/images/a/a6/Rick_Sanchez.png/revision/latest/scale-to-width-down/310?cb=20160923150728',
+    'https://static.wikia.nocookie.net/rickandmorty/images/a/a6/Rick_Sanchez.png',
     'MALE',
     'GOD',
     'auth0|5fedf6295696ae00712ead97'
@@ -219,6 +219,20 @@ INSERT INTO
     owner_id
   )
   SELECT
+    'Control the universe',
+    (SELECT id FROM cycle WHERE date_start='2021-01-01' AND team_id=(SELECT id FROM team WHERE name='Rick Sanchez Inc.')),
+    (SELECT id FROM "user" WHERE name='Rick Sanchez')
+  WHERE NOT EXISTS (
+    SELECT id FROM objective WHERE title='Control the universe'
+  );
+
+INSERT INTO
+  objective(
+    title,
+    cycle_id,
+    owner_id
+  )
+  SELECT
     'Rule the galaxy',
     (SELECT id FROM cycle WHERE date_start='2021-01-01' AND team_id=(SELECT id FROM team WHERE name='Rick Sanchez Inc.')),
     (SELECT id FROM "user" WHERE name='Morty Smith')
@@ -252,6 +266,30 @@ INSERT INTO
     (SELECT id FROM "user" WHERE name='Evil Morty')
   WHERE NOT EXISTS (
     SELECT id FROM objective WHERE title='Bring chaos to the galaxy'
+  );
+
+INSERT INTO
+  key_result(
+    title,
+    goal,
+    initial_value,
+    description,
+    format,
+    objective_id,
+    team_id,
+    owner_id
+  )
+  SELECT
+    'REPLICATE!!!',
+    4000,
+    0,
+    'Lets be honest. To control the galaxy I need to replicate. I should talk to unity...',
+    'NUMBER',
+    (SELECT id FROM objective WHERE title='Control the universe'),
+    (SELECT id FROM team WHERE name='Rick Sanchez Inc.'),
+    (SELECT id FROM "user" WHERE name='Rick Sanchez')
+  WHERE NOT EXISTS (
+    SELECT id FROM key_result WHERE title='REPLICATE!!!'
   );
 
 INSERT INTO
