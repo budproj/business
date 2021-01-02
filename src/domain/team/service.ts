@@ -14,11 +14,13 @@ import { UserDTO } from 'domain/user/dto'
 import { TeamDTO } from './dto'
 import { Team } from './entities'
 import DomainTeamRepository from './repository'
+import DomainTeamSpecification from './specification'
 
 @Injectable()
 class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
   constructor(
     public readonly repository: DomainTeamRepository,
+    public readonly specification: DomainTeamSpecification,
     @Inject(forwardRef(() => DomainKeyResultService))
     private readonly keyResultService: DomainKeyResultService,
   ) {

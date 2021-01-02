@@ -5,13 +5,16 @@ import DomainKeyResultModule from 'domain/key-result'
 
 import DomainTeamRepository from './repository'
 import DomainTeamService from './service'
+import DomainTeamSpecification from './specification'
+import DomainTeamSpecificationsModule from './specifications/module'
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([DomainTeamRepository]),
     forwardRef(() => DomainKeyResultModule),
+    DomainTeamSpecificationsModule,
   ],
-  providers: [DomainTeamService],
+  providers: [DomainTeamSpecification, DomainTeamService],
   exports: [DomainTeamService],
 })
 class DomainTeamModule {}

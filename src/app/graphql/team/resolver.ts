@@ -167,6 +167,16 @@ class GraphQLTeamResolver {
 
     return this.teamDomain.getLatestReport(team.id)
   }
+
+  @ResolveField()
+  async isCompany(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Deciding if the team is a company',
+    })
+
+    return this.teamDomain.specification.isACompany.isSatisfiedBy(team)
+  }
 }
 
 export default GraphQLTeamResolver

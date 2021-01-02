@@ -97,4 +97,7 @@ export class TeamObject {
     nullable: true,
   })
   latestReport: ProgressReportObject
+
+  @Field(() => Boolean, { description: 'Defines if the team is a company' })
+  isCompany: boolean
 }
