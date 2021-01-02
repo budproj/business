@@ -5,7 +5,10 @@ import DomainProgressReportModule from './progress'
 import DomainKeyResultReportService from './service'
 
 @Module({
-  imports: [forwardRef(() => DomainProgressReportModule), DomainConfidenceReportModule],
+  imports: [
+    forwardRef(() => DomainProgressReportModule),
+    forwardRef(() => DomainConfidenceReportModule),
+  ],
   providers: [DomainKeyResultReportService],
   exports: [DomainKeyResultReportService],
 })

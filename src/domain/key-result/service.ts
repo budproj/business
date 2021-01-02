@@ -27,14 +27,14 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     super(repository, DomainKeyResultService.name)
   }
 
-  async parseUserCompanyIDs(user: UserDTO): Promise<Array<TeamDTO['id']>> {
+  async parseUserCompanyIDs(user: UserDTO) {
     const userCompanies = await this.teamService.getUserCompanies(user)
     const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
 
     return userCompanyIDs
   }
 
-  async parseUserCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>): Promise<Array<TeamDTO['id']>> {
+  async parseUserCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>) {
     const companiesTeams = await this.teamService.getCompanyTeams(companyIDs)
     const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
 

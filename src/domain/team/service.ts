@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { flatten, isEqual, remove, uniqBy } from 'lodash'
+import { flatten, isEqual, remove, uniq, uniqBy } from 'lodash'
 
 import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
 import { ProgressReport } from 'domain/key-result/report/progress/entities'
@@ -19,6 +19,20 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     private readonly keyResultService: DomainKeyResultService,
   ) {
     super(repository, DomainTeamService.name)
+  }
+
+  async parseUserCompanyIDs(user: UserDTO) {
+    const userCompanies = await this.getUserCompanies(user)
+    const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
+
+    return userCompanyIDs
+  }
+
+  async parseUserCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>) {
+    const companiesTeams = await this.getCompanyTeams(companyIDs)
+    const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
+
+    return companiesTeamIDs
   }
 
   async getFromOwner(ownerId: UserDTO['id']): Promise<Team[]> {

@@ -5,6 +5,8 @@ import { SelectQueryBuilder } from 'typeorm'
 import { CONSTRAINT } from 'domain/constants'
 import DomainKeyResultService from 'domain/key-result/service'
 import DomainEntityService from 'domain/service'
+import { TeamDTO } from 'domain/team/dto'
+import DomainTeamService from 'domain/team/service'
 import { DomainServiceContext } from 'domain/types'
 import { UserDTO } from 'domain/user/dto'
 import DomainUserService from 'domain/user/service'
@@ -19,8 +21,23 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
     public readonly repository: DomainKeyResultViewRepository,
     @Inject(forwardRef(() => DomainUserService)) private readonly userService: DomainUserService,
     private readonly keyResultService: DomainKeyResultService,
+    private readonly teamService: DomainTeamService,
   ) {
     super(repository, DomainKeyResultViewService.name)
+  }
+
+  async parseUserCompanyIDs(user: UserDTO) {
+    const userCompanies = await this.teamService.getUserCompanies(user)
+    const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
+
+    return userCompanyIDs
+  }
+
+  async parseUserCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>) {
+    const companiesTeams = await this.teamService.getCompanyTeams(companyIDs)
+    const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
+
+    return companiesTeamIDs
   }
 
   async getOneInQuery(

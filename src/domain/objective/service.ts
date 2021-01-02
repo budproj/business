@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { startOfWeek } from 'date-fns'
+import { uniq } from 'lodash'
 import { Any } from 'typeorm'
 
 import { CycleDTO } from 'domain/cycle/dto'
@@ -8,6 +9,7 @@ import DomainKeyResultService from 'domain/key-result/service'
 import { ObjectiveDTO } from 'domain/objective/dto'
 import DomainEntityService from 'domain/service'
 import { TeamDTO } from 'domain/team/dto'
+import DomainTeamService from 'domain/team/service'
 import { UserDTO } from 'domain/user/dto'
 
 import { Objective } from './entities'
@@ -18,8 +20,23 @@ class DomainObjectiveService extends DomainEntityService<Objective, ObjectiveDTO
   constructor(
     public readonly repository: DomainObjectiveRepository,
     private readonly keyResultService: DomainKeyResultService,
+    private readonly teamService: DomainTeamService,
   ) {
     super(repository, DomainObjectiveService.name)
+  }
+
+  async parseUserCompanyIDs(user: UserDTO) {
+    const userCompanies = await this.teamService.getUserCompanies(user)
+    const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
+
+    return userCompanyIDs
+  }
+
+  async parseUserCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>) {
+    const companiesTeams = await this.teamService.getCompanyTeams(companyIDs)
+    const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
+
+    return companiesTeamIDs
   }
 
   async getFromCycle(cycleId: CycleDTO['id']): Promise<Objective[]> {
