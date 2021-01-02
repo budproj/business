@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { flatten, isEqual, remove, uniqBy } from 'lodash'
 
 import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
@@ -15,6 +15,7 @@ import DomainTeamRepository from './repository'
 class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
   constructor(
     public readonly repository: DomainTeamRepository,
+    @Inject(forwardRef(() => DomainKeyResultService))
     private readonly keyResultService: DomainKeyResultService,
   ) {
     super(repository, DomainTeamService.name)
@@ -86,8 +87,52 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     return uniqTeamUsers
   }
 
-  async getCompanyTeam(teamId: TeamDTO['id']) {
-    console.log(teamId)
+  async getTeamsForUser(user: UserDTO) {
+    const teams = await user.teams
+
+    return teams
+  }
+
+  async getUserCompanies(user: UserDTO) {
+    const teams = await this.getTeamsForUser(user)
+    const companyPromises = teams.map(async (team) => this.getRootTeamForTeam(team))
+
+    const companies = Promise.all(companyPromises)
+
+    return companies
+  }
+
+  async getRootTeamForTeam(team: TeamDTO) {
+    let rootTeam = team
+
+    while (rootTeam.parentTeamId) {
+      // Since we're dealing with a linked list, where we need to evaluate each step before trying the next one,
+      // we can disable the following eslint rule
+      // eslint-disable-next-line no-await-in-loop
+      rootTeam = await this.getOne({ id: rootTeam.parentTeamId })
+    }
+
+    return rootTeam
+  }
+
+  async getCompanyTeams(companyID: TeamDTO['id'] | Array<TeamDTO['id']>) {
+    let teams: Array<Partial<TeamDTO>> = []
+    let nextIterationTeams = Array.isArray(companyID) ? companyID : [companyID]
+
+    while (nextIterationTeams.length > 0) {
+      // Since we're dealing with a linked list, where we need to evaluate each step before trying the next one,
+      // we can disable the following eslint rule
+      // eslint-disable-next-line no-await-in-loop
+      const selectedTeams = await Promise.all(
+        nextIterationTeams.map(async (teamID) => this.getChildTeams(teamID)),
+      )
+      const currentIterationTeams = flatten(selectedTeams)
+
+      teams = [...teams, ...currentIterationTeams]
+      nextIterationTeams = remove(currentIterationTeams.map((team) => team?.id))
+    }
+
+    return teams
   }
 }
 

@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { uniq } from 'lodash'
 import { DeleteResult, FindConditions, SelectQueryBuilder } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
@@ -74,25 +73,39 @@ abstract class DomainEntityService<E, D> {
   }
 
   //* **** HELPERS *****//
-  async parseUserCompanyIDs(user: UserDTO): Promise<Array<TeamDTO['id']>> {
-    const userCompanies = await this.repository.selectCompaniesForUser(user)
-    const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
-
-    return userCompanyIDs
+  async parseUserCompanyIDs(_user: UserDTO): Promise<Array<TeamDTO['id']>> {
+    // To constrain our queries to the user company, we need to parse them and find all root teams (a.k.a companies).
+    // To do so, we need to use the teamService, which is a child class of DomainService. Because of that, adding the teamService call in this level would create a circular dependecy.
+    // You need to implement that class in your inherited service. You can simply copy/paste the following code:
+    //
+    //
+    // const userCompanies = await this.teamService.getUserCompanies(user)
+    // const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
+    //
+    // return userCompanyIDs
+    throw new Error('You need to implement the parseUserCompanyIDs method')
   }
 
-  async parseUserTeamIDs(user: UserDTO): Promise<Array<TeamDTO['id']>> {
-    const userTeams = await this.repository.selectTeamsForUser(user)
-    const userTeamIDs = uniq(userTeams.map((team) => team.id))
-
-    return userTeamIDs
+  async parseUserCompaniesTeamIDs(
+    _companyIDs: Array<TeamDTO['id']>,
+  ): Promise<Array<TeamDTO['id']>> {
+    // To constrain our queries to the user company, we need to parse them and find all teams inside user companies.
+    // To do so, we need to use the teamService, which is a child class of DomainService. Because of that, adding the teamService call in this level would create a circular dependecy.
+    // You need to implement that class in your inherited service. You can simply copy/paste the following code:
+    //
+    //
+    // const companiesTeams = await this.teamService.getCompanyTeams(companyIDs)
+    // const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
+    //
+    // return companiesTeamIDs
+    throw new Error('You need to implement the parseUserCompaniesTeamIDs method')
   }
 
-  async parseCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>): Promise<Array<TeamDTO['id']>> {
-    const companiesTeams = await this.repository.selectTeamsForCompanies(companyIDs)
-    const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
+  async parseUserTeamIDs(user: UserDTO) {
+    const teams = await user.teams
+    const teamIDs = teams.map((team) => team.id)
 
-    return companiesTeamIDs
+    return teamIDs
   }
 
   //* **** CREATE *****//
@@ -158,7 +171,7 @@ abstract class DomainEntityService<E, D> {
     context?: DomainServiceContext,
   ) {
     const companyIDs = await this.parseUserCompanyIDs(user)
-    const companiesTeamIDs = await this.parseCompaniesTeamIDs(companyIDs)
+    const companiesTeamIDs = await this.parseUserCompaniesTeamIDs(companyIDs)
 
     this.logger.debug({
       companyIDs,
@@ -253,7 +266,7 @@ abstract class DomainEntityService<E, D> {
     user: UserDTO,
   ): Promise<E | null> {
     const companyIDs = await this.parseUserCompanyIDs(user)
-    const companiesTeamIDs = await this.parseCompaniesTeamIDs(companyIDs)
+    const companiesTeamIDs = await this.parseUserCompaniesTeamIDs(companyIDs)
 
     this.logger.debug({
       companyIDs,
@@ -329,7 +342,7 @@ abstract class DomainEntityService<E, D> {
 
   async deleteIfUserIsInCompany(selector: FindConditions<E>, user: UserDTO): Promise<DeleteResult> {
     const companyIDs = await this.parseUserCompanyIDs(user)
-    const companiesTeamIDs = await this.parseCompaniesTeamIDs(companyIDs)
+    const companiesTeamIDs = await this.parseUserCompaniesTeamIDs(companyIDs)
 
     this.logger.debug({
       companyIDs,
