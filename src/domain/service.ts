@@ -22,18 +22,27 @@ abstract class DomainEntityService<E, D> {
 
   //* **** ABSTRACT METHODS *****//
   async createWithConstraint(constraint: CONSTRAINT, data: Partial<D>, user: UserDTO) {
+    const context: DomainServiceContext = {
+      user,
+      constraint,
+    }
+
     const availableSelectors = {
-      [CONSTRAINT.ANY]: async () => this.create(data),
-      [CONSTRAINT.COMPANY]: async () => this.createIfUserIsInCompany(data, user),
-      [CONSTRAINT.TEAM]: async () => this.createIfUserIsInTeam(data, user),
-      [CONSTRAINT.OWNS]: async () => this.createIfUserOwnsIt(data, user),
+      [CONSTRAINT.ANY]: async () => this.create(data, context),
+      [CONSTRAINT.COMPANY]: async () => this.createIfUserIsInCompany(data, user, context),
+      [CONSTRAINT.TEAM]: async () => this.createIfUserIsInTeam(data, user, context),
+      [CONSTRAINT.OWNS]: async () => this.createIfUserOwnsIt(data, user, context),
     }
     const constrainedSelector = availableSelectors[constraint]
 
     return constrainedSelector()
   }
 
-  async createIfUserIsInCompany(_data: Partial<D>, _user: UserDTO): Promise<E[] | null> {
+  async createIfUserIsInCompany(
+    _data: Partial<D>,
+    _user: UserDTO,
+    _context?: DomainServiceContext,
+  ): Promise<E[] | null> {
     // Since creation does not have a selector, we can not apply our constraint structure to it.
     // To solve it, each entity service must implement its own method that will decide if the user
     // is allowed to create that given resource.
@@ -46,7 +55,11 @@ abstract class DomainEntityService<E, D> {
     throw new Error('You need to implement the createIfUserIsInCompany method')
   }
 
-  async createIfUserIsInTeam(_data: Partial<D>, _user: UserDTO): Promise<E[] | null> {
+  async createIfUserIsInTeam(
+    _data: Partial<D>,
+    _user: UserDTO,
+    _context?: DomainServiceContext,
+  ): Promise<E[] | null> {
     // Since creation does not have a selector, we can not apply our constraint structure to it.
     // To solve it, each entity service must implement its own method that will decide if the user
     // is allowed to create that given resource.
@@ -59,7 +72,11 @@ abstract class DomainEntityService<E, D> {
     throw new Error('You need to implement the createIfUserIsInTeam method')
   }
 
-  async createIfUserOwnsIt(_data: Partial<D>, _user: UserDTO): Promise<E[] | null> {
+  async createIfUserOwnsIt(
+    _data: Partial<D>,
+    _user: UserDTO,
+    _context?: DomainServiceContext,
+  ): Promise<E[] | null> {
     // Since creation does not have a selector, we can not apply our constraint structure to it.
     // To solve it, each entity service must implement its own method that will decide if the user
     // is allowed to create that given resource.
@@ -109,7 +126,10 @@ abstract class DomainEntityService<E, D> {
   }
 
   //* **** CREATE *****//
-  async create(data: Partial<D> | Array<Partial<D>>): Promise<E[]> {
+  async create(
+    data: Partial<D> | Array<Partial<D>>,
+    _context?: DomainServiceContext,
+  ): Promise<E[]> {
     const result = await this.repository.insert(data as QueryDeepPartialEntity<E>)
 
     return result.raw
