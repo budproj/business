@@ -111,19 +111,13 @@ class GraphQLUserResolver {
   ) {
     this.logger.log({
       user,
-      limit,
       message: 'Fetching companies for user',
     })
-    const teams = await user.teams
-    const companyIDs = teams.map((team) => team.id)
-    // TODO
 
-    return this.teamDomain.getOne(
-      { id: companyIDs[0] },
-      {
-        limit,
-      },
-    )
+    const companies = await this.teamDomain.getUserCompanies(user)
+    const companiesWithLimit = limit ? companies.slice(0, limit) : companies
+
+    return companiesWithLimit
   }
 }
 

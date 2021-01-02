@@ -5,6 +5,7 @@ import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
 import { ProgressReport } from 'domain/key-result/report/progress/entities'
 import DomainKeyResultService from 'domain/key-result/service'
 import DomainEntityService from 'domain/service'
+import { TeamEntityFilter, TeamEntityRelation } from 'domain/team/types'
 import { UserDTO } from 'domain/user/dto'
 
 import { TeamDTO } from './dto'
@@ -71,8 +72,8 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
 
   async getChildTeams(
     teamId: TeamDTO['id'],
-    filter?: Array<keyof Team>,
-    relations?: Array<keyof Team>,
+    filter?: TeamEntityFilter[],
+    relations?: TeamEntityRelation[],
   ): Promise<Array<Partial<Team>>> {
     const childTeams = await this.repository.find({
       relations,

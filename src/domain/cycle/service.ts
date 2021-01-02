@@ -32,11 +32,6 @@ class DomainCycleService extends DomainEntityService<Cycle, CycleDTO> {
 
     return companiesTeamIDs
   }
-
-  async getFromCompany(companyId: TeamDTO['id']): Promise<Cycle[]> {
-    // TODO
-    return this.repository.find({ teamId: companyId })
-  }
 }
 
 export default DomainCycleService
