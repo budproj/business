@@ -7,6 +7,7 @@ import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
+import DomainCycleService from 'domain/cycle/service'
 import DomainKeyResultService from 'domain/key-result/service'
 import DomainObjectiveService from 'domain/objective/service'
 import DomainTeamService from 'domain/team/service'
@@ -27,6 +28,7 @@ class GraphQLTeamResolver {
     private readonly userDomain: DomainUserService,
     private readonly teamDomain: DomainTeamService,
     private readonly objectiveDomain: DomainObjectiveService,
+    private readonly cycleDomain: DomainCycleService,
   ) {}
 
   @Permissions(PERMISSION['TEAM:READ'])
@@ -130,6 +132,16 @@ class GraphQLTeamResolver {
     })
 
     return this.objectiveDomain.getFromTeam(team.id)
+  }
+
+  @ResolveField()
+  async cycles(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching cycles for team',
+    })
+
+    return this.cycleDomain.getFromTeam(team.id)
   }
 }
 

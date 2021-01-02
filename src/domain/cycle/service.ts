@@ -32,6 +32,19 @@ class DomainCycleService extends DomainEntityService<Cycle, CycleDTO> {
 
     return companiesTeamIDs
   }
+
+  async getFromTeam(teamId: TeamDTO['id']) {
+    const cycles = await this.repository.find({ teamId })
+    if (cycles.length === 0) return this.getFromParentTeam(teamId)
+
+    return cycles
+  }
+
+  async getFromParentTeam(childTeamID: TeamDTO['id']) {
+    const parentTeam = await this.teamService.getParentTeam(childTeamID)
+
+    return this.getFromTeam(parentTeam.id)
+  }
 }
 
 export default DomainCycleService

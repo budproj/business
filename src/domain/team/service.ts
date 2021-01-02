@@ -84,6 +84,12 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     return childTeams
   }
 
+  async getParentTeam(teamId: TeamDTO['id']) {
+    const { parentTeamId } = await this.getOne({ id: teamId })
+
+    return this.getOne({ id: parentTeamId })
+  }
+
   async getUsersInTeam(teamId: TeamDTO['id']): Promise<UserDTO[]> {
     const rootTeamData = await this.repository
       .find({
