@@ -20,7 +20,7 @@ registerEnumType(USER_POLICY, {
 
 @ObjectType('User', {
   description:
-    'User is an entity inside a given company. It is associated with many teams, progress reports, and others.',
+    'User is an entity inside a given root team (a.k.a. company). It is associated with many teams, progress reports, and others.',
 })
 export class UserObject {
   @Field(() => ID, { description: 'The ID of the user' })

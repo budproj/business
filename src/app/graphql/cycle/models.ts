@@ -5,7 +5,7 @@ import { TeamObject } from 'app/graphql/team'
 
 @ObjectType('Cycle', {
   description:
-    "The period of time that can contain multiple objectives. It is used to organize a company' strategy",
+    'The period of time that can contain multiple objectives. It is used to organize a team strategy',
 })
 export class CycleObject {
   @Field(() => ID, { description: 'The ID of the cycle' })

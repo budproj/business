@@ -13,7 +13,10 @@ registerEnumType(TEAM_GENDER, {
   description: 'Each gender represents a possible gender option for our teams',
 })
 
-@ObjectType('Team', { description: 'A collection of users for a given company' })
+@ObjectType('Team', {
+  description:
+    'A collection of users. It can be either inside another team, or a root team (a.k.a. company)',
+})
 export class TeamObject {
   @Field(() => ID, { description: 'The ID of the team' })
   id: string
@@ -83,4 +86,9 @@ export class TeamObject {
     description: 'The team that is the company of this team. This is also known as "rootTeam"',
   })
   company: TeamObject
+
+  @Field(() => Float, {
+    description: 'The percentage progress increase of the team since last monday',
+  })
+  percentageProgressIncrease: number
 }

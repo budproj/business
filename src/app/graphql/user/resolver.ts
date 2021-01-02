@@ -114,7 +114,7 @@ class GraphQLUserResolver {
       message: 'Fetching companies for user',
     })
 
-    const companies = await this.teamDomain.getUserCompanies(user)
+    const companies = await this.teamDomain.getUserRootTeams(user)
     const companiesWithLimit = limit ? companies.slice(0, limit) : companies
 
     return companiesWithLimit

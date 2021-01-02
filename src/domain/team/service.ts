@@ -1,8 +1,8 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
+import { startOfWeek } from 'date-fns'
 import { flatten, isEqual, remove, uniq, uniqBy } from 'lodash'
 
 import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
-import { ProgressReport } from 'domain/key-result/report/progress/entities'
 import DomainKeyResultService from 'domain/key-result/service'
 import DomainEntityService from 'domain/service'
 import { TeamEntityFilter, TeamEntityRelation } from 'domain/team/types'
@@ -23,14 +23,14 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
   }
 
   async parseUserCompanyIDs(user: UserDTO) {
-    const userCompanies = await this.getUserCompanies(user)
+    const userCompanies = await this.getUserRootTeams(user)
     const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
 
     return userCompanyIDs
   }
 
   async parseUserCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>) {
-    const companiesTeams = await this.getCompanyTeams(companyIDs)
+    const companiesTeams = await this.getAllTeamsBelowNodes(companyIDs)
     const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
 
     return companiesTeamIDs
@@ -40,20 +40,36 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     return this.repository.find({ ownerId })
   }
 
-  async getCurrentProgress(teamId: TeamDTO['id']): Promise<ProgressReport['valueNew']> {
-    const childTeams = await this.getChildTeams(teamId, ['id'])
+  async getCurrentProgress(teamID: TeamDTO['id']) {
+    const date = new Date()
+    const currentProgress = await this.getProgressAtDate(date, teamID)
+
+    return currentProgress
+  }
+
+  async getLastWeekProgress(teamID: TeamDTO['id']) {
+    const date = new Date()
+    const startOfWeekDate = startOfWeek(date)
+    const currentProgress = await this.getProgressAtDate(startOfWeekDate, teamID)
+
+    return currentProgress
+  }
+
+  async getProgressAtDate(date: Date, teamID: TeamDTO['id']) {
+    const childTeams = await this.getAllTeamsBelowNodes(teamID, ['id'])
     const childTeamIds = childTeams.map((childTeam) => childTeam.id)
 
-    const rootKeyResults = (await this.keyResultService.getFromTeam(teamId)) ?? []
-    const childKeyResults = (await this.keyResultService.getFromTeam(childTeamIds)) ?? []
-    const keyResults = remove([...rootKeyResults, ...childKeyResults])
+    const keyResults = await this.keyResultService.getFromTeam(childTeamIds)
     if (!keyResults) return
 
-    const teamCurrentProgress = this.keyResultService.calculateCurrentAverageProgressFromList(
-      keyResults,
-    )
+    const previousSnapshotDate = this.keyResultService.report.progress.snapshotDate
+    this.keyResultService.report.progress.snapshotDate = date
 
-    return teamCurrentProgress
+    const teamProgress = this.keyResultService.calculateSnapshotAverageProgressFromList(keyResults)
+
+    this.keyResultService.report.progress.snapshotDate = previousSnapshotDate
+
+    return teamProgress
   }
 
   async getCurrentConfidence(teamId: TeamDTO['id']): Promise<ConfidenceReport['valueNew']> {
@@ -114,7 +130,7 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     return teams
   }
 
-  async getUserCompanies(user: UserDTO) {
+  async getUserRootTeams(user: UserDTO) {
     const teams = await this.getTeamsForUser(user)
     const companyPromises = teams.map(async (team) => this.getRootTeamForTeam(team))
 
@@ -136,16 +152,20 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     return rootTeam
   }
 
-  async getCompanyTeams(companyID: TeamDTO['id'] | Array<TeamDTO['id']>) {
+  async getAllTeamsBelowNodes(
+    nodes: TeamDTO['id'] | Array<TeamDTO['id']>,
+    filter?: TeamEntityFilter[],
+    relations?: TeamEntityRelation[],
+  ) {
     let teams: Array<Partial<TeamDTO>> = []
-    let nextIterationTeams = Array.isArray(companyID) ? companyID : [companyID]
+    let nextIterationTeams = Array.isArray(nodes) ? nodes : [nodes]
 
     while (nextIterationTeams.length > 0) {
       // Since we're dealing with a linked list, where we need to evaluate each step before trying the next one,
       // we can disable the following eslint rule
       // eslint-disable-next-line no-await-in-loop
       const selectedTeams = await Promise.all(
-        nextIterationTeams.map(async (teamID) => this.getChildTeams(teamID)),
+        nextIterationTeams.map(async (teamID) => this.getChildTeams(teamID, filter, relations)),
       )
       const currentIterationTeams = flatten(selectedTeams)
 
@@ -154,6 +174,15 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     }
 
     return teams
+  }
+
+  async getPercentageProgressIncrease(teamID: TeamDTO['id']) {
+    const currentProgress = await this.getCurrentProgress(teamID)
+    const lastWeekProgress = await this.getLastWeekProgress(teamID)
+
+    const deltaProgress = currentProgress - lastWeekProgress
+
+    return deltaProgress
   }
 }
 

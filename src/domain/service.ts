@@ -79,7 +79,7 @@ abstract class DomainEntityService<E, D> {
     // You need to implement that class in your inherited service. You can simply copy/paste the following code:
     //
     //
-    // const userCompanies = await this.teamService.getUserCompanies(user)
+    // const userCompanies = await this.teamService.getUserRootTeams(user)
     // const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
     //
     // return userCompanyIDs
@@ -94,7 +94,7 @@ abstract class DomainEntityService<E, D> {
     // You need to implement that class in your inherited service. You can simply copy/paste the following code:
     //
     //
-    // const companiesTeams = await this.teamService.getCompanyTeams(companyIDs)
+    // const companiesTeams = await this.teamService.getAllTeamsBelowNodes(companyIDs)
     // const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
     //
     // return companiesTeamIDs
