@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { startOfWeek } from 'date-fns'
-import { flatten, isEqual, omit, remove, uniq, uniqBy, isUndefined, omitBy } from 'lodash'
+import { flatten, isEqual, omit, remove, uniq, uniqBy, isUndefined, omitBy, orderBy } from 'lodash'
 import { IsNull } from 'typeorm'
 
 import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
@@ -23,6 +23,31 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     private readonly keyResultService: DomainKeyResultService,
   ) {
     super(repository, DomainTeamService.name)
+  }
+
+  get(
+    teamSelector: TeamSelector,
+    constrainQuery?: SelectionQueryConstrain<Team>,
+    options?: DomainServiceGetOptions,
+  ) {
+    const buildParentTeamFilter = () => {
+      if (teamSelector.onlyCompanies) return IsNull()
+      if (teamSelector?.parentTeamId) return teamSelector.parentTeamId
+    }
+
+    const selector = {
+      ...omit(teamSelector, ['onlyCompanies']),
+      parentTeamId: buildParentTeamFilter(),
+    }
+
+    const cleanedSelectors = omitBy(selector, isUndefined)
+
+    const query = this.repository
+      .createQueryBuilder()
+      .where(cleanedSelectors)
+      .take(options?.limit ?? 0)
+
+    return constrainQuery ? constrainQuery(query) : query
   }
 
   async parseUserCompanyIDs(user: UserDTO) {
@@ -192,29 +217,16 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     return deltaProgress
   }
 
-  get(
-    teamSelector: TeamSelector,
-    constrainQuery?: SelectionQueryConstrain<Team>,
-    options?: DomainServiceGetOptions,
-  ) {
-    const buildParentTeamFilter = () => {
-      if (teamSelector.onlyCompanies) return IsNull()
-      if (teamSelector?.parentTeamId) return teamSelector.parentTeamId
-    }
+  async getLatestReport(teamID: TeamDTO['id']) {
+    const users = await this.getUsersInTeam(teamID)
+    const userIDs = users.map((user) => user.id)
 
-    const selector = {
-      ...omit(teamSelector, ['onlyCompanies']),
-      parentTeamId: buildParentTeamFilter(),
-    }
+    const reports = await this.keyResultService.report.getFromUsers(userIDs)
+    const orderedReports = orderBy(reports, ['createdAt'], ['desc'])
 
-    const cleanedSelectors = omitBy(selector, isUndefined)
+    const latestReport = orderedReports[0]
 
-    const query = this.repository
-      .createQueryBuilder()
-      .where(cleanedSelectors)
-      .take(options?.limit ?? 0)
-
-    return constrainQuery ? constrainQuery(query) : query
+    return latestReport
   }
 }
 

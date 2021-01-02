@@ -91,4 +91,10 @@ export class TeamObject {
     description: 'The percentage progress increase of the team since last monday',
   })
   percentageProgressIncrease: number
+
+  @Field(() => ProgressReportObject, {
+    description: 'The latest report for this team',
+    nullable: true,
+  })
+  latestReport: ProgressReportObject
 }

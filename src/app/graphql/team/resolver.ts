@@ -157,6 +157,16 @@ class GraphQLTeamResolver {
 
     return this.teamDomain.getPercentageProgressIncrease(team.id)
   }
+
+  @ResolveField()
+  async latestReport(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching latest report for team',
+    })
+
+    return this.teamDomain.getLatestReport(team.id)
+  }
 }
 
 export default GraphQLTeamResolver
