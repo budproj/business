@@ -82,7 +82,7 @@ class DomainObjectiveService extends DomainEntityService<Objective, ObjectiveDTO
     const keyResults = await this.keyResultService.getFromObjective(objectiveId)
     if (!keyResults) return
 
-    const objectiveCurrentConfidence = this.keyResultService.calculateCurrentAverageConfidenceFromList(
+    const objectiveCurrentConfidence = this.keyResultService.calculateAverageCurrentConfidenceFromList(
       keyResults,
     )
 

@@ -104,6 +104,22 @@ INSERT INTO
     owner_id
   )
   SELECT
+    'The dumbest team',
+    'Well, it is morty, right? So it is the dumbest team',
+    (SELECT id FROM team WHERE name='Space Force'),
+    (SELECT id FROM "user" WHERE name='Morty Smith')
+  WHERE NOT EXISTS (
+    SELECT id FROM team WHERE name='The dumbest team'
+  );
+
+INSERT INTO
+  team(
+    name,
+    description,
+    parent_team_id,
+    owner_id
+  )
+  SELECT
     'Earth Force',
     'Dedicated to bring balance here on our home planet, Earth Force focus finishing conflicts here on earth to maintain peace',
     (SELECT id FROM team WHERE name='Rick Sanchez Inc.'),
@@ -334,7 +350,7 @@ INSERT INTO
     'Since we need to explore and rule the galaxy, we must build as much autobots as we can',
     'NUMBER',
     (SELECT id FROM objective WHERE title='Rule the galaxy'),
-    (SELECT id FROM team WHERE name='Space Force'),
+    (SELECT id FROM team WHERE name='The dumbest team'),
     (SELECT id FROM "user" WHERE name='Morty Smith')
   WHERE NOT EXISTS (
     SELECT id FROM key_result WHERE title='Build autobots'
@@ -358,7 +374,7 @@ INSERT INTO
     'We need money to buy stuff',
     'COIN_BRL',
     (SELECT id FROM objective WHERE title='Rule the galaxy'),
-    (SELECT id FROM team WHERE name='Space Force'),
+    (SELECT id FROM team WHERE name='The dumbest team'),
     (SELECT id FROM "user" WHERE name='Morty Smith')
   WHERE NOT EXISTS (
     SELECT id FROM key_result WHERE title='Earn money'

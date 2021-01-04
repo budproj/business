@@ -109,7 +109,7 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     const keyResults = await this.keyResultService.getFromTeam(childTeamIds)
     if (!keyResults) return
 
-    const teamCurrentConfidence = this.keyResultService.calculateCurrentAverageConfidenceFromList(
+    const teamCurrentConfidence = this.keyResultService.calculateAverageCurrentConfidenceFromList(
       keyResults,
     )
 

@@ -124,9 +124,11 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     const currentProgressList = await Promise.all(
       keyResults.map(async ({ id }) => this.getProgressInPercentage(id, timeframeScope)),
     )
-    const calculatedCurrentProgress = sum(currentProgressList) / currentProgressList.length
+    const currentProgress = sum(currentProgressList) / currentProgressList.length
 
-    return calculatedCurrentProgress
+    const normalizedCurrentProgress = Number.isNaN(currentProgress) ? 0 : currentProgress
+
+    return normalizedCurrentProgress
   }
 
   async calculateCurrentAverageProgressFromList(keyResults: KeyResult[]) {
@@ -144,13 +146,15 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     return calculatedSnapshotProgress
   }
 
-  async calculateCurrentAverageConfidenceFromList(keyResults: KeyResult[]) {
+  async calculateAverageCurrentConfidenceFromList(keyResults: KeyResult[]) {
     const currentConfidenceList = await Promise.all(
       keyResults.map(async ({ id }) => this.getCurrentConfidence(id)),
     )
-    const calculatedCurrentConfidence = sum(currentConfidenceList) / currentConfidenceList.length
+    const currentConfidence = sum(currentConfidenceList) / currentConfidenceList.length
 
-    return calculatedCurrentConfidence
+    const normalizedCurrentConfidence = Number.isNaN(currentConfidence) ? 100 : currentConfidence
+
+    return normalizedCurrentConfidence
   }
 }
 
