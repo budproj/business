@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { startOfWeek } from 'date-fns'
-import { flatten, isEqual, omit, remove, uniq, uniqBy, isUndefined, omitBy, orderBy } from 'lodash'
+import { flatten, omit, remove, uniq, uniqBy, isUndefined, omitBy, orderBy } from 'lodash'
 import { IsNull } from 'typeorm'
 
 import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
@@ -136,20 +136,12 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     return this.getOne({ id: parentTeamId })
   }
 
-  async getUsersInTeam(teamId: TeamDTO['id']): Promise<UserDTO[]> {
-    const rootTeamData = await this.repository
-      .find({
-        where: { id: teamId },
-        relations: ['users'],
-      })
-      .then((teams) => teams[0])
-    const rootTeamUsers = await rootTeamData.users
+  async getUsersInTeam(teamID: TeamDTO['id']) {
+    const teamsBelowCurrentNode = await this.getAllTeamsBelowNodes(teamID)
 
-    const childTeams = await this.getChildTeams(teamId, undefined, ['users'])
-    const childTeamsUsers = await Promise.all(childTeams.map(async (childTeam) => childTeam.users))
-
-    const teamUsers = [...rootTeamUsers, ...flatten(childTeamsUsers)]
-    const uniqTeamUsers = uniqBy(teamUsers, isEqual)
+    const teamUsers = await Promise.all(teamsBelowCurrentNode.map(async (team) => team.users))
+    const flattenedTeamUsers = flatten(teamUsers)
+    const uniqTeamUsers = uniqBy(flattenedTeamUsers, 'id')
 
     return uniqTeamUsers
   }
@@ -189,7 +181,7 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
   ) {
     const nodesAsArray = Array.isArray(nodes) ? nodes : [nodes]
 
-    let teams: Array<Partial<TeamDTO>> = await Promise.all(
+    let teams: Array<Partial<Team>> = await Promise.all(
       nodesAsArray.map(async (id) => this.getOne({ id })),
     )
     let nextIterationTeams = nodesAsArray

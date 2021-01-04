@@ -41,9 +41,9 @@ export class Team implements TeamDTO {
   @OneToMany('KeyResult', 'team')
   public keyResults: KeyResultDTO[]
 
-  @ManyToMany('User', 'teams', { lazy: true })
+  @ManyToMany('User', 'teams', { lazy: true, nullable: true })
   @JoinTable()
-  public users: Promise<UserDTO[]>
+  public users?: Promise<UserDTO[]>
 
   @ManyToOne('User', 'ownedTeams')
   public owner: UserDTO
