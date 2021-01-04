@@ -15,6 +15,7 @@ import DomainUserService from 'domain/user/service'
 
 import { TeamObject } from './models'
 import GraphQLTeamService from './service'
+import { GraphQLTeamsQueryFilters } from './types'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -49,11 +50,14 @@ class GraphQLTeamResolver {
     parentTeamId: TeamObject['parentTeamId'],
     @Args('onlyCompanies', { type: () => Boolean, nullable: true })
     onlyCompanies: boolean,
+    @Args('onlyCompaniesAndDepartments', { type: () => Boolean, nullable: true })
+    onlyCompaniesAndDepartments: boolean,
     @GraphQLUser() user: AuthzUser,
   ) {
-    const filters = {
+    const filters: GraphQLTeamsQueryFilters = {
       parentTeamId,
       onlyCompanies,
+      onlyCompaniesAndDepartments,
     }
     const cleanedFilters = omitBy(filters, isUndefined)
 
@@ -63,7 +67,7 @@ class GraphQLTeamResolver {
       message: 'Fetching teams with args',
     })
 
-    const teams = await this.resolverService.getManyWithActionScopeConstraint(cleanedFilters, user)
+    const teams = await this.resolverService.getTeams(cleanedFilters, user)
 
     return teams
   }

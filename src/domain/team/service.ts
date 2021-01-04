@@ -1,14 +1,12 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { startOfWeek } from 'date-fns'
-import { flatten, omit, remove, uniq, uniqBy, isUndefined, omitBy, orderBy } from 'lodash'
+import { flatten, remove, uniq, uniqBy, orderBy } from 'lodash'
 import { IsNull } from 'typeorm'
 
 import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
 import DomainKeyResultService from 'domain/key-result/service'
-import { SelectionQueryConstrain } from 'domain/repository'
 import DomainEntityService from 'domain/service'
-import { TeamEntityFilter, TeamEntityRelation, TeamSelector } from 'domain/team/types'
-import { DomainServiceGetOptions } from 'domain/types'
+import { TeamEntityFilter, TeamEntityRelation } from 'domain/team/types'
 import { UserDTO } from 'domain/user/dto'
 
 import { TeamDTO } from './dto'
@@ -27,29 +25,10 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     super(repository, DomainTeamService.name)
   }
 
-  get(
-    teamSelector: TeamSelector,
-    constrainQuery?: SelectionQueryConstrain<Team>,
-    options?: DomainServiceGetOptions,
-  ) {
-    const buildParentTeamFilter = () => {
-      if (teamSelector.onlyCompanies) return IsNull()
-      if (teamSelector?.parentTeamId) return teamSelector.parentTeamId
+  buildOnlyCompaniesSelector() {
+    return {
+      parentTeamId: IsNull(),
     }
-
-    const selector = {
-      ...omit(teamSelector, ['onlyCompanies']),
-      parentTeamId: buildParentTeamFilter(),
-    }
-
-    const cleanedSelectors = omitBy(selector, isUndefined)
-
-    const query = this.repository
-      .createQueryBuilder()
-      .where(cleanedSelectors)
-      .take(options?.limit ?? 0)
-
-    return constrainQuery ? constrainQuery(query) : query
   }
 
   async parseUserCompanyIDs(user: UserDTO) {
@@ -117,14 +96,19 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
   }
 
   async getChildTeams(
-    teamId: TeamDTO['id'],
+    teamID: TeamDTO['id'] | Array<TeamDTO['id']>,
     filter?: TeamEntityFilter[],
     relations?: TeamEntityRelation[],
-  ): Promise<Array<Partial<Team>>> {
+  ) {
+    const teamIDs = Array.isArray(teamID) ? teamID : [teamID]
+    const whereSelector = teamIDs.map((teamID) => ({
+      parentTeamId: teamID,
+    }))
+
     const childTeams = await this.repository.find({
       relations,
       select: filter,
-      where: { parentTeamId: teamId },
+      where: whereSelector,
     })
 
     return childTeams
@@ -221,6 +205,15 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     const latestReport = orderedReports[0]
 
     return latestReport
+  }
+
+  async getDepartmentsForCompany(company: TeamDTO | TeamDTO[]) {
+    const companies = Array.isArray(company) ? company : [company]
+    const companyIDs = companies.map((company) => company.id)
+
+    const departments = await this.getChildTeams(companyIDs)
+
+    return departments
   }
 }
 
