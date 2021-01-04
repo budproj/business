@@ -7,7 +7,7 @@ import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
-import DomainCompanyService from 'domain/company/service'
+import DomainCycleService from 'domain/cycle/service'
 import DomainKeyResultService from 'domain/key-result/service'
 import DomainObjectiveService from 'domain/objective/service'
 import DomainTeamService from 'domain/team/service'
@@ -15,6 +15,7 @@ import DomainUserService from 'domain/user/service'
 
 import { TeamObject } from './models'
 import GraphQLTeamService from './service'
+import { GraphQLTeamsQueryFilters } from './types'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -25,10 +26,10 @@ class GraphQLTeamResolver {
   constructor(
     private readonly resolverService: GraphQLTeamService,
     private readonly keyResultDomain: DomainKeyResultService,
-    private readonly companyDomain: DomainCompanyService,
     private readonly userDomain: DomainUserService,
     private readonly teamDomain: DomainTeamService,
     private readonly objectiveDomain: DomainObjectiveService,
+    private readonly cycleDomain: DomainCycleService,
   ) {}
 
   @Permissions(PERMISSION['TEAM:READ'])
@@ -47,19 +48,26 @@ class GraphQLTeamResolver {
   async teams(
     @Args('parentTeamId', { type: () => ID, nullable: true })
     parentTeamId: TeamObject['parentTeamId'],
+    @Args('onlyCompanies', { type: () => Boolean, nullable: true })
+    onlyCompanies: boolean,
+    @Args('onlyCompaniesAndDepartments', { type: () => Boolean, nullable: true })
+    onlyCompaniesAndDepartments: boolean,
     @GraphQLUser() user: AuthzUser,
   ) {
-    const filters = {
+    const filters: GraphQLTeamsQueryFilters = {
       parentTeamId,
+      onlyCompanies,
+      onlyCompaniesAndDepartments,
     }
     const cleanedFilters = omitBy(filters, isUndefined)
 
     this.logger.log({
       cleanedFilters,
+      onlyCompanies,
       message: 'Fetching teams with args',
     })
 
-    const teams = await this.resolverService.getManyWithActionScopeConstraint(cleanedFilters, user)
+    const teams = await this.resolverService.getTeams(cleanedFilters, user)
 
     return teams
   }
@@ -72,16 +80,6 @@ class GraphQLTeamResolver {
     })
 
     return this.keyResultDomain.getFromTeam(team.id)
-  }
-
-  @ResolveField()
-  async company(@Parent() team: TeamObject) {
-    this.logger.log({
-      team,
-      message: 'Fetching company for team',
-    })
-
-    return this.companyDomain.getOne({ id: team.companyId })
   }
 
   @ResolveField()
@@ -142,6 +140,46 @@ class GraphQLTeamResolver {
     })
 
     return this.objectiveDomain.getFromTeam(team.id)
+  }
+
+  @ResolveField()
+  async cycles(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching cycles for team',
+    })
+
+    return this.cycleDomain.getFromTeam(team.id)
+  }
+
+  @ResolveField()
+  async percentageProgressIncrease(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching percentage progress increase for team',
+    })
+
+    return this.teamDomain.getPercentageProgressIncrease(team.id)
+  }
+
+  @ResolveField()
+  async latestReport(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching latest report for team',
+    })
+
+    return this.teamDomain.getLatestReport(team.id)
+  }
+
+  @ResolveField()
+  async isCompany(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Deciding if the team is a company',
+    })
+
+    return this.teamDomain.specification.isACompany.isSatisfiedBy(team)
   }
 }
 

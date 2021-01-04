@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { sum } from 'lodash'
+import { sum, uniq } from 'lodash'
 
 import { TIMEFRAME_SCOPE } from 'domain/constants'
 import { KeyResultDTO } from 'domain/key-result/dto'
@@ -8,6 +8,7 @@ import { ProgressReport } from 'domain/key-result/report/progress/entities'
 import { ObjectiveDTO } from 'domain/objective/dto'
 import DomainEntityService from 'domain/service'
 import { TeamDTO } from 'domain/team/dto'
+import DomainTeamService from 'domain/team/service'
 import { UserDTO } from 'domain/user/dto'
 
 import { KeyResult } from './entities'
@@ -20,8 +21,24 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     @Inject(forwardRef(() => DomainKeyResultReportService))
     public readonly report: DomainKeyResultReportService,
     public readonly repository: DomainKeyResultRepository,
+    @Inject(forwardRef(() => DomainTeamService))
+    private readonly teamService: DomainTeamService,
   ) {
     super(repository, DomainKeyResultService.name)
+  }
+
+  async parseUserCompanyIDs(user: UserDTO) {
+    const userCompanies = await this.teamService.getUserRootTeams(user)
+    const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
+
+    return userCompanyIDs
+  }
+
+  async parseUserCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>) {
+    const companiesTeams = await this.teamService.getAllTeamsBelowNodes(companyIDs)
+    const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
+
+    return companiesTeamIDs
   }
 
   async getFromOwner(ownerId: UserDTO['id']): Promise<KeyResult[]> {
@@ -107,12 +124,14 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     const currentProgressList = await Promise.all(
       keyResults.map(async ({ id }) => this.getProgressInPercentage(id, timeframeScope)),
     )
-    const calculatedCurrentProgress = sum(currentProgressList) / currentProgressList.length
+    const currentProgress = sum(currentProgressList) / currentProgressList.length
 
-    return calculatedCurrentProgress
+    const normalizedCurrentProgress = Number.isNaN(currentProgress) ? 0 : currentProgress
+
+    return normalizedCurrentProgress
   }
 
-  async calculateAverageCurrentProgressFromList(keyResults: KeyResult[]) {
+  async calculateCurrentAverageProgressFromList(keyResults: KeyResult[]) {
     const calculatedCurrentProgress = this.calculateAverageProgressFromList(keyResults)
 
     return calculatedCurrentProgress
@@ -131,9 +150,11 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     const currentConfidenceList = await Promise.all(
       keyResults.map(async ({ id }) => this.getCurrentConfidence(id)),
     )
-    const calculatedCurrentConfidence = sum(currentConfidenceList) / currentConfidenceList.length
+    const currentConfidence = sum(currentConfidenceList) / currentConfidenceList.length
 
-    return calculatedCurrentConfidence
+    const normalizedCurrentConfidence = Number.isNaN(currentConfidence) ? 100 : currentConfidence
+
+    return normalizedCurrentConfidence
   }
 }
 

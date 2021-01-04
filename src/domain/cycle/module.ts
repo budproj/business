@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
+import DomainTeamModule from 'domain/team'
+
 import DomainCycleRepository from './repository'
 import DomainCycleService from './service'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([DomainCycleRepository])],
+  imports: [TypeOrmModule.forFeature([DomainCycleRepository]), DomainTeamModule],
   providers: [DomainCycleService],
   exports: [DomainCycleService],
 })

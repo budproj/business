@@ -21,14 +21,13 @@ export class GraphQLAuthGuard extends AuthGuard('jwt') {
 
     const gqlContext = GqlExecutionContext.create(rawContext)
     const request = gqlContext.getContext().req
-    const allowRequest = () => super.canActivate(new ExecutionContextHost([request]))
+    const guardRequest = () => super.canActivate(new ExecutionContextHost([request]))
 
     this.logger.debug({
-      request,
       message: 'Evaluating if we should allow request',
     })
 
-    return allowRequest()
+    return guardRequest()
   }
 }
 

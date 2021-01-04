@@ -55,6 +55,19 @@ class GraphQLKeyResultViewResolver {
       identity,
     )
     const keyResultView = await this.resolverService.getOneWithActionScopeConstraint(selector, user)
+    if (!keyResultView && binding === KEY_RESULT_VIEW_BINDING.MINE) {
+      const createdKeyResultViews = await this.resolverService.createWithScopeConstraint(
+        {
+          binding,
+          title: 'Default',
+          userId: user.id,
+        },
+        user,
+      )
+
+      return createdKeyResultViews[0]
+    }
+
     if (!keyResultView)
       throw new NotFoundException('We could not found a key result view with given args')
 

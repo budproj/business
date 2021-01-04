@@ -7,9 +7,11 @@ const runQueryFromFile = async (sqlPath: string) => {
   const { manager } = await createConnection(config)
 
   const queries = SqlReader.readSqlFile(sqlPath)
-  const queryPromises = queries.map(async (query) => manager.query(query))
 
-  await Promise.all(queryPromises)
+  await queries.reduce(async (previousPromise, nextQuery) => {
+    await previousPromise
+    return manager.query(nextQuery)
+  }, Promise.resolve())
 }
 
 export default runQueryFromFile

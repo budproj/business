@@ -1,4 +1,4 @@
-import { CompanyDTO } from 'domain/company/dto'
+import { TeamDTO } from 'domain/team/dto'
 
 export class CycleDTO {
   id: string
@@ -6,5 +6,5 @@ export class CycleDTO {
   dateEnd: Date
   createdAt: Date
   updatedAt: Date
-  companyId: CompanyDTO['id']
+  teamId: TeamDTO['id']
 }

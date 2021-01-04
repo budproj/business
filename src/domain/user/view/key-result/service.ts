@@ -5,6 +5,8 @@ import { SelectQueryBuilder } from 'typeorm'
 import { CONSTRAINT } from 'domain/constants'
 import DomainKeyResultService from 'domain/key-result/service'
 import DomainEntityService from 'domain/service'
+import { TeamDTO } from 'domain/team/dto'
+import DomainTeamService from 'domain/team/service'
 import { DomainServiceContext } from 'domain/types'
 import { UserDTO } from 'domain/user/dto'
 import DomainUserService from 'domain/user/service'
@@ -19,8 +21,23 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
     public readonly repository: DomainKeyResultViewRepository,
     @Inject(forwardRef(() => DomainUserService)) private readonly userService: DomainUserService,
     private readonly keyResultService: DomainKeyResultService,
+    private readonly teamService: DomainTeamService,
   ) {
     super(repository, DomainKeyResultViewService.name)
+  }
+
+  async parseUserCompanyIDs(user: UserDTO) {
+    const userCompanies = await this.teamService.getUserRootTeams(user)
+    const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
+
+    return userCompanyIDs
+  }
+
+  async parseUserCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>) {
+    const companiesTeams = await this.teamService.getAllTeamsBelowNodes(companyIDs)
+    const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
+
+    return companiesTeamIDs
   }
 
   async getOneInQuery(
@@ -28,17 +45,15 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
     context: DomainServiceContext,
   ): Promise<KeyResultView | null> {
     const view = await query.getOne()
+    if (!view) return
+
     const refreshedView = await this.refreshView(view, context)
 
-    return refreshedView as KeyResultView
+    return refreshedView
   }
 
   async refreshView(view: KeyResultView, context?: DomainServiceContext) {
-    const availableKeyResults = await this.keyResultService.getManyWithConstraint(
-      context.constraint,
-      context.user,
-    )
-    const availableKeyResultIDs = availableKeyResults.map((keyResult) => keyResult.id.toString())
+    const availableKeyResultIDs = await this.getAvailableKeyResultIDs(context)
     const userRank = view?.rank ?? []
 
     const mergedRank = uniq([...userRank, ...availableKeyResultIDs])
@@ -57,38 +72,72 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
   async createIfUserIsInCompany(
     data: Partial<KeyResultView>,
     user: UserDTO,
-  ): Promise<KeyResultView[] | null> {
+    context: DomainServiceContext,
+  ) {
     const selector = { id: data.userId }
-    const keyResult = await this.userService.getOneWithConstraint(
+    const targetUser = await this.userService.getOneWithConstraint(
       CONSTRAINT.COMPANY,
       selector,
       user,
     )
-    if (!keyResult) return
+    if (!targetUser) return
 
-    return this.create(data)
+    return this.create(data, context)
   }
 
   async createIfUserIsInTeam(
     data: Partial<KeyResultView>,
     user: UserDTO,
-  ): Promise<KeyResultView[] | null> {
+    context: DomainServiceContext,
+  ) {
     const selector = { id: data.userId }
-    const keyResult = await this.userService.getOneWithConstraint(CONSTRAINT.TEAM, selector, user)
-    if (!keyResult) return
+    const targetUser = await this.userService.getOneWithConstraint(CONSTRAINT.TEAM, selector, user)
+    if (!targetUser) return
 
-    return this.create(data)
+    return this.create(data, context)
   }
 
   async createIfUserOwnsIt(
     data: Partial<KeyResultView>,
     user: UserDTO,
-  ): Promise<KeyResultView[] | null> {
+    context: DomainServiceContext,
+  ) {
     const selector = { id: data.userId }
-    const keyResult = await this.userService.getOneWithConstraint(CONSTRAINT.OWNS, selector, user)
-    if (!keyResult) return
+    const targetUser = await this.userService.getOneWithConstraint(CONSTRAINT.OWNS, selector, user)
+    if (!targetUser) return
 
-    return this.create(data)
+    return this.create(data, context)
+  }
+
+  async create(userView: Partial<KeyResultViewDTO>, context: DomainServiceContext) {
+    this.logger.debug({
+      userView,
+      context,
+      message: 'Creating new key result view',
+    })
+
+    if (!userView.rank) userView.rank = await this.getAvailableKeyResultIDs(context)
+    if (!userView.userId) userView.userId = context?.user.id
+
+    const data = await this.repository.insert(userView)
+    const createdViewsMetadata: Partial<KeyResultViewDTO[]> = data.raw
+    if (!createdViewsMetadata || createdViewsMetadata.length === 0) return
+
+    const createdViews = await Promise.all(
+      createdViewsMetadata.map(async (viewMetadata) => this.getOne({ id: viewMetadata.id })),
+    )
+
+    return createdViews
+  }
+
+  async getAvailableKeyResultIDs(context?: DomainServiceContext) {
+    const availableKeyResults = await this.keyResultService.getManyWithConstraint(
+      context.constraint,
+      context.user,
+    )
+    const availableKeyResultIDs = availableKeyResults.map((keyResult) => keyResult.id.toString())
+
+    return availableKeyResultIDs
   }
 }
 

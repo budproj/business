@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common'
 import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql'
 
-import GraphQLCompanyModule from './company'
 import GraphQLCycleModule from './cycle'
 import graphQLFactory from './factory'
 import GraphQLKeyResultModule from './key-result'
@@ -16,7 +15,6 @@ import GraphQLUserModule from './user'
     GraphQLUserModule,
     GraphQLObjectiveModule,
     GraphQLTeamModule,
-    GraphQLCompanyModule,
     GraphQLCycleModule,
   ],
 })

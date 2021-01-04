@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common'
-import { remove } from 'lodash'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
+import { remove, uniq } from 'lodash'
 
 import { KeyResultDTO } from 'domain/key-result/dto'
 import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
 import DomainEntityService from 'domain/service'
+import { TeamDTO } from 'domain/team/dto'
+import DomainTeamService from 'domain/team/service'
 import { UserDTO } from 'domain/user/dto'
 
 import { ConfidenceReport } from './entities'
@@ -14,8 +16,26 @@ class DomainConfidenceReportService extends DomainEntityService<
   ConfidenceReport,
   ConfidenceReportDTO
 > {
-  constructor(public readonly repository: DomainConfidenceReportRepository) {
+  constructor(
+    public readonly repository: DomainConfidenceReportRepository,
+    @Inject(forwardRef(() => DomainTeamService))
+    private readonly teamService: DomainTeamService,
+  ) {
     super(repository, DomainConfidenceReportService.name)
+  }
+
+  async parseUserCompanyIDs(user: UserDTO) {
+    const userCompanies = await this.teamService.getUserRootTeams(user)
+    const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
+
+    return userCompanyIDs
+  }
+
+  async parseUserCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>) {
+    const companiesTeams = await this.teamService.getAllTeamsBelowNodes(companyIDs)
+    const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
+
+    return companiesTeamIDs
   }
 
   async getFromKeyResult(

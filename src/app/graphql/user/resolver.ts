@@ -6,7 +6,6 @@ import { GraphQLUser, Permissions } from 'app/authz/decorators'
 import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'app/authz/guards'
 import { EnhanceWithBudUser } from 'app/authz/interceptors'
 import { AuthzUser } from 'app/authz/types'
-import DomainCompanyService from 'domain/company/service'
 import DomainKeyResultService from 'domain/key-result/service'
 import DomainObjectiveService from 'domain/objective/service'
 import DomainTeamService from 'domain/team/service'
@@ -25,7 +24,6 @@ class GraphQLUserResolver {
     private readonly keyResultDomain: DomainKeyResultService,
     private readonly objectiveDomain: DomainObjectiveService,
     private readonly teamDomain: DomainTeamService,
-    private readonly companyDomain: DomainCompanyService,
   ) {}
 
   @Permissions(PERMISSION['USER:READ'])
@@ -107,31 +105,19 @@ class GraphQLUserResolver {
   }
 
   @ResolveField()
-  async ownedCompanies(@Parent() user: UserObject) {
-    this.logger.log({
-      user,
-      message: 'Fetching owned companies for user',
-    })
-
-    return this.companyDomain.getFromOwner(user.id)
-  }
-
-  @ResolveField()
   async companies(
     @Parent() user: UserObject,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
   ) {
     this.logger.log({
       user,
-      limit,
       message: 'Fetching companies for user',
     })
-    const teams = await user.teams
-    const companyIDs = teams.map((team) => team.companyId)
 
-    return this.companyDomain.getFromIDs(companyIDs, {
-      limit,
-    })
+    const companies = await this.teamDomain.getUserRootTeams(user)
+    const companiesWithLimit = limit ? companies.slice(0, limit) : companies
+
+    return companiesWithLimit
   }
 }
 

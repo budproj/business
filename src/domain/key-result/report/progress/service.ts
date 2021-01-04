@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable, Scope } from '@nestjs/common'
-import { remove } from 'lodash'
+import { remove, uniq } from 'lodash'
 import { LessThanOrEqual } from 'typeorm'
 
 import { CONSTRAINT } from 'domain/constants'
@@ -7,6 +7,8 @@ import { KeyResultDTO } from 'domain/key-result/dto'
 import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
 import DomainKeyResultService from 'domain/key-result/service'
 import DomainEntityService from 'domain/service'
+import { TeamDTO } from 'domain/team/dto'
+import DomainTeamService from 'domain/team/service'
 import { UserDTO } from 'domain/user/dto'
 import { DuplicateEntityError } from 'errors'
 
@@ -21,8 +23,24 @@ class DomainProgressReportService extends DomainEntityService<ProgressReport, Pr
     public readonly repository: DomainProgressReportRepository,
     @Inject(forwardRef(() => DomainKeyResultService))
     private readonly keyResultService: DomainKeyResultService,
+    @Inject(forwardRef(() => DomainTeamService))
+    private readonly teamService: DomainTeamService,
   ) {
     super(repository, DomainProgressReportService.name)
+  }
+
+  async parseUserCompanyIDs(user: UserDTO) {
+    const userCompanies = await this.teamService.getUserRootTeams(user)
+    const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
+
+    return userCompanyIDs
+  }
+
+  async parseUserCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>) {
+    const companiesTeams = await this.teamService.getAllTeamsBelowNodes(companyIDs)
+    const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
+
+    return companiesTeamIDs
   }
 
   async getFromKeyResult(

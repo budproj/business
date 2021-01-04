@@ -10,5 +10,5 @@ export class UserDTO {
   picture?: string
   createdAt: Date
   updatedAt: Date
-  teams: Promise<TeamDTO[]> | TeamDTO[]
+  teams?: Promise<TeamDTO[]> | TeamDTO[]
 }

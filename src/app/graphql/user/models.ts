@@ -1,6 +1,5 @@
 import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
-import { CompanyObject } from 'app/graphql/company/models'
 import { KeyResultObject } from 'app/graphql/key-result/models'
 import { ConfidenceReportObject } from 'app/graphql/key-result/report/confidence/models'
 import { ProgressReportObject } from 'app/graphql/key-result/report/progress/models'
@@ -21,7 +20,7 @@ registerEnumType(USER_POLICY, {
 
 @ObjectType('User', {
   description:
-    'User is an entity inside a given company. It is associated with many teams, progress reports, and others.',
+    'User is an entity inside a given root team (a.k.a. company). It is associated with many teams, progress reports, and others.',
 })
 export class UserObject {
   @Field(() => ID, { description: 'The ID of the user' })
@@ -78,15 +77,10 @@ export class UserObject {
   })
   ownedTeams: TeamObject[]
 
-  @Field(() => [CompanyObject], {
-    description: 'The creation date ordered list of companies that this user owns',
-  })
-  ownedCompanies: CompanyObject[]
-
-  @Field(() => [CompanyObject], {
+  @Field(() => [TeamObject], {
     description: 'The creation date ordered list of companies that this user is a part of',
   })
-  companies: CompanyObject[]
+  companies: TeamObject[]
 }
 
 @ObjectType('Policies', {

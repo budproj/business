@@ -9,8 +9,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { CompanyDTO } from 'domain/company/dto'
 import { ObjectiveDTO } from 'domain/objective/dto'
+import { TeamDTO } from 'domain/team/dto'
 
 import { CycleDTO } from './dto'
 
@@ -31,12 +31,12 @@ export class Cycle implements CycleDTO {
   @UpdateDateColumn()
   public updatedAt: Date
 
-  @ManyToOne('Company', 'teams')
-  public company: CompanyDTO
+  @ManyToOne('Team', 'cycles')
+  public team: TeamDTO
 
   @Column()
-  @RelationId((team: Cycle) => team.company)
-  public companyId: CompanyDTO['id']
+  @RelationId((cycle: Cycle) => cycle.team)
+  public teamId: TeamDTO['id']
 
   @OneToMany('Objective', 'cycle')
   public objectives: ObjectiveDTO[]

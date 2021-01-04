@@ -17,6 +17,7 @@ class DomainKeyResultReportService {
   constructor(
     @Inject(forwardRef(() => DomainProgressReportService))
     public readonly progress: DomainProgressReportService,
+    @Inject(forwardRef(() => DomainConfidenceReportService))
     public readonly confidence: DomainConfidenceReportService,
   ) {}
 

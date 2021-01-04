@@ -91,6 +91,16 @@ class GraphQLObjectiveResolver {
 
     return this.objectiveDomain.getCurrentConfidence(objective.id)
   }
+
+  @ResolveField()
+  async percentageProgressIncrease(@Parent() objective: ObjectiveObject) {
+    this.logger.log({
+      objective,
+      message: 'Fetching percentage progress increase',
+    })
+
+    return this.objectiveDomain.getPercentageProgressIncrease(objective.id)
+  }
 }
 
 export default GraphQLObjectiveResolver

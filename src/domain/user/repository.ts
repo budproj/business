@@ -1,6 +1,5 @@
 import { EntityRepository, SelectQueryBuilder } from 'typeorm'
 
-import { CompanyDTO } from 'domain/company/dto'
 import DomainEntityRepository from 'domain/repository'
 import { TeamDTO } from 'domain/team/dto'
 import { UserDTO } from 'domain/user/dto'
@@ -9,12 +8,12 @@ import { User } from './entities'
 
 @EntityRepository(User)
 class DomainUserRepository extends DomainEntityRepository<User> {
-  constraintQueryToCompany(allowedCompanies: Array<CompanyDTO['id']>) {
+  constraintQueryToCompany(teamIDsInCompany: Array<TeamDTO['id']>) {
     const addConstraintToQuery = (query?: SelectQueryBuilder<User>) => {
       const baseQuery = query ?? this.createQueryBuilder()
       const constrainedQuery = baseQuery
         .leftJoinAndSelect(`${User.name}.teams`, 'teams')
-        .andWhere('teams.companyId IN (:...allowedCompanies)', { allowedCompanies })
+        .andWhere('teams.id IN (:...teamIDsInCompany)', { teamIDsInCompany })
 
       return constrainedQuery
     }
