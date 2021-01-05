@@ -31,4 +31,7 @@ export class CycleObject {
 
   @Field(() => [ObjectiveObject], { description: 'The objectives inside this cycle' })
   objectives: ObjectiveObject[]
+
+  @Field({ description: 'The name of the cycle' })
+  name?: string
 }
