@@ -7,4 +7,5 @@ export class CycleDTO {
   createdAt: Date
   updatedAt: Date
   teamId: TeamDTO['id']
+  name?: string
 }

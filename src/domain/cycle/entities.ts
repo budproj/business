@@ -40,4 +40,7 @@ export class Cycle implements CycleDTO {
 
   @OneToMany('Objective', 'cycle')
   public objectives: ObjectiveDTO[]
+
+  @Column({ nullable: true })
+  public name?: string
 }
