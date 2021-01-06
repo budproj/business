@@ -82,15 +82,14 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
   }
 
   async getCurrentConfidence(teamId: TeamDTO['id']): Promise<ConfidenceReport['valueNew']> {
+    const defaultConfidence = 100
     const childTeams = await this.getChildTeams(teamId, ['id'])
     const childTeamIds = childTeams.map((childTeam) => childTeam.id)
 
     const keyResults = await this.keyResultService.getFromTeam(childTeamIds)
-    if (!keyResults) return
+    if (!keyResults) return defaultConfidence
 
-    const teamCurrentConfidence = this.keyResultService.calculateAverageCurrentConfidenceFromList(
-      keyResults,
-    )
+    const teamCurrentConfidence = this.keyResultService.getLowestConfidenceFromList(keyResults)
 
     return teamCurrentConfidence
   }

@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { sum, uniq } from 'lodash'
+import { sum, min, uniq } from 'lodash'
 
 import { TIMEFRAME_SCOPE } from 'domain/constants'
 import { KeyResultDTO } from 'domain/key-result/dto'
@@ -146,15 +146,14 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     return calculatedSnapshotProgress
   }
 
-  async calculateAverageCurrentConfidenceFromList(keyResults: KeyResult[]) {
+  async getLowestConfidenceFromList(keyResults: KeyResult[]) {
+    const defaultConfidence = 100
     const currentConfidenceList = await Promise.all(
       keyResults.map(async ({ id }) => this.getCurrentConfidence(id)),
     )
-    const currentConfidence = sum(currentConfidenceList) / currentConfidenceList.length
+    const minConfidence = min(currentConfidenceList)
 
-    const normalizedCurrentConfidence = Number.isNaN(currentConfidence) ? 100 : currentConfidence
-
-    return normalizedCurrentConfidence
+    return minConfidence ?? defaultConfidence
   }
 }
 
