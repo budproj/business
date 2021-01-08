@@ -18,7 +18,7 @@ app "app" {
       command = [
         "bash",
         "-c",
-        "bash <(curl -s https://raw.githubusercontent.com/budproj/gist/main/gitops/deploy.sh) -s develop -t ${gitrefpretty()}",
+        "bash <(curl -s https://raw.githubusercontent.com/budproj/gist/main/gitops/deploy.sh) -s production -t ${gitrefpretty()}",
       ]
     }
   }
