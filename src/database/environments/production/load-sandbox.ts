@@ -13,6 +13,7 @@ const loadSandbox = async () => {
     join(__dirname, './sandbox-account/teams_users_user.sql'),
     join(__dirname, './sandbox-account/cycles.sql'),
     join(__dirname, './sandbox-account/objectives.sql'),
+    join(__dirname, './sandbox-account/key-results.sql'),
   ]
 
   const { manager } = await createConnection(config)
