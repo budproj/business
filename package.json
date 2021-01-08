@@ -25,7 +25,9 @@
     "db:local:up": "docker start business-postgres-database",
     "db:local:init": "run-s db:local:new migration:run db:local:load-data",
     "db:local:new": "docker run -d --name business-postgres-database -e POSTGRES_PASSWORD=Pass2020! -e POSTGRES_DB=business_local -v /var/lib/postgresql/data:/var/lib/postgresql/data -p 5432:5432 postgres",
-    "db:load-data": "ts-node -r tsconfig-paths/register src/database/environments/local/load-dump"
+    "db:local:load-data": "ts-node -r tsconfig-paths/register src/database/environments/local/load-dump",
+    "db:develop:load-data": "ts-node -r tsconfig-paths/register src/database/environments/develop/load-dump",
+    "db:production:load-sandbox-data": "ts-node -r tsconfig-paths/register src/database/environments/production/load-sandbox"
   },
   "author": "delucca <delucca@pm.me>",
   "license": "Apache-2.0",

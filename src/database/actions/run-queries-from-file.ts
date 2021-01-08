@@ -1,10 +1,10 @@
 import { SqlReader } from 'node-sql-reader'
-import { createConnection } from 'typeorm'
+import { createConnection, EntityManager } from 'typeorm'
 
 import config from 'config/database/config'
 
-const runQueryFromFile = async (sqlPath: string) => {
-  const { manager } = await createConnection(config)
+const runQueriesFromFile = async (sqlPath: string, manager?: EntityManager) => {
+  if (!manager) manager = (await createConnection(config)).manager
 
   const queries = SqlReader.readSqlFile(sqlPath)
 
@@ -14,4 +14,4 @@ const runQueryFromFile = async (sqlPath: string) => {
   }, Promise.resolve())
 }
 
-export default runQueryFromFile
+export default runQueriesFromFile
