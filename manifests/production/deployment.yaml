@@ -1,0 +1,74 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: business-app
+  labels:
+    app.kubernetes.io/name: business-app
+    app.kubernetes.io/version: 1.0.0
+    app.kubernetes.io/component: business
+    app.kubernetes.io/part-of: application-layer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: business-app
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: business-app
+        app.kubernetes.io/version: 1.0.0
+        app.kubernetes.io/component: business
+        app.kubernetes.io/part-of: application-layer
+    spec:
+      containers:
+        - name: business-app
+          image: 904333181156.dkr.ecr.sa-east-1.amazonaws.com/business:$ECR_TAG
+          ports:
+            - containerPort: 8080
+          env:
+            - name: APP_ENV
+              value: production
+            - name: PORT
+              value: '8080'
+            - name: TYPEORM_HOST
+              value: '172.20.8.235'
+            - name: TYPEORM_PORT
+              value: '5432'
+            - name: TYPEORM_DATABASE
+              value: business_develop
+            - name: TYPEORM_USER
+              valueFrom:
+                secretKeyRef:
+                  name: business-app
+                  key: typeorm-user
+            - name: TYPEORM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: business-app
+                  key: typeorm-password
+            - name: AUTH0_NAMESPACE
+              value: https://api.getbud.co
+            - name: AUTH0_CLIENT_ID
+              value: sC2t6uIvHC2wCN8creSkJ7npjZdkv4W9
+            - name: AUTH0_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: business-app
+                  key: auth0-client-secret
+            - name: AUTH0_ISSUER
+              value: https://getbud.us.auth0.com/
+            - name: AUTH0_AUDIENCE
+              value: https://api.getbud.co/business
+            - name: GRAPHQL_SCHEMA_FILE_PATH
+              value: './dist/src/app/graphql/schema.gql'
+            - name: LOGGING_LEVEL
+              value: error
+            - name: LOGGING_SERVICE_NAME
+              value: business@production
+            - name: GLOBAL_PREFIX
+              value: business
+            - name: CORS_ALLOWED_ORIGINS
+              value: https://app.getbud.co
+            - name: TYPEORM_LOGGING
+              value: 'false'

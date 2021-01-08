@@ -1,0 +1,18 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: business-app
+  labels:
+    app.kubernetes.io/name: business-app
+    app.kubernetes.io/version: 1.0.0
+    app.kubernetes.io/component: business
+    app.kubernetes.io/part-of: application-layer
+spec:
+  selector:
+    app.kubernetes.io/name: business-app
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
