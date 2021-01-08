@@ -1,1 +1,1 @@
-export { default as runQueryFromFile } from './run-query-from-file'
+export { default as runQueriesFromFile } from './run-queries-from-file'

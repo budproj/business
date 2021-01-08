@@ -271,11 +271,11 @@ INSERT INTO
   )
   SELECT
     (SELECT id FROM team WHERE name='Growth'),
-    (SELECT id FROM "user" WHERE name='Marcelino Gadelha')
+    (SELECT id FROM "user" WHERE name='Marcelino Guedelha')
   WHERE NOT EXISTS (
     SELECT team_id, user_id FROM team_users_user WHERE
       team_id=(SELECT id FROM team WHERE name='Growth') AND
-      user_id=(SELECT id FROM "user" WHERE name='Marcelino Gadelha')
+      user_id=(SELECT id FROM "user" WHERE name='Marcelino Guedelha')
   );
 
 INSERT INTO

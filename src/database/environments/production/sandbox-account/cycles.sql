@@ -6,7 +6,7 @@ INSERT INTO
     team_id
   )
   SELECT
-    'Q1 2021'
+    'Q1 2021',
     '2021-01-01',
     '2021-03-31',
     (SELECT id FROM team WHERE name='Company Inc.')

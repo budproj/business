@@ -1,19 +1,27 @@
 // eslint-disable-next-line unicorn/import-style
 import { join } from 'path'
 
-import { runQueryFromFile } from 'database/actions'
+import { createConnection } from 'typeorm'
 
-const sqlPaths = [
-  join(__dirname, './sandbox-account/users.sql'),
-  join(__dirname, './sandbox-account/teams.sql'),
-  join(__dirname, './sandbox-account/teams_users_user.sql'),
-  join(__dirname, './sandbox-account/cycles.sql'),
-  join(__dirname, './sandbox-account/objectives.sql'),
-]
-const queryPromises = sqlPaths.map(runQueryFromFile)
+import config from 'config/database/config'
+import { runQueriesFromFile } from 'database/actions'
+
+const loadSandbox = async () => {
+  const sqlPaths = [
+    join(__dirname, './sandbox-account/users.sql'),
+    join(__dirname, './sandbox-account/teams.sql'),
+    join(__dirname, './sandbox-account/teams_users_user.sql'),
+    join(__dirname, './sandbox-account/cycles.sql'),
+    join(__dirname, './sandbox-account/objectives.sql'),
+  ]
+
+  const { manager } = await createConnection(config)
+
+  await sqlPaths.reduce(async (previousPromise, nextPath) => {
+    await previousPromise
+    return runQueriesFromFile(nextPath, manager)
+  }, Promise.resolve())
+}
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
-queryPromises.reduce(async (previousPromise, nextQuery) => {
-  await previousPromise
-  return nextQuery
-}, Promise.resolve())
+loadSandbox()
