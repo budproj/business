@@ -36,7 +36,7 @@ spec:
             - name: TYPEORM_PORT
               value: '5432'
             - name: TYPEORM_DATABASE
-              value: business_develop
+              value: business_production
             - name: TYPEORM_USER
               valueFrom:
                 secretKeyRef:
