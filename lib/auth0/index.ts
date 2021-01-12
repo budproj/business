@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 
-import { ManagementClient, User } from 'auth0'
+import { ManagementClient, AuthenticationClient, User } from 'auth0'
 import * as csv from 'fast-csv'
 import { randomPassword } from 'secure-random-password'
 
@@ -19,10 +19,15 @@ type UserRoleName = 'Stakeholder' | 'Squad Member' | 'Leader' | 'Team Member'
 class Auth0 implements Auth0Interface {
   public domain = 'getbud.us.auth0.com'
   private readonly mgmtClient: ManagementClient
+  private readonly authClient: AuthenticationClient
 
   constructor(token: string) {
     this.mgmtClient = new ManagementClient({
       token,
+      domain: this.domain,
+    })
+
+    this.authClient = new AuthenticationClient({
       domain: this.domain,
     })
   }
@@ -74,13 +79,12 @@ class Auth0 implements Auth0Interface {
 
   async triggerInviteEmail(user: User) {
     const parameters = {
-      user_id: user.user_id,
-      result_url: 'https://app.getbud.co',
+      email: user.email,
+      connection: 'Username-Password-Authentication',
     }
 
-    const createdTicket = await this.mgmtClient.createPasswordChangeTicket(parameters)
-    console.log(`Created password reset ticket for user ${user.name}:`)
-    console.log(createdTicket)
+    await this.authClient.requestChangePasswordEmail(parameters)
+    console.log(`Sent a change password e-mail to user ${user.name}`)
   }
 }
 
