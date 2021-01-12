@@ -119,6 +119,16 @@ class GraphQLUserResolver {
 
     return companiesWithLimit
   }
+
+  @ResolveField()
+  async fullName(@Parent() user: UserObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching user full name',
+    })
+
+    return this.resolverService.getUserFullName(user)
+  }
 }
 
 export default GraphQLUserResolver
