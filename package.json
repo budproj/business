@@ -7,7 +7,8 @@
     "start": "node dist/src/main",
     "prebuild": "run-s clean",
     "build": "nest build",
-    "deploy": "npm run build && waypoint up",
+    "deploy": "run-s build waypoint:build waypoint:deploy",
+    "release": "waypoint up",
     "format": "prettier --write 'src/**/*.ts'",
     "start:dev": "run-s db:local:up start:watch",
     "start:watch": "nest start --watch",
@@ -27,7 +28,9 @@
     "db:local:new": "docker run -d --name business-postgres-database -e POSTGRES_PASSWORD=Pass2020! -e POSTGRES_DB=business_local -v /var/lib/postgresql/data:/var/lib/postgresql/data -p 5432:5432 postgres",
     "db:local:load-data": "ts-node -r tsconfig-paths/register src/database/environments/local/load-dump",
     "db:develop:load-data": "ts-node -r tsconfig-paths/register src/database/environments/develop/load-dump",
-    "db:production:load-sandbox-data": "ts-node -r tsconfig-paths/register src/database/environments/production/load-sandbox"
+    "db:production:load-sandbox-data": "ts-node -r tsconfig-paths/register src/database/environments/production/load-sandbox",
+    "waypoint:build": "waypoint build",
+    "waypoint:deploy": "waypoint deploy"
   },
   "author": "delucca <delucca@pm.me>",
   "license": "Apache-2.0",
