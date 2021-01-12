@@ -2,15 +2,15 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: business-app
+  name: business-canary
   labels:
-    app.kubernetes.io/name: business-app
-    app.kubernetes.io/version: 1.0.0
-    app.kubernetes.io/component: business
+    app.kubernetes.io/name: business-canary
     app.kubernetes.io/part-of: application-layer
+    app.kubernetes.io/component: backend-application
+    app.kubernetes.io/version: 1.0.0
 spec:
   selector:
-    app.kubernetes.io/name: business-app
+    app.kubernetes.io/name: business-canary
   ports:
     - name: http
       port: 80

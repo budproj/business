@@ -2,27 +2,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: business-app
+  name: business-stable
   labels:
-    app.kubernetes.io/name: business-app
-    app.kubernetes.io/version: 1.0.0
-    app.kubernetes.io/component: business
+    app.kubernetes.io/name: business-stable
     app.kubernetes.io/part-of: application-layer
+    app.kubernetes.io/component: backend-application
+    app.kubernetes.io/version: 1.0.0
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: business-app
+      app.kubernetes.io/name: business-stable
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: business-app
-        app.kubernetes.io/version: 1.0.0
-        app.kubernetes.io/component: business
+        app.kubernetes.io/name: business-stable
         app.kubernetes.io/part-of: application-layer
+        app.kubernetes.io/component: backend-application
+        app.kubernetes.io/version: 1.0.0
     spec:
       containers:
-        - name: business-app
+        - name: business
           image: 904333181156.dkr.ecr.sa-east-1.amazonaws.com/business:$ECR_TAG
           ports:
             - containerPort: 8080
@@ -32,20 +32,20 @@ spec:
             - name: PORT
               value: '8080'
             - name: TYPEORM_HOST
-              value: '172.20.8.235'
+              value: business.cka3r3gokfjc.sa-east-1.rds.amazonaws.com
             - name: TYPEORM_PORT
               value: '5432'
             - name: TYPEORM_DATABASE
-              value: business_production
+              value: business
             - name: TYPEORM_USER
               valueFrom:
                 secretKeyRef:
-                  name: business-app
+                  name: business
                   key: typeorm-user
             - name: TYPEORM_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: business-app
+                  name: business
                   key: typeorm-password
             - name: AUTH0_NAMESPACE
               value: https://api.getbud.co
@@ -54,7 +54,7 @@ spec:
             - name: AUTH0_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: business-app
+                  name: business
                   key: auth0-client-secret
             - name: AUTH0_ISSUER
               value: https://getbud.us.auth0.com/
@@ -65,7 +65,7 @@ spec:
             - name: LOGGING_LEVEL
               value: error
             - name: LOGGING_SERVICE_NAME
-              value: business@production
+              value: business@stable
             - name: GLOBAL_PREFIX
               value: business
             - name: CORS_ALLOWED_ORIGINS
