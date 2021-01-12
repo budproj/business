@@ -3,7 +3,8 @@ import { USER_GENDER } from 'domain/user/constants'
 
 export class UserDTO {
   id: string
-  name: string
+  firstName: string
+  lastName?: string
   authzSub: string
   gender?: USER_GENDER
   role?: string

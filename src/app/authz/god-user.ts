@@ -4,7 +4,7 @@ import { CONSTRAINT } from 'domain/constants'
 
 class GodUser implements AuthzUser {
   public readonly id: AuthzUser['id']
-  public readonly name: AuthzUser['name']
+  public readonly firstName: AuthzUser['firstName']
   public readonly authzSub: AuthzUser['authzSub']
   public readonly role: AuthzUser['role']
   public readonly picture: AuthzUser['picture']
@@ -16,7 +16,7 @@ class GodUser implements AuthzUser {
 
   constructor() {
     this.id = '7755b577-99cc-4de7-b3a4-5f34e1ab780c' // Replace with your local desired user ID
-    this.name = 'GOD'
+    this.firstName = 'GOD'
     this.authzSub = 'GOD'
     this.role = 'GOD'
     this.picture =

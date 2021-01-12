@@ -23,7 +23,10 @@ export class User implements UserDTO {
   public id: string
 
   @Column()
-  public name: string
+  public firstName: string
+
+  @Column({ nullable: true })
+  public lastName?: string
 
   @Column()
   public authzSub: string
