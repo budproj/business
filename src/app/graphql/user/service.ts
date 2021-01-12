@@ -11,6 +11,10 @@ class GraphQLUserService extends GraphQLEntityService<User, UserDTO> {
   constructor(public readonly userDomain: DomainUserService) {
     super(RESOURCE.USER, userDomain)
   }
+
+  getUserFullName(user: UserDTO) {
+    return this.userDomain.buildUserFullName(user)
+  }
 }
 
 export default GraphQLUserService

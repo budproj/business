@@ -38,6 +38,10 @@ class DomainUserService extends DomainEntityService<User, UserDTO> {
   async getUserFromSubjectWithTeamRelation(authzSub: UserDTO['authzSub']): Promise<User> {
     return this.repository.findOne({ authzSub }, { relations: ['teams'] })
   }
+
+  buildUserFullName(user: UserDTO) {
+    return `${user.firstName} ${user.lastName}`
+  }
 }
 
 export default DomainUserService
