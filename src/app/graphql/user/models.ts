@@ -27,7 +27,10 @@ export class UserObject {
   id: string
 
   @Field({ description: 'The name of the user' })
-  name: string
+  firstName: string
+
+  @Field({ description: 'The last name of the user' })
+  lastName: string
 
   @Field({ description: 'The sub field in Auth0 (their ID)' })
   authzSub: string
