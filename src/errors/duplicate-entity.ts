@@ -1,4 +1,4 @@
-import RailwayError from 'errors/railway-error'
+import RailwayError from 'src/errors/railway-error'
 
 class DuplicateEntityError extends RailwayError {
   public static get code() {

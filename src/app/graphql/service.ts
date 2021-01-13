@@ -2,11 +2,11 @@ import { mapValues } from 'lodash'
 import { FindConditions } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
-import { ACTION, RESOURCE } from 'app/authz/constants'
-import { AuthzUser } from 'app/authz/types'
-import { USER_POLICY } from 'app/graphql/user/constants'
-import { UserActionPolicies } from 'app/graphql/user/types'
-import DomainEntityService from 'domain/service'
+import { ACTION, RESOURCE } from 'src/app/authz/constants'
+import { AuthzUser } from 'src/app/authz/types'
+import { USER_POLICY } from 'src/app/graphql/user/constants'
+import { UserActionPolicies } from 'src/app/graphql/user/types'
+import DomainEntityService from 'src/domain/service'
 
 abstract class GraphQLEntityService<E, D> {
   public readonly entityService: DomainEntityService<E, D>

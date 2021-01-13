@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common'
 
-import { RESOURCE } from 'app/authz/constants'
-import GraphQLEntityService from 'app/graphql/service'
-import { ObjectiveDTO } from 'domain/objective/dto'
-import { Objective } from 'domain/objective/entities'
-import DomainObjectiveService from 'domain/objective/service'
+import { RESOURCE } from 'src/app/authz/constants'
+import GraphQLEntityService from 'src/app/graphql/service'
+import { ObjectiveDTO } from 'src/domain/objective/dto'
+import { Objective } from 'src/domain/objective/entities'
+import DomainObjectiveService from 'src/domain/objective/service'
 
 @Injectable()
 class GraphQLObjectiveService extends GraphQLEntityService<Objective, ObjectiveDTO> {

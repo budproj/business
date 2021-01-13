@@ -1,1 +1,9 @@
+.git
+.github
+.log
+.waypoint
+dist
+manifests
+node_modules
+scripts
 src/database/migrations

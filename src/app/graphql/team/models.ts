@@ -1,12 +1,12 @@
 import { Field, Float, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
-import { CycleObject } from 'app/graphql/cycle/models'
-import { KeyResultObject } from 'app/graphql/key-result/models'
-import { ConfidenceReportObject } from 'app/graphql/key-result/report/confidence'
-import { ProgressReportObject } from 'app/graphql/key-result/report/progress'
-import { ObjectiveObject } from 'app/graphql/objective/models'
-import { UserObject } from 'app/graphql/user/models'
-import { TEAM_GENDER } from 'domain/team/constants'
+import { CycleObject } from 'src/app/graphql/cycle/models'
+import { KeyResultObject } from 'src/app/graphql/key-result/models'
+import { ConfidenceReportObject } from 'src/app/graphql/key-result/report/confidence'
+import { ProgressReportObject } from 'src/app/graphql/key-result/report/progress'
+import { ObjectiveObject } from 'src/app/graphql/objective/models'
+import { UserObject } from 'src/app/graphql/user/models'
+import { TEAM_GENDER } from 'src/domain/team/constants'
 
 registerEnumType(TEAM_GENDER, {
   name: 'TEAM_GENDER',

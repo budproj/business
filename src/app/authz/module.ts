@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { PassportModule } from '@nestjs/passport'
 
-import { GraphQLAuthGuard } from 'app/authz/guards'
-import appConfig from 'config/app'
+import { GraphQLAuthGuard } from 'src/app/authz/guards'
+import appConfig from 'src/config/app'
 
 import AuthzStrategy from './strategy'
 

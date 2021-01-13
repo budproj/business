@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import DomainKeyResultModule from 'domain/key-result'
-import DomainTeamModule from 'domain/team'
+import DomainKeyResultModule from 'src/domain/key-result'
+import DomainTeamModule from 'src/domain/team'
 
 import DomainObjectiveRepository from './repository'
 import DomainObjectiveService from './service'

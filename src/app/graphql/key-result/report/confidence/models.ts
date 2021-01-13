@@ -1,7 +1,7 @@
 import { Field, ID, InputType, Int, ObjectType } from '@nestjs/graphql'
 
-import { KeyResultObject } from 'app/graphql/key-result/models'
-import { UserObject } from 'app/graphql/user/models'
+import { KeyResultObject } from 'src/app/graphql/key-result/models'
+import { UserObject } from 'src/app/graphql/user/models'
 
 @ObjectType('ConfidenceReport', {
   description: 'A report that records new confidence in a given key result',

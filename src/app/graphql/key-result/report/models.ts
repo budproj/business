@@ -1,6 +1,6 @@
 import { Field, Float, ID, InputType, Int, ObjectType } from '@nestjs/graphql'
 
-import { KeyResultObject } from 'app/graphql/key-result/models'
+import { KeyResultObject } from 'src/app/graphql/key-result/models'
 
 import { ConfidenceReportObject } from './confidence/models'
 import { ProgressReportObject } from './progress/models'

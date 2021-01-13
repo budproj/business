@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common'
 
-import { RESOURCE } from 'app/authz/constants'
-import { AuthzUser } from 'app/authz/types'
-import GraphQLEntityService from 'app/graphql/service'
-import { GraphQLTeamsQueryFilters } from 'app/graphql/team/types'
-import { TeamDTO } from 'domain/team/dto'
-import { Team } from 'domain/team/entities'
-import DomainTeamService from 'domain/team/service'
+import { RESOURCE } from 'src/app/authz/constants'
+import { AuthzUser } from 'src/app/authz/types'
+import GraphQLEntityService from 'src/app/graphql/service'
+import { GraphQLTeamsQueryFilters } from 'src/app/graphql/team/types'
+import { TeamDTO } from 'src/domain/team/dto'
+import { Team } from 'src/domain/team/entities'
+import DomainTeamService from 'src/domain/team/service'
 
 @Injectable()
 class GraphQLTeamService extends GraphQLEntityService<Team, TeamDTO> {

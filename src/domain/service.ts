@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { DeleteResult, FindConditions, SelectQueryBuilder } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
-import DomainEntityRepository, { SelectionQueryConstrain } from 'domain/repository'
+import DomainEntityRepository, { SelectionQueryConstrain } from 'src/domain/repository'
 
 import { CONSTRAINT } from './constants'
 import { TeamDTO } from './team/dto'

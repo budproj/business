@@ -1,7 +1,7 @@
 import { Repository, SelectQueryBuilder } from 'typeorm'
 
-import { TeamDTO } from 'domain/team/dto'
-import { UserDTO } from 'domain/user/dto'
+import { TeamDTO } from 'src/domain/team/dto'
+import { UserDTO } from 'src/domain/user/dto'
 
 export type SelectionQueryConstrain<E> = (_query?: SelectQueryBuilder<E>) => SelectQueryBuilder<E>
 

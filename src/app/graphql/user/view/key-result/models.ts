@@ -1,8 +1,8 @@
 import { Field, ID, InputType, ObjectType, registerEnumType } from '@nestjs/graphql'
 
-import { KeyResultObject } from 'app/graphql/key-result/models'
-import { UserObject } from 'app/graphql/user/models'
-import { KEY_RESULT_VIEW_BINDING } from 'domain/user/view/key-result/constants'
+import { KeyResultObject } from 'src/app/graphql/key-result/models'
+import { UserObject } from 'src/app/graphql/user/models'
+import { KEY_RESULT_VIEW_BINDING } from 'src/domain/user/view/key-result/constants'
 
 registerEnumType(KEY_RESULT_VIEW_BINDING, {
   name: 'KEY_RESULT_VIEW_BINDING',

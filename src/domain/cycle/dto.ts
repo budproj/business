@@ -1,4 +1,4 @@
-import { TeamDTO } from 'domain/team/dto'
+import { TeamDTO } from 'src/domain/team/dto'
 
 export class CycleDTO {
   id: string

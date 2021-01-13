@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 
-import { AppModule } from 'app'
+import { AppModule } from 'src/app'
 
 @Module({
   imports: [AppModule],

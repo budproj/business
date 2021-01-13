@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common'
 
-import { RESOURCE } from 'app/authz/constants'
-import GraphQLEntityService from 'app/graphql/service'
-import { CycleDTO } from 'domain/cycle/dto'
-import { Cycle } from 'domain/cycle/entities'
-import DomainCycleService from 'domain/cycle/service'
+import { RESOURCE } from 'src/app/authz/constants'
+import GraphQLEntityService from 'src/app/graphql/service'
+import { CycleDTO } from 'src/domain/cycle/dto'
+import { Cycle } from 'src/domain/cycle/entities'
+import DomainCycleService from 'src/domain/cycle/service'
 
 @Injectable()
 class GraphQLCycleService extends GraphQLEntityService<Cycle, CycleDTO> {

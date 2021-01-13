@@ -5,5 +5,12 @@
   "extends": ["@budproj/eslint-config-base-ts", "@budproj/eslint-config-prettier-ts"],
   "rules": {
     "new-cap": "off"
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "paths": ["./", "src"]
+      }
+    }
   }
 }

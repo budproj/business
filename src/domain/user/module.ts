@@ -1,7 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import DomainTeamModule from 'domain/team'
+import DomainTeamModule from 'src/domain/team'
 
 import DomainUserRepository from './repository'
 import DomainUserService from './service'

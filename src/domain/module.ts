@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import databaseConfig from 'config/database/config'
+import databaseConfig from 'src/config/database/config'
 
 import DomainCycleModule from './cycle'
 import DomainKeyResultModule from './key-result'

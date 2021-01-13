@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 
-import { Railway } from 'app/providers'
-import appConfig from 'config/app'
-import DomainModule from 'domain/module'
+import { Railway } from 'src/app/providers'
+import appConfig from 'src/config/app'
+import DomainModule from 'src/domain/module'
 
 import GraphQLConfidenceReportModule from './confidence'
 import GraphQLProgressReportModule from './progress'

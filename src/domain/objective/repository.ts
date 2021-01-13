@@ -1,8 +1,8 @@
 import { EntityRepository, SelectQueryBuilder } from 'typeorm'
 
-import DomainEntityRepository from 'domain/repository'
-import { TeamDTO } from 'domain/team/dto'
-import { UserDTO } from 'domain/user/dto'
+import DomainEntityRepository from 'src/domain/repository'
+import { TeamDTO } from 'src/domain/team/dto'
+import { UserDTO } from 'src/domain/user/dto'
 
 import { Objective } from './entities'
 

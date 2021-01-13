@@ -1,4 +1,4 @@
-import { UserDTO } from 'domain/user/dto'
+import { UserDTO } from 'src/domain/user/dto'
 
 import { TEAM_GENDER } from './constants'
 

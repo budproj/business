@@ -8,9 +8,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { ObjectiveDTO } from 'domain/objective/dto'
-import { TeamDTO } from 'domain/team/dto'
-import { UserDTO } from 'domain/user/dto'
+import { ObjectiveDTO } from 'src/domain/objective/dto'
+import { TeamDTO } from 'src/domain/team/dto'
+import { UserDTO } from 'src/domain/user/dto'
 
 import { KEY_RESULT_FORMAT } from './constants'
 import { KeyResultDTO } from './dto'

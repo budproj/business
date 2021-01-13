@@ -1,12 +1,12 @@
 import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
-import { KeyResultObject } from 'app/graphql/key-result/models'
-import { ConfidenceReportObject } from 'app/graphql/key-result/report/confidence/models'
-import { ProgressReportObject } from 'app/graphql/key-result/report/progress/models'
-import { ObjectiveObject } from 'app/graphql/objective/models'
-import { TeamObject } from 'app/graphql/team/models'
-import { USER_POLICY } from 'app/graphql/user/constants'
-import { USER_GENDER } from 'domain/user/constants'
+import { KeyResultObject } from 'src/app/graphql/key-result/models'
+import { ConfidenceReportObject } from 'src/app/graphql/key-result/report/confidence/models'
+import { ProgressReportObject } from 'src/app/graphql/key-result/report/progress/models'
+import { ObjectiveObject } from 'src/app/graphql/objective/models'
+import { TeamObject } from 'src/app/graphql/team/models'
+import { USER_POLICY } from 'src/app/graphql/user/constants'
+import { USER_GENDER } from 'src/domain/user/constants'
 
 registerEnumType(USER_GENDER, {
   name: 'USER_GENDER',

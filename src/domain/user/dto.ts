@@ -1,5 +1,5 @@
-import { TeamDTO } from 'domain/team/dto'
-import { USER_GENDER } from 'domain/user/constants'
+import { TeamDTO } from 'src/domain/team/dto'
+import { USER_GENDER } from 'src/domain/user/constants'
 
 export class UserDTO {
   id: string
