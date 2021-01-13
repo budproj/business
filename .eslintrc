@@ -1,11 +1,8 @@
 {
   "parserOptions": {
-    "project": "tsconfig.json"
+    "project": "tsconfig.build.json"
   },
-  "extends": [
-    "@budproj/eslint-config-base-ts",
-    "@budproj/eslint-config-prettier-ts",
-  ],
+  "extends": ["@budproj/eslint-config-base-ts", "@budproj/eslint-config-prettier-ts"],
   "rules": {
     "new-cap": "off"
   }
