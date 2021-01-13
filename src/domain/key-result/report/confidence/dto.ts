@@ -1,5 +1,5 @@
-import { KeyResultDTO } from 'domain/key-result/dto'
-import { UserDTO } from 'domain/user/dto'
+import { KeyResultDTO } from 'src/domain/key-result/dto'
+import { UserDTO } from 'src/domain/user/dto'
 
 export class ConfidenceReportDTO {
   id: string

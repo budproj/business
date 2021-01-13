@@ -1,11 +1,11 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
 import { remove } from 'lodash'
 
-import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
-import { ConfidenceReport } from 'domain/key-result/report/confidence/entities'
-import { ProgressReportDTO } from 'domain/key-result/report/progress/dto'
-import { ProgressReport } from 'domain/key-result/report/progress/entities'
-import { UserDTO } from 'domain/user/dto'
+import { ConfidenceReportDTO } from 'src/domain/key-result/report/confidence/dto'
+import { ConfidenceReport } from 'src/domain/key-result/report/confidence/entities'
+import { ProgressReportDTO } from 'src/domain/key-result/report/progress/dto'
+import { ProgressReport } from 'src/domain/key-result/report/progress/entities'
+import { UserDTO } from 'src/domain/user/dto'
 
 import DomainConfidenceReportService from './confidence/service'
 import DomainProgressReportService from './progress/service'

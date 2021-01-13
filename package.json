@@ -31,7 +31,9 @@
     "db:production:load-sandbox-data": "ts-node -r tsconfig-paths/register src/database/environments/production/load-sandbox",
     "waypoint:build": "waypoint build",
     "waypoint:deploy": "waypoint deploy",
-    "auth0:invite": "npm run build && node ./scripts/inviteUsers.js"
+    "scripts:create-and-invite-users": "run-s build scripts:create-users scripts:invite-users",
+    "scripts:create-users": "node ./scripts/createUsers.js",
+    "scripts:invite-users": "node ./scripts/inviteUsers.js"
   },
   "author": "delucca <delucca@pm.me>",
   "license": "Apache-2.0",
@@ -83,9 +85,9 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
-    "@budproj/eslint-config-base-ts": "^0.0.12",
-    "@budproj/eslint-config-prettier-ts": "^0.0.12",
-    "@budproj/prettier-config": "^0.0.12",
+    "@budproj/eslint-config-base-ts": "^1.0.0",
+    "@budproj/eslint-config-prettier-ts": "^1.0.0",
+    "@budproj/prettier-config": "^1.0.0",
     "@nestjs/schematics": "^7.2.1",
     "@types/auth0": "^2.20.12",
     "@types/eslint": "^7",

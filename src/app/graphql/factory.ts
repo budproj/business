@@ -1,7 +1,7 @@
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { GqlModuleAsyncOptions } from '@nestjs/graphql'
 
-import { gqlConfig } from 'config'
+import { gqlConfig } from 'src/config'
 
 const graphQLFactory: GqlModuleAsyncOptions = {
   imports: [ConfigModule.forFeature(gqlConfig)],

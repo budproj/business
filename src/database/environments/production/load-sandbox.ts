@@ -3,8 +3,8 @@ import { join } from 'path'
 
 import { createConnection } from 'typeorm'
 
-import config from 'config/database/config'
-import { runQueriesFromFile } from 'database/actions'
+import config from 'src/config/database/config'
+import { runQueriesFromFile } from 'src/database/actions'
 
 const loadSandbox = async () => {
   const sqlPaths = [

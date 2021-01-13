@@ -9,8 +9,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { KeyResultDTO } from 'domain/key-result/dto'
-import { UserDTO } from 'domain/user/dto'
+import { KeyResultDTO } from 'src/domain/key-result/dto'
+import { UserDTO } from 'src/domain/user/dto'
 
 import { KEY_RESULT_VIEW_BINDING } from './constants'
 import { KeyResultViewDTO } from './dto'

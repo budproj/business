@@ -5,8 +5,8 @@ import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 
-import appConfig from 'config/app/config'
 import buildLogger from 'lib/logger'
+import appConfig from 'src/config/app/config'
 
 import BootstrapModule from './module'
 

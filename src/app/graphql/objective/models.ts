@@ -1,10 +1,10 @@
 import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
 
-import { CycleObject } from 'app/graphql/cycle/models'
-import { KeyResultObject } from 'app/graphql/key-result/models'
-import { ConfidenceReportObject } from 'app/graphql/key-result/report/confidence'
-import { ProgressReportObject } from 'app/graphql/key-result/report/progress'
-import { UserObject } from 'app/graphql/user/models'
+import { CycleObject } from 'src/app/graphql/cycle/models'
+import { KeyResultObject } from 'src/app/graphql/key-result/models'
+import { ConfidenceReportObject } from 'src/app/graphql/key-result/report/confidence'
+import { ProgressReportObject } from 'src/app/graphql/key-result/report/progress'
+import { UserObject } from 'src/app/graphql/user/models'
 
 @ObjectType('Objective', { description: 'A group of key results that has the same focus' })
 export class ObjectiveObject {

@@ -1,5 +1,5 @@
-import { CycleDTO } from 'domain/cycle/dto'
-import { UserDTO } from 'domain/user/dto'
+import { CycleDTO } from 'src/domain/cycle/dto'
+import { UserDTO } from 'src/domain/user/dto'
 
 export class ObjectiveDTO {
   id: string

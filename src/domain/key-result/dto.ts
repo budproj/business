@@ -1,7 +1,7 @@
-import { KEY_RESULT_FORMAT } from 'domain/key-result/constants'
-import { ObjectiveDTO } from 'domain/objective/dto'
-import { TeamDTO } from 'domain/team/dto'
-import { UserDTO } from 'domain/user/dto'
+import { KEY_RESULT_FORMAT } from 'src/domain/key-result/constants'
+import { ObjectiveDTO } from 'src/domain/objective/dto'
+import { TeamDTO } from 'src/domain/team/dto'
+import { UserDTO } from 'src/domain/user/dto'
 
 export class KeyResultDTO {
   id: string

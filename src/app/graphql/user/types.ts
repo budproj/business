@@ -1,5 +1,5 @@
-import { ACTION } from 'app/authz/constants'
-import { USER_POLICY } from 'app/graphql/user/constants'
+import { ACTION } from 'src/app/authz/constants'
+import { USER_POLICY } from 'src/app/graphql/user/constants'
 
 export interface UserActionPolicies {
   [ACTION.CREATE]: USER_POLICY | Promise<USER_POLICY>

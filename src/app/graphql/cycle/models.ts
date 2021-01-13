@@ -1,7 +1,7 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql'
 
-import { ObjectiveObject } from 'app/graphql/objective/models'
-import { TeamObject } from 'app/graphql/team'
+import { ObjectiveObject } from 'src/app/graphql/objective/models'
+import { TeamObject } from 'src/app/graphql/team'
 
 @ObjectType('Cycle', {
   description:

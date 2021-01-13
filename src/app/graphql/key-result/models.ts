@@ -1,9 +1,9 @@
 import { Field, Float, ID, InputType, ObjectType, registerEnumType } from '@nestjs/graphql'
 
-import { ObjectiveObject } from 'app/graphql/objective/models'
-import { TeamObject } from 'app/graphql/team/models'
-import { PoliciesObject, UserObject } from 'app/graphql/user/models'
-import { KEY_RESULT_FORMAT } from 'domain/key-result/constants'
+import { ObjectiveObject } from 'src/app/graphql/objective/models'
+import { TeamObject } from 'src/app/graphql/team/models'
+import { PoliciesObject, UserObject } from 'src/app/graphql/user/models'
+import { KEY_RESULT_FORMAT } from 'src/domain/key-result/constants'
 
 import { ConfidenceReportObject } from './report/confidence/models'
 import { ProgressReportObject } from './report/progress/models'

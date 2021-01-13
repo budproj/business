@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 
-import appConfig from 'config/app'
-import DomainModule from 'domain/module'
+import appConfig from 'src/config/app'
+import DomainModule from 'src/domain/module'
 
 import GraphQLConfidenceReportResolver from './resolver'
 import GraphQLConfidenceReportService from './service'

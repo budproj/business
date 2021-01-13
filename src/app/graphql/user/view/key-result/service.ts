@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common'
 
-import { RESOURCE } from 'app/authz/constants'
-import GraphQLEntityService from 'app/graphql/service'
-import { KeyResultViewDTO } from 'domain/user/view/key-result/dto'
-import { KeyResultView } from 'domain/user/view/key-result/entities'
-import DomainKeyResultViewService from 'domain/user/view/key-result/service'
+import { RESOURCE } from 'src/app/authz/constants'
+import GraphQLEntityService from 'src/app/graphql/service'
+import { KeyResultViewDTO } from 'src/domain/user/view/key-result/dto'
+import { KeyResultView } from 'src/domain/user/view/key-result/entities'
+import DomainKeyResultViewService from 'src/domain/user/view/key-result/service'
 
 @Injectable()
 class GraphQLKeyResultViewService extends GraphQLEntityService<KeyResultView, KeyResultViewDTO> {

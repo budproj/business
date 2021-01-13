@@ -1,20 +1,24 @@
-import * as fs from 'fs'
-
-import { ManagementClient, AuthenticationClient, User } from 'auth0'
-import * as csv from 'fast-csv'
+import { ManagementClient, AuthenticationClient, User, CreateUserData } from 'auth0'
 import { randomPassword } from 'secure-random-password'
+
+import { USER_GENDER } from 'src/domain/user/constants'
 
 interface Auth0Interface {
   domain: string
 }
 
-interface AuthzUserDraft {
-  name: string
+interface UserDraft {
+  first_name: string
+  last_name: string
   email: string
-  role: UserRoleName
+  company_role: string
+  picture: string
+  gender: USER_GENDER
+  authz_role: AuthzRoleName
+  team: string
 }
 
-type UserRoleName = 'Stakeholder' | 'Squad Member' | 'Leader' | 'Team Member'
+type AuthzRoleName = 'Stakeholder' | 'Squad Member' | 'Leader' | 'Team Member'
 
 class Auth0 implements Auth0Interface {
   public domain = 'getbud.us.auth0.com'
@@ -32,36 +36,26 @@ class Auth0 implements Auth0Interface {
     })
   }
 
-  inviteUsersFromFile(filePath: string) {
-    fs.createReadStream(filePath)
-      .pipe(csv.parse({ headers: true }))
-      .on('error', (error) => console.error(error))
-      .on('data', async (user) => this.inviteUser(user))
+  buildUserFullName(userDraft: UserDraft) {
+    return `${userDraft.first_name} ${userDraft.last_name}`
   }
 
-  async inviteUser(userDraft: AuthzUserDraft) {
-    const createdUser = await this.createUser(userDraft)
-
-    await this.addDraftRoleToInvitedUser(createdUser, userDraft.role)
-    await this.triggerInviteEmail(createdUser)
-  }
-
-  async createUser(userDraft: AuthzUserDraft) {
-    const userToCreate = {
-      name: userDraft.name,
+  async createUser(userDraft: UserDraft) {
+    const userFullName = this.buildUserFullName(userDraft)
+    const userToCreate: CreateUserData = {
+      name: userFullName,
       email: userDraft.email,
+      picture: userDraft.picture,
       password: randomPassword(),
       connection: 'Username-Password-Authentication',
     }
 
     const createdUser = await this.mgmtClient.createUser(userToCreate)
-    console.log('Created user:')
-    console.log(createdUser)
 
     return createdUser
   }
 
-  async addDraftRoleToInvitedUser(user: User, roleName: UserRoleName) {
+  async addDraftRoleToInvitedUser(user: User, roleName: AuthzRoleName) {
     const roles = await this.mgmtClient.getRoles()
     const userRoles = roles.filter((role) => role.name === roleName)
 
@@ -73,8 +67,8 @@ class Auth0 implements Auth0Interface {
     }
 
     await this.mgmtClient.assignRolestoUser(parameters, userRolesData)
-    console.log('Roles assigned to user:')
-    console.log(userRoles)
+
+    return userRoles
   }
 
   async triggerInviteEmail(user: User) {
@@ -83,8 +77,13 @@ class Auth0 implements Auth0Interface {
       connection: 'Username-Password-Authentication',
     }
 
-    await this.authClient.requestChangePasswordEmail(parameters)
-    console.log(`Sent a change password e-mail to user ${user.name}`)
+    return this.authClient.requestChangePasswordEmail(parameters)
+  }
+
+  async getUserByEmail(email: string) {
+    const user = await this.mgmtClient.getUsersByEmail(email)
+
+    return user
   }
 }
 

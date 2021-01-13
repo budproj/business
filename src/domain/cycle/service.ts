@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { uniq } from 'lodash'
 
-import { CycleDTO } from 'domain/cycle/dto'
-import DomainEntityService from 'domain/service'
-import { TeamDTO } from 'domain/team/dto'
-import DomainTeamService from 'domain/team/service'
-import { UserDTO } from 'domain/user/dto'
+import { CycleDTO } from 'src/domain/cycle/dto'
+import DomainEntityService from 'src/domain/service'
+import { TeamDTO } from 'src/domain/team/dto'
+import DomainTeamService from 'src/domain/team/service'
+import { UserDTO } from 'src/domain/user/dto'
 
 import { Cycle } from './entities'
 import DomainCycleRepository from './repository'

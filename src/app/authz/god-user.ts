@@ -1,6 +1,6 @@
-import { ACTION, PERMISSION, RESOURCE } from 'app/authz/constants'
-import { AuthzUser } from 'app/authz/types'
-import { CONSTRAINT } from 'domain/constants'
+import { ACTION, PERMISSION, RESOURCE } from 'src/app/authz/constants'
+import { AuthzUser } from 'src/app/authz/types'
+import { CONSTRAINT } from 'src/domain/constants'
 
 class GodUser implements AuthzUser {
   public readonly id: AuthzUser['id']

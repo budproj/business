@@ -1,12 +1,12 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { remove, uniq } from 'lodash'
 
-import { KeyResultDTO } from 'domain/key-result/dto'
-import { ConfidenceReportDTO } from 'domain/key-result/report/confidence/dto'
-import DomainEntityService from 'domain/service'
-import { TeamDTO } from 'domain/team/dto'
-import DomainTeamService from 'domain/team/service'
-import { UserDTO } from 'domain/user/dto'
+import { KeyResultDTO } from 'src/domain/key-result/dto'
+import { ConfidenceReportDTO } from 'src/domain/key-result/report/confidence/dto'
+import DomainEntityService from 'src/domain/service'
+import { TeamDTO } from 'src/domain/team/dto'
+import DomainTeamService from 'src/domain/team/service'
+import { UserDTO } from 'src/domain/user/dto'
 
 import { ConfidenceReport } from './entities'
 import DomainConfidenceReportRepository from './repository'

@@ -9,9 +9,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { CycleDTO } from 'domain/cycle/dto'
-import { KeyResultDTO } from 'domain/key-result/dto'
-import { UserDTO } from 'domain/user/dto'
+import { CycleDTO } from 'src/domain/cycle/dto'
+import { KeyResultDTO } from 'src/domain/key-result/dto'
+import { UserDTO } from 'src/domain/user/dto'
 
 import { ObjectiveDTO } from './dto'
 
