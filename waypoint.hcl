@@ -8,7 +8,7 @@ app "app" {
       use "aws-ecr" {
         region = "sa-east-1"
         repository = "business"
-        tag = gitrefpretty()
+        tag = gitrefhash()
       }
     }
   }
@@ -18,7 +18,7 @@ app "app" {
       command = [
         "bash",
         "-c",
-        "bash <(curl -s https://raw.githubusercontent.com/budproj/gist/main/gitops/deploy.sh) -t ${gitrefpretty()} -s ${gitreftag()}",
+        "bash <(curl -s https://raw.githubusercontent.com/budproj/gist/main/gitops/deploy.sh) -t ${gitrefhash()} -s ${gitreftag()}",
       ]
     }
   }
