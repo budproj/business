@@ -77,8 +77,13 @@ class Auth0 implements Auth0Interface {
       connection: 'Username-Password-Authentication',
     }
 
-    await this.authClient.requestChangePasswordEmail(parameters)
-    console.log(`Sent a change password e-mail to user ${user.name}`)
+    return this.authClient.requestChangePasswordEmail(parameters)
+  }
+
+  async getUserByEmail(email: string) {
+    const user = await this.mgmtClient.getUsersByEmail(email)
+
+    return user
   }
 }
 

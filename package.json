@@ -31,7 +31,9 @@
     "db:production:load-sandbox-data": "ts-node -r tsconfig-paths/register src/database/environments/production/load-sandbox",
     "waypoint:build": "waypoint build",
     "waypoint:deploy": "waypoint deploy",
-    "scripts:create-users": "npm run build && node ./scripts/createUsers.js"
+    "scripts:create-and-invite": "run-s build scripts:create-users scripts:invite-users",
+    "scripts:create-users": "node ./scripts/createUsers.js",
+    "scripts:invite-users": "node ./scripts/inviteUsers.js"
   },
   "author": "delucca <delucca@pm.me>",
   "license": "Apache-2.0",
