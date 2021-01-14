@@ -16,6 +16,7 @@
     "compile": "tsc",
     "clean": "rimraf -rf dist",
     "lint": "eslint '{src,lib}/**/*.ts'",
+    "lint:staged": "lint-staged",
     "lint:fix": "npm run lint -- --fix",
     "typeorm": "run-s clean compile && npm run typeorm:run --",
     "typeorm:run": "ts-node -r tsconfig-paths/register ./node_modules/.bin/typeorm --config src/config/database/config",
