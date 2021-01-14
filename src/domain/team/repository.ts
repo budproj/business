@@ -1,6 +1,6 @@
 import { EntityRepository, SelectQueryBuilder } from 'typeorm'
 
-import DomainEntityRepository from 'src/domain/repository'
+import DomainEntityRepository, { CONSTRAINT_TYPE } from 'src/domain/repository'
 import { TeamDTO } from 'src/domain/team/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
@@ -8,12 +8,24 @@ import { Team } from './entities'
 
 @EntityRepository(Team)
 class DomainTeamRepository extends DomainEntityRepository<Team> {
-  constraintQueryToCompany(teamIDsInCompany: Array<TeamDTO['id']>) {
+  constraintQueryToTeam(
+    allowedTeams: Array<TeamDTO['id']>,
+    user: UserDTO,
+    constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.AND,
+  ) {
     const addConstraintToQuery = (query?: SelectQueryBuilder<Team>) => {
       const baseQuery = query ?? this.createQueryBuilder()
-      const constrainedQuery = baseQuery.andWhere(`${Team.name}.id IN (:...teamIDsInCompany)`, {
-        teamIDsInCompany,
-      })
+      const ownsConstrainedQuery = this.constraintQueryToOwns(user, CONSTRAINT_TYPE.OR)(baseQuery)
+      const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(
+        constraintType,
+      )
+
+      const constrainedQuery = ownsConstrainedQuery[constraintMethodName](
+        `${Team.name}.id IN (:...allowedTeams)`,
+        {
+          allowedTeams,
+        },
+      )
 
       return constrainedQuery
     }
@@ -21,23 +33,14 @@ class DomainTeamRepository extends DomainEntityRepository<Team> {
     return addConstraintToQuery
   }
 
-  constraintQueryToTeam(allowedTeams: Array<TeamDTO['id']>) {
+  constraintQueryToOwns(user: UserDTO, constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.AND) {
     const addConstraintToQuery = (query?: SelectQueryBuilder<Team>) => {
       const baseQuery = query ?? this.createQueryBuilder()
-      const constrainedQuery = baseQuery.andWhere(`${Team.name}.id IN (:...allowedTeams)`, {
-        allowedTeams,
-      })
+      const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(
+        constraintType,
+      )
 
-      return constrainedQuery
-    }
-
-    return addConstraintToQuery
-  }
-
-  constraintQueryToOwns(user: UserDTO) {
-    const addConstraintToQuery = (query?: SelectQueryBuilder<Team>) => {
-      const baseQuery = query ?? this.createQueryBuilder()
-      const constrainedQuery = baseQuery.andWhere(`${Team.name}.ownerId = :userID`, {
+      const constrainedQuery = baseQuery[constraintMethodName](`${Team.name}.ownerId = :userID`, {
         userID: user.id,
       })
 

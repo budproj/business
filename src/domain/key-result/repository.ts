@@ -9,30 +9,21 @@ import { KeyResult } from './entities'
 
 @EntityRepository(KeyResult)
 class DomainKeyResultRepository extends DomainEntityRepository<KeyResult> {
-  constraintQueryToCompany(teamIDsInCompany: Array<TeamDTO['id']>) {
-    const addConstraintToQuery = (query?: SelectQueryBuilder<KeyResult>) => {
-      const baseQuery = query ?? this.createQueryBuilder()
-      const constrainedQuery = baseQuery.andWhere(
-        `${KeyResult.name}.teamId IN (:...teamIDsInCompany)`,
-        {
-          teamIDsInCompany,
-        },
-      )
-
-      return constrainedQuery
-    }
-
-    return addConstraintToQuery
-  }
-
-  constraintQueryToTeam(allowedTeams: Array<TeamDTO['id']>, user: UserDTO) {
+  constraintQueryToTeam(
+    allowedTeams: Array<TeamDTO['id']>,
+    user: UserDTO,
+    constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.AND,
+  ) {
     const addConstraintToQuery = (query?: SelectQueryBuilder<KeyResult>) => {
       const baseQuery = query ?? this.createQueryBuilder()
       const ownsConstrainedQuery = this.constraintQueryToOwns(user, CONSTRAINT_TYPE.OR)(baseQuery)
+      const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(
+        constraintType,
+      )
 
       const constrainedQuery = ownsConstrainedQuery
         .leftJoinAndSelect(`${KeyResult.name}.team`, 'team')
-        .andWhere('team.id IN (:...allowedTeams)', { allowedTeams })
+        [constraintMethodName]('team.id IN (:...allowedTeams)', { allowedTeams })
 
       console.log(constrainedQuery.expressionMap.wheres[0].type)
 

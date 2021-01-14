@@ -16,16 +16,10 @@ export enum CONDITIONAL_METHOD_NAMES {
 }
 
 abstract class DomainEntityRepository<E> extends Repository<E> {
-  constraintQueryToCompany(
-    _teamIDsInCompany: Array<TeamDTO['id']>,
-    _user?: UserDTO,
-  ): SelectionQueryConstrain<E> {
-    throw new Error('You must implement the constraintQueryToCompany method')
-  }
-
   constraintQueryToTeam(
     _allowedTeams: Array<TeamDTO['id']>,
-    _user?: UserDTO,
+    _user: UserDTO,
+    _constraintType?: CONSTRAINT_TYPE,
   ): SelectionQueryConstrain<E> {
     throw new Error('You must implement the constraintQueryToTeam method')
   }
