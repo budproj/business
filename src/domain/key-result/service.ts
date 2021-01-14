@@ -2,6 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { sum, min, uniq } from 'lodash'
 
 import { TIMEFRAME_SCOPE } from 'src/domain/constants'
+import { DEFAULT_CONFIDENCE, DEFAULT_PROGRESS } from 'src/domain/key-result/constants'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { ConfidenceReport } from 'src/domain/key-result/report/confidence/entities'
 import { ProgressReport } from 'src/domain/key-result/report/progress/entities'
@@ -73,7 +74,6 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     id: KeyResultDTO['id'],
     timeframeScope: TIMEFRAME_SCOPE,
   ): Promise<ProgressReport['valueNew']> {
-    const defaultProgress = 0
     const progressTimeframedSelectors = {
       [TIMEFRAME_SCOPE.CURRENT]: async () => this.getCurrentProgress(id),
       [TIMEFRAME_SCOPE.SNAPSHOT]: async () => this.getSnapshotProgress(id),
@@ -81,7 +81,7 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
 
     const timeframeSelector = progressTimeframedSelectors[timeframeScope]
     const currentProgress = await timeframeSelector()
-    if (!currentProgress) return defaultProgress
+    if (!currentProgress) return DEFAULT_PROGRESS
 
     const { goal, initialValue } = await this.repository.findOne({ id })
     const currentProgressInPercentage =
@@ -91,28 +91,22 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
   }
 
   async getSnapshotProgress(id: KeyResultDTO['id']): Promise<ProgressReport['valueNew']> {
-    const defaultProgress = 0
-
     const latestProgressReport = await this.report.progress.getLatestFromSnapshotForKeyResult(id)
-    if (!latestProgressReport) return defaultProgress
+    if (!latestProgressReport) return DEFAULT_PROGRESS
 
     return latestProgressReport.valueNew
   }
 
   async getCurrentProgress(id: KeyResultDTO['id']): Promise<ProgressReport['valueNew']> {
-    const defaultProgress = 0
-
     const latestProgressReport = await this.report.progress.getLatestFromKeyResult(id)
-    if (!latestProgressReport) return defaultProgress
+    if (!latestProgressReport) return DEFAULT_PROGRESS
 
     return latestProgressReport.valueNew
   }
 
   async getCurrentConfidence(id: KeyResultDTO['id']): Promise<ConfidenceReport['valueNew']> {
-    const defaultConfidence = 51
-
     const latestConfidenceReport = await this.report.confidence.getLatestFromKeyResult(id)
-    if (!latestConfidenceReport) return defaultConfidence
+    if (!latestConfidenceReport) return DEFAULT_CONFIDENCE
 
     return latestConfidenceReport.valueNew
   }
@@ -147,13 +141,13 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
   }
 
   async getLowestConfidenceFromList(keyResults: KeyResult[]) {
-    const defaultConfidence = 100
+    const DEFAULT_CONFIDENCE = 100
     const currentConfidenceList = await Promise.all(
       keyResults.map(async ({ id }) => this.getCurrentConfidence(id)),
     )
     const minConfidence = min(currentConfidenceList)
 
-    return minConfidence ?? defaultConfidence
+    return minConfidence ?? DEFAULT_CONFIDENCE
   }
 }
 
