@@ -1,7 +1,8 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { sum, min, uniq } from 'lodash'
+import { sum, min, uniq, uniqBy, remove } from 'lodash'
+import { FindConditions } from 'typeorm'
 
-import { TIMEFRAME_SCOPE } from 'src/domain/constants'
+import { CONSTRAINT, TIMEFRAME_SCOPE } from 'src/domain/constants'
 import { DEFAULT_CONFIDENCE, DEFAULT_PROGRESS } from 'src/domain/key-result/constants'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { ConfidenceReport } from 'src/domain/key-result/report/confidence/entities'
@@ -154,12 +155,31 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     const progressReports = await this.report.progress.getFromKeyResult(keyResultID)
     const confidenceReports = await this.report.confidence.getFromKeyResult(keyResultID)
 
-    console.log(progressReports)
-    console.log(confidenceReports)
+    const mergedReports = [...progressReports, ...confidenceReports]
+    const uniqueReports = uniqBy(mergedReports, 'comment')
 
-    return {
-      id: 'ok',
-    }
+    return uniqueReports
+  }
+
+  async getOneReportWithConstraint(
+    constraint: CONSTRAINT,
+    selector: FindConditions<ProgressReport>,
+    user: UserDTO,
+  ) {
+    const progressReport = await this.report.progress.getOneWithConstraint(
+      constraint,
+      selector,
+      user,
+    )
+    const confidenceReport = await this.report.confidence.getOneWithConstraint(
+      constraint,
+      selector,
+      user,
+    )
+
+    const report = remove([progressReport, confidenceReport])[0]
+
+    return report
   }
 }
 

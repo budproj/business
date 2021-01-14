@@ -88,11 +88,11 @@ export class KeyResultObject {
   })
   currentConfidence: ConfidenceReportObject['valueNew']
 
-  @Field(() => ReportObject, {
+  @Field(() => [ReportObject], {
     description: 'Created date ordered list of reports regarding this key result',
     nullable: true,
   })
-  reports?: ReportObject
+  reports?: ReportObject[]
 }
 
 @InputType('KeyResultInput', {

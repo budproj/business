@@ -11,7 +11,7 @@ class DomainConfidenceReportRepository extends DomainEntityRepository<Confidence
   constraintQueryToTeam(
     allowedTeams: Array<TeamDTO['id']>,
     user: UserDTO,
-    constraintType: CONSTRAINT_TYPE.AND,
+    constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.AND,
   ) {
     const addConstraintToQuery = (query?: SelectQueryBuilder<ConfidenceReport>) => {
       const baseQuery = query ?? this.createQueryBuilder()
