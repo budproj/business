@@ -1,1 +1,1 @@
-export { default as AppModule } from './module';
+export { default as AppModule } from './module'
