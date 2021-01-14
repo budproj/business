@@ -47,26 +47,32 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
     const view = await query.getOne()
     if (!view) return
 
-    const refreshedView = await this.refreshView(view, context)
+    const refreshedView = await this.refreshView(view, context.user)
 
     return refreshedView
   }
 
-  async refreshView(view: KeyResultView, context?: DomainServiceContext) {
-    const availableKeyResultIDs = await this.getAvailableKeyResultIDs(context)
-    const userRank = view?.rank ?? []
-
-    const mergedRank = uniq([...userRank, ...availableKeyResultIDs])
+  async refreshView(view: KeyResultView, user: UserDTO) {
+    const rank = await this.refreshViewRank(user, view?.rank)
     const newView = {
       ...view,
-      rank: mergedRank,
+      rank,
     }
 
     const selector = { id: view.id }
-    const newData = { rank: mergedRank }
+    const newData = { rank }
     await this.update(selector, newData)
 
     return newView
+  }
+
+  async refreshViewRank(user: UserDTO, previousRank: KeyResultView['rank'] = []) {
+    const availableKeyResults = await this.keyResultService.getFromOwner(user.id)
+    const availableKeyResultIDs = availableKeyResults.map((keyResult) => keyResult.id)
+
+    const rank = uniq([...previousRank, ...availableKeyResultIDs])
+
+    return rank
   }
 
   async createIfUserIsInCompany(
@@ -116,7 +122,7 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
       message: 'Creating new key result view',
     })
 
-    if (!userView.rank) userView.rank = await this.getAvailableKeyResultIDs(context)
+    if (!userView.rank) userView.rank = await this.refreshViewRank(context.user)
     if (!userView.userId) userView.userId = context?.user.id
 
     const data = await this.repository.insert(userView)
@@ -128,16 +134,6 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
     )
 
     return createdViews
-  }
-
-  async getAvailableKeyResultIDs(context?: DomainServiceContext) {
-    const availableKeyResults = await this.keyResultService.getManyWithConstraint(
-      context.constraint,
-      context.user,
-    )
-    const availableKeyResultIDs = availableKeyResults.map((keyResult) => keyResult.id.toString())
-
-    return availableKeyResultIDs
   }
 }
 
