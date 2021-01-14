@@ -9,6 +9,7 @@ import DomainEntityService from 'src/domain/service'
 import { TeamEntityFilter, TeamEntityRelation } from 'src/domain/team/types'
 import { UserDTO } from 'src/domain/user/dto'
 
+import { DEFAULT_CONFIDENCE } from './constants'
 import { TeamDTO } from './dto'
 import { Team } from './entities'
 import DomainTeamRepository from './repository'
@@ -82,13 +83,11 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
   }
 
   async getCurrentConfidence(teamId: TeamDTO['id']): Promise<ConfidenceReport['valueNew']> {
-    const defaultConfidence = 100
-
     const teams = await this.getAllTeamsBelowNodes(teamId, ['id'])
     const teamIDs = teams.map((team) => team.id)
 
     const keyResults = await this.keyResultService.getFromTeam(teamIDs)
-    if (!keyResults) return defaultConfidence
+    if (!keyResults) return DEFAULT_CONFIDENCE
 
     const teamCurrentConfidence = this.keyResultService.getLowestConfidenceFromList(keyResults)
 
