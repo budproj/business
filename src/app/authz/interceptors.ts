@@ -90,7 +90,6 @@ export class EnhanceWithBudUser implements NestInterceptor {
       RESOURCE.CONFIDENCE_REPORT,
       permissions,
     )
-    const companyActionScopes = this.parseActionScopesForResource(RESOURCE.COMPANY, permissions)
     const cycleActionScopes = this.parseActionScopesForResource(RESOURCE.CYCLE, permissions)
     const objectiveActionScopes = this.parseActionScopesForResource(RESOURCE.OBJECTIVE, permissions)
     const teamActionScopes = this.parseActionScopesForResource(RESOURCE.TEAM, permissions)
@@ -104,7 +103,6 @@ export class EnhanceWithBudUser implements NestInterceptor {
       [RESOURCE.KEY_RESULT]: keyResultActionScopes,
       [RESOURCE.PROGRESS_REPORT]: progressReportActionScopes,
       [RESOURCE.CONFIDENCE_REPORT]: confidenceReportActionScopes,
-      [RESOURCE.COMPANY]: companyActionScopes,
       [RESOURCE.CYCLE]: cycleActionScopes,
       [RESOURCE.OBJECTIVE]: objectiveActionScopes,
       [RESOURCE.TEAM]: teamActionScopes,

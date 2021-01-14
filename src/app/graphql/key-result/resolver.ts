@@ -159,6 +159,16 @@ class GraphQLKeyResultResolver {
 
     return this.keyResultDomain.getCurrentConfidence(keyResult.id)
   }
+
+  @ResolveField()
+  async reports(@Parent() keyResult: KeyResultObject) {
+    this.logger.log({
+      keyResult,
+      message: 'Fetching reports for key result',
+    })
+
+    return this.keyResultDomain.getReports(keyResult.id)
+  }
 }
 
 export default GraphQLKeyResultResolver

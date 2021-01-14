@@ -1,5 +1,6 @@
 import { Field, Float, ID, InputType, ObjectType, registerEnumType } from '@nestjs/graphql'
 
+import { ReportObject } from 'src/app/graphql/key-result/report/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import { TeamObject } from 'src/app/graphql/team/models'
 import { PoliciesObject, UserObject } from 'src/app/graphql/user/models'
@@ -86,6 +87,12 @@ export class KeyResultObject {
     nullable: true,
   })
   currentConfidence: ConfidenceReportObject['valueNew']
+
+  @Field(() => [ReportObject], {
+    description: 'Created date ordered list of reports regarding this key result',
+    nullable: true,
+  })
+  reports?: ReportObject[]
 }
 
 @InputType('KeyResultInput', {
