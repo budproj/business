@@ -149,6 +149,12 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
 
     return minConfidence ?? DEFAULT_CONFIDENCE
   }
+
+  async getReports(_keyResultID: KeyResult['id']) {
+    return {
+      id: 'ok',
+    }
+  }
 }
 
 export default DomainKeyResultService
