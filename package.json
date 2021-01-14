@@ -52,8 +52,8 @@
     "url": "https://github.com/budproj/business/issues"
   },
   "engines": {
-    "npm": ">=6.14.11",
-    "node": ">=15.2.1"
+    "npm": ">=7.3.0",
+    "node": ">=15.5.1"
   },
   "dependencies": {
     "@nestjs/cli": "^7.5.3",
