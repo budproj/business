@@ -150,7 +150,13 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     return minConfidence ?? DEFAULT_CONFIDENCE
   }
 
-  async getReports(_keyResultID: KeyResult['id']) {
+  async getReports(keyResultID: KeyResult['id']) {
+    const progressReports = await this.report.progress.getFromKeyResult(keyResultID)
+    const confidenceReports = await this.report.confidence.getFromKeyResult(keyResultID)
+
+    console.log(progressReports)
+    console.log(confidenceReports)
+
     return {
       id: 'ok',
     }

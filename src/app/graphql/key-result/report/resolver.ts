@@ -59,10 +59,10 @@ class GraphQLKeyResultReportResolver {
         checkInInput,
         keyResult,
         message:
-          'User tried to create a check-in in a key resultat that he/she can not see. Either it does not exist, or the user has no permission to see it',
+          'User tried to create a check-in in a key result that he/she can not see. Either it does not exist, or the user has no permission to see it',
       })
       throw new NotFoundException(
-        `We could not found an Key Result with ID ${checkInInput.keyResultId}`,
+        `We could not found a Key Result with ID ${checkInInput.keyResultId}`,
       )
     }
 

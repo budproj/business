@@ -201,7 +201,7 @@ abstract class DomainEntityService<E, D> {
       message: `Reduced companies and companies teams for user`,
     })
 
-    const constrainQuery = this.repository.constraintQueryToCompany(companiesTeamIDs)
+    const constrainQuery = this.repository.constraintQueryToCompany(companiesTeamIDs, user)
 
     return this.get(selector, constrainQuery)
   }
@@ -215,7 +215,7 @@ abstract class DomainEntityService<E, D> {
       message: `Reduced teams for user`,
     })
 
-    const constrainQuery = this.repository.constraintQueryToTeam(userTeams)
+    const constrainQuery = this.repository.constraintQueryToTeam(userTeams, user)
 
     return this.get(selector, constrainQuery)
   }
