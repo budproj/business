@@ -44,7 +44,9 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
     query: SelectQueryBuilder<KeyResultView>,
     context: DomainServiceContext,
   ): Promise<KeyResultView | null> {
-    const view = await query.getOne()
+    const view = await query
+      .andWhere(`${KeyResultView.name}.user_id = :userID`, { userID: context.user.id })
+      .getOne()
     if (!view) return
 
     const refreshedView = await this.refreshView(view, context.user)
