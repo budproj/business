@@ -59,7 +59,9 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
     if (!teamIds || isEmptyArray) return
 
     const buildSelector = (teamId: TeamDTO['id']) => ({ teamId })
-    const selector = Array.isArray(teamIds) ? teamIds.map(buildSelector) : buildSelector(teamIds)
+    const selector = Array.isArray(teamIds)
+      ? teamIds.map((teamID) => buildSelector(teamID))
+      : buildSelector(teamIds)
 
     return this.repository.find({ where: selector, select: filter })
   }

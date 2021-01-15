@@ -65,7 +65,9 @@ class DomainConfidenceReportService extends DomainEntityService<
     confidenceReports: Partial<ConfidenceReportDTO> | Array<Partial<ConfidenceReportDTO>>,
   ): Promise<Array<Partial<ConfidenceReportDTO>>> {
     const enhancementPromises = Array.isArray(confidenceReports)
-      ? confidenceReports.map(this.enhanceWithPreviousValue)
+      ? confidenceReports.map(async (confidenceReport) =>
+          this.enhanceWithPreviousValue(confidenceReport),
+        )
       : [this.enhanceWithPreviousValue(confidenceReports)]
     const confidenceReportsWithPreviousValues = remove(await Promise.all(enhancementPromises))
 
