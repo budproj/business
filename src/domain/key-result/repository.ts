@@ -25,8 +25,6 @@ class DomainKeyResultRepository extends DomainEntityRepository<KeyResult> {
         .leftJoinAndSelect(`${KeyResult.name}.team`, 'team')
         [constraintMethodName]('team.id IN (:...allowedTeams)', { allowedTeams })
 
-      console.log(constrainedQuery.expressionMap.wheres[0].type)
-
       return constrainedQuery
     }
 

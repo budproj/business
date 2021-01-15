@@ -89,7 +89,7 @@ class DomainProgressReportService extends DomainEntityService<ProgressReport, Pr
     progressReports: Partial<ProgressReportDTO> | Array<Partial<ProgressReportDTO>>,
   ): Promise<Array<Partial<ProgressReportDTO>>> {
     const enhancementPromises = Array.isArray(progressReports)
-      ? progressReports.map(this.enhanceWithPreviousValue)
+      ? progressReports.map(async (progressReport) => this.enhanceWithPreviousValue(progressReport))
       : [this.enhanceWithPreviousValue(progressReports)]
     const progressReportsWithPreviousValues = remove(await Promise.all(enhancementPromises))
 

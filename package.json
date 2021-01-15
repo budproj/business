@@ -91,7 +91,7 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
-    "@budproj/eslint-config-base-ts": "^1.0.1",
+    "@budproj/eslint-config-base-ts": "^1.0.3",
     "@budproj/eslint-config-prettier-ts": "^1.0.0",
     "@budproj/prettier-config": "^1.0.0",
     "@nestjs/schematics": "^7.2.1",
