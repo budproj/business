@@ -1,54 +1,43 @@
-import { EntityRepository, SelectQueryBuilder } from 'typeorm'
+import { EntityRepository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
 import DomainEntityRepository, { CONSTRAINT_TYPE } from 'src/domain/repository'
 import { TeamDTO } from 'src/domain/team/dto'
+import { Team } from 'src/domain/team/entities'
 import { UserDTO } from 'src/domain/user/dto'
+import { User } from 'src/domain/user/entities'
 
 import { KeyResultView } from './entities'
 
 @EntityRepository(KeyResultView)
 class DomainKeyResultViewRepository extends DomainEntityRepository<KeyResultView> {
-  constraintQueryToTeam(
-    allowedTeams: Array<TeamDTO['id']>,
-    user: UserDTO,
-    constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.AND,
-  ) {
-    const addConstraintToQuery = (query?: SelectQueryBuilder<KeyResultView>) => {
-      const baseQuery = query ?? this.createQueryBuilder()
-      const ownsConstrainedQuery = this.constraintQueryToOwns(user, CONSTRAINT_TYPE.OR)(baseQuery)
-      const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(
-        constraintType,
-      )
-
-      const constrainedQuery = ownsConstrainedQuery
-        .leftJoinAndSelect(`${KeyResultView.name}.user`, 'user')
-        .leftJoinAndSelect('user.teams', 'teams')
-        [constraintMethodName]('teams.id IN (:...allowedTeams)', { allowedTeams })
-
-      return constrainedQuery
-    }
-
-    return addConstraintToQuery
+  setupTeamQuery(query: SelectQueryBuilder<KeyResultView>) {
+    return query
+      .leftJoinAndSelect(`${KeyResultView.name}.user`, User.name)
+      .leftJoinAndSelect(`${User.name}.teams`, Team.name)
   }
 
-  constraintQueryToOwns(user: UserDTO, constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.AND) {
-    const addConstraintToQuery = (query?: SelectQueryBuilder<KeyResultView>) => {
-      const baseQuery = query ?? this.createQueryBuilder()
-      const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(
-        constraintType,
-      )
+  addTeamWhereExpression(
+    query: WhereExpression,
+    allowedTeams: Array<TeamDTO['id']>,
+    constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,
+  ) {
+    const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
 
-      const constrainedQuery = baseQuery[constraintMethodName](
-        `${KeyResultView.name}.userId = :userID`,
-        {
-          userID: user.id,
-        },
-      )
+    return query[constraintMethodName](`${Team.name}.id IN (:...allowedTeams)`, {
+      allowedTeams,
+    })
+  }
 
-      return constrainedQuery
-    }
+  addOwnsWhereExpression(
+    query: WhereExpression,
+    user: UserDTO,
+    constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,
+  ) {
+    const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
 
-    return addConstraintToQuery
+    return query[constraintMethodName](`${KeyResultView.name}.userId = :userID`, {
+      userID: user.id,
+    })
   }
 }
 

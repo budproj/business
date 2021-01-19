@@ -1,53 +1,40 @@
-import { EntityRepository, SelectQueryBuilder } from 'typeorm'
+import { EntityRepository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
 import DomainEntityRepository, { CONSTRAINT_TYPE } from 'src/domain/repository'
 import { TeamDTO } from 'src/domain/team/dto'
+import { Team } from 'src/domain/team/entities'
 import { UserDTO } from 'src/domain/user/dto'
 
 import { Cycle } from './entities'
 
 @EntityRepository(Cycle)
 class DomainCycleRepository extends DomainEntityRepository<Cycle> {
-  constraintQueryToTeam(
-    allowedTeams: Array<TeamDTO['id']>,
-    user: UserDTO,
-    constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.AND,
-  ) {
-    const addConstraintToQuery = (query?: SelectQueryBuilder<Cycle>) => {
-      const baseQuery = query ?? this.createQueryBuilder()
-      const ownsConstrainedQuery = this.constraintQueryToOwns(user, CONSTRAINT_TYPE.OR)(baseQuery)
-      const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(
-        constraintType,
-      )
-
-      const constrainedQuery = ownsConstrainedQuery[constraintMethodName](
-        `${Cycle.name}.teamId IN (:...allowedTeams)`,
-        {
-          allowedTeams,
-        },
-      )
-
-      return constrainedQuery
-    }
-
-    return addConstraintToQuery
+  setupOwnsQuery(query: SelectQueryBuilder<Cycle>) {
+    return query.leftJoinAndSelect(`${Cycle.name}.team`, Team.name)
   }
 
-  constraintQueryToOwns(user: UserDTO, constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.AND) {
-    const addConstraintToQuery = (query?: SelectQueryBuilder<Cycle>) => {
-      const baseQuery = query ?? this.createQueryBuilder()
-      const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(
-        constraintType,
-      )
+  addTeamWhereExpression(
+    query: WhereExpression,
+    allowedTeams: Array<TeamDTO['id']>,
+    constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,
+  ) {
+    const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
 
-      const constrainedQuery = baseQuery
-        .leftJoinAndSelect(`${Cycle.name}.team`, 'team')
-        [constraintMethodName]('team.ownerId = :userID', { userID: user.id })
+    return query[constraintMethodName](`${Cycle.name}.teamId IN (:...allowedTeams)`, {
+      allowedTeams,
+    })
+  }
 
-      return constrainedQuery
-    }
+  addOwnsWhereExpression(
+    query: WhereExpression,
+    user: UserDTO,
+    constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,
+  ) {
+    const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
 
-    return addConstraintToQuery
+    return query[constraintMethodName](`${Team.name}.ownerId = :userID`, {
+      userID: user.id,
+    })
   }
 }
 
