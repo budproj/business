@@ -65,7 +65,7 @@ const main = () =>
     const handleUserDrafts = (userDrafts) => {
       const createUserPromises = userDrafts.map(createUser)
 
-      Promise.all(createUserPromises).then(() => dbConnection.close())
+      Promise.all(createUserPromises).then(() => dbConnection.close()).catch(console.error)
     }
 
     const userDrafts = []
