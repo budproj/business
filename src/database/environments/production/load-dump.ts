@@ -10,7 +10,13 @@ const loadDump = async () => {
   const client = process.argv[2]
   if (!client) throw new Error('You must declare a client')
 
-  const sqlPaths = [join(__dirname, `./clients/${client}/teams.sql`)]
+  const sqlPaths = [
+    join(__dirname, `./clients/${client}/teams.sql`),
+    join(__dirname, `./clients/${client}/teams_users_user.sql`),
+    join(__dirname, `./clients/${client}/cycles.sql`),
+    join(__dirname, `./clients/${client}/objectives.sql`),
+    join(__dirname, `./clients/${client}/key-results.sql`),
+  ]
 
   const { manager } = await createConnection(config)
 
