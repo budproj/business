@@ -20,8 +20,10 @@ interface UserDraft {
 
 type AuthzRoleName = 'Stakeholder' | 'Squad Member' | 'Leader' | 'Team Member'
 
+const { AUTH0_ISSUER } = process.env
+
 class Auth0 implements Auth0Interface {
-  public domain = 'getbud.us.auth0.com'
+  public domain = AUTH0_ISSUER
   private readonly mgmtClient: ManagementClient
   private readonly authClient: AuthenticationClient
 
