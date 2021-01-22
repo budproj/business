@@ -3,6 +3,7 @@ import { remove, uniq } from 'lodash'
 
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { ConfidenceReportDTO } from 'src/domain/key-result/report/confidence/dto'
+import DomainKeyResultService from 'src/domain/key-result/service'
 import DomainEntityService from 'src/domain/service'
 import { TeamDTO } from 'src/domain/team/dto'
 import DomainTeamService from 'src/domain/team/service'
@@ -18,6 +19,8 @@ class DomainConfidenceReportService extends DomainEntityService<
 > {
   constructor(
     public readonly repository: DomainConfidenceReportRepository,
+    @Inject(forwardRef(() => DomainKeyResultService))
+    private readonly keyResultService: DomainKeyResultService,
     @Inject(forwardRef(() => DomainTeamService))
     private readonly teamService: DomainTeamService,
   ) {
@@ -64,14 +67,12 @@ class DomainConfidenceReportService extends DomainEntityService<
   async buildConfidenceReports(
     confidenceReports: Partial<ConfidenceReportDTO> | Array<Partial<ConfidenceReportDTO>>,
   ): Promise<Array<Partial<ConfidenceReportDTO>>> {
-    const enhancementPromises = Array.isArray(confidenceReports)
-      ? confidenceReports.map(async (confidenceReport) =>
-          this.enhanceWithPreviousValue(confidenceReport),
-        )
-      : [this.enhanceWithPreviousValue(confidenceReports)]
-    const confidenceReportsWithPreviousValues = remove(await Promise.all(enhancementPromises))
+    const normalizedReportPromises = Array.isArray(confidenceReports)
+      ? confidenceReports.map(async (confidenceReport) => this.normalizeReport(confidenceReport))
+      : [this.normalizeReport(confidenceReports)]
+    const normalizedReports = remove(await Promise.all(normalizedReportPromises))
 
-    return confidenceReportsWithPreviousValues
+    return normalizedReports
   }
 
   async create(
@@ -90,6 +91,13 @@ class DomainConfidenceReportService extends DomainEntityService<
     return createdConfidenceReports
   }
 
+  async normalizeReport(confidenceReport: Partial<ConfidenceReportDTO>) {
+    const enhancedWithPreviousValue = await this.enhanceWithPreviousValue(confidenceReport)
+    const ensuredNewValue = await this.ensureNewValue(enhancedWithPreviousValue)
+
+    return ensuredNewValue
+  }
+
   async enhanceWithPreviousValue(
     confidenceReport: Partial<ConfidenceReportDTO>,
   ): Promise<Partial<ConfidenceReportDTO | undefined>> {
@@ -106,8 +114,20 @@ class DomainConfidenceReportService extends DomainEntityService<
       message: 'Enhancing confidence report with latest report value',
     })
 
-    if (enhancedConfidenceReport.valuePrevious === enhancedConfidenceReport.valueNew) return
     return enhancedConfidenceReport
+  }
+
+  async ensureNewValue(confidenceReport: Partial<ConfidenceReportDTO>) {
+    if (confidenceReport.valueNew) return confidenceReport
+
+    const previousValue =
+      confidenceReport.valuePrevious ??
+      (await this.keyResultService.getInitialValue(confidenceReport.keyResultId))
+
+    return {
+      ...confidenceReport,
+      valueNew: previousValue,
+    }
   }
 }
 

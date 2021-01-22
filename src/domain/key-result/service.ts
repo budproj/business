@@ -183,6 +183,15 @@ class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO
 
     return report
   }
+
+  async getInitialValue(keyResultID: KeyResult['id']) {
+    const keyResult = await this.repository.findOne(
+      { id: keyResultID },
+      { select: ['initialValue'] },
+    )
+
+    return keyResult.initialValue
+  }
 }
 
 export default DomainKeyResultService
