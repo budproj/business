@@ -10,7 +10,6 @@ import DomainEntityService from 'src/domain/service'
 import { TeamDTO } from 'src/domain/team/dto'
 import DomainTeamService from 'src/domain/team/service'
 import { UserDTO } from 'src/domain/user/dto'
-import { DuplicateEntityError } from 'src/errors'
 
 import { ProgressReport } from './entities'
 import DomainProgressReportRepository from './repository'
@@ -88,12 +87,12 @@ class DomainProgressReportService extends DomainEntityService<ProgressReport, Pr
   async buildProgressReports(
     progressReports: Partial<ProgressReportDTO> | Array<Partial<ProgressReportDTO>>,
   ): Promise<Array<Partial<ProgressReportDTO>>> {
-    const enhancementPromises = Array.isArray(progressReports)
-      ? progressReports.map(async (progressReport) => this.enhanceWithPreviousValue(progressReport))
-      : [this.enhanceWithPreviousValue(progressReports)]
-    const progressReportsWithPreviousValues = remove(await Promise.all(enhancementPromises))
+    const normalizedReportPromises = Array.isArray(progressReports)
+      ? progressReports.map(async (progressReport) => this.normalizeReport(progressReport))
+      : [this.normalizeReport(progressReports)]
+    const normalizedReports = remove(await Promise.all(normalizedReportPromises))
 
-    return progressReportsWithPreviousValues
+    return normalizedReports
   }
 
   async create(
@@ -128,8 +127,6 @@ class DomainProgressReportService extends DomainEntityService<ProgressReport, Pr
       message: 'Enhancing progress report with latest report value',
     })
 
-    if (enhancedProgressReport.valuePrevious === enhancedProgressReport.valueNew)
-      throw new DuplicateEntityError('This progress report is duplicated from latest')
     return enhancedProgressReport
   }
 
@@ -176,6 +173,26 @@ class DomainProgressReportService extends DomainEntityService<ProgressReport, Pr
     if (!keyResult) return
 
     return this.create(data)
+  }
+
+  async normalizeReport(confidenceReport: Partial<ProgressReportDTO>) {
+    const enhancedWithPreviousValue = await this.enhanceWithPreviousValue(confidenceReport)
+    const ensuredNewValue = await this.ensureNewValue(enhancedWithPreviousValue)
+
+    return ensuredNewValue
+  }
+
+  async ensureNewValue(confidenceReport: Partial<ProgressReportDTO>) {
+    if (confidenceReport.valueNew) return confidenceReport
+
+    const previousValue =
+      confidenceReport.valuePrevious ??
+      (await this.keyResultService.getInitialValue(confidenceReport.keyResultId))
+
+    return {
+      ...confidenceReport,
+      valueNew: previousValue,
+    }
   }
 }
 

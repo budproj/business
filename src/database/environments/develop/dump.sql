@@ -1,55 +1,61 @@
 INSERT INTO
   "user"(
-    name,
+    first_name,
+    last_name,
     picture,
     gender,
     role,
     authz_sub
   )
   SELECT
-    'Morty Smith',
+    'Morty',
+    'Smith',
     'https://vignette.wikia.nocookie.net/theapartments/images/2/2b/Screen_Shot_2019-02-06_at_11.36.07_AM.png/revision/latest?cb=20190206163327',
     'MALE',
     'CEO',
     'auth0|5fd773cfd16a7c00694ae5ff'
   WHERE NOT EXISTS (
-    SELECT id FROM "user" WHERE name='Morty Smith'
+    SELECT id FROM "user" WHERE first_name='Morty' AND last_name='Smith'
   );
 
 INSERT INTO
   "user"(
-    name,
+    first_name,
+    last_name,
     picture,
     gender,
     role,
     authz_sub
   )
   SELECT
-    'Rick Sanchez',
+    'Rick',
+    'Sanchez',
     'https://static.wikia.nocookie.net/rickandmorty/images/a/a6/Rick_Sanchez.png',
     'MALE',
     'GOD',
     'auth0|5fedf6295696ae00712ead97'
   WHERE NOT EXISTS (
-    SELECT id FROM "user" WHERE name='Rick Sanchez'
+    SELECT id FROM "user" WHERE first_name='Rick' AND last_name='Sanchez'
   );
 
 INSERT INTO
   "user"(
-    name,
+    first_name,
+    last_name,
     picture,
     gender,
     role,
     authz_sub
   )
   SELECT
-    'Evil Morty',
+    'Evil',
+    'Morty',
     'https://cdn.images.express.co.uk/img/dynamic/20/750x445/1278894.jpg',
     'MALE',
     'GOD',
     'auth0|5fedf78a45226800755a887c'
   WHERE NOT EXISTS (
-    SELECT id FROM "user" WHERE name='Evil Morty'
+    SELECT id FROM "user" WHERE first_name='Evil' AND last_name='Morty'
   );
 
 INSERT INTO
@@ -61,7 +67,7 @@ INSERT INTO
   SELECT
     'Rick Sanchez Inc.',
     'One of the most famous intergalatic empires, Rick Sanchez Inc. is responsible for bringing peace to the galaxy at all costs',
-    (SELECT id FROM "user" WHERE name='Morty Smith')
+    (SELECT id FROM "user" WHERE first_name='Morty' AND last_name='Smith')
   WHERE NOT EXISTS (
     SELECT id FROM team WHERE name='Rick Sanchez Inc.'
   );
@@ -75,7 +81,7 @@ INSERT INTO
   SELECT
     'Evil Morty S/A',
     'We dedicate our lives to end the TIRANY OF RICK SANCHEZ INC.!!!!',
-    (SELECT id FROM "user" WHERE name='Evil Morty')
+    (SELECT id FROM "user" WHERE first_name='Evil' AND last_name='Morty')
   WHERE NOT EXISTS (
     SELECT id FROM team WHERE name='Evil Morty S/A'
   );
@@ -91,7 +97,7 @@ INSERT INTO
     'Space Force',
     'Dedicated to bring balance to the galaxy, Space Force has the best of our company members to finish long lasting conflicts and bring peace to our controlled planets',
     (SELECT id FROM team WHERE name='Rick Sanchez Inc.'),
-    (SELECT id FROM "user" WHERE name='Morty Smith')
+    (SELECT id FROM "user" WHERE first_name='Morty' AND last_name='Smith')
   WHERE NOT EXISTS (
     SELECT id FROM team WHERE name='Space Force'
   );
@@ -107,7 +113,7 @@ INSERT INTO
     'The dumbest team',
     'Well, it is morty, right? So it is the dumbest team',
     (SELECT id FROM team WHERE name='Space Force'),
-    (SELECT id FROM "user" WHERE name='Morty Smith')
+    (SELECT id FROM "user" WHERE first_name='Morty' AND last_name='Smith')
   WHERE NOT EXISTS (
     SELECT id FROM team WHERE name='The dumbest team'
   );
@@ -123,7 +129,7 @@ INSERT INTO
     'Earth Force',
     'Dedicated to bring balance here on our home planet, Earth Force focus finishing conflicts here on earth to maintain peace',
     (SELECT id FROM team WHERE name='Rick Sanchez Inc.'),
-    (SELECT id FROM "user" WHERE name='Rick Sanchez')
+    (SELECT id FROM "user" WHERE first_name='Rick' AND last_name='Sanchez')
   WHERE NOT EXISTS (
     SELECT id FROM team WHERE name='Earth Force'
   );
@@ -139,7 +145,7 @@ INSERT INTO
     'Evil Morty Guerrilla',
     'This team does strategic strikes focusing on creating chaos in the galaxy',
     (SELECT id FROM team WHERE name='Evil Morty S/A'),
-    (SELECT id FROM "user" WHERE name='Evil Morty')
+    (SELECT id FROM "user" WHERE first_name='Evil' AND last_name='Morty')
   WHERE NOT EXISTS (
     SELECT id FROM team WHERE name='Evil Morty Guerrilla'
   );
@@ -151,11 +157,11 @@ INSERT INTO
   )
   SELECT
     (SELECT id FROM team WHERE name='Space Force'),
-    (SELECT id FROM "user" WHERE name='Morty Smith')
+    (SELECT id FROM "user" WHERE first_name='Morty' AND last_name='Smith')
   WHERE NOT EXISTS (
     SELECT team_id, user_id FROM team_users_user WHERE
       team_id=(SELECT id FROM team WHERE name='Space Force') AND
-      user_id=(SELECT id FROM "user" WHERE name='Morty Smith')
+      user_id=(SELECT id FROM "user" WHERE first_name='Morty' AND last_name='Smith')
   );
 
 INSERT INTO
@@ -165,11 +171,11 @@ INSERT INTO
   )
   SELECT
     (SELECT id FROM team WHERE name='Earth Force'),
-    (SELECT id FROM "user" WHERE name='Rick Sanchez')
+    (SELECT id FROM "user" WHERE first_name='Rick' AND last_name='Sanchez')
   WHERE NOT EXISTS (
     SELECT team_id, user_id FROM team_users_user WHERE
       team_id=(SELECT id FROM team WHERE name='Earth Force') AND
-      user_id=(SELECT id FROM "user" WHERE name='Rick Sanchez')
+      user_id=(SELECT id FROM "user" WHERE first_name='Rick' AND last_name='Sanchez')
   );
 
 INSERT INTO
@@ -179,11 +185,11 @@ INSERT INTO
   )
   SELECT
     (SELECT id FROM team WHERE name='Evil Morty Guerrilla'),
-    (SELECT id FROM "user" WHERE name='Evil Morty')
+    (SELECT id FROM "user" WHERE first_name='Evil' AND last_name='Morty')
   WHERE NOT EXISTS (
     SELECT team_id, user_id FROM team_users_user WHERE
       team_id=(SELECT id FROM team WHERE name='Evil Morty Guerrilla') AND
-      user_id=(SELECT id FROM "user" WHERE name='Evil Morty')
+      user_id=(SELECT id FROM "user" WHERE first_name='Evil' AND last_name='Morty')
   );
 
 INSERT INTO
@@ -243,7 +249,7 @@ INSERT INTO
   SELECT
     'Control the universe',
     (SELECT id FROM cycle WHERE date_start='2021-01-01' AND team_id=(SELECT id FROM team WHERE name='Rick Sanchez Inc.')),
-    (SELECT id FROM "user" WHERE name='Rick Sanchez')
+    (SELECT id FROM "user" WHERE first_name='Rick' AND last_name='Sanchez')
   WHERE NOT EXISTS (
     SELECT id FROM objective WHERE title='Control the universe'
   );
@@ -257,7 +263,7 @@ INSERT INTO
   SELECT
     'Rule the galaxy',
     (SELECT id FROM cycle WHERE date_start='2021-01-01' AND team_id=(SELECT id FROM team WHERE name='Rick Sanchez Inc.')),
-    (SELECT id FROM "user" WHERE name='Morty Smith')
+    (SELECT id FROM "user" WHERE first_name='Morty' AND last_name='Smith')
   WHERE NOT EXISTS (
     SELECT id FROM objective WHERE title='Rule the galaxy'
   );
@@ -271,7 +277,7 @@ INSERT INTO
   SELECT
     'Bring balance to earth',
     (SELECT id FROM cycle WHERE date_start='2021-01-01' AND team_id=(SELECT id FROM team WHERE name='Earth Force')),
-    (SELECT id FROM "user" WHERE name='Rick Sanchez')
+    (SELECT id FROM "user" WHERE first_name='Rick' AND last_name='Sanchez')
   WHERE NOT EXISTS (
     SELECT id FROM objective WHERE title='Bring balance to earth'
   );
@@ -285,7 +291,7 @@ INSERT INTO
   SELECT
     'Bring chaos to the galaxy',
     (SELECT id FROM cycle WHERE date_start='2021-01-01' AND team_id=(SELECT id FROM team WHERE name='Evil Morty S/A')),
-    (SELECT id FROM "user" WHERE name='Evil Morty')
+    (SELECT id FROM "user" WHERE first_name='Evil' AND last_name='Morty')
   WHERE NOT EXISTS (
     SELECT id FROM objective WHERE title='Bring chaos to the galaxy'
   );
@@ -309,7 +315,7 @@ INSERT INTO
     'NUMBER',
     (SELECT id FROM objective WHERE title='Control the universe'),
     (SELECT id FROM team WHERE name='Rick Sanchez Inc.'),
-    (SELECT id FROM "user" WHERE name='Rick Sanchez')
+    (SELECT id FROM "user" WHERE first_name='Rick' AND last_name='Sanchez')
   WHERE NOT EXISTS (
     SELECT id FROM key_result WHERE title='REPLICATE!!!'
   );
@@ -333,7 +339,7 @@ INSERT INTO
     'PERCENTAGE',
     (SELECT id FROM objective WHERE title='Rule the galaxy'),
     (SELECT id FROM team WHERE name='Space Force'),
-    (SELECT id FROM "user" WHERE name='Morty Smith')
+    (SELECT id FROM "user" WHERE first_name='Morty' AND last_name='Smith')
   WHERE NOT EXISTS (
     SELECT id FROM key_result WHERE title='Explore Earth solar system'
   );
@@ -357,7 +363,7 @@ INSERT INTO
     'NUMBER',
     (SELECT id FROM objective WHERE title='Rule the galaxy'),
     (SELECT id FROM team WHERE name='The dumbest team'),
-    (SELECT id FROM "user" WHERE name='Morty Smith')
+    (SELECT id FROM "user" WHERE first_name='Morty' AND last_name='Smith')
   WHERE NOT EXISTS (
     SELECT id FROM key_result WHERE title='Build autobots'
   );
@@ -381,7 +387,7 @@ INSERT INTO
     'COIN_BRL',
     (SELECT id FROM objective WHERE title='Rule the galaxy'),
     (SELECT id FROM team WHERE name='The dumbest team'),
-    (SELECT id FROM "user" WHERE name='Morty Smith')
+    (SELECT id FROM "user" WHERE first_name='Morty' AND last_name='Smith')
   WHERE NOT EXISTS (
     SELECT id FROM key_result WHERE title='Earn money'
   );
@@ -405,7 +411,7 @@ INSERT INTO
     'NUMBER',
     (SELECT id FROM objective WHERE title='Bring balance to earth'),
     (SELECT id FROM team WHERE name='Earth Force'),
-    (SELECT id FROM "user" WHERE name='Rick Sanchez')
+    (SELECT id FROM "user" WHERE first_name='Rick' AND last_name='Sanchez')
   WHERE NOT EXISTS (
     SELECT id FROM key_result WHERE title='Kill stupid humans'
   );
@@ -429,7 +435,7 @@ INSERT INTO
     'NUMBER',
     (SELECT id FROM objective WHERE title='Bring chaos to the galaxy'),
     (SELECT id FROM team WHERE name='Evil Morty Guerrilla'),
-    (SELECT id FROM "user" WHERE name='Evil Morty')
+    (SELECT id FROM "user" WHERE first_name='Evil' AND last_name='Morty')
   WHERE NOT EXISTS (
     SELECT id FROM key_result WHERE title='Kill Rick Sanchez'
   );
@@ -447,9 +453,9 @@ INSERT INTO
       (SELECT id FROM key_result WHERE title='Build autobots'),
       (SELECT id FROM key_result WHERE title='Explore Earth solar system')
     ],
-    (SELECT id FROM "user" WHERE name='Morty Smith')
+    (SELECT id FROM "user" WHERE first_name='Morty' AND last_name='Smith')
   WHERE NOT EXISTS (
     SELECT id FROM key_result_view WHERE
       binding='MINE' AND
-      user_id=(SELECT id FROM "user" WHERE name='Morty Smith')
+      user_id=(SELECT id FROM "user" WHERE first_name='Morty' AND last_name='Smith')
   );
