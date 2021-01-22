@@ -59,6 +59,26 @@ INSERT INTO
   );
 
 INSERT INTO
+  "user"(
+    first_name,
+    last_name,
+    picture,
+    gender,
+    role,
+    authz_sub
+  )
+  SELECT
+    'Jerry',
+    'Smith',
+    'https://i.pinimg.com/originals/72/c3/3b/72c33b5df086100cfcd1c29aa02020b6.png',
+    'MALE',
+    'Dumb',
+    'auth0|600b2b2adf7b5a00718d8aa8'
+  WHERE NOT EXISTS (
+    SELECT id FROM "user" WHERE first_name='Jerry' AND last_name='Smith'
+  );
+
+INSERT INTO
   team(
     name,
     description,
@@ -176,6 +196,20 @@ INSERT INTO
     SELECT team_id, user_id FROM team_users_user WHERE
       team_id=(SELECT id FROM team WHERE name='Earth Force') AND
       user_id=(SELECT id FROM "user" WHERE first_name='Rick' AND last_name='Sanchez')
+  );
+
+INSERT INTO
+  team_users_user(
+    team_id,
+    user_id
+  )
+  SELECT
+    (SELECT id FROM team WHERE name='Earth Force'),
+    (SELECT id FROM "user" WHERE first_name='Jerry' AND last_name='Smith')
+  WHERE NOT EXISTS (
+    SELECT team_id, user_id FROM team_users_user WHERE
+      team_id=(SELECT id FROM team WHERE name='Earth Force') AND
+      user_id=(SELECT id FROM "user" WHERE first_name='Jerry' AND last_name='Smith')
   );
 
 INSERT INTO
