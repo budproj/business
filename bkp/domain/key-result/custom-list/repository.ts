@@ -6,13 +6,13 @@ import { Team } from 'src/domain/team/entities'
 import { UserDTO } from 'src/domain/user/dto'
 import { User } from 'src/domain/user/entities'
 
-import { KeyResultView } from './entities'
+import { KeyResultCustomList } from './entities'
 
-@EntityRepository(KeyResultView)
-class DomainKeyResultViewRepository extends DomainEntityRepository<KeyResultView> {
-  setupTeamQuery(query: SelectQueryBuilder<KeyResultView>) {
+@EntityRepository(KeyResultCustomList)
+class DomainKeyResultCustomListRepository extends DomainEntityRepository<KeyResultCustomList> {
+  setupTeamQuery(query: SelectQueryBuilder<KeyResultCustomList>) {
     return query
-      .leftJoinAndSelect(`${KeyResultView.name}.user`, User.name)
+      .leftJoinAndSelect(`${KeyResultCustomList.name}.user`, User.name)
       .leftJoinAndSelect(`${User.name}.teams`, Team.name)
   }
 
@@ -35,10 +35,10 @@ class DomainKeyResultViewRepository extends DomainEntityRepository<KeyResultView
   ) {
     const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
 
-    return query[constraintMethodName](`${KeyResultView.name}.userId = :userID`, {
+    return query[constraintMethodName](`${KeyResultCustomList.name}.userId = :userID`, {
       userID: user.id,
     })
   }
 }
 
-export default DomainKeyResultViewRepository
+export default DomainKeyResultCustomListRepository

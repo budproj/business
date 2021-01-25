@@ -11,8 +11,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-import { CycleDTO } from 'src/domain/cycle/dto'
-import { KeyResultDTO } from 'src/domain/key-result/dto'
+// import { CycleDTO } from 'src/domain/cycle/dto'
+// import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
 import { TEAM_GENDER } from './constants'
@@ -38,8 +38,8 @@ export class Team implements TeamDTO {
   @UpdateDateColumn()
   public updatedAt: Date
 
-  @OneToMany('KeyResult', 'team')
-  public keyResults: KeyResultDTO[]
+  // @OneToMany('KeyResult', 'team')
+  // public keyResults: KeyResultDTO[]
 
   @ManyToMany('User', 'teams', { lazy: true, nullable: true })
   @JoinTable()
@@ -62,6 +62,6 @@ export class Team implements TeamDTO {
   @OneToMany('Team', 'parentTeam')
   public teams: TeamDTO[]
 
-  @OneToMany('Cycle', 'team')
-  public cycles: CycleDTO[]
+  // @OneToMany('Cycle', 'team')
+  // public cycles: CycleDTO[]
 }

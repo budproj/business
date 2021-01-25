@@ -33,7 +33,7 @@ query GET_KEY_RESULT_WITH_ID($id: ID!) {
   }
 }
 
-query GET_KEY_RESULT_VIEW_WITH_BINDING($binding: KEY_RESULT_VIEW_BINDING!) {
+query GET_KEY_RESULT_VIEW_WITH_BINDING($binding: KEY_RESULT_CUSTOM_LIST_BINDING!) {
   keyResultView(binding: $binding) {
     id
     rank

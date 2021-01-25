@@ -12,20 +12,20 @@ import {
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
-import { KEY_RESULT_VIEW_BINDING } from './constants'
-import { KeyResultViewDTO } from './dto'
+import { KEY_RESULT_CUSTOM_LIST_BINDING } from './constants'
+import { KeyResultCustomListDTO } from './dto'
 
 @Entity()
 @Unique(['user', 'binding'])
-export class KeyResultView implements KeyResultViewDTO {
+export class KeyResultCustomList implements KeyResultCustomListDTO {
   @PrimaryGeneratedColumn('uuid')
   public id: string
 
   @Column({ nullable: true })
   public title?: string
 
-  @Column({ type: 'enum', enum: KEY_RESULT_VIEW_BINDING, nullable: true })
-  public binding?: KEY_RESULT_VIEW_BINDING
+  @Column({ type: 'enum', enum: KEY_RESULT_CUSTOM_LIST_BINDING, nullable: true })
+  public binding?: KEY_RESULT_CUSTOM_LIST_BINDING
 
   @Column('uuid', { array: true, nullable: true })
   public rank?: Array<KeyResultDTO['id']>
@@ -36,10 +36,10 @@ export class KeyResultView implements KeyResultViewDTO {
   @UpdateDateColumn()
   public updatedAt: Date
 
-  @ManyToOne('User', 'keyResultViews')
+  @ManyToOne('User', 'keyResultCustomLists')
   public user: UserDTO
 
   @Column()
-  @RelationId((keyResultView: KeyResultView) => keyResultView.user)
+  @RelationId((keyResultCustomList: KeyResultCustomList) => keyResultCustomList.user)
   public userId: UserDTO['id']
 }

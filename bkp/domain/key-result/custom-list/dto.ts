@@ -1,13 +1,13 @@
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
-import { KEY_RESULT_VIEW_BINDING } from './constants'
+import { KEY_RESULT_CUSTOM_LIST_BINDING } from './constants'
 
-export class KeyResultViewDTO {
+export class KeyResultCustomListDTO {
   id: string
   user: UserDTO
   title?: string
-  binding?: KEY_RESULT_VIEW_BINDING
+  binding?: KEY_RESULT_CUSTOM_LIST_BINDING
   rank?: Array<KeyResultDTO['id']>
   createdAt: Date
   updatedAt: Date

@@ -12,6 +12,6 @@ import DomainKeyResultReportService from './service'
   providers: [DomainKeyResultReportService],
   exports: [DomainKeyResultReportService],
 })
-class DomainKeyResultViewModule {}
+class DomainKeyResultReportModule {}
 
-export default DomainKeyResultViewModule
+export default DomainKeyResultReportModule

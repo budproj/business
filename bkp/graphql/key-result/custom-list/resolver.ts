@@ -17,33 +17,37 @@ import { AuthzUser } from 'src/app/authz/types'
 import { Railway } from 'src/app/providers'
 import DomainKeyResultService from 'src/domain/key-result/service'
 import DomainUserService from 'src/domain/user/service'
-import { KEY_RESULT_VIEW_BINDING } from 'src/domain/user/view/key-result/constants'
-import { KeyResultView } from 'src/domain/user/view/key-result/entities'
+import { KEY_RESULT_CUSTOM_LIST_BINDING } from 'src/domain/key-result/custom-list/constants'
+import { KeyResultCustomList } from 'src/domain/key-result/custom-list/entities'
 import { RailwayError } from 'src/errors'
 
-import { KeyResultViewObject, KeyResultViewInput, KeyResultViewRankInput } from './models'
-import GraphQLKeyResultViewService from './service'
+import {
+  KeyResultCustomListObject,
+  KeyResultCustomListInput,
+  KeyResultCustomListRankInput,
+} from './models'
+import GraphQLKeyResultCustomListService from './service'
 
 @UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
 @UseInterceptors(EnhanceWithBudUser)
-@Resolver(() => KeyResultViewObject)
-class GraphQLKeyResultViewResolver {
-  private readonly logger = new Logger(GraphQLKeyResultViewResolver.name)
+@Resolver(() => KeyResultCustomListObject)
+class GraphQLKeyResultCustomListResolver {
+  private readonly logger = new Logger(GraphQLKeyResultCustomListResolver.name)
 
   constructor(
-    private readonly resolverService: GraphQLKeyResultViewService,
+    private readonly resolverService: GraphQLKeyResultCustomListService,
     private readonly keyResultDomain: DomainKeyResultService,
     private readonly userDomain: DomainUserService,
     private readonly railway: Railway,
   ) {}
 
   @Permissions(PERMISSION['KEY_RESULT_VIEW:READ'])
-  @Query(() => KeyResultViewObject)
+  @Query(() => KeyResultCustomListObject)
   async keyResultView(
     @GraphQLUser() user: AuthzUser,
-    @Args('id', { type: () => ID, nullable: true }) id?: KeyResultViewObject['id'],
-    @Args('binding', { type: () => KEY_RESULT_VIEW_BINDING, nullable: true })
-    binding?: KeyResultViewObject['binding'],
+    @Args('id', { type: () => ID, nullable: true }) id?: KeyResultCustomListObject['id'],
+    @Args('binding', { type: () => KEY_RESULT_CUSTOM_LIST_BINDING, nullable: true })
+    binding?: KeyResultCustomListObject['binding'],
   ) {
     this.logger.log('Fetching key result view')
 
@@ -55,8 +59,8 @@ class GraphQLKeyResultViewResolver {
       identity,
     )
     const keyResultView = await this.resolverService.getOneWithActionScopeConstraint(selector, user)
-    if (!keyResultView && binding === KEY_RESULT_VIEW_BINDING.MINE) {
-      const createdKeyResultViews = await this.resolverService.createWithScopeConstraint(
+    if (!keyResultView && binding === KEY_RESULT_CUSTOM_LIST_BINDING.MINE) {
+      const createdKeyResultCustomLists = await this.resolverService.createWithScopeConstraint(
         {
           binding,
           title: 'Default',
@@ -65,7 +69,7 @@ class GraphQLKeyResultViewResolver {
         user,
       )
 
-      return createdKeyResultViews[0]
+      return createdKeyResultCustomLists[0]
     }
 
     if (!keyResultView)
@@ -75,7 +79,7 @@ class GraphQLKeyResultViewResolver {
   }
 
   @ResolveField()
-  async user(@Parent() keyResultView: KeyResultViewObject) {
+  async user(@Parent() keyResultView: KeyResultCustomListObject) {
     this.logger.log({
       keyResultView,
       message: 'Fetching user for key result view',
@@ -85,7 +89,7 @@ class GraphQLKeyResultViewResolver {
   }
 
   @ResolveField()
-  async keyResults(@Parent() keyResultView: KeyResultViewObject) {
+  async keyResults(@Parent() keyResultView: KeyResultCustomListObject) {
     this.logger.log({
       keyResultView,
       message: 'Fetching key results for key result view',
@@ -95,11 +99,11 @@ class GraphQLKeyResultViewResolver {
   }
 
   @Permissions(PERMISSION['KEY_RESULT_VIEW:UPDATE'])
-  @Mutation(() => KeyResultViewObject)
+  @Mutation(() => KeyResultCustomListObject)
   async updateRank(
-    @Args('id', { type: () => ID }) id: KeyResultViewObject['id'],
-    @Args('keyResultViewRankInput', { type: () => KeyResultViewRankInput })
-    keyResultViewRankInput: KeyResultViewRankInput,
+    @Args('id', { type: () => ID }) id: KeyResultCustomListObject['id'],
+    @Args('keyResultViewRankInput', { type: () => KeyResultCustomListRankInput })
+    keyResultViewRankInput: KeyResultCustomListRankInput,
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log({
@@ -107,23 +111,23 @@ class GraphQLKeyResultViewResolver {
       message: `Updating rank for key result view of id ${id}`,
     })
 
-    const updatedKeyResultView = await this.resolverService.updateWithScopeConstraint(
+    const updatedKeyResultCustomList = await this.resolverService.updateWithScopeConstraint(
       { id },
       keyResultViewRankInput,
       user,
     )
-    if (!updatedKeyResultView)
+    if (!updatedKeyResultCustomList)
       throw new NotFoundException(`We could not found a key result view for id ${id}`)
 
-    return updatedKeyResultView
+    return updatedKeyResultCustomList
   }
 
   @Permissions(PERMISSION['KEY_RESULT_VIEW:CREATE'])
-  @Mutation(() => KeyResultViewObject)
-  async createKeyResultView(
+  @Mutation(() => KeyResultCustomListObject)
+  async createKeyResultCustomList(
     @GraphQLUser() user: AuthzUser,
-    @Args('keyResultViewInput', { type: () => KeyResultViewInput })
-    keyResultViewInput: KeyResultViewInput,
+    @Args('keyResultViewInput', { type: () => KeyResultCustomListInput })
+    keyResultViewInput: KeyResultCustomListInput,
   ) {
     this.logger.log({
       user,
@@ -137,20 +141,20 @@ class GraphQLKeyResultViewResolver {
     }
 
     const creationPromise = this.resolverService.createWithScopeConstraint(enhancedWithUserID, user)
-    const [error, createdKeyResultView] = await this.railway.handleRailwayPromise<
+    const [error, createdKeyResultCustomList] = await this.railway.handleRailwayPromise<
       RailwayError,
-      KeyResultView[]
+      KeyResultCustomList[]
     >(creationPromise)
     if (error?.code === '23505')
       throw new PreconditionFailedException('View bindings must be unique')
     if (error) throw new InternalServerErrorException('Unknown error')
-    if (!createdKeyResultView)
+    if (!createdKeyResultCustomList)
       throw new NotFoundException(
         `We could not found an user with ID ${enhancedWithUserID.userId} to create your view`,
       )
 
-    return createdKeyResultView[0]
+    return createdKeyResultCustomList[0]
   }
 }
 
-export default GraphQLKeyResultViewResolver
+export default GraphQLKeyResultCustomListResolver

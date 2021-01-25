@@ -6,9 +6,8 @@ import { Observable } from 'rxjs'
 
 import { AppRequest } from 'src/app/types'
 import { CONSTRAINT } from 'src/domain/constants'
-import TeamService from 'src/domain/team/service'
+import DomainService from 'src/domain/service'
 import { User } from 'src/domain/user/entities'
-import UserService from 'src/domain/user/service'
 
 import { ACTION, RESOURCE, SCOPED_PERMISSION } from './constants'
 import GodUser from './god-user'
@@ -21,9 +20,8 @@ export class EnhanceWithBudUser implements NestInterceptor {
   private readonly godUser: AuthzUser = new GodUser()
 
   constructor(
-    private readonly userService: UserService,
     private readonly configService: ConfigService,
-    private readonly teamService: TeamService,
+    private readonly domain: DomainService,
   ) {
     this.godMode = this.configService.get<boolean>('godMode')
   }
@@ -34,7 +32,7 @@ export class EnhanceWithBudUser implements NestInterceptor {
 
     if (this.godMode) return this.godBypass(request, next)
 
-    const { teams, ...user }: User = await this.userService.getUserFromSubjectWithTeamRelation(
+    const { teams, ...user }: User = await this.domain.user.getUserFromSubjectWithTeamRelation(
       request.user.token.sub,
     )
     const scopes = this.parseActionScopesFromUserPermissions(
@@ -57,7 +55,15 @@ export class EnhanceWithBudUser implements NestInterceptor {
   }
 
   async godBypass(request: AppRequest, next: CallHandler): Promise<Observable<unknown>> {
-    const teamsPromise = this.teamService.getMany({ id: 'cd1cf934-2d51-4c0b-b5d5-95bf742a79bf' })
+    const godContext = {
+      user: {},
+      constraint: CONSTRAINT.ANY,
+    }
+
+    const teamsPromise = this.domain.team.getManyWithConstraint(
+      { id: 'cd1cf934-2d51-4c0b-b5d5-95bf742a79bf' },
+      godContext as any,
+    )
 
     const user = {
       teams: await teamsPromise,

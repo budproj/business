@@ -11,19 +11,25 @@ import { DomainServiceContext } from 'src/domain/types'
 import { UserDTO } from 'src/domain/user/dto'
 import DomainUserService from 'src/domain/user/service'
 
-import { KeyResultViewDTO } from './dto'
-import { KeyResultView } from './entities'
-import DomainKeyResultViewRepository from './repository'
+import { KeyResultCustomListDTO } from './dto'
+import { KeyResultCustomList } from './entities'
+import DomainKeyResultCustomListRepository from './repository'
 
 @Injectable()
-class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyResultViewDTO> {
+class DomainKeyResultCustomListService extends DomainEntityService<
+  KeyResultCustomList,
+  KeyResultCustomListDTO
+> {
   constructor(
-    public readonly repository: DomainKeyResultViewRepository,
-    @Inject(forwardRef(() => DomainUserService)) private readonly userService: DomainUserService,
+    public readonly repository: DomainKeyResultCustomListRepository,
+    @Inject(forwardRef(() => DomainUserService))
+    private readonly userService: DomainUserService,
+    @Inject(forwardRef(() => DomainKeyResultService))
     private readonly keyResultService: DomainKeyResultService,
+    @Inject(forwardRef(() => DomainTeamService))
     private readonly teamService: DomainTeamService,
   ) {
-    super(repository, DomainKeyResultViewService.name)
+    super(repository, DomainKeyResultCustomListService.name)
   }
 
   async parseUserCompanyIDs(user: UserDTO) {
@@ -41,11 +47,11 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
   }
 
   async getOneInQuery(
-    query: SelectQueryBuilder<KeyResultView>,
+    query: SelectQueryBuilder<KeyResultCustomList>,
     context: DomainServiceContext,
-  ): Promise<KeyResultView | null> {
+  ): Promise<KeyResultCustomList | null> {
     const view = await query
-      .andWhere(`${KeyResultView.name}.user_id = :userID`, { userID: context.user.id })
+      .andWhere(`${KeyResultCustomList.name}.user_id = :userID`, { userID: context.user.id })
       .getOne()
     if (!view) return
 
@@ -54,7 +60,7 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
     return refreshedView
   }
 
-  async refreshView(view: KeyResultView, user: UserDTO) {
+  async refreshView(view: KeyResultCustomList, user: UserDTO) {
     const rank = await this.refreshViewRank(user, view?.rank)
     const newView = {
       ...view,
@@ -68,7 +74,7 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
     return newView
   }
 
-  async refreshViewRank(user: UserDTO, previousRank: KeyResultView['rank'] = []) {
+  async refreshViewRank(user: UserDTO, previousRank: KeyResultCustomList['rank'] = []) {
     const availableKeyResults = await this.keyResultService.getFromOwner(user.id)
     const availableKeyResultIDs = availableKeyResults.map((keyResult) => keyResult.id)
 
@@ -78,7 +84,7 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
   }
 
   async createIfUserIsInCompany(
-    data: Partial<KeyResultView>,
+    data: Partial<KeyResultCustomList>,
     user: UserDTO,
     context: DomainServiceContext,
   ) {
@@ -94,7 +100,7 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
   }
 
   async createIfUserIsInTeam(
-    data: Partial<KeyResultView>,
+    data: Partial<KeyResultCustomList>,
     user: UserDTO,
     context: DomainServiceContext,
   ) {
@@ -106,7 +112,7 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
   }
 
   async createIfUserOwnsIt(
-    data: Partial<KeyResultView>,
+    data: Partial<KeyResultCustomList>,
     user: UserDTO,
     context: DomainServiceContext,
   ) {
@@ -117,7 +123,7 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
     return this.create(data, context)
   }
 
-  async create(userView: Partial<KeyResultViewDTO>, context: DomainServiceContext) {
+  async create(userView: Partial<KeyResultCustomListDTO>, context: DomainServiceContext) {
     this.logger.debug({
       userView,
       context,
@@ -128,7 +134,7 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
     if (!userView.userId) userView.userId = context?.user.id
 
     const data = await this.repository.insert(userView)
-    const createdViewsMetadata: Partial<KeyResultViewDTO[]> = data.raw
+    const createdViewsMetadata: Partial<KeyResultCustomListDTO[]> = data.raw
     if (!createdViewsMetadata || createdViewsMetadata.length === 0) return
 
     const createdViews = await Promise.all(
@@ -139,4 +145,4 @@ class DomainKeyResultViewService extends DomainEntityService<KeyResultView, KeyR
   }
 }
 
-export default DomainKeyResultViewService
+export default DomainKeyResultCustomListService

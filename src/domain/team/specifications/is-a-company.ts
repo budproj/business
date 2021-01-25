@@ -1,7 +1,7 @@
-import DomainSpecification from 'src/domain/specification'
+import { DomainEntitySpecification } from 'src/domain/entity'
 import { TeamDTO } from 'src/domain/team/dto'
 
-class IsACompany extends DomainSpecification<TeamDTO> {
+class IsACompany extends DomainEntitySpecification<TeamDTO> {
   currentRevision = this.rev20210102DoNotHaveParentTeam
 
   isSatisfiedBy(team: TeamDTO) {
