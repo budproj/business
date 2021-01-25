@@ -13,12 +13,11 @@ class AuthzStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly configService: ConfigService) {
     super({
       secretOrKeyProvider: passportJwtSecret({
-        jwksUri: `${configService.get<string>('authz.issuer')}.well-known/jwks.json`,
+        jwksUri: `https://${configService.get<string>('authz.issuer')}/.well-known/jwks.json`,
       }),
-
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       audience: configService.get<string>('authz.audience'),
-      issuer: configService.get<string>('authz.issuer'),
+      issuer: `https://${configService.get<string>('authz.issuer')}/`,
       algorithms: ['RS256'],
     })
   }
