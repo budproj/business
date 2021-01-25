@@ -1,0 +1,88 @@
+query GET_COMPANY_OBJECTIVES {
+  teams(onlyCompanies: true) {
+    id
+    name
+    gender
+    objectives {
+      id
+      title
+      currentProgress
+      currentConfidence
+      percentageProgressIncrease
+    }
+  }
+}
+
+query GET_TEAM_NAME($teamId: ID!) {
+  team(id: $teamId) {
+    id
+    name
+  }
+}
+
+query GET_TEAMS {
+  teams(onlyCompaniesAndDepartments: true) {
+    id
+    name
+    description
+    currentProgress
+    currentConfidence
+    isCompany
+    users {
+      fullName
+      picture
+    }
+  }
+}
+
+query GET_USER_PRIMARY_COMPANY {
+  me {
+    companies(limit: 1) {
+      id
+      name
+      gender
+      currentProgress
+      currentConfidence
+      percentageProgressIncrease
+      latestReport {
+        id
+        createdAt
+        user {
+          id
+          fullName
+        }
+      }
+    }
+  }
+}
+
+query GET_TEAM_AND_CHILD_TEAMS_OBJECTIVES($rootTeamId: ID!) {
+  team(id: $rootTeamId) {
+    id
+    name
+    objectives {
+      id
+      title
+      currentProgress
+      currentConfidence
+      percentageProgressIncrease
+      cycle {
+        dateEnd
+      }
+    }
+    teams {
+      id
+      name
+      objectives {
+        id
+        title
+        currentProgress
+        currentConfidence
+        percentageProgressIncrease
+        cycle {
+          dateEnd
+        }
+      }
+    }
+  }
+}
