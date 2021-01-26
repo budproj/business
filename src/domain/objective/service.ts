@@ -25,7 +25,7 @@ class DomainObjectiveService
     return this.repository.find({ ownerId })
   }
 
-  public async getFromCycle(cycleId: CycleDTO['id']): Promise<Objective[]> {
+  public async getFromCycle(cycleId: CycleDTO['id']) {
     return this.repository.find({ cycleId })
   }
   //

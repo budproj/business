@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
+import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import { TeamObject } from 'src/app/graphql/team/models'
 import { USER_GENDER } from 'src/domain/user/constants'
@@ -62,10 +63,11 @@ export class UserObject {
   })
   objectives: ObjectiveObject[]
 
-  // @Field(() => [KeyResultObject], {
-  //   description: 'The creation date ordered list of key results that this user owns',
-  // })
-  // keyResults: KeyResultObject[]
+  @Field(() => [KeyResultObject], {
+    description: 'The creation date ordered list of key results that this user owns',
+    nullable: true,
+  })
+  keyResults?: KeyResultObject[]
   //
   //
   // @Field(() => [ProgressReportObject], {

@@ -23,9 +23,6 @@ export class KeyResult implements KeyResultDTO {
   @Column()
   public title: string
 
-  @Column({ type: 'text', nullable: true })
-  public description?: string | null
-
   @Column('numeric')
   public initialValue: number
 
@@ -61,4 +58,7 @@ export class KeyResult implements KeyResultDTO {
   @Column()
   @RelationId((keyResult: KeyResult) => keyResult.team)
   public teamId: TeamDTO['id']
+
+  @Column({ type: 'text', nullable: true })
+  public description?: string
 }

@@ -8,6 +8,7 @@ import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
 import { CycleObject } from 'src/app/graphql/cycle/models'
+import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import { UserObject } from 'src/app/graphql/user'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
@@ -40,15 +41,15 @@ class GraphQLObjectiveResolver extends GraphQLEntityResolver<Objective, Objectiv
     return objective
   }
 
-  // @ResolveField()
-  // async keyResults(@Parent() objective: ObjectiveObject) {
-  //   this.logger.log({
-  //     objective,
-  //     message: 'Fetching key results for objective',
-  //   })
-  //
-  //   return this.keyResultDomain.getFromObjective(objective.id)
-  // }
+  @ResolveField('owner', () => UserObject)
+  protected async getObjectiveOwner(@Parent() objective: ObjectiveObject) {
+    this.logger.log({
+      objective,
+      message: 'Fetching owner for objective',
+    })
+
+    return this.domain.user.getOne({ id: objective.ownerId })
+  }
 
   @ResolveField('cycle', () => CycleObject)
   protected async getObjectiveCycle(@Parent() objective: ObjectiveObject) {
@@ -60,14 +61,14 @@ class GraphQLObjectiveResolver extends GraphQLEntityResolver<Objective, Objectiv
     return this.domain.cycle.getOne({ id: objective.cycleId })
   }
 
-  @ResolveField('owner', () => UserObject)
-  protected async getObjectiveOwner(@Parent() objective: ObjectiveObject) {
+  @ResolveField('keyResults', () => [KeyResultObject])
+  protected async getObjectiveKeyResults(@Parent() objective: ObjectiveObject) {
     this.logger.log({
       objective,
-      message: 'Fetching owner for objective',
+      message: 'Fetching key results for objective',
     })
 
-    return this.domain.user.getOne({ id: objective.ownerId })
+    return this.domain.keyResult.getFromObjective(objective.id)
   }
 
   // @ResolveField()

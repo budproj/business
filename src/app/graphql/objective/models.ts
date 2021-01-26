@@ -1,6 +1,7 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql'
 
 import { CycleObject } from 'src/app/graphql/cycle/models'
+import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import { UserObject } from 'src/app/graphql/user/models'
 
 @ObjectType('Objective', { description: 'A group of key results that has the same focus' })
@@ -17,11 +18,6 @@ export class ObjectiveObject {
   @Field({ description: 'The last update date of the objective' })
   updatedAt: Date
 
-  // @Field(() => [KeyResultObject], {
-  //   description: 'A creation date ordered list of key results that belongs to this objective',
-  // })
-  // keyResults: KeyResultObject[]
-
   @Field(() => ID, { description: 'The cycle ID that owns this objective' })
   cycleId: CycleObject['id']
 
@@ -33,6 +29,12 @@ export class ObjectiveObject {
 
   @Field(() => UserObject, { description: 'The user that owns this objective' })
   owner: UserObject
+
+  @Field(() => [KeyResultObject], {
+    description: 'A creation date ordered list of key results that belongs to this objective',
+    nullable: true,
+  })
+  keyResults?: KeyResultObject[]
 
   // @Field(() => Float, {
   //   description: 'The computed percentage current progress of this objective',

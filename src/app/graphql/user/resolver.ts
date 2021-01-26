@@ -7,6 +7,7 @@ import { AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
+import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import { TeamObject } from 'src/app/graphql/team/models'
@@ -111,16 +112,16 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
 
     return this.domain.objective.getFromOwner(user.id)
   }
-  //
-  // @ResolveField()
-  // async keyResults(@Parent() user: UserObject) {
-  //   this.logger.log({
-  //     user,
-  //     message: 'Fetching key results for user',
-  //   })
-  //
-  //   return this.keyResultDomain.getFromOwner(user.id)
-  // }
+
+  @ResolveField('keyResults', () => [KeyResultObject])
+  protected async getUserKeyResults(@Parent() user: UserObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching key results for user',
+    })
+
+    return this.domain.keyResult.getFromOwner(user.id)
+  }
   //
   //
   // @ResolveField()

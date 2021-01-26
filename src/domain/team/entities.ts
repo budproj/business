@@ -13,6 +13,7 @@ import {
 
 // Import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { CycleDTO } from 'src/domain/cycle/dto'
+import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
 import { TEAM_GENDER } from './constants'
@@ -26,20 +27,11 @@ export class Team implements TeamDTO {
   @Column()
   public name: string
 
-  @Column({ type: 'text', nullable: true })
-  public description?: string | null
-
-  @Column({ type: 'enum', enum: TEAM_GENDER, nullable: true })
-  public gender?: TEAM_GENDER
-
   @CreateDateColumn()
   public createdAt: Date
 
   @UpdateDateColumn()
   public updatedAt: Date
-
-  // @OneToMany('KeyResult', 'team')
-  // public keyResults: KeyResultDTO[]
 
   @ManyToMany('User', 'teams', { lazy: true, nullable: true })
   @JoinTable()
@@ -64,4 +56,13 @@ export class Team implements TeamDTO {
 
   @OneToMany('Cycle', 'team')
   public cycles: CycleDTO[]
+
+  @Column({ type: 'text', nullable: true })
+  public description?: string | null
+
+  @Column({ type: 'enum', enum: TEAM_GENDER, nullable: true })
+  public gender?: TEAM_GENDER
+
+  @OneToMany('KeyResult', 'team', { nullable: true })
+  public keyResults?: KeyResultDTO[]
 }

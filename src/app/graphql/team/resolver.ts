@@ -9,6 +9,7 @@ import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
 import { CycleObject } from 'src/app/graphql/cycle/models'
+import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import { UserObject } from 'src/app/graphql/user'
 import DomainService from 'src/domain/service'
@@ -134,6 +135,16 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return this.domain.team.specification.isACompany.isSatisfiedBy(team)
   }
 
+  @ResolveField('keyResults', () => [KeyResultObject])
+  protected async getTeamKeyResults(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching key results for team',
+    })
+
+    return this.domain.keyResult.getFromTeam(team.id)
+  }
+
   // @ResolveField('objectives', () => [ObjectiveObject])
   // protected async getTeamObjectives(@Parent() team: TeamObject) {
   //   this.logger.log({
@@ -144,15 +155,6 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   //   return this.domain.objective.getFromTeam(team.id)
   // }
 
-  // @ResolveField()
-  // async keyResults(@Parent() team: TeamObject) {
-  //   this.logger.log({
-  //     team,
-  //     message: 'Fetching key results for team',
-  //   })
-  //
-  //   return this.keyResultDomain.getFromTeam(team.id)
-  // }
   //
   //
   // @ResolveField()

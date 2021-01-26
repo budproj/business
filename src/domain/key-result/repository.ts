@@ -1,7 +1,7 @@
 import { EntityRepository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
+import { CONSTRAINT_TYPE, DomainEntityRepository } from 'src/domain/entity'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
-import DomainEntityRepository, { CONSTRAINT_TYPE } from 'src/domain/repository'
 import { TeamDTO } from 'src/domain/team/dto'
 import { Team } from 'src/domain/team/entities'
 import { UserDTO } from 'src/domain/user/dto'

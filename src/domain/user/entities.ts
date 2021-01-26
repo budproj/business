@@ -12,6 +12,8 @@ import {
 // import { ConfidenceReportDTO } from 'src/domain/key-result/report/confidence/dto'
 // import { ProgressReportDTO } from 'src/domain/key-result/report/progress/dto'
 // import { ObjectiveDTO } from 'src/domain/objective/dto'
+import { KeyResultDTO } from 'src/domain/key-result/dto'
+import { ObjectiveDTO } from 'src/domain/objective/dto'
 import { TeamDTO } from 'src/domain/team/dto'
 import { USER_GENDER } from 'src/domain/user/constants'
 
@@ -52,15 +54,15 @@ export class User implements UserDTO {
 
   @OneToMany('Team', 'owner', { nullable: true })
   public ownedTeams?: TeamDTO[]
-  //
+
+  @OneToMany('Objective', 'owner', { nullable: true })
+  public objectives: ObjectiveDTO[]
+
+  @OneToMany('KeyResult', 'owner', { nullable: true })
+  public keyResults?: KeyResultDTO[]
+
   // @OneToMany('KeyResultCustomList', 'user')
   // public keyResultCustomLists: KeyResultCustomListDTO[]
-
-  // @OneToMany('KeyResult', 'owner')
-  // public keyResults: KeyResultDTO[]
-  //
-  // @OneToMany('Objective', 'owner')
-  // public objectives: ObjectiveDTO[]
   //
   // @OneToMany('ConfidenceReport', 'user')
   // public confidenceReports: ConfidenceReportDTO[]

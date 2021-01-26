@@ -6,7 +6,6 @@ import { UserDTO } from 'src/domain/user/dto'
 export class KeyResultDTO {
   id: string
   title: string
-  description?: string
   initialValue: number
   goal: number
   format: KEY_RESULT_FORMAT
@@ -15,4 +14,5 @@ export class KeyResultDTO {
   ownerId: UserDTO['id']
   objectiveId: ObjectiveDTO['id']
   teamId: TeamDTO['id']
+  description?: string
 }

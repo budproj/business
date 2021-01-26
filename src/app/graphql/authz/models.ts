@@ -6,7 +6,7 @@ import { POLICY } from 'src/app/authz/constants'
   description:
     'Defines the current available resource policies. You can use it to build read/create/update/delete logic on your application',
 })
-export class PoliciesObject {
+export class PolicyObject {
   @Field(() => POLICY, { defaultValue: POLICY.DENY })
   create: POLICY
 

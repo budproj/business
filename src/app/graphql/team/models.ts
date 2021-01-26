@@ -1,6 +1,7 @@
 import { Field, Float, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { CycleObject } from 'src/app/graphql/cycle/models'
+import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import { UserObject } from 'src/app/graphql/user/models'
 import { TEAM_GENDER } from 'src/domain/team/constants'
@@ -15,12 +16,6 @@ export class TeamObject {
 
   @Field({ description: 'The name of the team' })
   name: string
-
-  @Field({ nullable: true, description: 'The description about the team' })
-  description?: string
-
-  @Field({ nullable: true, description: 'The gender of the team' })
-  gender?: TEAM_GENDER
 
   @Field({ description: 'The creation date of the team' })
   createdAt: Date
@@ -57,10 +52,17 @@ export class TeamObject {
   })
   objectives: ObjectiveObject[]
 
-  // @Field(() => [KeyResultObject], {
-  //   description: 'The creation date ordered list of key results that belongs to that team',
-  // })
-  // keyResults: KeyResultObject[]
+  @Field({ nullable: true, description: 'The description about the team' })
+  description?: string
+
+  @Field({ nullable: true, description: 'The gender of the team' })
+  gender?: TEAM_GENDER
+
+  @Field(() => [KeyResultObject], {
+    description: 'The creation date ordered list of key results that belongs to that team',
+    nullable: true,
+  })
+  keyResults?: KeyResultObject[]
 
   // @Field(() => Float, {
   //   description: 'The computed percentage current progress of this team',
