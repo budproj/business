@@ -78,7 +78,7 @@ class GraphQLKeyResultCustomListResolver extends GraphQLEntityResolver<
     return this.domain.user.getOne({ id: keyResultCustomList.userId })
   }
 
-  @ResolveField('keyResults', () => [KeyResultObject])
+  @ResolveField('keyResults', () => [KeyResultObject], { nullable: true })
   protected async getKeyResultCustomListKeyResults(
     @Parent() keyResultCustomList: KeyResultCustomListObject,
   ) {

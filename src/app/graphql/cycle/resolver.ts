@@ -50,7 +50,7 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
     return this.domain.team.getOne({ id: cycle.teamId })
   }
 
-  @ResolveField('objectives', () => [ObjectiveObject])
+  @ResolveField('objectives', () => [ObjectiveObject], { nullable: true })
   protected async getCycleObjectives(@Parent() cycle: CycleObject) {
     this.logger.log({
       cycle,

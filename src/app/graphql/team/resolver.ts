@@ -9,6 +9,7 @@ import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
 import { CycleObject } from 'src/app/graphql/cycle/models'
+import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
@@ -106,7 +107,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return this.domain.team.getMany({ parentTeamId: team.id })
   }
 
-  @ResolveField('cycles', () => [CycleObject])
+  @ResolveField('cycles', () => [CycleObject], { nullable: true })
   protected async getTeamCycles(@Parent() team: TeamObject) {
     this.logger.log({
       team,
@@ -136,7 +137,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return this.domain.team.specification.isACompany.isSatisfiedBy(team)
   }
 
-  @ResolveField('keyResults', () => [KeyResultObject])
+  @ResolveField('keyResults', () => [KeyResultObject], { nullable: true })
   protected async getTeamKeyResults(@Parent() team: TeamObject) {
     this.logger.log({
       team,
@@ -146,7 +147,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return this.domain.keyResult.getFromTeam(team.id)
   }
 
-  @ResolveField('objectives', () => [ObjectiveObject])
+  @ResolveField('objectives', () => [ObjectiveObject], { nullable: true })
   protected async getTeamObjectives(@Parent() team: TeamObject) {
     this.logger.log({
       team,
@@ -156,8 +157,16 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return this.domain.objective.getFromTeam(team)
   }
 
-  //
-  //
+  @ResolveField('latestCheckIn', () => KeyResultCheckInObject, { nullable: true })
+  protected async getTeamLatestCheckIn(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching latest key result check-in for team',
+    })
+
+    return this.domain.keyResult.getLatestCheckInForTeam(team)
+  }
+
   // @ResolveField()
   // async currentProgress(@Parent() team: TeamObject) {
   //   this.logger.log({
@@ -178,9 +187,6 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   //   return this.teamDomain.getCurrentConfidence(team.id)
   // }
   //
-  //
-  //
-  //
   // @ResolveField()
   // async percentageProgressIncrease(@Parent() team: TeamObject) {
   //   this.logger.log({
@@ -191,15 +197,6 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   //   return this.teamDomain.getPercentageProgressIncrease(team.id)
   // }
   //
-  // @ResolveField()
-  // async latestReport(@Parent() team: TeamObject) {
-  //   this.logger.log({
-  //     team,
-  //     message: 'Fetching latest report for team',
-  //   })
-  //
-  //   return this.teamDomain.getLatestReport(team.id)
-  // }
 }
 
 export default GraphQLTeamResolver

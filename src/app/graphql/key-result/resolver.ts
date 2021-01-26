@@ -8,7 +8,6 @@ import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
 import { PolicyObject } from 'src/app/graphql/authz/models'
-import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import { TeamObject } from 'src/app/graphql/team/models'
@@ -18,6 +17,7 @@ import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { KeyResult } from 'src/domain/key-result/entities'
 import DomainService from 'src/domain/service'
 
+import { KeyResultCheckInObject } from './check-in/models'
 import { KeyResultObject } from './models'
 
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
@@ -89,7 +89,7 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
     return this.getUserPolicies(selector, user)
   }
 
-  @ResolveField('checkIns', () => [KeyResultCheckInObject])
+  @ResolveField('checkIns', () => KeyResultCheckInObject, { nullable: true })
   protected async getKeyResultCheckIns(
     @Parent() keyResult: KeyResultObject,
     @Args('order', { type: () => DOMAIN_QUERY_ORDER, defaultValue: DOMAIN_QUERY_ORDER.DESC })

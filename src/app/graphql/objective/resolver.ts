@@ -61,7 +61,7 @@ class GraphQLObjectiveResolver extends GraphQLEntityResolver<Objective, Objectiv
     return this.domain.cycle.getOne({ id: objective.cycleId })
   }
 
-  @ResolveField('keyResults', () => [KeyResultObject])
+  @ResolveField('keyResults', () => [KeyResultObject], { nullable: true })
   protected async getObjectiveKeyResults(@Parent() objective: ObjectiveObject) {
     this.logger.log({
       objective,

@@ -5,7 +5,6 @@ import { KeyResultCustomListObject } from 'src/app/graphql/key-result/custom-lis
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import { TeamObject } from 'src/app/graphql/team/models'
-import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import { USER_GENDER } from 'src/domain/user/constants'
 
 @ObjectType('User', {
@@ -63,8 +62,9 @@ export class UserObject {
 
   @Field(() => [ObjectiveObject], {
     description: 'The creation date ordered list of objectives that this user owns',
+    nullable: true,
   })
-  objectives: ObjectiveObject[]
+  objectives?: ObjectiveObject[]
 
   @Field(() => [KeyResultObject], {
     description: 'The creation date ordered list of key results that this user owns',
@@ -82,7 +82,7 @@ export class UserObject {
     description: 'The creation date ordered list of key result check-ins created by this user',
     nullable: true,
   })
-  checkIns?: KeyResultCheckIn[]
+  checkIns?: KeyResultCheckInObject[]
 }
 
 registerEnumType(USER_GENDER, {

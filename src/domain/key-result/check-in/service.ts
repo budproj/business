@@ -1,20 +1,46 @@
 import { Injectable, Scope } from '@nestjs/common'
+import { Any } from 'typeorm'
 
+import { DOMAIN_QUERY_ORDER } from 'src/domain/constants'
 import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
+import { UserDTO } from 'src/domain/user/dto'
 
 import DomainKeyResultCheckInRepository from './repository'
+
+export interface DomainKeyResultCheckInServiceInterface {
+  snapshot: Date
+
+  getLatestFromUsers: (users: UserDTO[]) => Promise<KeyResultCheckIn | null>
+}
 
 @Injectable({ scope: Scope.REQUEST })
 class DomainKeyResultCheckInService extends DomainEntityService<
   KeyResultCheckIn,
   KeyResultCheckInDTO
 > {
-  public snapshotDate: Date
+  public snapshot: Date
 
   constructor(public readonly repository: DomainKeyResultCheckInRepository) {
     super(repository, DomainKeyResultCheckInService.name)
+  }
+
+  public async getLatestFromUsers(users: UserDTO[]) {
+    const userIDs = users.map((user) => user.id)
+
+    const selector = {
+      userId: Any(userIDs),
+    }
+    const options = {
+      orderBy: {
+        createdAt: DOMAIN_QUERY_ORDER.DESC,
+      },
+    }
+
+    const latestCheckIn = await this.getOne(selector, undefined, options)
+
+    return latestCheckIn
   }
 
   protected async createIfUserIsInCompany(

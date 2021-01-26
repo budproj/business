@@ -67,7 +67,7 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
     return this.domain.user.buildUserFullName(user)
   }
 
-  @ResolveField('companies', () => [TeamObject])
+  @ResolveField('companies', () => [TeamObject], { nullable: true })
   protected async getUserCompanies(
     @Parent() user: UserObject,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
@@ -83,7 +83,7 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
     return companiesWithLimit
   }
 
-  @ResolveField('teams', () => [TeamObject])
+  @ResolveField('teams', () => [TeamObject], { nullable: true })
   protected async getUserTeams(@Parent() user: UserObject) {
     this.logger.log({
       user,
@@ -95,7 +95,7 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
     return teams
   }
 
-  @ResolveField('ownedTeams', () => [TeamObject])
+  @ResolveField('ownedTeams', () => [TeamObject], { nullable: true })
   protected async getUserOwnedTeams(@Parent() user: UserObject) {
     this.logger.log({
       user,
@@ -105,7 +105,7 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
     return this.domain.team.getFromOwner(user.id)
   }
 
-  @ResolveField('objectives', () => [ObjectiveObject])
+  @ResolveField('objectives', () => [ObjectiveObject], { nullable: true })
   protected async getUserObjectives(@Parent() user: UserObject) {
     this.logger.log({
       user,
@@ -115,7 +115,7 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
     return this.domain.objective.getFromOwner(user.id)
   }
 
-  @ResolveField('keyResults', () => [KeyResultObject])
+  @ResolveField('keyResults', () => [KeyResultObject], { nullable: true })
   protected async getUserKeyResults(@Parent() user: UserObject) {
     this.logger.log({
       user,
@@ -125,7 +125,7 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
     return this.domain.keyResult.getFromOwner(user.id)
   }
 
-  @ResolveField('keyResultCustomLists', () => [KeyResultCustomListObject])
+  @ResolveField('keyResultCustomLists', () => [KeyResultCustomListObject], { nullable: true })
   protected async getUserKeyResultCustomLists(@Parent() user: UserObject) {
     this.logger.log({
       user,
@@ -135,7 +135,7 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
     return this.domain.keyResult.getUserCustomLists(user)
   }
 
-  @ResolveField('checkIns', () => [KeyResultCheckInObject])
+  @ResolveField('checkIns', () => [KeyResultCheckInObject], { nullable: true })
   protected async getUserCheckIns(@Parent() user: UserObject) {
     this.logger.log({
       user,

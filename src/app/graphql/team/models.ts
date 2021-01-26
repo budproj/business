@@ -1,6 +1,7 @@
 import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { CycleObject } from 'src/app/graphql/cycle/models'
+import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import { UserObject } from 'src/app/graphql/user/models'
@@ -46,15 +47,6 @@ export class TeamObject {
   @Field(() => [TeamObject], { description: 'A list of teams that belongs to this team' })
   teams: TeamObject[]
 
-  @Field(() => [CycleObject], { description: 'The cycles that belongs to this team' })
-  cycles: CycleObject[]
-
-  @Field(() => [ObjectiveObject], {
-    nullable: true,
-    description: 'The created ordered list of objectives in this team',
-  })
-  objectives: ObjectiveObject[]
-
   @Field({ nullable: true, description: 'The description about the team' })
   description?: string
 
@@ -67,17 +59,29 @@ export class TeamObject {
   })
   company?: TeamObject
 
+  @Field(() => [CycleObject], {
+    description: 'The cycles that belongs to this team',
+    nullable: true,
+  })
+  cycles?: CycleObject[]
+
+  @Field(() => [ObjectiveObject], {
+    description: 'The created ordered list of objectives in this team',
+    nullable: true,
+  })
+  objectives?: ObjectiveObject[]
+
   @Field(() => [KeyResultObject], {
     description: 'The creation date ordered list of key results that belongs to that team',
     nullable: true,
   })
   keyResults?: KeyResultObject[]
 
-  // @Field(() => ProgressReportObject, {
-  //   description: 'The latest report for this team',
-  //   nullable: true,
-  // })
-  // latestReport: ProgressReportObject
+  @Field(() => KeyResultCheckInObject, {
+    description: 'The latest check-in for this team',
+    nullable: true,
+  })
+  latestCheckIn?: KeyResultCheckInObject
 
   // @Field(() => Float, {
   //   description: 'The computed percentage current progress of this team',

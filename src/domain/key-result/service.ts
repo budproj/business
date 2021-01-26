@@ -40,6 +40,7 @@ export interface DomainKeyResultServiceInterface {
     options?: DomainServiceGetOptions<KeyResultCheckIn>,
   ) => Promise<KeyResultCheckIn[] | null>
   getCheckInsByUser: (user: UserDTO) => Promise<KeyResultCheckIn[] | null>
+  getLatestCheckInForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn | null>
 }
 
 @Injectable()
@@ -138,6 +139,13 @@ class DomainKeyResultService
     const selector = { userId: user.id }
 
     return this.checkIn.getMany(selector)
+  }
+
+  public async getLatestCheckInForTeam(team: TeamDTO) {
+    const users = await this.teamService.getUsersInTeam(team.id)
+    const latestCheckIn = await this.checkIn.getLatestFromUsers(users)
+
+    return latestCheckIn
   }
 
   protected async createIfUserIsInCompany(
