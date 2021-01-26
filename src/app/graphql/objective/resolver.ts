@@ -24,7 +24,7 @@ class GraphQLObjectiveResolver extends GraphQLEntityResolver<Objective, Objectiv
   private readonly logger = new Logger(GraphQLObjectiveResolver.name)
 
   constructor(protected readonly domain: DomainService) {
-    super(RESOURCE.TEAM, domain, domain.objective)
+    super(RESOURCE.OBJECTIVE, domain, domain.objective)
   }
 
   @Permissions(PERMISSION['OBJECTIVE:READ'])

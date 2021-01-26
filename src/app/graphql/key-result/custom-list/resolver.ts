@@ -28,10 +28,10 @@ class GraphQLKeyResultCustomListResolver extends GraphQLEntityResolver<
   private readonly logger = new Logger(GraphQLKeyResultCustomListResolver.name)
 
   constructor(protected readonly domain: DomainService) {
-    super(RESOURCE.USER, domain, domain.keyResult.customList)
+    super(RESOURCE.KEY_RESULT, domain, domain.keyResult.customList)
   }
 
-  @Permissions(PERMISSION['KEY_RESULT_VIEW:READ'])
+  @Permissions(PERMISSION['KEY_RESULT:READ'])
   @Query(() => KeyResultCustomListObject, { name: 'keyResultCustomList' })
   protected async getKeyResultCustomList(
     @GraphQLUser() user: AuthzUser,

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 
 import { CONSTRAINT } from 'src/domain/constants'
 import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
+import DomainKeyResultCheckInService from 'src/domain/key-result/check-in/service'
 import { KEY_RESULT_CUSTOM_LIST_BINDING } from 'src/domain/key-result/custom-list/constants'
 import { KeyResultCustomListDTO } from 'src/domain/key-result/custom-list/dto'
 import { KeyResultCustomList } from 'src/domain/key-result/custom-list/entities'
@@ -18,7 +19,7 @@ import DomainKeyResultRepository from './repository'
 export interface DomainKeyResultServiceInterface {
   repository: DomainKeyResultRepository
   customList: DomainKeyResultCustomListService
-  teamService: DomainTeamService
+  checkIn: DomainKeyResultCheckInService
 
   getFromOwner: (ownerId: UserDTO['id']) => Promise<KeyResult[]>
   getFromTeam: (teamIDs: TeamDTO['id'] | Array<TeamDTO['id']>) => Promise<KeyResult[]>
@@ -42,7 +43,8 @@ class DomainKeyResultService
   constructor(
     public readonly repository: DomainKeyResultRepository,
     public readonly customList: DomainKeyResultCustomListService,
-    public readonly teamService: DomainTeamService,
+    public readonly checkIn: DomainKeyResultCheckInService,
+    private readonly teamService: DomainTeamService,
   ) {
     super(repository, DomainKeyResultService.name)
   }

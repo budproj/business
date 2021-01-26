@@ -25,7 +25,7 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
   private readonly logger = new Logger(GraphQLKeyResultResolver.name)
 
   constructor(protected readonly domain: DomainService) {
-    super(RESOURCE.TEAM, domain, domain.keyResult)
+    super(RESOURCE.KEY_RESULT, domain, domain.keyResult)
   }
 
   @Permissions(PERMISSION['KEY_RESULT:READ'])

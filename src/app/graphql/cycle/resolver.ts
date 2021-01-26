@@ -23,7 +23,7 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
   private readonly logger = new Logger(GraphQLCycleResolver.name)
 
   constructor(protected readonly domain: DomainService) {
-    super(RESOURCE.TEAM, domain, domain.cycle)
+    super(RESOURCE.CYCLE, domain, domain.cycle)
   }
 
   @Permissions(PERMISSION['CYCLE:READ'])

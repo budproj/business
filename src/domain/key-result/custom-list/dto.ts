@@ -4,12 +4,12 @@ import { UserDTO } from 'src/domain/user/dto'
 import { KEY_RESULT_CUSTOM_LIST_BINDING } from './constants'
 
 export class KeyResultCustomListDTO {
-  id: string
-  user: UserDTO
-  createdAt: Date
-  updatedAt: Date
-  userId: UserDTO['id']
-  title?: string
-  binding?: KEY_RESULT_CUSTOM_LIST_BINDING
-  rank?: Array<KeyResultDTO['id']>
+  public id: string
+  public user: UserDTO
+  public createdAt: Date
+  public updatedAt: Date
+  public userId: UserDTO['id']
+  public title?: string
+  public binding?: KEY_RESULT_CUSTOM_LIST_BINDING
+  public rank?: Array<KeyResultDTO['id']>
 }

@@ -10,36 +10,36 @@ import {
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
-import { ConfidenceReportDTO } from './dto'
+import { KeyResultCheckInDTO } from './dto'
 
 @Entity()
-export class ConfidenceReport implements ConfidenceReportDTO {
+export class KeyResultCheckIn implements KeyResultCheckInDTO {
   @PrimaryGeneratedColumn('uuid')
   public id: string
 
-  @Column({ nullable: true })
-  public valuePrevious?: number
+  @Column({ type: 'real' })
+  public progress: number
 
   @Column()
-  public valueNew: number
-
-  @Column({ type: 'text', nullable: true })
-  public comment?: string
+  public confidence: number
 
   @CreateDateColumn()
   public createdAt: Date
 
-  @ManyToOne('KeyResult', 'confidenceReports')
+  @ManyToOne('KeyResult', 'progressReports')
   public keyResult: KeyResultDTO
 
   @Column()
-  @RelationId((progressReport: ConfidenceReport) => progressReport.keyResult)
+  @RelationId((progressReport: KeyResultCheckIn) => progressReport.keyResult)
   public keyResultId: KeyResultDTO['id']
 
-  @ManyToOne('User', 'confidenceReports')
+  @ManyToOne('User', 'progressReports')
   public user: UserDTO
 
   @Column()
-  @RelationId((progressReport: ConfidenceReport) => progressReport.user)
+  @RelationId((progressReport: KeyResultCheckIn) => progressReport.user)
   public userId: UserDTO['id']
+
+  @Column({ type: 'text', nullable: true })
+  public comment?: string
 }
