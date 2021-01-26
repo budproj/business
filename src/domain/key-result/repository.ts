@@ -11,6 +11,7 @@ import { KeyResult } from './entities'
 export interface DomainKeyResultRepositoryInterface {
   buildRankSortColumn: (rank: Array<KeyResultDTO['id']>) => string
   findByIdsRanked: (ids: Array<KeyResultDTO['id']>, rank: string) => Promise<KeyResult[]>
+  getInitialValueForKeyResult: (keyResult: KeyResultDTO) => Promise<KeyResult['initialValue']>
 }
 
 @EntityRepository(KeyResult)
@@ -36,6 +37,20 @@ class DomainKeyResultRepository extends DomainEntityRepository<KeyResult> {
     const orderedQuery = filteredQuery.orderBy(rank)
 
     return orderedQuery.getMany()
+  }
+
+  public async getInitialValueForKeyResult(keyResult: KeyResultDTO) {
+    const where = {
+      id: keyResult.id,
+    }
+    const select: Array<keyof KeyResult> = ['initialValue']
+
+    const selectedKeyResult = await this.findOne({
+      where,
+      select,
+    })
+
+    return selectedKeyResult.initialValue
   }
 
   protected setupTeamQuery(query: SelectQueryBuilder<KeyResult>) {

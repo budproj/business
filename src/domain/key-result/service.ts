@@ -4,7 +4,7 @@ import { CONSTRAINT } from 'src/domain/constants'
 import { DomainEntityService, DomainQueryContext, DomainServiceGetOptions } from 'src/domain/entity'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import DomainKeyResultCheckInService from 'src/domain/key-result/check-in/service'
-import { DEFAULT_CONFIDENCE, DEFAULT_PROGRESS } from 'src/domain/key-result/constants'
+import { DEFAULT_CONFIDENCE } from 'src/domain/key-result/constants'
 import { KEY_RESULT_CUSTOM_LIST_BINDING } from 'src/domain/key-result/custom-list/constants'
 import { KeyResultCustomListDTO } from 'src/domain/key-result/custom-list/dto'
 import { KeyResultCustomList } from 'src/domain/key-result/custom-list/entities'
@@ -155,7 +155,7 @@ class DomainKeyResultService
 
   public async getCurrentProgressForKeyResult(keyResult: KeyResultDTO) {
     const latestCheckIn = await this.checkIn.getLatestFromKeyResult(keyResult)
-    if (!latestCheckIn) return DEFAULT_PROGRESS
+    if (!latestCheckIn) return this.repository.getInitialValueForKeyResult(keyResult)
 
     return latestCheckIn.progress
   }
@@ -290,14 +290,6 @@ class DomainKeyResultService
   //   return report
   // }
   //
-  // async getInitialValue(keyResultID: KeyResult['id']) {
-  //   const keyResult = await this.repository.findOne(
-  //     { id: keyResultID },
-  //     { select: ['initialValue'] },
-  //   )
-  //
-  //   return keyResult.initialValue
-  // }
 }
 
 export default DomainKeyResultService
