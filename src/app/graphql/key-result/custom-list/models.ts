@@ -43,27 +43,6 @@ export class KeyResultCustomListObject {
   keyResults?: KeyResultObject[]
 }
 
-// @InputType({ description: 'Required data to create a new key result view' })
-// export class KeyResultCustomListInput {
-//   @Field({ nullable: true, description: 'The title(name) of the key result view' })
-//   title?: string
-//
-//   @Field({
-//     nullable: true,
-//     description: 'An anchor between this view and a fixed tab in our applications',
-//   })
-//   binding?: KEY_RESULT_CUSTOM_LIST_BINDING
-//
-//   @Field(() => [ID], { description: 'Ordered list of key result IDs' })
-//   rank: Array<KeyResultObject['id']>
-//
-//   @Field(() => ID, {
-//     description: 'The ID of the user that you are creating a view to',
-//     nullable: true,
-//   })
-//   userId?: UserObject['id']
-// }
-//
 // @InputType({ description: 'Required data to update a given key result view rank' })
 // export class KeyResultCustomListRankInput {
 //   @Field(() => [ID], { description: 'Ordered list of key result IDs' })

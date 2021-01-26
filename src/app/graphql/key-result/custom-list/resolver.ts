@@ -123,40 +123,6 @@ class GraphQLKeyResultCustomListResolver extends GraphQLEntityResolver<
   //
   //   return updatedKeyResultCustomList
   // }
-  //
-  // @Permissions(PERMISSION['KEY_RESULT_VIEW:CREATE'])
-  // @Mutation(() => KeyResultCustomListObject)
-  // async createKeyResultCustomList(
-  //   @GraphQLUser() user: AuthzUser,
-  //   @Args('keyResultCustomListInput', { type: () => KeyResultCustomListInput })
-  //   keyResultCustomListInput: KeyResultCustomListInput,
-  // ) {
-  //   this.logger.log({
-  //     user,
-  //     keyResultCustomListInput,
-  //     message: 'Creating a new key result custom list',
-  //   })
-  //
-  //   const enhancedWithUserID = {
-  //     userId: user.id,
-  //     ...keyResultCustomListInput,
-  //   }
-  //
-  //   const creationPromise = this.resolverService.createWithScopeConstraint(enhancedWithUserID, user)
-  //   const [error, createdKeyResultCustomList] = await this.railway.handleRailwayPromise<
-  //     RailwayError,
-  //     KeyResultCustomList[]
-  //   >(creationPromise)
-  //   if (error?.code === '23505')
-  //     throw new PreconditionFailedException('View bindings must be unique')
-  //   if (error) throw new InternalServerErrorException('Unknown error')
-  //   if (!createdKeyResultCustomList)
-  //     throw new NotFoundException(
-  //       `We could not found an user with ID ${enhancedWithUserID.userId} to create your view`,
-  //     )
-  //
-  //   return createdKeyResultCustomList[0]
-  // }
 }
 
 export default GraphQLKeyResultCustomListResolver

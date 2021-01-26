@@ -27,6 +27,7 @@ export interface DomainKeyResultCustomListServiceInterface {
     user: UserDTO,
     keyResults: KeyResult[],
   ) => Promise<KeyResultCustomList>
+  getFromUser: (user: UserDTO) => Promise<KeyResultCustomList[]>
 }
 
 @Injectable()
@@ -66,6 +67,12 @@ class DomainKeyResultCustomListService extends DomainEntityService<
     const createdData = await this.create(data)
 
     return createdData[0]
+  }
+
+  public async getFromUser(user: UserDTO) {
+    const customLists = await this.getMany({ userId: user.id })
+
+    return customLists
   }
 
   protected async createIfUserIsInCompany(

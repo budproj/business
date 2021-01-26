@@ -10,6 +10,7 @@ import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/grap
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
 import { CycleObject } from 'src/app/graphql/cycle/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
+import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import { UserObject } from 'src/app/graphql/user'
 import DomainService from 'src/domain/service'
@@ -145,15 +146,15 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return this.domain.keyResult.getFromTeam(team.id)
   }
 
-  // @ResolveField('objectives', () => [ObjectiveObject])
-  // protected async getTeamObjectives(@Parent() team: TeamObject) {
-  //   this.logger.log({
-  //     team,
-  //     message: 'Fetching objectives for team',
-  //   })
-  //
-  //   return this.domain.objective.getFromTeam(team.id)
-  // }
+  @ResolveField('objectives', () => [ObjectiveObject])
+  protected async getTeamObjectives(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching objectives for team',
+    })
+
+    return this.domain.objective.getFromTeam(team)
+  }
 
   //
   //

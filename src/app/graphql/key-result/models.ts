@@ -59,35 +59,6 @@ export class KeyResultObject {
   description?: string
 }
 
-// @InputType('KeyResultInput', {
-//   description: 'Partial key result data you can send to update a given key result',
-// })
-// export class KeyResultInput {
-//   @Field({ nullable: true, description: 'The title(name) of the key result' })
-//   title: string
-//
-//   @Field({ nullable: true, description: 'The description explaining the key result' })
-//   description?: string
-//
-//   @Field(() => Float, { nullable: true, description: 'The initial value of the key result' })
-//   initialValue: number
-//
-//   @Field(() => Float, { nullable: true, description: 'The goal of the key result' })
-//   goal?: number
-//
-//   @Field({ nullable: true, description: 'The format of the key result' })
-//   format?: KEY_RESULT_FORMAT
-//
-//   @Field(() => ID, { nullable: true, description: 'The owner ID of the key result' })
-//   ownerId?: UserObject['id']
-//
-//   @Field(() => ID, { nullable: true, description: 'The object ID that this key result belongs to' })
-//   objectiveId?: ObjectiveObject['id']
-//
-//   @Field(() => ID, { nullable: true, description: 'The team ID that this key result belongs to' })
-//   teamId?: TeamObject['id']
-// }
-
 registerEnumType(KEY_RESULT_FORMAT, {
   name: 'KEY_RESULT_FORMAT',
   description: 'Each format represents how our user wants to see the metrics of the key result',

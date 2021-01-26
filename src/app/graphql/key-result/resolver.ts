@@ -120,31 +120,6 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
   //   })
   // }
   //
-  //
-  // @Permissions(PERMISSION['KEY_RESULT:UPDATE'])
-  // @Mutation(() => KeyResultObject)
-  // async updateKeyResult(
-  //   @Args('id', { type: () => ID }) id: KeyResultObject['id'],
-  //   @Args('keyResultInput', { type: () => KeyResultInput })
-  //   keyResultInput: KeyResultInput,
-  //   @GraphQLUser() user: AuthzUser,
-  // ) {
-  //   this.logger.log({
-  //     keyResultInput,
-  //     message: `Updating key result of id ${id}`,
-  //   })
-  //
-  //   const updatedKeyResult = await this.resolverService.updateWithScopeConstraint(
-  //     { id },
-  //     keyResultInput,
-  //     user,
-  //   )
-  //   if (!updatedKeyResult)
-  //     throw new NotFoundException(`We could not found a key result for id ${id}`)
-  //
-  //   return updatedKeyResult
-  // }
-  //
   // @ResolveField()
   // async currentProgress(@Parent() keyResult: KeyResultObject) {
   //   this.logger.log({

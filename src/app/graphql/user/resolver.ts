@@ -7,6 +7,7 @@ import { AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
+import { KeyResultCustomListObject } from 'src/app/graphql/key-result/custom-list/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
@@ -122,7 +123,17 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
 
     return this.domain.keyResult.getFromOwner(user.id)
   }
-  //
+
+  @ResolveField('keyResultCustomLists', () => [KeyResultCustomListObject])
+  protected async getUserKeyResultCustomLists(@Parent() user: UserObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching key result custom lists for user',
+    })
+
+    return this.domain.keyResult.getUserCustomLists(user)
+  }
+
   //
   // @ResolveField()
   // async progressReports(@Parent() user: UserObject) {

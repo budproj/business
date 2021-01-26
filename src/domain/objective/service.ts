@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common'
+import { Any } from 'typeorm'
 
 import { CycleDTO } from 'src/domain/cycle/dto'
 import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
+import DomainKeyResultService from 'src/domain/key-result/service'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
+import { TeamDTO } from 'src/domain/team/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
 import { Objective } from './entities'
@@ -13,13 +16,17 @@ export interface DomainObjectiveServiceInterface {
 
   getFromOwner: (ownerId: UserDTO['id']) => Promise<Objective[]>
   getFromCycle: (cycleId: UserDTO['id']) => Promise<Objective[]>
+  getFromTeam: (team: TeamDTO) => Promise<Objective[]>
 }
 
 @Injectable()
 class DomainObjectiveService
   extends DomainEntityService<Objective, ObjectiveDTO>
   implements DomainObjectiveServiceInterface {
-  constructor(public readonly repository: DomainObjectiveRepository) {
+  constructor(
+    public readonly repository: DomainObjectiveRepository,
+    private readonly keyResultService: DomainKeyResultService,
+  ) {
     super(repository, DomainObjectiveService.name)
   }
 
@@ -30,7 +37,18 @@ class DomainObjectiveService
   public async getFromCycle(cycleId: CycleDTO['id']) {
     return this.repository.find({ cycleId })
   }
-  //
+
+  async getFromTeam(team: TeamDTO) {
+    const keyResults = await this.keyResultService.getFromTeam(team.id, ['objectiveId'])
+    if (!keyResults) return []
+
+    const objectiveIds = keyResults.map((keyResult) => keyResult.objectiveId)
+    if (objectiveIds.length === 0) return []
+
+    const objectives = await this.repository.find({ where: { id: Any(objectiveIds) } })
+
+    return objectives
+  }
   //
   // async getCurrentProgress(objectiveID: ObjectiveDTO['id']) {
   //   const date = new Date()
@@ -72,17 +90,6 @@ class DomainObjectiveService
   //   return objectiveCurrentConfidence
   // }
   //
-  // async getFromTeam(teamId: TeamDTO['id']) {
-  //   const keyResults = await this.keyResultService.getFromTeam(teamId, ['objectiveId'])
-  //   if (!keyResults) return []
-  //
-  //   const objectiveIds = keyResults.map((keyResult) => keyResult.objectiveId)
-  //   if (objectiveIds.length === 0) return []
-  //
-  //   const objectives = await this.repository.find({ where: { id: Any(objectiveIds) } })
-  //
-  //   return objectives
-  // }
   //
   // async getPercentageProgressIncrease(objectiveID: ObjectiveDTO['id']) {
   //   const currentProgress = await this.getCurrentProgress(objectiveID)

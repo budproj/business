@@ -12,14 +12,14 @@ import {
 // import { ConfidenceReportDTO } from 'src/domain/key-result/report/confidence/dto'
 // import { ProgressReportDTO } from 'src/domain/key-result/report/progress/dto'
 // import { ObjectiveDTO } from 'src/domain/objective/dto'
+import { KeyResultCustomListDTO } from 'src/domain/key-result/custom-list/dto'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
 import { TeamDTO } from 'src/domain/team/dto'
 import { USER_GENDER } from 'src/domain/user/constants'
 
 import { UserDTO } from './dto'
-// Import { KeyResultCustomListDTO } from 'src/domain/key-result/custom-list/dto'
-//
+
 @Entity()
 export class User implements UserDTO {
   @PrimaryGeneratedColumn('uuid')
@@ -61,9 +61,9 @@ export class User implements UserDTO {
   @OneToMany('KeyResult', 'owner', { nullable: true })
   public keyResults?: KeyResultDTO[]
 
-  // @OneToMany('KeyResultCustomList', 'user')
-  // public keyResultCustomLists: KeyResultCustomListDTO[]
-  //
+  @OneToMany('KeyResultCustomList', 'user', { nullable: true })
+  public keyResultCustomLists?: KeyResultCustomListDTO[]
+
   // @OneToMany('ConfidenceReport', 'user')
   // public confidenceReports: ConfidenceReportDTO[]
   //

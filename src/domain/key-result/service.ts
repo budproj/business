@@ -32,6 +32,7 @@ export interface DomainKeyResultServiceInterface {
     binding: KEY_RESULT_CUSTOM_LIST_BINDING,
     user: UserDTO,
   ) => Promise<KeyResultCustomList>
+  getUserCustomLists: (user: UserDTO) => Promise<KeyResultCustomList[]>
 }
 
 @Injectable()
@@ -110,6 +111,12 @@ class DomainKeyResultService
     return customList
   }
 
+  public async getUserCustomLists(user: UserDTO) {
+    const customLists = await this.customList.getFromUser(user)
+
+    return customLists
+  }
+
   protected async createIfUserIsInCompany(
     _data: Partial<KeyResult>,
     _queryContext: DomainQueryContext,
@@ -127,8 +134,7 @@ class DomainKeyResultService
   protected async createIfUserOwnsIt(_data: Partial<KeyResult>, _queryContext: DomainQueryContext) {
     return {} as any
   }
-  //
-  //
+
   //
   // async getProgressInPercentage(
   //   id: KeyResultDTO['id'],
