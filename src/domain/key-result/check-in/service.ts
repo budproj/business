@@ -5,6 +5,7 @@ import { DOMAIN_QUERY_ORDER } from 'src/domain/constants'
 import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
+import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
 import DomainKeyResultCheckInRepository from './repository'
@@ -13,6 +14,7 @@ export interface DomainKeyResultCheckInServiceInterface {
   snapshot: Date
 
   getLatestFromUsers: (users: UserDTO[]) => Promise<KeyResultCheckIn | null>
+  getLatestFromKeyResult: (keyResult: KeyResultDTO) => Promise<KeyResultCheckIn | null>
 }
 
 @Injectable({ scope: Scope.REQUEST })
@@ -41,6 +43,13 @@ class DomainKeyResultCheckInService extends DomainEntityService<
     const latestCheckIn = await this.getOne(selector, undefined, options)
 
     return latestCheckIn
+  }
+
+  public async getLatestFromKeyResult(keyResult: KeyResultDTO) {
+    const date = new Date()
+    const checkIn = await this.repository.getLatestFromDateForKeyResult(date, keyResult)
+
+    return checkIn
   }
 
   protected async createIfUserIsInCompany(
@@ -83,12 +92,6 @@ class DomainKeyResultCheckInService extends DomainEntityService<
   //   return this.repository.selectManyInUserIDs(userIDs)
   // }
   //
-  // async getLatestFromKeyResult(keyResultID: KeyResultDTO['id']) {
-  //   const date = new Date()
-  //   const progress = await this.getLatestFromDateForKeyResult(keyResultID, date)
-  //
-  //   return progress
-  // }
   //
   // async getLatestFromSnapshotForKeyResult(keyResultID: KeyResultDTO['id']) {
   //   const progress = await this.getLatestFromDateForKeyResult(keyResultID, this.snapshotDate)
@@ -96,15 +99,6 @@ class DomainKeyResultCheckInService extends DomainEntityService<
   //   return progress
   // }
   //
-  // async getLatestFromDateForKeyResult(keyResultId: KeyResultDTO['id'], date: Date) {
-  //   const isoDate = date.toISOString()
-  //   const progress = await this.repository.findOne({
-  //     where: { keyResultId, createdAt: LessThanOrEqual(isoDate) },
-  //     order: { createdAt: 'DESC' },
-  //   })
-  //
-  //   return progress
-  // }
   //
   // async buildKeyResultCheckIns(
   //   progressReports: Partial<KeyResultCheckInDTO> | Array<Partial<KeyResultCheckInDTO>>,

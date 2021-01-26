@@ -4,6 +4,7 @@ import { CONSTRAINT } from 'src/domain/constants'
 import { DomainEntityService, DomainQueryContext, DomainServiceGetOptions } from 'src/domain/entity'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import DomainKeyResultCheckInService from 'src/domain/key-result/check-in/service'
+import { DEFAULT_CONFIDENCE, DEFAULT_PROGRESS } from 'src/domain/key-result/constants'
 import { KEY_RESULT_CUSTOM_LIST_BINDING } from 'src/domain/key-result/custom-list/constants'
 import { KeyResultCustomListDTO } from 'src/domain/key-result/custom-list/dto'
 import { KeyResultCustomList } from 'src/domain/key-result/custom-list/entities'
@@ -41,6 +42,10 @@ export interface DomainKeyResultServiceInterface {
   ) => Promise<KeyResultCheckIn[] | null>
   getCheckInsByUser: (user: UserDTO) => Promise<KeyResultCheckIn[] | null>
   getLatestCheckInForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn | null>
+  getCurrentProgressForKeyResult: (keyResult: KeyResultDTO) => Promise<KeyResultCheckIn['progress']>
+  getCurrentConfidenceForKeyResult: (
+    keyResult: KeyResultDTO,
+  ) => Promise<KeyResultCheckIn['confidence']>
 }
 
 @Injectable()
@@ -148,6 +153,20 @@ class DomainKeyResultService
     return latestCheckIn
   }
 
+  public async getCurrentProgressForKeyResult(keyResult: KeyResultDTO) {
+    const latestCheckIn = await this.checkIn.getLatestFromKeyResult(keyResult)
+    if (!latestCheckIn) return DEFAULT_PROGRESS
+
+    return latestCheckIn.progress
+  }
+
+  public async getCurrentConfidenceForKeyResult(keyResult: KeyResultDTO) {
+    const latestCheckIn = await this.checkIn.getLatestFromKeyResult(keyResult)
+    if (!latestCheckIn) return DEFAULT_CONFIDENCE
+
+    return latestCheckIn.confidence
+  }
+
   protected async createIfUserIsInCompany(
     _data: Partial<KeyResult>,
     _queryContext: DomainQueryContext,
@@ -165,7 +184,6 @@ class DomainKeyResultService
   protected async createIfUserOwnsIt(_data: Partial<KeyResult>, _queryContext: DomainQueryContext) {
     return {} as any
   }
-
   //
   // async getProgressInPercentage(
   //   id: KeyResultDTO['id'],
@@ -194,12 +212,6 @@ class DomainKeyResultService
   //   return latestProgressReport.valueNew
   // }
   //
-  // async getCurrentProgress(id: KeyResultDTO['id']): Promise<ProgressReport['valueNew']> {
-  //   const latestProgressReport = await this.report.progress.getLatestFromKeyResult(id)
-  //   if (!latestProgressReport) return DEFAULT_PROGRESS
-  //
-  //   return latestProgressReport.valueNew
-  // }
   //
   // async getCurrentConfidence(id: KeyResultDTO['id']): Promise<ConfidenceReport['valueNew']> {
   //   const latestConfidenceReport = await this.report.confidence.getLatestFromKeyResult(id)

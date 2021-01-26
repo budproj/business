@@ -1,4 +1,4 @@
-import { Field, Float, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { Field, Float, ID, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
@@ -26,6 +26,12 @@ export class KeyResultObject {
 
   @Field({ description: 'The format of the key result' })
   public format: KEY_RESULT_FORMAT
+
+  @Field(() => Float, { description: 'The current progress of this key result' })
+  public currentProgress: number
+
+  @Field(() => Int, { description: 'The current confidence of this key result' })
+  public currentConfidence: number
 
   @Field({ description: 'The creation date of the key result' })
   public createdAt: Date

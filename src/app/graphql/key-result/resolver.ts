@@ -1,5 +1,5 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, Float, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
@@ -112,26 +112,26 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
 
     return this.domain.keyResult.getCheckIns(keyResult, options)
   }
-  //
-  // @ResolveField()
-  // async currentProgress(@Parent() keyResult: KeyResultObject) {
-  //   this.logger.log({
-  //     keyResult,
-  //     message: 'Fetching current progress for key result',
-  //   })
-  //
-  //   return this.keyResultDomain.getCurrentProgress(keyResult.id)
-  // }
-  //
-  // @ResolveField()
-  // async currentConfidence(@Parent() keyResult: KeyResultObject) {
-  //   this.logger.log({
-  //     keyResult,
-  //     message: 'Fetching current confidence for key result',
-  //   })
-  //
-  //   return this.keyResultDomain.getCurrentConfidence(keyResult.id)
-  // }
+
+  @ResolveField('currentProgress', () => Float)
+  protected async getKeyResultCurrentProgress(@Parent() keyResult: KeyResultObject) {
+    this.logger.log({
+      keyResult,
+      message: 'Fetching current progress for key result',
+    })
+
+    return this.domain.keyResult.getCurrentProgressForKeyResult(keyResult)
+  }
+
+  @ResolveField('currentConfidence', () => Float)
+  protected async getKeyResultCurrentConfidence(@Parent() keyResult: KeyResultObject) {
+    this.logger.log({
+      keyResult,
+      message: 'Fetching current confidence for key result',
+    })
+
+    return this.domain.keyResult.getCurrentConfidenceForKeyResult(keyResult)
+  }
 }
 
 export default GraphQLKeyResultResolver
