@@ -13,58 +13,58 @@ import { KeyResultCheckInObject } from './check-in/models'
 })
 export class KeyResultObject {
   @Field(() => ID, { description: 'The ID of the key result' })
-  id: string
+  public id: string
 
   @Field({ description: 'The title(name) of the key result' })
-  title: string
+  public title: string
 
   @Field(() => Float, { description: 'The initial value of the key result' })
-  initialValue: number
+  public initialValue: number
 
   @Field(() => Float, { description: 'The goal of the key result' })
-  goal: number
+  public goal: number
 
   @Field({ description: 'The format of the key result' })
-  format: KEY_RESULT_FORMAT
+  public format: KEY_RESULT_FORMAT
 
   @Field({ description: 'The creation date of the key result' })
-  createdAt: Date
+  public createdAt: Date
 
   @Field({ description: 'The last update date of the key result' })
-  updatedAt: Date
+  public updatedAt: Date
 
   @Field(() => ID, { description: 'The owner ID of the key result' })
-  ownerId: UserObject['id']
+  public ownerId: UserObject['id']
 
   @Field(() => UserObject, { description: 'The owner of the key result' })
-  owner: UserObject
+  public owner: UserObject
 
   @Field(() => ID, { description: 'The object ID that this key result belongs to' })
-  objectiveId: ObjectiveObject['id']
+  public objectiveId: ObjectiveObject['id']
 
   @Field(() => ObjectiveObject, { description: 'The objective that this key result belongs to' })
-  objective: ObjectiveObject
+  public objective: ObjectiveObject
 
   @Field(() => ID, { description: 'The team ID that this key result belongs to' })
-  teamId: TeamObject['id']
+  public teamId: TeamObject['id']
 
   @Field(() => TeamObject, { description: 'The team that this key result belongs to' })
-  team: TeamObject
+  public team: TeamObject
 
   @Field(() => PolicyObject, {
     description:
       'Group of policies regarding given key result. Those policies decribe actions that your user can perform with that given resource',
   })
-  policies: PolicyObject
+  public policies: PolicyObject
 
   @Field({ description: 'The description explaining the key result', nullable: true })
-  description?: string
+  public description?: string
 
   @Field(() => KeyResultCheckInObject, {
     description: 'A created date ordered list of key result check-ins for this key result',
     nullable: true,
   })
-  checkIns?: KeyResultCheckInObject[]
+  public checkIns?: KeyResultCheckInObject[]
 }
 
 registerEnumType(KEY_RESULT_FORMAT, {

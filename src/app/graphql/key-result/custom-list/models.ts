@@ -10,28 +10,28 @@ import { KEY_RESULT_CUSTOM_LIST_BINDING } from 'src/domain/key-result/custom-lis
 })
 export class KeyResultCustomListObject {
   @Field(() => ID, { description: 'The ID of the key result view' })
-  id: string
+  public id: string
 
   @Field({ description: 'The creation date of this view' })
-  createdAt: Date
+  public createdAt: Date
 
   @Field({ description: 'The last update date of this view' })
-  updatedAt: Date
+  public updatedAt: Date
 
   @Field(() => ID, { description: 'The ID of the uswer that owns this view' })
-  userId: UserObject['id']
+  public userId: UserObject['id']
 
   @Field(() => UserObject, { description: 'The user that owns this view' })
-  user: UserObject
+  public user: UserObject
 
   @Field({ nullable: true, description: 'The title of the key result view' })
-  title?: string
+  public title?: string
 
   @Field({
     description: 'An anchor between this view and a fixed tab in our applications',
     nullable: true,
   })
-  binding?: KEY_RESULT_CUSTOM_LIST_BINDING
+  public binding?: KEY_RESULT_CUSTOM_LIST_BINDING
 
   @Field(() => [ID], { description: 'Ordered list of key result IDs', nullable: true })
   rank?: Array<KeyResultObject['id']>
@@ -40,7 +40,7 @@ export class KeyResultCustomListObject {
     description: 'The rank ordered list of key results in that view',
     nullable: true,
   })
-  keyResults?: KeyResultObject[]
+  public keyResults?: KeyResultObject[]
 }
 
 // @InputType({ description: 'Required data to update a given key result view rank' })

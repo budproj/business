@@ -13,75 +13,75 @@ import { TEAM_GENDER } from 'src/domain/team/constants'
 })
 export class TeamObject {
   @Field(() => ID, { description: 'The ID of the team' })
-  id: string
+  public id: string
 
   @Field({ description: 'The name of the team' })
-  name: string
+  public name: string
 
   @Field({ description: 'The creation date of the team' })
-  createdAt: Date
+  public createdAt: Date
 
   @Field({ description: 'The last update date of the team' })
-  updatedAt: Date
+  public updatedAt: Date
 
   @Field(() => [UserObject], {
     description: 'A creation date ordered list of users that are members of this team',
   })
-  users: UserObject[]
+  public users: UserObject[]
 
   @Field(() => ID, { description: 'The user ID that owns this team' })
-  ownerId: UserObject['id']
+  public ownerId: UserObject['id']
 
   @Field(() => UserObject, { description: 'The user that owns this team' })
-  owner: UserObject
+  public owner: UserObject
 
   @Field(() => ID, { description: 'The ID of the team that owns this team', nullable: true })
-  parentTeamId: TeamObject['id']
+  public parentTeamId: TeamObject['id']
 
   @Field(() => TeamObject, { description: 'The team that owns this team', nullable: true })
-  parentTeam: TeamObject
+  public parentTeam: TeamObject
 
   @Field(() => Boolean, { description: 'Defines if the team is a company' })
-  isCompany: boolean
+  public isCompany: boolean
 
   @Field(() => [TeamObject], { description: 'A list of teams that belongs to this team' })
-  teams: TeamObject[]
+  public teams: TeamObject[]
 
   @Field({ nullable: true, description: 'The description about the team' })
-  description?: string
+  public description?: string
 
   @Field({ nullable: true, description: 'The gender of the team' })
-  gender?: TEAM_GENDER
+  public gender?: TEAM_GENDER
 
   @Field(() => TeamObject, {
     description: 'The team that is the company of this team. This is also known as "rootTeam"',
     nullable: true,
   })
-  company?: TeamObject
+  public company?: TeamObject
 
   @Field(() => [CycleObject], {
     description: 'The cycles that belongs to this team',
     nullable: true,
   })
-  cycles?: CycleObject[]
+  public cycles?: CycleObject[]
 
   @Field(() => [ObjectiveObject], {
     description: 'The created ordered list of objectives in this team',
     nullable: true,
   })
-  objectives?: ObjectiveObject[]
+  public objectives?: ObjectiveObject[]
 
   @Field(() => [KeyResultObject], {
     description: 'The creation date ordered list of key results that belongs to that team',
     nullable: true,
   })
-  keyResults?: KeyResultObject[]
+  public keyResults?: KeyResultObject[]
 
   @Field(() => KeyResultCheckInObject, {
     description: 'The latest check-in for this team',
     nullable: true,
   })
-  latestCheckIn?: KeyResultCheckInObject
+  public latestCheckIn?: KeyResultCheckInObject
 
   // @Field(() => Float, {
   //   description: 'The computed percentage current progress of this team',

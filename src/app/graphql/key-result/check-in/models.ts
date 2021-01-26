@@ -8,31 +8,31 @@ import { UserObject } from 'src/app/graphql/user/models'
 })
 export class KeyResultCheckInObject {
   @Field(() => ID, { description: 'The ID of your report' })
-  id: string
+  public id: string
 
   @Field(() => Float, { description: 'The reported progress in this check-in' })
-  progress: number
+  public progress: number
 
   @Field(() => Int, { description: 'The reported confidence in this check-in' })
-  confidence: number
+  public confidence: number
 
   @Field({ description: 'The creation date of the report' })
-  createdAt: Date
+  public createdAt: Date
 
   @Field(() => ID, { description: 'The key result ID that this report is related to' })
-  keyResultId: KeyResultObject['id']
+  public keyResultId: KeyResultObject['id']
 
   @Field(() => KeyResultObject, { description: 'The key result that this report relates to' })
-  keyResult: KeyResultObject
+  public keyResult: KeyResultObject
 
   @Field(() => ID, { description: 'The user ID that owns this report' })
-  userId: UserObject['id']
+  public userId: UserObject['id']
 
   @Field(() => UserObject, { description: 'The user that owns this report' })
-  user: UserObject
+  public user: UserObject
 
   @Field({ description: 'The comment added in the report', nullable: true })
-  comment?: string
+  public comment?: string
 }
 
 // @InputType({ description: 'The required data to create a new progress report' })

@@ -8,16 +8,16 @@ import { POLICY } from 'src/app/authz/constants'
 })
 export class PolicyObject {
   @Field(() => POLICY, { defaultValue: POLICY.DENY })
-  create: POLICY
+  public create: POLICY
 
   @Field(() => POLICY, { defaultValue: POLICY.DENY })
-  read: POLICY
+  public read: POLICY
 
   @Field(() => POLICY, { defaultValue: POLICY.DENY })
-  update: POLICY
+  public update: POLICY
 
   @Field(() => POLICY, { defaultValue: POLICY.DENY })
-  delete: POLICY
+  public delete: POLICY
 }
 
 registerEnumType(POLICY, {

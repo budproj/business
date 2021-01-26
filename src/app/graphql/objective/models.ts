@@ -7,34 +7,34 @@ import { UserObject } from 'src/app/graphql/user/models'
 @ObjectType('Objective', { description: 'A group of key results that has the same focus' })
 export class ObjectiveObject {
   @Field(() => ID, { description: 'The ID of the objective' })
-  id: string
+  public id: string
 
   @Field({ description: 'The title(name) of the objective' })
-  title: string
+  public title: string
 
   @Field({ description: 'The creation date of the objective' })
-  createdAt: Date
+  public createdAt: Date
 
   @Field({ description: 'The last update date of the objective' })
-  updatedAt: Date
+  public updatedAt: Date
 
   @Field(() => ID, { description: 'The cycle ID that owns this objective' })
-  cycleId: CycleObject['id']
+  public cycleId: CycleObject['id']
 
   @Field(() => CycleObject, { description: 'The cycle that owns this objective' })
-  cycle: CycleObject
+  public cycle: CycleObject
 
   @Field(() => ID, { description: 'The user ID that owns this objective' })
-  ownerId: UserObject['id']
+  public ownerId: UserObject['id']
 
   @Field(() => UserObject, { description: 'The user that owns this objective' })
-  owner: UserObject
+  public owner: UserObject
 
   @Field(() => [KeyResultObject], {
     description: 'A creation date ordered list of key results that belongs to this objective',
     nullable: true,
   })
-  keyResults?: KeyResultObject[]
+  public keyResults?: KeyResultObject[]
 
   // @Field(() => Float, {
   //   description: 'The computed percentage current progress of this objective',

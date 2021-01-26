@@ -13,76 +13,76 @@ import { USER_GENDER } from 'src/domain/user/constants'
 })
 export class UserObject {
   @Field(() => ID, { description: 'The ID of the user' })
-  id: string
+  public id: string
 
   @Field({ description: 'The name of the user' })
-  firstName: string
+  public firstName: string
 
   @Field({ description: 'The full name of the user' })
-  fullName: string
+  public fullName: string
 
   @Field({ description: 'The sub field in Auth0 (their ID)' })
-  authzSub: string
+  public authzSub: string
 
   @Field({ description: 'The creation date of the user' })
-  createdAt: Date
+  public createdAt: Date
 
   @Field({ description: 'The last update date of this user' })
-  updatedAt: Date
+  public updatedAt: Date
 
   @Field({ description: 'The last name of the user', nullable: true })
-  lastName?: string
+  public lastName?: string
 
   @Field({ description: 'The gender of the user', nullable: true })
-  gender?: USER_GENDER
+  public gender?: USER_GENDER
 
   @Field({ description: 'The user role in the company', nullable: true })
-  role?: string
+  public role?: string
 
   @Field({ description: 'The picture of the user', nullable: true })
-  picture?: string
+  public picture?: string
 
   @Field(() => [TeamObject], {
     description: 'The creation date ordered list of companies that this user is a part of',
     nullable: true,
   })
-  companies?: TeamObject[]
+  public companies?: TeamObject[]
 
   @Field(() => [TeamObject], {
     description: 'The creation date ordered list of teams that this user is part of',
     nullable: true,
   })
-  teams?: Promise<TeamObject[]>
+  public teams?: Promise<TeamObject[]>
 
   @Field(() => [TeamObject], {
     description: 'The creation date ordered list of teams that this user owns',
     nullable: true,
   })
-  ownedTeams?: TeamObject[]
+  public ownedTeams?: TeamObject[]
 
   @Field(() => [ObjectiveObject], {
     description: 'The creation date ordered list of objectives that this user owns',
     nullable: true,
   })
-  objectives?: ObjectiveObject[]
+  public objectives?: ObjectiveObject[]
 
   @Field(() => [KeyResultObject], {
     description: 'The creation date ordered list of key results that this user owns',
     nullable: true,
   })
-  keyResults?: KeyResultObject[]
+  public keyResults?: KeyResultObject[]
 
   @Field(() => [KeyResultCustomListObject], {
     description: 'The creation date ordered list of key result custom lists that this user owns',
     nullable: true,
   })
-  keyResultCustomLists?: KeyResultCustomListObject[]
+  public keyResultCustomLists?: KeyResultCustomListObject[]
 
   @Field(() => [KeyResultCheckInObject], {
     description: 'The creation date ordered list of key result check-ins created by this user',
     nullable: true,
   })
-  checkIns?: KeyResultCheckInObject[]
+  public checkIns?: KeyResultCheckInObject[]
 }
 
 registerEnumType(USER_GENDER, {
