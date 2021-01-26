@@ -10,6 +10,7 @@ import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/grap
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
 import { CycleObject } from 'src/app/graphql/cycle/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
+import { UserObject } from 'src/app/graphql/user'
 import DomainService from 'src/domain/service'
 import { TeamDTO } from 'src/domain/team/dto'
 import { Team } from 'src/domain/team/entities'
@@ -83,14 +84,54 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return teams
   }
 
+  @ResolveField('owner', () => UserObject)
+  protected async getTeamOwner(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching owner for team',
+    })
+
+    return this.domain.user.getOne({ id: team.ownerId })
+  }
+
+  @ResolveField('teams', () => [TeamObject])
+  protected async getTeamChildTeams(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching child teams for team',
+    })
+
+    return this.domain.team.getMany({ parentTeamId: team.id })
+  }
+
   @ResolveField('cycles', () => [CycleObject])
-  protected async getCycles(@Parent() team: TeamObject) {
+  protected async getTeamCycles(@Parent() team: TeamObject) {
     this.logger.log({
       team,
       message: 'Fetching cycles for team',
     })
 
     return this.domain.cycle.getFromTeam(team.id)
+  }
+
+  @ResolveField('users', () => [UserObject])
+  protected async getTeamUsers(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching users for team',
+    })
+
+    return this.domain.team.getUsersInTeam(team.id)
+  }
+
+  @ResolveField('isCompany', () => Boolean)
+  protected async getTeamIsCompanySpecification(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Deciding if the team is a company',
+    })
+
+    return this.domain.team.specification.isACompany.isSatisfiedBy(team)
   }
 
   // @ResolveField()
@@ -103,25 +144,6 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   //   return this.keyResultDomain.getFromTeam(team.id)
   // }
   //
-  // @ResolveField()
-  // async owner(@Parent() team: TeamObject) {
-  //   this.logger.log({
-  //     team,
-  //     message: 'Fetching owner for team',
-  //   })
-  //
-  //   return this.userDomain.getOne({ id: team.ownerId })
-  // }
-  //
-  // @ResolveField(() => [TeamObject], { name: 'teams' })
-  // async getTeams(@Parent() team: TeamObject, @GraphQLUser() user: AuthzUser) {
-  //   this.logger.log({
-  //     team,
-  //     message: 'Fetching child teams for team',
-  //   })
-  //
-  //   return this.resolverService.getManyWithActionScopeConstraint({ parentTeamId: team.id }, user)
-  // }
   //
   // @ResolveField()
   // async currentProgress(@Parent() team: TeamObject) {
@@ -143,15 +165,6 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   //   return this.teamDomain.getCurrentConfidence(team.id)
   // }
   //
-  // @ResolveField()
-  // async users(@Parent() team: TeamObject) {
-  //   this.logger.log({
-  //     team,
-  //     message: 'Fetching users for team',
-  //   })
-  //
-  //   return this.teamDomain.getUsersInTeam(team.id)
-  // }
   //
   // @ResolveField()
   // async objectives(@Parent() team: TeamObject) {
@@ -182,16 +195,6 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   //   })
   //
   //   return this.teamDomain.getLatestReport(team.id)
-  // }
-  //
-  // @ResolveField()
-  // async isCompany(@Parent() team: TeamObject) {
-  //   this.logger.log({
-  //     team,
-  //     message: 'Deciding if the team is a company',
-  //   })
-  //
-  //   return this.teamDomain.specification.isACompany.isSatisfiedBy(team)
   // }
 }
 

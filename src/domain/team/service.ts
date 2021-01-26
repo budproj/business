@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { flatten, remove } from 'lodash'
+import { flatten, remove, uniqBy } from 'lodash'
 
 import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { TeamEntityFilter, TeamEntityRelation } from 'src/domain/team/types'
@@ -21,6 +21,7 @@ export interface DomainTeamServiceInterface {
     relations?: TeamEntityRelation[],
   ) => Promise<Array<Partial<Team>>>
   getParentTeam: (teamID: TeamDTO['id']) => Promise<Team>
+  getUsersInTeam: (teamID: TeamDTO['id']) => Promise<UserDTO[]>
 }
 
 @Injectable()
@@ -92,6 +93,16 @@ class DomainTeamService
     const { parentTeamId } = await this.getOne({ id: teamID })
 
     return this.getOne({ id: parentTeamId })
+  }
+
+  public async getUsersInTeam(teamID: TeamDTO['id']) {
+    const teamsBelowCurrentNode = await this.getAllTeamsBelowNodes(teamID)
+
+    const teamUsers = await Promise.all(teamsBelowCurrentNode.map(async (team) => team.users))
+    const flattenedTeamUsers = flatten(teamUsers)
+    const uniqTeamUsers = uniqBy(flattenedTeamUsers, 'id')
+
+    return uniqTeamUsers
   }
 
   protected async createIfUserIsInCompany(_data: Partial<Team>, _queryContext: DomainQueryContext) {
