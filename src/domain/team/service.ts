@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { flatten, remove, uniq, uniqBy } from 'lodash'
+import { flatten, remove, uniqBy } from 'lodash'
 
 import { CONSTRAINT } from 'src/domain/constants'
 import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
@@ -15,17 +15,17 @@ export interface DomainTeamServiceInterface {
   repository: DomainTeamRepository
   specification: DomainTeamSpecification
 
-  getFromOwner: (userID: UserDTO['id']) => Promise<Team[]>
-  getUserCompanies: (user: UserDTO) => Promise<TeamDTO[]>
-  getUserCompaniesAndDepartments: (user: UserDTO) => Promise<TeamDTO[]>
-  getForUser: (user: UserDTO) => Promise<TeamDTO[]>
+  getFromOwner: (owner: UserDTO) => Promise<Team[]>
+  getUserCompanies: (user: UserDTO) => Promise<Team[]>
+  getUserCompaniesAndDepartments: (user: UserDTO) => Promise<Team[]>
+  getWithUser: (user: UserDTO) => Promise<Team[]>
   getAllTeamsBelowNodes: (
-    nodes: TeamDTO['id'] | Array<TeamDTO['id']>,
+    nodes: TeamDTO | TeamDTO[],
     filter?: TeamEntityFilter[],
     relations?: TeamEntityRelation[],
   ) => Promise<Array<Partial<Team>>>
-  getParentTeam: (teamID: TeamDTO['id']) => Promise<Team>
-  getUsersInTeam: (teamID: TeamDTO['id']) => Promise<UserDTO[]>
+  getParentTeam: (team: TeamDTO) => Promise<Team>
+  getUsersInTeam: (teamID: TeamDTO) => Promise<UserDTO[]>
   buildTeamQueryContext: (user: UserDTO, constraint: CONSTRAINT) => Promise<DomainQueryContext>
 }
 
@@ -40,12 +40,12 @@ class DomainTeamService
     super(repository, DomainTeamService.name)
   }
 
-  public async getFromOwner(ownerId: UserDTO['id']) {
-    return this.repository.find({ ownerId })
+  public async getFromOwner(owner: UserDTO) {
+    return this.repository.find({ ownerId: owner.id })
   }
 
   public async getUserCompanies(user: UserDTO) {
-    const teams = await this.getForUser(user)
+    const teams = await this.getWithUser(user)
     const companyPromises = teams.map(async (team) => this.getRootTeamForTeam(team))
 
     const companies = Promise.all(companyPromises)
@@ -53,21 +53,21 @@ class DomainTeamService
     return companies
   }
 
-  public async getForUser(user: UserDTO) {
+  public async getWithUser(user: UserDTO) {
     const teams = await user.teams
 
-    return teams
+    return teams as Team[]
   }
 
   public async getAllTeamsBelowNodes(
-    nodes: TeamDTO['id'] | Array<TeamDTO['id']>,
+    nodes: TeamDTO | TeamDTO[],
     filter?: TeamEntityFilter[],
     relations?: TeamEntityRelation[],
   ) {
     const nodesAsArray = Array.isArray(nodes) ? nodes : [nodes]
 
-    let teams: Array<Partial<Team>> = await Promise.all(
-      nodesAsArray.map(async (id) => this.getOne({ id })),
+    let teams: Team[] = await Promise.all(
+      nodesAsArray.map(async (team) => this.getOne({ id: team.id })),
     )
     let nextIterationTeams = nodesAsArray
 
@@ -76,12 +76,12 @@ class DomainTeamService
       // trying the next one, we can disable the following eslint rule
       // eslint-disable-next-line no-await-in-loop
       const selectedTeams = await Promise.all(
-        nextIterationTeams.map(async (teamID) => this.getChildTeams(teamID, filter, relations)),
+        nextIterationTeams.map(async (team) => this.getChildTeams(team, filter, relations)),
       )
       const currentIterationTeams = flatten(selectedTeams)
 
       teams = [...teams, ...currentIterationTeams]
-      nextIterationTeams = remove(currentIterationTeams.map((team) => team?.id))
+      nextIterationTeams = remove(currentIterationTeams)
     }
 
     return teams
@@ -94,14 +94,14 @@ class DomainTeamService
     return [...companies, ...departments]
   }
 
-  public async getParentTeam(teamID: TeamDTO['id']) {
-    const { parentTeamId } = await this.getOne({ id: teamID })
+  public async getParentTeam(team: TeamDTO) {
+    const { parentTeamId } = await this.getOne({ id: team.id })
 
     return this.getOne({ id: parentTeamId })
   }
 
-  public async getUsersInTeam(teamID: TeamDTO['id']) {
-    const teamsBelowCurrentNode = await this.getAllTeamsBelowNodes(teamID)
+  public async getUsersInTeam(team: TeamDTO) {
+    const teamsBelowCurrentNode = await this.getAllTeamsBelowNodes(team)
 
     const teamUsers = await Promise.all(teamsBelowCurrentNode.map(async (team) => team.users))
     const flattenedTeamUsers = flatten(teamUsers)
@@ -113,13 +113,13 @@ class DomainTeamService
   public async buildTeamQueryContext(user: UserDTO, constraint: CONSTRAINT) {
     const context = this.buildContext(user, constraint)
 
-    const userCompaniesIDs = await this.parseUserCompanyIDs(user)
-    const userCompaniesTeamsIDs = await this.parseUserCompaniesTeamIDs(userCompaniesIDs)
-    const userTeams = await this.parseUserTeamIDs(user)
+    const userCompanies = await this.parseUserCompanies(user)
+    const userCompaniesTeams = await this.parseUserCompaniesTeams(userCompanies)
+    const userTeams = await this.getWithUser(user)
 
     const query = {
-      companies: userCompaniesIDs,
-      teams: userCompaniesTeamsIDs,
+      companies: userCompanies,
+      teams: userCompaniesTeams,
       userTeams,
     }
 
@@ -144,7 +144,7 @@ class DomainTeamService
   }
 
   private async getRootTeamForTeam(team: TeamDTO) {
-    let rootTeam = team
+    let rootTeam = team as Team
 
     while (rootTeam.parentTeamId) {
       // Since we're dealing with a linked list, where we need to evaluate each step before trying
@@ -157,13 +157,13 @@ class DomainTeamService
   }
 
   private async getChildTeams(
-    teamID: TeamDTO['id'] | Array<TeamDTO['id']>,
+    teams: TeamDTO | TeamDTO[],
     filter?: TeamEntityFilter[],
     relations?: TeamEntityRelation[],
   ) {
-    const teamIDs = Array.isArray(teamID) ? teamID : [teamID]
-    const whereSelector = teamIDs.map((teamID) => ({
-      parentTeamId: teamID,
+    const teamsAsArray = Array.isArray(teams) ? teams : [teams]
+    const whereSelector = teamsAsArray.map((team) => ({
+      parentTeamId: team.id,
     }))
 
     const childTeams = await this.repository.find({
@@ -177,32 +177,21 @@ class DomainTeamService
 
   private async getUserCompaniesDepartments(user: UserDTO) {
     const companies = await this.getUserCompanies(user)
-    const companyIDs = companies.map((company) => company.id)
-
-    const departments = this.getChildTeams(companyIDs)
+    const departments = this.getChildTeams(companies)
 
     return departments
   }
 
-  private async parseUserCompanyIDs(user: UserDTO) {
+  private async parseUserCompanies(user: UserDTO) {
     const userCompanies = await this.getUserCompanies(user)
-    const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
 
-    return userCompanyIDs
+    return userCompanies
   }
 
-  private async parseUserCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>) {
-    const companiesTeams = await this.getAllTeamsBelowNodes(companyIDs)
-    const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
+  private async parseUserCompaniesTeams(companies: TeamDTO[]) {
+    const companiesTeams = await this.getAllTeamsBelowNodes(companies)
 
-    return companiesTeamIDs
-  }
-
-  private async parseUserTeamIDs(user: UserDTO) {
-    const teams = await user.teams
-    const teamIDs = teams.map((team) => team.id)
-
-    return teamIDs
+    return companiesTeams
   }
 }
 

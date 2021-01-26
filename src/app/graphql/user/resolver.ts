@@ -90,7 +90,7 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
       message: 'Fetching teams for user',
     })
 
-    const teams = await this.domain.team.getForUser(user)
+    const teams = await this.domain.team.getWithUser(user)
 
     return teams
   }
@@ -102,7 +102,7 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
       message: 'Fetching owned teams for user',
     })
 
-    return this.domain.team.getFromOwner(user.id)
+    return this.domain.team.getFromOwner(user)
   }
 
   @ResolveField('objectives', () => [ObjectiveObject], { nullable: true })
@@ -112,7 +112,7 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
       message: 'Fetching objectives for user',
     })
 
-    return this.domain.objective.getFromOwner(user.id)
+    return this.domain.objective.getFromOwner(user)
   }
 
   @ResolveField('keyResults', () => [KeyResultObject], { nullable: true })
@@ -122,7 +122,7 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
       message: 'Fetching key results for user',
     })
 
-    return this.domain.keyResult.getFromOwner(user.id)
+    return this.domain.keyResult.getFromOwner(user)
   }
 
   @ResolveField('keyResultCustomLists', () => [KeyResultCustomListObject], { nullable: true })

@@ -114,7 +114,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
       message: 'Fetching cycles for team',
     })
 
-    return this.domain.cycle.getFromTeam(team.id)
+    return this.domain.cycle.getFromTeam(team)
   }
 
   @ResolveField('users', () => [UserObject])
@@ -124,7 +124,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
       message: 'Fetching users for team',
     })
 
-    return this.domain.team.getUsersInTeam(team.id)
+    return this.domain.team.getUsersInTeam(team)
   }
 
   @ResolveField('isCompany', () => Boolean)
@@ -144,7 +144,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
       message: 'Fetching key results for team',
     })
 
-    return this.domain.keyResult.getFromTeam(team.id)
+    return this.domain.keyResult.getFromTeams(team)
   }
 
   @ResolveField('objectives', () => [ObjectiveObject], { nullable: true })

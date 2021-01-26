@@ -23,9 +23,9 @@ export interface DomainKeyResultServiceInterface {
   customList: DomainKeyResultCustomListService
   checkIn: DomainKeyResultCheckInService
 
-  getFromOwner: (ownerId: UserDTO['id']) => Promise<KeyResult[]>
-  getFromTeam: (teamIDs: TeamDTO['id'] | Array<TeamDTO['id']>) => Promise<KeyResult[]>
-  getFromObjective: (objectiveId: ObjectiveDTO['id']) => Promise<KeyResult[]>
+  getFromOwner: (owner: UserDTO) => Promise<KeyResult[]>
+  getFromTeams: (teams: TeamDTO | TeamDTO[]) => Promise<KeyResult[]>
+  getFromObjective: (objective: ObjectiveDTO) => Promise<KeyResult[]>
   getFromCustomList: (keyResultCustomList: KeyResultCustomListDTO) => Promise<KeyResult[]>
   refreshCustomListWithOwnedKeyResults: (
     user: UserDTO,
@@ -61,27 +61,27 @@ class DomainKeyResultService
     super(repository, DomainKeyResultService.name)
   }
 
-  public async getFromOwner(ownerId: UserDTO['id']) {
-    return this.repository.find({ ownerId })
+  public async getFromOwner(owner: UserDTO) {
+    return this.repository.find({ ownerId: owner.id })
   }
 
-  public async getFromTeam(
-    teamIDs: TeamDTO['id'] | Array<TeamDTO['id']>,
+  public async getFromTeams(
+    teams: TeamDTO | TeamDTO[],
     filter?: Array<keyof KeyResult>,
   ): Promise<KeyResult[]> {
-    const isEmptyArray = Array.isArray(teamIDs) ? teamIDs.length === 0 : false
-    if (!teamIDs || isEmptyArray) return
+    const isEmptyArray = Array.isArray(teams) ? teams.length === 0 : false
+    if (!teams || isEmptyArray) return
 
     const buildSelector = (teamId: TeamDTO['id']) => ({ teamId })
-    const selector = Array.isArray(teamIDs)
-      ? teamIDs.map((teamID) => buildSelector(teamID))
-      : buildSelector(teamIDs)
+    const selector = Array.isArray(teams)
+      ? teams.map((team) => buildSelector(team.id))
+      : buildSelector(teams.id)
 
     return this.repository.find({ where: selector, select: filter })
   }
 
-  public async getFromObjective(objectiveId: ObjectiveDTO['id']): Promise<KeyResult[]> {
-    return this.repository.find({ objectiveId })
+  public async getFromObjective(objective: ObjectiveDTO) {
+    return this.repository.find({ objectiveId: objective.id })
   }
 
   public async getFromCustomList(keyResultCustomList: KeyResultCustomListDTO) {
@@ -95,7 +95,7 @@ class DomainKeyResultService
     user: UserDTO,
     keyResultCustomList?: KeyResultCustomListDTO,
   ) {
-    const availableKeyResults = await this.getFromOwner(user.id)
+    const availableKeyResults = await this.getFromOwner(user)
     const refreshedCustomList = await this.customList.refreshWithNewKeyResults(
       availableKeyResults,
       keyResultCustomList,
@@ -147,7 +147,7 @@ class DomainKeyResultService
   }
 
   public async getLatestCheckInForTeam(team: TeamDTO) {
-    const users = await this.teamService.getUsersInTeam(team.id)
+    const users = await this.teamService.getUsersInTeam(team)
     const latestCheckIn = await this.checkIn.getLatestFromUsers(users)
 
     return latestCheckIn

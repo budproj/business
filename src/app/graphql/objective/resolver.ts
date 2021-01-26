@@ -1,5 +1,5 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, Float, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
@@ -68,18 +68,18 @@ class GraphQLObjectiveResolver extends GraphQLEntityResolver<Objective, Objectiv
       message: 'Fetching key results for objective',
     })
 
-    return this.domain.keyResult.getFromObjective(objective.id)
+    return this.domain.keyResult.getFromObjective(objective)
   }
 
-  // @ResolveField()
-  // async currentProgress(@Parent() objective: ObjectiveObject) {
-  //   this.logger.log({
-  //     objective,
-  //     message: 'Fetching current progress for objective',
-  //   })
-  //
-  //   return this.objectiveDomain.getCurrentProgress(objective.id)
-  // }
+  @ResolveField('currentProgress', () => Float)
+  protected async getObjectiveCurrentProgress(@Parent() objective: ObjectiveObject) {
+    this.logger.log({
+      objective,
+      message: 'Fetching current progress for objective',
+    })
+
+    return this.domain.objective.getCurrentProgressForObjective(objective)
+  }
   //
   // @ResolveField()
   // async currentConfidence(@Parent() objective: ObjectiveObject) {

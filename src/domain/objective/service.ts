@@ -3,6 +3,7 @@ import { Any } from 'typeorm'
 
 import { CycleDTO } from 'src/domain/cycle/dto'
 import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
+import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import DomainKeyResultService from 'src/domain/key-result/service'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
 import { TeamDTO } from 'src/domain/team/dto'
@@ -14,9 +15,12 @@ import DomainObjectiveRepository from './repository'
 export interface DomainObjectiveServiceInterface {
   repository: DomainObjectiveRepository
 
-  getFromOwner: (ownerId: UserDTO['id']) => Promise<Objective[]>
-  getFromCycle: (cycleId: UserDTO['id']) => Promise<Objective[]>
+  getFromOwner: (owner: UserDTO) => Promise<Objective[]>
+  getFromCycle: (cycle: CycleDTO) => Promise<Objective[]>
   getFromTeam: (team: TeamDTO) => Promise<Objective[]>
+  getCurrentProgressForObjective: (
+    objective: ObjectiveDTO,
+  ) => Promise<KeyResultCheckInDTO['progress']>
 }
 
 @Injectable()
@@ -30,16 +34,16 @@ class DomainObjectiveService
     super(repository, DomainObjectiveService.name)
   }
 
-  public async getFromOwner(ownerId: UserDTO['id']) {
-    return this.repository.find({ ownerId })
+  public async getFromOwner(owner: UserDTO) {
+    return this.repository.find({ ownerId: owner.id })
   }
 
-  public async getFromCycle(cycleId: CycleDTO['id']) {
-    return this.repository.find({ cycleId })
+  public async getFromCycle(cycle: CycleDTO) {
+    return this.repository.find({ cycleId: cycle.id })
   }
 
-  async getFromTeam(team: TeamDTO) {
-    const keyResults = await this.keyResultService.getFromTeam(team.id, ['objectiveId'])
+  public async getFromTeam(team: TeamDTO) {
+    const keyResults = await this.keyResultService.getFromTeams(team, ['objectiveId'])
     if (!keyResults) return []
 
     const objectiveIds = keyResults.map((keyResult) => keyResult.objectiveId)
@@ -49,13 +53,13 @@ class DomainObjectiveService
 
     return objectives
   }
-  //
-  // async getCurrentProgress(objectiveID: ObjectiveDTO['id']) {
-  //   const date = new Date()
-  //   const currentProgress = await this.getProgressAtDate(date, objectiveID)
-  //
-  //   return currentProgress
-  // }
+
+  public async getCurrentProgressForObjective(objective: ObjectiveDTO) {
+    const date = new Date()
+    const currentProgress = 0 // Await this.getProgressAtDateForObjective(date, objective)
+
+    return currentProgress
+  }
   //
   // async getLastWeekProgress(objectiveID: ObjectiveDTO['id']) {
   //   const date = new Date()
@@ -65,21 +69,6 @@ class DomainObjectiveService
   //   return currentProgress
   // }
   //
-  // async getProgressAtDate(date: Date, objectiveId: ObjectiveDTO['id']) {
-  //   const keyResults = await this.keyResultService.getFromObjective(objectiveId)
-  //   if (!keyResults) return
-  //
-  //   const previousSnapshotDate = this.keyResultService.report.progress.snapshotDate
-  //   this.keyResultService.report.progress.snapshotDate = date
-  //
-  //   const objectiveCurrentProgress = this.keyResultService.calculateSnapshotAverageProgressFromList(
-  //     keyResults,
-  //   )
-  //
-  //   this.keyResultService.report.progress.snapshotDate = previousSnapshotDate
-  //
-  //   return objectiveCurrentProgress
-  // }
   //
   // async getCurrentConfidence(objectiveId: ObjectiveDTO['id']): Promise<ProgressReport['valueNew']> {
   //   const keyResults = await this.keyResultService.getFromObjective(objectiveId)
@@ -117,6 +106,22 @@ class DomainObjectiveService
   protected async createIfUserOwnsIt(_data: Partial<Objective>, _queryContext: DomainQueryContext) {
     return {} as any
   }
+
+  // Private async getProgressAtDateForObjective(date: Date, objective: ObjectiveDTO) {
+  //   const keyResults = await this.keyResultService.getFromObjective(objective)
+  //   if (!keyResults) return DEFAULT_PROGRESS
+  //
+  //   const previousSnapshotDate = this.keyResultService.report.progress.snapshotDate
+  //   this.keyResultService.report.progress.snapshotDate = date
+  //
+  //   const objectiveCurrentProgress = this.keyResultService.calculateSnapshotAverageProgressFromList(
+  //     keyResults,
+  //   )
+  //
+  //   this.keyResultService.report.progress.snapshotDate = previousSnapshotDate
+  //
+  //   return objectiveCurrentProgress
+  // }
 }
 
 export default DomainObjectiveService

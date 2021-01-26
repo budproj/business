@@ -57,7 +57,7 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
       message: 'Fetching objectives for cycle',
     })
 
-    return this.domain.objective.getFromCycle(cycle.id)
+    return this.domain.objective.getFromCycle(cycle)
   }
 }
 

@@ -10,6 +10,8 @@ import {
 } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
+import { Team } from 'src/domain/team/entities'
+
 import { CONSTRAINT, DOMAIN_QUERY_ORDER } from './constants'
 import { TeamDTO } from './team/dto'
 import { UserDTO } from './user/dto'
@@ -60,9 +62,9 @@ export interface DomainServiceContext {
 }
 
 export interface QueryContext {
-  companies: Array<TeamDTO['id']>
-  teams: Array<TeamDTO['id']>
-  userTeams: Array<TeamDTO['id']>
+  companies: Team[]
+  teams: Team[]
+  userTeams: Team[]
 }
 
 export interface DomainQueryContext extends DomainServiceContext {
@@ -375,10 +377,7 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
 export type SelectionQueryConstrain<E> = (query?: SelectQueryBuilder<E>) => SelectQueryBuilder<E>
 
 export interface DomainEntityRepositoryInterface<E> {
-  constraintQueryToTeam: (
-    allowedTeams: Array<TeamDTO['id']>,
-    user: UserDTO,
-  ) => SelectionQueryConstrain<E>
+  constraintQueryToTeam: (allowedTeams: TeamDTO[], user: UserDTO) => SelectionQueryConstrain<E>
 
   constraintQueryToOwns: (user: UserDTO) => (query: SelectQueryBuilder<E>) => SelectQueryBuilder<E>
 }
@@ -398,14 +397,15 @@ export abstract class DomainEntityRepository<E>
   implements DomainEntityRepositoryInterface<E> {
   protected composeTeamQuery = flow(this.setupOwnsQuery, this.setupTeamQuery)
 
-  public constraintQueryToTeam(allowedTeams: Array<TeamDTO['id']>, user: UserDTO) {
+  public constraintQueryToTeam(allowedTeams: TeamDTO[], user: UserDTO) {
     const addConstraintToQuery = (query?: SelectQueryBuilder<E>) => {
       const baseQuery = query ?? this.createQueryBuilder()
       const composedQuery = this.composeTeamQuery(baseQuery)
+      const allowedTeamIDs = allowedTeams.map((team) => team.id)
 
       return composedQuery.andWhere(
         new Brackets((query) => {
-          const teamOwnedEntities = this.addTeamWhereExpression(query, allowedTeams)
+          const teamOwnedEntities = this.addTeamWhereExpression(query, allowedTeamIDs)
           const userAndTeamOwnedEntities = this.addOwnsWhereExpression(teamOwnedEntities, user)
 
           return userAndTeamOwnedEntities

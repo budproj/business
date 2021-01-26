@@ -11,7 +11,7 @@ import DomainCycleRepository from './repository'
 export interface DomainCycleServiceInterface {
   repository: DomainCycleRepository
 
-  getFromTeam: (teamId: TeamDTO['id']) => Promise<Cycle[]>
+  getFromTeam: (team: TeamDTO) => Promise<Cycle[]>
 }
 
 @Injectable()
@@ -25,9 +25,9 @@ class DomainCycleService
     super(repository, DomainCycleService.name)
   }
 
-  public async getFromTeam(teamId: TeamDTO['id']) {
-    const cycles = await this.repository.find({ teamId })
-    if (cycles.length === 0) return this.getFromParentTeam(teamId)
+  public async getFromTeam(team: TeamDTO) {
+    const cycles = await this.repository.find({ teamId: team.id })
+    if (cycles.length === 0) return this.getFromParentTeam(team)
 
     return cycles
   }
@@ -47,10 +47,10 @@ class DomainCycleService
     return {} as any
   }
 
-  private async getFromParentTeam(childTeamID: TeamDTO['id']) {
-    const parentTeam = await this.teamService.getParentTeam(childTeamID)
+  private async getFromParentTeam(childTeam: TeamDTO) {
+    const parentTeam = await this.teamService.getParentTeam(childTeam)
 
-    return this.getFromTeam(parentTeam.id)
+    return this.getFromTeam(parentTeam)
   }
 }
 
