@@ -1,9 +1,11 @@
 import { LogLevel } from 'lib/logger'
+import { TeamDTO } from 'src/domain/team/dto'
+import { UserDTO } from 'src/domain/user/dto'
 
 export interface AppConfigOptions {
   port: number
   globalPrefix: string
-  godMode: boolean
+  godMode: GodModuleConfigOptions
   authz: AuthzConfigOptions
   logging: LoggingConfigOptions
   https: HttpsConfigOptions
@@ -34,4 +36,10 @@ export interface HttpsCredentialsConfigOptions {
 
 export interface CorsConfigOptions {
   allowedOrigins: string | string[]
+}
+
+export interface GodModuleConfigOptions {
+  enabled: boolean
+  userID: UserDTO['id']
+  teamID: TeamDTO['id']
 }

@@ -1,122 +1,42 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { startOfWeek } from 'date-fns'
-import { flatten, remove, uniq, uniqBy, orderBy } from 'lodash'
-import { IsNull } from 'typeorm'
+import { Injectable } from '@nestjs/common'
+import { flatten, remove } from 'lodash'
 
-// import { ConfidenceReport } from 'src/domain/key-result/report/confidence/entities'
-// import DomainKeyResultService from 'src/domain/key-result/service'
+import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { TeamEntityFilter, TeamEntityRelation } from 'src/domain/team/types'
 import { UserDTO } from 'src/domain/user/dto'
 
-import { DEFAULT_CONFIDENCE } from './constants'
 import { TeamDTO } from './dto'
 import { Team } from './entities'
 import DomainTeamRepository from './repository'
 import DomainTeamSpecification from './specification'
-import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 
 export interface DomainTeamServiceInterface {
-  getFromOwner: (userID: UserDTO['id']) => Promise<Team>
-  getUserCompanies: (user: UserDTO) => Promise<Team[]>
-  getForUser: (user: UserDTO) => Promise<Team[]>
+  getFromOwner: (userID: UserDTO['id']) => Promise<Team[]>
+  getUserCompanies: (user: UserDTO) => Promise<TeamDTO[]>
+  getUserCompaniesAndDepartments: (user: UserDTO) => Promise<TeamDTO[]>
+  getForUser: (user: UserDTO) => Promise<TeamDTO[]>
   getAllTeamsBelowNodes: (
     nodes: TeamDTO['id'] | Array<TeamDTO['id']>,
     filter?: TeamEntityFilter[],
     relations?: TeamEntityRelation[],
-  ) => Promise<Partial<Team>>
+  ) => Promise<Array<Partial<Team>>>
 }
 
 @Injectable()
-class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
+class DomainTeamService
+  extends DomainEntityService<Team, TeamDTO>
+  implements DomainTeamServiceInterface {
   constructor(
     public readonly repository: DomainTeamRepository,
-    public readonly specification: DomainTeamSpecification, // @Inject(forwardRef(() => DomainKeyResultService)) // private readonly keyResultService: DomainKeyResultService,
+    public readonly specification: DomainTeamSpecification,
   ) {
     super(repository, DomainTeamService.name)
   }
 
-  buildOnlyCompaniesSelector() {
-    return {
-      parentTeamId: IsNull(),
-    }
-  }
-
-  protected async createIfUserIsInCompany(_data: Partial<Team>, _queryContext: DomainQueryContext) {
-    return {} as any
-  }
-
-  protected async createIfUserIsInTeam(_data: Partial<Team>, _queryContext: DomainQueryContext) {
-    return {} as any
-  }
-
-  protected async createIfUserOwnsIt(_data: Partial<Team>, _queryContext: DomainQueryContext) {
-    return {} as any
-  }
-
-  public async getFromOwner(ownerId: UserDTO['id']): Promise<Team[]> {
+  public async getFromOwner(ownerId: UserDTO['id']) {
     return this.repository.find({ ownerId })
   }
-  //
-  // async getCurrentProgress(teamID: TeamDTO['id']) {
-  //   const date = new Date()
-  //   const currentProgress = await this.getProgressAtDate(date, teamID)
-  //
-  //   return currentProgress
-  // }
-  //
-  // async getLastWeekProgress(teamID: TeamDTO['id']) {
-  //   const date = new Date()
-  //   const startOfWeekDate = startOfWeek(date)
-  //   const currentProgress = await this.getProgressAtDate(startOfWeekDate, teamID)
-  //
-  //   return currentProgress
-  // }
 
-  // async getProgressAtDate(date: Date, teamID: TeamDTO['id']) {
-  //   const childTeams = await this.getAllTeamsBelowNodes(teamID, ['id'])
-  //   const childTeamIds = childTeams.map((childTeam) => childTeam.id)
-  //
-  //   const keyResults = await this.keyResultService.getFromTeam(childTeamIds)
-  //   if (!keyResults) return
-  //
-  //   const previousSnapshotDate = this.keyResultService.report.progress.snapshotDate
-  //   this.keyResultService.report.progress.snapshotDate = date
-  //
-  //   const teamProgress = this.keyResultService.calculateSnapshotAverageProgressFromList(keyResults)
-  //
-  //   this.keyResultService.report.progress.snapshotDate = previousSnapshotDate
-  //
-  //   return teamProgress
-  // }
-  //
-  // async getCurrentConfidence(teamId: TeamDTO['id']): Promise<ConfidenceReport['valueNew']> {
-  //   const teams = await this.getAllTeamsBelowNodes(teamId, ['id'])
-  //   const teamIDs = teams.map((team) => team.id)
-  //
-  //   const keyResults = await this.keyResultService.getFromTeam(teamIDs)
-  //   if (!keyResults) return DEFAULT_CONFIDENCE
-  //
-  //   const teamCurrentConfidence = this.keyResultService.getLowestConfidenceFromList(keyResults)
-  //
-  //   return teamCurrentConfidence
-  // }
-  //
-  // async getParentTeam(teamId: TeamDTO['id']) {
-  //   const { parentTeamId } = await this.getOne({ id: teamId })
-  //
-  //   return this.getOne({ id: parentTeamId })
-  // }
-  //
-  // async getUsersInTeam(teamID: TeamDTO['id']) {
-  //   const teamsBelowCurrentNode = await this.getAllTeamsBelowNodes(teamID)
-  //
-  //   const teamUsers = await Promise.all(teamsBelowCurrentNode.map(async (team) => team.users))
-  //   const flattenedTeamUsers = flatten(teamUsers)
-  //   const uniqTeamUsers = uniqBy(flattenedTeamUsers, 'id')
-  //
-  //   return uniqTeamUsers
-  // }
-  //
   public async getUserCompanies(user: UserDTO) {
     const teams = await this.getForUser(user)
     const companyPromises = teams.map(async (team) => this.getRootTeamForTeam(team))
@@ -130,19 +50,6 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     const teams = await user.teams
 
     return teams
-  }
-
-  private async getRootTeamForTeam(team: TeamDTO) {
-    let rootTeam = team
-
-    while (rootTeam.parentTeamId) {
-      // Since we're dealing with a linked list, where we need to evaluate each step before trying
-      // the next one, we can disable the following eslint rule
-      // eslint-disable-next-line no-await-in-loop
-      rootTeam = await this.getOne({ id: rootTeam.parentTeamId })
-    }
-
-    return rootTeam
   }
 
   public async getAllTeamsBelowNodes(
@@ -173,6 +80,38 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     return teams
   }
 
+  public async getUserCompaniesAndDepartments(user: UserDTO) {
+    const companies = await this.getUserCompanies(user)
+    const departments = await this.getUserCompaniesDepartments(user)
+
+    return [...companies, ...departments]
+  }
+
+  protected async createIfUserIsInCompany(_data: Partial<Team>, _queryContext: DomainQueryContext) {
+    return {} as any
+  }
+
+  protected async createIfUserIsInTeam(_data: Partial<Team>, _queryContext: DomainQueryContext) {
+    return {} as any
+  }
+
+  protected async createIfUserOwnsIt(_data: Partial<Team>, _queryContext: DomainQueryContext) {
+    return {} as any
+  }
+
+  private async getRootTeamForTeam(team: TeamDTO) {
+    let rootTeam = team
+
+    while (rootTeam.parentTeamId) {
+      // Since we're dealing with a linked list, where we need to evaluate each step before trying
+      // the next one, we can disable the following eslint rule
+      // eslint-disable-next-line no-await-in-loop
+      rootTeam = await this.getOne({ id: rootTeam.parentTeamId })
+    }
+
+    return rootTeam
+  }
+
   private async getChildTeams(
     teamID: TeamDTO['id'] | Array<TeamDTO['id']>,
     filter?: TeamEntityFilter[],
@@ -191,36 +130,15 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
 
     return childTeams
   }
-  //
-  // async getPercentageProgressIncrease(teamID: TeamDTO['id']) {
-  //   const currentProgress = await this.getCurrentProgress(teamID)
-  //   const lastWeekProgress = await this.getLastWeekProgress(teamID)
-  //
-  //   const deltaProgress = currentProgress - lastWeekProgress
-  //
-  //   return deltaProgress
-  // }
-  //
-  // async getLatestReport(teamID: TeamDTO['id']) {
-  //   const users = await this.getUsersInTeam(teamID)
-  //   const userIDs = users.map((user) => user.id)
-  //
-  //   const reports = await this.keyResultService.report.getFromUsers(userIDs)
-  //   const orderedReports = orderBy(reports, ['createdAt'], ['desc'])
-  //
-  //   const latestReport = orderedReports[0]
-  //
-  //   return latestReport
-  // }
-  //
-  // async getDepartmentsForCompany(company: TeamDTO | TeamDTO[]) {
-  //   const companies = Array.isArray(company) ? company : [company]
-  //   const companyIDs = companies.map((company) => company.id)
-  //
-  //   const departments = await this.getChildTeams(companyIDs)
-  //
-  //   return departments
-  // }
+
+  private async getUserCompaniesDepartments(user: UserDTO) {
+    const companies = await this.getUserCompanies(user)
+    const companyIDs = companies.map((company) => company.id)
+
+    const departments = this.getChildTeams(companyIDs)
+
+    return departments
+  }
 }
 
 export default DomainTeamService

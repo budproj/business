@@ -2,6 +2,11 @@ import { ACTION, RESOURCE } from 'src/app/authz/constants'
 import { CONSTRAINT } from 'src/domain/constants'
 import { UserDTO } from 'src/domain/user/dto'
 
+export interface AuthzUser extends UserDTO {
+  token: AuthzToken
+  scopes: AuthzScopes
+}
+
 export interface AuthzToken {
   iss: string
   sub: string
@@ -11,11 +16,6 @@ export interface AuthzToken {
   azp: string
   scope: string
   permissions: string[]
-}
-
-export interface AuthzUser extends UserDTO {
-  token: AuthzToken
-  scopes: AuthzScopes
 }
 
 export type AuthzScopes = Record<RESOURCE, AuthzScopeGroup>

@@ -11,7 +11,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-// import { CycleDTO } from 'src/domain/cycle/dto'
+// Import { CycleDTO } from 'src/domain/cycle/dto'
 // import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { UserDTO } from 'src/domain/user/dto'
 

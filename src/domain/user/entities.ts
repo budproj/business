@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-// import { KeyResultDTO } from 'src/domain/key-result/dto'
+// Import { KeyResultDTO } from 'src/domain/key-result/dto'
 // import { ConfidenceReportDTO } from 'src/domain/key-result/report/confidence/dto'
 // import { ProgressReportDTO } from 'src/domain/key-result/report/progress/dto'
 // import { ObjectiveDTO } from 'src/domain/objective/dto'
@@ -16,7 +16,7 @@ import { TeamDTO } from 'src/domain/team/dto'
 import { USER_GENDER } from 'src/domain/user/constants'
 
 import { UserDTO } from './dto'
-// import { KeyResultCustomListDTO } from 'src/domain/key-result/custom-list/dto'
+// Import { KeyResultCustomListDTO } from 'src/domain/key-result/custom-list/dto'
 //
 @Entity()
 export class User implements UserDTO {

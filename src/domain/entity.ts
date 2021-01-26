@@ -1,4 +1,5 @@
 import { Logger } from '@nestjs/common'
+import { flow } from 'lodash'
 import {
   Brackets,
   DeleteResult,
@@ -12,7 +13,6 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 import { CONSTRAINT } from './constants'
 import { TeamDTO } from './team/dto'
 import { UserDTO } from './user/dto'
-import { flow } from 'lodash'
 
 export interface DomainEntityServiceInterface<E, D> {
   logger: Logger
@@ -48,9 +48,9 @@ export interface DomainServiceContext {
 }
 
 export interface QueryContext {
-  companies: TeamDTO['id'][]
-  teams: TeamDTO['id'][]
-  userTeams: TeamDTO['id'][]
+  companies: Array<TeamDTO['id']>
+  teams: Array<TeamDTO['id']>
+  userTeams: Array<TeamDTO['id']>
 }
 
 export interface DomainQueryContext extends DomainServiceContext {
@@ -88,27 +88,6 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
     return constrainedSelector()
   }
 
-  protected async create(data: Partial<D> | Partial<D>[], _context: DomainQueryContext) {
-    const result = await this.repository.insert(data as QueryDeepPartialEntity<E>)
-
-    return result.raw
-  }
-
-  protected abstract createIfUserIsInCompany(
-    data: Partial<D>,
-    queryContext: DomainQueryContext,
-  ): Promise<E[]>
-
-  protected abstract createIfUserIsInTeam(
-    data: Partial<D>,
-    queryContext: DomainQueryContext,
-  ): Promise<E[]>
-
-  protected abstract createIfUserOwnsIt(
-    data: Partial<D>,
-    queryContext: DomainQueryContext,
-  ): Promise<E[]>
-
   public async getOneWithConstraint(selector: FindConditions<E>, queryContext: DomainQueryContext) {
     const query = await this.getWithConstraint(selector, queryContext)
     const data = this.getOneInQuery(query, queryContext)
@@ -124,6 +103,41 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
     const data = this.getManyInQuery(query, queryContext)
 
     return data
+  }
+
+  public async updateWithConstraint(
+    selector: FindConditions<E>,
+    newData: QueryDeepPartialEntity<E>,
+    queryContext: DomainQueryContext,
+  ) {
+    const availableSelectors = {
+      [CONSTRAINT.ANY]: async () => this.update(selector, newData, queryContext),
+      [CONSTRAINT.COMPANY]: async () =>
+        this.updateIfUserIsInCompany(selector, newData, queryContext),
+      [CONSTRAINT.TEAM]: async () => this.updateIfUserIsInTeam(selector, newData, queryContext),
+      [CONSTRAINT.OWNS]: async () => this.updateIfUserOwnsIt(selector, newData, queryContext),
+    }
+    const constrainedSelector = availableSelectors[queryContext.constraint]
+
+    return constrainedSelector()
+  }
+
+  public async deleteWithConstraint(selector: FindConditions<E>, queryContext: DomainQueryContext) {
+    const availableSelectors = {
+      [CONSTRAINT.ANY]: async () => this.delete(selector, queryContext),
+      [CONSTRAINT.COMPANY]: async () => this.deleteIfUserIsInCompany(selector, queryContext),
+      [CONSTRAINT.TEAM]: async () => this.deleteIfUserIsInTeam(selector, queryContext),
+      [CONSTRAINT.OWNS]: async () => this.deleteIfUserOwnsIt(selector, queryContext),
+    }
+    const constrainedSelector = availableSelectors[queryContext.constraint]
+
+    return constrainedSelector()
+  }
+
+  protected async create(data: Partial<D> | Array<Partial<D>>, _context: DomainQueryContext) {
+    const result = await this.repository.insert(data as QueryDeepPartialEntity<E>)
+
+    return result.raw
   }
 
   protected async getWithConstraint(selector: FindConditions<E>, queryContext: DomainQueryContext) {
@@ -214,23 +228,6 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
     return query.getMany()
   }
 
-  public async updateWithConstraint(
-    selector: FindConditions<E>,
-    newData: QueryDeepPartialEntity<E>,
-    queryContext: DomainQueryContext,
-  ) {
-    const availableSelectors = {
-      [CONSTRAINT.ANY]: async () => this.update(selector, newData, queryContext),
-      [CONSTRAINT.COMPANY]: async () =>
-        this.updateIfUserIsInCompany(selector, newData, queryContext),
-      [CONSTRAINT.TEAM]: async () => this.updateIfUserIsInTeam(selector, newData, queryContext),
-      [CONSTRAINT.OWNS]: async () => this.updateIfUserOwnsIt(selector, newData, queryContext),
-    }
-    const constrainedSelector = availableSelectors[queryContext.constraint]
-
-    return constrainedSelector()
-  }
-
   protected async update(
     selector: FindConditions<E>,
     newData: QueryDeepPartialEntity<E>,
@@ -292,18 +289,6 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
     return this.update(selector, newData, queryContext)
   }
 
-  public async deleteWithConstraint(selector: FindConditions<E>, queryContext: DomainQueryContext) {
-    const availableSelectors = {
-      [CONSTRAINT.ANY]: async () => this.delete(selector, queryContext),
-      [CONSTRAINT.COMPANY]: async () => this.deleteIfUserIsInCompany(selector, queryContext),
-      [CONSTRAINT.TEAM]: async () => this.deleteIfUserIsInTeam(selector, queryContext),
-      [CONSTRAINT.OWNS]: async () => this.deleteIfUserOwnsIt(selector, queryContext),
-    }
-    const constrainedSelector = availableSelectors[queryContext.constraint]
-
-    return constrainedSelector()
-  }
-
   protected async delete(selector: FindConditions<E>, _queryContext: DomainQueryContext) {
     return this.repository.delete(selector)
   }
@@ -355,13 +340,28 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
 
     return this.delete(selector, queryContext)
   }
+
+  protected abstract createIfUserIsInCompany(
+    data: Partial<D>,
+    queryContext: DomainQueryContext,
+  ): Promise<E[]>
+
+  protected abstract createIfUserIsInTeam(
+    data: Partial<D>,
+    queryContext: DomainQueryContext,
+  ): Promise<E[]>
+
+  protected abstract createIfUserOwnsIt(
+    data: Partial<D>,
+    queryContext: DomainQueryContext,
+  ): Promise<E[]>
 }
 
 export type SelectionQueryConstrain<E> = (query?: SelectQueryBuilder<E>) => SelectQueryBuilder<E>
 
 export interface DomainEntityRepositoryInterface<E> {
   constraintQueryToTeam: (
-    allowedTeams: TeamDTO['id'][],
+    allowedTeams: Array<TeamDTO['id']>,
     user: UserDTO,
   ) => SelectionQueryConstrain<E>
 
@@ -382,36 +382,6 @@ export abstract class DomainEntityRepository<E>
   extends Repository<E>
   implements DomainEntityRepositoryInterface<E> {
   protected composeTeamQuery = flow(this.setupOwnsQuery, this.setupTeamQuery)
-
-  protected abstract addTeamWhereExpression(
-    query: WhereExpression,
-    allowedTeams: TeamDTO['id'][],
-    constraintType?: CONSTRAINT_TYPE,
-  ): WhereExpression
-
-  protected abstract addOwnsWhereExpression(
-    query: WhereExpression,
-    user: UserDTO,
-    constraintType?: CONSTRAINT_TYPE,
-  ): WhereExpression
-
-  protected setupTeamQuery(query: SelectQueryBuilder<E>) {
-    return query
-  }
-
-  protected setupOwnsQuery(query: SelectQueryBuilder<E>) {
-    return query
-  }
-
-  protected selectConditionMethodNameBasedOnConstraintType(constraintType: CONSTRAINT_TYPE) {
-    const methodNames = {
-      [CONSTRAINT_TYPE.AND]: CONDITIONAL_METHOD_NAMES.AND_WHERE,
-      [CONSTRAINT_TYPE.OR]: CONDITIONAL_METHOD_NAMES.OR_WHERE,
-    }
-    const constraintTypeMethodName = methodNames[constraintType]
-
-    return constraintTypeMethodName
-  }
 
   public constraintQueryToTeam(allowedTeams: Array<TeamDTO['id']>, user: UserDTO) {
     const addConstraintToQuery = (query?: SelectQueryBuilder<E>) => {
@@ -446,6 +416,36 @@ export abstract class DomainEntityRepository<E>
 
     return addConstraintToQuery
   }
+
+  protected setupTeamQuery(query: SelectQueryBuilder<E>) {
+    return query
+  }
+
+  protected setupOwnsQuery(query: SelectQueryBuilder<E>) {
+    return query
+  }
+
+  protected selectConditionMethodNameBasedOnConstraintType(constraintType: CONSTRAINT_TYPE) {
+    const methodNames = {
+      [CONSTRAINT_TYPE.AND]: CONDITIONAL_METHOD_NAMES.AND_WHERE,
+      [CONSTRAINT_TYPE.OR]: CONDITIONAL_METHOD_NAMES.OR_WHERE,
+    }
+    const constraintTypeMethodName = methodNames[constraintType]
+
+    return constraintTypeMethodName
+  }
+
+  protected abstract addTeamWhereExpression(
+    query: WhereExpression,
+    allowedTeams: Array<TeamDTO['id']>,
+    constraintType?: CONSTRAINT_TYPE,
+  ): WhereExpression
+
+  protected abstract addOwnsWhereExpression(
+    query: WhereExpression,
+    user: UserDTO,
+    constraintType?: CONSTRAINT_TYPE,
+  ): WhereExpression
 }
 
 export interface DomainEntitySpecificationInterface<T> {

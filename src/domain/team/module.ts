@@ -1,7 +1,7 @@
-import { forwardRef, Module } from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-// import DomainKeyResultModule from 'src/domain/key-result'
+// Import DomainKeyResultModule from 'src/domain/key-result'
 import databaseConfig from 'src/config/database/config'
 
 import DomainTeamRepository from './repository'
@@ -13,7 +13,7 @@ import DomainTeamSpecificationsModule from './specifications/module'
   imports: [
     TypeOrmModule.forRoot(databaseConfig),
     TypeOrmModule.forFeature([DomainTeamRepository]),
-    // forwardRef(() => DomainKeyResultModule),
+    // ForwardRef(() => DomainKeyResultModule),
     DomainTeamSpecificationsModule,
   ],
   providers: [DomainTeamSpecification, DomainTeamService],

@@ -1,10 +1,10 @@
 import { EntityRepository, WhereExpression } from 'typeorm'
 
+import { CONSTRAINT_TYPE, DomainEntityRepository } from 'src/domain/entity'
 import { TeamDTO } from 'src/domain/team/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
 import { Team } from './entities'
-import { CONSTRAINT_TYPE, DomainEntityRepository } from 'src/domain/entity'
 
 @EntityRepository(Team)
 class DomainTeamRepository extends DomainEntityRepository<Team> {

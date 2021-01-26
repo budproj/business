@@ -1,11 +1,13 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Query, Resolver } from '@nestjs/graphql'
+import { isUndefined, omitBy } from 'lodash'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
-import { GraphQLUser, Permissions } from 'src/app/authz/decorators'
-import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'src/app/authz/guards'
-import { EnhanceWithBudUser } from 'src/app/authz/interceptors'
+import { Permissions } from 'src/app/authz/decorators'
 import { AuthzUser } from 'src/app/authz/types'
+import { GraphQLUser } from 'src/app/graphql/authz/decorators'
+import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
+import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import DomainService from 'src/domain/service'
 import { TeamDTO } from 'src/domain/team/dto'
@@ -13,7 +15,7 @@ import { Team } from 'src/domain/team/entities'
 
 import { TeamObject } from './models'
 
-@UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
+@UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser)
 @Resolver(() => TeamObject)
 class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
@@ -24,8 +26,11 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   }
 
   @Permissions(PERMISSION['TEAM:READ'])
-  @Query(() => TeamObject)
-  async team(@Args('id', { type: () => ID }) id: TeamObject['id'], @GraphQLUser() user: AuthzUser) {
+  @Query(() => TeamObject, { name: 'team' })
+  protected async getTeam(
+    @Args('id', { type: () => ID }) id: TeamObject['id'],
+    @GraphQLUser() user: AuthzUser,
+  ) {
     this.logger.log(`Fetching team with id ${id.toString()}`)
 
     const team = await this.getOneWithActionScopeConstraint({ id }, user)
@@ -34,35 +39,49 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return team
   }
 
-  // @Permissions(PERMISSION['TEAM:READ'])
-  // @Query(() => [TeamObject], { nullable: true })
-  // async teams(
-  //   @Args('parentTeamId', { type: () => ID, nullable: true })
-  //   parentTeamId: TeamObject['parentTeamId'],
-  //   @Args('onlyCompanies', { type: () => Boolean, nullable: true })
-  //   onlyCompanies: boolean,
-  //   @Args('onlyCompaniesAndDepartments', { type: () => Boolean, nullable: true })
-  //   onlyCompaniesAndDepartments: boolean,
-  //   @GraphQLUser() user: AuthzUser,
-  // ) {
-  //   const filters: GraphQLTeamsQueryFilters = {
-  //     parentTeamId,
-  //     onlyCompanies,
-  //     onlyCompaniesAndDepartments,
-  //   }
-  //   const cleanedFilters = omitBy(filters, isUndefined)
-  //
-  //   this.logger.log({
-  //     cleanedFilters,
-  //     onlyCompanies,
-  //     message: 'Fetching teams with args',
-  //   })
-  //
-  //   const teams = await this.resolverService.getTeams(cleanedFilters, user)
-  //
-  //   return teams
-  // }
-  //
+  @Permissions(PERMISSION['TEAM:READ'])
+  @Query(() => [TeamObject], { name: 'teams', nullable: true })
+  protected async getAllTeams(
+    @Args('parentTeamId', { type: () => ID, nullable: true })
+    parentTeamId: TeamObject['parentTeamId'],
+    @Args('onlyCompanies', { type: () => Boolean, nullable: true })
+    onlyCompanies: boolean,
+    @Args('onlyCompaniesAndDepartments', { type: () => Boolean, nullable: true })
+    onlyCompaniesAndDepartments: boolean,
+    @GraphQLUser() user: AuthzUser,
+  ) {
+    const filters = {
+      parentTeamId,
+      onlyCompanies,
+      onlyCompaniesAndDepartments,
+    }
+    const cleanedFilters = omitBy(filters, isUndefined)
+
+    this.logger.log({
+      cleanedFilters,
+      onlyCompanies,
+      message: 'Fetching teams with args',
+    })
+
+    const railways = {
+      default: async () => this.getManyWithActionScopeConstraint(cleanedFilters, user),
+      onlyCompanies: async () => this.domain.team.getUserCompanies(user),
+      onlyCompaniesAndDepartments: async () =>
+        this.domain.team.getUserCompaniesAndDepartments(user),
+    }
+
+    const getOnlyCompaniesAndDepartmentsRailway = onlyCompaniesAndDepartments
+      ? railways.onlyCompaniesAndDepartments
+      : railways.default
+    const getAllTeamsRailway = onlyCompanies
+      ? railways.onlyCompanies
+      : getOnlyCompaniesAndDepartmentsRailway
+
+    const teams = await getAllTeamsRailway()
+
+    return teams
+  }
+
   // @ResolveField()
   // async keyResults(@Parent() team: TeamObject) {
   //   this.logger.log({

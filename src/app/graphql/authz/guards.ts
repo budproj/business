@@ -6,18 +6,22 @@ import { GqlExecutionContext } from '@nestjs/graphql'
 import { AuthGuard } from '@nestjs/passport'
 import { Observable } from 'rxjs'
 
-@Injectable()
-export class GraphQLAuthGuard extends AuthGuard('jwt') {
-  private readonly godMode: boolean
-  private readonly logger = new Logger(GraphQLAuthGuard.name)
+import { PERMISSION, SCOPED_PERMISSION } from 'src/app/authz/constants'
 
-  constructor(private readonly configService: ConfigService) {
+@Injectable()
+export class GraphQLAuthzAuthGuard extends AuthGuard('jwt') {
+  private readonly logger = new Logger(GraphQLAuthzAuthGuard.name)
+
+  constructor(protected readonly configService: ConfigService) {
     super()
-    this.godMode = configService.get<boolean>('godMode')
   }
 
-  canActivate(rawContext: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-    if (this.godMode) return true
+  public canActivate(
+    rawContext: ExecutionContext,
+  ): boolean | Promise<boolean> | Observable<boolean> {
+    const isGodModeEnabled = this.configService.get<boolean>('godMode.enabled')
+
+    if (isGodModeEnabled) return true
 
     const gqlContext = GqlExecutionContext.create(rawContext)
     const request = gqlContext.getContext().req
@@ -32,29 +36,32 @@ export class GraphQLAuthGuard extends AuthGuard('jwt') {
 }
 
 @Injectable()
-export class GraphQLPermissionsGuard implements CanActivate {
+export class GraphQLAuthzPermissionGuard implements CanActivate {
   private readonly godMode: boolean
-  private readonly logger = new Logger(GraphQLPermissionsGuard.name)
+  private readonly logger = new Logger(GraphQLAuthzPermissionGuard.name)
 
   constructor(
     private readonly reflector: Reflector,
-    private readonly configService: ConfigService,
+    protected readonly configService: ConfigService,
   ) {
     this.godMode = configService.get<boolean>('godMode')
   }
 
-  canActivate(rawContext: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+  public canActivate(rawContext: ExecutionContext) {
     if (this.godMode) return true
 
     const gqlContext = GqlExecutionContext.create(rawContext)
     const request = gqlContext.getContext().req
 
-    const routePermissions = this.reflector.get<string[]>('permissions', gqlContext.getHandler())
-    const userPermissions = request.user.token.permissions ?? []
+    const routePermissions = this.reflector.get<PERMISSION[]>(
+      'permissions',
+      gqlContext.getHandler(),
+    )
+    const userScopedPermissions: SCOPED_PERMISSION[] = request.user.token.permissions ?? []
 
     this.logger.debug({
       routePermissions,
-      userPermissions,
+      userScopedPermissions,
       message: 'Checking if user is allowed in given route',
     })
 
@@ -64,7 +71,9 @@ export class GraphQLPermissionsGuard implements CanActivate {
 
     const hasPermission = () =>
       routePermissions.every((routePermission) =>
-        userPermissions.some((userPermission) => userPermission.includes(routePermission)),
+        userScopedPermissions.some((userScopedPermission) =>
+          userScopedPermission.includes(routePermission),
+        ),
       )
 
     return hasPermission()

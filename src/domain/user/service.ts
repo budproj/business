@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 
+import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { UserDTO } from 'src/domain/user/dto'
 
 import { User } from './entities'
@@ -21,6 +21,10 @@ class DomainUserService extends DomainEntityService<User, UserDTO> {
     return `${user.firstName} ${user.lastName}`
   }
 
+  public async getUserFromSubjectWithTeamRelation(authzSub: UserDTO['authzSub']) {
+    return this.repository.findOne({ authzSub }, { relations: ['teams'] })
+  }
+
   protected async createIfUserIsInCompany(_data: Partial<User>, _queryContext: DomainQueryContext) {
     return {} as any
   }
@@ -31,10 +35,6 @@ class DomainUserService extends DomainEntityService<User, UserDTO> {
 
   protected async createIfUserOwnsIt(_data: Partial<User>, _queryContext: DomainQueryContext) {
     return {} as any
-  }
-
-  public async getUserFromSubjectWithTeamRelation(authzSub: UserDTO['authzSub']) {
-    return this.repository.findOne({ authzSub }, { relations: ['teams'] })
   }
 }
 

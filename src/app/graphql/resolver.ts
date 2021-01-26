@@ -6,12 +6,10 @@ import { ACTION, RESOURCE } from 'src/app/authz/constants'
 import { AuthzUser } from 'src/app/authz/types'
 import { USER_POLICY } from 'src/app/graphql/user/constants'
 import { UserActionPolicies } from 'src/app/graphql/user/types'
-import { DomainEntityService } from 'src/domain/entity'
-import DomainTeamService from 'src/domain/team/service'
-import { TeamDTO } from 'src/domain/team/dto'
 import { CONSTRAINT } from 'src/domain/constants'
-import { Injectable } from '@nestjs/common'
+import { DomainEntityService } from 'src/domain/entity'
 import DomainService from 'src/domain/service'
+import { TeamDTO } from 'src/domain/team/dto'
 
 export interface GraphQLEntityResolverInterface<E, D> {
   createWithActionScopeConstraint: (data: Partial<D>, user: AuthzUser, action: ACTION) => Promise<E>
@@ -49,46 +47,6 @@ abstract class GraphQLEntityResolver<E, D> implements GraphQLEntityResolverInter
     protected readonly domainService: DomainService,
     protected readonly entityService: DomainEntityService<E, D>,
   ) {}
-
-  private async buildDomainQueryContext(user: AuthzUser, constraint: CONSTRAINT) {
-    const context = this.entityService.buildContext(user, constraint)
-
-    const userCompaniesIDs = await this.parseUserCompanyIDs(user)
-    const userCompaniesTeamsIDs = await this.parseUserCompaniesTeamIDs(userCompaniesIDs)
-    const userTeams = await this.parseUserTeamIDs(user)
-
-    const query = {
-      companies: userCompaniesIDs,
-      teams: userCompaniesTeamsIDs,
-      userTeams,
-    }
-
-    return {
-      ...context,
-      query,
-    }
-  }
-
-  private async parseUserCompanyIDs(user: AuthzUser) {
-    const userCompanies = await this.domainService.team.getUserCompanies(user)
-    const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
-
-    return userCompanyIDs
-  }
-
-  private async parseUserCompaniesTeamIDs(companyIDs: TeamDTO['id'][]) {
-    const companiesTeams = await this.domainService.team.getAllTeamsBelowNodes(companyIDs)
-    const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
-
-    return companiesTeamIDs
-  }
-
-  private async parseUserTeamIDs(user: AuthzUser) {
-    const teams = await user.teams
-    const teamIDs = teams.map((team) => team.id)
-
-    return teamIDs
-  }
 
   public async createWithActionScopeConstraint(
     data: Partial<D>,
@@ -154,7 +112,7 @@ abstract class GraphQLEntityResolver<E, D> implements GraphQLEntityResolverInter
       [ACTION.DELETE]: user.scopes[this.resource][ACTION.DELETE],
     }
 
-    const policies = mapValues(
+    const policies: UserActionPolicies = mapValues(
       actionSelectors,
       async (constraint): Promise<USER_POLICY> => {
         if (!constraint) return USER_POLICY.DENY
@@ -165,6 +123,46 @@ abstract class GraphQLEntityResolver<E, D> implements GraphQLEntityResolverInter
     )
 
     return policies
+  }
+
+  private async buildDomainQueryContext(user: AuthzUser, constraint: CONSTRAINT) {
+    const context = this.entityService.buildContext(user, constraint)
+
+    const userCompaniesIDs = await this.parseUserCompanyIDs(user)
+    const userCompaniesTeamsIDs = await this.parseUserCompaniesTeamIDs(userCompaniesIDs)
+    const userTeams = await this.parseUserTeamIDs(user)
+
+    const query = {
+      companies: userCompaniesIDs,
+      teams: userCompaniesTeamsIDs,
+      userTeams,
+    }
+
+    return {
+      ...context,
+      query,
+    }
+  }
+
+  private async parseUserCompanyIDs(user: AuthzUser) {
+    const userCompanies = await this.domainService.team.getUserCompanies(user)
+    const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
+
+    return userCompanyIDs
+  }
+
+  private async parseUserCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>) {
+    const companiesTeams = await this.domainService.team.getAllTeamsBelowNodes(companyIDs)
+    const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
+
+    return companiesTeamIDs
+  }
+
+  private async parseUserTeamIDs(user: AuthzUser) {
+    const teams = await user.teams
+    const teamIDs = teams.map((team) => team.id)
+
+    return teamIDs
   }
 }
 

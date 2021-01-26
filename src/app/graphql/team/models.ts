@@ -3,11 +3,6 @@ import { Field, Float, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 import { UserObject } from 'src/app/graphql/user/models'
 import { TEAM_GENDER } from 'src/domain/team/constants'
 
-registerEnumType(TEAM_GENDER, {
-  name: 'TEAM_GENDER',
-  description: 'Each gender represents a possible gender option for our teams',
-})
-
 @ObjectType('Team', {
   description:
     'A collection of users. It can be either inside another team, or a root team (a.k.a. company)',
@@ -96,3 +91,8 @@ export class TeamObject {
   @Field(() => Boolean, { description: 'Defines if the team is a company' })
   isCompany: boolean
 }
+
+registerEnumType(TEAM_GENDER, {
+  name: 'TEAM_GENDER',
+  description: 'Each gender represents a possible gender option for our teams',
+})

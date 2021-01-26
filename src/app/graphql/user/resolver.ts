@@ -2,10 +2,11 @@ import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/c
 import { Args, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
-import { GraphQLUser, Permissions } from 'src/app/authz/decorators'
-import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'src/app/authz/guards'
-import { EnhanceWithBudUser } from 'src/app/authz/interceptors'
+import { Permissions } from 'src/app/authz/decorators'
 import { AuthzUser } from 'src/app/authz/types'
+import { GraphQLUser } from 'src/app/graphql/authz/decorators'
+import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
+import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import { TeamObject } from 'src/app/graphql/team/models'
 import DomainService from 'src/domain/service'
@@ -14,7 +15,7 @@ import { User } from 'src/domain/user/entities'
 
 import { UserObject } from './models'
 
-@UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
+@UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser)
 @Resolver(() => UserObject)
 class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
@@ -91,7 +92,7 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
   }
 
   @ResolveField('ownedTeams', () => [TeamObject])
-  async getUserOwnedTeams(@Parent() user: UserObject) {
+  protected async getUserOwnedTeams(@Parent() user: UserObject) {
     this.logger.log({
       user,
       message: 'Fetching owned teams for user',

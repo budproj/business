@@ -1,21 +1,17 @@
 import { Module } from '@nestjs/common'
 import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql'
 
+import GraphQLAuthzModule from './authz'
 import graphQLFactory from './factory'
-import GraphQLUserModule from './user'
 import GraphQLTeamModule from './team'
-// import GraphQLCycleModule from './cycle'
-// import GraphQLKeyResultModule from './key-result'
-// import GraphQLObjectiveModule from './objective'
+import GraphQLUserModule from './user'
 
 @Module({
   imports: [
     NestGraphQLModule.forRootAsync(graphQLFactory),
+    GraphQLAuthzModule,
     GraphQLUserModule,
     GraphQLTeamModule,
-    // GraphQLKeyResultModule,
-    // GraphQLObjectiveModule,
-    // GraphQLCycleModule,
   ],
 })
 class GraphQLModule {}
