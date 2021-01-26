@@ -16,6 +16,7 @@ import { UserDTO } from './user/dto'
 
 export interface DomainEntityServiceInterface<E, D> {
   logger: Logger
+  repository: DomainEntityRepository<E>
 
   buildContext: (user: UserDTO, constraint: CONSTRAINT) => DomainServiceContext
   createWithConstraint: (data: Partial<D>, queryContext: DomainQueryContext) => Promise<E[]>

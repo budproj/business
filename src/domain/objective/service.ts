@@ -9,6 +9,8 @@ import { Objective } from './entities'
 import DomainObjectiveRepository from './repository'
 
 export interface DomainObjectiveServiceInterface {
+  repository: DomainObjectiveRepository
+
   getFromOwner: (ownerId: UserDTO['id']) => Promise<Objective[]>
   getFromCycle: (cycleId: UserDTO['id']) => Promise<Objective[]>
 }

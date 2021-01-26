@@ -9,6 +9,8 @@ import { Cycle } from './entities'
 import DomainCycleRepository from './repository'
 
 export interface DomainCycleServiceInterface {
+  repository: DomainCycleRepository
+
   getFromTeam: (teamId: TeamDTO['id']) => Promise<Cycle[]>
 }
 

@@ -21,15 +21,6 @@ export class KeyResultCustomList implements KeyResultCustomListDTO {
   @PrimaryGeneratedColumn('uuid')
   public id: string
 
-  @Column({ nullable: true })
-  public title?: string
-
-  @Column({ type: 'enum', enum: KEY_RESULT_CUSTOM_LIST_BINDING, nullable: true })
-  public binding?: KEY_RESULT_CUSTOM_LIST_BINDING
-
-  @Column('uuid', { array: true, nullable: true })
-  public rank?: Array<KeyResultDTO['id']>
-
   @CreateDateColumn()
   public createdAt: Date
 
@@ -42,4 +33,13 @@ export class KeyResultCustomList implements KeyResultCustomListDTO {
   @Column()
   @RelationId((keyResultCustomList: KeyResultCustomList) => keyResultCustomList.user)
   public userId: UserDTO['id']
+
+  @Column({ nullable: true })
+  public title?: string
+
+  @Column({ type: 'enum', enum: KEY_RESULT_CUSTOM_LIST_BINDING, nullable: true })
+  public binding?: KEY_RESULT_CUSTOM_LIST_BINDING
+
+  @Column('uuid', { array: true, nullable: true })
+  public rank?: Array<KeyResultDTO['id']>
 }

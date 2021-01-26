@@ -11,6 +11,9 @@ import DomainTeamRepository from './repository'
 import DomainTeamSpecification from './specification'
 
 export interface DomainTeamServiceInterface {
+  repository: DomainTeamRepository
+  specification: DomainTeamSpecification
+
   getFromOwner: (userID: UserDTO['id']) => Promise<Team[]>
   getUserCompanies: (user: UserDTO) => Promise<TeamDTO[]>
   getUserCompaniesAndDepartments: (user: UserDTO) => Promise<TeamDTO[]>

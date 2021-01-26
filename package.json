@@ -22,6 +22,7 @@
     "typeorm:run": "ts-node -r tsconfig-paths/register ./node_modules/.bin/typeorm --config src/config/database/config",
     "migration:generate": "npm run typeorm migration:generate -- -n",
     "migration:run": "npm run typeorm migration:run",
+    "migration:revert": "npm run typeorm migration:revert",
     "migration:format": "prettier --write 'src/migrations/*.ts'",
     "db:develop:up": "docker start business-postgres-database",
     "db:develop:init": "run-s db:develop:new migration:run db:develop:load-data",
