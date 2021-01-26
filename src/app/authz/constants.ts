@@ -1,3 +1,8 @@
+export enum POLICY {
+  ALLOW = 'ALLOW',
+  DENY = 'DENY',
+}
+
 export enum RESOURCE {
   USER = 'user',
   TEAM = 'team',

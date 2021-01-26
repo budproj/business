@@ -27,6 +27,16 @@ export interface DomainEntityServiceInterface<E, D> {
     selector: FindConditions<E>,
     queryContext: DomainQueryContext,
   ) => Promise<E[]>
+  getOne: (
+    selector: FindConditions<E>,
+    queryContext?: DomainQueryContext,
+    options?: DomainServiceGetOptions,
+  ) => Promise<E>
+  getMany: (
+    selector: FindConditions<E>,
+    queryContext?: DomainQueryContext,
+    options?: DomainServiceGetOptions,
+  ) => Promise<E[]>
   updateWithConstraint: (
     selector: FindConditions<E>,
     newData: QueryDeepPartialEntity<E>,
@@ -134,6 +144,26 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
     return constrainedSelector()
   }
 
+  public async getOne(
+    selector: FindConditions<E>,
+    queryContext?: DomainQueryContext,
+    options?: DomainServiceGetOptions,
+  ) {
+    const query = this.get(selector, queryContext, undefined, options)
+
+    return query.getOne()
+  }
+
+  public async getMany(
+    selector: FindConditions<E>,
+    queryContext?: DomainQueryContext,
+    options?: DomainServiceGetOptions,
+  ) {
+    const query = this.get(selector, queryContext, undefined, options)
+
+    return query.getMany()
+  }
+
   protected async create(data: Partial<D> | Array<Partial<D>>, _context: DomainQueryContext) {
     const result = await this.repository.insert(data as QueryDeepPartialEntity<E>)
 
@@ -204,26 +234,6 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
       queryContext,
       message: `Getting many for request`,
     })
-
-    return query.getMany()
-  }
-
-  protected async getOne(
-    selector: FindConditions<E>,
-    queryContext?: DomainQueryContext,
-    options?: DomainServiceGetOptions,
-  ) {
-    const query = this.get(selector, queryContext, undefined, options)
-
-    return query.getOne()
-  }
-
-  protected async getMany(
-    selector: FindConditions<E>,
-    queryContext?: DomainQueryContext,
-    options?: DomainServiceGetOptions,
-  ) {
-    const query = this.get(selector, queryContext, undefined, options)
 
     return query.getMany()
   }

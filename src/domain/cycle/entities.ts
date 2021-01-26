@@ -3,13 +3,11 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   RelationId,
   UpdateDateColumn,
 } from 'typeorm'
 
-import { ObjectiveDTO } from 'src/domain/objective/dto'
 import { TeamDTO } from 'src/domain/team/dto'
 
 import { CycleDTO } from './dto'
@@ -37,9 +35,6 @@ export class Cycle implements CycleDTO {
   @Column()
   @RelationId((cycle: Cycle) => cycle.team)
   public teamId: TeamDTO['id']
-
-  @OneToMany('Objective', 'cycle')
-  public objectives: ObjectiveDTO[]
 
   @Column({ nullable: true })
   public name?: string

@@ -20,6 +20,7 @@ export interface DomainTeamServiceInterface {
     filter?: TeamEntityFilter[],
     relations?: TeamEntityRelation[],
   ) => Promise<Array<Partial<Team>>>
+  getParentTeam: (teamID: TeamDTO['id']) => Promise<Team>
 }
 
 @Injectable()
@@ -85,6 +86,12 @@ class DomainTeamService
     const departments = await this.getUserCompaniesDepartments(user)
 
     return [...companies, ...departments]
+  }
+
+  public async getParentTeam(teamID: TeamDTO['id']) {
+    const { parentTeamId } = await this.getOne({ id: teamID })
+
+    return this.getOne({ id: parentTeamId })
   }
 
   protected async createIfUserIsInCompany(_data: Partial<Team>, _queryContext: DomainQueryContext) {

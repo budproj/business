@@ -2,10 +2,8 @@ import { mapValues, uniq } from 'lodash'
 import { DeleteResult, FindConditions } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
-import { ACTION, RESOURCE } from 'src/app/authz/constants'
-import { AuthzUser } from 'src/app/authz/types'
-import { USER_POLICY } from 'src/app/graphql/user/constants'
-import { UserActionPolicies } from 'src/app/graphql/user/types'
+import { ACTION, POLICY, RESOURCE } from 'src/app/authz/constants'
+import { ActionPolicies, AuthzUser } from 'src/app/authz/types'
 import { CONSTRAINT } from 'src/domain/constants'
 import { DomainEntityService } from 'src/domain/entity'
 import DomainService from 'src/domain/service'
@@ -38,7 +36,7 @@ export interface GraphQLEntityResolverInterface<E, D> {
     action: ACTION,
   ) => Promise<DeleteResult>
 
-  getUserPolicies: (selector: FindConditions<E>, user: AuthzUser) => Promise<UserActionPolicies>
+  getUserPolicies: (selector: FindConditions<E>, user: AuthzUser) => Promise<ActionPolicies>
 }
 
 abstract class GraphQLEntityResolver<E, D> implements GraphQLEntityResolverInterface<E, D> {
@@ -112,13 +110,13 @@ abstract class GraphQLEntityResolver<E, D> implements GraphQLEntityResolverInter
       [ACTION.DELETE]: user.scopes[this.resource][ACTION.DELETE],
     }
 
-    const policies: UserActionPolicies = mapValues(
+    const policies: ActionPolicies = mapValues(
       actionSelectors,
-      async (constraint): Promise<USER_POLICY> => {
-        if (!constraint) return USER_POLICY.DENY
+      async (constraint): Promise<POLICY> => {
+        if (!constraint) return POLICY.DENY
         const foundData = await this.getOneWithActionScopeConstraint(selector, user)
 
-        return foundData ? USER_POLICY.ALLOW : USER_POLICY.DENY
+        return foundData ? POLICY.ALLOW : POLICY.DENY
       },
     )
 

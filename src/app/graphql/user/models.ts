@@ -1,18 +1,7 @@
 import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { TeamObject } from 'src/app/graphql/team/models'
-import { USER_POLICY } from 'src/app/graphql/user/constants'
 import { USER_GENDER } from 'src/domain/user/constants'
-
-registerEnumType(USER_GENDER, {
-  name: 'USER_GENDER',
-  description: 'Each gender represents a possible gender option for our users',
-})
-
-registerEnumType(USER_POLICY, {
-  name: 'USER_POLICY',
-  description: 'Defines if the user has the allowance for a given action regarding the resource',
-})
 
 @ObjectType('User', {
   description:
@@ -90,20 +79,7 @@ export class UserObject {
   //
 }
 
-@ObjectType('Policies', {
-  description:
-    'Defines the current user policies regarding a given resource. You can use it to display read/create/update/delete controls on your application',
+registerEnumType(USER_GENDER, {
+  name: 'USER_GENDER',
+  description: 'Each gender represents a possible gender option for our users',
 })
-export class PoliciesObject {
-  @Field(() => USER_POLICY, { defaultValue: USER_POLICY.DENY })
-  create: USER_POLICY
-
-  @Field(() => USER_POLICY, { defaultValue: USER_POLICY.DENY })
-  read: USER_POLICY
-
-  @Field(() => USER_POLICY, { defaultValue: USER_POLICY.DENY })
-  update: USER_POLICY
-
-  @Field(() => USER_POLICY, { defaultValue: USER_POLICY.DENY })
-  delete: USER_POLICY
-}

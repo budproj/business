@@ -1,5 +1,5 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, ID, Query, Resolver } from '@nestjs/graphql'
+import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { isUndefined, omitBy } from 'lodash'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
@@ -8,6 +8,7 @@ import { AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
+import { CycleObject } from 'src/app/graphql/cycle/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import DomainService from 'src/domain/service'
 import { TeamDTO } from 'src/domain/team/dto'
@@ -82,6 +83,16 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return teams
   }
 
+  @ResolveField('cycles', () => [CycleObject])
+  protected async getCycles(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching cycles for team',
+    })
+
+    return this.domain.cycle.getFromTeam(team.id)
+  }
+
   // @ResolveField()
   // async keyResults(@Parent() team: TeamObject) {
   //   this.logger.log({
@@ -152,15 +163,6 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   //   return this.objectiveDomain.getFromTeam(team.id)
   // }
   //
-  // @ResolveField()
-  // async cycles(@Parent() team: TeamObject) {
-  //   this.logger.log({
-  //     team,
-  //     message: 'Fetching cycles for team',
-  //   })
-  //
-  //   return this.cycleDomain.getFromTeam(team.id)
-  // }
   //
   // @ResolveField()
   // async percentageProgressIncrease(@Parent() team: TeamObject) {
