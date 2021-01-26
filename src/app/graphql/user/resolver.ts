@@ -7,6 +7,7 @@ import { AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
+import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
 import { KeyResultCustomListObject } from 'src/app/graphql/key-result/custom-list/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
@@ -134,27 +135,15 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
     return this.domain.keyResult.getUserCustomLists(user)
   }
 
-  //
-  // @ResolveField()
-  // async progressReports(@Parent() user: UserObject) {
-  //   this.logger.log({
-  //     user,
-  //     message: 'Fetching progress reports for user',
-  //   })
-  //
-  //   return this.keyResultDomain.report.progress.getFromUser(user.id)
-  // }
-  //
-  // @ResolveField()
-  // async confidenceReports(@Parent() user: UserObject) {
-  //   this.logger.log({
-  //     user,
-  //     message: 'Fetching confidence reports for user',
-  //   })
-  //
-  //   return this.keyResultDomain.report.confidence.getFromUser(user.id)
-  // }
-  //
+  @ResolveField('checkIns', () => [KeyResultCheckInObject])
+  protected async getUserCheckIns(@Parent() user: UserObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching check-ins by user',
+    })
+
+    return this.domain.keyResult.getCheckInsByUser(user)
+  }
 }
 
 export default GraphQLUserResolver

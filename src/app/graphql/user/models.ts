@@ -1,9 +1,11 @@
 import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
+import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
 import { KeyResultCustomListObject } from 'src/app/graphql/key-result/custom-list/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import { TeamObject } from 'src/app/graphql/team/models'
+import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import { USER_GENDER } from 'src/domain/user/constants'
 
 @ObjectType('User', {
@@ -76,18 +78,11 @@ export class UserObject {
   })
   keyResultCustomLists?: KeyResultCustomListObject[]
 
-  //
-  // @Field(() => [ProgressReportObject], {
-  //   description: 'The creation date ordered list of progress reports created by this user',
-  // })
-  // progressReports: ProgressReportObject[]
-  //
-  // @Field(() => [ConfidenceReportObject], {
-  //   description: 'The creation date ordered list of confidence reports created by this user',
-  // })
-  // confidenceReports: ConfidenceReportObject[]
-  //
-  //
+  @Field(() => [KeyResultCheckInObject], {
+    description: 'The creation date ordered list of key result check-ins created by this user',
+    nullable: true,
+  })
+  checkIns?: KeyResultCheckIn[]
 }
 
 registerEnumType(USER_GENDER, {

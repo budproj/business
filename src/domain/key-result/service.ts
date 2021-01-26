@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common'
 
 import { CONSTRAINT } from 'src/domain/constants'
-import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
+import { DomainEntityService, DomainQueryContext, DomainServiceGetOptions } from 'src/domain/entity'
+import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import DomainKeyResultCheckInService from 'src/domain/key-result/check-in/service'
 import { KEY_RESULT_CUSTOM_LIST_BINDING } from 'src/domain/key-result/custom-list/constants'
 import { KeyResultCustomListDTO } from 'src/domain/key-result/custom-list/dto'
@@ -34,6 +35,11 @@ export interface DomainKeyResultServiceInterface {
     user: UserDTO,
   ) => Promise<KeyResultCustomList>
   getUserCustomLists: (user: UserDTO) => Promise<KeyResultCustomList[]>
+  getCheckIns: (
+    keyResult: KeyResultDTO,
+    options?: DomainServiceGetOptions<KeyResultCheckIn>,
+  ) => Promise<KeyResultCheckIn[] | null>
+  getCheckInsByUser: (user: UserDTO) => Promise<KeyResultCheckIn[] | null>
 }
 
 @Injectable()
@@ -117,6 +123,21 @@ class DomainKeyResultService
     const customLists = await this.customList.getFromUser(user)
 
     return customLists
+  }
+
+  public async getCheckIns(
+    keyResult: KeyResultDTO,
+    options?: DomainServiceGetOptions<KeyResultCheckIn>,
+  ) {
+    const selector = { keyResultId: keyResult.id }
+
+    return this.checkIn.getMany(selector, undefined, options)
+  }
+
+  public async getCheckInsByUser(user: UserDTO) {
+    const selector = { userId: user.id }
+
+    return this.checkIn.getMany(selector)
   }
 
   protected async createIfUserIsInCompany(

@@ -3,11 +3,13 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   RelationId,
   UpdateDateColumn,
 } from 'typeorm'
 
+import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
 import { TeamDTO } from 'src/domain/team/dto'
 import { UserDTO } from 'src/domain/user/dto'
@@ -58,6 +60,9 @@ export class KeyResult implements KeyResultDTO {
   @Column()
   @RelationId((keyResult: KeyResult) => keyResult.team)
   public teamId: TeamDTO['id']
+
+  @OneToMany('KeyResultCheckIn', 'keyResult', { nullable: true })
+  public checkIns?: KeyResultCheckInDTO
 
   @Column({ type: 'text', nullable: true })
   public description?: string

@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common'
-import { flow } from 'lodash'
+import { flow, mapKeys, snakeCase } from 'lodash'
 import {
   Brackets,
   DeleteResult,
@@ -10,7 +10,7 @@ import {
 } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
-import { CONSTRAINT } from './constants'
+import { CONSTRAINT, DOMAIN_QUERY_ORDER } from './constants'
 import { TeamDTO } from './team/dto'
 import { UserDTO } from './user/dto'
 
@@ -31,12 +31,12 @@ export interface DomainEntityServiceInterface<E, D> {
   getOne: (
     selector: FindConditions<E>,
     queryContext?: DomainQueryContext,
-    options?: DomainServiceGetOptions,
+    options?: DomainServiceGetOptions<E>,
   ) => Promise<E | null>
   getMany: (
     selector: FindConditions<E>,
     queryContext?: DomainQueryContext,
-    options?: DomainServiceGetOptions,
+    options?: DomainServiceGetOptions<E>,
   ) => Promise<E[] | null>
   updateWithConstraint: (
     selector: FindConditions<E>,
@@ -49,8 +49,9 @@ export interface DomainEntityServiceInterface<E, D> {
   ) => Promise<DeleteResult>
 }
 
-export interface DomainServiceGetOptions {
+export interface DomainServiceGetOptions<E> {
   limit?: number
+  orderBy?: Partial<Record<keyof E, DOMAIN_QUERY_ORDER>>
 }
 
 export interface DomainServiceContext {
@@ -148,7 +149,7 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
   public async getOne(
     selector: FindConditions<E>,
     queryContext?: DomainQueryContext,
-    options?: DomainServiceGetOptions,
+    options?: DomainServiceGetOptions<E>,
   ) {
     const query = this.get(selector, queryContext, undefined, options)
 
@@ -158,7 +159,7 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
   public async getMany(
     selector: FindConditions<E>,
     queryContext?: DomainQueryContext,
-    options?: DomainServiceGetOptions,
+    options?: DomainServiceGetOptions<E>,
   ) {
     const query = this.get(selector, queryContext, undefined, options)
 
@@ -187,12 +188,15 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
     selector: FindConditions<E>,
     _queryContext: DomainQueryContext,
     constrainQuery?: SelectionQueryConstrain<E>,
-    options?: DomainServiceGetOptions,
+    options?: DomainServiceGetOptions<E>,
   ) {
+    const orderBy = mapKeys(options?.orderBy, (_, key) => snakeCase(key))
+
     const query = this.repository
       .createQueryBuilder()
       .where(selector)
       .take(options?.limit ?? 0)
+      .orderBy(orderBy)
 
     return constrainQuery ? constrainQuery(query) : query
   }

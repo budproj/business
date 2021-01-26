@@ -3,10 +3,10 @@ import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import { UserObject } from 'src/app/graphql/user/models'
 
-@ObjectType('CheckIn', {
+@ObjectType('KeyResultCheckIn', {
   description: 'A report that records new progress in a given key result',
 })
-export class CheckInObject {
+export class KeyResultCheckInObject {
   @Field(() => ID, { description: 'The ID of your report' })
   id: string
 

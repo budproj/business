@@ -9,6 +9,8 @@ import GraphQLObjectiveModule from './objective'
 import GraphQLTeamModule from './team'
 import GraphQLUserModule from './user'
 
+import './models'
+
 @Module({
   imports: [
     NestGraphQLModule.forRootAsync(graphQLFactory),

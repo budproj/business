@@ -9,3 +9,8 @@ export enum TIMEFRAME_SCOPE {
   CURRENT = 'CURRENT',
   SNAPSHOT = 'SNAPSHOT',
 }
+
+export enum DOMAIN_QUERY_ORDER {
+  DESC = 'DESC',
+  ASC = 'ASC',
+}

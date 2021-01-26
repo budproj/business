@@ -1,4 +1,4 @@
-import { Field, Float, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { CycleObject } from 'src/app/graphql/cycle/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
@@ -40,6 +40,9 @@ export class TeamObject {
   @Field(() => TeamObject, { description: 'The team that owns this team', nullable: true })
   parentTeam: TeamObject
 
+  @Field(() => Boolean, { description: 'Defines if the team is a company' })
+  isCompany: boolean
+
   @Field(() => [TeamObject], { description: 'A list of teams that belongs to this team' })
   teams: TeamObject[]
 
@@ -58,11 +61,23 @@ export class TeamObject {
   @Field({ nullable: true, description: 'The gender of the team' })
   gender?: TEAM_GENDER
 
+  @Field(() => TeamObject, {
+    description: 'The team that is the company of this team. This is also known as "rootTeam"',
+    nullable: true,
+  })
+  company?: TeamObject
+
   @Field(() => [KeyResultObject], {
     description: 'The creation date ordered list of key results that belongs to that team',
     nullable: true,
   })
   keyResults?: KeyResultObject[]
+
+  // @Field(() => ProgressReportObject, {
+  //   description: 'The latest report for this team',
+  //   nullable: true,
+  // })
+  // latestReport: ProgressReportObject
 
   // @Field(() => Float, {
   //   description: 'The computed percentage current progress of this team',
@@ -76,25 +91,10 @@ export class TeamObject {
   // })
   // currentConfidence: ConfidenceReportObject['valueNew']
   //
-
-  @Field(() => TeamObject, {
-    description: 'The team that is the company of this team. This is also known as "rootTeam"',
-  })
-  company: TeamObject
-
-  @Field(() => Float, {
-    description: 'The percentage progress increase of the team since last monday',
-  })
-  percentageProgressIncrease: number
-
-  // @Field(() => ProgressReportObject, {
-  //   description: 'The latest report for this team',
-  //   nullable: true,
+  // @Field(() => Float, {
+  //   description: 'The percentage progress increase of the team since last monday',
   // })
-  // latestReport: ProgressReportObject
-
-  @Field(() => Boolean, { description: 'Defines if the team is a company' })
-  isCompany: boolean
+  // percentageProgressIncrease: number
 }
 
 registerEnumType(TEAM_GENDER, {

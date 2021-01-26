@@ -1,5 +1,5 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
@@ -8,10 +8,12 @@ import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
 import { PolicyObject } from 'src/app/graphql/authz/models'
+import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import { TeamObject } from 'src/app/graphql/team/models'
 import { UserObject } from 'src/app/graphql/user'
+import { DOMAIN_QUERY_ORDER } from 'src/domain/constants'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { KeyResult } from 'src/domain/key-result/entities'
 import DomainService from 'src/domain/service'
@@ -86,39 +88,30 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
 
     return this.getUserPolicies(selector, user)
   }
-  //
-  //
-  // @ResolveField()
-  // async progressReports(
-  //   @Parent() keyResult: KeyResultObject,
-  //   @Args('limit', { type: () => Int, nullable: true }) limit?: number,
-  // ) {
-  //   this.logger.log({
-  //     keyResult,
-  //     limit,
-  //     message: 'Fetching progress reports for key result',
-  //   })
-  //
-  //   return this.keyResultDomain.report.progress.getFromKeyResult(keyResult.id, {
-  //     limit,
-  //   })
-  // }
-  //
-  // @ResolveField()
-  // async confidenceReports(
-  //   @Parent() keyResult: KeyResultObject,
-  //   @Args('limit', { type: () => Int, nullable: true }) limit?: number,
-  // ) {
-  //   this.logger.log({
-  //     keyResult,
-  //     limit,
-  //     message: 'Fetching confidence reports for key result',
-  //   })
-  //
-  //   return this.keyResultDomain.report.confidence.getFromKeyResult(keyResult.id, {
-  //     limit,
-  //   })
-  // }
+
+  @ResolveField('checkIns', () => [KeyResultCheckInObject])
+  protected async getKeyResultCheckIns(
+    @Parent() keyResult: KeyResultObject,
+    @Args('order', { type: () => DOMAIN_QUERY_ORDER, defaultValue: DOMAIN_QUERY_ORDER.DESC })
+    order: DOMAIN_QUERY_ORDER,
+    @Args('limit', { type: () => Int, nullable: true }) limit?: number,
+  ) {
+    this.logger.log({
+      keyResult,
+      limit,
+      order,
+      message: 'Fetching check-ins for key result',
+    })
+
+    const options = {
+      limit,
+      orderBy: {
+        createdAt: order,
+      },
+    }
+
+    return this.domain.keyResult.getCheckIns(keyResult, options)
+  }
   //
   // @ResolveField()
   // async currentProgress(@Parent() keyResult: KeyResultObject) {
@@ -138,16 +131,6 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
   //   })
   //
   //   return this.keyResultDomain.getCurrentConfidence(keyResult.id)
-  // }
-  //
-  // @ResolveField()
-  // async reports(@Parent() keyResult: KeyResultObject) {
-  //   this.logger.log({
-  //     keyResult,
-  //     message: 'Fetching reports for key result',
-  //   })
-  //
-  //   return this.keyResultDomain.getReports(keyResult.id)
   // }
 }
 

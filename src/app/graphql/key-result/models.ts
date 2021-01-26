@@ -1,6 +1,7 @@
 import { Field, Float, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
+import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import { TeamObject } from 'src/app/graphql/team/models'
 import { UserObject } from 'src/app/graphql/user/models'
@@ -55,8 +56,14 @@ export class KeyResultObject {
   })
   policies: PolicyObject
 
-  @Field({ nullable: true, description: 'The description explaining the key result' })
+  @Field({ description: 'The description explaining the key result', nullable: true })
   description?: string
+
+  @Field({
+    description: 'A created date ordered list of key result check-ins for this key result',
+    nullable: true,
+  })
+  checkIns?: KeyResultCheckInObject
 }
 
 registerEnumType(KEY_RESULT_FORMAT, {
