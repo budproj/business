@@ -29,7 +29,7 @@ class DomainProgressReportService extends DomainEntityService<ProgressReport, Pr
   }
 
   async parseUserCompanyIDs(user: UserDTO) {
-    const userCompanies = await this.teamService.getUserRootTeams(user)
+    const userCompanies = await this.teamService.getUserCompanies(user)
     const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
 
     return userCompanyIDs

@@ -1,10 +1,5 @@
 import { Field, Float, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
-import { CycleObject } from 'src/app/graphql/cycle/models'
-import { KeyResultObject } from 'src/app/graphql/key-result/models'
-import { ConfidenceReportObject } from 'src/app/graphql/key-result/report/confidence'
-import { ProgressReportObject } from 'src/app/graphql/key-result/report/progress'
-import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import { UserObject } from 'src/app/graphql/user/models'
 import { TEAM_GENDER } from 'src/domain/team/constants'
 
@@ -36,10 +31,10 @@ export class TeamObject {
   @Field({ description: 'The last update date of the team' })
   updatedAt: Date
 
-  @Field(() => [KeyResultObject], {
-    description: 'The creation date ordered list of key results that belongs to that team',
-  })
-  keyResults: KeyResultObject[]
+  // @Field(() => [KeyResultObject], {
+  //   description: 'The creation date ordered list of key results that belongs to that team',
+  // })
+  // keyResults: KeyResultObject[]
 
   @Field(() => [UserObject], {
     description: 'A creation date ordered list of users that are members of this team',
@@ -61,26 +56,26 @@ export class TeamObject {
   @Field(() => [TeamObject], { description: 'A list of teams that belongs to this team' })
   teams: TeamObject[]
 
-  @Field(() => Float, {
-    description: 'The computed percentage current progress of this team',
-    nullable: true,
-  })
-  currentProgress: ProgressReportObject['valueNew']
-
-  @Field(() => Float, {
-    description: 'The computed current confidence of this team',
-    nullable: true,
-  })
-  currentConfidence: ConfidenceReportObject['valueNew']
-
-  @Field(() => [ObjectiveObject], {
-    nullable: true,
-    description: 'The created ordered list of objectives in this team',
-  })
-  objectives: ObjectiveObject[]
-
-  @Field(() => [CycleObject], { description: 'The cycles that belongs to this team' })
-  cycles: CycleObject[]
+  // @Field(() => Float, {
+  //   description: 'The computed percentage current progress of this team',
+  //   nullable: true,
+  // })
+  // currentProgress: ProgressReportObject['valueNew']
+  //
+  // @Field(() => Float, {
+  //   description: 'The computed current confidence of this team',
+  //   nullable: true,
+  // })
+  // currentConfidence: ConfidenceReportObject['valueNew']
+  //
+  // @Field(() => [ObjectiveObject], {
+  //   nullable: true,
+  //   description: 'The created ordered list of objectives in this team',
+  // })
+  // objectives: ObjectiveObject[]
+  //
+  // @Field(() => [CycleObject], { description: 'The cycles that belongs to this team' })
+  // cycles: CycleObject[]
 
   @Field(() => TeamObject, {
     description: 'The team that is the company of this team. This is also known as "rootTeam"',
@@ -92,11 +87,11 @@ export class TeamObject {
   })
   percentageProgressIncrease: number
 
-  @Field(() => ProgressReportObject, {
-    description: 'The latest report for this team',
-    nullable: true,
-  })
-  latestReport: ProgressReportObject
+  // @Field(() => ProgressReportObject, {
+  //   description: 'The latest report for this team',
+  //   nullable: true,
+  // })
+  // latestReport: ProgressReportObject
 
   @Field(() => Boolean, { description: 'Defines if the team is a company' })
   isCompany: boolean

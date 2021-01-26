@@ -1,10 +1,10 @@
 import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { TeamObject } from 'src/app/graphql/team/models'
 
 // import { KeyResultObject } from 'src/app/graphql/key-result/models'
 // import { ConfidenceReportObject } from 'src/app/graphql/key-result/report/confidence/models'
 // import { ProgressReportObject } from 'src/app/graphql/key-result/report/progress/models'
 // import { ObjectiveObject } from 'src/app/graphql/objective/models'
-// import { TeamObject } from 'src/app/graphql/team/models'
 import { USER_POLICY } from 'src/app/graphql/user/constants'
 import { USER_GENDER } from 'src/domain/user/constants'
 
@@ -29,29 +29,47 @@ export class UserObject {
   @Field({ description: 'The name of the user' })
   firstName: string
 
-  @Field({ description: 'The last name of the user', nullable: true })
-  lastName?: string
-
   @Field({ description: 'The full name of the user' })
   fullName: string
 
   @Field({ description: 'The sub field in Auth0 (their ID)' })
   authzSub: string
 
-  @Field({ nullable: true, description: 'The gender of the user' })
-  gender?: USER_GENDER
-
-  @Field({ nullable: true, description: 'The user role in the company' })
-  role?: string
-
-  @Field({ nullable: true, description: 'The picture of the user' })
-  picture?: string
-
   @Field({ description: 'The creation date of the user' })
   createdAt: Date
 
   @Field({ description: 'The last update date of this user' })
   updatedAt: Date
+
+  @Field({ description: 'The last name of the user', nullable: true })
+  lastName?: string
+
+  @Field({ description: 'The gender of the user', nullable: true })
+  gender?: USER_GENDER
+
+  @Field({ description: 'The user role in the company', nullable: true })
+  role?: string
+
+  @Field({ description: 'The picture of the user', nullable: true })
+  picture?: string
+
+  @Field(() => [TeamObject], {
+    description: 'The creation date ordered list of companies that this user is a part of',
+    nullable: true,
+  })
+  companies?: TeamObject[]
+
+  @Field(() => [TeamObject], {
+    description: 'The creation date ordered list of teams that this user is part of',
+    nullable: true,
+  })
+  teams?: Promise<TeamObject[]>
+
+  @Field(() => [TeamObject], {
+    description: 'The creation date ordered list of teams that this user owns',
+    nullable: true,
+  })
+  ownedTeams?: TeamObject[]
 
   // @Field(() => [KeyResultObject], {
   //   description: 'The creation date ordered list of key results that this user owns',
@@ -73,20 +91,7 @@ export class UserObject {
   // })
   // confidenceReports: ConfidenceReportObject[]
   //
-  // @Field(() => [TeamObject], {
-  //   description: 'The creation date ordered list of teams that this user is part of',
-  // })
-  // teams: Promise<TeamObject[]>
   //
-  // @Field(() => [TeamObject], {
-  //   description: 'The creation date ordered list of teams that this user owns',
-  // })
-  // ownedTeams: TeamObject[]
-  //
-  // @Field(() => [TeamObject], {
-  //   description: 'The creation date ordered list of companies that this user is a part of',
-  // })
-  // companies: TeamObject[]
 }
 
 @ObjectType('Policies', {

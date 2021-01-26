@@ -7,10 +7,10 @@ import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'src/app/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/authz/interceptors'
 import { AuthzUser } from 'src/app/authz/types'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
+import { TeamObject } from 'src/app/graphql/team/models'
 import DomainService from 'src/domain/service'
 import { UserDTO } from 'src/domain/user/dto'
 import { User } from 'src/domain/user/entities'
-import DomainUserService from 'src/domain/user/service'
 
 import { UserObject } from './models'
 
@@ -25,8 +25,8 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
   }
 
   @Permissions(PERMISSION['USER:READ'])
-  @Query(() => UserObject)
-  async user(
+  @Query(() => UserObject, { name: 'user' })
+  protected async getUser(
     @Args('id', { type: () => ID }) id: UserObject['id'],
     @GraphQLUser() authzUser: AuthzUser,
   ) {
@@ -38,19 +38,67 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
     return user
   }
 
-  // @Permissions(PERMISSION['USER:READ'])
-  // @Query(() => UserObject)
-  // async me(@GraphQLUser() authzUser: AuthzUser) {
-  //   const { id } = authzUser
-  //   this.logger.log(
-  //     `Fetching data about the user that is executing the request. Provided user ID: ${id.toString()}`,
-  //   )
-  //
-  //   const user = await this.resolverService.getOneWithActionScopeConstraint({ id }, authzUser)
-  //   if (!user) throw new NotFoundException(`We could not found an user with ID ${id}`)
-  //
-  //   return user
-  // }
+  @Permissions(PERMISSION['USER:READ'])
+  @Query(() => UserObject, { name: 'me' })
+  protected async getMyUser(@GraphQLUser() authzUser: AuthzUser) {
+    const { id } = authzUser
+    this.logger.log(
+      `Fetching data about the user that is executing the request. Provided user ID: ${id.toString()}`,
+    )
+
+    const user = await this.getOneWithActionScopeConstraint({ id }, authzUser)
+    if (!user) throw new NotFoundException(`We could not found an user with ID ${id}`)
+
+    return user
+  }
+
+  @ResolveField('fullName', () => String)
+  protected async getUserFullName(@Parent() user: UserObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching user full name',
+    })
+
+    return this.domain.user.buildUserFullName(user)
+  }
+
+  @ResolveField('companies', () => [TeamObject])
+  protected async getUserCompanies(
+    @Parent() user: UserObject,
+    @Args('limit', { type: () => Int, nullable: true }) limit?: number,
+  ) {
+    this.logger.log({
+      user,
+      message: 'Fetching companies for user',
+    })
+
+    const companies = await this.domain.team.getUserCompanies(user)
+    const companiesWithLimit = limit ? companies.slice(0, limit) : companies
+
+    return companiesWithLimit
+  }
+
+  @ResolveField('teams', () => [TeamObject])
+  protected async getUserTeams(@Parent() user: UserObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching teams for user',
+    })
+
+    const teams = await this.domain.team.getForUser(user)
+
+    return teams
+  }
+
+  @ResolveField('ownedTeams', () => [TeamObject])
+  async getUserOwnedTeams(@Parent() user: UserObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching owned teams for user',
+    })
+
+    return this.domain.team.getFromOwner(user.id)
+  }
   //
   // @ResolveField()
   // async keyResults(@Parent() user: UserObject) {
@@ -92,41 +140,6 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
   //   return this.keyResultDomain.report.confidence.getFromUser(user.id)
   // }
   //
-  // @ResolveField()
-  // async ownedTeams(@Parent() user: UserObject) {
-  //   this.logger.log({
-  //     user,
-  //     message: 'Fetching owned teams for user',
-  //   })
-  //
-  //   return this.teamDomain.getFromOwner(user.id)
-  // }
-  //
-  // @ResolveField()
-  // async companies(
-  //   @Parent() user: UserObject,
-  //   @Args('limit', { type: () => Int, nullable: true }) limit?: number,
-  // ) {
-  //   this.logger.log({
-  //     user,
-  //     message: 'Fetching companies for user',
-  //   })
-  //
-  //   const companies = await this.teamDomain.getUserRootTeams(user)
-  //   const companiesWithLimit = limit ? companies.slice(0, limit) : companies
-  //
-  //   return companiesWithLimit
-  // }
-  //
-  // @ResolveField()
-  // async fullName(@Parent() user: UserObject) {
-  //   this.logger.log({
-  //     user,
-  //     message: 'Fetching user full name',
-  //   })
-  //
-  //   return this.resolverService.getUserFullName(user)
-  // }
 }
 
 export default GraphQLUserResolver

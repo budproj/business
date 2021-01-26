@@ -5,11 +5,10 @@ import appConfig from 'src/config/app'
 import DomainModule from 'src/domain/module'
 
 import GraphQLTeamResolver from './resolver'
-import GraphQLTeamService from './service'
 
 @Module({
   imports: [ConfigModule.forFeature(appConfig), DomainModule],
-  providers: [GraphQLTeamResolver, GraphQLTeamService],
+  providers: [GraphQLTeamResolver],
 })
 class GraphQLTeamModule {}
 

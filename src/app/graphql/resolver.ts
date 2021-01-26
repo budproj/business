@@ -70,7 +70,7 @@ abstract class GraphQLEntityResolver<E, D> implements GraphQLEntityResolverInter
   }
 
   private async parseUserCompanyIDs(user: AuthzUser) {
-    const userCompanies = await this.domainService.team.getUserRootTeams(user)
+    const userCompanies = await this.domainService.team.getUserCompanies(user)
     const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
 
     return userCompanyIDs

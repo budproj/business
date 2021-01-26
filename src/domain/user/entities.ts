@@ -26,11 +26,17 @@ export class User implements UserDTO {
   @Column()
   public firstName: string
 
-  @Column({ nullable: true })
-  public lastName?: string
-
   @Column()
   public authzSub: string
+
+  @CreateDateColumn()
+  public createdAt: Date
+
+  @UpdateDateColumn()
+  public updatedAt: Date
+
+  @Column({ nullable: true })
+  public lastName?: string
 
   @Column({ type: 'enum', enum: USER_GENDER, nullable: true })
   public gender?: USER_GENDER
@@ -41,11 +47,14 @@ export class User implements UserDTO {
   @Column({ nullable: true })
   public picture?: string
 
-  @CreateDateColumn()
-  public createdAt: Date
+  @ManyToMany('Team', 'users', { lazy: true, nullable: true })
+  public teams?: Promise<TeamDTO[]>
 
-  @UpdateDateColumn()
-  public updatedAt: Date
+  @OneToMany('Team', 'owner', { nullable: true })
+  public ownedTeams?: TeamDTO[]
+  //
+  // @OneToMany('KeyResultCustomList', 'user')
+  // public keyResultCustomLists: KeyResultCustomListDTO[]
 
   // @OneToMany('KeyResult', 'owner')
   // public keyResults: KeyResultDTO[]
@@ -58,13 +67,4 @@ export class User implements UserDTO {
   //
   // @OneToMany('ProgressReport', 'user')
   // public progressReports: ProgressReportDTO[]
-  //
-  @ManyToMany('Team', 'users', { lazy: true, nullable: true })
-  public teams?: Promise<TeamDTO[]>
-
-  @OneToMany('Team', 'owner')
-  public ownedTeams: TeamDTO[]
-  //
-  // @OneToMany('KeyResultCustomList', 'user')
-  // public keyResultCustomLists: KeyResultCustomListDTO[]
 }

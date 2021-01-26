@@ -16,7 +16,9 @@ import DomainTeamSpecification from './specification'
 import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 
 export interface DomainTeamServiceInterface {
-  getUserRootTeams: (user: UserDTO) => Promise<TeamDTO[]>
+  getFromOwner: (userID: UserDTO['id']) => Promise<Team>
+  getUserCompanies: (user: UserDTO) => Promise<Team[]>
+  getForUser: (user: UserDTO) => Promise<Team[]>
   getAllTeamsBelowNodes: (
     nodes: TeamDTO['id'] | Array<TeamDTO['id']>,
     filter?: TeamEntityFilter[],
@@ -51,9 +53,9 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     return {} as any
   }
 
-  // async getFromOwner(ownerId: UserDTO['id']): Promise<Team[]> {
-  //   return this.repository.find({ ownerId })
-  // }
+  public async getFromOwner(ownerId: UserDTO['id']): Promise<Team[]> {
+    return this.repository.find({ ownerId })
+  }
   //
   // async getCurrentProgress(teamID: TeamDTO['id']) {
   //   const date = new Date()
@@ -115,8 +117,8 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
   //   return uniqTeamUsers
   // }
   //
-  public async getUserRootTeams(user: UserDTO) {
-    const teams = await this.getTeamsForUser(user)
+  public async getUserCompanies(user: UserDTO) {
+    const teams = await this.getForUser(user)
     const companyPromises = teams.map(async (team) => this.getRootTeamForTeam(team))
 
     const companies = Promise.all(companyPromises)
@@ -124,7 +126,7 @@ class DomainTeamService extends DomainEntityService<Team, TeamDTO> {
     return companies
   }
 
-  private async getTeamsForUser(user: UserDTO) {
+  public async getForUser(user: UserDTO) {
     const teams = await user.teams
 
     return teams

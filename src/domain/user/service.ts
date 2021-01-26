@@ -7,6 +7,7 @@ import { User } from './entities'
 import DomainUserRepository from './repository'
 
 export interface DomainUserServiceInterface {
+  buildUserFullName: (user: UserDTO) => string
   getUserFromSubjectWithTeamRelation: (authzSub: UserDTO['authzSub']) => Promise<User>
 }
 
