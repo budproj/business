@@ -1,5 +1,5 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, ID, Query, Resolver } from '@nestjs/graphql'
+import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { pickBy, identity } from 'lodash'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
@@ -8,7 +8,9 @@ import { AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
+import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
+import { UserObject } from 'src/app/graphql/user'
 import { KEY_RESULT_CUSTOM_LIST_BINDING } from 'src/domain/key-result/custom-list/constants'
 import { KeyResultCustomListDTO } from 'src/domain/key-result/custom-list/dto'
 import { KeyResultCustomList } from 'src/domain/key-result/custom-list/entities'
@@ -37,7 +39,7 @@ class GraphQLKeyResultCustomListResolver extends GraphQLEntityResolver<
     @Args('binding', { type: () => KEY_RESULT_CUSTOM_LIST_BINDING, nullable: true })
     binding?: KeyResultCustomListObject['binding'],
   ) {
-    this.logger.log('Fetching key result view')
+    this.logger.log('Fetching key result custom list')
 
     const selector = pickBy(
       {
@@ -46,66 +48,78 @@ class GraphQLKeyResultCustomListResolver extends GraphQLEntityResolver<
       },
       identity,
     )
-    const keyResultView = await this.getOneWithActionScopeConstraint(selector, user)
-    // If (!keyResultView && binding === KEY_RESULT_CUSTOM_LIST_BINDING.MINE) {
-    //   const createdKeyResultCustomLists = await this.createWithScopeConstraint(
-    //     {
-    //       binding,
-    //       title: 'Default',
-    //       userId: user.id,
-    //     },
-    //     user,
-    //   )
-    //
-    //   return createdKeyResultCustomLists[0]
-    // }
+    const keyResultCustomList = await this.getOneWithActionScopeConstraint(selector, user)
+    if (!keyResultCustomList && !binding)
+      throw new NotFoundException('We could not found a key result custom list with given args')
 
-    if (!keyResultView)
-      throw new NotFoundException('We could not found a key result view with given args')
+    const normalizedKeyResultCustomList = await this.normalizedBasedOnBinding(
+      binding,
+      user,
+      keyResultCustomList,
+    )
 
-    return keyResultView
+    console.log(normalizedKeyResultCustomList)
+
+    if (!normalizedKeyResultCustomList)
+      throw new NotFoundException('We could not found a key result custom list with given args')
+
+    return normalizedKeyResultCustomList
   }
 
-  // @ResolveField()
-  // async user(@Parent() keyResultView: KeyResultCustomListObject) {
-  //   this.logger.log({
-  //     keyResultView,
-  //     message: 'Fetching user for key result view',
-  //   })
-  //
-  //   return this.userDomain.getOne({ id: keyResultView.userId })
-  // }
-  //
-  // @ResolveField()
-  // async keyResults(@Parent() keyResultView: KeyResultCustomListObject) {
-  //   this.logger.log({
-  //     keyResultView,
-  //     message: 'Fetching key results for key result view',
-  //   })
-  //
-  //   return this.keyResultDomain.getManyByIdsPreservingOrder(keyResultView.rank)
-  // }
-  //
+  @ResolveField('user', () => UserObject)
+  protected async getKeyResultCustomListUser(
+    @Parent() keyResultCustomList: KeyResultCustomListObject,
+  ) {
+    this.logger.log({
+      keyResultCustomList,
+      message: 'Fetching user for key result custom list',
+    })
+
+    return this.domain.user.getOne({ id: keyResultCustomList.userId })
+  }
+
+  @ResolveField('keyResults', () => [KeyResultObject])
+  protected async getKeyResultCustomListKeyResults(
+    @Parent() keyResultCustomList: KeyResultCustomListObject,
+  ) {
+    this.logger.log({
+      keyResultCustomList,
+      message: 'Fetching key results for key result custom list',
+    })
+
+    return this.domain.keyResult.getFromCustomList(keyResultCustomList)
+  }
+
+  private async normalizedBasedOnBinding(
+    binding: KEY_RESULT_CUSTOM_LIST_BINDING,
+    user: AuthzUser,
+    keyResultCustomList?: KeyResultCustomListDTO,
+  ) {
+    return keyResultCustomList
+      ? this.domain.keyResult.refreshCustomListWithOwnedKeyResults(user, keyResultCustomList)
+      : this.domain.keyResult.createCustomListForBinding(binding, user)
+  }
+
   // @Permissions(PERMISSION['KEY_RESULT_VIEW:UPDATE'])
   // @Mutation(() => KeyResultCustomListObject)
   // async updateRank(
   //   @Args('id', { type: () => ID }) id: KeyResultCustomListObject['id'],
-  //   @Args('keyResultViewRankInput', { type: () => KeyResultCustomListRankInput })
-  //   keyResultViewRankInput: KeyResultCustomListRankInput,
+  //   @Args('keyResultCustomListRankInput', { type: () => KeyResultCustomListRankInput })
+  //   keyResultCustomListRankInput: KeyResultCustomListRankInput,
   //   @GraphQLUser() user: AuthzUser,
   // ) {
   //   this.logger.log({
-  //     keyResultViewRankInput,
-  //     message: `Updating rank for key result view of id ${id}`,
+  //     keyResultCustomListRankInput,
+  //     message: `Updating rank for key result custom list of id ${id}`,
   //   })
   //
   //   const updatedKeyResultCustomList = await this.resolverService.updateWithScopeConstraint(
   //     { id },
-  //     keyResultViewRankInput,
+  //     keyResultCustomListRankInput,
   //     user,
   //   )
   //   if (!updatedKeyResultCustomList)
-  //     throw new NotFoundException(`We could not found a key result view for id ${id}`)
+  //     throw new NotFoundException(`We could not found a key result custom list for id ${id}`)
   //
   //   return updatedKeyResultCustomList
   // }
@@ -114,18 +128,18 @@ class GraphQLKeyResultCustomListResolver extends GraphQLEntityResolver<
   // @Mutation(() => KeyResultCustomListObject)
   // async createKeyResultCustomList(
   //   @GraphQLUser() user: AuthzUser,
-  //   @Args('keyResultViewInput', { type: () => KeyResultCustomListInput })
-  //   keyResultViewInput: KeyResultCustomListInput,
+  //   @Args('keyResultCustomListInput', { type: () => KeyResultCustomListInput })
+  //   keyResultCustomListInput: KeyResultCustomListInput,
   // ) {
   //   this.logger.log({
   //     user,
-  //     keyResultViewInput,
-  //     message: 'Creating a new key result view',
+  //     keyResultCustomListInput,
+  //     message: 'Creating a new key result custom list',
   //   })
   //
   //   const enhancedWithUserID = {
   //     userId: user.id,
-  //     ...keyResultViewInput,
+  //     ...keyResultCustomListInput,
   //   }
   //
   //   const creationPromise = this.resolverService.createWithScopeConstraint(enhancedWithUserID, user)

@@ -9,11 +9,11 @@ import { Cycle } from './entities'
 
 @EntityRepository(Cycle)
 class DomainCycleRepository extends DomainEntityRepository<Cycle> {
-  setupOwnsQuery(query: SelectQueryBuilder<Cycle>) {
+  protected setupOwnsQuery(query: SelectQueryBuilder<Cycle>) {
     return query.leftJoinAndSelect(`${Cycle.name}.team`, Team.name)
   }
 
-  addTeamWhereExpression(
+  protected addTeamWhereExpression(
     query: WhereExpression,
     allowedTeams: Array<TeamDTO['id']>,
     constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,
@@ -25,7 +25,7 @@ class DomainCycleRepository extends DomainEntityRepository<Cycle> {
     })
   }
 
-  addOwnsWhereExpression(
+  protected addOwnsWhereExpression(
     query: WhereExpression,
     user: UserDTO,
     constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,

@@ -23,21 +23,21 @@ export interface DomainEntityServiceInterface<E, D> {
   getOneWithConstraint: (
     selector: FindConditions<E>,
     queryContext: DomainQueryContext,
-  ) => Promise<E>
+  ) => Promise<E | null>
   getManyWithConstraint: (
     selector: FindConditions<E>,
     queryContext: DomainQueryContext,
-  ) => Promise<E[]>
+  ) => Promise<E[] | null>
   getOne: (
     selector: FindConditions<E>,
     queryContext?: DomainQueryContext,
     options?: DomainServiceGetOptions,
-  ) => Promise<E>
+  ) => Promise<E | null>
   getMany: (
     selector: FindConditions<E>,
     queryContext?: DomainQueryContext,
     options?: DomainServiceGetOptions,
-  ) => Promise<E[]>
+  ) => Promise<E[] | null>
   updateWithConstraint: (
     selector: FindConditions<E>,
     newData: QueryDeepPartialEntity<E>,
@@ -165,7 +165,7 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
     return query.getMany()
   }
 
-  protected async create(data: Partial<D> | Array<Partial<D>>, _context: DomainQueryContext) {
+  protected async create(data: Partial<D> | Array<Partial<D>>, _queryContext?: DomainQueryContext) {
     const result = await this.repository.insert(data as QueryDeepPartialEntity<E>)
 
     return result.raw
@@ -242,7 +242,7 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
   protected async update(
     selector: FindConditions<E>,
     newData: QueryDeepPartialEntity<E>,
-    queryContext: DomainQueryContext,
+    queryContext?: DomainQueryContext,
   ) {
     await this.repository.update(selector, newData)
 

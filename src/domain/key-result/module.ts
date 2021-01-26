@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
 import databaseConfig from 'src/config/database/config'
+import DomainTeamModule from 'src/domain/team'
 
 import DomainKeyResultCustomListModule from './custom-list'
 import DomainKeyResultRepository from './repository'
@@ -12,6 +13,7 @@ import DomainKeyResultService from './service'
     TypeOrmModule.forRoot(databaseConfig),
     TypeOrmModule.forFeature([DomainKeyResultRepository]),
     DomainKeyResultCustomListModule,
+    DomainTeamModule,
   ],
   providers: [DomainKeyResultService],
   exports: [DomainKeyResultService],

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
-import { flatten, remove, uniqBy } from 'lodash'
+import { flatten, remove, uniq, uniqBy } from 'lodash'
 
+import { CONSTRAINT } from 'src/domain/constants'
 import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { TeamEntityFilter, TeamEntityRelation } from 'src/domain/team/types'
 import { UserDTO } from 'src/domain/user/dto'
@@ -25,6 +26,7 @@ export interface DomainTeamServiceInterface {
   ) => Promise<Array<Partial<Team>>>
   getParentTeam: (teamID: TeamDTO['id']) => Promise<Team>
   getUsersInTeam: (teamID: TeamDTO['id']) => Promise<UserDTO[]>
+  buildTeamQueryContext: (user: UserDTO, constraint: CONSTRAINT) => Promise<DomainQueryContext>
 }
 
 @Injectable()
@@ -108,6 +110,27 @@ class DomainTeamService
     return uniqTeamUsers
   }
 
+  public async buildTeamQueryContext(user: UserDTO, constraint: CONSTRAINT) {
+    const context = this.buildContext(user, constraint)
+
+    const userCompaniesIDs = await this.parseUserCompanyIDs(user)
+    const userCompaniesTeamsIDs = await this.parseUserCompaniesTeamIDs(userCompaniesIDs)
+    const userTeams = await this.parseUserTeamIDs(user)
+
+    const query = {
+      companies: userCompaniesIDs,
+      teams: userCompaniesTeamsIDs,
+      userTeams,
+    }
+
+    const queryContext = {
+      ...context,
+      query,
+    }
+
+    return queryContext
+  }
+
   protected async createIfUserIsInCompany(_data: Partial<Team>, _queryContext: DomainQueryContext) {
     return {} as any
   }
@@ -159,6 +182,27 @@ class DomainTeamService
     const departments = this.getChildTeams(companyIDs)
 
     return departments
+  }
+
+  private async parseUserCompanyIDs(user: UserDTO) {
+    const userCompanies = await this.getUserCompanies(user)
+    const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
+
+    return userCompanyIDs
+  }
+
+  private async parseUserCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>) {
+    const companiesTeams = await this.getAllTeamsBelowNodes(companyIDs)
+    const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
+
+    return companiesTeamIDs
+  }
+
+  private async parseUserTeamIDs(user: UserDTO) {
+    const teams = await user.teams
+    const teamIDs = teams.map((team) => team.id)
+
+    return teamIDs
   }
 }
 

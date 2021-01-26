@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common'
 
+import { CONSTRAINT } from 'src/domain/constants'
 import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
+import { KEY_RESULT_CUSTOM_LIST_BINDING } from 'src/domain/key-result/custom-list/constants'
+import { KeyResultCustomListDTO } from 'src/domain/key-result/custom-list/dto'
+import { KeyResultCustomList } from 'src/domain/key-result/custom-list/entities'
 import DomainKeyResultCustomListService from 'src/domain/key-result/custom-list/service'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
 import { TeamDTO } from 'src/domain/team/dto'
+import DomainTeamService from 'src/domain/team/service'
 import { UserDTO } from 'src/domain/user/dto'
 
 import { KeyResult } from './entities'
@@ -13,10 +18,20 @@ import DomainKeyResultRepository from './repository'
 export interface DomainKeyResultServiceInterface {
   repository: DomainKeyResultRepository
   customList: DomainKeyResultCustomListService
+  teamService: DomainTeamService
 
   getFromOwner: (ownerId: UserDTO['id']) => Promise<KeyResult[]>
   getFromTeam: (teamIDs: TeamDTO['id'] | Array<TeamDTO['id']>) => Promise<KeyResult[]>
   getFromObjective: (objectiveId: ObjectiveDTO['id']) => Promise<KeyResult[]>
+  getFromCustomList: (keyResultCustomList: KeyResultCustomListDTO) => Promise<KeyResult[]>
+  refreshCustomListWithOwnedKeyResults: (
+    user: UserDTO,
+    keyResultCustomList?: KeyResultCustomListDTO,
+  ) => Promise<KeyResultCustomList>
+  createCustomListForBinding: (
+    binding: KEY_RESULT_CUSTOM_LIST_BINDING,
+    user: UserDTO,
+  ) => Promise<KeyResultCustomList>
 }
 
 @Injectable()
@@ -26,6 +41,7 @@ class DomainKeyResultService
   constructor(
     public readonly repository: DomainKeyResultRepository,
     public readonly customList: DomainKeyResultCustomListService,
+    public readonly teamService: DomainTeamService,
   ) {
     super(repository, DomainKeyResultService.name)
   }
@@ -53,6 +69,47 @@ class DomainKeyResultService
     return this.repository.find({ objectiveId })
   }
 
+  public async getFromCustomList(keyResultCustomList: KeyResultCustomListDTO) {
+    const rankSortColumn = this.repository.buildRankSortColumn(keyResultCustomList.rank)
+    const data = this.repository.findByIdsRanked(keyResultCustomList.rank, rankSortColumn)
+
+    return data
+  }
+
+  public async refreshCustomListWithOwnedKeyResults(
+    user: UserDTO,
+    keyResultCustomList?: KeyResultCustomListDTO,
+  ) {
+    const availableKeyResults = await this.getFromOwner(user.id)
+    const refreshedCustomList = await this.customList.refreshWithNewKeyResults(
+      availableKeyResults,
+      keyResultCustomList,
+    )
+
+    return refreshedCustomList
+  }
+
+  public async createCustomListForBinding(binding: KEY_RESULT_CUSTOM_LIST_BINDING, user: UserDTO) {
+    const bindingContextBuilders = {
+      [KEY_RESULT_CUSTOM_LIST_BINDING.MINE]: async () =>
+        this.teamService.buildTeamQueryContext(user, CONSTRAINT.OWNS),
+    }
+
+    const contextBuilder = bindingContextBuilders[binding]
+    const context = await contextBuilder()
+
+    const bindingKeyResults = await this.getManyWithConstraint({}, context)
+    const createdCustomList = await this.customList.createForBinding(
+      binding,
+      user,
+      bindingKeyResults,
+    )
+
+    const customList = await this.customList.getOne({ id: createdCustomList.id })
+
+    return customList
+  }
+
   protected async createIfUserIsInCompany(
     _data: Partial<KeyResult>,
     _queryContext: DomainQueryContext,
@@ -72,12 +129,6 @@ class DomainKeyResultService
   }
   //
   //
-  // async getManyByIdsPreservingOrder(ids: Array<KeyResultDTO['id']>): Promise<KeyResult[]> {
-  //   const rankSortColumn = this.repository.buildRankSortColumn(ids)
-  //   const data = this.repository.findByIdsRanked(ids, rankSortColumn)
-  //
-  //   return data
-  // }
   //
   // async getProgressInPercentage(
   //   id: KeyResultDTO['id'],

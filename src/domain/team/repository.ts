@@ -8,7 +8,7 @@ import { Team } from './entities'
 
 @EntityRepository(Team)
 class DomainTeamRepository extends DomainEntityRepository<Team> {
-  addTeamWhereExpression(
+  protected addTeamWhereExpression(
     query: WhereExpression,
     allowedTeams: Array<TeamDTO['id']>,
     constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,
@@ -20,7 +20,7 @@ class DomainTeamRepository extends DomainEntityRepository<Team> {
     })
   }
 
-  addOwnsWhereExpression(
+  protected addOwnsWhereExpression(
     query: WhereExpression,
     user: UserDTO,
     constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,

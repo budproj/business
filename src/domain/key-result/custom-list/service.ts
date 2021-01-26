@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common'
+import { uniq } from 'lodash'
 
 import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
+import {
+  KEY_RESULT_CUSTOM_LIST_BINDING,
+  KEY_RESULT_CUSTOM_LIST_BINDING_NAMES,
+} from 'src/domain/key-result/custom-list/constants'
+import { KeyResult } from 'src/domain/key-result/entities'
+import { UserDTO } from 'src/domain/user/dto'
 
 import { KeyResultCustomListDTO } from './dto'
 import { KeyResultCustomList } from './entities'
@@ -10,6 +17,18 @@ export interface DomainKeyResultCustomListServiceInterface {
   repository: DomainKeyResultCustomListRepository
 }
 
+export interface DomainKeyResultCustomListServiceInterface {
+  refreshWithNewKeyResults: (
+    keyResults: KeyResult[],
+    keyResultCustomList?: KeyResultCustomListDTO,
+  ) => Promise<KeyResultCustomList>
+  createForBinding: (
+    binding: KEY_RESULT_CUSTOM_LIST_BINDING,
+    user: UserDTO,
+    keyResults: KeyResult[],
+  ) => Promise<KeyResultCustomList>
+}
+
 @Injectable()
 class DomainKeyResultCustomListService extends DomainEntityService<
   KeyResultCustomList,
@@ -17,6 +36,36 @@ class DomainKeyResultCustomListService extends DomainEntityService<
 > {
   constructor(public readonly repository: DomainKeyResultCustomListRepository) {
     super(repository, DomainKeyResultCustomListService.name)
+  }
+
+  public async refreshWithNewKeyResults(
+    keyResults: KeyResult[],
+    keyResultCustomList?: KeyResultCustomListDTO,
+  ) {
+    const rank = this.buildRefreshedRank(keyResults, keyResultCustomList?.rank)
+    const newData = { rank }
+
+    const selector = { id: keyResultCustomList.id }
+    const newCustomList = await this.update(selector, newData)
+
+    return newCustomList
+  }
+
+  public async createForBinding(
+    binding: KEY_RESULT_CUSTOM_LIST_BINDING,
+    user: UserDTO,
+    keyResults: KeyResult[],
+  ) {
+    const bindingBuilders = {
+      [KEY_RESULT_CUSTOM_LIST_BINDING.MINE]: () => this.buildMineBindingList(user, keyResults),
+    }
+
+    const builder = bindingBuilders[binding]
+    const data = builder()
+
+    const createdData = await this.create(data)
+
+    return createdData[0]
   }
 
   protected async createIfUserIsInCompany(
@@ -40,103 +89,34 @@ class DomainKeyResultCustomListService extends DomainEntityService<
     return {} as any
   }
 
-  // Async getOneInQuery(
-  //   query: SelectQueryBuilder<KeyResultCustomList>,
-  //   context: DomainServiceContext,
-  // ): Promise<KeyResultCustomList | null> {
-  //   const view = await query
-  //     .andWhere(`${KeyResultCustomList.name}.user_id = :userID`, { userID: context.user.id })
-  //     .getOne()
-  //   if (!view) return
-  //
-  //   const refreshedView = await this.refreshView(view, context.user)
-  //
-  //   return refreshedView
-  // }
-  //
-  // async refreshView(view: KeyResultCustomList, user: UserDTO) {
-  //   const rank = await this.refreshViewRank(user, view?.rank)
-  //   const newView = {
-  //     ...view,
-  //     rank,
-  //   }
-  //
-  //   const selector = { id: view.id }
-  //   const newData = { rank }
-  //   await this.update(selector, newData)
-  //
-  //   return newView
-  // }
-  //
-  // async refreshViewRank(user: UserDTO, previousRank: KeyResultCustomList['rank'] = []) {
-  //   const availableKeyResults = await this.keyResultService.getFromOwner(user.id)
-  //   const availableKeyResultIDs = availableKeyResults.map((keyResult) => keyResult.id)
-  //
-  //   const rank = uniq([...previousRank, ...availableKeyResultIDs])
-  //
-  //   return rank
-  // }
-  //
-  // async createIfUserIsInCompany(
-  //   data: Partial<KeyResultCustomList>,
-  //   user: UserDTO,
-  //   context: DomainServiceContext,
-  // ) {
-  //   const selector = { id: data.userId }
-  //   const targetUser = await this.userService.getOneWithConstraint(
-  //     CONSTRAINT.COMPANY,
-  //     selector,
-  //     user,
-  //   )
-  //   if (!targetUser) return
-  //
-  //   return this.create(data, context)
-  // }
-  //
-  // async createIfUserIsInTeam(
-  //   data: Partial<KeyResultCustomList>,
-  //   user: UserDTO,
-  //   context: DomainServiceContext,
-  // ) {
-  //   const selector = { id: data.userId }
-  //   const targetUser = await this.userService.getOneWithConstraint(CONSTRAINT.TEAM, selector, user)
-  //   if (!targetUser) return
-  //
-  //   return this.create(data, context)
-  // }
-  //
-  // async createIfUserOwnsIt(
-  //   data: Partial<KeyResultCustomList>,
-  //   user: UserDTO,
-  //   context: DomainServiceContext,
-  // ) {
-  //   const selector = { id: data.userId }
-  //   const targetUser = await this.userService.getOneWithConstraint(CONSTRAINT.OWNS, selector, user)
-  //   if (!targetUser) return
-  //
-  //   return this.create(data, context)
-  // }
-  //
-  // async create(userView: Partial<KeyResultCustomListDTO>, context: DomainServiceContext) {
-  //   this.logger.debug({
-  //     userView,
-  //     context,
-  //     message: 'Creating new key result view',
-  //   })
-  //
-  //   if (!userView.rank) userView.rank = await this.refreshViewRank(context.user)
-  //   if (!userView.userId) userView.userId = context?.user.id
-  //
-  //   const data = await this.repository.insert(userView)
-  //   const createdViewsMetadata: Partial<KeyResultCustomListDTO[]> = data.raw
-  //   if (!createdViewsMetadata || createdViewsMetadata.length === 0) return
-  //
-  //   const createdViews = await Promise.all(
-  //     createdViewsMetadata.map(async (viewMetadata) => this.getOne({ id: viewMetadata.id })),
-  //   )
-  //
-  //   return createdViews
-  // }
+  private buildRefreshedRank(
+    newKeyResults: KeyResult[],
+    previousRank: KeyResultCustomList['rank'] = [],
+  ) {
+    const availableKeyResultIDs = this.buildRankFromKeyResults(newKeyResults)
+
+    const rank = uniq([...previousRank, ...availableKeyResultIDs])
+
+    return rank
+  }
+
+  private buildMineBindingList(user: UserDTO, keyResults: KeyResult[]) {
+    const binding = KEY_RESULT_CUSTOM_LIST_BINDING.MINE
+    const rank = this.buildRankFromKeyResults(keyResults)
+
+    const customList = {
+      binding,
+      rank,
+      title: KEY_RESULT_CUSTOM_LIST_BINDING_NAMES[binding],
+      userId: user.id,
+    }
+
+    return customList
+  }
+
+  private buildRankFromKeyResults(keyResults: KeyResult[]) {
+    return keyResults.map((keyResult) => keyResult.id)
+  }
 }
 
 export default DomainKeyResultCustomListService

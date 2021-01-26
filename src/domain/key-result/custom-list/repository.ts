@@ -10,13 +10,13 @@ import { KeyResultCustomList } from './entities'
 
 @EntityRepository(KeyResultCustomList)
 class DomainKeyResultCustomListRepository extends DomainEntityRepository<KeyResultCustomList> {
-  setupTeamQuery(query: SelectQueryBuilder<KeyResultCustomList>) {
+  protected setupTeamQuery(query: SelectQueryBuilder<KeyResultCustomList>) {
     return query
       .leftJoinAndSelect(`${KeyResultCustomList.name}.user`, User.name)
       .leftJoinAndSelect(`${User.name}.teams`, Team.name)
   }
 
-  addTeamWhereExpression(
+  protected addTeamWhereExpression(
     query: WhereExpression,
     allowedTeams: Array<TeamDTO['id']>,
     constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,
@@ -28,7 +28,7 @@ class DomainKeyResultCustomListRepository extends DomainEntityRepository<KeyResu
     })
   }
 
-  addOwnsWhereExpression(
+  protected addOwnsWhereExpression(
     query: WhereExpression,
     user: UserDTO,
     constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,

@@ -1,13 +1,11 @@
-import { mapValues, uniq } from 'lodash'
+import { mapValues } from 'lodash'
 import { DeleteResult, FindConditions } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
 import { ACTION, POLICY, RESOURCE } from 'src/app/authz/constants'
 import { ActionPolicies, AuthzUser } from 'src/app/authz/types'
-import { CONSTRAINT } from 'src/domain/constants'
 import { DomainEntityService } from 'src/domain/entity'
 import DomainService from 'src/domain/service'
-import { TeamDTO } from 'src/domain/team/dto'
 
 export interface GraphQLEntityResolverInterface<E, D> {
   createWithActionScopeConstraint: (data: Partial<D>, user: AuthzUser, action: ACTION) => Promise<E>
@@ -16,12 +14,12 @@ export interface GraphQLEntityResolverInterface<E, D> {
     selector: FindConditions<E>,
     user: AuthzUser,
     action: ACTION,
-  ) => Promise<E>
+  ) => Promise<E | null>
   getManyWithActionScopeConstraint: (
     selector: FindConditions<E>,
     user: AuthzUser,
     action: ACTION,
-  ) => Promise<E[]>
+  ) => Promise<E[] | null>
 
   updateWithActionScopeConstraint: (
     selector: FindConditions<E>,
@@ -52,7 +50,7 @@ abstract class GraphQLEntityResolver<E, D> implements GraphQLEntityResolverInter
     action: ACTION = ACTION.CREATE,
   ) {
     const scopeConstraint = user.scopes[this.resource][action]
-    const queryContext = await this.buildDomainQueryContext(user, scopeConstraint)
+    const queryContext = await this.domainService.team.buildTeamQueryContext(user, scopeConstraint)
 
     return this.entityService.createWithConstraint(data, queryContext)
   }
@@ -63,7 +61,7 @@ abstract class GraphQLEntityResolver<E, D> implements GraphQLEntityResolverInter
     action: ACTION = ACTION.READ,
   ) {
     const scopeConstraint = user.scopes[this.resource][action]
-    const queryContext = await this.buildDomainQueryContext(user, scopeConstraint)
+    const queryContext = await this.domainService.team.buildTeamQueryContext(user, scopeConstraint)
 
     return this.entityService.getOneWithConstraint(selector, queryContext)
   }
@@ -74,7 +72,7 @@ abstract class GraphQLEntityResolver<E, D> implements GraphQLEntityResolverInter
     action: ACTION = ACTION.READ,
   ) {
     const scopeConstraint = user.scopes[this.resource][action]
-    const queryContext = await this.buildDomainQueryContext(user, scopeConstraint)
+    const queryContext = await this.domainService.team.buildTeamQueryContext(user, scopeConstraint)
 
     return this.entityService.getManyWithConstraint(selector, queryContext)
   }
@@ -86,7 +84,7 @@ abstract class GraphQLEntityResolver<E, D> implements GraphQLEntityResolverInter
     action: ACTION = ACTION.UPDATE,
   ) {
     const scopeConstraint = user.scopes[this.resource][action]
-    const queryContext = await this.buildDomainQueryContext(user, scopeConstraint)
+    const queryContext = await this.domainService.team.buildTeamQueryContext(user, scopeConstraint)
 
     return this.entityService.updateWithConstraint(selector, newData, queryContext)
   }
@@ -97,7 +95,7 @@ abstract class GraphQLEntityResolver<E, D> implements GraphQLEntityResolverInter
     action: ACTION = ACTION.DELETE,
   ) {
     const scopeConstraint = user.scopes[this.resource][action]
-    const queryContext = await this.buildDomainQueryContext(user, scopeConstraint)
+    const queryContext = await this.domainService.team.buildTeamQueryContext(user, scopeConstraint)
 
     return this.entityService.deleteWithConstraint(selector, queryContext)
   }
@@ -121,46 +119,6 @@ abstract class GraphQLEntityResolver<E, D> implements GraphQLEntityResolverInter
     )
 
     return policies
-  }
-
-  private async buildDomainQueryContext(user: AuthzUser, constraint: CONSTRAINT) {
-    const context = this.entityService.buildContext(user, constraint)
-
-    const userCompaniesIDs = await this.parseUserCompanyIDs(user)
-    const userCompaniesTeamsIDs = await this.parseUserCompaniesTeamIDs(userCompaniesIDs)
-    const userTeams = await this.parseUserTeamIDs(user)
-
-    const query = {
-      companies: userCompaniesIDs,
-      teams: userCompaniesTeamsIDs,
-      userTeams,
-    }
-
-    return {
-      ...context,
-      query,
-    }
-  }
-
-  private async parseUserCompanyIDs(user: AuthzUser) {
-    const userCompanies = await this.domainService.team.getUserCompanies(user)
-    const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
-
-    return userCompanyIDs
-  }
-
-  private async parseUserCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>) {
-    const companiesTeams = await this.domainService.team.getAllTeamsBelowNodes(companyIDs)
-    const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
-
-    return companiesTeamIDs
-  }
-
-  private async parseUserTeamIDs(user: AuthzUser) {
-    const teams = await user.teams
-    const teamIDs = teams.map((team) => team.id)
-
-    return teamIDs
   }
 }
 

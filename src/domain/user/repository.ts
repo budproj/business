@@ -9,11 +9,11 @@ import { User } from './entities'
 
 @EntityRepository(User)
 class DomainUserRepository extends DomainEntityRepository<User> {
-  setupTeamQuery(query: SelectQueryBuilder<User>) {
+  protected setupTeamQuery(query: SelectQueryBuilder<User>) {
     return query.leftJoinAndSelect(`${User.name}.teams`, Team.name)
   }
 
-  addTeamWhereExpression(
+  protected addTeamWhereExpression(
     query: WhereExpression,
     allowedTeams: Array<TeamDTO['id']>,
     constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,
@@ -25,7 +25,7 @@ class DomainUserRepository extends DomainEntityRepository<User> {
     })
   }
 
-  addOwnsWhereExpression(
+  protected addOwnsWhereExpression(
     query: WhereExpression,
     user: UserDTO,
     constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,
