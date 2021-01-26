@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
-import DomainCycleService from 'src/domain/cycle/service'
-
+import DomainCycleService from './cycle/service'
+import DomainObjectiveService from './objective/service'
 import DomainTeamService from './team/service'
 import DomainUserService from './user/service'
 
@@ -11,6 +11,7 @@ class DomainService {
     public team: DomainTeamService,
     public user: DomainUserService,
     public cycle: DomainCycleService,
+    public objective: DomainObjectiveService,
   ) {}
 }
 

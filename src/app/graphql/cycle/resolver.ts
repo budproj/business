@@ -7,6 +7,7 @@ import { AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
+import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import { TeamObject } from 'src/app/graphql/team/models'
 import { CycleDTO } from 'src/domain/cycle/dto'
@@ -49,15 +50,15 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
     return this.domain.team.getOne({ id: cycle.teamId })
   }
 
-  // @ResolveField()
-  // async objectives(@Parent() cycle: CycleObject) {
-  //   this.logger.log({
-  //     cycle,
-  //     message: 'Fetching objectives for cycle',
-  //   })
-  //
-  //   return this.objectiveDomain.getFromCycle(cycle.id)
-  // }
+  @ResolveField('objectives', () => [ObjectiveObject])
+  protected async getCycleObjectives(@Parent() cycle: CycleObject) {
+    this.logger.log({
+      cycle,
+      message: 'Fetching objectives for cycle',
+    })
+
+    return this.domain.objective.getFromCycle(cycle.id)
+  }
 }
 
 export default GraphQLCycleResolver

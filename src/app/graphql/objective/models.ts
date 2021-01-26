@@ -1,9 +1,6 @@
-import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
+import { Field, ID, ObjectType } from '@nestjs/graphql'
 
 import { CycleObject } from 'src/app/graphql/cycle/models'
-import { KeyResultObject } from 'src/app/graphql/key-result/models'
-import { ConfidenceReportObject } from 'src/app/graphql/key-result/report/confidence'
-import { ProgressReportObject } from 'src/app/graphql/key-result/report/progress'
 import { UserObject } from 'src/app/graphql/user/models'
 
 @ObjectType('Objective', { description: 'A group of key results that has the same focus' })
@@ -20,10 +17,10 @@ export class ObjectiveObject {
   @Field({ description: 'The last update date of the objective' })
   updatedAt: Date
 
-  @Field(() => [KeyResultObject], {
-    description: 'A creation date ordered list of key results that belongs to this objective',
-  })
-  keyResults: KeyResultObject[]
+  // @Field(() => [KeyResultObject], {
+  //   description: 'A creation date ordered list of key results that belongs to this objective',
+  // })
+  // keyResults: KeyResultObject[]
 
   @Field(() => ID, { description: 'The cycle ID that owns this objective' })
   cycleId: CycleObject['id']
@@ -37,20 +34,20 @@ export class ObjectiveObject {
   @Field(() => UserObject, { description: 'The user that owns this objective' })
   owner: UserObject
 
-  @Field(() => Float, {
-    description: 'The computed percentage current progress of this objective',
-    nullable: true,
-  })
-  currentProgress: ProgressReportObject['valueNew']
-
-  @Field(() => Float, {
-    description: 'The computed current confidence of this objective',
-    nullable: true,
-  })
-  currentConfidence: ConfidenceReportObject['valueNew']
-
-  @Field(() => Float, {
-    description: 'The percentage progress increase since last monday',
-  })
-  percentageProgressIncrease: number
+  // @Field(() => Float, {
+  //   description: 'The computed percentage current progress of this objective',
+  //   nullable: true,
+  // })
+  // currentProgress: ProgressReportObject['valueNew']
+  //
+  // @Field(() => Float, {
+  //   description: 'The computed current confidence of this objective',
+  //   nullable: true,
+  // })
+  // currentConfidence: ConfidenceReportObject['valueNew']
+  //
+  // @Field(() => Float, {
+  //   description: 'The percentage progress increase since last monday',
+  // })
+  // percentageProgressIncrease: number
 }

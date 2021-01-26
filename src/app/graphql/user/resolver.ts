@@ -7,6 +7,7 @@ import { AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
+import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import { TeamObject } from 'src/app/graphql/team/models'
 import DomainService from 'src/domain/service'
@@ -100,6 +101,16 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
 
     return this.domain.team.getFromOwner(user.id)
   }
+
+  @ResolveField('objectives', () => [ObjectiveObject])
+  protected async getUserObjectives(@Parent() user: UserObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching objectives for user',
+    })
+
+    return this.domain.objective.getFromOwner(user.id)
+  }
   //
   // @ResolveField()
   // async keyResults(@Parent() user: UserObject) {
@@ -111,15 +122,6 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
   //   return this.keyResultDomain.getFromOwner(user.id)
   // }
   //
-  // @ResolveField()
-  // async objectives(@Parent() user: UserObject) {
-  //   this.logger.log({
-  //     user,
-  //     message: 'Fetching objectives for user',
-  //   })
-  //
-  //   return this.objectiveDomain.getFromOwner(user.id)
-  // }
   //
   // @ResolveField()
   // async progressReports(@Parent() user: UserObject) {

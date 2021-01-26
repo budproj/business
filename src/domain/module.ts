@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
 import databaseConfig from 'src/config/database/config'
-import DomainCycleModule from 'src/domain/cycle'
-import DomainService from 'src/domain/service'
 
+import DomainCycleModule from './cycle'
+import DomainObjectiveModule from './objective'
+import DomainService from './service'
 import DomainTeamModule from './team'
 import DomainUserModule from './user'
 
@@ -14,6 +15,7 @@ import DomainUserModule from './user'
     DomainUserModule,
     DomainTeamModule,
     DomainCycleModule,
+    DomainObjectiveModule,
   ],
   providers: [DomainService],
   exports: [DomainService],

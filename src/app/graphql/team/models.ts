@@ -1,6 +1,7 @@
 import { Field, Float, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { CycleObject } from 'src/app/graphql/cycle/models'
+import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import { UserObject } from 'src/app/graphql/user/models'
 import { TEAM_GENDER } from 'src/domain/team/constants'
 
@@ -50,6 +51,12 @@ export class TeamObject {
   @Field(() => [CycleObject], { description: 'The cycles that belongs to this team' })
   cycles: CycleObject[]
 
+  @Field(() => [ObjectiveObject], {
+    nullable: true,
+    description: 'The created ordered list of objectives in this team',
+  })
+  objectives: ObjectiveObject[]
+
   // @Field(() => [KeyResultObject], {
   //   description: 'The creation date ordered list of key results that belongs to that team',
   // })
@@ -66,12 +73,6 @@ export class TeamObject {
   //   nullable: true,
   // })
   // currentConfidence: ConfidenceReportObject['valueNew']
-  //
-  // @Field(() => [ObjectiveObject], {
-  //   nullable: true,
-  //   description: 'The created ordered list of objectives in this team',
-  // })
-  // objectives: ObjectiveObject[]
   //
 
   @Field(() => TeamObject, {

@@ -3,14 +3,13 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   RelationId,
   UpdateDateColumn,
 } from 'typeorm'
 
 import { CycleDTO } from 'src/domain/cycle/dto'
-import { KeyResultDTO } from 'src/domain/key-result/dto'
+// Import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
 import { ObjectiveDTO } from './dto'
@@ -29,9 +28,9 @@ export class Objective implements ObjectiveDTO {
   @UpdateDateColumn()
   public updatedAt: Date
 
-  @OneToMany('KeyResult', 'objective')
-  public keyResults: KeyResultDTO[]
-
+  // @OneToMany('KeyResult', 'objective')
+  // public keyResults: KeyResultDTO[]
+  //
   @ManyToOne('Cycle', 'objectives')
   public cycle: CycleDTO
 

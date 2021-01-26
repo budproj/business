@@ -134,6 +134,16 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return this.domain.team.specification.isACompany.isSatisfiedBy(team)
   }
 
+  // @ResolveField('objectives', () => [ObjectiveObject])
+  // protected async getTeamObjectives(@Parent() team: TeamObject) {
+  //   this.logger.log({
+  //     team,
+  //     message: 'Fetching objectives for team',
+  //   })
+  //
+  //   return this.domain.objective.getFromTeam(team.id)
+  // }
+
   // @ResolveField()
   // async keyResults(@Parent() team: TeamObject) {
   //   this.logger.log({
@@ -166,15 +176,6 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   // }
   //
   //
-  // @ResolveField()
-  // async objectives(@Parent() team: TeamObject) {
-  //   this.logger.log({
-  //     team,
-  //     message: 'Fetching objectives for team',
-  //   })
-  //
-  //   return this.objectiveDomain.getFromTeam(team.id)
-  // }
   //
   //
   // @ResolveField()
