@@ -93,10 +93,10 @@ export class TeamObject {
   public keyResults?: KeyResultObject[]
 
   @Field(() => KeyResultCheckInObject, {
-    description: 'The latest check-in for this team',
+    description: 'The latest key result check-in for this team',
     nullable: true,
   })
-  public latestCheckIn?: KeyResultCheckInObject
+  public latestKeyResultCheckIn?: KeyResultCheckInObject
 }
 
 registerEnumType(TEAM_GENDER, {

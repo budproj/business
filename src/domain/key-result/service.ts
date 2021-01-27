@@ -239,6 +239,7 @@ class DomainKeyResultService
       keyResultId: checkInData.keyResultId,
       progress: checkInData.progress,
       confidence: checkInData.confidence,
+      comment: checkInData.comment,
     }
 
     return checkIn

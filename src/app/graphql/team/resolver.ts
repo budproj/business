@@ -167,8 +167,8 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return this.domain.objective.getFromTeam(team)
   }
 
-  @ResolveField('latestCheckIn', () => KeyResultCheckInObject, { nullable: true })
-  protected async getTeamLatestCheckIn(@Parent() team: TeamObject) {
+  @ResolveField('latestKeyResultCheckIn', () => KeyResultCheckInObject, { nullable: true })
+  protected async getTeamLatestKeyResultCheckIn(@Parent() team: TeamObject) {
     this.logger.log({
       team,
       message: 'Fetching latest key result check-in for team',

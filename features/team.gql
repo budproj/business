@@ -44,7 +44,7 @@ query GET_USER_PRIMARY_COMPANY {
       currentProgress
       currentConfidence
       percentageProgressIncrease
-      latestReport {
+      latestKeyResultCheckIn {
         id
         createdAt
         user {

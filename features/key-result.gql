@@ -21,7 +21,7 @@ query GET_KEY_RESULT_WITH_ID($id: ID!) {
     policies {
       update
     }
-    reports {
+    checkIns {
       id
       createdAt
       comment
@@ -34,7 +34,7 @@ query GET_KEY_RESULT_WITH_ID($id: ID!) {
 }
 
 query GET_KEY_RESULT_VIEW_WITH_BINDING($binding: KEY_RESULT_CUSTOM_LIST_BINDING!) {
-  keyResultView(binding: $binding) {
+  keyResultCustomList(binding: $binding) {
     id
     rank
     keyResults {
@@ -61,7 +61,7 @@ query GET_KEY_RESULT_VIEW_WITH_BINDING($binding: KEY_RESULT_CUSTOM_LIST_BINDING!
         picture
         role
       }
-      confidenceReports(limit: 1) {
+      checkIns(limit: 1) {
         comment
         createdAt
         user {
@@ -72,21 +72,14 @@ query GET_KEY_RESULT_VIEW_WITH_BINDING($binding: KEY_RESULT_CUSTOM_LIST_BINDING!
   }
 }
 
-mutation UPDATE_RANK($id: ID!, $rankInput: KeyResultViewRankInput!) {
-  updateRank(id: $id, keyResultViewRankInput: $rankInput) {
+mutation UPDATE_RANK($id: ID!, $newRank: [ID!]!) {
+  updateKeyResultCustomList(id: $id, keyResultCustomListInput: { rank: $newRank }) {
     id
   }
 }
 
-mutation UPDATE_KEY_RESULT($id: ID!, $keyResultInput: KeyResultInput!) {
-  updateKeyResult(id: $id, keyResultInput: $keyResultInput) {
-    id
-    title
-  }
-}
-
-mutation CREATE_CHECK_IN($checkInInput: CheckInInput!) {
-  createCheckIn(checkInInput: $checkInInput) {
+mutation CREATE_KEY_RESULT_CHECK_IN($keyResultCheckInInput: KeyResultCheckInInput!) {
+  createKeyResultCheckIn(keyResultCheckIn: $keyResultCheckInInput) {
     id
   }
 }

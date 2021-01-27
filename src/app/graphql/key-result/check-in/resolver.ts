@@ -79,11 +79,17 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     this.logger.log({
       user,
       keyResultCheckIn,
-      message: 'Creating a new check-in',
+      message: 'Received create check-in request',
     })
 
     const checkIn = this.domain.keyResult.buildCheckInForUser(user, keyResultCheckIn)
     const createCheckInPromise = this.createWithActionScopeConstraint(checkIn, user, ACTION.UPDATE)
+
+    this.logger.log({
+      user,
+      checkIn,
+      message: 'Creating a new check-in in our database',
+    })
 
     const [error, createdCheckIns] = await this.railway.execute<KeyResultCheckIn[]>(
       createCheckInPromise,
