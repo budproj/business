@@ -82,7 +82,7 @@ export class UserObject {
     description: 'The creation date ordered list of key result check-ins created by this user',
     nullable: true,
   })
-  public checkIns?: KeyResultCheckInObject[]
+  public keyResultCheckIns?: KeyResultCheckInObject[]
 }
 
 registerEnumType(USER_GENDER, {

@@ -135,8 +135,8 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
     return this.domain.keyResult.getUserCustomLists(user)
   }
 
-  @ResolveField('checkIns', () => [KeyResultCheckInObject], { nullable: true })
-  protected async getUserCheckIns(@Parent() user: UserObject) {
+  @ResolveField('keyResultCheckIns', () => [KeyResultCheckInObject], { nullable: true })
+  protected async getUserKeyResultCheckIns(@Parent() user: UserObject) {
     this.logger.log({
       user,
       message: 'Fetching check-ins by user',
