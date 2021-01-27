@@ -97,7 +97,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return this.domain.user.getOne({ id: team.ownerId })
   }
 
-  @ResolveField('teams', () => [TeamObject])
+  @ResolveField('teams', () => [TeamObject], { nullable: true })
   protected async getTeamChildTeams(@Parent() team: TeamObject) {
     this.logger.log({
       team,
@@ -107,7 +107,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return this.domain.team.getMany({ parentTeamId: team.id })
   }
 
-  @ResolveField('parentTeam', () => TeamObject)
+  @ResolveField('parentTeam', () => TeamObject, { nullable: true })
   protected async getTeamParentTeam(@Parent() team: TeamObject) {
     this.logger.log({
       team,
@@ -127,7 +127,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return this.domain.cycle.getFromTeam(team)
   }
 
-  @ResolveField('users', () => [UserObject])
+  @ResolveField('users', () => [UserObject], { nullable: true })
   protected async getTeamUsers(@Parent() team: TeamObject) {
     this.logger.log({
       team,

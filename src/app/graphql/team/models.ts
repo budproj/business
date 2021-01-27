@@ -48,20 +48,6 @@ export class TeamObject {
   @Field(() => UserObject, { description: 'The user that owns this team' })
   public owner: UserObject
 
-  @Field(() => ID, { description: 'The ID of the team that owns this team', nullable: true })
-  public parentTeamId: TeamObject['id']
-
-  @Field(() => TeamObject, { description: 'The team that owns this team', nullable: true })
-  public parentTeam: TeamObject
-
-  @Field(() => [UserObject], {
-    description: 'A creation date ordered list of users that are members of this team',
-  })
-  public users: UserObject[]
-
-  @Field(() => [TeamObject], { description: 'A list of teams that belongs to this team' })
-  public teams: TeamObject[]
-
   @Field({ nullable: true, description: 'The description about the team' })
   public description?: string
 
@@ -73,6 +59,24 @@ export class TeamObject {
     nullable: true,
   })
   public company?: TeamObject
+
+  @Field(() => ID, { description: 'The ID of the team that owns this team', nullable: true })
+  public parentTeamId?: TeamObject['id']
+
+  @Field(() => TeamObject, { description: 'The team that owns this team', nullable: true })
+  public parentTeam?: TeamObject
+
+  @Field(() => [UserObject], {
+    description: 'A creation date ordered list of users that are members of this team',
+    nullable: true,
+  })
+  public users?: UserObject[]
+
+  @Field(() => [TeamObject], {
+    description: 'A list of teams that belongs to this team',
+    nullable: true,
+  })
+  public teams?: TeamObject[]
 
   @Field(() => [CycleObject], {
     description: 'The cycles that belongs to this team',
