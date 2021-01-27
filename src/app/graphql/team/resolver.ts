@@ -1,5 +1,5 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Float, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, Float, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { isUndefined, omitBy } from 'lodash'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
@@ -176,16 +176,16 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
 
     return this.domain.team.getCurrentProgressForTeam(team)
   }
-  //
-  // @ResolveField()
-  // async currentConfidence(@Parent() team: TeamObject) {
-  //   this.logger.log({
-  //     team,
-  //     message: 'Fetching current confidence for team',
-  //   })
-  //
-  //   return this.teamDomain.getCurrentConfidence(team.id)
-  // }
+
+  @ResolveField('currentConfidence', () => Int)
+  protected async getTeamCurrentConfidence(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching current confidence for team',
+    })
+
+    return this.domain.team.getCurrentConfidenceForTeam(team)
+  }
   //
   // @ResolveField()
   // async percentageProgressIncrease(@Parent() team: TeamObject) {

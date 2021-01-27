@@ -207,7 +207,7 @@ class DomainKeyResultService
 
   public buildDefaultCheckInGroup(
     progress: KeyResultCheckIn['progress'] = DEFAULT_PERCENTAGE_PROGRESS,
-    confidence = (KeyResultCheckIn.confidence = DEFAULT_CONFIDENCE),
+    confidence: KeyResultCheckIn['confidence'] = DEFAULT_CONFIDENCE,
   ) {
     const defaultCheckInState: DomainKeyResultCheckInGroup = {
       progress,

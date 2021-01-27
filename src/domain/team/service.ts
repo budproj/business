@@ -3,6 +3,7 @@ import { flatten, remove, uniqBy } from 'lodash'
 
 import { CONSTRAINT } from 'src/domain/constants'
 import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
+import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import DomainKeyResultService from 'src/domain/key-result/service'
 import { TeamEntityFilter, TeamEntityRelation } from 'src/domain/team/types'
 import { UserDTO } from 'src/domain/user/dto'
@@ -28,6 +29,8 @@ export interface DomainTeamServiceInterface {
   getParentTeam: (team: TeamDTO) => Promise<Team>
   getUsersInTeam: (teamID: TeamDTO) => Promise<UserDTO[]>
   buildTeamQueryContext: (user: UserDTO, constraint: CONSTRAINT) => Promise<DomainQueryContext>
+  getCurrentProgressForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
+  getCurrentConfidenceForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['confidence']>
 }
 
 @Injectable()
@@ -139,6 +142,13 @@ class DomainTeamService
     const currentCheckInGroup = await this.getCheckInGroupAtDateForTeam(date, team)
 
     return currentCheckInGroup.progress
+  }
+
+  public async getCurrentConfidenceForTeam(team: TeamDTO) {
+    const date = new Date()
+    const currentCheckInGroup = await this.getCheckInGroupAtDateForTeam(date, team)
+
+    return currentCheckInGroup.confidence
   }
 
   protected async createIfUserIsInCompany(_data: Partial<Team>, _queryContext: DomainQueryContext) {
