@@ -1,10 +1,10 @@
 import { mapValues } from 'lodash'
-import { DeleteResult, FindConditions } from 'typeorm'
+import { FindConditions } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
 import { ACTION, POLICY, RESOURCE } from 'src/app/authz/constants'
 import { ActionPolicies, AuthzUser } from 'src/app/authz/types'
-import { DomainEntityService } from 'src/domain/entity'
+import { DomainEntityService, DomainMutationQueryResult } from 'src/domain/entity'
 import DomainService from 'src/domain/service'
 
 export interface GraphQLEntityResolverInterface<E, D> {
@@ -26,13 +26,13 @@ export interface GraphQLEntityResolverInterface<E, D> {
     newData: QueryDeepPartialEntity<E>,
     user: AuthzUser,
     action: ACTION,
-  ) => Promise<E>
+  ) => DomainMutationQueryResult<E>
 
   deleteWithActionScopeConstraint: (
     selector: FindConditions<E>,
     user: AuthzUser,
     action: ACTION,
-  ) => Promise<DeleteResult>
+  ) => DomainMutationQueryResult<E>
 
   getUserPolicies: (selector: FindConditions<E>, user: AuthzUser) => Promise<ActionPolicies>
 }

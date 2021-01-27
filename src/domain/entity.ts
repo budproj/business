@@ -41,11 +41,11 @@ export interface DomainEntityServiceInterface<E, D> {
     selector: FindConditions<E>,
     newData: QueryDeepPartialEntity<E>,
     queryContext: DomainQueryContext,
-  ) => Promise<E>
+  ) => DomainMutationQueryResult<E>
   deleteWithConstraint: (
     selector: FindConditions<E>,
     queryContext: DomainQueryContext,
-  ) => Promise<DeleteResult>
+  ) => DomainMutationQueryResult<E>
 }
 
 export interface DomainServiceGetOptions<E> {
@@ -68,8 +68,9 @@ export interface DomainQueryContext extends DomainServiceContext {
   query: QueryContext
 }
 
+export type DomainMutationQueryResult<E> = Promise<E | E[] | DeleteResult | null>
 export type DomainCreationQuery<E> = () => Promise<E[] | null>
-export type DomainMutationQuery<E> = () => Promise<E | E[] | DeleteResult | null>
+export type DomainMutationQuery<E> = () => DomainMutationQueryResult<E>
 
 export abstract class DomainEntityService<E, D> implements DomainEntityServiceInterface<E, D> {
   protected readonly logger: Logger
@@ -120,28 +121,19 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
     newData: QueryDeepPartialEntity<E>,
     queryContext: DomainQueryContext,
   ) {
-    const availableSelectors = {
-      [CONSTRAINT.ANY]: async () => this.update(selector, newData, queryContext),
-      [CONSTRAINT.COMPANY]: async () =>
-        this.updateIfUserIsInCompany(selector, newData, queryContext),
-      [CONSTRAINT.TEAM]: async () => this.updateIfUserIsInTeam(selector, newData, queryContext),
-      [CONSTRAINT.OWNS]: async () => this.updateIfUserOwnsIt(selector, newData, queryContext),
-    }
-    const constrainedSelector = availableSelectors[queryContext.constraint]
+    const shouldConstrainCreation = queryContext.constraint !== CONSTRAINT.ANY
 
-    return constrainedSelector()
+    return shouldConstrainCreation
+      ? this.updateIfWithinConstraint(selector, newData, queryContext)
+      : this.update(selector, newData, queryContext)
   }
 
   public async deleteWithConstraint(selector: FindConditions<E>, queryContext: DomainQueryContext) {
-    const availableSelectors = {
-      [CONSTRAINT.ANY]: async () => this.delete(selector, queryContext),
-      [CONSTRAINT.COMPANY]: async () => this.deleteIfUserIsInCompany(selector, queryContext),
-      [CONSTRAINT.TEAM]: async () => this.deleteIfUserIsInTeam(selector, queryContext),
-      [CONSTRAINT.OWNS]: async () => this.deleteIfUserOwnsIt(selector, queryContext),
-    }
-    const constrainedSelector = availableSelectors[queryContext.constraint]
+    const shouldConstrainCreation = queryContext.constraint !== CONSTRAINT.ANY
 
-    return constrainedSelector()
+    return shouldConstrainCreation
+      ? this.deleteIfWithinConstraint(selector, queryContext)
+      : this.delete(selector, queryContext)
   }
 
   public async getOne(
@@ -257,107 +249,27 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
     return this.getOne(selector, queryContext)
   }
 
-  protected async updateIfUserIsInCompany(
+  protected async updateIfWithinConstraint(
     selector: FindConditions<E>,
     newData: QueryDeepPartialEntity<E>,
     queryContext: DomainQueryContext,
   ) {
-    const { query, user } = queryContext
+    const updateQuery = async () => this.update(selector, newData, queryContext)
 
-    const constrainQuery = this.repository.constraintQueryToTeam(query.teams, user)
-    const selectionQuery = this.repository.createQueryBuilder().where(selector)
-    const constrainedSelectionQuery = constrainQuery(selectionQuery)
-
-    const allowedData = await constrainedSelectionQuery.getMany()
-    if (allowedData.length === 0) return
-
-    return this.update(selector, newData, queryContext)
-  }
-
-  protected async updateIfUserIsInTeam(
-    selector: FindConditions<E>,
-    newData: QueryDeepPartialEntity<E>,
-    queryContext: DomainQueryContext,
-  ) {
-    const { query, user } = queryContext
-
-    const constrainQuery = this.repository.constraintQueryToTeam(query.userTeams, user)
-    const selectionQuery = this.repository.createQueryBuilder().where(selector)
-    const constrainedSelectionQuery = constrainQuery(selectionQuery)
-
-    const allowedData = await constrainedSelectionQuery.getMany()
-    if (allowedData.length === 0) return
-
-    return this.update(selector, newData, queryContext)
-  }
-
-  protected async updateIfUserOwnsIt(
-    selector: FindConditions<E>,
-    newData: QueryDeepPartialEntity<E>,
-    queryContext: DomainQueryContext,
-  ) {
-    const { user } = queryContext
-
-    const constrainQuery = this.repository.constraintQueryToOwns(user)
-    const selectionQuery = this.repository.createQueryBuilder().where(selector)
-    const constrainedSelectionQuery = constrainQuery(selectionQuery)
-
-    const allowedData = await constrainedSelectionQuery.getMany()
-    if (allowedData.length === 0) return
-
-    return this.update(selector, newData, queryContext)
+    return this.protectMutationQuery(updateQuery, selector, queryContext)
   }
 
   protected async delete(selector: FindConditions<E>, _queryContext: DomainQueryContext) {
     return this.repository.delete(selector)
   }
 
-  protected async deleteIfUserIsInCompany(
+  protected async deleteIfWithinConstraint(
     selector: FindConditions<E>,
     queryContext: DomainQueryContext,
   ) {
-    const { query, user } = queryContext
+    const deleteQuery = async () => this.delete(selector, queryContext)
 
-    const constrainQuery = this.repository.constraintQueryToTeam(query.companies, user)
-    const selectionQuery = this.repository.createQueryBuilder().where(selector)
-    const constrainedSelectionQuery = constrainQuery(selectionQuery)
-
-    const allowedData = await constrainedSelectionQuery.getMany()
-    if (allowedData.length === 0) return
-
-    return this.delete(selector, queryContext)
-  }
-
-  protected async deleteIfUserIsInTeam(
-    selector: FindConditions<E>,
-    queryContext: DomainQueryContext,
-  ) {
-    const { query, user } = queryContext
-
-    const constrainQuery = this.repository.constraintQueryToTeam(query.teams, user)
-    const selectionQuery = this.repository.createQueryBuilder().where(selector)
-    const constrainedSelectionQuery = constrainQuery(selectionQuery)
-
-    const allowedData = await constrainedSelectionQuery.getMany()
-    if (allowedData.length === 0) return
-
-    return this.delete(selector, queryContext)
-  }
-
-  protected async deleteIfUserOwnsIt(
-    selector: FindConditions<E>,
-    queryContext: DomainQueryContext,
-  ) {
-    const { user } = queryContext
-
-    const constrainQuery = this.repository.constraintQueryToOwns(user)
-    const selectionQuery = this.repository.createQueryBuilder().where(selector)
-    const constrainedSelectionQuery = constrainQuery(selectionQuery)
-
-    const allowedData = await constrainedSelectionQuery.getMany()
-    if (allowedData.length === 0) return
-
-    return this.delete(selector, queryContext)
+    return this.protectMutationQuery(deleteQuery, selector, queryContext)
   }
 
   protected async protectMutationQuery(
