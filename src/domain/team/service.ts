@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { flatten, remove, uniqBy } from 'lodash'
 
 import { CONSTRAINT } from 'src/domain/constants'
 import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
+import DomainKeyResultService from 'src/domain/key-result/service'
 import { TeamEntityFilter, TeamEntityRelation } from 'src/domain/team/types'
 import { UserDTO } from 'src/domain/user/dto'
 
@@ -36,6 +37,8 @@ class DomainTeamService
   constructor(
     public readonly repository: DomainTeamRepository,
     public readonly specification: DomainTeamSpecification,
+    @Inject(forwardRef(() => DomainKeyResultService))
+    private readonly keyResultService: DomainKeyResultService,
   ) {
     super(repository, DomainTeamService.name)
   }
@@ -131,6 +134,13 @@ class DomainTeamService
     return queryContext
   }
 
+  public async getCurrentProgressForTeam(team: TeamDTO) {
+    const date = new Date()
+    const currentCheckInGroup = await this.getCheckInGroupAtDateForTeam(date, team)
+
+    return currentCheckInGroup.progress
+  }
+
   protected async createIfUserIsInCompany(_data: Partial<Team>, _queryContext: DomainQueryContext) {
     return {} as any
   }
@@ -192,6 +202,19 @@ class DomainTeamService
     const companiesTeams = await this.getAllTeamsBelowNodes(companies)
 
     return companiesTeams
+  }
+
+  private async getCheckInGroupAtDateForTeam(date: Date, team: TeamDTO) {
+    const childTeams = await this.getAllTeamsBelowNodes(team)
+    const keyResults = await this.keyResultService.getFromTeams(childTeams)
+    if (!keyResults) return this.keyResultService.buildDefaultCheckInGroup()
+
+    const teamCheckInGroup = this.keyResultService.buildCheckInGroupForKeyResultListAtDate(
+      date,
+      keyResults,
+    )
+
+    return teamCheckInGroup
   }
 }
 

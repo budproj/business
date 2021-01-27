@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { Field, Float, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { CycleObject } from 'src/app/graphql/cycle/models'
 import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
@@ -47,6 +47,11 @@ export class TeamObject {
   @Field(() => [TeamObject], { description: 'A list of teams that belongs to this team' })
   public teams: TeamObject[]
 
+  @Field(() => Float, {
+    description: 'The computed percentage current progress of this team',
+  })
+  public currentProgress: KeyResultCheckInObject['progress']
+
   @Field({ nullable: true, description: 'The description about the team' })
   public description?: string
 
@@ -83,11 +88,6 @@ export class TeamObject {
   })
   public latestCheckIn?: KeyResultCheckInObject
 
-  // @Field(() => Float, {
-  //   description: 'The computed percentage current progress of this team',
-  //   nullable: true,
-  // })
-  // currentProgress: ProgressReportObject['valueNew']
   //
   // @Field(() => Float, {
   //   description: 'The computed current confidence of this team',

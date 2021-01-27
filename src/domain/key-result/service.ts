@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { filter, maxBy, minBy } from 'lodash'
 
 import { CONSTRAINT } from 'src/domain/constants'
@@ -6,7 +6,11 @@ import { DomainEntityService, DomainQueryContext, DomainServiceGetOptions } from
 import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import DomainKeyResultCheckInService from 'src/domain/key-result/check-in/service'
-import { DEFAULT_CONFIDENCE, KEY_RESULT_FORMAT } from 'src/domain/key-result/constants'
+import {
+  DEFAULT_CONFIDENCE,
+  DEFAULT_PERCENTAGE_PROGRESS,
+  KEY_RESULT_FORMAT,
+} from 'src/domain/key-result/constants'
 import { KEY_RESULT_CUSTOM_LIST_BINDING } from 'src/domain/key-result/custom-list/constants'
 import { KeyResultCustomListDTO } from 'src/domain/key-result/custom-list/dto'
 import { KeyResultCustomList } from 'src/domain/key-result/custom-list/entities'
@@ -52,6 +56,10 @@ export interface DomainKeyResultServiceInterface {
     date: Date,
     keyResults: KeyResult[],
   ) => Promise<DomainKeyResultCheckInGroup>
+  buildDefaultCheckInGroup: (
+    progress?: KeyResultCheckIn['progress'],
+    confidence?: KeyResultCheckIn['confidence'],
+  ) => DomainKeyResultCheckInGroup
 }
 
 export interface DomainKeyResultCheckInGroup {
@@ -68,6 +76,7 @@ class DomainKeyResultService
     public readonly repository: DomainKeyResultRepository,
     public readonly customList: DomainKeyResultCustomListService,
     public readonly checkIn: DomainKeyResultCheckInService,
+    @Inject(forwardRef(() => DomainTeamService))
     private readonly teamService: DomainTeamService,
   ) {
     super(repository, DomainKeyResultService.name)
@@ -196,25 +205,17 @@ class DomainKeyResultService
     return checkInGroup
   }
 
-  // Public async getSnapshotProgressForKeyResult(keyResult: KeyResultDTO) {
-  //   const snapshot = this.snapshotDate
-  //   const latestCheckInAtSnapshot = await this.checkIn.getLatestFromKeyResultAtSnapshot(
-  //     keyResult,
-  //     snapshot,
-  //   )
-  //   if (!latestCheckInAtSnapshot) return DEFAULT_PERCENTAGE_PROGRESS
-  //
-  //   return latestCheckInAtSnapshot.progress
-  // }
-  //
-  // public async calculateSnapshotAverageProgressFromKeyResultList(keyResults: KeyResult[]) {
-  //   const calculatedSnapshotProgress = this.calculateAverageProgressFromKeyResultList(
-  //     keyResults,
-  //     TIMEFRAME_SCOPE.SNAPSHOT,
-  //   )
-  //
-  //   return calculatedSnapshotProgress
-  // }
+  public buildDefaultCheckInGroup(
+    progress: KeyResultCheckIn['progress'] = DEFAULT_PERCENTAGE_PROGRESS,
+    confidence = (KeyResultCheckIn.confidence = DEFAULT_CONFIDENCE),
+  ) {
+    const defaultCheckInState: DomainKeyResultCheckInGroup = {
+      progress,
+      confidence,
+    }
+
+    return defaultCheckInState
+  }
 
   protected async createIfUserIsInCompany(
     _data: Partial<KeyResult>,

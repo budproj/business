@@ -5,12 +5,11 @@ import { Any } from 'typeorm'
 import { CycleDTO } from 'src/domain/cycle/dto'
 import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
-import DomainKeyResultService, { DomainKeyResultCheckInGroup } from 'src/domain/key-result/service'
+import DomainKeyResultService from 'src/domain/key-result/service'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
 import { TeamDTO } from 'src/domain/team/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
-import { DEFAULT_CONFIDENCE, DEFAULT_PROGRESS } from './constants'
 import { Objective } from './entities'
 import DomainObjectiveRepository from './repository'
 
@@ -103,23 +102,14 @@ class DomainObjectiveService
 
   private async getCheckInGroupAtDateForObjective(date: Date, objective: ObjectiveDTO) {
     const keyResults = await this.keyResultService.getFromObjective(objective)
-    if (!keyResults) return this.buildDefaultCheckInState()
+    if (!keyResults) return this.keyResultService.buildDefaultCheckInGroup()
 
-    const objectiveCurrentCheckInGroup = this.keyResultService.buildCheckInGroupForKeyResultListAtDate(
+    const objectiveCheckInGroup = this.keyResultService.buildCheckInGroupForKeyResultListAtDate(
       date,
       keyResults,
     )
 
-    return objectiveCurrentCheckInGroup
-  }
-
-  private buildDefaultCheckInState() {
-    const defaultCheckInState: DomainKeyResultCheckInGroup = {
-      progress: DEFAULT_PROGRESS,
-      confidence: DEFAULT_CONFIDENCE,
-    }
-
-    return defaultCheckInState
+    return objectiveCheckInGroup
   }
 
   private async getLastWeekProgressForObjective(objective: ObjectiveDTO) {
