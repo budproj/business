@@ -8,10 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-// Import { KeyResultDTO } from 'src/domain/key-result/dto'
-// import { ConfidenceReportDTO } from 'src/domain/key-result/report/confidence/dto'
-// import { ProgressReportDTO } from 'src/domain/key-result/report/progress/dto'
-// import { ObjectiveDTO } from 'src/domain/objective/dto'
+import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { KeyResultCustomListDTO } from 'src/domain/key-result/custom-list/dto'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
@@ -64,9 +61,6 @@ export class User implements UserDTO {
   @OneToMany('KeyResultCustomList', 'user', { nullable: true })
   public keyResultCustomLists?: KeyResultCustomListDTO[]
 
-  // @OneToMany('ConfidenceReport', 'user')
-  // public confidenceReports: ConfidenceReportDTO[]
-  //
-  // @OneToMany('ProgressReport', 'user')
-  // public progressReports: ProgressReportDTO[]
+  @OneToMany('KeyResultCheckIn', 'user')
+  public keyResultCheckIns: KeyResultCheckInDTO[]
 }

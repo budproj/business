@@ -26,14 +26,14 @@ export class KeyResultCheckIn implements KeyResultCheckInDTO {
   @CreateDateColumn()
   public createdAt: Date
 
-  @ManyToOne('KeyResult', 'progressReports')
+  @ManyToOne('KeyResult', 'checkIns')
   public keyResult: KeyResultDTO
 
   @Column()
   @RelationId((progressReport: KeyResultCheckIn) => progressReport.keyResult)
   public keyResultId: KeyResultDTO['id']
 
-  @ManyToOne('User', 'progressReports')
+  @ManyToOne('User', 'keyResultCheckIns')
   public user: UserDTO
 
   @Column()
