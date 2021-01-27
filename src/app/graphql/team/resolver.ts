@@ -186,17 +186,16 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
 
     return this.domain.team.getCurrentConfidenceForTeam(team)
   }
-  //
-  // @ResolveField()
-  // async percentageProgressIncrease(@Parent() team: TeamObject) {
-  //   this.logger.log({
-  //     team,
-  //     message: 'Fetching percentage progress increase for team',
-  //   })
-  //
-  //   return this.teamDomain.getPercentageProgressIncrease(team.id)
-  // }
-  //
+
+  @ResolveField('percentageProgressIncrease', () => Float)
+  protected async getTeamPercentageProgressIncrease(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching percentage progress increase for team',
+    })
+
+    return this.domain.team.getPercentageProgressIncreaseForTeam(team)
+  }
 }
 
 export default GraphQLTeamResolver

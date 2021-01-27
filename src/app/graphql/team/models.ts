@@ -57,6 +57,11 @@ export class TeamObject {
   })
   public currentConfidence: KeyResultCheckInObject['confidence']
 
+  @Field(() => Float, {
+    description: 'The percentage progress increase of the team since last monday',
+  })
+  public percentageProgressIncrease: number
+
   @Field({ nullable: true, description: 'The description about the team' })
   public description?: string
 
@@ -92,12 +97,6 @@ export class TeamObject {
     nullable: true,
   })
   public latestCheckIn?: KeyResultCheckInObject
-
-  //
-  // @Field(() => Float, {
-  //   description: 'The percentage progress increase of the team since last monday',
-  // })
-  // percentageProgressIncrease: number
 }
 
 registerEnumType(TEAM_GENDER, {
