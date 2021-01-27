@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { filter, maxBy } from 'lodash'
+import { filter, maxBy, minBy } from 'lodash'
 
 import { CONSTRAINT } from 'src/domain/constants'
 import { DomainEntityService, DomainQueryContext, DomainServiceGetOptions } from 'src/domain/entity'
@@ -184,12 +184,13 @@ class DomainKeyResultService
       this.checkIn.getLatestFromKeyResultAtDate(keyResult, date),
     )
     const latestCheckInsAtDate = await Promise.all(latestCheckInAtDatePromises)
-    const latestCheckIn = maxBy(filter(latestCheckInsAtDate), (checkIn) => checkIn?.createdAt)
+    const latestNotUndefinedCheckIns = filter(latestCheckInsAtDate)
+    const latestCheckIn = maxBy(latestNotUndefinedCheckIns, (checkIn) => checkIn?.createdAt)
 
     const checkInGroup: DomainKeyResultCheckInGroup = {
       latestCheckIn,
       progress: this.calculateCheckInGroupAverageProgress(latestCheckInsAtDate, keyResults),
-      confidence: 0,
+      confidence: this.getCheckInGroupLowestConfidenceValue(latestCheckInsAtDate),
     }
 
     return checkInGroup
@@ -257,101 +258,14 @@ class DomainKeyResultService
     return percentageCheckInWithLimit
   }
 
-  // Private async calculateAverageProgressFromKeyResultList(
-  //   keyResults: KeyResult[],
-  //   timeframeScope: TIMEFRAME_SCOPE = TIMEFRAME_SCOPE.CURRENT,
-  // ) {
-  //   const currentProgressList = await Promise.all(
-  //     keyResults.map(async (keyResult) =>
-  //       this.getProgressForKeyResultInPercentage(keyResult, timeframeScope),
-  //     ),
-  //   )
-  //   const currentProgress = sum(currentProgressList) / currentProgressList.length
-  //
-  //   const normalizedCurrentProgress = Number.isNaN(currentProgress)
-  //     ? DEFAULT_PERCENTAGE_PROGRESS
-  //     : currentProgress
-  //
-  //   return normalizedCurrentProgress
-  // }
-  //
-  // private async getProgressForKeyResultInPercentage(
-  //   keyResult: KeyResult,
-  //   timeframeScope: TIMEFRAME_SCOPE,
-  // ) {
-  //   const progressTimeframedSelectors = {
-  //     [TIMEFRAME_SCOPE.CURRENT]: async () => this.getCurrentProgressForKeyResult(keyResult),
-  //     [TIMEFRAME_SCOPE.SNAPSHOT]: async () => this.getSnapshotProgressForKeyResult(keyResult),
-  //   }
-  //
-  //   const timeframeSelector = progressTimeframedSelectors[timeframeScope]
-  //   const currentProgress = await timeframeSelector()
-  //   if (!currentProgress) return DEFAULT_PERCENTAGE_PROGRESS
-  //
-  //   const { goal, initialValue } = keyResult
-  //   const currentProgressInPercentage =
-  //     ((currentProgress - initialValue) * 100) / (goal - initialValue)
-  //
-  //   return currentProgressInPercentage
-  // }
-  //
-  //
-  // async getCurrentConfidence(id: KeyResultDTO['id']): Promise<ConfidenceReport['valueNew']> {
-  //   const latestConfidenceReport = await this.report.confidence.getLatestFromKeyResult(id)
-  //   if (!latestConfidenceReport) return DEFAULT_CONFIDENCE
-  //
-  //   return latestConfidenceReport.valueNew
-  // }
-  //
-  //
-  // async calculateCurrentAverageProgressFromList(keyResults: KeyResult[]) {
-  //   const calculatedCurrentProgress = this.calculateAverageProgressFromList(keyResults)
-  //
-  //   return calculatedCurrentProgress
-  // }
-  //
-  //
-  // async getLowestConfidenceFromList(keyResults: KeyResult[]) {
-  //   const DEFAULT_CONFIDENCE = 100
-  //   const currentConfidenceList = await Promise.all(
-  //     keyResults.map(async ({ id }) => this.getCurrentConfidence(id)),
-  //   )
-  //   const minConfidence = min(currentConfidenceList)
-  //
-  //   return minConfidence ?? DEFAULT_CONFIDENCE
-  // }
-  //
-  // async getReports(keyResultID: KeyResult['id']) {
-  //   const progressReports = await this.report.progress.getFromKeyResult(keyResultID)
-  //   const confidenceReports = await this.report.confidence.getFromKeyResult(keyResultID)
-  //
-  //   const mergedReports = [...progressReports, ...confidenceReports]
-  //   const uniqueReports = uniqBy(mergedReports, 'comment')
-  //
-  //   return uniqueReports
-  // }
-  //
-  // async getOneReportWithConstraint(
-  //   constraint: CONSTRAINT,
-  //   selector: FindConditions<ProgressReport>,
-  //   user: UserDTO,
-  // ) {
-  //   const progressReport = await this.report.progress.getOneWithConstraint(
-  //     constraint,
-  //     selector,
-  //     user,
-  //   )
-  //   const confidenceReport = await this.report.confidence.getOneWithConstraint(
-  //     constraint,
-  //     selector,
-  //     user,
-  //   )
-  //
-  //   const report = remove([progressReport, confidenceReport])[0]
-  //
-  //   return report
-  // }
-  //
+  private getCheckInGroupLowestConfidenceValue(checkIns: KeyResultCheckIn[]) {
+    const notUndefinedCheckIns = filter(checkIns)
+    if (notUndefinedCheckIns.length === 0) return DEFAULT_CONFIDENCE
+
+    const minConfidenceCheckIn = minBy(notUndefinedCheckIns, (checkIn) => checkIn.confidence)
+
+    return minConfidenceCheckIn.confidence
+  }
 }
 
 export default DomainKeyResultService

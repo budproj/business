@@ -47,7 +47,6 @@ export class ObjectiveObject {
   public keyResults?: KeyResultObject[]
 
   //
-  //
   // @Field(() => Float, {
   //   description: 'The percentage progress increase since last monday',
   // })

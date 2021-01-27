@@ -67,9 +67,9 @@ class DomainObjectiveService
 
   public async getCurrentConfidenceForObjective(objective: ObjectiveDTO) {
     const date = new Date()
-    const currentProgress = await this.getCheckInGroupAtDateForObjective(date, objective)
+    const currentCheckInGroup = await this.getCheckInGroupAtDateForObjective(date, objective)
 
-    return currentProgress.progress
+    return currentCheckInGroup.confidence
   }
   //
   // async getLastWeekProgress(objectiveID: ObjectiveDTO['id']) {
