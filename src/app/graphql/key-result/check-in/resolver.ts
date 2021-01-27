@@ -1,19 +1,29 @@
-import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import {
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common'
+import { Args, ID, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
+import { ACTION, PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
 import { AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
-import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
+import {
+  KeyResultCheckInInput,
+  KeyResultCheckInObject,
+} from 'src/app/graphql/key-result/check-in/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import { UserObject } from 'src/app/graphql/user'
 import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import DomainService from 'src/domain/service'
+import RailwayProvider from 'src/railway'
 
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -21,7 +31,7 @@ import DomainService from 'src/domain/service'
 class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, KeyResultCheckInDTO> {
   private readonly logger = new Logger(GraphQLCheckInResolver.name)
 
-  constructor(protected readonly domain: DomainService) {
+  constructor(protected readonly domain: DomainService, private readonly railway: RailwayProvider) {
     super(RESOURCE.KEY_RESULT, domain, domain.keyResult.checkIn)
   }
 
@@ -58,44 +68,36 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
 
     return this.domain.keyResult.getOne({ id: checkIn.keyResultId })
   }
-  //
-  //
-  // @Permissions(PERMISSION['PROGRESS_REPORT:CREATE'])
-  // @Mutation(() => KeyResultCheckInObject)
-  // async createCheckIn(
-  //   @GraphQLUser() user: AuthzUser,
-  //   @Args('checkInInput', { type: () => CheckInInput })
-  //   checkInInput: CheckInInput,
-  // ) {
-  //   this.logger.log({
-  //     user,
-  //     checkInInput,
-  //     message: 'Creating a new check-in',
-  //   })
-  //
-  //   const enhancedWithUserID = {
-  //     userId: user.id,
-  //     keyResultId: checkInInput.keyResultId,
-  //     comment: checkInInput.comment,
-  //     valueNew: checkInInput.value,
-  //   }
-  //
-  //   const creationPromise = this.resolverService.createWithScopeConstraint(enhancedWithUserID, user)
-  //   const [error, createdCheckIn] = await this.railway.handleRailwayPromise<
-  //     RailwayError,
-  //     CheckIn[]
-  //   >(creationPromise)
-  //   console.log(error)
-  //   if (error.code === DuplicateEntityError.code)
-  //     throw new PreconditionFailedException('You have already created that report')
-  //   if (error) throw new InternalServerErrorException('Unknown error')
-  //   if (!createdCheckIn)
-  //     throw new NotFoundException(
-  //       `We could not found a key result with ID ${checkInInput.keyResultId} to add your report`,
-  //     )
-  //
-  //   return createdCheckIn[0]
-  // }
+
+  @Permissions(PERMISSION['KEY_RESULT:UPDATE'])
+  @Mutation(() => KeyResultCheckInObject, { name: 'createKeyResultCheckIn' })
+  protected async createKeyResultCheckIn(
+    @GraphQLUser() user: AuthzUser,
+    @Args('keyResultCheckIn', { type: () => KeyResultCheckInInput })
+    keyResultCheckIn: KeyResultCheckInInput,
+  ) {
+    this.logger.log({
+      user,
+      keyResultCheckIn,
+      message: 'Creating a new check-in',
+    })
+
+    const checkIn = this.domain.keyResult.buildCheckInForUser(user, keyResultCheckIn)
+    const createCheckInPromise = this.createWithActionScopeConstraint(checkIn, user, ACTION.UPDATE)
+
+    const [error, createdCheckIns] = await this.railway.execute<KeyResultCheckIn[]>(
+      createCheckInPromise,
+    )
+    if (error) throw new InternalServerErrorException(error.message)
+    if (!createdCheckIns || createdCheckIns.length === 0)
+      throw new NotFoundException(
+        `We could not find any key result with ID ${keyResultCheckIn.keyResultId} to add your check-in`,
+      )
+
+    const createdCheckIn = createdCheckIns[0]
+
+    return createdCheckIn
+  }
 }
 
 export default GraphQLCheckInResolver

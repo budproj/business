@@ -14,7 +14,7 @@ import DomainKeyResultService from './service'
     TypeOrmModule.forRoot(databaseConfig),
     TypeOrmModule.forFeature([DomainKeyResultRepository]),
     DomainKeyResultCustomListModule,
-    DomainKeyResultCheckInModule,
+    forwardRef(() => DomainKeyResultCheckInModule),
     forwardRef(() => DomainTeamModule),
   ],
   providers: [DomainKeyResultService],

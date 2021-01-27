@@ -2,7 +2,12 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { filter, maxBy, minBy } from 'lodash'
 
 import { CONSTRAINT } from 'src/domain/constants'
-import { DomainEntityService, DomainQueryContext, DomainServiceGetOptions } from 'src/domain/entity'
+import {
+  DomainCreationQuery,
+  DomainEntityService,
+  DomainQueryContext,
+  DomainServiceGetOptions,
+} from 'src/domain/entity'
 import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import DomainKeyResultCheckInService from 'src/domain/key-result/check-in/service'
@@ -25,7 +30,6 @@ import { KeyResult } from './entities'
 import DomainKeyResultRepository from './repository'
 
 export interface DomainKeyResultServiceInterface {
-  repository: DomainKeyResultRepository
   customList: DomainKeyResultCustomListService
   checkIn: DomainKeyResultCheckInService
 
@@ -60,6 +64,10 @@ export interface DomainKeyResultServiceInterface {
     progress?: KeyResultCheckIn['progress'],
     confidence?: KeyResultCheckIn['confidence'],
   ) => DomainKeyResultCheckInGroup
+  buildCheckInForUser: (
+    user: UserDTO,
+    checkInData: DomainKeyResultCheckInPayload,
+  ) => Partial<KeyResultCheckInDTO>
 }
 
 export interface DomainKeyResultCheckInGroup {
@@ -68,18 +76,26 @@ export interface DomainKeyResultCheckInGroup {
   latestCheckIn?: KeyResultCheckInDTO
 }
 
+export interface DomainKeyResultCheckInPayload {
+  progress: KeyResultCheckIn['progress']
+  confidence: KeyResultCheckIn['confidence']
+  keyResultId: KeyResultCheckIn['keyResultId']
+  comment?: KeyResultCheckIn['comment']
+}
+
 @Injectable()
 class DomainKeyResultService
   extends DomainEntityService<KeyResult, KeyResultDTO>
   implements DomainKeyResultServiceInterface {
   constructor(
-    public readonly repository: DomainKeyResultRepository,
     public readonly customList: DomainKeyResultCustomListService,
+    @Inject(forwardRef(() => DomainKeyResultCheckInService))
     public readonly checkIn: DomainKeyResultCheckInService,
+    protected readonly repository: DomainKeyResultRepository,
     @Inject(forwardRef(() => DomainTeamService))
     private readonly teamService: DomainTeamService,
   ) {
-    super(repository, DomainKeyResultService.name)
+    super(DomainKeyResultService.name, repository)
   }
 
   public async getFromOwner(owner: UserDTO) {
@@ -217,22 +233,23 @@ class DomainKeyResultService
     return defaultCheckInState
   }
 
-  protected async createIfUserIsInCompany(
-    _data: Partial<KeyResult>,
-    _queryContext: DomainQueryContext,
-  ) {
-    return {} as any
+  public buildCheckInForUser(user: UserDTO, checkInData: DomainKeyResultCheckInPayload) {
+    const checkIn: Partial<KeyResultCheckInDTO> = {
+      userId: user.id,
+      keyResultId: checkInData.keyResultId,
+      progress: checkInData.progress,
+      confidence: checkInData.confidence,
+    }
+
+    return checkIn
   }
 
-  protected async createIfUserIsInTeam(
-    _data: Partial<KeyResult>,
+  protected async protectCreationQuery(
+    _query: DomainCreationQuery<KeyResult>,
+    _data: Partial<KeyResultDTO>,
     _queryContext: DomainQueryContext,
   ) {
-    return {} as any
-  }
-
-  protected async createIfUserOwnsIt(_data: Partial<KeyResult>, _queryContext: DomainQueryContext) {
-    return {} as any
+    return []
   }
 
   private calculateCheckInGroupAverageProgress(

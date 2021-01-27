@@ -1,4 +1,4 @@
-import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql'
+import { Field, Float, ID, InputType, Int, ObjectType } from '@nestjs/graphql'
 
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import { UserObject } from 'src/app/graphql/user/models'
@@ -35,14 +35,17 @@ export class KeyResultCheckInObject {
   public comment?: string
 }
 
-// @InputType({ description: 'The required data to create a new progress report' })
-// export class ProgressReportInput {
-//   @Field(() => Float, { description: 'The progress value you are reporting' })
-//   value: number
-//
-//   @Field({ nullable: true, description: 'The comment in your report' })
-//   comment?: string
-//
-//   @Field(() => ID, { description: 'The key result ID related to this report' })
-//   keyResultId: KeyResultObject['id']
-// }
+@InputType({ description: 'The required data to create a new progress report' })
+export class KeyResultCheckInInput {
+  @Field(() => Float, { description: 'The progress value you are reporting' })
+  public progress: number
+
+  @Field(() => Int, { description: 'The confidence value you are reporting' })
+  public confidence: number
+
+  @Field(() => ID, { description: 'The key result ID related to this report' })
+  public keyResultId: KeyResultObject['id']
+
+  @Field({ description: 'The comment in your report', nullable: true })
+  public comment?: string
+}

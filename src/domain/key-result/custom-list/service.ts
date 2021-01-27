@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { uniq } from 'lodash'
 
-import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
+import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import {
   KEY_RESULT_CUSTOM_LIST_BINDING,
   KEY_RESULT_CUSTOM_LIST_BINDING_NAMES,
@@ -12,10 +12,6 @@ import { UserDTO } from 'src/domain/user/dto'
 import { KeyResultCustomListDTO } from './dto'
 import { KeyResultCustomList } from './entities'
 import DomainKeyResultCustomListRepository from './repository'
-
-export interface DomainKeyResultCustomListServiceInterface {
-  repository: DomainKeyResultCustomListRepository
-}
 
 export interface DomainKeyResultCustomListServiceInterface {
   refreshWithNewKeyResults: (
@@ -31,12 +27,11 @@ export interface DomainKeyResultCustomListServiceInterface {
 }
 
 @Injectable()
-class DomainKeyResultCustomListService extends DomainEntityService<
-  KeyResultCustomList,
-  KeyResultCustomListDTO
-> {
-  constructor(public readonly repository: DomainKeyResultCustomListRepository) {
-    super(repository, DomainKeyResultCustomListService.name)
+class DomainKeyResultCustomListService
+  extends DomainEntityService<KeyResultCustomList, KeyResultCustomListDTO>
+  implements DomainKeyResultCustomListServiceInterface {
+  constructor(protected readonly repository: DomainKeyResultCustomListRepository) {
+    super(DomainKeyResultCustomListService.name, repository)
   }
 
   public async refreshWithNewKeyResults(
@@ -75,25 +70,12 @@ class DomainKeyResultCustomListService extends DomainEntityService<
     return customLists
   }
 
-  protected async createIfUserIsInCompany(
-    _data: Partial<KeyResultCustomList>,
+  protected async protectCreationQuery(
+    _query: DomainCreationQuery<KeyResultCustomList>,
+    _data: Partial<KeyResultCustomListDTO>,
     _queryContext: DomainQueryContext,
   ) {
-    return {} as any
-  }
-
-  protected async createIfUserIsInTeam(
-    _data: Partial<KeyResultCustomList>,
-    _queryContext: DomainQueryContext,
-  ) {
-    return {} as any
-  }
-
-  protected async createIfUserOwnsIt(
-    _data: Partial<KeyResultCustomList>,
-    _queryContext: DomainQueryContext,
-  ) {
-    return {} as any
+    return []
   }
 
   private buildRefreshedRank(

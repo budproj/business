@@ -16,7 +16,7 @@ import { KeyResultCustomListDTO } from 'src/domain/key-result/custom-list/dto'
 import { KeyResultCustomList } from 'src/domain/key-result/custom-list/entities'
 import DomainService from 'src/domain/service'
 
-import { KeyResultCustomListObject, KeyResultCustomListRankInput } from './models'
+import { KeyResultCustomListObject, KeyResultCustomListInput } from './models'
 
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -89,21 +89,21 @@ class GraphQLKeyResultCustomListResolver extends GraphQLEntityResolver<
   }
 
   @Permissions(PERMISSION['KEY_RESULT:UPDATE'])
-  @Mutation(() => KeyResultCustomListObject, { name: 'updateKeyResultCustomListRank' })
-  protected async updateKeyResultCustomListRank(
+  @Mutation(() => KeyResultCustomListObject, { name: 'updateKeyResultCustomList' })
+  protected async updateKeyResultCustomList(
     @Args('id', { type: () => ID }) id: KeyResultCustomListObject['id'],
-    @Args('keyResultCustomListRankInput', { type: () => KeyResultCustomListRankInput })
-    keyResultCustomListRankInput: KeyResultCustomListRankInput,
+    @Args('keyResultCustomListInput', { type: () => KeyResultCustomListInput })
+    keyResultCustomListInput: KeyResultCustomListInput,
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log({
-      keyResultCustomListRankInput,
+      keyResultCustomListInput,
       message: `Updating rank for key result custom list of id ${id}`,
     })
 
     const updatedKeyResultCustomList = await this.updateWithActionScopeConstraint(
       { id },
-      keyResultCustomListRankInput,
+      keyResultCustomListInput,
       user,
     )
     if (!updatedKeyResultCustomList)

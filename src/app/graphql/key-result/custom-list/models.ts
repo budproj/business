@@ -43,10 +43,10 @@ export class KeyResultCustomListObject {
   public keyResults?: KeyResultObject[]
 }
 
-@InputType({ description: 'Required data to update a given key result view rank' })
-export class KeyResultCustomListRankInput {
+@InputType({ description: 'Required data to update a given key result custom list' })
+export class KeyResultCustomListInput {
   @Field(() => [ID], { description: 'Ordered list of key result IDs' })
-  rank: Array<KeyResultObject['id']>
+  public rank: Array<KeyResultObject['id']>
 }
 
 registerEnumType(KEY_RESULT_CUSTOM_LIST_BINDING, {

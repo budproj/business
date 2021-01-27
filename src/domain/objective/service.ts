@@ -3,7 +3,7 @@ import { startOfWeek } from 'date-fns'
 import { Any } from 'typeorm'
 
 import { CycleDTO } from 'src/domain/cycle/dto'
-import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
+import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import DomainKeyResultService from 'src/domain/key-result/service'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
@@ -14,8 +14,6 @@ import { Objective } from './entities'
 import DomainObjectiveRepository from './repository'
 
 export interface DomainObjectiveServiceInterface {
-  repository: DomainObjectiveRepository
-
   getFromOwner: (owner: UserDTO) => Promise<Objective[]>
   getFromCycle: (cycle: CycleDTO) => Promise<Objective[]>
   getFromTeam: (team: TeamDTO) => Promise<Objective[]>
@@ -33,10 +31,10 @@ class DomainObjectiveService
   extends DomainEntityService<Objective, ObjectiveDTO>
   implements DomainObjectiveServiceInterface {
   constructor(
-    public readonly repository: DomainObjectiveRepository,
+    protected readonly repository: DomainObjectiveRepository,
     private readonly keyResultService: DomainKeyResultService,
   ) {
-    super(repository, DomainObjectiveService.name)
+    super(DomainObjectiveService.name, repository)
   }
 
   public async getFromOwner(owner: UserDTO) {
@@ -82,22 +80,12 @@ class DomainObjectiveService
     return deltaProgress
   }
 
-  protected async createIfUserIsInCompany(
-    _data: Partial<Objective>,
+  protected async protectCreationQuery(
+    _query: DomainCreationQuery<Objective>,
+    _data: Partial<ObjectiveDTO>,
     _queryContext: DomainQueryContext,
   ) {
-    return {} as any
-  }
-
-  protected async createIfUserIsInTeam(
-    _data: Partial<Objective>,
-    _queryContext: DomainQueryContext,
-  ) {
-    return {} as any
-  }
-
-  protected async createIfUserOwnsIt(_data: Partial<Objective>, _queryContext: DomainQueryContext) {
-    return {} as any
+    return []
   }
 
   private async getCheckInGroupAtDateForObjective(date: Date, objective: ObjectiveDTO) {

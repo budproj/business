@@ -1,22 +1,20 @@
 import { Injectable } from '@nestjs/common'
 
-import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
+import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { UserDTO } from 'src/domain/user/dto'
 
 import { User } from './entities'
 import DomainUserRepository from './repository'
 
 export interface DomainUserServiceInterface {
-  repository: DomainUserRepository
-
   buildUserFullName: (user: UserDTO) => string
   getUserFromSubjectWithTeamRelation: (authzSub: UserDTO['authzSub']) => Promise<User>
 }
 
 @Injectable()
 class DomainUserService extends DomainEntityService<User, UserDTO> {
-  constructor(public readonly repository: DomainUserRepository) {
-    super(repository, DomainUserService.name)
+  constructor(protected readonly repository: DomainUserRepository) {
+    super(DomainUserService.name, repository)
   }
 
   public buildUserFullName(user: UserDTO) {
@@ -27,16 +25,12 @@ class DomainUserService extends DomainEntityService<User, UserDTO> {
     return this.repository.findOne({ authzSub }, { relations: ['teams'] })
   }
 
-  protected async createIfUserIsInCompany(_data: Partial<User>, _queryContext: DomainQueryContext) {
-    return {} as any
-  }
-
-  protected async createIfUserIsInTeam(_data: Partial<User>, _queryContext: DomainQueryContext) {
-    return {} as any
-  }
-
-  protected async createIfUserOwnsIt(_data: Partial<User>, _queryContext: DomainQueryContext) {
-    return {} as any
+  protected async protectCreationQuery(
+    _query: DomainCreationQuery<User>,
+    _data: Partial<UserDTO>,
+    _queryContext: DomainQueryContext,
+  ) {
+    return []
   }
 }
 

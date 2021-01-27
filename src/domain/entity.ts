@@ -17,9 +17,6 @@ import { TeamDTO } from './team/dto'
 import { UserDTO } from './user/dto'
 
 export interface DomainEntityServiceInterface<E, D> {
-  logger: Logger
-  repository: DomainEntityRepository<E>
-
   buildContext: (user: UserDTO, constraint: CONSTRAINT) => DomainServiceContext
   createWithConstraint: (data: Partial<D>, queryContext: DomainQueryContext) => Promise<E[]>
   getOneWithConstraint: (
@@ -71,12 +68,15 @@ export interface DomainQueryContext extends DomainServiceContext {
   query: QueryContext
 }
 
+export type DomainCreationQuery<E> = () => Promise<E[] | null>
+export type DomainMutationQuery<E> = () => Promise<E | E[] | DeleteResult | null>
+
 export abstract class DomainEntityService<E, D> implements DomainEntityServiceInterface<E, D> {
-  public readonly logger: Logger
+  protected readonly logger: Logger
 
   constructor(
-    public readonly repository: DomainEntityRepository<E>,
-    public readonly loggerName: string,
+    protected readonly loggerName: string,
+    protected readonly repository: DomainEntityRepository<E>,
   ) {
     this.logger = new Logger(loggerName ?? DomainEntityService.name)
   }
@@ -91,15 +91,11 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
   }
 
   public async createWithConstraint(data: Partial<D>, queryContext: DomainQueryContext) {
-    const availableSelectors = {
-      [CONSTRAINT.ANY]: async () => this.create(data, queryContext),
-      [CONSTRAINT.COMPANY]: async () => this.createIfUserIsInCompany(data, queryContext),
-      [CONSTRAINT.TEAM]: async () => this.createIfUserIsInTeam(data, queryContext),
-      [CONSTRAINT.OWNS]: async () => this.createIfUserOwnsIt(data, queryContext),
-    }
-    const constrainedSelector = availableSelectors[queryContext.constraint]
+    const shouldConstrainCreation = queryContext.constraint !== CONSTRAINT.ANY
 
-    return constrainedSelector()
+    return shouldConstrainCreation
+      ? this.createIfWithinConstraint(data, queryContext)
+      : this.create(data, queryContext)
   }
 
   public async getOneWithConstraint(selector: FindConditions<E>, queryContext: DomainQueryContext) {
@@ -172,6 +168,12 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
     const result = await this.repository.insert(data as QueryDeepPartialEntity<E>)
 
     return result.raw
+  }
+
+  protected async createIfWithinConstraint(data: Partial<D>, queryContext: DomainQueryContext) {
+    const creationQuery = async () => this.create(data, queryContext)
+
+    return this.protectCreationQuery(creationQuery, data, queryContext)
   }
 
   protected async getWithConstraint(selector: FindConditions<E>, queryContext: DomainQueryContext) {
@@ -358,20 +360,22 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
     return this.delete(selector, queryContext)
   }
 
-  protected abstract createIfUserIsInCompany(
-    data: Partial<D>,
+  protected async protectMutationQuery(
+    query: DomainMutationQuery<E>,
+    selector: FindConditions<E>,
     queryContext: DomainQueryContext,
-  ): Promise<E[]>
+  ) {
+    const validationData = await this.getWithConstraint(selector, queryContext)
+    if (!validationData) return
 
-  protected abstract createIfUserIsInTeam(
-    data: Partial<D>,
-    queryContext: DomainQueryContext,
-  ): Promise<E[]>
+    return query()
+  }
 
-  protected abstract createIfUserOwnsIt(
+  protected abstract protectCreationQuery(
+    query: DomainMutationQuery<E>,
     data: Partial<D>,
     queryContext: DomainQueryContext,
-  ): Promise<E[]>
+  ): Promise<E[] | null>
 }
 
 export type SelectionQueryConstrain<E> = (query?: SelectQueryBuilder<E>) => SelectQueryBuilder<E>

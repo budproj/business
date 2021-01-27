@@ -3,7 +3,7 @@ import { startOfWeek } from 'date-fns'
 import { flatten, remove, uniqBy } from 'lodash'
 
 import { CONSTRAINT } from 'src/domain/constants'
-import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
+import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import DomainKeyResultService from 'src/domain/key-result/service'
 import { TeamEntityFilter, TeamEntityRelation } from 'src/domain/team/types'
@@ -15,7 +15,6 @@ import DomainTeamRepository from './repository'
 import DomainTeamSpecification from './specification'
 
 export interface DomainTeamServiceInterface {
-  repository: DomainTeamRepository
   specification: DomainTeamSpecification
 
   getFromOwner: (owner: UserDTO) => Promise<Team[]>
@@ -40,12 +39,12 @@ class DomainTeamService
   extends DomainEntityService<Team, TeamDTO>
   implements DomainTeamServiceInterface {
   constructor(
-    public readonly repository: DomainTeamRepository,
     public readonly specification: DomainTeamSpecification,
+    protected readonly repository: DomainTeamRepository,
     @Inject(forwardRef(() => DomainKeyResultService))
     private readonly keyResultService: DomainKeyResultService,
   ) {
-    super(repository, DomainTeamService.name)
+    super(DomainTeamService.name, repository)
   }
 
   public async getFromOwner(owner: UserDTO) {
@@ -162,16 +161,12 @@ class DomainTeamService
     return deltaProgress
   }
 
-  protected async createIfUserIsInCompany(_data: Partial<Team>, _queryContext: DomainQueryContext) {
-    return {} as any
-  }
-
-  protected async createIfUserIsInTeam(_data: Partial<Team>, _queryContext: DomainQueryContext) {
-    return {} as any
-  }
-
-  protected async createIfUserOwnsIt(_data: Partial<Team>, _queryContext: DomainQueryContext) {
-    return {} as any
+  protected async protectCreationQuery(
+    _query: DomainCreationQuery<Team>,
+    _data: Partial<TeamDTO>,
+    _queryContext: DomainQueryContext,
+  ) {
+    return []
   }
 
   private async getRootTeamForTeam(team: TeamDTO) {

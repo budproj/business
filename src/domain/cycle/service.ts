@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 import { CycleDTO } from 'src/domain/cycle/dto'
-import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
+import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { TeamDTO } from 'src/domain/team/dto'
 import DomainTeamService from 'src/domain/team/service'
 
@@ -9,8 +9,6 @@ import { Cycle } from './entities'
 import DomainCycleRepository from './repository'
 
 export interface DomainCycleServiceInterface {
-  repository: DomainCycleRepository
-
   getFromTeam: (team: TeamDTO) => Promise<Cycle[]>
 }
 
@@ -19,10 +17,10 @@ class DomainCycleService
   extends DomainEntityService<Cycle, CycleDTO>
   implements DomainCycleServiceInterface {
   constructor(
-    public readonly repository: DomainCycleRepository,
+    protected readonly repository: DomainCycleRepository,
     private readonly teamService: DomainTeamService,
   ) {
-    super(repository, DomainCycleService.name)
+    super(DomainCycleService.name, repository)
   }
 
   public async getFromTeam(team: TeamDTO) {
@@ -32,19 +30,12 @@ class DomainCycleService
     return cycles
   }
 
-  protected async createIfUserIsInCompany(
-    _data: Partial<Cycle>,
+  protected async protectCreationQuery(
+    _query: DomainCreationQuery<Cycle>,
+    _data: Partial<CycleDTO>,
     _queryContext: DomainQueryContext,
   ) {
-    return {} as any
-  }
-
-  protected async createIfUserIsInTeam(_data: Partial<Cycle>, _queryContext: DomainQueryContext) {
-    return {} as any
-  }
-
-  protected async createIfUserOwnsIt(_data: Partial<Cycle>, _queryContext: DomainQueryContext) {
-    return {} as any
+    return []
   }
 
   private async getFromParentTeam(childTeam: TeamDTO) {

@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { sum } from 'lodash'
 import { Any } from 'typeorm'
 
 import { DOMAIN_QUERY_ORDER } from 'src/domain/constants'
-import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
+import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import {
   MAX_PERCENTAGE_PROGRESS,
   MIN_PERCENTAGE_PROGRESS,
@@ -13,6 +13,7 @@ import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import { KEY_RESULT_FORMAT } from 'src/domain/key-result/constants'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { KeyResult } from 'src/domain/key-result/entities'
+import DomainKeyResultService from 'src/domain/key-result/service'
 import { UserDTO } from 'src/domain/user/dto'
 
 import DomainKeyResultCheckInRepository from './repository'
@@ -39,8 +40,12 @@ class DomainKeyResultCheckInService extends DomainEntityService<
   KeyResultCheckIn,
   KeyResultCheckInDTO
 > {
-  constructor(public readonly repository: DomainKeyResultCheckInRepository) {
-    super(repository, DomainKeyResultCheckInService.name)
+  constructor(
+    protected readonly repository: DomainKeyResultCheckInRepository,
+    @Inject(forwardRef(() => DomainKeyResultService))
+    private readonly keyResultService: DomainKeyResultService,
+  ) {
+    super(DomainKeyResultCheckInService.name, repository)
   }
 
   public async getLatestFromUsers(users: UserDTO[]) {
@@ -110,25 +115,18 @@ class DomainKeyResultCheckInService extends DomainEntityService<
     return averageProgress
   }
 
-  protected async createIfUserIsInCompany(
-    _data: Partial<KeyResultCheckIn>,
-    _queryContext: DomainQueryContext,
+  protected async protectCreationQuery(
+    query: DomainCreationQuery<KeyResultCheckIn>,
+    data: Partial<KeyResultCheckInDTO>,
+    queryContext: DomainQueryContext,
   ) {
-    return {} as any
-  }
+    const selector = { id: data.keyResultId }
 
-  protected async createIfUserIsInTeam(
-    _data: Partial<KeyResultCheckIn>,
-    _queryContext: DomainQueryContext,
-  ) {
-    return {} as any
-  }
+    console.log(selector, 'ok')
+    const validationData = await this.keyResultService.getOneWithConstraint(selector, queryContext)
+    if (!validationData) return
 
-  protected async createIfUserOwnsIt(
-    _data: Partial<KeyResultCheckIn>,
-    _queryContext: DomainQueryContext,
-  ) {
-    return {} as any
+    return query()
   }
 
   private minmax(value: number, min: number, max: number) {
