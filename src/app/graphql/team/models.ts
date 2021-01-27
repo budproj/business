@@ -18,34 +18,8 @@ export class TeamObject {
   @Field({ description: 'The name of the team' })
   public name: string
 
-  @Field({ description: 'The creation date of the team' })
-  public createdAt: Date
-
-  @Field({ description: 'The last update date of the team' })
-  public updatedAt: Date
-
-  @Field(() => [UserObject], {
-    description: 'A creation date ordered list of users that are members of this team',
-  })
-  public users: UserObject[]
-
-  @Field(() => ID, { description: 'The user ID that owns this team' })
-  public ownerId: UserObject['id']
-
-  @Field(() => UserObject, { description: 'The user that owns this team' })
-  public owner: UserObject
-
-  @Field(() => ID, { description: 'The ID of the team that owns this team', nullable: true })
-  public parentTeamId: TeamObject['id']
-
-  @Field(() => TeamObject, { description: 'The team that owns this team', nullable: true })
-  public parentTeam: TeamObject
-
   @Field(() => Boolean, { description: 'Defines if the team is a company' })
   public isCompany: boolean
-
-  @Field(() => [TeamObject], { description: 'A list of teams that belongs to this team' })
-  public teams: TeamObject[]
 
   @Field(() => Float, {
     description: 'The computed percentage current progress of this team',
@@ -61,6 +35,32 @@ export class TeamObject {
     description: 'The percentage progress increase of the team since last monday',
   })
   public percentageProgressIncrease: number
+
+  @Field({ description: 'The creation date of the team' })
+  public createdAt: Date
+
+  @Field({ description: 'The last update date of the team' })
+  public updatedAt: Date
+
+  @Field(() => ID, { description: 'The user ID that owns this team' })
+  public ownerId: UserObject['id']
+
+  @Field(() => UserObject, { description: 'The user that owns this team' })
+  public owner: UserObject
+
+  @Field(() => ID, { description: 'The ID of the team that owns this team', nullable: true })
+  public parentTeamId: TeamObject['id']
+
+  @Field(() => TeamObject, { description: 'The team that owns this team', nullable: true })
+  public parentTeam: TeamObject
+
+  @Field(() => [UserObject], {
+    description: 'A creation date ordered list of users that are members of this team',
+  })
+  public users: UserObject[]
+
+  @Field(() => [TeamObject], { description: 'A list of teams that belongs to this team' })
+  public teams: TeamObject[]
 
   @Field({ nullable: true, description: 'The description about the team' })
   public description?: string
