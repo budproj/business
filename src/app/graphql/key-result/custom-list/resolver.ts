@@ -1,5 +1,5 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, ID, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { pickBy, identity } from 'lodash'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
@@ -16,7 +16,7 @@ import { KeyResultCustomListDTO } from 'src/domain/key-result/custom-list/dto'
 import { KeyResultCustomList } from 'src/domain/key-result/custom-list/entities'
 import DomainService from 'src/domain/service'
 
-import { KeyResultCustomListObject } from './models'
+import { KeyResultCustomListObject, KeyResultCustomListRankInput } from './models'
 
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -58,8 +58,6 @@ class GraphQLKeyResultCustomListResolver extends GraphQLEntityResolver<
       keyResultCustomList,
     )
 
-    console.log(normalizedKeyResultCustomList)
-
     if (!normalizedKeyResultCustomList)
       throw new NotFoundException('We could not found a key result custom list with given args')
 
@@ -90,6 +88,30 @@ class GraphQLKeyResultCustomListResolver extends GraphQLEntityResolver<
     return this.domain.keyResult.getFromCustomList(keyResultCustomList)
   }
 
+  @Permissions(PERMISSION['KEY_RESULT:UPDATE'])
+  @Mutation(() => KeyResultCustomListObject, { name: 'updateKeyResultCustomListRank' })
+  protected async updateKeyResultCustomListRank(
+    @Args('id', { type: () => ID }) id: KeyResultCustomListObject['id'],
+    @Args('keyResultCustomListRankInput', { type: () => KeyResultCustomListRankInput })
+    keyResultCustomListRankInput: KeyResultCustomListRankInput,
+    @GraphQLUser() user: AuthzUser,
+  ) {
+    this.logger.log({
+      keyResultCustomListRankInput,
+      message: `Updating rank for key result custom list of id ${id}`,
+    })
+
+    const updatedKeyResultCustomList = await this.updateWithActionScopeConstraint(
+      { id },
+      keyResultCustomListRankInput,
+      user,
+    )
+    if (!updatedKeyResultCustomList)
+      throw new NotFoundException(`We could not found a key result custom list for id ${id}`)
+
+    return updatedKeyResultCustomList
+  }
+
   private async normalizedBasedOnBinding(
     binding: KEY_RESULT_CUSTOM_LIST_BINDING,
     user: AuthzUser,
@@ -99,30 +121,6 @@ class GraphQLKeyResultCustomListResolver extends GraphQLEntityResolver<
       ? this.domain.keyResult.refreshCustomListWithOwnedKeyResults(user, keyResultCustomList)
       : this.domain.keyResult.createCustomListForBinding(binding, user)
   }
-
-  // @Permissions(PERMISSION['KEY_RESULT_VIEW:UPDATE'])
-  // @Mutation(() => KeyResultCustomListObject)
-  // async updateRank(
-  //   @Args('id', { type: () => ID }) id: KeyResultCustomListObject['id'],
-  //   @Args('keyResultCustomListRankInput', { type: () => KeyResultCustomListRankInput })
-  //   keyResultCustomListRankInput: KeyResultCustomListRankInput,
-  //   @GraphQLUser() user: AuthzUser,
-  // ) {
-  //   this.logger.log({
-  //     keyResultCustomListRankInput,
-  //     message: `Updating rank for key result custom list of id ${id}`,
-  //   })
-  //
-  //   const updatedKeyResultCustomList = await this.resolverService.updateWithScopeConstraint(
-  //     { id },
-  //     keyResultCustomListRankInput,
-  //     user,
-  //   )
-  //   if (!updatedKeyResultCustomList)
-  //     throw new NotFoundException(`We could not found a key result custom list for id ${id}`)
-  //
-  //   return updatedKeyResultCustomList
-  // }
 }
 
 export default GraphQLKeyResultCustomListResolver

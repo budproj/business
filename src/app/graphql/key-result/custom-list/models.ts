@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { Field, ID, InputType, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import { UserObject } from 'src/app/graphql/user/models'
@@ -43,11 +43,11 @@ export class KeyResultCustomListObject {
   public keyResults?: KeyResultObject[]
 }
 
-// @InputType({ description: 'Required data to update a given key result view rank' })
-// export class KeyResultCustomListRankInput {
-//   @Field(() => [ID], { description: 'Ordered list of key result IDs' })
-//   rank: Array<KeyResultObject['id']>
-// }
+@InputType({ description: 'Required data to update a given key result view rank' })
+export class KeyResultCustomListRankInput {
+  @Field(() => [ID], { description: 'Ordered list of key result IDs' })
+  rank: Array<KeyResultObject['id']>
+}
 
 registerEnumType(KEY_RESULT_CUSTOM_LIST_BINDING, {
   name: 'KEY_RESULT_CUSTOM_LIST_BINDING',
