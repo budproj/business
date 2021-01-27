@@ -1,4 +1,4 @@
-import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
+import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql'
 
 import { CycleObject } from 'src/app/graphql/cycle/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
@@ -16,6 +16,11 @@ export class ObjectiveObject {
     description: 'The computed percentage current progress of this objective',
   })
   currentProgress: number
+
+  @Field(() => Int, {
+    description: 'The computed current confidence of this objective',
+  })
+  currentConfidence: number
 
   @Field({ description: 'The creation date of the objective' })
   public createdAt: Date
@@ -42,11 +47,6 @@ export class ObjectiveObject {
   public keyResults?: KeyResultObject[]
 
   //
-  // @Field(() => Float, {
-  //   description: 'The computed current confidence of this objective',
-  //   nullable: true,
-  // })
-  // currentConfidence: ConfidenceReportObject['valueNew']
   //
   // @Field(() => Float, {
   //   description: 'The percentage progress increase since last monday',

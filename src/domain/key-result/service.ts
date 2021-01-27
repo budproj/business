@@ -1,11 +1,12 @@
-import { Injectable, Scope } from '@nestjs/common'
-import { sum } from 'lodash'
+import { Injectable } from '@nestjs/common'
+import { filter, maxBy } from 'lodash'
 
-import { CONSTRAINT, TIMEFRAME_SCOPE } from 'src/domain/constants'
+import { CONSTRAINT } from 'src/domain/constants'
 import { DomainEntityService, DomainQueryContext, DomainServiceGetOptions } from 'src/domain/entity'
+import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import DomainKeyResultCheckInService from 'src/domain/key-result/check-in/service'
-import { DEFAULT_CONFIDENCE, DEFAULT_PERCENTAGE_PROGRESS } from 'src/domain/key-result/constants'
+import { DEFAULT_CONFIDENCE, KEY_RESULT_FORMAT } from 'src/domain/key-result/constants'
 import { KEY_RESULT_CUSTOM_LIST_BINDING } from 'src/domain/key-result/custom-list/constants'
 import { KeyResultCustomListDTO } from 'src/domain/key-result/custom-list/dto'
 import { KeyResultCustomList } from 'src/domain/key-result/custom-list/entities'
@@ -20,7 +21,6 @@ import { KeyResult } from './entities'
 import DomainKeyResultRepository from './repository'
 
 export interface DomainKeyResultServiceInterface {
-  snapshotDate: Date
   repository: DomainKeyResultRepository
   customList: DomainKeyResultCustomListService
   checkIn: DomainKeyResultCheckInService
@@ -45,23 +45,25 @@ export interface DomainKeyResultServiceInterface {
   getCheckInsByUser: (user: UserDTO) => Promise<KeyResultCheckIn[] | null>
   getLatestCheckInForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn | null>
   getCurrentProgressForKeyResult: (keyResult: KeyResultDTO) => Promise<KeyResultCheckIn['progress']>
-  getSnapshotProgressForKeyResult: (
-    keyResult: KeyResultDTO,
-  ) => Promise<KeyResultCheckIn['progress']>
   getCurrentConfidenceForKeyResult: (
     keyResult: KeyResultDTO,
   ) => Promise<KeyResultCheckIn['confidence']>
-  calculateSnapshotAverageProgressFromKeyResultList: (
+  buildCheckInGroupForKeyResultListAtDate: (
+    date: Date,
     keyResults: KeyResult[],
-  ) => Promise<KeyResultCheckIn['progress']>
+  ) => Promise<DomainKeyResultCheckInGroup>
 }
 
-@Injectable({ scope: Scope.REQUEST })
+export interface DomainKeyResultCheckInGroup {
+  progress: KeyResultCheckInDTO['progress']
+  confidence: KeyResultCheckInDTO['confidence']
+  latestCheckIn?: KeyResultCheckInDTO
+}
+
+@Injectable()
 class DomainKeyResultService
   extends DomainEntityService<KeyResult, KeyResultDTO>
   implements DomainKeyResultServiceInterface {
-  public snapshotDate: Date
-
   constructor(
     public readonly repository: DomainKeyResultRepository,
     public readonly customList: DomainKeyResultCustomListService,
@@ -170,17 +172,6 @@ class DomainKeyResultService
     return latestCheckIn.progress
   }
 
-  public async getSnapshotProgressForKeyResult(keyResult: KeyResultDTO) {
-    const snapshot = this.snapshotDate
-    const latestCheckInAtSnapshot = await this.checkIn.getLatestFromKeyResultAtSnapshot(
-      keyResult,
-      snapshot,
-    )
-    if (!latestCheckInAtSnapshot) return DEFAULT_PERCENTAGE_PROGRESS
-
-    return latestCheckInAtSnapshot.progress
-  }
-
   public async getCurrentConfidenceForKeyResult(keyResult: KeyResultDTO) {
     const latestCheckIn = await this.checkIn.getLatestFromKeyResult(keyResult)
     if (!latestCheckIn) return DEFAULT_CONFIDENCE
@@ -188,14 +179,41 @@ class DomainKeyResultService
     return latestCheckIn.confidence
   }
 
-  public async calculateSnapshotAverageProgressFromKeyResultList(keyResults: KeyResult[]) {
-    const calculatedSnapshotProgress = this.calculateAverageProgressFromKeyResultList(
-      keyResults,
-      TIMEFRAME_SCOPE.SNAPSHOT,
+  public async buildCheckInGroupForKeyResultListAtDate(date: Date, keyResults: KeyResult[]) {
+    const latestCheckInAtDatePromises = keyResults.map(async (keyResult) =>
+      this.checkIn.getLatestFromKeyResultAtDate(keyResult, date),
     )
+    const latestCheckInsAtDate = await Promise.all(latestCheckInAtDatePromises)
+    const latestCheckIn = maxBy(filter(latestCheckInsAtDate), (checkIn) => checkIn?.createdAt)
 
-    return calculatedSnapshotProgress
+    const checkInGroup: DomainKeyResultCheckInGroup = {
+      latestCheckIn,
+      progress: this.calculateCheckInGroupAverageProgress(latestCheckInsAtDate, keyResults),
+      confidence: 0,
+    }
+
+    return checkInGroup
   }
+
+  // Public async getSnapshotProgressForKeyResult(keyResult: KeyResultDTO) {
+  //   const snapshot = this.snapshotDate
+  //   const latestCheckInAtSnapshot = await this.checkIn.getLatestFromKeyResultAtSnapshot(
+  //     keyResult,
+  //     snapshot,
+  //   )
+  //   if (!latestCheckInAtSnapshot) return DEFAULT_PERCENTAGE_PROGRESS
+  //
+  //   return latestCheckInAtSnapshot.progress
+  // }
+  //
+  // public async calculateSnapshotAverageProgressFromKeyResultList(keyResults: KeyResult[]) {
+  //   const calculatedSnapshotProgress = this.calculateAverageProgressFromKeyResultList(
+  //     keyResults,
+  //     TIMEFRAME_SCOPE.SNAPSHOT,
+  //   )
+  //
+  //   return calculatedSnapshotProgress
+  // }
 
   protected async createIfUserIsInCompany(
     _data: Partial<KeyResult>,
@@ -215,43 +233,67 @@ class DomainKeyResultService
     return {} as any
   }
 
-  private async calculateAverageProgressFromKeyResultList(
+  private calculateCheckInGroupAverageProgress(
+    latestCheckIns: KeyResultCheckIn[],
     keyResults: KeyResult[],
-    timeframeScope: TIMEFRAME_SCOPE = TIMEFRAME_SCOPE.CURRENT,
   ) {
-    const currentProgressList = await Promise.all(
-      keyResults.map(async (keyResult) =>
-        this.getProgressForKeyResultInPercentage(keyResult, timeframeScope),
-      ),
+    const normalizedCheckIns = latestCheckIns.map((checkIn, index) =>
+      this.normalizeCheckInToPercentage(checkIn, keyResults[index]),
     )
-    const currentProgress = sum(currentProgressList) / currentProgressList.length
+    const checkInGroupAverageProgress = this.checkIn.calculateAverageProgressFromCheckInList(
+      normalizedCheckIns,
+    )
 
-    const normalizedCurrentProgress = Number.isNaN(currentProgress)
-      ? DEFAULT_PERCENTAGE_PROGRESS
-      : currentProgress
-
-    return normalizedCurrentProgress
+    return checkInGroupAverageProgress
   }
 
-  private async getProgressForKeyResultInPercentage(
-    keyResult: KeyResult,
-    timeframeScope: TIMEFRAME_SCOPE,
-  ) {
-    const progressTimeframedSelectors = {
-      [TIMEFRAME_SCOPE.CURRENT]: async () => this.getCurrentProgressForKeyResult(keyResult),
-      [TIMEFRAME_SCOPE.SNAPSHOT]: async () => this.getSnapshotProgressForKeyResult(keyResult),
-    }
+  private normalizeCheckInToPercentage(checkIn: KeyResultCheckIn, keyResult: KeyResult) {
+    if (!checkIn) return
+    if (keyResult.format === KEY_RESULT_FORMAT.PERCENTAGE) return checkIn
 
-    const timeframeSelector = progressTimeframedSelectors[timeframeScope]
-    const currentProgress = await timeframeSelector()
-    if (!currentProgress) return DEFAULT_PERCENTAGE_PROGRESS
+    const percentageCheckIn = this.checkIn.transformCheckInToPercentage(checkIn, keyResult)
+    const percentageCheckInWithLimit = this.checkIn.limitPercentageCheckIn(percentageCheckIn)
 
-    const { goal, initialValue } = keyResult
-    const currentProgressInPercentage =
-      ((currentProgress - initialValue) * 100) / (goal - initialValue)
-
-    return currentProgressInPercentage
+    return percentageCheckInWithLimit
   }
+
+  // Private async calculateAverageProgressFromKeyResultList(
+  //   keyResults: KeyResult[],
+  //   timeframeScope: TIMEFRAME_SCOPE = TIMEFRAME_SCOPE.CURRENT,
+  // ) {
+  //   const currentProgressList = await Promise.all(
+  //     keyResults.map(async (keyResult) =>
+  //       this.getProgressForKeyResultInPercentage(keyResult, timeframeScope),
+  //     ),
+  //   )
+  //   const currentProgress = sum(currentProgressList) / currentProgressList.length
+  //
+  //   const normalizedCurrentProgress = Number.isNaN(currentProgress)
+  //     ? DEFAULT_PERCENTAGE_PROGRESS
+  //     : currentProgress
+  //
+  //   return normalizedCurrentProgress
+  // }
+  //
+  // private async getProgressForKeyResultInPercentage(
+  //   keyResult: KeyResult,
+  //   timeframeScope: TIMEFRAME_SCOPE,
+  // ) {
+  //   const progressTimeframedSelectors = {
+  //     [TIMEFRAME_SCOPE.CURRENT]: async () => this.getCurrentProgressForKeyResult(keyResult),
+  //     [TIMEFRAME_SCOPE.SNAPSHOT]: async () => this.getSnapshotProgressForKeyResult(keyResult),
+  //   }
+  //
+  //   const timeframeSelector = progressTimeframedSelectors[timeframeScope]
+  //   const currentProgress = await timeframeSelector()
+  //   if (!currentProgress) return DEFAULT_PERCENTAGE_PROGRESS
+  //
+  //   const { goal, initialValue } = keyResult
+  //   const currentProgressInPercentage =
+  //     ((currentProgress - initialValue) * 100) / (goal - initialValue)
+  //
+  //   return currentProgressInPercentage
+  // }
   //
   //
   // async getCurrentConfidence(id: KeyResultDTO['id']): Promise<ConfidenceReport['valueNew']> {

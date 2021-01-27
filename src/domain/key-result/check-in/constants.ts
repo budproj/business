@@ -1,0 +1,2 @@
+export const MAX_PERCENTAGE_PROGRESS = 100
+export const MIN_PERCENTAGE_PROGRESS = 0

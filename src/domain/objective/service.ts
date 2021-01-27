@@ -4,12 +4,12 @@ import { Any } from 'typeorm'
 import { CycleDTO } from 'src/domain/cycle/dto'
 import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
-import DomainKeyResultService from 'src/domain/key-result/service'
-import { DEFAULT_PROGRESS } from 'src/domain/objective/constants'
+import DomainKeyResultService, { DomainKeyResultCheckInGroup } from 'src/domain/key-result/service'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
 import { TeamDTO } from 'src/domain/team/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
+import { DEFAULT_CONFIDENCE, DEFAULT_PROGRESS } from './constants'
 import { Objective } from './entities'
 import DomainObjectiveRepository from './repository'
 
@@ -22,6 +22,9 @@ export interface DomainObjectiveServiceInterface {
   getCurrentProgressForObjective: (
     objective: ObjectiveDTO,
   ) => Promise<KeyResultCheckInDTO['progress']>
+  getCurrentConfidenceForObjective: (
+    objective: ObjectiveDTO,
+  ) => Promise<KeyResultCheckInDTO['confidence']>
 }
 
 @Injectable()
@@ -57,9 +60,16 @@ class DomainObjectiveService
 
   public async getCurrentProgressForObjective(objective: ObjectiveDTO) {
     const date = new Date()
-    const currentProgress = await this.getProgressAtDateForObjective(date, objective)
+    const currentCheckInGroup = await this.getCheckInGroupAtDateForObjective(date, objective)
 
-    return currentProgress
+    return currentCheckInGroup.progress
+  }
+
+  public async getCurrentConfidenceForObjective(objective: ObjectiveDTO) {
+    const date = new Date()
+    const currentProgress = await this.getCheckInGroupAtDateForObjective(date, objective)
+
+    return currentProgress.progress
   }
   //
   // async getLastWeekProgress(objectiveID: ObjectiveDTO['id']) {
@@ -108,20 +118,25 @@ class DomainObjectiveService
     return {} as any
   }
 
-  private async getProgressAtDateForObjective(date: Date, objective: ObjectiveDTO) {
+  private async getCheckInGroupAtDateForObjective(date: Date, objective: ObjectiveDTO) {
     const keyResults = await this.keyResultService.getFromObjective(objective)
-    if (!keyResults) return DEFAULT_PROGRESS
+    if (!keyResults) return this.buildDefaultCheckInState()
 
-    const previousSnapshotDate = this.keyResultService.snapshotDate
-    this.keyResultService.snapshotDate = date
-
-    const objectiveCurrentProgress = this.keyResultService.calculateSnapshotAverageProgressFromKeyResultList(
+    const objectiveCurrentCheckInGroup = this.keyResultService.buildCheckInGroupForKeyResultListAtDate(
+      date,
       keyResults,
     )
 
-    this.keyResultService.snapshotDate = previousSnapshotDate
+    return objectiveCurrentCheckInGroup
+  }
 
-    return objectiveCurrentProgress
+  private buildDefaultCheckInState() {
+    const defaultCheckInState: DomainKeyResultCheckInGroup = {
+      progress: DEFAULT_PROGRESS,
+      confidence: DEFAULT_CONFIDENCE,
+    }
+
+    return defaultCheckInState
   }
 }
 

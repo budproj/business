@@ -1,5 +1,5 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Float, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, Float, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
@@ -80,16 +80,16 @@ class GraphQLObjectiveResolver extends GraphQLEntityResolver<Objective, Objectiv
 
     return this.domain.objective.getCurrentProgressForObjective(objective)
   }
-  //
-  // @ResolveField()
-  // async currentConfidence(@Parent() objective: ObjectiveObject) {
-  //   this.logger.log({
-  //     objective,
-  //     message: 'Fetching current confidence for objective',
-  //   })
-  //
-  //   return this.objectiveDomain.getCurrentConfidence(objective.id)
-  // }
+
+  @ResolveField('currentConfidence', () => Int)
+  protected async getObjectiveCurrentConfidence(@Parent() objective: ObjectiveObject) {
+    this.logger.log({
+      objective,
+      message: 'Fetching current confidence for objective',
+    })
+
+    return this.domain.objective.getCurrentConfidenceForObjective(objective)
+  }
   //
   // @ResolveField()
   // async percentageProgressIncrease(@Parent() objective: ObjectiveObject) {
