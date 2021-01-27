@@ -90,16 +90,16 @@ class GraphQLObjectiveResolver extends GraphQLEntityResolver<Objective, Objectiv
 
     return this.domain.objective.getCurrentConfidenceForObjective(objective)
   }
-  //
-  // @ResolveField()
-  // async percentageProgressIncrease(@Parent() objective: ObjectiveObject) {
-  //   this.logger.log({
-  //     objective,
-  //     message: 'Fetching percentage progress increase',
-  //   })
-  //
-  //   return this.objectiveDomain.getPercentageProgressIncrease(objective.id)
-  // }
+
+  @ResolveField('percentageProgressIncrease', () => Float)
+  protected async getObjectivePercentageProgressIncrease(@Parent() objective: ObjectiveObject) {
+    this.logger.log({
+      objective,
+      message: 'Fetching percentage progress increase for objective',
+    })
+
+    return this.domain.objective.getPercentageProgressIncreaseForObjective(objective)
+  }
 }
 
 export default GraphQLObjectiveResolver

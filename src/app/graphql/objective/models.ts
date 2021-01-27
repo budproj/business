@@ -15,12 +15,17 @@ export class ObjectiveObject {
   @Field(() => Float, {
     description: 'The computed percentage current progress of this objective',
   })
-  currentProgress: number
+  public currentProgress: number
 
   @Field(() => Int, {
     description: 'The computed current confidence of this objective',
   })
-  currentConfidence: number
+  public currentConfidence: number
+
+  @Field(() => Float, {
+    description: 'The percentage progress increase since last monday',
+  })
+  public percentageProgressIncrease: number
 
   @Field({ description: 'The creation date of the objective' })
   public createdAt: Date
@@ -45,10 +50,4 @@ export class ObjectiveObject {
     nullable: true,
   })
   public keyResults?: KeyResultObject[]
-
-  //
-  // @Field(() => Float, {
-  //   description: 'The percentage progress increase since last monday',
-  // })
-  // percentageProgressIncrease: number
 }

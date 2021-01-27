@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common'
+import { startOfWeek } from 'date-fns'
 import { Any } from 'typeorm'
 
 import { CycleDTO } from 'src/domain/cycle/dto'
 import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
-import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
+import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import DomainKeyResultService, { DomainKeyResultCheckInGroup } from 'src/domain/key-result/service'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
 import { TeamDTO } from 'src/domain/team/dto'
@@ -19,12 +20,13 @@ export interface DomainObjectiveServiceInterface {
   getFromOwner: (owner: UserDTO) => Promise<Objective[]>
   getFromCycle: (cycle: CycleDTO) => Promise<Objective[]>
   getFromTeam: (team: TeamDTO) => Promise<Objective[]>
-  getCurrentProgressForObjective: (
-    objective: ObjectiveDTO,
-  ) => Promise<KeyResultCheckInDTO['progress']>
+  getCurrentProgressForObjective: (objective: ObjectiveDTO) => Promise<KeyResultCheckIn['progress']>
   getCurrentConfidenceForObjective: (
     objective: ObjectiveDTO,
-  ) => Promise<KeyResultCheckInDTO['confidence']>
+  ) => Promise<KeyResultCheckIn['confidence']>
+  getPercentageProgressIncreaseForObjective: (
+    objective: ObjectiveDTO,
+  ) => Promise<KeyResultCheckIn['progress']>
 }
 
 @Injectable()
@@ -71,34 +73,15 @@ class DomainObjectiveService
 
     return currentCheckInGroup.confidence
   }
-  //
-  // async getLastWeekProgress(objectiveID: ObjectiveDTO['id']) {
-  //   const date = new Date()
-  //   const startOfWeekDate = startOfWeek(date)
-  //   const currentProgress = await this.getProgressAtDate(startOfWeekDate, objectiveID)
-  //
-  //   return currentProgress
-  // }
-  //
-  //
-  // async getCurrentConfidence(objectiveId: ObjectiveDTO['id']): Promise<ProgressReport['valueNew']> {
-  //   const keyResults = await this.keyResultService.getFromObjective(objectiveId)
-  //   if (!keyResults) return
-  //
-  //   const objectiveCurrentConfidence = this.keyResultService.getLowestConfidenceFromList(keyResults)
-  //
-  //   return objectiveCurrentConfidence
-  // }
-  //
-  //
-  // async getPercentageProgressIncrease(objectiveID: ObjectiveDTO['id']) {
-  //   const currentProgress = await this.getCurrentProgress(objectiveID)
-  //   const lastWeekProgress = await this.getLastWeekProgress(objectiveID)
-  //
-  //   const deltaProgress = currentProgress - lastWeekProgress
-  //
-  //   return deltaProgress
-  // }
+
+  public async getPercentageProgressIncreaseForObjective(objective: ObjectiveDTO) {
+    const currentProgress = await this.getCurrentProgressForObjective(objective)
+    const lastWeekProgress = await this.getLastWeekProgressForObjective(objective)
+
+    const deltaProgress = currentProgress - lastWeekProgress
+
+    return deltaProgress
+  }
 
   protected async createIfUserIsInCompany(
     _data: Partial<Objective>,
@@ -137,6 +120,18 @@ class DomainObjectiveService
     }
 
     return defaultCheckInState
+  }
+
+  private async getLastWeekProgressForObjective(objective: ObjectiveDTO) {
+    const date = new Date()
+    const startOfWeekDate = startOfWeek(date)
+
+    const lastWeekCheckInGroup = await this.getCheckInGroupAtDateForObjective(
+      startOfWeekDate,
+      objective,
+    )
+
+    return lastWeekCheckInGroup.progress
   }
 }
 
