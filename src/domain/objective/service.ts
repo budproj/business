@@ -5,6 +5,7 @@ import { CycleDTO } from 'src/domain/cycle/dto'
 import { DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import DomainKeyResultService from 'src/domain/key-result/service'
+import { DEFAULT_PROGRESS } from 'src/domain/objective/constants'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
 import { TeamDTO } from 'src/domain/team/dto'
 import { UserDTO } from 'src/domain/user/dto'
@@ -56,7 +57,7 @@ class DomainObjectiveService
 
   public async getCurrentProgressForObjective(objective: ObjectiveDTO) {
     const date = new Date()
-    const currentProgress = 0 // Await this.getProgressAtDateForObjective(date, objective)
+    const currentProgress = await this.getProgressAtDateForObjective(date, objective)
 
     return currentProgress
   }
@@ -107,21 +108,21 @@ class DomainObjectiveService
     return {} as any
   }
 
-  // Private async getProgressAtDateForObjective(date: Date, objective: ObjectiveDTO) {
-  //   const keyResults = await this.keyResultService.getFromObjective(objective)
-  //   if (!keyResults) return DEFAULT_PROGRESS
-  //
-  //   const previousSnapshotDate = this.keyResultService.report.progress.snapshotDate
-  //   this.keyResultService.report.progress.snapshotDate = date
-  //
-  //   const objectiveCurrentProgress = this.keyResultService.calculateSnapshotAverageProgressFromList(
-  //     keyResults,
-  //   )
-  //
-  //   this.keyResultService.report.progress.snapshotDate = previousSnapshotDate
-  //
-  //   return objectiveCurrentProgress
-  // }
+  private async getProgressAtDateForObjective(date: Date, objective: ObjectiveDTO) {
+    const keyResults = await this.keyResultService.getFromObjective(objective)
+    if (!keyResults) return DEFAULT_PROGRESS
+
+    const previousSnapshotDate = this.keyResultService.snapshotDate
+    this.keyResultService.snapshotDate = date
+
+    const objectiveCurrentProgress = this.keyResultService.calculateSnapshotAverageProgressFromKeyResultList(
+      keyResults,
+    )
+
+    this.keyResultService.snapshotDate = previousSnapshotDate
+
+    return objectiveCurrentProgress
+  }
 }
 
 export default DomainObjectiveService

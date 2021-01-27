@@ -4,4 +4,5 @@ export enum KEY_RESULT_FORMAT {
   COIN_BRL = 'COIN_BRL',
 }
 
+export const DEFAULT_PERCENTAGE_PROGRESS = 0
 export const DEFAULT_CONFIDENCE = 100

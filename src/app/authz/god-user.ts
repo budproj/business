@@ -55,7 +55,7 @@ class AuthzGodUser implements AuthzUser {
 
       [RESOURCE.CYCLE]: {
         [ACTION.CREATE]: CONSTRAINT.ANY,
-        [ACTION.READ]: CONSTRAINT.COMPANY,
+        [ACTION.READ]: CONSTRAINT.ANY,
         [ACTION.UPDATE]: CONSTRAINT.ANY,
         [ACTION.DELETE]: CONSTRAINT.ANY,
       },
@@ -69,7 +69,7 @@ class AuthzGodUser implements AuthzUser {
 
       [RESOURCE.KEY_RESULT]: {
         [ACTION.CREATE]: CONSTRAINT.ANY,
-        [ACTION.READ]: CONSTRAINT.COMPANY,
+        [ACTION.READ]: CONSTRAINT.ANY,
         [ACTION.UPDATE]: CONSTRAINT.ANY,
         [ACTION.DELETE]: CONSTRAINT.ANY,
       },

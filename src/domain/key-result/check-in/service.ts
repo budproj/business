@@ -1,4 +1,4 @@
-import { Injectable, Scope } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { Any } from 'typeorm'
 
 import { DOMAIN_QUERY_ORDER } from 'src/domain/constants'
@@ -11,19 +11,19 @@ import { UserDTO } from 'src/domain/user/dto'
 import DomainKeyResultCheckInRepository from './repository'
 
 export interface DomainKeyResultCheckInServiceInterface {
-  snapshot: Date
-
   getLatestFromUsers: (users: UserDTO[]) => Promise<KeyResultCheckIn | null>
   getLatestFromKeyResult: (keyResult: KeyResultDTO) => Promise<KeyResultCheckIn | null>
+  getLatestFromKeyResultAtSnapshot: (
+    keyResult: KeyResultDTO,
+    snapshot: Date,
+  ) => Promise<KeyResultCheckIn | null>
 }
 
-@Injectable({ scope: Scope.REQUEST })
+@Injectable()
 class DomainKeyResultCheckInService extends DomainEntityService<
   KeyResultCheckIn,
   KeyResultCheckInDTO
 > {
-  public snapshot: Date
-
   constructor(public readonly repository: DomainKeyResultCheckInRepository) {
     super(repository, DomainKeyResultCheckInService.name)
   }
@@ -48,6 +48,12 @@ class DomainKeyResultCheckInService extends DomainEntityService<
   public async getLatestFromKeyResult(keyResult: KeyResultDTO) {
     const date = new Date()
     const checkIn = await this.repository.getLatestFromDateForKeyResult(date, keyResult)
+
+    return checkIn
+  }
+
+  public async getLatestFromKeyResultAtSnapshot(keyResult: KeyResultDTO, snapshot: Date) {
+    const checkIn = await this.repository.getLatestFromDateForKeyResult(snapshot, keyResult)
 
     return checkIn
   }
