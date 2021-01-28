@@ -2,7 +2,9 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   RelationId,
 } from 'typeorm'
@@ -30,16 +32,24 @@ export class KeyResultCheckIn implements KeyResultCheckInDTO {
   public keyResult: KeyResultDTO
 
   @Column()
-  @RelationId((progressReport: KeyResultCheckIn) => progressReport.keyResult)
+  @RelationId((keyResultCheckIn: KeyResultCheckIn) => keyResultCheckIn.keyResult)
   public keyResultId: KeyResultDTO['id']
 
   @ManyToOne('User', 'keyResultCheckIns')
   public user: UserDTO
 
   @Column()
-  @RelationId((progressReport: KeyResultCheckIn) => progressReport.user)
+  @RelationId((keyResultCheckIn: KeyResultCheckIn) => keyResultCheckIn.user)
   public userId: UserDTO['id']
 
   @Column({ type: 'text', nullable: true })
   public comment?: string
+
+  @OneToOne('KeyResultCheckIn', 'id', { nullable: true })
+  @JoinColumn()
+  public parent?: KeyResultCheckInDTO
+
+  @Column({ nullable: true })
+  @RelationId((keyResultCheckIn: KeyResultCheckIn) => keyResultCheckIn.parent)
+  public parentId?: KeyResultCheckInDTO['id']
 }
