@@ -10,7 +10,6 @@ import {
 } from 'src/domain/key-result/check-in/constants'
 import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
-import { KEY_RESULT_FORMAT } from 'src/domain/key-result/constants'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { KeyResult } from 'src/domain/key-result/entities'
 import DomainKeyResultService from 'src/domain/key-result/service'
@@ -25,7 +24,7 @@ export interface DomainKeyResultCheckInServiceInterface {
     keyResult: KeyResultDTO,
     date: Date,
   ) => Promise<KeyResultCheckIn | null>
-  transformCheckInToPercentage: (
+  transformCheckInToRelativePercentage: (
     checkIn: KeyResultCheckIn,
     keyResult: KeyResult,
   ) => KeyResultCheckIn
@@ -78,16 +77,14 @@ class DomainKeyResultCheckInService extends DomainEntityService<
     return checkIn
   }
 
-  public transformCheckInToPercentage(checkIn: KeyResultCheckIn, keyResult: KeyResult) {
-    if (keyResult.format === KEY_RESULT_FORMAT.PERCENTAGE) return checkIn
-
+  public transformCheckInToRelativePercentage(checkIn: KeyResultCheckIn, keyResult: KeyResult) {
     const { initialValue, goal } = keyResult
     const { progress } = checkIn
 
-    const percentageProgress = ((progress - initialValue) * 100) / (goal - initialValue)
+    const relativePercentageProgress = ((progress - initialValue) * 100) / (goal - initialValue)
     const normalizedCheckIn: KeyResultCheckIn = {
       ...checkIn,
-      progress: percentageProgress,
+      progress: relativePercentageProgress,
     }
 
     return normalizedCheckIn
@@ -122,7 +119,6 @@ class DomainKeyResultCheckInService extends DomainEntityService<
   ) {
     const selector = { id: data.keyResultId }
 
-    console.log(selector, 'ok')
     const validationData = await this.keyResultService.getOneWithConstraint(selector, queryContext)
     if (!validationData) return
 
