@@ -13,10 +13,10 @@ export class KeyResultCheckInObject {
   @Field(() => Float, { description: 'The reported progress in this check-in' })
   public progress: number
 
-  // @Field(() => Int, {
-  //   description: 'The percentage progress increase comparing to previous check-in',
-  // })
-  // public percentageProgressIncrease: number
+  @Field(() => Int, {
+    description: 'The percentage progress increase comparing to previous check-in',
+  })
+  public percentageProgressIncrease: number
 
   @Field(() => Int, { description: 'The reported confidence in this check-in' })
   public confidence: number

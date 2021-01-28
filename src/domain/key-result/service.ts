@@ -67,8 +67,9 @@ export interface DomainKeyResultServiceInterface {
   buildCheckInForUser: (
     user: UserDTO,
     checkInData: DomainKeyResultCheckInPayload,
-  ) => Partial<KeyResultCheckInDTO>
+  ) => Promise<Partial<KeyResultCheckInDTO>>
   getParentCheckInFromCheckIn: (checkIn: KeyResultCheckInDTO) => Promise<KeyResultCheckIn | null>
+  getCheckInPercentageProgressIncrease: (checkIn: KeyResultCheckInDTO) => Promise<number>
 }
 
 export interface DomainKeyResultCheckInGroup {
@@ -234,13 +235,17 @@ class DomainKeyResultService
     return defaultCheckInState
   }
 
-  public buildCheckInForUser(user: UserDTO, checkInData: DomainKeyResultCheckInPayload) {
+  public async buildCheckInForUser(user: UserDTO, checkInData: DomainKeyResultCheckInPayload) {
+    const keyResult = await this.getOne({ id: checkInData.keyResultId })
+    const previousCheckIn = await this.checkIn.getLatestFromKeyResult(keyResult)
+
     const checkIn: Partial<KeyResultCheckInDTO> = {
       userId: user.id,
       keyResultId: checkInData.keyResultId,
       progress: checkInData.progress,
       confidence: checkInData.confidence,
       comment: checkInData.comment,
+      parentId: previousCheckIn?.id,
     }
 
     return checkIn
@@ -248,6 +253,12 @@ class DomainKeyResultService
 
   public async getParentCheckInFromCheckIn(checkIn: KeyResultCheckInDTO) {
     return this.checkIn.getOne({ id: checkIn.parentId })
+  }
+
+  public async getCheckInPercentageProgressIncrease(checkIn: KeyResultCheckInDTO) {
+    console.log(checkIn)
+
+    return 0
   }
 
   protected async protectCreationQuery(

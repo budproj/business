@@ -5,7 +5,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common'
-import { Args, ID, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, ID, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { ACTION, PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
@@ -62,7 +62,7 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
       message: 'Received create check-in request',
     })
 
-    const checkIn = this.domain.keyResult.buildCheckInForUser(user, keyResultCheckIn)
+    const checkIn = await this.domain.keyResult.buildCheckInForUser(user, keyResultCheckIn)
     const createCheckInPromise = this.createWithActionScopeConstraint(checkIn, user, ACTION.UPDATE)
 
     this.logger.log({
@@ -113,6 +113,18 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     })
 
     return this.domain.keyResult.getParentCheckInFromCheckIn(checkIn)
+  }
+
+  @ResolveField('percentageProgressIncrease', () => Int)
+  protected async getKeyResultCheckInPercentageProgressIncrease(
+    @Parent() checkIn: KeyResultCheckInObject,
+  ) {
+    this.logger.log({
+      checkIn,
+      message: 'Fetching percentage progress increase for key result check-in',
+    })
+
+    return this.domain.keyResult.getCheckInPercentageProgressIncrease(checkIn)
   }
 }
 
