@@ -15,7 +15,7 @@ export class MovesToCheckInEntity1611691340975 implements MigrationInterface {
     )
 
     await queryRunner.query(
-      `INSERT INTO "key_result_check_in"(progress, confidence, created_at, key_result_id, user_id, comment) SELECT pr.value_new AS progress, cr.value_new AS confidence, pr.created_at, pr.key_result_id, pr.user_id, COALESCE(pr.comment, cr.comment) AS comment FROM progress_report as pr FULL OUTER JOIN confidence_report as cr ON pr.key_result_id=cr.key_result_id AND (pr.comment = cr.comment OR date_trunc('minute', pr.created_at) = date_trunc('minute', cr.created_at))`,
+      `INSERT INTO "key_result_check_in"(progress, confidence, created_at, key_result_id, user_id, comment) SELECT pr.value_new AS progress, COALESCE(cr.value_new, 100) AS confidence, pr.created_at, pr.key_result_id, pr.user_id, COALESCE(pr.comment, cr.comment) AS comment FROM progress_report as pr FULL OUTER JOIN confidence_report as cr ON pr.key_result_id=cr.key_result_id AND (pr.comment = cr.comment OR date_trunc('minute', pr.created_at) = date_trunc('minute', cr.created_at))`,
     )
 
     await queryRunner.query(
