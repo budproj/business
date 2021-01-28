@@ -49,26 +49,6 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     return checkIn
   }
 
-  @ResolveField('user', () => UserObject)
-  protected async getKeyResultCheckInUser(@Parent() checkIn: KeyResultCheckInObject) {
-    this.logger.log({
-      checkIn,
-      message: 'Fetching user for key result check-in',
-    })
-
-    return this.domain.user.getOne({ id: checkIn.userId })
-  }
-
-  @ResolveField('keyResult', () => KeyResultObject)
-  protected async getKeyResultCheckInKeyResult(@Parent() checkIn: KeyResultCheckInObject) {
-    this.logger.log({
-      checkIn,
-      message: 'Fetching key result for key result check-in',
-    })
-
-    return this.domain.keyResult.getOne({ id: checkIn.keyResultId })
-  }
-
   @Permissions(PERMISSION['KEY_RESULT:UPDATE'])
   @Mutation(() => KeyResultCheckInObject, { name: 'createKeyResultCheckIn' })
   protected async createKeyResultCheckIn(
@@ -103,6 +83,36 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     const createdCheckIn = createdCheckIns[0]
 
     return createdCheckIn
+  }
+
+  @ResolveField('user', () => UserObject)
+  protected async getKeyResultCheckInUser(@Parent() checkIn: KeyResultCheckInObject) {
+    this.logger.log({
+      checkIn,
+      message: 'Fetching user for key result check-in',
+    })
+
+    return this.domain.user.getOne({ id: checkIn.userId })
+  }
+
+  @ResolveField('keyResult', () => KeyResultObject)
+  protected async getKeyResultCheckInKeyResult(@Parent() checkIn: KeyResultCheckInObject) {
+    this.logger.log({
+      checkIn,
+      message: 'Fetching key result for key result check-in',
+    })
+
+    return this.domain.keyResult.getOne({ id: checkIn.keyResultId })
+  }
+
+  @ResolveField('parent', () => KeyResultCheckInObject, { nullable: true })
+  protected async getKeyResultCheckInParent(@Parent() checkIn: KeyResultCheckInObject) {
+    this.logger.log({
+      checkIn,
+      message: 'Fetching parent for key result check-in',
+    })
+
+    return this.domain.keyResult.getParentCheckInFromCheckIn(checkIn)
   }
 }
 

@@ -13,6 +13,11 @@ export class KeyResultCheckInObject {
   @Field(() => Float, { description: 'The reported progress in this check-in' })
   public progress: number
 
+  // @Field(() => Int, {
+  //   description: 'The percentage progress increase comparing to previous check-in',
+  // })
+  // public percentageProgressIncrease: number
+
   @Field(() => Int, { description: 'The reported confidence in this check-in' })
   public confidence: number
 
@@ -33,6 +38,12 @@ export class KeyResultCheckInObject {
 
   @Field({ description: 'The comment added in the report', nullable: true })
   public comment?: string
+
+  @Field(() => KeyResultCheckInObject, {
+    description: 'The parent check-in of this check-in',
+    nullable: true,
+  })
+  public parent: KeyResultCheckInObject
 }
 
 @InputType({ description: 'The required data to create a new progress report' })

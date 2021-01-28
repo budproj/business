@@ -68,6 +68,7 @@ export interface DomainKeyResultServiceInterface {
     user: UserDTO,
     checkInData: DomainKeyResultCheckInPayload,
   ) => Partial<KeyResultCheckInDTO>
+  getParentCheckInFromCheckIn: (checkIn: KeyResultCheckInDTO) => Promise<KeyResultCheckIn | null>
 }
 
 export interface DomainKeyResultCheckInGroup {
@@ -243,6 +244,10 @@ class DomainKeyResultService
     }
 
     return checkIn
+  }
+
+  public async getParentCheckInFromCheckIn(checkIn: KeyResultCheckInDTO) {
+    return this.checkIn.getOne({ id: checkIn.parentId })
   }
 
   protected async protectCreationQuery(
