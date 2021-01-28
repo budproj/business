@@ -1,5 +1,6 @@
-import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
+import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { UserInputError } from 'apollo-server-fastify'
 import { pickBy, identity } from 'lodash'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
@@ -50,7 +51,7 @@ class GraphQLKeyResultCustomListResolver extends GraphQLEntityResolver<
     )
     const keyResultCustomList = await this.getOneWithActionScopeConstraint(selector, user)
     if (!keyResultCustomList && !binding)
-      throw new NotFoundException('We could not found a key result custom list with given args')
+      throw new UserInputError('We could not found a key result custom list with given args')
 
     const normalizedKeyResultCustomList = await this.normalizedBasedOnBinding(
       binding,
@@ -59,7 +60,7 @@ class GraphQLKeyResultCustomListResolver extends GraphQLEntityResolver<
     )
 
     if (!normalizedKeyResultCustomList)
-      throw new NotFoundException('We could not found a key result custom list with given args')
+      throw new UserInputError('We could not found a key result custom list with given args')
 
     return normalizedKeyResultCustomList
   }
@@ -107,7 +108,7 @@ class GraphQLKeyResultCustomListResolver extends GraphQLEntityResolver<
       user,
     )
     if (!updatedKeyResultCustomList)
-      throw new NotFoundException(`We could not found a key result custom list for id ${id}`)
+      throw new UserInputError(`We could not found a key result custom list for id ${id}`)
 
     return updatedKeyResultCustomList
   }

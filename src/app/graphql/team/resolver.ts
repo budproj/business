@@ -1,5 +1,6 @@
-import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
+import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, Float, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { UserInputError } from 'apollo-server-fastify'
 import { isUndefined, omitBy } from 'lodash'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
@@ -39,7 +40,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     this.logger.log(`Fetching team with id ${id.toString()}`)
 
     const team = await this.getOneWithActionScopeConstraint({ id }, user)
-    if (!team) throw new NotFoundException(`We could not found a team with id ${id}`)
+    if (!team) throw new UserInputError(`We could not found a team with id ${id}`)
 
     return team
   }

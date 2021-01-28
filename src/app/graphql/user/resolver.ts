@@ -1,5 +1,6 @@
-import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
+import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { UserInputError } from 'apollo-server-fastify'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
@@ -38,7 +39,7 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
     this.logger.log(`Fetching user with id ${id.toString()}`)
 
     const user = await this.getOneWithActionScopeConstraint({ id }, authzUser)
-    if (!user) throw new NotFoundException(`We could not found an user with id ${id}`)
+    if (!user) throw new UserInputError(`We could not found an user with id ${id}`)
 
     return user
   }
@@ -52,7 +53,7 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
     )
 
     const user = await this.getOneWithActionScopeConstraint({ id }, authzUser)
-    if (!user) throw new NotFoundException(`We could not found an user with ID ${id}`)
+    if (!user) throw new UserInputError(`We could not found an user with ID ${id}`)
 
     return user
   }

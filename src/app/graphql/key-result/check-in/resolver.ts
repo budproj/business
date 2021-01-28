@@ -1,11 +1,6 @@
-import {
-  InternalServerErrorException,
-  Logger,
-  NotFoundException,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common'
+import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { UserInputError, ApolloError } from 'apollo-server-fastify'
 
 import { ACTION, PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
@@ -44,7 +39,7 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     this.logger.log(`Fetching key result check-in with id ${id.toString()}`)
 
     const checkIn = await this.getOneWithActionScopeConstraint({ id }, user)
-    if (!checkIn) throw new NotFoundException(`We could not found a check-in with id ${id}`)
+    if (!checkIn) throw new UserInputError(`We could not found a check-in with id ${id}`)
 
     return checkIn
   }
@@ -74,9 +69,9 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     const [error, createdCheckIns] = await this.railway.execute<KeyResultCheckIn[]>(
       createCheckInPromise,
     )
-    if (error) throw new InternalServerErrorException(error.message)
+    if (error) throw new ApolloError(error.message)
     if (!createdCheckIns || createdCheckIns.length === 0)
-      throw new NotFoundException(
+      throw new UserInputError(
         `We could not find any key result with ID ${keyResultCheckIn.keyResultId} to add your check-in`,
       )
 
