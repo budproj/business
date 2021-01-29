@@ -90,7 +90,7 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
     return this.getUserPolicies(selector, user)
   }
 
-  @ResolveField('checkIns', () => [KeyResultCheckInObject], { nullable: true })
+  @ResolveField('keyResultCheckIns', () => [KeyResultCheckInObject], { nullable: true })
   protected async getKeyResultCheckIns(
     @Parent() keyResult: KeyResultObject,
     @Args('order', { type: () => DOMAIN_QUERY_ORDER, defaultValue: DOMAIN_QUERY_ORDER.DESC })
