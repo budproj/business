@@ -121,6 +121,18 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
 
     return this.domain.keyResult.getCheckInPercentageProgressIncrease(checkIn)
   }
+
+  @ResolveField('absoluteConfidenceIncrease', () => Int)
+  protected async getKeyResultCheckInAbsoluteConfidenceIncrease(
+    @Parent() checkIn: KeyResultCheckInObject,
+  ) {
+    this.logger.log({
+      checkIn,
+      message: 'Fetching absolute confidence increase for key result check-in',
+    })
+
+    return this.domain.keyResult.getCheckInAbsoluteConfidenceIncrease(checkIn)
+  }
 }
 
 export default GraphQLCheckInResolver

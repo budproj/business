@@ -32,6 +32,14 @@ export interface DomainKeyResultCheckInServiceInterface {
   calculateAverageProgressFromCheckInList: (
     checkIns: KeyResultCheckIn[],
   ) => KeyResultCheckInDTO['progress']
+  calculateProgressDifference: (
+    oldCheckIn: KeyResultCheckInDTO,
+    newCheckIn: KeyResultCheckInDTO,
+  ) => number
+  calculateConfidenceDifference: (
+    oldCheckIn: KeyResultCheckInDTO,
+    newCheckIn: KeyResultCheckInDTO,
+  ) => number
 }
 
 @Injectable()
@@ -110,6 +118,24 @@ class DomainKeyResultCheckInService extends DomainEntityService<
     const averageProgress = sum(progressList) / progressList.length
 
     return averageProgress
+  }
+
+  public calculateProgressDifference(
+    oldCheckIn: KeyResultCheckInDTO,
+    newCheckIn: KeyResultCheckInDTO,
+  ) {
+    const deltaProgress = newCheckIn.progress - oldCheckIn.progress
+
+    return deltaProgress
+  }
+
+  public calculateConfidenceDifference(
+    oldCheckIn: KeyResultCheckInDTO,
+    newCheckIn: KeyResultCheckInDTO,
+  ) {
+    const deltaConfidence = newCheckIn.confidence - oldCheckIn.confidence
+
+    return deltaConfidence
   }
 
   protected async protectCreationQuery(
