@@ -13,14 +13,14 @@ export class KeyResultCheckInObject {
   @Field(() => Float, { description: 'The reported progress in this check-in' })
   public progress: number
 
+  @Field(() => Int, { description: 'The reported confidence in this check-in' })
+  public confidence: number
+
   @Field(() => Float, {
     description:
       'The relative percentage progress of this check-in. It calculates the percentage of the completion for this key result, where 0% is equal to the initial value of the key result, and 100% is the goal of that given key result. Also, this metric cannot go above 100% or below 0%',
   })
   public relativePercentageProgress: number
-
-  @Field(() => Int, { description: 'The reported confidence in this check-in' })
-  public confidence: number
 
   @Field(() => Int, {
     description: 'The percentage progress increase comparing to previous check-in',
