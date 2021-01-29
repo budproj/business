@@ -71,6 +71,7 @@ export interface DomainKeyResultServiceInterface {
   getParentCheckInFromCheckIn: (checkIn: KeyResultCheckInDTO) => Promise<KeyResultCheckIn | null>
   getCheckInPercentageProgressIncrease: (checkIn: KeyResultCheckIn) => Promise<number>
   getCheckInAbsoluteConfidenceIncrease: (checkIn: KeyResultCheckIn) => Promise<number>
+  getCheckInRelativePercentageProgress: (checkIn: KeyResultCheckIn) => Promise<number>
 }
 
 export interface DomainKeyResultCheckInGroup {
@@ -283,6 +284,13 @@ class DomainKeyResultService
     const deltaConfidence = this.checkIn.calculateConfidenceDifference(previousCheckIn, checkIn)
 
     return deltaConfidence
+  }
+
+  public async getCheckInRelativePercentageProgress(checkIn: KeyResultCheckIn) {
+    const keyResult = await this.getOne({ id: checkIn.keyResultId })
+    const normalizedCheckIn = this.checkIn.transformCheckInToRelativePercentage(checkIn, keyResult)
+
+    return normalizedCheckIn.progress
   }
 
   protected async protectCreationQuery(

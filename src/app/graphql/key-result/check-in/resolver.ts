@@ -133,6 +133,18 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
 
     return this.domain.keyResult.getCheckInAbsoluteConfidenceIncrease(checkIn)
   }
+
+  @ResolveField('relativePercentageProgress', () => Int)
+  protected async getKeyResultCheckInRelativePercentageProgress(
+    @Parent() checkIn: KeyResultCheckInObject,
+  ) {
+    this.logger.log({
+      checkIn,
+      message: 'Fetching relative percentage progress for key result check-in',
+    })
+
+    return this.domain.keyResult.getCheckInRelativePercentageProgress(checkIn)
+  }
 }
 
 export default GraphQLCheckInResolver
