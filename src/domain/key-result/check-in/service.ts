@@ -95,7 +95,9 @@ class DomainKeyResultCheckInService extends DomainEntityService<
       progress: relativePercentageProgress,
     }
 
-    return normalizedCheckIn
+    const limitedNormalizedCheckIn = this.limitPercentageCheckIn(normalizedCheckIn)
+
+    return limitedNormalizedCheckIn
   }
 
   public limitPercentageCheckIn(checkIn: KeyResultCheckIn) {
