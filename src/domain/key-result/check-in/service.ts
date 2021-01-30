@@ -16,6 +16,7 @@ import DomainKeyResultService from 'src/domain/key-result/service'
 import { UserDTO } from 'src/domain/user/dto'
 
 import DomainKeyResultCheckInRepository from './repository'
+import { DEFAULT_CONFIDENCE } from 'src/domain/team/constants'
 
 export interface DomainKeyResultCheckInServiceInterface {
   getLatestFromUsers: (users: UserDTO[]) => Promise<KeyResultCheckIn | null>
@@ -135,7 +136,10 @@ class DomainKeyResultCheckInService extends DomainEntityService<
     oldCheckIn: KeyResultCheckInDTO,
     newCheckIn: KeyResultCheckInDTO,
   ) {
-    const deltaConfidence = newCheckIn.confidence - oldCheckIn.confidence
+    const currentConfidence = newCheckIn.confidence
+    const previousConfidence = oldCheckIn?.confidence ?? DEFAULT_CONFIDENCE
+
+    const deltaConfidence = currentConfidence - previousConfidence
 
     return deltaConfidence
   }

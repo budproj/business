@@ -1,5 +1,15 @@
 import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, ID, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import {
+  Args,
+  Float,
+  ID,
+  Int,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql'
 import { UserInputError, ApolloError } from 'apollo-server-fastify'
 
 import { ACTION, PERMISSION, RESOURCE } from 'src/app/authz/constants'
@@ -110,7 +120,7 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     return this.domain.keyResult.getParentCheckInFromCheckIn(checkIn)
   }
 
-  @ResolveField('percentageProgressIncrease', () => Int)
+  @ResolveField('percentageProgressIncrease', () => Float)
   protected async getKeyResultCheckInPercentageProgressIncrease(
     @Parent() checkIn: KeyResultCheckInObject,
   ) {
@@ -134,7 +144,7 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     return this.domain.keyResult.getCheckInAbsoluteConfidenceIncrease(checkIn)
   }
 
-  @ResolveField('relativePercentageProgress', () => Int)
+  @ResolveField('relativePercentageProgress', () => Float)
   protected async getKeyResultCheckInRelativePercentageProgress(
     @Parent() checkIn: KeyResultCheckInObject,
   ) {

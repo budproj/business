@@ -6,12 +6,12 @@ import appConfig from 'src/config/app'
 import DomainModule from 'src/domain/module'
 import RailwayProvider from 'src/railway'
 
-import GraphQLKeyResultCheckInResolver from './resolver'
+import GraphQLProgressReportResolver from './resolver'
 
 @Module({
   imports: [ConfigModule.forFeature(appConfig), DomainModule, GraphQLAuthzModule],
-  providers: [GraphQLKeyResultCheckInResolver, RailwayProvider],
+  providers: [GraphQLProgressReportResolver, RailwayProvider],
 })
-class GraphQLKeyResultCheckInsModule {}
+class GraphQLProgressReportsModule {}
 
-export default GraphQLKeyResultCheckInsModule
+export default GraphQLProgressReportsModule

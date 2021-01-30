@@ -22,7 +22,7 @@ export class KeyResultCheckInObject {
   })
   public relativePercentageProgress: number
 
-  @Field(() => Int, {
+  @Field(() => Float, {
     description: 'The percentage progress increase comparing to previous check-in',
   })
   public percentageProgressIncrease: number

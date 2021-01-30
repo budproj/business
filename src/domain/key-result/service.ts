@@ -261,12 +261,14 @@ class DomainKeyResultService
     const keyResult = await this.getOne({ id: checkIn.keyResultId })
     const previousCheckIn = await this.getParentCheckInFromCheckIn(checkIn)
 
-    const normalizedPreviousCheckIn = this.checkIn.transformCheckInToRelativePercentage(
-      previousCheckIn,
-      keyResult,
-    )
     const normalizedCurrentCheckIn = this.checkIn.transformCheckInToRelativePercentage(
       checkIn,
+      keyResult,
+    )
+    if (!previousCheckIn) return normalizedCurrentCheckIn.progress
+
+    const normalizedPreviousCheckIn = this.checkIn.transformCheckInToRelativePercentage(
+      previousCheckIn,
       keyResult,
     )
 
