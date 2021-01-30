@@ -9,6 +9,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
+// eslint-disable-next-line unused-imports/no-unused-imports-ts
+import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
 import { KEY_RESULT_CUSTOM_LIST_BINDING } from './constants'
