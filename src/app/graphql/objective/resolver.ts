@@ -1,105 +1,104 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, Float, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { PERMISSION } from 'src/app/authz/constants'
-import { GraphQLUser, Permissions } from 'src/app/authz/decorators'
-import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'src/app/authz/guards'
-import { EnhanceWithBudUser } from 'src/app/authz/interceptors'
+import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
+import { Permissions } from 'src/app/authz/decorators'
 import { AuthzUser } from 'src/app/authz/types'
-import DomainCycleService from 'src/domain/cycle/service'
-import DomainKeyResultService from 'src/domain/key-result/service'
-import DomainObjectiveService from 'src/domain/objective/service'
-import DomainUserService from 'src/domain/user/service'
+import { GraphQLUser } from 'src/app/graphql/authz/decorators'
+import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
+import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
+import { CycleObject } from 'src/app/graphql/cycle/models'
+import { KeyResultObject } from 'src/app/graphql/key-result/models'
+import GraphQLEntityResolver from 'src/app/graphql/resolver'
+import { UserObject } from 'src/app/graphql/user'
+import { ObjectiveDTO } from 'src/domain/objective/dto'
+import { Objective } from 'src/domain/objective/entities'
+import DomainService from 'src/domain/service'
 
 import { ObjectiveObject } from './models'
-import GraphQLObjectiveService from './service'
 
-@UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
+@UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser)
 @Resolver(() => ObjectiveObject)
-class GraphQLObjectiveResolver {
+class GraphQLObjectiveResolver extends GraphQLEntityResolver<Objective, ObjectiveDTO> {
   private readonly logger = new Logger(GraphQLObjectiveResolver.name)
 
-  constructor(
-    private readonly resolverService: GraphQLObjectiveService,
-    private readonly keyResultDomain: DomainKeyResultService,
-    private readonly cycleDomain: DomainCycleService,
-    private readonly userDomain: DomainUserService,
-    private readonly objectiveDomain: DomainObjectiveService,
-  ) {}
+  constructor(protected readonly domain: DomainService) {
+    super(RESOURCE.OBJECTIVE, domain, domain.objective)
+  }
 
   @Permissions(PERMISSION['OBJECTIVE:READ'])
-  @Query(() => ObjectiveObject)
-  async objective(
+  @Query(() => ObjectiveObject, { name: 'objective' })
+  protected async getObjective(
     @Args('id', { type: () => ID }) id: ObjectiveObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log(`Fetching objective with id ${id.toString()}`)
 
-    const objective = await this.resolverService.getOneWithActionScopeConstraint({ id }, user)
+    const objective = await this.getOneWithActionScopeConstraint({ id }, user)
     if (!objective) throw new NotFoundException(`We could not found an objective with id ${id}`)
 
     return objective
   }
 
-  @ResolveField()
-  async keyResults(@Parent() objective: ObjectiveObject) {
-    this.logger.log({
-      objective,
-      message: 'Fetching key results for objective',
-    })
-
-    return this.keyResultDomain.getFromObjective(objective.id)
-  }
-
-  @ResolveField()
-  async cycle(@Parent() objective: ObjectiveObject) {
-    this.logger.log({
-      objective,
-      message: 'Fetching cycle for objective',
-    })
-
-    return this.cycleDomain.getOne({ id: objective.cycleId })
-  }
-
-  @ResolveField()
-  async owner(@Parent() objective: ObjectiveObject) {
+  @ResolveField('owner', () => UserObject)
+  protected async getObjectiveOwner(@Parent() objective: ObjectiveObject) {
     this.logger.log({
       objective,
       message: 'Fetching owner for objective',
     })
 
-    return this.userDomain.getOne({ id: objective.ownerId })
+    return this.domain.user.getOne({ id: objective.ownerId })
   }
 
-  @ResolveField()
-  async currentProgress(@Parent() objective: ObjectiveObject) {
+  @ResolveField('cycle', () => CycleObject)
+  protected async getObjectiveCycle(@Parent() objective: ObjectiveObject) {
+    this.logger.log({
+      objective,
+      message: 'Fetching cycle for objective',
+    })
+
+    return this.domain.cycle.getOne({ id: objective.cycleId })
+  }
+
+  @ResolveField('keyResults', () => [KeyResultObject], { nullable: true })
+  protected async getObjectiveKeyResults(@Parent() objective: ObjectiveObject) {
+    this.logger.log({
+      objective,
+      message: 'Fetching key results for objective',
+    })
+
+    return this.domain.keyResult.getFromObjective(objective)
+  }
+
+  @ResolveField('currentProgress', () => Float)
+  protected async getObjectiveCurrentProgress(@Parent() objective: ObjectiveObject) {
     this.logger.log({
       objective,
       message: 'Fetching current progress for objective',
     })
 
-    return this.objectiveDomain.getCurrentProgress(objective.id)
+    return this.domain.objective.getCurrentProgressForObjective(objective)
   }
 
-  @ResolveField()
-  async currentConfidence(@Parent() objective: ObjectiveObject) {
+  @ResolveField('currentConfidence', () => Int)
+  protected async getObjectiveCurrentConfidence(@Parent() objective: ObjectiveObject) {
     this.logger.log({
       objective,
       message: 'Fetching current confidence for objective',
     })
 
-    return this.objectiveDomain.getCurrentConfidence(objective.id)
+    return this.domain.objective.getCurrentConfidenceForObjective(objective)
   }
 
-  @ResolveField()
-  async percentageProgressIncrease(@Parent() objective: ObjectiveObject) {
+  @ResolveField('percentageProgressIncrease', () => Float)
+  protected async getObjectivePercentageProgressIncrease(@Parent() objective: ObjectiveObject) {
     this.logger.log({
       objective,
-      message: 'Fetching percentage progress increase',
+      message: 'Fetching percentage progress increase for objective',
     })
 
-    return this.objectiveDomain.getPercentageProgressIncrease(objective.id)
+    return this.domain.objective.getPercentageProgressIncreaseForObjective(objective)
   }
 }
 

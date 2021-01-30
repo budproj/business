@@ -1,6 +1,6 @@
 import { EntityRepository, WhereExpression } from 'typeorm'
 
-import DomainEntityRepository, { CONSTRAINT_TYPE } from 'src/domain/repository'
+import { CONSTRAINT_TYPE, DomainEntityRepository } from 'src/domain/entity'
 import { TeamDTO } from 'src/domain/team/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
@@ -8,7 +8,7 @@ import { Team } from './entities'
 
 @EntityRepository(Team)
 class DomainTeamRepository extends DomainEntityRepository<Team> {
-  addTeamWhereExpression(
+  protected addTeamWhereExpression(
     query: WhereExpression,
     allowedTeams: Array<TeamDTO['id']>,
     constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,
@@ -20,7 +20,7 @@ class DomainTeamRepository extends DomainEntityRepository<Team> {
     })
   }
 
-  addOwnsWhereExpression(
+  protected addOwnsWhereExpression(
     query: WhereExpression,
     user: UserDTO,
     constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,

@@ -1,49 +1,47 @@
 import { Injectable } from '@nestjs/common'
-import { uniq } from 'lodash'
 
 import { CycleDTO } from 'src/domain/cycle/dto'
-import DomainEntityService from 'src/domain/service'
+import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { TeamDTO } from 'src/domain/team/dto'
 import DomainTeamService from 'src/domain/team/service'
-import { UserDTO } from 'src/domain/user/dto'
 
 import { Cycle } from './entities'
 import DomainCycleRepository from './repository'
 
+export interface DomainCycleServiceInterface {
+  getFromTeam: (team: TeamDTO) => Promise<Cycle[]>
+}
+
 @Injectable()
-class DomainCycleService extends DomainEntityService<Cycle, CycleDTO> {
+class DomainCycleService
+  extends DomainEntityService<Cycle, CycleDTO>
+  implements DomainCycleServiceInterface {
   constructor(
-    public readonly repository: DomainCycleRepository,
+    protected readonly repository: DomainCycleRepository,
     private readonly teamService: DomainTeamService,
   ) {
-    super(repository, DomainCycleService.name)
+    super(DomainCycleService.name, repository)
   }
 
-  async parseUserCompanyIDs(user: UserDTO) {
-    const userCompanies = await this.teamService.getUserRootTeams(user)
-    const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
-
-    return userCompanyIDs
-  }
-
-  async parseUserCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>) {
-    const companiesTeams = await this.teamService.getAllTeamsBelowNodes(companyIDs)
-    const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
-
-    return companiesTeamIDs
-  }
-
-  async getFromTeam(teamId: TeamDTO['id']) {
-    const cycles = await this.repository.find({ teamId })
-    if (cycles.length === 0) return this.getFromParentTeam(teamId)
+  public async getFromTeam(team: TeamDTO) {
+    const cycles = await this.repository.find({ teamId: team.id })
+    if (cycles.length === 0) return this.getFromParentTeam(team)
 
     return cycles
   }
 
-  async getFromParentTeam(childTeamID: TeamDTO['id']) {
-    const parentTeam = await this.teamService.getParentTeam(childTeamID)
+  protected async protectCreationQuery(
+    _query: DomainCreationQuery<Cycle>,
+    _data: Partial<CycleDTO>,
+    _queryContext: DomainQueryContext,
+  ) {
+    return []
+  }
 
-    return this.getFromTeam(parentTeam.id)
+  private async getFromParentTeam(childTeam: TeamDTO) {
+    const parentTeam = await this.teamService.getParentTeam(childTeam)
+
+    return this.getFromTeam(parentTeam)
   }
 }
 

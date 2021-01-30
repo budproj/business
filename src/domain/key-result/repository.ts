@@ -1,44 +1,22 @@
 import { EntityRepository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
+import { CONSTRAINT_TYPE, DomainEntityRepository } from 'src/domain/entity'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
-import DomainEntityRepository, { CONSTRAINT_TYPE } from 'src/domain/repository'
 import { TeamDTO } from 'src/domain/team/dto'
 import { Team } from 'src/domain/team/entities'
 import { UserDTO } from 'src/domain/user/dto'
 
 import { KeyResult } from './entities'
 
+export interface DomainKeyResultRepositoryInterface {
+  buildRankSortColumn: (rank: Array<KeyResultDTO['id']>) => string
+  findByIdsRanked: (ids: Array<KeyResultDTO['id']>, rank: string) => Promise<KeyResult[]>
+  getInitialValueForKeyResult: (keyResult: KeyResultDTO) => Promise<KeyResult['initialValue']>
+}
+
 @EntityRepository(KeyResult)
 class DomainKeyResultRepository extends DomainEntityRepository<KeyResult> {
-  setupTeamQuery(query: SelectQueryBuilder<KeyResult>) {
-    return query.leftJoinAndSelect(`${KeyResult.name}.team`, Team.name)
-  }
-
-  addTeamWhereExpression(
-    query: WhereExpression,
-    allowedTeams: Array<TeamDTO['id']>,
-    constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,
-  ) {
-    const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
-
-    return query[constraintMethodName](`${Team.name}.id IN (:...allowedTeams)`, {
-      allowedTeams,
-    })
-  }
-
-  addOwnsWhereExpression(
-    query: WhereExpression,
-    user: UserDTO,
-    constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,
-  ) {
-    const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
-
-    return query[constraintMethodName](`${KeyResult.name}.ownerId = :userID`, {
-      userID: user.id,
-    })
-  }
-
-  buildRankSortColumn(rank: Array<KeyResultDTO['id']>): string {
+  public buildRankSortColumn(rank: Array<KeyResultDTO['id']>): string {
     if (rank.length === 0) return ''
 
     const prefix = '(CASE'
@@ -53,12 +31,54 @@ class DomainKeyResultRepository extends DomainEntityRepository<KeyResult> {
     return rankSortColumn
   }
 
-  async findByIdsRanked(ids: Array<KeyResultDTO['id']>, rank: string): Promise<KeyResult[]> {
+  public async findByIdsRanked(ids: Array<KeyResultDTO['id']>, rank: string) {
     const query = this.createQueryBuilder()
     const filteredQuery = query.where(`${KeyResult.name}.id IN (:...ids)`, { ids })
     const orderedQuery = filteredQuery.orderBy(rank)
 
     return orderedQuery.getMany()
+  }
+
+  public async getInitialValueForKeyResult(keyResult: KeyResultDTO) {
+    const where = {
+      id: keyResult.id,
+    }
+    const select: Array<keyof KeyResult> = ['initialValue']
+
+    const selectedKeyResult = await this.findOne({
+      where,
+      select,
+    })
+
+    return selectedKeyResult.initialValue
+  }
+
+  protected setupTeamQuery(query: SelectQueryBuilder<KeyResult>) {
+    return query.leftJoinAndSelect(`${KeyResult.name}.team`, Team.name)
+  }
+
+  protected addTeamWhereExpression(
+    query: WhereExpression,
+    allowedTeams: Array<TeamDTO['id']>,
+    constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,
+  ) {
+    const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
+
+    return query[constraintMethodName](`${Team.name}.id IN (:...allowedTeams)`, {
+      allowedTeams,
+    })
+  }
+
+  protected addOwnsWhereExpression(
+    query: WhereExpression,
+    user: UserDTO,
+    constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,
+  ) {
+    const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
+
+    return query[constraintMethodName](`${KeyResult.name}.ownerId = :userID`, {
+      userID: user.id,
+    })
   }
 }
 

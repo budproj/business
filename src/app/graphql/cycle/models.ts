@@ -1,7 +1,7 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql'
 
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
-import { TeamObject } from 'src/app/graphql/team'
+import { TeamObject } from 'src/app/graphql/team/models'
 
 @ObjectType('Cycle', {
   description:
@@ -9,29 +9,32 @@ import { TeamObject } from 'src/app/graphql/team'
 })
 export class CycleObject {
   @Field(() => ID, { description: 'The ID of the cycle' })
-  id: string
+  public id: string
 
   @Field({ description: 'The date that this cycle starts' })
-  dateStart: Date
+  public dateStart: Date
 
   @Field({ description: 'The date that this cycle ends' })
-  dateEnd: Date
+  public dateEnd: Date
 
   @Field({ description: 'The creation date of this cycle' })
-  createdAt: Date
+  public createdAt: Date
 
   @Field({ description: 'The last update date of this cycle' })
-  updatedAt: Date
+  public updatedAt: Date
 
   @Field(() => ID, { description: 'The team ID that this cycle belongs to' })
-  teamId: TeamObject['id']
+  public teamId: TeamObject['id']
 
   @Field(() => TeamObject, { description: 'The team that this cycle belongs to' })
-  team: TeamObject
-
-  @Field(() => [ObjectiveObject], { description: 'The objectives inside this cycle' })
-  objectives: ObjectiveObject[]
+  public team: TeamObject
 
   @Field({ description: 'The name of the cycle' })
-  name?: string
+  public name?: string
+
+  @Field(() => [ObjectiveObject], {
+    description: 'The objectives inside this cycle',
+    nullable: true,
+  })
+  public objectives?: ObjectiveObject[]
 }

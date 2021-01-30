@@ -38,9 +38,9 @@ export class Cycle implements CycleDTO {
   @RelationId((cycle: Cycle) => cycle.team)
   public teamId: TeamDTO['id']
 
-  @OneToMany('Objective', 'cycle')
-  public objectives: ObjectiveDTO[]
-
   @Column({ nullable: true })
   public name?: string
+
+  @OneToMany('Objective', 'cycle')
+  public objectives?: ObjectiveDTO[]
 }

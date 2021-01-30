@@ -1,94 +1,52 @@
 import { Injectable } from '@nestjs/common'
 import { startOfWeek } from 'date-fns'
-import { uniq } from 'lodash'
 import { Any } from 'typeorm'
 
 import { CycleDTO } from 'src/domain/cycle/dto'
-import { ProgressReport } from 'src/domain/key-result/report/progress/entities'
+import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
+import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import DomainKeyResultService from 'src/domain/key-result/service'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
-import DomainEntityService from 'src/domain/service'
 import { TeamDTO } from 'src/domain/team/dto'
-import DomainTeamService from 'src/domain/team/service'
 import { UserDTO } from 'src/domain/user/dto'
 
 import { Objective } from './entities'
 import DomainObjectiveRepository from './repository'
 
+export interface DomainObjectiveServiceInterface {
+  getFromOwner: (owner: UserDTO) => Promise<Objective[]>
+  getFromCycle: (cycle: CycleDTO) => Promise<Objective[]>
+  getFromTeam: (team: TeamDTO) => Promise<Objective[]>
+  getCurrentProgressForObjective: (objective: ObjectiveDTO) => Promise<KeyResultCheckIn['progress']>
+  getCurrentConfidenceForObjective: (
+    objective: ObjectiveDTO,
+  ) => Promise<KeyResultCheckIn['confidence']>
+  getPercentageProgressIncreaseForObjective: (
+    objective: ObjectiveDTO,
+  ) => Promise<KeyResultCheckIn['progress']>
+}
+
 @Injectable()
-class DomainObjectiveService extends DomainEntityService<Objective, ObjectiveDTO> {
+class DomainObjectiveService
+  extends DomainEntityService<Objective, ObjectiveDTO>
+  implements DomainObjectiveServiceInterface {
   constructor(
-    public readonly repository: DomainObjectiveRepository,
+    protected readonly repository: DomainObjectiveRepository,
     private readonly keyResultService: DomainKeyResultService,
-    private readonly teamService: DomainTeamService,
   ) {
-    super(repository, DomainObjectiveService.name)
+    super(DomainObjectiveService.name, repository)
   }
 
-  async parseUserCompanyIDs(user: UserDTO) {
-    const userCompanies = await this.teamService.getUserRootTeams(user)
-    const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
-
-    return userCompanyIDs
+  public async getFromOwner(owner: UserDTO) {
+    return this.repository.find({ ownerId: owner.id })
   }
 
-  async parseUserCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>) {
-    const companiesTeams = await this.teamService.getAllTeamsBelowNodes(companyIDs)
-    const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
-
-    return companiesTeamIDs
+  public async getFromCycle(cycle: CycleDTO) {
+    return this.repository.find({ cycleId: cycle.id })
   }
 
-  async getFromCycle(cycleId: CycleDTO['id']): Promise<Objective[]> {
-    return this.repository.find({ cycleId })
-  }
-
-  async getFromOwner(ownerId: UserDTO['id']): Promise<Objective[]> {
-    return this.repository.find({ ownerId })
-  }
-
-  async getCurrentProgress(objectiveID: ObjectiveDTO['id']) {
-    const date = new Date()
-    const currentProgress = await this.getProgressAtDate(date, objectiveID)
-
-    return currentProgress
-  }
-
-  async getLastWeekProgress(objectiveID: ObjectiveDTO['id']) {
-    const date = new Date()
-    const startOfWeekDate = startOfWeek(date)
-    const currentProgress = await this.getProgressAtDate(startOfWeekDate, objectiveID)
-
-    return currentProgress
-  }
-
-  async getProgressAtDate(date: Date, objectiveId: ObjectiveDTO['id']) {
-    const keyResults = await this.keyResultService.getFromObjective(objectiveId)
-    if (!keyResults) return
-
-    const previousSnapshotDate = this.keyResultService.report.progress.snapshotDate
-    this.keyResultService.report.progress.snapshotDate = date
-
-    const objectiveCurrentProgress = this.keyResultService.calculateSnapshotAverageProgressFromList(
-      keyResults,
-    )
-
-    this.keyResultService.report.progress.snapshotDate = previousSnapshotDate
-
-    return objectiveCurrentProgress
-  }
-
-  async getCurrentConfidence(objectiveId: ObjectiveDTO['id']): Promise<ProgressReport['valueNew']> {
-    const keyResults = await this.keyResultService.getFromObjective(objectiveId)
-    if (!keyResults) return
-
-    const objectiveCurrentConfidence = this.keyResultService.getLowestConfidenceFromList(keyResults)
-
-    return objectiveCurrentConfidence
-  }
-
-  async getFromTeam(teamId: TeamDTO['id']) {
-    const keyResults = await this.keyResultService.getFromTeam(teamId, ['objectiveId'])
+  public async getFromTeam(team: TeamDTO) {
+    const keyResults = await this.keyResultService.getFromTeams(team, ['objectiveId'])
     if (!keyResults) return []
 
     const objectiveIds = keyResults.map((keyResult) => keyResult.objectiveId)
@@ -99,13 +57,59 @@ class DomainObjectiveService extends DomainEntityService<Objective, ObjectiveDTO
     return objectives
   }
 
-  async getPercentageProgressIncrease(objectiveID: ObjectiveDTO['id']) {
-    const currentProgress = await this.getCurrentProgress(objectiveID)
-    const lastWeekProgress = await this.getLastWeekProgress(objectiveID)
+  public async getCurrentProgressForObjective(objective: ObjectiveDTO) {
+    const date = new Date()
+    const currentCheckInGroup = await this.getCheckInGroupAtDateForObjective(date, objective)
+
+    return currentCheckInGroup.progress
+  }
+
+  public async getCurrentConfidenceForObjective(objective: ObjectiveDTO) {
+    const date = new Date()
+    const currentCheckInGroup = await this.getCheckInGroupAtDateForObjective(date, objective)
+
+    return currentCheckInGroup.confidence
+  }
+
+  public async getPercentageProgressIncreaseForObjective(objective: ObjectiveDTO) {
+    const currentProgress = await this.getCurrentProgressForObjective(objective)
+    const lastWeekProgress = await this.getLastWeekProgressForObjective(objective)
 
     const deltaProgress = currentProgress - lastWeekProgress
 
     return deltaProgress
+  }
+
+  protected async protectCreationQuery(
+    _query: DomainCreationQuery<Objective>,
+    _data: Partial<ObjectiveDTO>,
+    _queryContext: DomainQueryContext,
+  ) {
+    return []
+  }
+
+  private async getCheckInGroupAtDateForObjective(date: Date, objective: ObjectiveDTO) {
+    const keyResults = await this.keyResultService.getFromObjective(objective)
+    if (!keyResults) return this.keyResultService.buildDefaultCheckInGroup()
+
+    const objectiveCheckInGroup = this.keyResultService.buildCheckInGroupForKeyResultListAtDate(
+      date,
+      keyResults,
+    )
+
+    return objectiveCheckInGroup
+  }
+
+  private async getLastWeekProgressForObjective(objective: ObjectiveDTO) {
+    const date = new Date()
+    const startOfWeekDate = startOfWeek(date)
+
+    const lastWeekCheckInGroup = await this.getCheckInGroupAtDateForObjective(
+      startOfWeekDate,
+      objective,
+    )
+
+    return lastWeekCheckInGroup.progress
   }
 }
 

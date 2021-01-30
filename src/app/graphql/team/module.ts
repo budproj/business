@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 
+import GraphQLAuthzModule from 'src/app/graphql/authz'
 import appConfig from 'src/config/app'
 import DomainModule from 'src/domain/module'
 
 import GraphQLTeamResolver from './resolver'
-import GraphQLTeamService from './service'
 
 @Module({
-  imports: [ConfigModule.forFeature(appConfig), DomainModule],
-  providers: [GraphQLTeamResolver, GraphQLTeamService],
+  imports: [ConfigModule.forFeature(appConfig), DomainModule, GraphQLAuthzModule],
+  providers: [GraphQLTeamResolver],
 })
 class GraphQLTeamModule {}
 

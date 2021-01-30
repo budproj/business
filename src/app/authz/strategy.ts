@@ -4,13 +4,13 @@ import { PassportStrategy } from '@nestjs/passport'
 import { passportJwtSecret } from 'jwks-rsa'
 import { ExtractJwt, Strategy } from 'passport-jwt'
 
-import { AuthzToken, AuthzUser } from './types'
+import { AuthzToken, AuthzUser } from 'src/app/authz/types'
 
 @Injectable()
 class AuthzStrategy extends PassportStrategy(Strategy) {
   private readonly logger = new Logger(AuthzStrategy.name)
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(protected readonly configService: ConfigService) {
     super({
       secretOrKeyProvider: passportJwtSecret({
         jwksUri: `https://${configService.get<string>('authz.issuer')}/.well-known/jwks.json`,
@@ -22,7 +22,7 @@ class AuthzStrategy extends PassportStrategy(Strategy) {
     })
   }
 
-  validate(token: AuthzToken): Partial<AuthzUser> {
+  protected validate(token: AuthzToken): Partial<AuthzUser> {
     this.logger.debug({ message: 'Received request to guarded endpoint with token', token })
     return { token }
   }

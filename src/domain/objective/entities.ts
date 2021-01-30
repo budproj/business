@@ -29,9 +29,6 @@ export class Objective implements ObjectiveDTO {
   @UpdateDateColumn()
   public updatedAt: Date
 
-  @OneToMany('KeyResult', 'objective')
-  public keyResults: KeyResultDTO[]
-
   @ManyToOne('Cycle', 'objectives')
   public cycle: CycleDTO
 
@@ -45,4 +42,7 @@ export class Objective implements ObjectiveDTO {
   @Column()
   @RelationId((objective: Objective) => objective.owner)
   public ownerId: UserDTO['id']
+
+  @OneToMany('KeyResult', 'objective', { nullable: true })
+  public keyResults?: KeyResultDTO[]
 }

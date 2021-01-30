@@ -1,46 +1,36 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { uniq } from 'lodash'
+import { Injectable } from '@nestjs/common'
 
-import DomainEntityService from 'src/domain/service'
-import { TeamDTO } from 'src/domain/team/dto'
-import DomainTeamService from 'src/domain/team/service'
+import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { UserDTO } from 'src/domain/user/dto'
 
 import { User } from './entities'
 import DomainUserRepository from './repository'
-import DomainUserViewService from './view/service'
+
+export interface DomainUserServiceInterface {
+  buildUserFullName: (user: UserDTO) => string
+  getUserFromSubjectWithTeamRelation: (authzSub: UserDTO['authzSub']) => Promise<User>
+}
 
 @Injectable()
 class DomainUserService extends DomainEntityService<User, UserDTO> {
-  constructor(
-    @Inject(forwardRef(() => DomainUserViewService))
-    public readonly view: DomainUserViewService,
-    public readonly repository: DomainUserRepository,
-    private readonly teamService: DomainTeamService,
-  ) {
-    super(repository, DomainUserService.name)
+  constructor(protected readonly repository: DomainUserRepository) {
+    super(DomainUserService.name, repository)
   }
 
-  async parseUserCompanyIDs(user: UserDTO) {
-    const userCompanies = await this.teamService.getUserRootTeams(user)
-    const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
-
-    return userCompanyIDs
+  public buildUserFullName(user: UserDTO) {
+    return `${user.firstName} ${user.lastName}`
   }
 
-  async parseUserCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>) {
-    const companiesTeams = await this.teamService.getAllTeamsBelowNodes(companyIDs)
-    const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
-
-    return companiesTeamIDs
-  }
-
-  async getUserFromSubjectWithTeamRelation(authzSub: UserDTO['authzSub']): Promise<User> {
+  public async getUserFromSubjectWithTeamRelation(authzSub: UserDTO['authzSub']) {
     return this.repository.findOne({ authzSub }, { relations: ['teams'] })
   }
 
-  buildUserFullName(user: UserDTO) {
-    return `${user.firstName} ${user.lastName}`
+  protected async protectCreationQuery(
+    _query: DomainCreationQuery<User>,
+    _data: Partial<UserDTO>,
+    _queryContext: DomainQueryContext,
+  ) {
+    return []
   }
 }
 

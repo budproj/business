@@ -1,0 +1,85 @@
+query GET_KEY_RESULT_WITH_ID($id: ID!) {
+  keyResult(id: $id) {
+    id
+    title
+    description
+    goal
+    currentProgress
+    currentConfidence
+    owner {
+      fullName
+      picture
+    }
+    objective {
+      title
+      cycle {
+        name
+        dateStart
+        dateEnd
+      }
+    }
+    policies {
+      update
+    }
+    checkIns {
+      id
+      createdAt
+      comment
+      user {
+        fullName
+        picture
+      }
+    }
+  }
+}
+
+query GET_KEY_RESULT_VIEW_WITH_BINDING($binding: KEY_RESULT_CUSTOM_LIST_BINDING!) {
+  keyResultCustomList(binding: $binding) {
+    id
+    rank
+    keyResults {
+      id
+      title
+      initialValue
+      goal
+      format
+      currentProgress
+      currentConfidence
+      team {
+        name
+      }
+      objective {
+        title
+        cycle {
+          name
+          dateStart
+          dateEnd
+        }
+      }
+      owner {
+        fullName
+        picture
+        role
+      }
+      checkIns(limit: 1) {
+        comment
+        createdAt
+        user {
+          fullName
+        }
+      }
+    }
+  }
+}
+
+mutation UPDATE_RANK($id: ID!, $newRank: [ID!]!) {
+  updateKeyResultCustomList(id: $id, keyResultCustomListInput: { rank: $newRank }) {
+    id
+  }
+}
+
+mutation CREATE_KEY_RESULT_CHECK_IN($keyResultCheckInInput: KeyResultCheckInInput!) {
+  createKeyResultCheckIn(keyResultCheckIn: $keyResultCheckInInput) {
+    id
+  }
+}

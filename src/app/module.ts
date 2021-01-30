@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 
-import AuthzModule from 'src/app/authz'
 import appConfig from 'src/config/app'
 
+import AuthzModule from './authz'
 import GraphQLModule from './graphql'
 
 @Module({

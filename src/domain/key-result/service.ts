@@ -1,196 +1,289 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { sum, min, uniq, uniqBy, remove } from 'lodash'
-import { FindConditions } from 'typeorm'
+import { filter, maxBy, minBy } from 'lodash'
 
-import { CONSTRAINT, TIMEFRAME_SCOPE } from 'src/domain/constants'
-import { DEFAULT_CONFIDENCE, DEFAULT_PROGRESS } from 'src/domain/key-result/constants'
+import { CONSTRAINT } from 'src/domain/constants'
+import {
+  DomainCreationQuery,
+  DomainEntityService,
+  DomainQueryContext,
+  DomainServiceGetOptions,
+} from 'src/domain/entity'
+import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
+import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
+import DomainKeyResultCheckInService from 'src/domain/key-result/check-in/service'
+import {
+  DEFAULT_CONFIDENCE,
+  DEFAULT_PERCENTAGE_PROGRESS,
+  KEY_RESULT_FORMAT,
+} from 'src/domain/key-result/constants'
+import { KEY_RESULT_CUSTOM_LIST_BINDING } from 'src/domain/key-result/custom-list/constants'
+import { KeyResultCustomListDTO } from 'src/domain/key-result/custom-list/dto'
+import { KeyResultCustomList } from 'src/domain/key-result/custom-list/entities'
+import DomainKeyResultCustomListService from 'src/domain/key-result/custom-list/service'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
-import { ConfidenceReport } from 'src/domain/key-result/report/confidence/entities'
-import { ProgressReport } from 'src/domain/key-result/report/progress/entities'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
-import DomainEntityService from 'src/domain/service'
 import { TeamDTO } from 'src/domain/team/dto'
 import DomainTeamService from 'src/domain/team/service'
 import { UserDTO } from 'src/domain/user/dto'
 
 import { KeyResult } from './entities'
-import DomainKeyResultReportService from './report/service'
 import DomainKeyResultRepository from './repository'
 
+export interface DomainKeyResultServiceInterface {
+  customList: DomainKeyResultCustomListService
+  checkIn: DomainKeyResultCheckInService
+
+  getFromOwner: (owner: UserDTO) => Promise<KeyResult[]>
+  getFromTeams: (teams: TeamDTO | TeamDTO[]) => Promise<KeyResult[]>
+  getFromObjective: (objective: ObjectiveDTO) => Promise<KeyResult[]>
+  getFromCustomList: (keyResultCustomList: KeyResultCustomListDTO) => Promise<KeyResult[]>
+  refreshCustomListWithOwnedKeyResults: (
+    user: UserDTO,
+    keyResultCustomList?: KeyResultCustomListDTO,
+  ) => Promise<KeyResultCustomList>
+  createCustomListForBinding: (
+    binding: KEY_RESULT_CUSTOM_LIST_BINDING,
+    user: UserDTO,
+  ) => Promise<KeyResultCustomList>
+  getUserCustomLists: (user: UserDTO) => Promise<KeyResultCustomList[]>
+  getCheckIns: (
+    keyResult: KeyResultDTO,
+    options?: DomainServiceGetOptions<KeyResultCheckIn>,
+  ) => Promise<KeyResultCheckIn[] | null>
+  getCheckInsByUser: (user: UserDTO) => Promise<KeyResultCheckIn[] | null>
+  getLatestCheckInForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn | null>
+  getCurrentProgressForKeyResult: (keyResult: KeyResultDTO) => Promise<KeyResultCheckIn['progress']>
+  getCurrentConfidenceForKeyResult: (
+    keyResult: KeyResultDTO,
+  ) => Promise<KeyResultCheckIn['confidence']>
+  buildCheckInGroupForKeyResultListAtDate: (
+    date: Date,
+    keyResults: KeyResult[],
+  ) => Promise<DomainKeyResultCheckInGroup>
+  buildDefaultCheckInGroup: (
+    progress?: KeyResultCheckIn['progress'],
+    confidence?: KeyResultCheckIn['confidence'],
+  ) => DomainKeyResultCheckInGroup
+  buildCheckInForUser: (
+    user: UserDTO,
+    checkInData: DomainKeyResultCheckInPayload,
+  ) => Partial<KeyResultCheckInDTO>
+}
+
+export interface DomainKeyResultCheckInGroup {
+  progress: KeyResultCheckInDTO['progress']
+  confidence: KeyResultCheckInDTO['confidence']
+  latestCheckIn?: KeyResultCheckInDTO
+}
+
+export interface DomainKeyResultCheckInPayload {
+  progress: KeyResultCheckIn['progress']
+  confidence: KeyResultCheckIn['confidence']
+  keyResultId: KeyResultCheckIn['keyResultId']
+  comment?: KeyResultCheckIn['comment']
+}
+
 @Injectable()
-class DomainKeyResultService extends DomainEntityService<KeyResult, KeyResultDTO> {
+class DomainKeyResultService
+  extends DomainEntityService<KeyResult, KeyResultDTO>
+  implements DomainKeyResultServiceInterface {
   constructor(
-    @Inject(forwardRef(() => DomainKeyResultReportService))
-    public readonly report: DomainKeyResultReportService,
-    public readonly repository: DomainKeyResultRepository,
+    public readonly customList: DomainKeyResultCustomListService,
+    @Inject(forwardRef(() => DomainKeyResultCheckInService))
+    public readonly checkIn: DomainKeyResultCheckInService,
+    protected readonly repository: DomainKeyResultRepository,
     @Inject(forwardRef(() => DomainTeamService))
     private readonly teamService: DomainTeamService,
   ) {
-    super(repository, DomainKeyResultService.name)
+    super(DomainKeyResultService.name, repository)
   }
 
-  async parseUserCompanyIDs(user: UserDTO) {
-    const userCompanies = await this.teamService.getUserRootTeams(user)
-    const userCompanyIDs = uniq(userCompanies.map((company) => company.id))
-
-    return userCompanyIDs
+  public async getFromOwner(owner: UserDTO) {
+    return this.repository.find({ ownerId: owner.id })
   }
 
-  async parseUserCompaniesTeamIDs(companyIDs: Array<TeamDTO['id']>) {
-    const companiesTeams = await this.teamService.getAllTeamsBelowNodes(companyIDs)
-    const companiesTeamIDs = uniq(companiesTeams.map((team) => team.id))
-
-    return companiesTeamIDs
-  }
-
-  async getFromOwner(ownerId: UserDTO['id']): Promise<KeyResult[]> {
-    return this.repository.find({ ownerId })
-  }
-
-  async getFromObjective(objectiveId: ObjectiveDTO['id']): Promise<KeyResult[]> {
-    return this.repository.find({ objectiveId })
-  }
-
-  async getFromTeam(
-    teamIds: TeamDTO['id'] | Array<TeamDTO['id']>,
+  public async getFromTeams(
+    teams: TeamDTO | TeamDTO[],
     filter?: Array<keyof KeyResult>,
   ): Promise<KeyResult[]> {
-    const isEmptyArray = Array.isArray(teamIds) ? teamIds.length === 0 : false
-    if (!teamIds || isEmptyArray) return
+    const isEmptyArray = Array.isArray(teams) ? teams.length === 0 : false
+    if (!teams || isEmptyArray) return
 
     const buildSelector = (teamId: TeamDTO['id']) => ({ teamId })
-    const selector = Array.isArray(teamIds)
-      ? teamIds.map((teamID) => buildSelector(teamID))
-      : buildSelector(teamIds)
+    const selector = Array.isArray(teams)
+      ? teams.map((team) => buildSelector(team.id))
+      : buildSelector(teams.id)
 
     return this.repository.find({ where: selector, select: filter })
   }
 
-  async getManyByIdsPreservingOrder(ids: Array<KeyResultDTO['id']>): Promise<KeyResult[]> {
-    const rankSortColumn = this.repository.buildRankSortColumn(ids)
-    const data = this.repository.findByIdsRanked(ids, rankSortColumn)
+  public async getFromObjective(objective: ObjectiveDTO) {
+    return this.repository.find({ objectiveId: objective.id })
+  }
+
+  public async getFromCustomList(keyResultCustomList: KeyResultCustomListDTO) {
+    const rankSortColumn = this.repository.buildRankSortColumn(keyResultCustomList.rank)
+    const data = this.repository.findByIdsRanked(keyResultCustomList.rank, rankSortColumn)
 
     return data
   }
 
-  async getProgressInPercentage(
-    id: KeyResultDTO['id'],
-    timeframeScope: TIMEFRAME_SCOPE,
-  ): Promise<ProgressReport['valueNew']> {
-    const progressTimeframedSelectors = {
-      [TIMEFRAME_SCOPE.CURRENT]: async () => this.getCurrentProgress(id),
-      [TIMEFRAME_SCOPE.SNAPSHOT]: async () => this.getSnapshotProgress(id),
+  public async refreshCustomListWithOwnedKeyResults(
+    user: UserDTO,
+    keyResultCustomList?: KeyResultCustomListDTO,
+  ) {
+    const availableKeyResults = await this.getFromOwner(user)
+    const refreshedCustomList = await this.customList.refreshWithNewKeyResults(
+      availableKeyResults,
+      keyResultCustomList,
+    )
+
+    return refreshedCustomList
+  }
+
+  public async createCustomListForBinding(binding: KEY_RESULT_CUSTOM_LIST_BINDING, user: UserDTO) {
+    const bindingContextBuilders = {
+      [KEY_RESULT_CUSTOM_LIST_BINDING.MINE]: async () =>
+        this.teamService.buildTeamQueryContext(user, CONSTRAINT.OWNS),
     }
 
-    const timeframeSelector = progressTimeframedSelectors[timeframeScope]
-    const currentProgress = await timeframeSelector()
-    if (!currentProgress) return DEFAULT_PROGRESS
+    const contextBuilder = bindingContextBuilders[binding]
+    const context = await contextBuilder()
 
-    const { goal, initialValue } = await this.repository.findOne({ id })
-    const currentProgressInPercentage =
-      ((currentProgress - initialValue) * 100) / (goal - initialValue)
+    const bindingKeyResults = await this.getManyWithConstraint({}, context)
+    const createdCustomList = await this.customList.createForBinding(
+      binding,
+      user,
+      bindingKeyResults,
+    )
 
-    return currentProgressInPercentage
+    const customList = await this.customList.getOne({ id: createdCustomList.id })
+
+    return customList
   }
 
-  async getSnapshotProgress(id: KeyResultDTO['id']): Promise<ProgressReport['valueNew']> {
-    const latestProgressReport = await this.report.progress.getLatestFromSnapshotForKeyResult(id)
-    if (!latestProgressReport) return DEFAULT_PROGRESS
+  public async getUserCustomLists(user: UserDTO) {
+    const customLists = await this.customList.getFromUser(user)
 
-    return latestProgressReport.valueNew
+    return customLists
   }
 
-  async getCurrentProgress(id: KeyResultDTO['id']): Promise<ProgressReport['valueNew']> {
-    const latestProgressReport = await this.report.progress.getLatestFromKeyResult(id)
-    if (!latestProgressReport) return DEFAULT_PROGRESS
+  public async getCheckIns(
+    keyResult: KeyResultDTO,
+    options?: DomainServiceGetOptions<KeyResultCheckIn>,
+  ) {
+    const selector = { keyResultId: keyResult.id }
 
-    return latestProgressReport.valueNew
+    return this.checkIn.getMany(selector, undefined, options)
   }
 
-  async getCurrentConfidence(id: KeyResultDTO['id']): Promise<ConfidenceReport['valueNew']> {
-    const latestConfidenceReport = await this.report.confidence.getLatestFromKeyResult(id)
-    if (!latestConfidenceReport) return DEFAULT_CONFIDENCE
+  public async getCheckInsByUser(user: UserDTO) {
+    const selector = { userId: user.id }
 
-    return latestConfidenceReport.valueNew
+    return this.checkIn.getMany(selector)
   }
 
-  async calculateAverageProgressFromList(
+  public async getLatestCheckInForTeam(team: TeamDTO) {
+    const users = await this.teamService.getUsersInTeam(team)
+    const latestCheckIn = await this.checkIn.getLatestFromUsers(users)
+
+    return latestCheckIn
+  }
+
+  public async getCurrentProgressForKeyResult(keyResult: KeyResultDTO) {
+    const latestCheckIn = await this.checkIn.getLatestFromKeyResult(keyResult)
+    if (!latestCheckIn) return this.repository.getInitialValueForKeyResult(keyResult)
+
+    return latestCheckIn.progress
+  }
+
+  public async getCurrentConfidenceForKeyResult(keyResult: KeyResultDTO) {
+    const latestCheckIn = await this.checkIn.getLatestFromKeyResult(keyResult)
+    if (!latestCheckIn) return DEFAULT_CONFIDENCE
+
+    return latestCheckIn.confidence
+  }
+
+  public async buildCheckInGroupForKeyResultListAtDate(date: Date, keyResults: KeyResult[]) {
+    const latestCheckInAtDatePromises = keyResults.map(async (keyResult) =>
+      this.checkIn.getLatestFromKeyResultAtDate(keyResult, date),
+    )
+    const latestCheckInsAtDate = await Promise.all(latestCheckInAtDatePromises)
+    const latestNotUndefinedCheckIns = filter(latestCheckInsAtDate)
+    const latestCheckIn = maxBy(latestNotUndefinedCheckIns, (checkIn) => checkIn?.createdAt)
+
+    const checkInGroup: DomainKeyResultCheckInGroup = {
+      latestCheckIn,
+      progress: this.calculateCheckInGroupAverageProgress(latestCheckInsAtDate, keyResults),
+      confidence: this.getCheckInGroupLowestConfidenceValue(latestCheckInsAtDate),
+    }
+
+    return checkInGroup
+  }
+
+  public buildDefaultCheckInGroup(
+    progress: KeyResultCheckIn['progress'] = DEFAULT_PERCENTAGE_PROGRESS,
+    confidence: KeyResultCheckIn['confidence'] = DEFAULT_CONFIDENCE,
+  ) {
+    const defaultCheckInState: DomainKeyResultCheckInGroup = {
+      progress,
+      confidence,
+    }
+
+    return defaultCheckInState
+  }
+
+  public buildCheckInForUser(user: UserDTO, checkInData: DomainKeyResultCheckInPayload) {
+    const checkIn: Partial<KeyResultCheckInDTO> = {
+      userId: user.id,
+      keyResultId: checkInData.keyResultId,
+      progress: checkInData.progress,
+      confidence: checkInData.confidence,
+      comment: checkInData.comment,
+    }
+
+    return checkIn
+  }
+
+  protected async protectCreationQuery(
+    _query: DomainCreationQuery<KeyResult>,
+    _data: Partial<KeyResultDTO>,
+    _queryContext: DomainQueryContext,
+  ) {
+    return []
+  }
+
+  private calculateCheckInGroupAverageProgress(
+    latestCheckIns: KeyResultCheckIn[],
     keyResults: KeyResult[],
-    timeframeScope: TIMEFRAME_SCOPE = TIMEFRAME_SCOPE.CURRENT,
   ) {
-    const currentProgressList = await Promise.all(
-      keyResults.map(async ({ id }) => this.getProgressInPercentage(id, timeframeScope)),
+    const normalizedCheckIns = latestCheckIns.map((checkIn, index) =>
+      this.normalizeCheckInToPercentage(checkIn, keyResults[index]),
     )
-    const currentProgress = sum(currentProgressList) / currentProgressList.length
-
-    const normalizedCurrentProgress = Number.isNaN(currentProgress) ? 0 : currentProgress
-
-    return normalizedCurrentProgress
-  }
-
-  async calculateCurrentAverageProgressFromList(keyResults: KeyResult[]) {
-    const calculatedCurrentProgress = this.calculateAverageProgressFromList(keyResults)
-
-    return calculatedCurrentProgress
-  }
-
-  async calculateSnapshotAverageProgressFromList(keyResults: KeyResult[]) {
-    const calculatedSnapshotProgress = this.calculateAverageProgressFromList(
-      keyResults,
-      TIMEFRAME_SCOPE.SNAPSHOT,
+    const checkInGroupAverageProgress = this.checkIn.calculateAverageProgressFromCheckInList(
+      normalizedCheckIns,
     )
 
-    return calculatedSnapshotProgress
+    return checkInGroupAverageProgress
   }
 
-  async getLowestConfidenceFromList(keyResults: KeyResult[]) {
-    const DEFAULT_CONFIDENCE = 100
-    const currentConfidenceList = await Promise.all(
-      keyResults.map(async ({ id }) => this.getCurrentConfidence(id)),
-    )
-    const minConfidence = min(currentConfidenceList)
+  private normalizeCheckInToPercentage(checkIn: KeyResultCheckIn, keyResult: KeyResult) {
+    if (!checkIn) return
+    if (keyResult.format === KEY_RESULT_FORMAT.PERCENTAGE) return checkIn
 
-    return minConfidence ?? DEFAULT_CONFIDENCE
+    const percentageCheckIn = this.checkIn.transformCheckInToPercentage(checkIn, keyResult)
+    const percentageCheckInWithLimit = this.checkIn.limitPercentageCheckIn(percentageCheckIn)
+
+    return percentageCheckInWithLimit
   }
 
-  async getReports(keyResultID: KeyResult['id']) {
-    const progressReports = await this.report.progress.getFromKeyResult(keyResultID)
-    const confidenceReports = await this.report.confidence.getFromKeyResult(keyResultID)
+  private getCheckInGroupLowestConfidenceValue(checkIns: KeyResultCheckIn[]) {
+    const notUndefinedCheckIns = filter(checkIns)
+    if (notUndefinedCheckIns.length === 0) return DEFAULT_CONFIDENCE
 
-    const mergedReports = [...progressReports, ...confidenceReports]
-    const uniqueReports = uniqBy(mergedReports, 'comment')
+    const minConfidenceCheckIn = minBy(notUndefinedCheckIns, (checkIn) => checkIn.confidence)
 
-    return uniqueReports
-  }
-
-  async getOneReportWithConstraint(
-    constraint: CONSTRAINT,
-    selector: FindConditions<ProgressReport>,
-    user: UserDTO,
-  ) {
-    const progressReport = await this.report.progress.getOneWithConstraint(
-      constraint,
-      selector,
-      user,
-    )
-    const confidenceReport = await this.report.confidence.getOneWithConstraint(
-      constraint,
-      selector,
-      user,
-    )
-
-    const report = remove([progressReport, confidenceReport])[0]
-
-    return report
-  }
-
-  async getInitialValue(keyResultID: KeyResult['id']) {
-    const keyResult = await this.repository.findOne(
-      { id: keyResultID },
-      { select: ['initialValue'] },
-    )
-
-    return keyResult.initialValue
+    return minConfidenceCheckIn.confidence
   }
 }
 

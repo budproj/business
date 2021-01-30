@@ -1,111 +1,74 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { PERMISSION } from 'src/app/authz/constants'
-import { GraphQLUser, Permissions } from 'src/app/authz/decorators'
-import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'src/app/authz/guards'
-import { EnhanceWithBudUser } from 'src/app/authz/interceptors'
+import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
+import { Permissions } from 'src/app/authz/decorators'
 import { AuthzUser } from 'src/app/authz/types'
-import DomainKeyResultService from 'src/domain/key-result/service'
-import DomainObjectiveService from 'src/domain/objective/service'
-import DomainTeamService from 'src/domain/team/service'
+import { GraphQLUser } from 'src/app/graphql/authz/decorators'
+import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
+import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
+import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
+import { KeyResultCustomListObject } from 'src/app/graphql/key-result/custom-list/models'
+import { KeyResultObject } from 'src/app/graphql/key-result/models'
+import { ObjectiveObject } from 'src/app/graphql/objective/models'
+import GraphQLEntityResolver from 'src/app/graphql/resolver'
+import { TeamObject } from 'src/app/graphql/team/models'
+import DomainService from 'src/domain/service'
+import { UserDTO } from 'src/domain/user/dto'
+import { User } from 'src/domain/user/entities'
 
 import { UserObject } from './models'
-import GraphQLUserService from './service'
 
-@UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
+@UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser)
 @Resolver(() => UserObject)
-class GraphQLUserResolver {
+class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
   private readonly logger = new Logger(GraphQLUserResolver.name)
 
-  constructor(
-    private readonly resolverService: GraphQLUserService,
-    private readonly keyResultDomain: DomainKeyResultService,
-    private readonly objectiveDomain: DomainObjectiveService,
-    private readonly teamDomain: DomainTeamService,
-  ) {}
+  constructor(protected readonly domain: DomainService) {
+    super(RESOURCE.USER, domain, domain.user)
+  }
 
   @Permissions(PERMISSION['USER:READ'])
-  @Query(() => UserObject)
-  async user(
+  @Query(() => UserObject, { name: 'user' })
+  protected async getUser(
     @Args('id', { type: () => ID }) id: UserObject['id'],
     @GraphQLUser() authzUser: AuthzUser,
   ) {
     this.logger.log(`Fetching user with id ${id.toString()}`)
 
-    const user = await this.resolverService.getOneWithActionScopeConstraint({ id }, authzUser)
+    const user = await this.getOneWithActionScopeConstraint({ id }, authzUser)
     if (!user) throw new NotFoundException(`We could not found an user with id ${id}`)
 
     return user
   }
 
   @Permissions(PERMISSION['USER:READ'])
-  @Query(() => UserObject)
-  async me(@GraphQLUser() authzUser: AuthzUser) {
+  @Query(() => UserObject, { name: 'me' })
+  protected async getMyUser(@GraphQLUser() authzUser: AuthzUser) {
     const { id } = authzUser
     this.logger.log(
       `Fetching data about the user that is executing the request. Provided user ID: ${id.toString()}`,
     )
 
-    const user = await this.resolverService.getOneWithActionScopeConstraint({ id }, authzUser)
+    const user = await this.getOneWithActionScopeConstraint({ id }, authzUser)
     if (!user) throw new NotFoundException(`We could not found an user with ID ${id}`)
 
     return user
   }
 
-  @ResolveField()
-  async keyResults(@Parent() user: UserObject) {
+  @ResolveField('fullName', () => String)
+  protected async getUserFullName(@Parent() user: UserObject) {
     this.logger.log({
       user,
-      message: 'Fetching key results for user',
+      message: 'Fetching user full name',
     })
 
-    return this.keyResultDomain.getFromOwner(user.id)
+    return this.domain.user.buildUserFullName(user)
   }
 
-  @ResolveField()
-  async objectives(@Parent() user: UserObject) {
-    this.logger.log({
-      user,
-      message: 'Fetching objectives for user',
-    })
-
-    return this.objectiveDomain.getFromOwner(user.id)
-  }
-
-  @ResolveField()
-  async progressReports(@Parent() user: UserObject) {
-    this.logger.log({
-      user,
-      message: 'Fetching progress reports for user',
-    })
-
-    return this.keyResultDomain.report.progress.getFromUser(user.id)
-  }
-
-  @ResolveField()
-  async confidenceReports(@Parent() user: UserObject) {
-    this.logger.log({
-      user,
-      message: 'Fetching confidence reports for user',
-    })
-
-    return this.keyResultDomain.report.confidence.getFromUser(user.id)
-  }
-
-  @ResolveField()
-  async ownedTeams(@Parent() user: UserObject) {
-    this.logger.log({
-      user,
-      message: 'Fetching owned teams for user',
-    })
-
-    return this.teamDomain.getFromOwner(user.id)
-  }
-
-  @ResolveField()
-  async companies(
+  @ResolveField('companies', () => [TeamObject], { nullable: true })
+  protected async getUserCompanies(
     @Parent() user: UserObject,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
   ) {
@@ -114,20 +77,72 @@ class GraphQLUserResolver {
       message: 'Fetching companies for user',
     })
 
-    const companies = await this.teamDomain.getUserRootTeams(user)
+    const companies = await this.domain.team.getUserCompanies(user)
     const companiesWithLimit = limit ? companies.slice(0, limit) : companies
 
     return companiesWithLimit
   }
 
-  @ResolveField()
-  async fullName(@Parent() user: UserObject) {
+  @ResolveField('teams', () => [TeamObject], { nullable: true })
+  protected async getUserTeams(@Parent() user: UserObject) {
     this.logger.log({
       user,
-      message: 'Fetching user full name',
+      message: 'Fetching teams for user',
     })
 
-    return this.resolverService.getUserFullName(user)
+    const teams = await this.domain.team.getWithUser(user)
+
+    return teams
+  }
+
+  @ResolveField('ownedTeams', () => [TeamObject], { nullable: true })
+  protected async getUserOwnedTeams(@Parent() user: UserObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching owned teams for user',
+    })
+
+    return this.domain.team.getFromOwner(user)
+  }
+
+  @ResolveField('objectives', () => [ObjectiveObject], { nullable: true })
+  protected async getUserObjectives(@Parent() user: UserObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching objectives for user',
+    })
+
+    return this.domain.objective.getFromOwner(user)
+  }
+
+  @ResolveField('keyResults', () => [KeyResultObject], { nullable: true })
+  protected async getUserKeyResults(@Parent() user: UserObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching key results for user',
+    })
+
+    return this.domain.keyResult.getFromOwner(user)
+  }
+
+  @ResolveField('keyResultCustomLists', () => [KeyResultCustomListObject], { nullable: true })
+  protected async getUserKeyResultCustomLists(@Parent() user: UserObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching key result custom lists for user',
+    })
+
+    return this.domain.keyResult.getUserCustomLists(user)
+  }
+
+  @ResolveField('keyResultCheckIns', () => [KeyResultCheckInObject], { nullable: true })
+  protected async getUserKeyResultCheckIns(@Parent() user: UserObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching check-ins by user',
+    })
+
+    return this.domain.keyResult.getCheckInsByUser(user)
   }
 }
 

@@ -1,111 +1,84 @@
 import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, ID, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, Float, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { PERMISSION } from 'src/app/authz/constants'
-import { GraphQLUser, Permissions } from 'src/app/authz/decorators'
-import { GraphQLAuthGuard, GraphQLPermissionsGuard } from 'src/app/authz/guards'
-import { EnhanceWithBudUser } from 'src/app/authz/interceptors'
+import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
+import { Permissions } from 'src/app/authz/decorators'
 import { AuthzUser } from 'src/app/authz/types'
-import DomainKeyResultService from 'src/domain/key-result/service'
-import DomainObjectiveService from 'src/domain/objective/service'
-import DomainTeamService from 'src/domain/team/service'
-import DomainUserService from 'src/domain/user/service'
+import { GraphQLUser } from 'src/app/graphql/authz/decorators'
+import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
+import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
+import { PolicyObject } from 'src/app/graphql/authz/models'
+import { ObjectiveObject } from 'src/app/graphql/objective/models'
+import GraphQLEntityResolver from 'src/app/graphql/resolver'
+import { TeamObject } from 'src/app/graphql/team/models'
+import { UserObject } from 'src/app/graphql/user'
+import { DOMAIN_QUERY_ORDER } from 'src/domain/constants'
+import { KeyResultDTO } from 'src/domain/key-result/dto'
+import { KeyResult } from 'src/domain/key-result/entities'
+import DomainService from 'src/domain/service'
 
-import { KeyResultInput, KeyResultObject } from './models'
-import GraphQLKeyResultService from './service'
+import { KeyResultCheckInObject } from './check-in/models'
+import { KeyResultObject } from './models'
 
-@UseGuards(GraphQLAuthGuard, GraphQLPermissionsGuard)
+@UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser)
 @Resolver(() => KeyResultObject)
-class GraphQLKeyResultResolver {
+class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResultDTO> {
   private readonly logger = new Logger(GraphQLKeyResultResolver.name)
 
-  constructor(
-    private readonly resolverService: GraphQLKeyResultService,
-    private readonly keyResultDomain: DomainKeyResultService,
-    private readonly userDomain: DomainUserService,
-    private readonly objectiveDomain: DomainObjectiveService,
-    private readonly teamDomain: DomainTeamService,
-  ) {}
+  constructor(protected readonly domain: DomainService) {
+    super(RESOURCE.KEY_RESULT, domain, domain.keyResult)
+  }
 
   @Permissions(PERMISSION['KEY_RESULT:READ'])
-  @Query(() => KeyResultObject)
-  async keyResult(
+  @Query(() => KeyResultObject, { name: 'keyResult' })
+  protected async getKeyResult(
     @Args('id', { type: () => ID }) id: KeyResultObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log(`Fetching key result with id ${id.toString()}`)
 
-    const keyResult = await this.resolverService.getOneWithActionScopeConstraint({ id }, user)
+    const keyResult = await this.getOneWithActionScopeConstraint({ id }, user)
     if (!keyResult) throw new NotFoundException(`We could not found a key result with id ${id}`)
 
     return keyResult
   }
 
-  @ResolveField()
-  async owner(@Parent() keyResult: KeyResultObject) {
+  @ResolveField('owner', () => UserObject)
+  protected async getKeyResultOwner(@Parent() keyResult: KeyResultObject) {
     this.logger.log({
       keyResult,
       message: 'Fetching owner for key result',
     })
 
-    return this.userDomain.getOne({ id: keyResult.ownerId })
+    return this.domain.user.getOne({ id: keyResult.ownerId })
   }
 
-  @ResolveField()
-  async objective(@Parent() keyResult: KeyResultObject) {
-    this.logger.log({
-      keyResult,
-      message: 'Fetching objective for key result',
-    })
-
-    return this.objectiveDomain.getOne({ id: keyResult.objectiveId })
-  }
-
-  @ResolveField()
-  async team(@Parent() keyResult: KeyResultObject) {
+  @ResolveField('team', () => TeamObject)
+  protected async getKeyResultTeam(@Parent() keyResult: KeyResultObject) {
     this.logger.log({
       keyResult,
       message: 'Fetching team for key result',
     })
 
-    return this.teamDomain.getOne({ id: keyResult.teamId })
+    return this.domain.team.getOne({ id: keyResult.teamId })
   }
 
-  @ResolveField()
-  async progressReports(
-    @Parent() keyResult: KeyResultObject,
-    @Args('limit', { type: () => Int, nullable: true }) limit?: number,
-  ) {
+  @ResolveField('objective', () => ObjectiveObject)
+  protected async getKeyResultObjective(@Parent() keyResult: KeyResultObject) {
     this.logger.log({
       keyResult,
-      limit,
-      message: 'Fetching progress reports for key result',
+      message: 'Fetching objective for key result',
     })
 
-    return this.keyResultDomain.report.progress.getFromKeyResult(keyResult.id, {
-      limit,
-    })
+    return this.domain.objective.getOne({ id: keyResult.objectiveId })
   }
 
-  @ResolveField()
-  async confidenceReports(
+  @ResolveField('policies', () => PolicyObject)
+  protected async getKeyResultPolicies(
     @Parent() keyResult: KeyResultObject,
-    @Args('limit', { type: () => Int, nullable: true }) limit?: number,
+    @GraphQLUser() user: AuthzUser,
   ) {
-    this.logger.log({
-      keyResult,
-      limit,
-      message: 'Fetching confidence reports for key result',
-    })
-
-    return this.keyResultDomain.report.confidence.getFromKeyResult(keyResult.id, {
-      limit,
-    })
-  }
-
-  @ResolveField()
-  async policies(@Parent() keyResult: KeyResultObject, @GraphQLUser() user: AuthzUser) {
     this.logger.log({
       keyResult,
       user,
@@ -113,61 +86,51 @@ class GraphQLKeyResultResolver {
     })
     const selector = { id: keyResult.id }
 
-    return this.resolverService.getUserPolicies(selector, user)
+    return this.getUserPolicies(selector, user)
   }
 
-  @Permissions(PERMISSION['KEY_RESULT:UPDATE'])
-  @Mutation(() => KeyResultObject)
-  async updateKeyResult(
-    @Args('id', { type: () => ID }) id: KeyResultObject['id'],
-    @Args('keyResultInput', { type: () => KeyResultInput })
-    keyResultInput: KeyResultInput,
-    @GraphQLUser() user: AuthzUser,
+  @ResolveField('checkIns', () => [KeyResultCheckInObject], { nullable: true })
+  protected async getKeyResultCheckIns(
+    @Parent() keyResult: KeyResultObject,
+    @Args('order', { type: () => DOMAIN_QUERY_ORDER, defaultValue: DOMAIN_QUERY_ORDER.DESC })
+    order: DOMAIN_QUERY_ORDER,
+    @Args('limit', { type: () => Int, nullable: true }) limit?: number,
   ) {
     this.logger.log({
-      keyResultInput,
-      message: `Updating key result of id ${id}`,
+      keyResult,
+      limit,
+      order,
+      message: 'Fetching check-ins for key result',
     })
 
-    const updatedKeyResult = await this.resolverService.updateWithScopeConstraint(
-      { id },
-      keyResultInput,
-      user,
-    )
-    if (!updatedKeyResult)
-      throw new NotFoundException(`We could not found a key result for id ${id}`)
+    const options = {
+      limit,
+      orderBy: {
+        createdAt: order,
+      },
+    }
 
-    return updatedKeyResult
+    return this.domain.keyResult.getCheckIns(keyResult, options)
   }
 
-  @ResolveField()
-  async currentProgress(@Parent() keyResult: KeyResultObject) {
+  @ResolveField('currentProgress', () => Float)
+  protected async getKeyResultCurrentProgress(@Parent() keyResult: KeyResultObject) {
     this.logger.log({
       keyResult,
       message: 'Fetching current progress for key result',
     })
 
-    return this.keyResultDomain.getCurrentProgress(keyResult.id)
+    return this.domain.keyResult.getCurrentProgressForKeyResult(keyResult)
   }
 
-  @ResolveField()
-  async currentConfidence(@Parent() keyResult: KeyResultObject) {
+  @ResolveField('currentConfidence', () => Float)
+  protected async getKeyResultCurrentConfidence(@Parent() keyResult: KeyResultObject) {
     this.logger.log({
       keyResult,
       message: 'Fetching current confidence for key result',
     })
 
-    return this.keyResultDomain.getCurrentConfidence(keyResult.id)
-  }
-
-  @ResolveField()
-  async reports(@Parent() keyResult: KeyResultObject) {
-    this.logger.log({
-      keyResult,
-      message: 'Fetching reports for key result',
-    })
-
-    return this.keyResultDomain.getReports(keyResult.id)
+    return this.domain.keyResult.getCurrentConfidenceForKeyResult(keyResult)
   }
 }
 

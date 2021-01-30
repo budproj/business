@@ -1,0 +1,20 @@
+query GET_USER_NAMED_AVATAR_DATA {
+  me {
+    id
+    firstName
+    fullName
+    picture
+    companies(limit: 1) {
+      id
+      name
+    }
+  }
+}
+
+query GET_USER_NAME_AND_GENDER {
+  me {
+    id
+    firstName
+    gender
+  }
+}

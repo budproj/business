@@ -1,22 +1,11 @@
 import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
+import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
+import { KeyResultCustomListObject } from 'src/app/graphql/key-result/custom-list/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
-import { ConfidenceReportObject } from 'src/app/graphql/key-result/report/confidence/models'
-import { ProgressReportObject } from 'src/app/graphql/key-result/report/progress/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import { TeamObject } from 'src/app/graphql/team/models'
-import { USER_POLICY } from 'src/app/graphql/user/constants'
 import { USER_GENDER } from 'src/domain/user/constants'
-
-registerEnumType(USER_GENDER, {
-  name: 'USER_GENDER',
-  description: 'Each gender represents a possible gender option for our users',
-})
-
-registerEnumType(USER_POLICY, {
-  name: 'USER_POLICY',
-  description: 'Defines if the user has the allowance for a given action regarding the resource',
-})
 
 @ObjectType('User', {
   description:
@@ -24,85 +13,79 @@ registerEnumType(USER_POLICY, {
 })
 export class UserObject {
   @Field(() => ID, { description: 'The ID of the user' })
-  id: string
+  public id: string
 
   @Field({ description: 'The name of the user' })
-  firstName: string
-
-  @Field({ description: 'The last name of the user', nullable: true })
-  lastName?: string
+  public firstName: string
 
   @Field({ description: 'The full name of the user' })
-  fullName: string
+  public fullName: string
 
   @Field({ description: 'The sub field in Auth0 (their ID)' })
-  authzSub: string
-
-  @Field({ nullable: true, description: 'The gender of the user' })
-  gender?: USER_GENDER
-
-  @Field({ nullable: true, description: 'The user role in the company' })
-  role?: string
-
-  @Field({ nullable: true, description: 'The picture of the user' })
-  picture?: string
+  public authzSub: string
 
   @Field({ description: 'The creation date of the user' })
-  createdAt: Date
+  public createdAt: Date
 
   @Field({ description: 'The last update date of this user' })
-  updatedAt: Date
+  public updatedAt: Date
 
-  @Field(() => [KeyResultObject], {
-    description: 'The creation date ordered list of key results that this user owns',
-  })
-  keyResults: KeyResultObject[]
+  @Field({ description: 'The last name of the user', nullable: true })
+  public lastName?: string
 
-  @Field(() => [ObjectiveObject], {
-    description: 'The creation date ordered list of objectives that this user owns',
-  })
-  objectives: ObjectiveObject[]
+  @Field({ description: 'The gender of the user', nullable: true })
+  public gender?: USER_GENDER
 
-  @Field(() => [ProgressReportObject], {
-    description: 'The creation date ordered list of progress reports created by this user',
-  })
-  progressReports: ProgressReportObject[]
+  @Field({ description: 'The user role in the company', nullable: true })
+  public role?: string
 
-  @Field(() => [ConfidenceReportObject], {
-    description: 'The creation date ordered list of confidence reports created by this user',
-  })
-  confidenceReports: ConfidenceReportObject[]
-
-  @Field(() => [TeamObject], {
-    description: 'The creation date ordered list of teams that this user is part of',
-  })
-  teams: Promise<TeamObject[]>
-
-  @Field(() => [TeamObject], {
-    description: 'The creation date ordered list of teams that this user owns',
-  })
-  ownedTeams: TeamObject[]
+  @Field({ description: 'The picture of the user', nullable: true })
+  public picture?: string
 
   @Field(() => [TeamObject], {
     description: 'The creation date ordered list of companies that this user is a part of',
+    nullable: true,
   })
-  companies: TeamObject[]
+  public companies?: TeamObject[]
+
+  @Field(() => [TeamObject], {
+    description: 'The creation date ordered list of teams that this user is part of',
+    nullable: true,
+  })
+  public teams?: Promise<TeamObject[]>
+
+  @Field(() => [TeamObject], {
+    description: 'The creation date ordered list of teams that this user owns',
+    nullable: true,
+  })
+  public ownedTeams?: TeamObject[]
+
+  @Field(() => [ObjectiveObject], {
+    description: 'The creation date ordered list of objectives that this user owns',
+    nullable: true,
+  })
+  public objectives?: ObjectiveObject[]
+
+  @Field(() => [KeyResultObject], {
+    description: 'The creation date ordered list of key results that this user owns',
+    nullable: true,
+  })
+  public keyResults?: KeyResultObject[]
+
+  @Field(() => [KeyResultCustomListObject], {
+    description: 'The creation date ordered list of key result custom lists that this user owns',
+    nullable: true,
+  })
+  public keyResultCustomLists?: KeyResultCustomListObject[]
+
+  @Field(() => [KeyResultCheckInObject], {
+    description: 'The creation date ordered list of key result check-ins created by this user',
+    nullable: true,
+  })
+  public keyResultCheckIns?: KeyResultCheckInObject[]
 }
 
-@ObjectType('Policies', {
-  description:
-    'Defines the current user policies regarding a given resource. You can use it to display read/create/update/delete controls on your application',
+registerEnumType(USER_GENDER, {
+  name: 'USER_GENDER',
+  description: 'Each gender represents a possible gender option for our users',
 })
-export class PoliciesObject {
-  @Field(() => USER_POLICY, { defaultValue: USER_POLICY.DENY })
-  create: USER_POLICY
-
-  @Field(() => USER_POLICY, { defaultValue: USER_POLICY.DENY })
-  read: USER_POLICY
-
-  @Field(() => USER_POLICY, { defaultValue: USER_POLICY.DENY })
-  update: USER_POLICY
-
-  @Field(() => USER_POLICY, { defaultValue: USER_POLICY.DENY })
-  delete: USER_POLICY
-}

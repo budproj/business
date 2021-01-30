@@ -1,20 +1,18 @@
-import { forwardRef, Module } from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import DomainTeamModule from 'src/domain/team'
+import databaseConfig from 'src/config/database/config'
 
 import DomainUserRepository from './repository'
 import DomainUserService from './service'
-import DomainUserViewModule from './view'
 
 @Module({
   imports: [
+    TypeOrmModule.forRoot(databaseConfig),
     TypeOrmModule.forFeature([DomainUserRepository]),
-    forwardRef(() => DomainUserViewModule),
-    DomainTeamModule,
   ],
   providers: [DomainUserService],
-  exports: [DomainUserService, DomainUserViewModule],
+  exports: [DomainUserService],
 })
 class UserModule {}
 

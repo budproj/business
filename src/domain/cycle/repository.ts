@@ -1,6 +1,6 @@
 import { EntityRepository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
-import DomainEntityRepository, { CONSTRAINT_TYPE } from 'src/domain/repository'
+import { CONSTRAINT_TYPE, DomainEntityRepository } from 'src/domain/entity'
 import { TeamDTO } from 'src/domain/team/dto'
 import { Team } from 'src/domain/team/entities'
 import { UserDTO } from 'src/domain/user/dto'
@@ -9,11 +9,11 @@ import { Cycle } from './entities'
 
 @EntityRepository(Cycle)
 class DomainCycleRepository extends DomainEntityRepository<Cycle> {
-  setupOwnsQuery(query: SelectQueryBuilder<Cycle>) {
+  protected setupOwnsQuery(query: SelectQueryBuilder<Cycle>) {
     return query.leftJoinAndSelect(`${Cycle.name}.team`, Team.name)
   }
 
-  addTeamWhereExpression(
+  protected addTeamWhereExpression(
     query: WhereExpression,
     allowedTeams: Array<TeamDTO['id']>,
     constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,
@@ -25,7 +25,7 @@ class DomainCycleRepository extends DomainEntityRepository<Cycle> {
     })
   }
 
-  addOwnsWhereExpression(
+  protected addOwnsWhereExpression(
     query: WhereExpression,
     user: UserDTO,
     constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,

@@ -1,0 +1,29 @@
+query GET_OBJECTIVE_KEY_RESULTS($objectiveID: ID!) {
+  objective(id: $objectiveID) {
+    id
+    keyResults {
+      id
+      title
+      format
+      goal
+      initialValue
+      currentConfidence
+      currentProgress
+      owner {
+        fullName
+        picture
+        role
+      }
+      team {
+        name
+      }
+      objective {
+        cycle {
+          name
+          dateStart
+          dateEnd
+        }
+      }
+    }
+  }
+}

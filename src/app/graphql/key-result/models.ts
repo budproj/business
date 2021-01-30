@@ -1,125 +1,79 @@
-import { Field, Float, ID, InputType, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { Field, Float, ID, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
 
-import { ReportObject } from 'src/app/graphql/key-result/report/models'
+import { PolicyObject } from 'src/app/graphql/authz/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import { TeamObject } from 'src/app/graphql/team/models'
-import { PoliciesObject, UserObject } from 'src/app/graphql/user/models'
+import { UserObject } from 'src/app/graphql/user/models'
 import { KEY_RESULT_FORMAT } from 'src/domain/key-result/constants'
 
-import { ConfidenceReportObject } from './report/confidence/models'
-import { ProgressReportObject } from './report/progress/models'
-
-registerEnumType(KEY_RESULT_FORMAT, {
-  name: 'KEY_RESULT_FORMAT',
-  description: 'Each format represents how our user wants to see the metrics of the key result',
-})
+import { KeyResultCheckInObject } from './check-in/models'
 
 @ObjectType('KeyResult', {
   description: 'A goal that is created for the team focusing in a given team objective',
 })
 export class KeyResultObject {
   @Field(() => ID, { description: 'The ID of the key result' })
-  id: string
+  public id: string
 
   @Field({ description: 'The title(name) of the key result' })
-  title: string
-
-  @Field({ nullable: true, description: 'The description explaining the key result' })
-  description?: string
+  public title: string
 
   @Field(() => Float, { description: 'The initial value of the key result' })
-  initialValue: number
+  public initialValue: number
 
   @Field(() => Float, { description: 'The goal of the key result' })
-  goal: number
+  public goal: number
 
   @Field({ description: 'The format of the key result' })
-  format: KEY_RESULT_FORMAT
+  public format: KEY_RESULT_FORMAT
+
+  @Field(() => Float, { description: 'The current progress of this key result' })
+  public currentProgress: number
+
+  @Field(() => Int, { description: 'The current confidence of this key result' })
+  public currentConfidence: number
 
   @Field({ description: 'The creation date of the key result' })
-  createdAt: Date
+  public createdAt: Date
 
   @Field({ description: 'The last update date of the key result' })
-  updatedAt: Date
+  public updatedAt: Date
 
   @Field(() => ID, { description: 'The owner ID of the key result' })
-  ownerId: UserObject['id']
+  public ownerId: UserObject['id']
 
   @Field(() => UserObject, { description: 'The owner of the key result' })
-  owner: UserObject
+  public owner: UserObject
 
   @Field(() => ID, { description: 'The object ID that this key result belongs to' })
-  objectiveId: ObjectiveObject['id']
+  public objectiveId: ObjectiveObject['id']
 
   @Field(() => ObjectiveObject, { description: 'The objective that this key result belongs to' })
-  objective: ObjectiveObject
+  public objective: ObjectiveObject
 
   @Field(() => ID, { description: 'The team ID that this key result belongs to' })
-  teamId: TeamObject['id']
+  public teamId: TeamObject['id']
 
   @Field(() => TeamObject, { description: 'The team that this key result belongs to' })
-  team: TeamObject
+  public team: TeamObject
 
-  @Field(() => [ProgressReportObject], {
-    description: 'The creation date ordered list of progress reports for this key result',
-  })
-  progressReports: ProgressReportObject[]
-
-  @Field(() => [ConfidenceReportObject], {
-    description: 'The creation date ordered list of confidence reports for this key result',
-  })
-  confidenceReports: ConfidenceReportObject[]
-
-  @Field(() => PoliciesObject, {
+  @Field(() => PolicyObject, {
     description:
       'Group of policies regarding given key result. Those policies decribe actions that your user can perform with that given resource',
   })
-  policies: PoliciesObject
+  public policies: PolicyObject
 
-  @Field(() => Float, {
-    description: 'The latest reported current progress of this key result',
+  @Field({ description: 'The description explaining the key result', nullable: true })
+  public description?: string
+
+  @Field(() => KeyResultCheckInObject, {
+    description: 'A created date ordered list of key result check-ins for this key result',
     nullable: true,
   })
-  currentProgress: ProgressReportObject['valueNew']
-
-  @Field(() => Float, {
-    description: 'The latest reported current confidence of this key result',
-    nullable: true,
-  })
-  currentConfidence: ConfidenceReportObject['valueNew']
-
-  @Field(() => [ReportObject], {
-    description: 'Created date ordered list of reports regarding this key result',
-    nullable: true,
-  })
-  reports?: ReportObject[]
+  public checkIns?: KeyResultCheckInObject[]
 }
 
-@InputType('KeyResultInput', {
-  description: 'Partial key result data you can send to update a given key result',
+registerEnumType(KEY_RESULT_FORMAT, {
+  name: 'KEY_RESULT_FORMAT',
+  description: 'Each format represents how our user wants to see the metrics of the key result',
 })
-export class KeyResultInput {
-  @Field({ nullable: true, description: 'The title(name) of the key result' })
-  title?: string
-
-  @Field({ nullable: true, description: 'The description explaining the key result' })
-  description?: string
-
-  @Field(() => Float, { nullable: true, description: 'The initial value of the key result' })
-  initialValue?: number
-
-  @Field(() => Float, { nullable: true, description: 'The goal of the key result' })
-  goal?: number
-
-  @Field({ nullable: true, description: 'The format of the key result' })
-  format?: KEY_RESULT_FORMAT
-
-  @Field(() => ID, { nullable: true, description: 'The owner ID of the key result' })
-  ownerId?: UserObject['id']
-
-  @Field(() => ID, { nullable: true, description: 'The object ID that this key result belongs to' })
-  objectiveId?: ObjectiveObject['id']
-
-  @Field(() => ID, { nullable: true, description: 'The team ID that this key result belongs to' })
-  teamId?: TeamObject['id']
-}

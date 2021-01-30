@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 
+import GraphQLAuthzModule from 'src/app/graphql/authz'
 import appConfig from 'src/config/app'
 import DomainModule from 'src/domain/module'
 
 import GraphQLCycleResolver from './resolver'
-import GraphQLCycleService from './service'
 
 @Module({
-  imports: [ConfigModule.forFeature(appConfig), DomainModule],
-  providers: [GraphQLCycleResolver, GraphQLCycleService],
+  imports: [ConfigModule.forFeature(appConfig), DomainModule, GraphQLAuthzModule],
+  providers: [GraphQLCycleResolver],
 })
 class GraphQLCyclesModule {}
 

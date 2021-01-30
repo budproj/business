@@ -1,6 +1,6 @@
 import { EntityRepository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
-import DomainEntityRepository, { CONSTRAINT_TYPE } from 'src/domain/repository'
+import { CONSTRAINT_TYPE, DomainEntityRepository } from 'src/domain/entity'
 import { TeamDTO } from 'src/domain/team/dto'
 import { Team } from 'src/domain/team/entities'
 import { UserDTO } from 'src/domain/user/dto'
@@ -10,13 +10,13 @@ import { Objective } from './entities'
 
 @EntityRepository(Objective)
 class DomainObjectiveRepository extends DomainEntityRepository<Objective> {
-  setupTeamQuery(query: SelectQueryBuilder<Objective>) {
+  protected setupTeamQuery(query: SelectQueryBuilder<Objective>) {
     return query
       .leftJoinAndSelect(`${Objective.name}.owner`, User.name)
       .leftJoinAndSelect(`${User.name}.teams`, Team.name)
   }
 
-  addTeamWhereExpression(
+  protected addTeamWhereExpression(
     query: WhereExpression,
     allowedTeams: Array<TeamDTO['id']>,
     constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,
@@ -28,7 +28,7 @@ class DomainObjectiveRepository extends DomainEntityRepository<Objective> {
     })
   }
 
-  addOwnsWhereExpression(
+  protected addOwnsWhereExpression(
     query: WhereExpression,
     user: UserDTO,
     constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,
