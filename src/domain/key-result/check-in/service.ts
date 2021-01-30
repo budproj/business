@@ -13,10 +13,10 @@ import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { KeyResult } from 'src/domain/key-result/entities'
 import DomainKeyResultService from 'src/domain/key-result/service'
+import { DEFAULT_CONFIDENCE } from 'src/domain/team/constants'
 import { UserDTO } from 'src/domain/user/dto'
 
 import DomainKeyResultCheckInRepository from './repository'
-import { DEFAULT_CONFIDENCE } from 'src/domain/team/constants'
 
 export interface DomainKeyResultCheckInServiceInterface {
   getLatestFromUsers: (users: UserDTO[]) => Promise<KeyResultCheckIn | null>
