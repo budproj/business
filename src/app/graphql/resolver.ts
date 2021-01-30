@@ -3,7 +3,7 @@ import { FindConditions } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
 import { ACTION, POLICY, RESOURCE } from 'src/app/authz/constants'
-import { ActionPolicies, AuthzUser } from 'src/app/authz/types'
+import { ActionPolicies, AuthzScopeGroup, AuthzUser } from 'src/app/authz/types'
 import { DomainEntityService, DomainMutationQueryResult } from 'src/domain/entity'
 import DomainService from 'src/domain/service'
 
@@ -101,7 +101,7 @@ abstract class GraphQLEntityResolver<E, D> implements GraphQLEntityResolverInter
   }
 
   public async getUserPolicies(selector: FindConditions<E>, user: AuthzUser) {
-    const actionSelectors = {
+    const actionSelectors: AuthzScopeGroup = {
       [ACTION.CREATE]: user.scopes[this.resource][ACTION.CREATE],
       [ACTION.READ]: user.scopes[this.resource][ACTION.READ],
       [ACTION.UPDATE]: user.scopes[this.resource][ACTION.UPDATE],
@@ -110,9 +110,9 @@ abstract class GraphQLEntityResolver<E, D> implements GraphQLEntityResolverInter
 
     const policies: ActionPolicies = mapValues(
       actionSelectors,
-      async (constraint): Promise<POLICY> => {
+      async (constraint, action: ACTION): Promise<POLICY> => {
         if (!constraint) return POLICY.DENY
-        const foundData = await this.getOneWithActionScopeConstraint(selector, user)
+        const foundData = await this.getOneWithActionScopeConstraint(selector, user, action)
 
         return foundData ? POLICY.ALLOW : POLICY.DENY
       },
