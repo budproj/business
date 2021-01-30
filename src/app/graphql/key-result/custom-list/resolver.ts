@@ -45,6 +45,7 @@ class GraphQLKeyResultCustomListResolver extends GraphQLEntityResolver<
       {
         id,
         binding,
+        userId: user.id,
       },
       identity,
     )
@@ -84,6 +85,8 @@ class GraphQLKeyResultCustomListResolver extends GraphQLEntityResolver<
       keyResultCustomList,
       message: 'Fetching key results for key result custom list',
     })
+
+    if (keyResultCustomList.rank.length === 0) return
 
     return this.domain.keyResult.getFromCustomList(keyResultCustomList)
   }
