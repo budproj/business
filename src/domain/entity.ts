@@ -158,8 +158,11 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
 
   protected async create(data: Partial<D> | Array<Partial<D>>, _queryContext?: DomainQueryContext) {
     const result = await this.repository.insert(data as QueryDeepPartialEntity<E>)
+    const createdIDs = result.identifiers.map((data) => data.id)
 
-    return result.raw
+    const createdData = await this.repository.findByIds(createdIDs)
+
+    return createdData
   }
 
   protected async createIfWithinConstraint(data: Partial<D>, queryContext: DomainQueryContext) {
