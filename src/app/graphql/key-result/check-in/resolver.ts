@@ -1,11 +1,16 @@
+import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
 import {
-  InternalServerErrorException,
-  Logger,
-  NotFoundException,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common'
-import { Args, ID, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+  Args,
+  Float,
+  ID,
+  Int,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql'
+import { UserInputError, ApolloError } from 'apollo-server-fastify'
 
 import { ACTION, PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
@@ -44,9 +49,45 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     this.logger.log(`Fetching key result check-in with id ${id.toString()}`)
 
     const checkIn = await this.getOneWithActionScopeConstraint({ id }, user)
-    if (!checkIn) throw new NotFoundException(`We could not found a check-in with id ${id}`)
+    if (!checkIn) throw new UserInputError(`We could not found a check-in with id ${id}`)
 
     return checkIn
+  }
+
+  @Permissions(PERMISSION['KEY_RESULT:UPDATE'])
+  @Mutation(() => KeyResultCheckInObject, { name: 'createKeyResultCheckIn' })
+  protected async createKeyResultCheckIn(
+    @GraphQLUser() user: AuthzUser,
+    @Args('keyResultCheckIn', { type: () => KeyResultCheckInInput })
+    keyResultCheckIn: KeyResultCheckInInput,
+  ) {
+    this.logger.log({
+      user,
+      keyResultCheckIn,
+      message: 'Received create check-in request',
+    })
+
+    const checkIn = await this.domain.keyResult.buildCheckInForUser(user, keyResultCheckIn)
+    const createCheckInPromise = this.createWithActionScopeConstraint(checkIn, user, ACTION.UPDATE)
+
+    this.logger.log({
+      user,
+      checkIn,
+      message: 'Creating a new check-in in our database',
+    })
+
+    const [error, createdCheckIns] = await this.railway.execute<KeyResultCheckIn[]>(
+      createCheckInPromise,
+    )
+    if (error) throw new ApolloError(error.message)
+    if (!createdCheckIns || createdCheckIns.length === 0)
+      throw new UserInputError(
+        `We could not find any key result with ID ${keyResultCheckIn.keyResultId} to add your check-in`,
+      )
+
+    const createdCheckIn = createdCheckIns[0]
+
+    return createdCheckIn
   }
 
   @ResolveField('user', () => UserObject)
@@ -69,40 +110,50 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     return this.domain.keyResult.getOne({ id: checkIn.keyResultId })
   }
 
-  @Permissions(PERMISSION['KEY_RESULT:UPDATE'])
-  @Mutation(() => KeyResultCheckInObject, { name: 'createKeyResultCheckIn' })
-  protected async createKeyResultCheckIn(
-    @GraphQLUser() user: AuthzUser,
-    @Args('keyResultCheckIn', { type: () => KeyResultCheckInInput })
-    keyResultCheckIn: KeyResultCheckInInput,
+  @ResolveField('parent', () => KeyResultCheckInObject, { nullable: true })
+  protected async getKeyResultCheckInParent(@Parent() checkIn: KeyResultCheckInObject) {
+    this.logger.log({
+      checkIn,
+      message: 'Fetching parent for key result check-in',
+    })
+
+    return this.domain.keyResult.getParentCheckInFromCheckIn(checkIn)
+  }
+
+  @ResolveField('percentageProgressIncrease', () => Float)
+  protected async getKeyResultCheckInPercentageProgressIncrease(
+    @Parent() checkIn: KeyResultCheckInObject,
   ) {
     this.logger.log({
-      user,
-      keyResultCheckIn,
-      message: 'Received create check-in request',
-    })
-
-    const checkIn = this.domain.keyResult.buildCheckInForUser(user, keyResultCheckIn)
-    const createCheckInPromise = this.createWithActionScopeConstraint(checkIn, user, ACTION.UPDATE)
-
-    this.logger.log({
-      user,
       checkIn,
-      message: 'Creating a new check-in in our database',
+      message: 'Fetching percentage progress increase for key result check-in',
     })
 
-    const [error, createdCheckIns] = await this.railway.execute<KeyResultCheckIn[]>(
-      createCheckInPromise,
-    )
-    if (error) throw new InternalServerErrorException(error.message)
-    if (!createdCheckIns || createdCheckIns.length === 0)
-      throw new NotFoundException(
-        `We could not find any key result with ID ${keyResultCheckIn.keyResultId} to add your check-in`,
-      )
+    return this.domain.keyResult.getCheckInPercentageProgressIncrease(checkIn)
+  }
 
-    const createdCheckIn = createdCheckIns[0]
+  @ResolveField('absoluteConfidenceIncrease', () => Int)
+  protected async getKeyResultCheckInAbsoluteConfidenceIncrease(
+    @Parent() checkIn: KeyResultCheckInObject,
+  ) {
+    this.logger.log({
+      checkIn,
+      message: 'Fetching absolute confidence increase for key result check-in',
+    })
 
-    return createdCheckIn
+    return this.domain.keyResult.getCheckInAbsoluteConfidenceIncrease(checkIn)
+  }
+
+  @ResolveField('relativePercentageProgress', () => Float)
+  protected async getKeyResultCheckInRelativePercentageProgress(
+    @Parent() checkIn: KeyResultCheckInObject,
+  ) {
+    this.logger.log({
+      checkIn,
+      message: 'Fetching relative percentage progress for key result check-in',
+    })
+
+    return this.domain.keyResult.getCheckInRelativePercentageProgress(checkIn)
   }
 }
 

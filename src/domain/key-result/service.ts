@@ -67,7 +67,11 @@ export interface DomainKeyResultServiceInterface {
   buildCheckInForUser: (
     user: UserDTO,
     checkInData: DomainKeyResultCheckInPayload,
-  ) => Partial<KeyResultCheckInDTO>
+  ) => Promise<Partial<KeyResultCheckInDTO>>
+  getParentCheckInFromCheckIn: (checkIn: KeyResultCheckInDTO) => Promise<KeyResultCheckIn | null>
+  getCheckInPercentageProgressIncrease: (checkIn: KeyResultCheckIn) => Promise<number>
+  getCheckInAbsoluteConfidenceIncrease: (checkIn: KeyResultCheckIn) => Promise<number>
+  getCheckInRelativePercentageProgress: (checkIn: KeyResultCheckIn) => Promise<number>
 }
 
 export interface DomainKeyResultCheckInGroup {
@@ -233,16 +237,62 @@ class DomainKeyResultService
     return defaultCheckInState
   }
 
-  public buildCheckInForUser(user: UserDTO, checkInData: DomainKeyResultCheckInPayload) {
+  public async buildCheckInForUser(user: UserDTO, checkInData: DomainKeyResultCheckInPayload) {
+    const keyResult = await this.getOne({ id: checkInData.keyResultId })
+    const previousCheckIn = await this.checkIn.getLatestFromKeyResult(keyResult)
+
     const checkIn: Partial<KeyResultCheckInDTO> = {
       userId: user.id,
       keyResultId: checkInData.keyResultId,
       progress: checkInData.progress,
       confidence: checkInData.confidence,
       comment: checkInData.comment,
+      parentId: previousCheckIn?.id,
     }
 
     return checkIn
+  }
+
+  public async getParentCheckInFromCheckIn(checkIn: KeyResultCheckInDTO) {
+    return this.checkIn.getOne({ id: checkIn.parentId })
+  }
+
+  public async getCheckInPercentageProgressIncrease(checkIn: KeyResultCheckIn) {
+    const keyResult = await this.getOne({ id: checkIn.keyResultId })
+    const previousCheckIn = await this.getParentCheckInFromCheckIn(checkIn)
+
+    const normalizedCurrentCheckIn = this.checkIn.transformCheckInToRelativePercentage(
+      checkIn,
+      keyResult,
+    )
+    if (!previousCheckIn) return normalizedCurrentCheckIn.progress
+
+    const normalizedPreviousCheckIn = this.checkIn.transformCheckInToRelativePercentage(
+      previousCheckIn,
+      keyResult,
+    )
+
+    const deltaProgress = this.checkIn.calculateProgressDifference(
+      normalizedPreviousCheckIn,
+      normalizedCurrentCheckIn,
+    )
+
+    return deltaProgress
+  }
+
+  public async getCheckInAbsoluteConfidenceIncrease(checkIn: KeyResultCheckIn) {
+    const previousCheckIn = await this.getParentCheckInFromCheckIn(checkIn)
+
+    const deltaConfidence = this.checkIn.calculateConfidenceDifference(previousCheckIn, checkIn)
+
+    return deltaConfidence
+  }
+
+  public async getCheckInRelativePercentageProgress(checkIn: KeyResultCheckIn) {
+    const keyResult = await this.getOne({ id: checkIn.keyResultId })
+    const normalizedCheckIn = this.checkIn.transformCheckInToRelativePercentage(checkIn, keyResult)
+
+    return normalizedCheckIn.progress
   }
 
   protected async protectCreationQuery(
@@ -271,7 +321,7 @@ class DomainKeyResultService
     if (!checkIn) return
     if (keyResult.format === KEY_RESULT_FORMAT.PERCENTAGE) return checkIn
 
-    const percentageCheckIn = this.checkIn.transformCheckInToPercentage(checkIn, keyResult)
+    const percentageCheckIn = this.checkIn.transformCheckInToRelativePercentage(checkIn, keyResult)
     const percentageCheckInWithLimit = this.checkIn.limitPercentageCheckIn(percentageCheckIn)
 
     return percentageCheckInWithLimit

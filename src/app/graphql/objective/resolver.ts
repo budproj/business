@@ -1,5 +1,6 @@
-import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
+import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, Float, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { UserInputError } from 'apollo-server-fastify'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
@@ -36,7 +37,7 @@ class GraphQLObjectiveResolver extends GraphQLEntityResolver<Objective, Objectiv
     this.logger.log(`Fetching objective with id ${id.toString()}`)
 
     const objective = await this.getOneWithActionScopeConstraint({ id }, user)
-    if (!objective) throw new NotFoundException(`We could not found an objective with id ${id}`)
+    if (!objective) throw new UserInputError(`We could not found an objective with id ${id}`)
 
     return objective
   }

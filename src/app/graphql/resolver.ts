@@ -8,7 +8,11 @@ import { DomainEntityService, DomainMutationQueryResult } from 'src/domain/entit
 import DomainService from 'src/domain/service'
 
 export interface GraphQLEntityResolverInterface<E, D> {
-  createWithActionScopeConstraint: (data: Partial<D>, user: AuthzUser, action: ACTION) => Promise<E>
+  createWithActionScopeConstraint: (
+    data: Partial<D>,
+    user: AuthzUser,
+    action: ACTION,
+  ) => Promise<E[]>
 
   getOneWithActionScopeConstraint: (
     selector: FindConditions<E>,

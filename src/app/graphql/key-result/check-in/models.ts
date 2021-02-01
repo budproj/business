@@ -16,6 +16,22 @@ export class KeyResultCheckInObject {
   @Field(() => Int, { description: 'The reported confidence in this check-in' })
   public confidence: number
 
+  @Field(() => Float, {
+    description:
+      'The relative percentage progress of this check-in. It calculates the percentage of the completion for this key result, where 0% is equal to the initial value of the key result, and 100% is the goal of that given key result. Also, this metric cannot go above 100% or below 0%',
+  })
+  public relativePercentageProgress: number
+
+  @Field(() => Float, {
+    description: 'The percentage progress increase comparing to previous check-in',
+  })
+  public percentageProgressIncrease: number
+
+  @Field(() => Int, {
+    description: 'The absolute confidence increase comparing to previous check-in',
+  })
+  public absoluteConfidenceIncrease: number
+
   @Field({ description: 'The creation date of the report' })
   public createdAt: Date
 
@@ -33,6 +49,12 @@ export class KeyResultCheckInObject {
 
   @Field({ description: 'The comment added in the report', nullable: true })
   public comment?: string
+
+  @Field(() => KeyResultCheckInObject, {
+    description: 'The parent check-in of this check-in',
+    nullable: true,
+  })
+  public parent: KeyResultCheckInObject
 }
 
 @InputType({ description: 'The required data to create a new progress report' })

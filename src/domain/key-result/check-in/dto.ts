@@ -9,4 +9,5 @@ export class KeyResultCheckInDTO {
   public keyResultId: KeyResultDTO['id']
   public userId: UserDTO['id']
   public comment?: string
+  public parentId?: KeyResultCheckInDTO['id']
 }

@@ -70,7 +70,7 @@ export class KeyResultObject {
     description: 'A created date ordered list of key result check-ins for this key result',
     nullable: true,
   })
-  public checkIns?: KeyResultCheckInObject[]
+  public keyResultCheckIns?: KeyResultCheckInObject[]
 }
 
 registerEnumType(KEY_RESULT_FORMAT, {

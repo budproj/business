@@ -1,5 +1,6 @@
-import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
+import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, Float, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { UserInputError } from 'apollo-server-fastify'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
@@ -39,7 +40,7 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
     this.logger.log(`Fetching key result with id ${id.toString()}`)
 
     const keyResult = await this.getOneWithActionScopeConstraint({ id }, user)
-    if (!keyResult) throw new NotFoundException(`We could not found a key result with id ${id}`)
+    if (!keyResult) throw new UserInputError(`We could not found a key result with id ${id}`)
 
     return keyResult
   }
@@ -89,7 +90,7 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
     return this.getUserPolicies(selector, user)
   }
 
-  @ResolveField('checkIns', () => [KeyResultCheckInObject], { nullable: true })
+  @ResolveField('keyResultCheckIns', () => [KeyResultCheckInObject], { nullable: true })
   protected async getKeyResultCheckIns(
     @Parent() keyResult: KeyResultObject,
     @Args('order', { type: () => DOMAIN_QUERY_ORDER, defaultValue: DOMAIN_QUERY_ORDER.DESC })

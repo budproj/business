@@ -10,10 +10,10 @@ import {
 } from 'src/domain/key-result/check-in/constants'
 import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
-import { KEY_RESULT_FORMAT } from 'src/domain/key-result/constants'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { KeyResult } from 'src/domain/key-result/entities'
 import DomainKeyResultService from 'src/domain/key-result/service'
+import { DEFAULT_CONFIDENCE } from 'src/domain/team/constants'
 import { UserDTO } from 'src/domain/user/dto'
 
 import DomainKeyResultCheckInRepository from './repository'
@@ -25,7 +25,7 @@ export interface DomainKeyResultCheckInServiceInterface {
     keyResult: KeyResultDTO,
     date: Date,
   ) => Promise<KeyResultCheckIn | null>
-  transformCheckInToPercentage: (
+  transformCheckInToRelativePercentage: (
     checkIn: KeyResultCheckIn,
     keyResult: KeyResult,
   ) => KeyResultCheckIn
@@ -33,6 +33,14 @@ export interface DomainKeyResultCheckInServiceInterface {
   calculateAverageProgressFromCheckInList: (
     checkIns: KeyResultCheckIn[],
   ) => KeyResultCheckInDTO['progress']
+  calculateProgressDifference: (
+    oldCheckIn: KeyResultCheckInDTO,
+    newCheckIn: KeyResultCheckInDTO,
+  ) => number
+  calculateConfidenceDifference: (
+    oldCheckIn: KeyResultCheckInDTO,
+    newCheckIn: KeyResultCheckInDTO,
+  ) => number
 }
 
 @Injectable()
@@ -78,19 +86,19 @@ class DomainKeyResultCheckInService extends DomainEntityService<
     return checkIn
   }
 
-  public transformCheckInToPercentage(checkIn: KeyResultCheckIn, keyResult: KeyResult) {
-    if (keyResult.format === KEY_RESULT_FORMAT.PERCENTAGE) return checkIn
-
+  public transformCheckInToRelativePercentage(checkIn: KeyResultCheckIn, keyResult: KeyResult) {
     const { initialValue, goal } = keyResult
     const { progress } = checkIn
 
-    const percentageProgress = ((progress - initialValue) * 100) / (goal - initialValue)
+    const relativePercentageProgress = ((progress - initialValue) * 100) / (goal - initialValue)
     const normalizedCheckIn: KeyResultCheckIn = {
       ...checkIn,
-      progress: percentageProgress,
+      progress: relativePercentageProgress,
     }
 
-    return normalizedCheckIn
+    const limitedNormalizedCheckIn = this.limitPercentageCheckIn(normalizedCheckIn)
+
+    return limitedNormalizedCheckIn
   }
 
   public limitPercentageCheckIn(checkIn: KeyResultCheckIn) {
@@ -115,6 +123,27 @@ class DomainKeyResultCheckInService extends DomainEntityService<
     return averageProgress
   }
 
+  public calculateProgressDifference(
+    oldCheckIn: KeyResultCheckInDTO,
+    newCheckIn: KeyResultCheckInDTO,
+  ) {
+    const deltaProgress = newCheckIn.progress - oldCheckIn.progress
+
+    return deltaProgress
+  }
+
+  public calculateConfidenceDifference(
+    oldCheckIn: KeyResultCheckInDTO,
+    newCheckIn: KeyResultCheckInDTO,
+  ) {
+    const currentConfidence = newCheckIn.confidence
+    const previousConfidence = oldCheckIn?.confidence ?? DEFAULT_CONFIDENCE
+
+    const deltaConfidence = currentConfidence - previousConfidence
+
+    return deltaConfidence
+  }
+
   protected async protectCreationQuery(
     query: DomainCreationQuery<KeyResultCheckIn>,
     data: Partial<KeyResultCheckInDTO>,
@@ -122,7 +151,6 @@ class DomainKeyResultCheckInService extends DomainEntityService<
   ) {
     const selector = { id: data.keyResultId }
 
-    console.log(selector, 'ok')
     const validationData = await this.keyResultService.getOneWithConstraint(selector, queryContext)
     if (!validationData) return
 

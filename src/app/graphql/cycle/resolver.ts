@@ -1,5 +1,6 @@
-import { Logger, NotFoundException, UseGuards, UseInterceptors } from '@nestjs/common'
+import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { UserInputError } from 'apollo-server-fastify'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
@@ -35,7 +36,7 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
     this.logger.log(`Fetching cycle with id ${id.toString()}`)
 
     const cycle = await this.getOneWithActionScopeConstraint({ id }, user)
-    if (!cycle) throw new NotFoundException(`We could not found a cycle with id ${id}`)
+    if (!cycle) throw new UserInputError(`We could not found a cycle with id ${id}`)
 
     return cycle
   }
