@@ -37,10 +37,10 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
   private readonly logger = new Logger(GraphQLCheckInResolver.name)
 
   constructor(protected readonly domain: DomainService, private readonly railway: RailwayProvider) {
-    super(RESOURCE.KEY_RESULT, domain, domain.keyResult.checkIn)
+    super(RESOURCE.KEY_RESULT_CHECK_IN, domain, domain.keyResult.checkIn)
   }
 
-  @Permissions(PERMISSION['KEY_RESULT:READ'])
+  @Permissions(PERMISSION['KEY_RESULT_CHECK_IN:READ'])
   @Query(() => KeyResultCheckInObject, { name: 'keyResultCheckIn' })
   protected async getCheckIn(
     @Args('id', { type: () => ID }) id: KeyResultCheckInObject['id'],
@@ -54,7 +54,7 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     return checkIn
   }
 
-  @Permissions(PERMISSION['KEY_RESULT:UPDATE'])
+  @Permissions(PERMISSION['KEY_RESULT_CHECK_IN:UPDATE'])
   @Mutation(() => KeyResultCheckInObject, { name: 'createKeyResultCheckIn' })
   protected async createKeyResultCheckIn(
     @GraphQLUser() user: AuthzUser,

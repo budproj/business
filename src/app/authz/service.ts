@@ -62,6 +62,18 @@ class AuthzService implements AuthzServiceInterface {
       RESOURCE.KEY_RESULT,
       permissions,
     )
+    const keyResultCheckInActionScopes = this.parseActionScopesForResource(
+      RESOURCE.KEY_RESULT_CHECK_IN,
+      permissions,
+    )
+    const keyResultCommentActionScopes = this.parseActionScopesForResource(
+      RESOURCE.KEY_RESULT_CHECK_IN,
+      permissions,
+    )
+    const keyResultCustomListActionScopes = this.parseActionScopesForResource(
+      RESOURCE.KEY_RESULT_CHECK_IN,
+      permissions,
+    )
 
     return {
       [RESOURCE.USER]: userActionScopes,
@@ -69,6 +81,9 @@ class AuthzService implements AuthzServiceInterface {
       [RESOURCE.CYCLE]: cycleActionScopes,
       [RESOURCE.OBJECTIVE]: objectiveActionScopes,
       [RESOURCE.KEY_RESULT]: keyResultActionScopes,
+      [RESOURCE.KEY_RESULT_CHECK_IN]: keyResultCheckInActionScopes,
+      [RESOURCE.KEY_RESULT_COMMENT]: keyResultCommentActionScopes,
+      [RESOURCE.KEY_RESULT_CUSTOM_LIST]: keyResultCustomListActionScopes,
     }
   }
 

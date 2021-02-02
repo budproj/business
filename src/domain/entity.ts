@@ -2,15 +2,15 @@ import { Logger } from '@nestjs/common'
 import { flow, mapKeys, snakeCase } from 'lodash'
 import {
   Brackets,
+  CreateDateColumn,
   DeleteResult,
   FindConditions,
+  PrimaryGeneratedColumn,
   Repository,
   SelectQueryBuilder,
   WhereExpression,
 } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
-
-import { Team } from 'src/domain/team/entities'
 
 import { CONSTRAINT, DOMAIN_QUERY_ORDER } from './constants'
 import { TeamDTO } from './team/dto'
@@ -59,9 +59,9 @@ export interface DomainServiceContext {
 }
 
 export interface QueryContext {
-  companies: Team[]
-  teams: Team[]
-  userTeams: Team[]
+  companies: TeamDTO[]
+  teams: TeamDTO[]
+  userTeams: TeamDTO[]
 }
 
 export interface DomainQueryContext extends DomainServiceContext {
@@ -432,4 +432,12 @@ class NotSpecification<T> extends DomainEntitySpecification<T> {
   public isSatisfiedBy(candidate: T) {
     return !this.wrapped.isSatisfiedBy(candidate)
   }
+}
+
+export abstract class DomainEntity {
+  @PrimaryGeneratedColumn('uuid')
+  public id: string
+
+  @CreateDateColumn()
+  public createdAt: Date
 }

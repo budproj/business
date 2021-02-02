@@ -29,10 +29,10 @@ class GraphQLKeyResultCustomListResolver extends GraphQLEntityResolver<
   private readonly logger = new Logger(GraphQLKeyResultCustomListResolver.name)
 
   constructor(protected readonly domain: DomainService) {
-    super(RESOURCE.KEY_RESULT, domain, domain.keyResult.customList)
+    super(RESOURCE.KEY_RESULT_CUSTOM_LIST, domain, domain.keyResult.customList)
   }
 
-  @Permissions(PERMISSION['KEY_RESULT:READ'])
+  @Permissions(PERMISSION['KEY_RESULT_CUSTOM_LIST:READ'])
   @Query(() => KeyResultCustomListObject, { name: 'keyResultCustomList' })
   protected async getKeyResultCustomList(
     @GraphQLUser() user: AuthzUser,
@@ -46,7 +46,6 @@ class GraphQLKeyResultCustomListResolver extends GraphQLEntityResolver<
       {
         id,
         binding,
-        userId: user.id,
       },
       identity,
     )
@@ -92,7 +91,7 @@ class GraphQLKeyResultCustomListResolver extends GraphQLEntityResolver<
     return this.domain.keyResult.getFromCustomList(keyResultCustomList)
   }
 
-  @Permissions(PERMISSION['KEY_RESULT:UPDATE'])
+  @Permissions(PERMISSION['KEY_RESULT_CUSTOM_LIST:UPDATE'])
   @Mutation(() => KeyResultCustomListObject, { name: 'updateKeyResultCustomList' })
   protected async updateKeyResultCustomList(
     @Args('id', { type: () => ID }) id: KeyResultCustomListObject['id'],

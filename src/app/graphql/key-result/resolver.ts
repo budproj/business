@@ -8,7 +8,6 @@ import { AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
-import { PolicyObject } from 'src/app/graphql/authz/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import { TeamObject } from 'src/app/graphql/team/models'
@@ -73,21 +72,6 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
     })
 
     return this.domain.objective.getOne({ id: keyResult.objectiveId })
-  }
-
-  @ResolveField('policies', () => PolicyObject)
-  protected async getKeyResultPolicies(
-    @Parent() keyResult: KeyResultObject,
-    @GraphQLUser() user: AuthzUser,
-  ) {
-    this.logger.log({
-      keyResult,
-      user,
-      message: 'Deciding policies for user regarding key result',
-    })
-    const selector = { id: keyResult.id }
-
-    return this.getUserPolicies(selector, user)
   }
 
   @ResolveField('keyResultCheckIns', () => [KeyResultCheckInObject], { nullable: true })

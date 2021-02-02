@@ -1,20 +1,20 @@
-import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { Field, ObjectType, registerEnumType } from '@nestjs/graphql'
 
+import { PolicyObject } from 'src/app/graphql/authz/models'
 import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
 import { KeyResultCustomListObject } from 'src/app/graphql/key-result/custom-list/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
+import { EntityObject } from 'src/app/graphql/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import { TeamObject } from 'src/app/graphql/team/models'
 import { USER_GENDER } from 'src/domain/user/constants'
 
 @ObjectType('User', {
+  implements: () => EntityObject,
   description:
     'User is an entity inside a given root team (a.k.a. company). It is associated with many teams, progress reports, and others.',
 })
-export class UserObject {
-  @Field(() => ID, { description: 'The ID of the user' })
-  public id: string
-
+export class UserObject implements EntityObject {
   @Field({ description: 'The name of the user' })
   public firstName: string
 
@@ -83,6 +83,9 @@ export class UserObject {
     nullable: true,
   })
   public keyResultCheckIns?: KeyResultCheckInObject[]
+
+  public id: string
+  public policies: PolicyObject
 }
 
 registerEnumType(USER_GENDER, {

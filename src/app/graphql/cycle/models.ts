@@ -1,16 +1,16 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql'
 
+import { PolicyObject } from 'src/app/graphql/authz/models'
+import { EntityObject } from 'src/app/graphql/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import { TeamObject } from 'src/app/graphql/team/models'
 
 @ObjectType('Cycle', {
+  implements: () => EntityObject,
   description:
     'The period of time that can contain multiple objectives. It is used to organize a team strategy',
 })
-export class CycleObject {
-  @Field(() => ID, { description: 'The ID of the cycle' })
-  public id: string
-
+export class CycleObject implements EntityObject {
   @Field({ description: 'The date that this cycle starts' })
   public dateStart: Date
 
@@ -37,4 +37,7 @@ export class CycleObject {
     nullable: true,
   })
   public objectives?: ObjectiveObject[]
+
+  public id: string
+  public policies: PolicyObject
 }

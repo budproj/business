@@ -1,15 +1,15 @@
 import { Field, Float, ID, InputType, Int, ObjectType } from '@nestjs/graphql'
 
+import { PolicyObject } from 'src/app/graphql/authz/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
+import { EntityObject } from 'src/app/graphql/models'
 import { UserObject } from 'src/app/graphql/user/models'
 
 @ObjectType('KeyResultCheckIn', {
+  implements: () => EntityObject,
   description: 'A report that records new progress in a given key result',
 })
-export class KeyResultCheckInObject {
-  @Field(() => ID, { description: 'The ID of your report' })
-  public id: string
-
+export class KeyResultCheckInObject implements EntityObject {
   @Field(() => Float, { description: 'The reported progress in this check-in' })
   public progress: number
 
@@ -55,6 +55,9 @@ export class KeyResultCheckInObject {
     nullable: true,
   })
   public parent: KeyResultCheckInObject
+
+  public id: string
+  public policies: PolicyObject
 }
 
 @InputType({ description: 'The required data to create a new progress report' })

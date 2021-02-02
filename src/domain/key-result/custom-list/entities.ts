@@ -1,14 +1,6 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  RelationId,
-  Unique,
-  UpdateDateColumn,
-} from 'typeorm'
+import { Column, Entity, ManyToOne, RelationId, Unique, UpdateDateColumn } from 'typeorm'
 
+import { DomainEntity } from 'src/domain/entity'
 // eslint-disable-next-line unused-imports/no-unused-imports-ts
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { UserDTO } from 'src/domain/user/dto'
@@ -18,13 +10,7 @@ import { KeyResultCustomListDTO } from './dto'
 
 @Entity()
 @Unique(['user', 'binding'])
-export class KeyResultCustomList implements KeyResultCustomListDTO {
-  @PrimaryGeneratedColumn('uuid')
-  public id: string
-
-  @CreateDateColumn()
-  public createdAt: Date
-
+export class KeyResultCustomList extends DomainEntity implements KeyResultCustomListDTO {
   @UpdateDateColumn()
   public updatedAt: Date
 
