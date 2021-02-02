@@ -9,6 +9,11 @@ import { KEY_RESULT_FORMAT } from 'src/domain/key-result/constants'
 
 import { KeyResultCheckInObject } from './check-in/models'
 
+registerEnumType(KEY_RESULT_FORMAT, {
+  name: 'KEY_RESULT_FORMAT',
+  description: 'Each format represents how our user wants to see the metrics of the key result',
+})
+
 @ObjectType('KeyResult', {
   implements: () => EntityObject,
   description: 'A goal that is created for the team focusing in a given team objective',
@@ -68,8 +73,3 @@ export class KeyResultObject implements EntityObject {
   public id: string
   public policies: PolicyObject
 }
-
-registerEnumType(KEY_RESULT_FORMAT, {
-  name: 'KEY_RESULT_FORMAT',
-  description: 'Each format represents how our user wants to see the metrics of the key result',
-})

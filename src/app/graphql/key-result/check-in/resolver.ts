@@ -14,6 +14,7 @@ import { UserInputError, ApolloError } from 'apollo-server-fastify'
 
 import { ACTION, PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
+import AuthzService from 'src/app/authz/service'
 import { AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
@@ -36,8 +37,12 @@ import RailwayProvider from 'src/railway'
 class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, KeyResultCheckInDTO> {
   private readonly logger = new Logger(GraphQLCheckInResolver.name)
 
-  constructor(protected readonly domain: DomainService, private readonly railway: RailwayProvider) {
-    super(RESOURCE.KEY_RESULT_CHECK_IN, domain, domain.keyResult.checkIn)
+  constructor(
+    protected readonly domain: DomainService,
+    protected readonly authzService: AuthzService,
+    private readonly railway: RailwayProvider,
+  ) {
+    super(RESOURCE.KEY_RESULT_CHECK_IN, domain, domain.keyResult.checkIn, authzService)
   }
 
   @Permissions(PERMISSION['KEY_RESULT_CHECK_IN:READ'])

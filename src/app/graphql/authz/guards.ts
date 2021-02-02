@@ -7,6 +7,7 @@ import { AuthGuard } from '@nestjs/passport'
 import { Observable } from 'rxjs'
 
 import { PERMISSION, SCOPED_PERMISSION } from 'src/app/authz/constants'
+import AuthzService from 'src/app/authz/service'
 
 @Injectable()
 export class GraphQLAuthzAuthGuard extends AuthGuard('jwt') {
@@ -41,10 +42,11 @@ export class GraphQLAuthzPermissionGuard implements CanActivate {
   private readonly logger = new Logger(GraphQLAuthzPermissionGuard.name)
 
   constructor(
-    private readonly reflector: Reflector,
     protected readonly configService: ConfigService,
+    private readonly reflector: Reflector,
+    private readonly authzService: AuthzService,
   ) {
-    this.godMode = configService.get<boolean>('godMode')
+    this.godMode = configService.get<boolean>('godMode.enabled')
   }
 
   public canActivate(rawContext: ExecutionContext) {
@@ -58,6 +60,7 @@ export class GraphQLAuthzPermissionGuard implements CanActivate {
       gqlContext.getHandler(),
     )
     const userScopedPermissions: SCOPED_PERMISSION[] = request.user.token.permissions ?? []
+    const userPermissions = this.authzService.drillUpScopedPermissions(userScopedPermissions)
 
     this.logger.debug({
       routePermissions,
@@ -65,17 +68,8 @@ export class GraphQLAuthzPermissionGuard implements CanActivate {
       message: 'Checking if user is allowed in given route',
     })
 
-    if (!routePermissions) {
-      return true
-    }
+    const hasPermission = this.authzService.userHasPermission(userPermissions, routePermissions)
 
-    const hasPermission = () =>
-      routePermissions.every((routePermission) =>
-        userScopedPermissions.some((userScopedPermission) =>
-          userScopedPermission.includes(routePermission),
-        ),
-      )
-
-    return hasPermission()
+    return hasPermission
   }
 }

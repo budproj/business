@@ -5,6 +5,7 @@ import { isUndefined, omitBy } from 'lodash'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
+import AuthzService from 'src/app/authz/service'
 import { AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
@@ -27,8 +28,11 @@ import { TeamObject } from './models'
 class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   private readonly logger = new Logger(GraphQLTeamResolver.name)
 
-  constructor(protected readonly domain: DomainService) {
-    super(RESOURCE.TEAM, domain, domain.team)
+  constructor(
+    protected readonly domain: DomainService,
+    protected readonly authzService: AuthzService,
+  ) {
+    super(RESOURCE.TEAM, domain, domain.team, authzService)
   }
 
   @Permissions(PERMISSION['TEAM:READ'])

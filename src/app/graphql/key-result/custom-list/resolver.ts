@@ -5,6 +5,7 @@ import { pickBy, identity } from 'lodash'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
+import AuthzService from 'src/app/authz/service'
 import { AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
@@ -28,8 +29,11 @@ class GraphQLKeyResultCustomListResolver extends GraphQLEntityResolver<
 > {
   private readonly logger = new Logger(GraphQLKeyResultCustomListResolver.name)
 
-  constructor(protected readonly domain: DomainService) {
-    super(RESOURCE.KEY_RESULT_CUSTOM_LIST, domain, domain.keyResult.customList)
+  constructor(
+    protected readonly domain: DomainService,
+    protected readonly authzService: AuthzService,
+  ) {
+    super(RESOURCE.KEY_RESULT_CUSTOM_LIST, domain, domain.keyResult.customList, authzService)
   }
 
   @Permissions(PERMISSION['KEY_RESULT_CUSTOM_LIST:READ'])

@@ -4,6 +4,7 @@ import { UserInputError } from 'apollo-server-fastify'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
+import AuthzService from 'src/app/authz/service'
 import { AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
@@ -26,8 +27,11 @@ import { KeyResultObject } from './models'
 class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResultDTO> {
   private readonly logger = new Logger(GraphQLKeyResultResolver.name)
 
-  constructor(protected readonly domain: DomainService) {
-    super(RESOURCE.KEY_RESULT, domain, domain.keyResult)
+  constructor(
+    protected readonly domain: DomainService,
+    protected readonly authzService: AuthzService,
+  ) {
+    super(RESOURCE.KEY_RESULT, domain, domain.keyResult, authzService)
   }
 
   @Permissions(PERMISSION['KEY_RESULT:READ'])

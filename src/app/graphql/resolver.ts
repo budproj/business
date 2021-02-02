@@ -1,13 +1,14 @@
-import { Parent, ResolveField, Resolver } from '@nestjs/graphql'
-import { mapValues } from 'lodash'
+import { Args, ResolveField, Resolver } from '@nestjs/graphql'
 import { FindConditions } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
-import { ACTION, POLICY, RESOURCE } from 'src/app/authz/constants'
-import { ActionPolicies, AuthzScopeGroup, AuthzUser } from 'src/app/authz/types'
+import { ACTION, RESOURCE } from 'src/app/authz/constants'
+import AuthzService from 'src/app/authz/service'
+import { AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { EntityObject } from 'src/app/graphql/models'
+import { CONSTRAINT } from 'src/domain/constants'
 import { DomainEntity, DomainEntityService, DomainMutationQueryResult } from 'src/domain/entity'
 import DomainService from 'src/domain/service'
 
@@ -41,8 +42,6 @@ export interface GraphQLEntityResolverInterface<E extends DomainEntity, D> {
     user: AuthzUser,
     action: ACTION,
   ) => DomainMutationQueryResult<E>
-
-  getUserPolicies: (selector: FindConditions<E>, user: AuthzUser) => Promise<ActionPolicies>
 }
 
 @Resolver(() => EntityObject)
@@ -52,17 +51,19 @@ abstract class GraphQLEntityResolver<E extends DomainEntity, D>
     protected readonly resource: RESOURCE,
     protected readonly domainService: DomainService,
     protected readonly entityService: DomainEntityService<E, D>,
+    protected readonly authzService: AuthzService,
   ) {}
 
   @ResolveField('policies', () => PolicyObject)
   protected async getEntityPolicies(
-    @Parent() entity: EntityObject,
-    @GraphQLUser() user: AuthzUser,
+    @Args('constraint', { type: () => CONSTRAINT, defaultValue: CONSTRAINT.COMPANY })
+    constraint: CONSTRAINT,
+    @GraphQLUser() authzUser: AuthzUser,
   ) {
-    const selector = { id: entity.id } as any
-    // We need to use the as any until this bug is solved: https://github.com/typeorm/typeorm/issues/7338
+    const userPermissions = this.authzService.getUserPermissionsForScope(authzUser, constraint)
+    const resourcePolicies = userPermissions[this.resource]
 
-    return this.getUserPolicies(selector, user)
+    return resourcePolicies
   }
 
   public async createWithActionScopeConstraint(
@@ -119,27 +120,6 @@ abstract class GraphQLEntityResolver<E extends DomainEntity, D>
     const queryContext = await this.domainService.team.buildTeamQueryContext(user, scopeConstraint)
 
     return this.entityService.deleteWithConstraint(selector, queryContext)
-  }
-
-  public async getUserPolicies(selector: FindConditions<E>, user: AuthzUser) {
-    const actionSelectors: AuthzScopeGroup = {
-      [ACTION.CREATE]: user.scopes[this.resource][ACTION.CREATE],
-      [ACTION.READ]: user.scopes[this.resource][ACTION.READ],
-      [ACTION.UPDATE]: user.scopes[this.resource][ACTION.UPDATE],
-      [ACTION.DELETE]: user.scopes[this.resource][ACTION.DELETE],
-    }
-
-    const policies: ActionPolicies = mapValues(
-      actionSelectors,
-      async (constraint, action: ACTION): Promise<POLICY> => {
-        if (!constraint) return POLICY.DENY
-        const foundData = await this.getOneWithActionScopeConstraint(selector, user, action)
-
-        return foundData ? POLICY.ALLOW : POLICY.DENY
-      },
-    )
-
-    return policies
   }
 }
 

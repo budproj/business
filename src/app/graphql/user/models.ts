@@ -9,6 +9,11 @@ import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import { TeamObject } from 'src/app/graphql/team/models'
 import { USER_GENDER } from 'src/domain/user/constants'
 
+registerEnumType(USER_GENDER, {
+  name: 'USER_GENDER',
+  description: 'Each gender represents a possible gender option for our users',
+})
+
 @ObjectType('User', {
   implements: () => EntityObject,
   description:
@@ -87,8 +92,3 @@ export class UserObject implements EntityObject {
   public id: string
   public policies: PolicyObject
 }
-
-registerEnumType(USER_GENDER, {
-  name: 'USER_GENDER',
-  description: 'Each gender represents a possible gender option for our users',
-})

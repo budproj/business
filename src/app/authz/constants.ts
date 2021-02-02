@@ -4,6 +4,7 @@ export enum POLICY {
 }
 
 export enum RESOURCE {
+  PERMISSION = 'permission',
   USER = 'user',
   TEAM = 'team',
   CYCLE = 'cycle',
@@ -22,6 +23,11 @@ export enum ACTION {
 }
 
 export enum PERMISSION {
+  'PERMISSION:CREATE' = 'permission:create',
+  'PERMISSION:UPDATE' = 'permission:update',
+  'PERMISSION:READ' = 'permission:read',
+  'PERMISSION:DELETE' = 'permission:delete',
+
   'USER:CREATE' = 'user:create',
   'USER:UPDATE' = 'user:update',
   'USER:READ' = 'user:read',
@@ -64,6 +70,22 @@ export enum PERMISSION {
 }
 
 export enum SCOPED_PERMISSION {
+  'PERMISSION:CREATE:ANY' = 'permission:create:any',
+  'PERMISSION:CREATE:COMPANY' = 'permission:create:company',
+  'PERMISSION:CREATE:TEAM' = 'permission:create:team',
+  'PERMISSION:UPDATE:ANY' = 'permission:update:any',
+  'PERMISSION:UPDATE:COMPANY' = 'permission:update:company',
+  'PERMISSION:UPDATE:TEAM' = 'permission:update:team',
+  'PERMISSION:UPDATE:OWNS' = 'permission:update:owns',
+  'PERMISSION:READ:ANY' = 'permission:read:any',
+  'PERMISSION:READ:COMPANY' = 'permission:read:company',
+  'PERMISSION:READ:TEAM' = 'permission:read:team',
+  'PERMISSION:READ:OWNS' = 'permission:read:owns',
+  'PERMISSION:DELETE:ANY' = 'permission:delete:any',
+  'PERMISSION:DELETE:COMPANY' = 'permission:delete:company',
+  'PERMISSION:DELETE:TEAM' = 'permission:delete:team',
+  'PERMISSION:DELETE:OWNS' = 'permission:delete:owns',
+
   'USER:CREATE:ANY' = 'user:create:any',
   'USER:CREATE:COMPANY' = 'user:create:company',
   'USER:CREATE:TEAM' = 'user:create:team',

@@ -1,19 +1,25 @@
 import { Injectable, CallHandler } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { uniq } from 'lodash'
+import { mapValues, uniq } from 'lodash'
 import { Observable } from 'rxjs'
 
 import { AppRequest } from 'src/app/types'
 import { CONSTRAINT } from 'src/domain/constants'
 import DomainService from 'src/domain/service'
 
-import { ACTION, RESOURCE, SCOPED_PERMISSION } from './constants'
+import { ACTION, PERMISSION, POLICY, RESOURCE, SCOPED_PERMISSION } from './constants'
 import AuthzGodUser from './god-user'
-import { AuthzScopeGroup, AuthzScopes } from './types'
+import { AuthzScopeGroup, AuthzScopes, AuthzUser, AuthzUserResourceActionPolicies } from './types'
 
 export interface AuthzServiceInterface {
   godBypass: (request: AppRequest, next: CallHandler) => Promise<Observable<any>>
   parseActionScopesFromUserPermissions: (permissions: SCOPED_PERMISSION[]) => AuthzScopes
+  getUserPermissionsForScope: (
+    user: AuthzUser,
+    scope: CONSTRAINT,
+  ) => AuthzUserResourceActionPolicies
+  userHasPermission: (userPermissions: PERMISSION[], requiredPermissions: PERMISSION[]) => boolean
+  drillUpScopedPermissions: (scopedPermissions: SCOPED_PERMISSION[]) => PERMISSION[]
 }
 
 @Injectable()
@@ -54,6 +60,10 @@ class AuthzService implements AuthzServiceInterface {
   }
 
   public parseActionScopesFromUserPermissions(permissions: SCOPED_PERMISSION[]) {
+    const permissionActionScopes = this.parseActionScopesForResource(
+      RESOURCE.PERMISSION,
+      permissions,
+    )
     const userActionScopes = this.parseActionScopesForResource(RESOURCE.USER, permissions)
     const teamActionScopes = this.parseActionScopesForResource(RESOURCE.TEAM, permissions)
     const cycleActionScopes = this.parseActionScopesForResource(RESOURCE.CYCLE, permissions)
@@ -76,6 +86,7 @@ class AuthzService implements AuthzServiceInterface {
     )
 
     return {
+      [RESOURCE.PERMISSION]: permissionActionScopes,
       [RESOURCE.USER]: userActionScopes,
       [RESOURCE.TEAM]: teamActionScopes,
       [RESOURCE.CYCLE]: cycleActionScopes,
@@ -85,6 +96,38 @@ class AuthzService implements AuthzServiceInterface {
       [RESOURCE.KEY_RESULT_COMMENT]: keyResultCommentActionScopes,
       [RESOURCE.KEY_RESULT_CUSTOM_LIST]: keyResultCustomListActionScopes,
     }
+  }
+
+  public getUserPermissionsForScope(user: AuthzUser, constraint: CONSTRAINT) {
+    const resources = Object.values(RESOURCE)
+    const userResourcePermissions = resources.reduce<AuthzUserResourceActionPolicies>(
+      (permissions, resource) => ({
+        ...permissions,
+        [resource]: this.buildActionPoliciesForUserInConstraint(user, constraint, resource),
+      }),
+      {},
+    )
+
+    return userResourcePermissions
+  }
+
+  public userHasPermission(userPermissions: PERMISSION[], requiredPermissions: PERMISSION[]) {
+    if (!requiredPermissions || requiredPermissions.length === 0) return true
+
+    const hasPermission = () =>
+      requiredPermissions.every((requiredPermission) =>
+        userPermissions.some((userPermission) => userPermission === requiredPermission),
+      )
+
+    return hasPermission()
+  }
+
+  public drillUpScopedPermissions(scopedPermissions: SCOPED_PERMISSION[]) {
+    const permissions = scopedPermissions.map(
+      (scopedPermission) => scopedPermission.split(':').slice(0, -1).join(':') as PERMISSION,
+    )
+
+    return permissions
   }
 
   private parseActionScopesForResource(
@@ -139,6 +182,29 @@ class AuthzService implements AuthzServiceInterface {
     const highestScope = sortedScopeList[0]
 
     return highestScope?.scope
+  }
+
+  private buildActionPoliciesForUserInConstraint(
+    user: AuthzUser,
+    constraint: CONSTRAINT,
+    resource: RESOURCE,
+  ) {
+    const userScopes = user.scopes[resource]
+    const userActionPolicies = mapValues(userScopes, (userConstraint) =>
+      this.isConstraintHigherOrEqual(constraint, userConstraint) ? POLICY.ALLOW : POLICY.DENY,
+    )
+
+    return userActionPolicies
+  }
+
+  private isConstraintHigherOrEqual(base: CONSTRAINT, candidate?: CONSTRAINT) {
+    if (!candidate) return false
+
+    const constraintOrder = [CONSTRAINT.ANY, CONSTRAINT.COMPANY, CONSTRAINT.TEAM, CONSTRAINT.OWNS]
+    const baseIndex = constraintOrder.indexOf(base)
+    const candidateIndex = constraintOrder.indexOf(candidate)
+
+    return candidateIndex <= baseIndex
   }
 }
 

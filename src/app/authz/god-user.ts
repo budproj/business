@@ -39,6 +39,13 @@ class AuthzGodUser implements AuthzUser {
       permissions: Object.values(PERMISSION),
     }
     this.scopes = {
+      [RESOURCE.PERMISSION]: {
+        [ACTION.CREATE]: CONSTRAINT.ANY,
+        [ACTION.READ]: CONSTRAINT.ANY,
+        [ACTION.UPDATE]: CONSTRAINT.ANY,
+        [ACTION.DELETE]: CONSTRAINT.ANY,
+      },
+
       [RESOURCE.USER]: {
         [ACTION.CREATE]: CONSTRAINT.ANY,
         [ACTION.READ]: CONSTRAINT.ANY,

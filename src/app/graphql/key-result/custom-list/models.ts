@@ -6,6 +6,11 @@ import { EntityObject } from 'src/app/graphql/models'
 import { UserObject } from 'src/app/graphql/user/models'
 import { KEY_RESULT_CUSTOM_LIST_BINDING } from 'src/domain/key-result/custom-list/constants'
 
+registerEnumType(KEY_RESULT_CUSTOM_LIST_BINDING, {
+  name: 'KEY_RESULT_CUSTOM_LIST_BINDING',
+  description: 'Each binding represents a given key result custom list in our applications',
+})
+
 @ObjectType('KeyResultCustomList', {
   implements: () => EntityObject,
   description:
@@ -51,8 +56,3 @@ export class KeyResultCustomListInput {
   @Field(() => [ID], { description: 'Ordered list of key result IDs' })
   public rank: Array<KeyResultObject['id']>
 }
-
-registerEnumType(KEY_RESULT_CUSTOM_LIST_BINDING, {
-  name: 'KEY_RESULT_CUSTOM_LIST_BINDING',
-  description: 'Each binding represents a given key result custom list in our applications',
-})
