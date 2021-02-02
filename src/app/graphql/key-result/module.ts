@@ -6,6 +6,7 @@ import appConfig from 'src/config/app'
 import DomainModule from 'src/domain/module'
 
 import GraphQLKeyResultCheckInModule from './check-in'
+import GraphQLKeyResultCommentModule from './comment'
 import GraphQLKeyResultCustomListModule from './custom-list'
 import GraphQLKeyResultResolver from './resolver'
 
@@ -16,6 +17,7 @@ import GraphQLKeyResultResolver from './resolver'
     GraphQLAuthzModule,
     GraphQLKeyResultCustomListModule,
     GraphQLKeyResultCheckInModule,
+    GraphQLKeyResultCommentModule,
   ],
   providers: [GraphQLKeyResultResolver],
   exports: [GraphQLKeyResultCustomListModule, GraphQLKeyResultCheckInModule],

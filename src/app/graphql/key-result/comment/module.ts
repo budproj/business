@@ -6,12 +6,12 @@ import appConfig from 'src/config/app'
 import DomainModule from 'src/domain/module'
 import RailwayProvider from 'src/railway'
 
-import GraphQLCheckInResolver from './resolver'
+import GraphQLCommentResolver from './resolver'
 
 @Module({
   imports: [ConfigModule.forFeature(appConfig), DomainModule, GraphQLAuthzModule],
-  providers: [GraphQLCheckInResolver, RailwayProvider],
+  providers: [GraphQLCommentResolver, RailwayProvider],
 })
-class GraphQLCheckInsModule {}
+class GraphQLCommentsModule {}
 
-export default GraphQLCheckInsModule
+export default GraphQLCommentsModule

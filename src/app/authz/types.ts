@@ -18,25 +18,13 @@ export interface AuthzToken {
   permissions: string[]
 }
 
-export interface AuthzUserResourceActionPolicies {
-  permission: ActionPolicies
-  user: ActionPolicies
-  team: ActionPolicies
-  cycle: ActionPolicies
-  objective: ActionPolicies
-  keyResult: ActionPolicies
-  keyResultCheckIn: ActionPolicies
-  keyResultComment: ActionPolicies
-  keyResultCustomList: ActionPolicies
-}
-
 export type AuthzScopes = Record<RESOURCE, AuthzScopeGroup>
 
 export type AuthzScopeGroup = Record<ACTION, CONSTRAINT>
 
 export interface ActionPolicies {
-  [ACTION.CREATE]: POLICY | Promise<POLICY>
-  [ACTION.READ]: POLICY | Promise<POLICY>
-  [ACTION.UPDATE]: POLICY | Promise<POLICY>
-  [ACTION.DELETE]: POLICY | Promise<POLICY>
+  [ACTION.CREATE]: POLICY
+  [ACTION.READ]: POLICY
+  [ACTION.UPDATE]: POLICY
+  [ACTION.DELETE]: POLICY
 }

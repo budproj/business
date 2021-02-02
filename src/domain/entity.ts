@@ -179,6 +179,7 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
       [CONSTRAINT.OWNS]: async () => this.getIfUserOwnsIt(selector, queryContext),
     }
     const constrainedSelector = availableSelectors[queryContext.constraint]
+    if (!constrainedSelector) return
 
     return constrainedSelector()
   }

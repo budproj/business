@@ -19,10 +19,6 @@ import { AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
-import {
-  KeyResultCheckInInput,
-  KeyResultCheckInObject,
-} from 'src/app/graphql/key-result/check-in/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import { UserObject } from 'src/app/graphql/user'
@@ -30,6 +26,8 @@ import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import DomainService from 'src/domain/service'
 import RailwayProvider from 'src/railway'
+
+import { KeyResultCheckInInput, KeyResultCheckInObject } from './models'
 
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -51,7 +49,7 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     @Args('id', { type: () => ID }) id: KeyResultCheckInObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
-    this.logger.log(`Fetching key result check-in with id ${id.toString()}`)
+    this.logger.log(`Fetching key result check-in with id ${id}`)
 
     const checkIn = await this.getOneWithActionScopeConstraint({ id }, user)
     if (!checkIn) throw new UserInputError(`We could not found a check-in with id ${id}`)
@@ -59,7 +57,7 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     return checkIn
   }
 
-  @Permissions(PERMISSION['KEY_RESULT_CHECK_IN:UPDATE'])
+  @Permissions(PERMISSION['KEY_RESULT_CHECK_IN:CREATE'])
   @Mutation(() => KeyResultCheckInObject, { name: 'createKeyResultCheckIn' })
   protected async createKeyResultCheckIn(
     @GraphQLUser() user: AuthzUser,

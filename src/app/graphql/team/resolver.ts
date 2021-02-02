@@ -41,7 +41,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     @Args('id', { type: () => ID }) id: TeamObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
-    this.logger.log(`Fetching team with id ${id.toString()}`)
+    this.logger.log(`Fetching team with id ${id}`)
 
     const team = await this.getOneWithActionScopeConstraint({ id }, user)
     if (!team) throw new UserInputError(`We could not found a team with id ${id}`)

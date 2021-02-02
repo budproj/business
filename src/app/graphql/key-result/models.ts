@@ -1,6 +1,7 @@
 import { Field, Float, ID, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
+import { KeyResultCommentObject } from 'src/app/graphql/key-result/comment/models'
 import { EntityObject } from 'src/app/graphql/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import { TeamObject } from 'src/app/graphql/team/models'
@@ -64,11 +65,17 @@ export class KeyResultObject implements EntityObject {
   @Field({ description: 'The description explaining the key result', nullable: true })
   public description?: string
 
-  @Field(() => KeyResultCheckInObject, {
+  @Field(() => [KeyResultCheckInObject], {
     description: 'A created date ordered list of key result check-ins for this key result',
     nullable: true,
   })
   public keyResultCheckIns?: KeyResultCheckInObject[]
+
+  @Field(() => [KeyResultCommentObject], {
+    description: 'A created date ordered list of key result comments for this key result',
+    nullable: true,
+  })
+  public keyResultComments?: KeyResultCommentObject[]
 
   public id: string
   public policies: PolicyObject

@@ -1,6 +1,6 @@
 import { Injectable, CallHandler } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { mapValues, uniq } from 'lodash'
+import { mapValues, uniq, fromPairs, Dictionary } from 'lodash'
 import { Observable } from 'rxjs'
 
 import { AppRequest } from 'src/app/types'
@@ -9,15 +9,12 @@ import DomainService from 'src/domain/service'
 
 import { ACTION, PERMISSION, POLICY, RESOURCE, SCOPED_PERMISSION } from './constants'
 import AuthzGodUser from './god-user'
-import { AuthzScopeGroup, AuthzScopes, AuthzUser, AuthzUserResourceActionPolicies } from './types'
+import { AuthzScopeGroup, AuthzScopes, AuthzUser, ActionPolicies } from './types'
 
 export interface AuthzServiceInterface {
   godBypass: (request: AppRequest, next: CallHandler) => Promise<Observable<any>>
   parseActionScopesFromUserPermissions: (permissions: SCOPED_PERMISSION[]) => AuthzScopes
-  getUserPermissionsForScope: (
-    user: AuthzUser,
-    scope: CONSTRAINT,
-  ) => AuthzUserResourceActionPolicies
+  getUserPermissionsForScope: (user: AuthzUser, scope: CONSTRAINT) => Dictionary<ActionPolicies>
   userHasPermission: (userPermissions: PERMISSION[], requiredPermissions: PERMISSION[]) => boolean
   drillUpScopedPermissions: (scopedPermissions: SCOPED_PERMISSION[]) => PERMISSION[]
 }
@@ -100,13 +97,12 @@ class AuthzService implements AuthzServiceInterface {
 
   public getUserPermissionsForScope(user: AuthzUser, constraint: CONSTRAINT) {
     const resources = Object.values(RESOURCE)
-    const userResourcePermissions = resources.reduce<AuthzUserResourceActionPolicies>(
-      (permissions, resource) => ({
-        ...permissions,
-        [resource]: this.buildActionPoliciesForUserInConstraint(user, constraint, resource),
-      }),
-      {},
-    )
+
+    const userResourcePermissionPairs = resources.map<[RESOURCE, ActionPolicies]>((resource) => [
+      resource,
+      this.buildActionPoliciesForUserInConstraint(user, constraint, resource),
+    ])
+    const userResourcePermissions = fromPairs<ActionPolicies>(userResourcePermissionPairs)
 
     return userResourcePermissions
   }
@@ -190,7 +186,7 @@ class AuthzService implements AuthzServiceInterface {
     resource: RESOURCE,
   ) {
     const userScopes = user.scopes[resource]
-    const userActionPolicies = mapValues(userScopes, (userConstraint) =>
+    const userActionPolicies: ActionPolicies = mapValues(userScopes, (userConstraint) =>
       this.isConstraintHigherOrEqual(constraint, userConstraint) ? POLICY.ALLOW : POLICY.DENY,
     )
 

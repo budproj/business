@@ -40,7 +40,7 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
     @Args('id', { type: () => ID }) id: UserObject['id'],
     @GraphQLUser() authzUser: AuthzUser,
   ) {
-    this.logger.log(`Fetching user with id ${id.toString()}`)
+    this.logger.log(`Fetching user with id ${id}`)
 
     const user = await this.getOneWithActionScopeConstraint({ id }, authzUser)
     if (!user) throw new UserInputError(`We could not found an user with id ${id}`)

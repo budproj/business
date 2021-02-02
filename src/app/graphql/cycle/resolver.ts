@@ -37,7 +37,7 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
     @Args('id', { type: () => ID }) id: CycleObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
-    this.logger.log(`Fetching cycle with id ${id.toString()}`)
+    this.logger.log(`Fetching cycle with id ${id}`)
 
     const cycle = await this.getOneWithActionScopeConstraint({ id }, user)
     if (!cycle) throw new UserInputError(`We could not found a cycle with id ${id}`)

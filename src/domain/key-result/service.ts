@@ -11,6 +11,9 @@ import {
 import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import DomainKeyResultCheckInService from 'src/domain/key-result/check-in/service'
+import { KeyResultCommentDTO } from 'src/domain/key-result/comment/dto'
+import { KeyResultComment } from 'src/domain/key-result/comment/entities'
+import DomainKeyResultCommentService from 'src/domain/key-result/comment/service'
 import {
   DEFAULT_CONFIDENCE,
   DEFAULT_PERCENTAGE_PROGRESS,
@@ -32,6 +35,7 @@ import DomainKeyResultRepository from './repository'
 export interface DomainKeyResultServiceInterface {
   customList: DomainKeyResultCustomListService
   checkIn: DomainKeyResultCheckInService
+  comment: DomainKeyResultCommentService
 
   getFromOwner: (owner: UserDTO) => Promise<KeyResult[]>
   getFromTeams: (teams: TeamDTO | TeamDTO[]) => Promise<KeyResult[]>
@@ -72,6 +76,14 @@ export interface DomainKeyResultServiceInterface {
   getCheckInPercentageProgressIncrease: (checkIn: KeyResultCheckIn) => Promise<number>
   getCheckInAbsoluteConfidenceIncrease: (checkIn: KeyResultCheckIn) => Promise<number>
   getCheckInRelativePercentageProgress: (checkIn: KeyResultCheckIn) => Promise<number>
+  buildCommentForUser: (
+    user: UserDTO,
+    commentData: DomainKeyResultCommentPayload,
+  ) => Promise<Partial<KeyResultCheckInDTO>>
+  getComments: (
+    keyResult: KeyResultDTO,
+    options?: DomainServiceGetOptions<KeyResultComment>,
+  ) => Promise<KeyResultComment[] | null>
 }
 
 export interface DomainKeyResultCheckInGroup {
@@ -87,6 +99,11 @@ export interface DomainKeyResultCheckInPayload {
   comment?: KeyResultCheckIn['comment']
 }
 
+export interface DomainKeyResultCommentPayload {
+  text: KeyResultComment['text']
+  keyResultId: KeyResultComment['keyResultId']
+}
+
 @Injectable()
 class DomainKeyResultService
   extends DomainEntityService<KeyResult, KeyResultDTO>
@@ -95,6 +112,8 @@ class DomainKeyResultService
     public readonly customList: DomainKeyResultCustomListService,
     @Inject(forwardRef(() => DomainKeyResultCheckInService))
     public readonly checkIn: DomainKeyResultCheckInService,
+    @Inject(forwardRef(() => DomainKeyResultCommentService))
+    public readonly comment: DomainKeyResultCommentService,
     protected readonly repository: DomainKeyResultRepository,
     @Inject(forwardRef(() => DomainTeamService))
     private readonly teamService: DomainTeamService,
@@ -293,6 +312,25 @@ class DomainKeyResultService
     const normalizedCheckIn = this.checkIn.transformCheckInToRelativePercentage(checkIn, keyResult)
 
     return normalizedCheckIn.progress
+  }
+
+  public async buildCommentForUser(user: UserDTO, commentData: DomainKeyResultCommentPayload) {
+    const comment: Partial<KeyResultCommentDTO> = {
+      text: commentData.text,
+      userId: user.id,
+      keyResultId: commentData.keyResultId,
+    }
+
+    return comment
+  }
+
+  public async getComments(
+    keyResult: KeyResultDTO,
+    options?: DomainServiceGetOptions<KeyResultComment>,
+  ) {
+    const selector = { keyResultId: keyResult.id }
+
+    return this.comment.getMany(selector, undefined, options)
   }
 
   protected async protectCreationQuery(

@@ -38,7 +38,7 @@ class GraphQLObjectiveResolver extends GraphQLEntityResolver<Objective, Objectiv
     @Args('id', { type: () => ID }) id: ObjectiveObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
-    this.logger.log(`Fetching objective with id ${id.toString()}`)
+    this.logger.log(`Fetching objective with id ${id}`)
 
     const objective = await this.getOneWithActionScopeConstraint({ id }, user)
     if (!objective) throw new UserInputError(`We could not found an objective with id ${id}`)

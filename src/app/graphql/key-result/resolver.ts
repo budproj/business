@@ -9,6 +9,7 @@ import { AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
+import { KeyResultCommentObject } from 'src/app/graphql/key-result/comment/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import { TeamObject } from 'src/app/graphql/team/models'
@@ -40,7 +41,7 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
     @Args('id', { type: () => ID }) id: KeyResultObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
-    this.logger.log(`Fetching key result with id ${id.toString()}`)
+    this.logger.log(`Fetching key result with id ${id}`)
 
     const keyResult = await this.getOneWithActionScopeConstraint({ id }, user)
     if (!keyResult) throw new UserInputError(`We could not found a key result with id ${id}`)
@@ -120,6 +121,16 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
     })
 
     return this.domain.keyResult.getCurrentConfidenceForKeyResult(keyResult)
+  }
+
+  @ResolveField('keyResultComments', () => [KeyResultCommentObject])
+  protected async getKeyResultComments(@Parent() keyResult: KeyResultObject) {
+    this.logger.log({
+      keyResult,
+      message: 'Fetching comments for key result',
+    })
+
+    return this.domain.keyResult.getComments(keyResult)
   }
 }
 
