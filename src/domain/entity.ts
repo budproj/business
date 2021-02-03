@@ -12,7 +12,7 @@ import {
 } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
-import { CONSTRAINT, DOMAIN_QUERY_ORDER } from './constants'
+import { CONSTRAINT, CONSTRAINT_ORDER, DOMAIN_QUERY_ORDER } from './constants'
 import { TeamDTO } from './team/dto'
 import { UserDTO } from './user/dto'
 
@@ -46,6 +46,11 @@ export interface DomainEntityServiceInterface<E, D> {
     selector: FindConditions<E>,
     queryContext: DomainQueryContext,
   ) => DomainMutationQueryResult<E>
+  defineResourceHighestConstraint: (
+    entity: E,
+    queryContext: DomainQueryContext,
+    currentConstraint?: CONSTRAINT,
+  ) => Promise<CONSTRAINT>
 }
 
 export interface DomainServiceGetOptions<E> {
@@ -72,7 +77,8 @@ export type DomainMutationQueryResult<E> = Promise<E | E[] | DeleteResult | null
 export type DomainCreationQuery<E> = () => Promise<E[] | null>
 export type DomainMutationQuery<E> = () => DomainMutationQueryResult<E>
 
-export abstract class DomainEntityService<E, D> implements DomainEntityServiceInterface<E, D> {
+export abstract class DomainEntityService<E extends DomainEntity, D>
+  implements DomainEntityServiceInterface<E, D> {
   protected readonly logger: Logger
 
   constructor(
@@ -154,6 +160,27 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
     const query = this.get(selector, queryContext, undefined, options)
 
     return query.getMany()
+  }
+
+  public async defineResourceHighestConstraint(
+    entity: E,
+    originalQueryContext: DomainQueryContext,
+    currentConstraint: CONSTRAINT = CONSTRAINT.ANY,
+  ) {
+    const currentConstraintIndex = CONSTRAINT_ORDER.indexOf(currentConstraint)
+    const nextConstraintIndex = currentConstraintIndex + 1
+    const isLastIndex = nextConstraintIndex + 1 === CONSTRAINT_ORDER.length
+
+    const selector = { id: entity.id } as any
+    const nextConstraint = CONSTRAINT_ORDER[nextConstraintIndex]
+    const queryContext = this.changeConstraintInQueryContext(originalQueryContext, nextConstraint)
+
+    const foundData = await this.getOneWithConstraint(selector, queryContext)
+    if (!foundData) return currentConstraint
+
+    return isLastIndex
+      ? nextConstraint
+      : this.defineResourceHighestConstraint(entity, queryContext, nextConstraint)
   }
 
   protected async create(data: Partial<D> | Array<Partial<D>>, _queryContext?: DomainQueryContext) {
@@ -285,6 +312,16 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
     if (!validationData) return
 
     return query()
+  }
+
+  protected changeConstraintInQueryContext(
+    originalQueryContext: DomainQueryContext,
+    constraint: CONSTRAINT,
+  ) {
+    return {
+      ...originalQueryContext,
+      constraint,
+    }
   }
 
   protected abstract protectCreationQuery(

@@ -1,6 +1,6 @@
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql'
 
-import { POLICY } from 'src/app/authz/constants'
+import { POLICY, RESOURCE } from 'src/app/authz/constants'
 import { CONSTRAINT } from 'src/domain/constants'
 
 registerEnumType(POLICY, {
@@ -13,6 +13,11 @@ registerEnumType(CONSTRAINT, {
   name: 'CONSTRAINT',
   description:
     'A constraint is a given scope inside our domain. It defines which type of resources are you trying to interact with',
+})
+
+registerEnumType(RESOURCE, {
+  name: 'RESOURCE',
+  description: 'A resource in our domain. This define the entity you are currently working with',
 })
 
 @ObjectType('Policy', {

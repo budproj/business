@@ -1,4 +1,4 @@
-import { Args, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, Parent, ResolveField, Resolver } from '@nestjs/graphql'
 import { FindConditions } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
@@ -56,12 +56,17 @@ abstract class GraphQLEntityResolver<E extends DomainEntity, D>
 
   @ResolveField('policies', () => PolicyObject)
   protected async getEntityPolicies(
-    @Args('constraint', { type: () => CONSTRAINT, defaultValue: CONSTRAINT.COMPANY })
-    constraint: CONSTRAINT,
+    @Parent() entity: E,
     @GraphQLUser() authzUser: AuthzUser,
+    @Args('constraint', { type: () => CONSTRAINT, nullable: true })
+    constraint: CONSTRAINT,
+    @Args('resource', { type: () => RESOURCE, nullable: true })
+    resource: RESOURCE = this.resource,
   ) {
+    if (!constraint) constraint = await this.getHighestConstraintForEntity(entity, authzUser)
+
     const userPermissions = this.authzService.getUserPermissionsForScope(authzUser, constraint)
-    const resourcePolicies = userPermissions[this.resource]
+    const resourcePolicies = userPermissions[resource]
 
     return resourcePolicies
   }
@@ -120,6 +125,16 @@ abstract class GraphQLEntityResolver<E extends DomainEntity, D>
     const queryContext = await this.domainService.team.buildTeamQueryContext(user, scopeConstraint)
 
     return this.entityService.deleteWithConstraint(selector, queryContext)
+  }
+
+  private async getHighestConstraintForEntity(entity: E, user: AuthzUser) {
+    const queryContext = await this.domainService.team.buildTeamQueryContext(user)
+    const constraint = await this.entityService.defineResourceHighestConstraint(
+      entity,
+      queryContext,
+    )
+
+    return constraint
   }
 }
 

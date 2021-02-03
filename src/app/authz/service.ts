@@ -4,7 +4,7 @@ import { mapValues, uniq, fromPairs, Dictionary } from 'lodash'
 import { Observable } from 'rxjs'
 
 import { AppRequest } from 'src/app/types'
-import { CONSTRAINT } from 'src/domain/constants'
+import { CONSTRAINT, CONSTRAINT_ORDER } from 'src/domain/constants'
 import DomainService from 'src/domain/service'
 
 import { ACTION, PERMISSION, POLICY, RESOURCE, SCOPED_PERMISSION } from './constants'
@@ -196,9 +196,8 @@ class AuthzService implements AuthzServiceInterface {
   private isConstraintHigherOrEqual(base: CONSTRAINT, candidate?: CONSTRAINT) {
     if (!candidate) return false
 
-    const constraintOrder = [CONSTRAINT.ANY, CONSTRAINT.COMPANY, CONSTRAINT.TEAM, CONSTRAINT.OWNS]
-    const baseIndex = constraintOrder.indexOf(base)
-    const candidateIndex = constraintOrder.indexOf(candidate)
+    const baseIndex = CONSTRAINT_ORDER.indexOf(base)
+    const candidateIndex = CONSTRAINT_ORDER.indexOf(candidate)
 
     return candidateIndex <= baseIndex
   }
