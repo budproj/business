@@ -55,6 +55,7 @@ export interface DomainEntityServiceInterface<E, D> {
 
 export interface DomainServiceGetOptions<E> {
   limit?: number
+  skip?: number
   orderBy?: Partial<Record<keyof E, DOMAIN_QUERY_ORDER>>
 }
 
@@ -335,7 +336,6 @@ export type SelectionQueryConstrain<E> = (query?: SelectQueryBuilder<E>) => Sele
 
 export interface DomainEntityRepositoryInterface<E> {
   constraintQueryToTeam: (allowedTeams: TeamDTO[], user: UserDTO) => SelectionQueryConstrain<E>
-
   constraintQueryToOwns: (user: UserDTO) => (query: SelectQueryBuilder<E>) => SelectQueryBuilder<E>
 }
 

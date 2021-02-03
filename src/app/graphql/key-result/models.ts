@@ -1,4 +1,12 @@
-import { Field, Float, ID, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
+import {
+  createUnionType,
+  Field,
+  Float,
+  ID,
+  Int,
+  ObjectType,
+  registerEnumType,
+} from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { KeyResultCommentObject } from 'src/app/graphql/key-result/comment/models'
@@ -13,6 +21,20 @@ import { KeyResultCheckInObject } from './check-in/models'
 registerEnumType(KEY_RESULT_FORMAT, {
   name: 'KEY_RESULT_FORMAT',
   description: 'Each format represents how our user wants to see the metrics of the key result',
+})
+
+export const TimelineEntryUnion = createUnionType({
+  name: 'TimelineEntryUnion',
+  types: () => [KeyResultCheckInObject, KeyResultCommentObject],
+  resolveType(value) {
+    if (value.progress) {
+      return KeyResultCheckInObject
+    }
+
+    if (value.text) {
+      return KeyResultCommentObject
+    }
+  },
 })
 
 @ObjectType('KeyResult', {
@@ -37,6 +59,12 @@ export class KeyResultObject implements EntityObject {
 
   @Field(() => Int, { description: 'The current confidence of this key result' })
   public currentConfidence: number
+
+  @Field(() => [TimelineEntryUnion], {
+    description:
+      'The timeline for this key result. It is ordered by creation date and is composed by both check-ins and comments',
+  })
+  public timeline: Array<KeyResultCheckInObject | KeyResultCommentObject>
 
   @Field({ description: 'The creation date of the key result' })
   public createdAt: Date

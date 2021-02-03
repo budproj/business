@@ -20,7 +20,7 @@ import { KeyResult } from 'src/domain/key-result/entities'
 import DomainService from 'src/domain/service'
 
 import { KeyResultCheckInObject } from './check-in/models'
-import { KeyResultObject } from './models'
+import { KeyResultObject, TimelineEntryUnion } from './models'
 
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -131,6 +131,27 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
     })
 
     return this.domain.keyResult.getComments(keyResult)
+  }
+
+  @ResolveField('timeline', () => [TimelineEntryUnion])
+  protected async getKeyResultTimeline(
+    @Parent() keyResult: KeyResultObject,
+    @Args('limit', { type: () => Int, defaultValue: 10 }) limit: number,
+    @Args('skip', { type: () => Int, nullable: true }) skip?: number,
+  ) {
+    this.logger.log({
+      keyResult,
+      limit,
+      skip,
+      message: 'Fetching timeline for key result',
+    })
+
+    const options = {
+      limit,
+      skip,
+    }
+
+    return this.domain.keyResult.getTimeline(keyResult, options)
   }
 }
 

@@ -9,6 +9,7 @@ import DomainKeyResultCheckInModule from './check-in'
 import DomainKeyResultCustomListModule from './custom-list'
 import DomainKeyResultRepository from './repository'
 import DomainKeyResultService from './service'
+import DomainKeyResultTimelineService from './timeline'
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import DomainKeyResultService from './service'
     forwardRef(() => DomainTeamModule),
     forwardRef(() => DomainKeyResultCommentModule),
   ],
-  providers: [DomainKeyResultService],
+  providers: [DomainKeyResultService, DomainKeyResultTimelineService],
   exports: [DomainKeyResultService],
 })
 class DomainKeyResultModule {}

@@ -8,34 +8,32 @@ import {
   DomainQueryContext,
   DomainServiceGetOptions,
 } from 'src/domain/entity'
-import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
-import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
-import DomainKeyResultCheckInService from 'src/domain/key-result/check-in/service'
-import { KeyResultCommentDTO } from 'src/domain/key-result/comment/dto'
-import { KeyResultComment } from 'src/domain/key-result/comment/entities'
-import DomainKeyResultCommentService from 'src/domain/key-result/comment/service'
-import {
-  DEFAULT_CONFIDENCE,
-  DEFAULT_PERCENTAGE_PROGRESS,
-  KEY_RESULT_FORMAT,
-} from 'src/domain/key-result/constants'
-import { KEY_RESULT_CUSTOM_LIST_BINDING } from 'src/domain/key-result/custom-list/constants'
-import { KeyResultCustomListDTO } from 'src/domain/key-result/custom-list/dto'
-import { KeyResultCustomList } from 'src/domain/key-result/custom-list/entities'
-import DomainKeyResultCustomListService from 'src/domain/key-result/custom-list/service'
-import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
 import { TeamDTO } from 'src/domain/team/dto'
 import DomainTeamService from 'src/domain/team/service'
 import { UserDTO } from 'src/domain/user/dto'
 
+import { KeyResultCheckInDTO } from './check-in/dto'
+import { KeyResultCheckIn } from './check-in/entities'
+import DomainKeyResultCheckInService from './check-in/service'
+import { KeyResultCommentDTO } from './comment/dto'
+import { KeyResultComment } from './comment/entities'
+import DomainKeyResultCommentService from './comment/service'
+import { DEFAULT_CONFIDENCE, DEFAULT_PERCENTAGE_PROGRESS, KEY_RESULT_FORMAT } from './constants'
+import { KEY_RESULT_CUSTOM_LIST_BINDING } from './custom-list/constants'
+import { KeyResultCustomListDTO } from './custom-list/dto'
+import { KeyResultCustomList } from './custom-list/entities'
+import DomainKeyResultCustomListService from './custom-list/service'
+import { KeyResultDTO } from './dto'
 import { KeyResult } from './entities'
 import DomainKeyResultRepository from './repository'
+import DomainKeyResultTimelineService, { DomainKeyResultTimelineGetOptions } from './timeline'
 
 export interface DomainKeyResultServiceInterface {
   customList: DomainKeyResultCustomListService
   checkIn: DomainKeyResultCheckInService
   comment: DomainKeyResultCommentService
+  timeline: DomainKeyResultTimelineService
 
   getFromOwner: (owner: UserDTO) => Promise<KeyResult[]>
   getFromTeams: (teams: TeamDTO | TeamDTO[]) => Promise<KeyResult[]>
@@ -84,6 +82,10 @@ export interface DomainKeyResultServiceInterface {
     keyResult: KeyResultDTO,
     options?: DomainServiceGetOptions<KeyResultComment>,
   ) => Promise<KeyResultComment[] | null>
+  getTimeline: (
+    keyResult: KeyResultDTO,
+    options: DomainKeyResultTimelineGetOptions,
+  ) => Promise<Array<KeyResultCheckIn | KeyResultComment>>
 }
 
 export interface DomainKeyResultCheckInGroup {
@@ -114,6 +116,8 @@ class DomainKeyResultService
     public readonly checkIn: DomainKeyResultCheckInService,
     @Inject(forwardRef(() => DomainKeyResultCommentService))
     public readonly comment: DomainKeyResultCommentService,
+    @Inject(forwardRef(() => DomainKeyResultTimelineService))
+    public readonly timeline: DomainKeyResultTimelineService,
     protected readonly repository: DomainKeyResultRepository,
     @Inject(forwardRef(() => DomainTeamService))
     private readonly teamService: DomainTeamService,
@@ -331,6 +335,13 @@ class DomainKeyResultService
     const selector = { keyResultId: keyResult.id }
 
     return this.comment.getMany(selector, undefined, options)
+  }
+
+  public async getTimeline(keyResult: KeyResultDTO, options: DomainKeyResultTimelineGetOptions) {
+    const timelineOrder = await this.timeline.buildUnionQuery(keyResult, options)
+    const timelineEntries = await this.timeline.getEntriesForTimelineOrder(timelineOrder)
+
+    return timelineEntries
   }
 
   protected async protectCreationQuery(
