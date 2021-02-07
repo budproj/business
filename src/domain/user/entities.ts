@@ -24,7 +24,7 @@ export class User extends DomainEntity implements UserDTO {
   @Column({ nullable: true })
   public lastName?: string
 
-  @Column({ type: 'enum', enum: USER_GENDER, nullable: true })
+  @Column({ type: 'simple-enum', enum: USER_GENDER, nullable: true })
   public gender?: USER_GENDER
 
   @Column({ nullable: true })

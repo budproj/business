@@ -20,7 +20,7 @@ export class KeyResult extends DomainEntity implements KeyResultDTO {
   @Column('numeric')
   public goal: number
 
-  @Column({ type: 'enum', enum: KEY_RESULT_FORMAT, default: KEY_RESULT_FORMAT.NUMBER })
+  @Column({ type: 'simple-enum', enum: KEY_RESULT_FORMAT, default: KEY_RESULT_FORMAT.NUMBER })
   public format: KEY_RESULT_FORMAT
 
   @UpdateDateColumn()

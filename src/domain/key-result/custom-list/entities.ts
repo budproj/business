@@ -24,7 +24,7 @@ export class KeyResultCustomList extends DomainEntity implements KeyResultCustom
   @Column({ nullable: true })
   public title?: string
 
-  @Column({ type: 'enum', enum: KEY_RESULT_CUSTOM_LIST_BINDING, nullable: true })
+  @Column({ type: 'simple-enum', enum: KEY_RESULT_CUSTOM_LIST_BINDING, nullable: true })
   public binding?: KEY_RESULT_CUSTOM_LIST_BINDING
 
   @Column('uuid', { array: true, nullable: true })

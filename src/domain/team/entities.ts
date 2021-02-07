@@ -49,7 +49,7 @@ export class Team extends DomainEntity implements TeamDTO {
   @Column({ type: 'text', nullable: true })
   public description?: string | null
 
-  @Column({ type: 'enum', enum: TEAM_GENDER, nullable: true })
+  @Column({ type: 'simple-enum', enum: TEAM_GENDER, nullable: true })
   public gender?: TEAM_GENDER
 
   @OneToMany('Cycle', 'team', { nullable: true })
