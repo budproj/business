@@ -27,7 +27,11 @@ import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import DomainService from 'src/domain/service'
 import RailwayProvider from 'src/railway'
 
-import { KeyResultCheckInInput, KeyResultCheckInObject } from './models'
+import {
+  KeyResultCheckInDeleteResultObject,
+  KeyResultCheckInInput,
+  KeyResultCheckInObject,
+} from './models'
 
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -91,6 +95,28 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     const createdCheckIn = createdCheckIns[0]
 
     return createdCheckIn
+  }
+
+  @Permissions(PERMISSION['KEY_RESULT_CHECK_IN:DELETE'])
+  @Mutation(() => KeyResultCheckInDeleteResultObject, { name: 'deleteKeyResultCheckIn' })
+  protected async deleteKeyResultComment(
+    @GraphQLUser() user: AuthzUser,
+    @Args('id', { type: () => ID }) keyResultCheckInID: KeyResultCheckIn['id'],
+  ) {
+    this.logger.log({
+      user,
+      keyResultCheckInID,
+      message: 'Removing key result check-in',
+    })
+
+    const selector = { id: keyResultCheckInID }
+    const result = await this.deleteWithActionScopeConstraint(selector, user)
+    if (!result)
+      throw new UserInputError(
+        `We could not find any key result check-in with ${keyResultCheckInID} to delete`,
+      )
+
+    return result
   }
 
   @ResolveField('user', () => UserObject)

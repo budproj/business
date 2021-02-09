@@ -12,7 +12,7 @@ import {
 } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
-import { CONSTRAINT, CONSTRAINT_ORDER, DOMAIN_QUERY_ORDER } from './constants'
+import { CONSTRAINT, CONSTRAINT_ORDER, DOMAIN_QUERY_ORDER, MUTATION_QUERY_TYPE } from './constants'
 import { TeamDTO } from './team/dto'
 import { UserDTO } from './user/dto'
 
@@ -286,7 +286,12 @@ export abstract class DomainEntityService<E extends DomainEntity, D>
   ) {
     const updateQuery = async () => this.update(selector, newData, queryContext)
 
-    return this.protectMutationQuery<E>(updateQuery, selector, queryContext)
+    return this.protectMutationQuery<E>(
+      updateQuery,
+      selector,
+      queryContext,
+      MUTATION_QUERY_TYPE.UPDATE,
+    )
   }
 
   protected async delete(selector: FindConditions<E>, _queryContext: DomainQueryContext) {
@@ -299,20 +304,52 @@ export abstract class DomainEntityService<E extends DomainEntity, D>
   ) {
     const deleteQuery = async () => this.delete(selector, queryContext)
 
-    return this.protectMutationQuery<DeleteResult>(deleteQuery, selector, queryContext)
+    return this.protectMutationQuery<DeleteResult>(
+      deleteQuery,
+      selector,
+      queryContext,
+      MUTATION_QUERY_TYPE.DELETE,
+    )
   }
 
   protected async protectMutationQuery<T>(
     query: () => Promise<T>,
     selector: FindConditions<E>,
     queryContext: DomainQueryContext,
+    queryType: MUTATION_QUERY_TYPE,
   ) {
-    const validationQuery = await this.getWithConstraint(selector, queryContext)
-    const validationData = await validationQuery.getOne()
+    const availableSetups = {
+      [MUTATION_QUERY_TYPE.UPDATE]: async (
+        query: SelectQueryBuilder<E>,
+        queryContext: DomainQueryContext,
+      ) => this.setupUpdateMutationQuery(query, queryContext),
+      [MUTATION_QUERY_TYPE.DELETE]: async (
+        query: SelectQueryBuilder<E>,
+        queryContext: DomainQueryContext,
+      ) => this.setupDeleteMutationQuery(query, queryContext),
+    }
+    const setup = availableSetups[queryType]
 
+    const validationQuery = await this.getWithConstraint(selector, queryContext)
+    const validationQueryAfterSetup = await setup(validationQuery, queryContext)
+    const validationData = await validationQueryAfterSetup.getOne()
     if (!validationData) return
 
     return query()
+  }
+
+  protected async setupUpdateMutationQuery(
+    query: SelectQueryBuilder<E>,
+    _queryContext: DomainQueryContext,
+  ) {
+    return query
+  }
+
+  protected async setupDeleteMutationQuery(
+    query: SelectQueryBuilder<E>,
+    _queryContext: DomainQueryContext,
+  ) {
+    return query
   }
 
   protected changeConstraintInQueryContext(

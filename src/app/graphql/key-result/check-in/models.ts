@@ -2,7 +2,7 @@ import { Field, Float, ID, InputType, Int, ObjectType } from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
-import { EntityObject } from 'src/app/graphql/models'
+import { DeleteResultObject, EntityObject } from 'src/app/graphql/models'
 import { UserObject } from 'src/app/graphql/user/models'
 
 @ObjectType('KeyResultCheckIn', {
@@ -58,6 +58,14 @@ export class KeyResultCheckInObject implements EntityObject {
 
   public id: string
   public policies: PolicyObject
+}
+
+@ObjectType('KeyResultCheckInDeleteResult', {
+  implements: () => DeleteResultObject,
+  description: 'The delete result from a delete mutation for key result check-ins',
+})
+export class KeyResultCheckInDeleteResultObject implements DeleteResultObject {
+  public affected: number
 }
 
 @InputType({ description: 'The required data to create a new progress report' })

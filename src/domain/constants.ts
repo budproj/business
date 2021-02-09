@@ -21,3 +21,8 @@ export enum DOMAIN_QUERY_ORDER {
   DESC = 'DESC',
   ASC = 'ASC',
 }
+
+export enum MUTATION_QUERY_TYPE {
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
+}

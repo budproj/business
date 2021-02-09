@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { sum } from 'lodash'
-import { Any } from 'typeorm'
+import { Any, SelectQueryBuilder } from 'typeorm'
 
 import { DOMAIN_QUERY_ORDER } from 'src/domain/constants'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
@@ -166,6 +166,22 @@ class DomainKeyResultCheckInService extends DomainEntityService<
     if (!validationData) return
 
     return query()
+  }
+
+  protected async setupDeleteMutationQuery(query: SelectQueryBuilder<KeyResultCheckIn>) {
+    const currentKeyResultCheckIn = await query
+      .leftJoinAndSelect(`${KeyResultCheckIn.name}.keyResult`, 'keyResult')
+      .getOne()
+    if (!currentKeyResultCheckIn) return query
+
+    const { keyResult } = currentKeyResultCheckIn
+    const latestCheckIn = await this.getLatestFromKeyResult(keyResult)
+
+    const constrainedQuery = query.andWhere(`${KeyResultCheckIn.name}.id = :latestCheckInID`, {
+      latestCheckInID: latestCheckIn.id,
+    })
+
+    return constrainedQuery
   }
 
   private minmax(value: number, min: number, max: number) {
