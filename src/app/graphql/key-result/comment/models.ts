@@ -2,7 +2,7 @@ import { Field, ID, InputType, ObjectType } from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
-import { EntityObject } from 'src/app/graphql/models'
+import { DeleteResultObject, EntityObject } from 'src/app/graphql/models'
 import { UserObject } from 'src/app/graphql/user/models'
 
 @ObjectType('KeyResultComment', {
@@ -33,6 +33,14 @@ export class KeyResultCommentObject implements EntityObject {
 
   public id: string
   public policies: PolicyObject
+}
+
+@ObjectType('KeyResultCommentDeleteResult', {
+  implements: () => DeleteResultObject,
+  description: 'The delete result from a delete mutation for key result comments',
+})
+export class KeyResultCommentDeleteResultObject implements DeleteResultObject {
+  public affected: number
 }
 
 @InputType({ description: 'The required data to create a new comment' })

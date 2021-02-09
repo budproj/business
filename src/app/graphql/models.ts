@@ -1,4 +1,4 @@
-import { Field, ID, InterfaceType, registerEnumType } from '@nestjs/graphql'
+import { Field, ID, Int, InterfaceType, registerEnumType } from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { DOMAIN_QUERY_ORDER } from 'src/domain/constants'
@@ -18,4 +18,10 @@ export abstract class EntityObject {
       'Group of policies regarding the given entity. Those policies decribe actions that your user can perform with that given resource',
   })
   public policies: PolicyObject
+}
+
+@InterfaceType()
+export abstract class DeleteResultObject {
+  @Field(() => Int, { description: 'The amount of entities removed' })
+  public affected: number
 }

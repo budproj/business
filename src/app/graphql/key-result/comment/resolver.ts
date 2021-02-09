@@ -17,7 +17,11 @@ import { KeyResultComment } from 'src/domain/key-result/comment/entities'
 import DomainService from 'src/domain/service'
 import RailwayProvider from 'src/railway'
 
-import { KeyResultCommentInput, KeyResultCommentObject } from './models'
+import {
+  KeyResultCommentDeleteResultObject,
+  KeyResultCommentInput,
+  KeyResultCommentObject,
+} from './models'
 
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -81,6 +85,28 @@ class GraphQLCommentResolver extends GraphQLEntityResolver<KeyResultComment, Key
     const createdComment = createdComments[0]
 
     return createdComment
+  }
+
+  @Permissions(PERMISSION['KEY_RESULT_COMMENT:DELETE'])
+  @Mutation(() => KeyResultCommentDeleteResultObject, { name: 'deleteKeyResultComment' })
+  protected async deleteKeyResultComment(
+    @GraphQLUser() user: AuthzUser,
+    @Args('id', { type: () => ID }) keyResultCommentID: KeyResultComment['id'],
+  ) {
+    this.logger.log({
+      user,
+      keyResultCommentID,
+      message: 'Removing key result comment',
+    })
+
+    const selector = { id: keyResultCommentID }
+    const result = await this.deleteWithActionScopeConstraint(selector, user)
+    if (!result)
+      throw new UserInputError(
+        `We could not find any key result comment with ${keyResultCommentID} to delete`,
+      )
+
+    return result
   }
 
   @ResolveField('user', () => UserObject)

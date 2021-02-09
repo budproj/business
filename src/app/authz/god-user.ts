@@ -92,7 +92,7 @@ class AuthzGodUser implements AuthzUser {
         [ACTION.CREATE]: CONSTRAINT.ANY,
         [ACTION.READ]: CONSTRAINT.ANY,
         [ACTION.UPDATE]: CONSTRAINT.ANY,
-        [ACTION.DELETE]: CONSTRAINT.ANY,
+        [ACTION.DELETE]: CONSTRAINT.OWNS,
       },
 
       [RESOURCE.KEY_RESULT_CUSTOM_LIST]: {

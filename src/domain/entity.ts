@@ -41,11 +41,11 @@ export interface DomainEntityServiceInterface<E, D> {
     selector: FindConditions<E>,
     newData: QueryDeepPartialEntity<E>,
     queryContext: DomainQueryContext,
-  ) => DomainMutationQueryResult<E>
+  ) => Promise<E | E[] | null>
   deleteWithConstraint: (
     selector: FindConditions<E>,
     queryContext: DomainQueryContext,
-  ) => DomainMutationQueryResult<E>
+  ) => Promise<DeleteResult>
   defineResourceHighestConstraint: (
     entity: E,
     queryContext: DomainQueryContext,
@@ -74,9 +74,7 @@ export interface DomainQueryContext extends DomainServiceContext {
   query: QueryContext
 }
 
-export type DomainMutationQueryResult<E> = Promise<E | E[] | DeleteResult | null>
 export type DomainCreationQuery<E> = () => Promise<E[] | null>
-export type DomainMutationQuery<E> = () => DomainMutationQueryResult<E>
 
 export abstract class DomainEntityService<E extends DomainEntity, D>
   implements DomainEntityServiceInterface<E, D> {
@@ -136,9 +134,9 @@ export abstract class DomainEntityService<E extends DomainEntity, D>
   }
 
   public async deleteWithConstraint(selector: FindConditions<E>, queryContext: DomainQueryContext) {
-    const shouldConstrainCreation = queryContext.constraint !== CONSTRAINT.ANY
+    const shouldConstrainDeletion = queryContext.constraint !== CONSTRAINT.ANY
 
-    return shouldConstrainCreation
+    return shouldConstrainDeletion
       ? this.deleteIfWithinConstraint(selector, queryContext)
       : this.delete(selector, queryContext)
   }
@@ -288,7 +286,7 @@ export abstract class DomainEntityService<E extends DomainEntity, D>
   ) {
     const updateQuery = async () => this.update(selector, newData, queryContext)
 
-    return this.protectMutationQuery(updateQuery, selector, queryContext)
+    return this.protectMutationQuery<E>(updateQuery, selector, queryContext)
   }
 
   protected async delete(selector: FindConditions<E>, _queryContext: DomainQueryContext) {
@@ -301,15 +299,17 @@ export abstract class DomainEntityService<E extends DomainEntity, D>
   ) {
     const deleteQuery = async () => this.delete(selector, queryContext)
 
-    return this.protectMutationQuery(deleteQuery, selector, queryContext)
+    return this.protectMutationQuery<DeleteResult>(deleteQuery, selector, queryContext)
   }
 
-  protected async protectMutationQuery(
-    query: DomainMutationQuery<E>,
+  protected async protectMutationQuery<T>(
+    query: () => Promise<T>,
     selector: FindConditions<E>,
     queryContext: DomainQueryContext,
   ) {
-    const validationData = await this.getWithConstraint(selector, queryContext)
+    const validationQuery = await this.getWithConstraint(selector, queryContext)
+    const validationData = await validationQuery.getOne()
+
     if (!validationData) return
 
     return query()
@@ -326,7 +326,7 @@ export abstract class DomainEntityService<E extends DomainEntity, D>
   }
 
   protected abstract protectCreationQuery(
-    query: DomainMutationQuery<E>,
+    query: DomainCreationQuery<E>,
     data: Partial<D>,
     queryContext: DomainQueryContext,
   ): Promise<E[] | null>

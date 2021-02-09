@@ -1,5 +1,5 @@
 import { Args, Parent, ResolveField, Resolver } from '@nestjs/graphql'
-import { FindConditions } from 'typeorm'
+import { DeleteResult, FindConditions } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
 import { ACTION, RESOURCE } from 'src/app/authz/constants'
@@ -9,7 +9,7 @@ import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { EntityObject } from 'src/app/graphql/models'
 import { CONSTRAINT } from 'src/domain/constants'
-import { DomainEntity, DomainEntityService, DomainMutationQueryResult } from 'src/domain/entity'
+import { DomainEntity, DomainEntityService } from 'src/domain/entity'
 import DomainService from 'src/domain/service'
 
 export interface GraphQLEntityResolverInterface<E extends DomainEntity, D> {
@@ -35,13 +35,13 @@ export interface GraphQLEntityResolverInterface<E extends DomainEntity, D> {
     newData: QueryDeepPartialEntity<E>,
     user: AuthzUser,
     action: ACTION,
-  ) => DomainMutationQueryResult<E>
+  ) => Promise<E | E[] | null>
 
   deleteWithActionScopeConstraint: (
     selector: FindConditions<E>,
     user: AuthzUser,
     action: ACTION,
-  ) => DomainMutationQueryResult<E>
+  ) => Promise<DeleteResult>
 }
 
 @Resolver(() => EntityObject)
