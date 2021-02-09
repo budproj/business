@@ -1,7 +1,6 @@
 import { Column, Entity, ManyToOne, RelationId, Unique, UpdateDateColumn } from 'typeorm'
 
 import { DomainEntity } from 'src/domain/entity'
-// eslint-disable-next-line unused-imports/no-unused-imports-ts
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { UserDTO } from 'src/domain/user/dto'
 

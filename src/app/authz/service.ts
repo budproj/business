@@ -74,11 +74,11 @@ class AuthzService implements AuthzServiceInterface {
       permissions,
     )
     const keyResultCommentActionScopes = this.parseActionScopesForResource(
-      RESOURCE.KEY_RESULT_CHECK_IN,
+      RESOURCE.KEY_RESULT_COMMENT,
       permissions,
     )
     const keyResultCustomListActionScopes = this.parseActionScopesForResource(
-      RESOURCE.KEY_RESULT_CHECK_IN,
+      RESOURCE.KEY_RESULT_CUSTOM_LIST,
       permissions,
     )
 
