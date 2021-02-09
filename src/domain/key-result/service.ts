@@ -54,6 +54,7 @@ export interface DomainKeyResultServiceInterface {
   ) => Promise<KeyResultCheckIn[] | null>
   getCheckInsByUser: (user: UserDTO) => Promise<KeyResultCheckIn[] | null>
   getLatestCheckInForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn | null>
+  getLatestCheckInForKeyResult: (team: KeyResultDTO) => Promise<KeyResultCheckIn | null>
   getCurrentProgressForKeyResult: (keyResult: KeyResultDTO) => Promise<KeyResultCheckIn['progress']>
   getCurrentConfidenceForKeyResult: (
     keyResult: KeyResultDTO,
@@ -213,6 +214,12 @@ class DomainKeyResultService
   public async getLatestCheckInForTeam(team: TeamDTO) {
     const users = await this.teamService.getUsersInTeam(team)
     const latestCheckIn = await this.checkIn.getLatestFromUsers(users)
+
+    return latestCheckIn
+  }
+
+  public async getLatestCheckInForKeyResult(keyResult: KeyResultDTO) {
+    const latestCheckIn = await this.checkIn.getLatestFromKeyResult(keyResult)
 
     return latestCheckIn
   }

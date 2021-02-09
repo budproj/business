@@ -12,10 +12,10 @@ import {
 } from '@nestjs/graphql'
 import { UserInputError, ApolloError } from 'apollo-server-fastify'
 
-import { ACTION, PERMISSION, RESOURCE } from 'src/app/authz/constants'
+import { ACTION, PERMISSION, POLICY, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
 import AuthzService from 'src/app/authz/service'
-import { AuthzUser } from 'src/app/authz/types'
+import { ActionPolicies, AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
@@ -183,6 +183,25 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     })
 
     return this.domain.keyResult.getCheckInRelativePercentageProgress(checkIn)
+  }
+
+  protected async customizeEntityPolicies(
+    originalPolicies: ActionPolicies,
+    keyResultCheckIn: KeyResultCheckIn,
+  ) {
+    const keyResult = await this.domain.keyResult.getOne({ id: keyResultCheckIn.keyResultId })
+    const latestCheckIn = await this.domain.keyResult.getLatestCheckInForKeyResult(keyResult)
+
+    const updatedDeletePolicy =
+      latestCheckIn.id === keyResultCheckIn.id ? POLICY.ALLOW : POLICY.DENY
+    const shouldUpdateDeletePolicy = originalPolicies.delete === POLICY.ALLOW
+
+    const policies: ActionPolicies = {
+      ...originalPolicies,
+      [ACTION.DELETE]: shouldUpdateDeletePolicy ? updatedDeletePolicy : originalPolicies.delete,
+    }
+
+    return policies
   }
 }
 

@@ -4,7 +4,7 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 
 import { ACTION, RESOURCE } from 'src/app/authz/constants'
 import AuthzService from 'src/app/authz/service'
-import { AuthzUser } from 'src/app/authz/types'
+import { ActionPolicies, AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { EntityObject } from 'src/app/graphql/models'
@@ -68,7 +68,9 @@ abstract class GraphQLEntityResolver<E extends DomainEntity, D>
     const userPermissions = this.authzService.getUserPermissionsForScope(authzUser, constraint)
     const resourcePolicies = userPermissions[resource]
 
-    return resourcePolicies
+    const customizedResourcePolicies = await this.customizeEntityPolicies(resourcePolicies, entity)
+
+    return customizedResourcePolicies
   }
 
   public async createWithActionScopeConstraint(
@@ -125,6 +127,10 @@ abstract class GraphQLEntityResolver<E extends DomainEntity, D>
     const queryContext = await this.domainService.team.buildTeamQueryContext(user, scopeConstraint)
 
     return this.entityService.deleteWithConstraint(selector, queryContext)
+  }
+
+  protected async customizeEntityPolicies(originalPolicies: ActionPolicies, _entity: E) {
+    return originalPolicies
   }
 
   private async getHighestConstraintForEntity(entity: E, user: AuthzUser) {
