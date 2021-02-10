@@ -137,18 +137,18 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
   protected async getKeyResultTimeline(
     @Parent() keyResult: KeyResultObject,
     @Args('limit', { type: () => Int, defaultValue: 10 }) limit: number,
-    @Args('skip', { type: () => Int, nullable: true }) skip?: number,
+    @Args('offset', { type: () => Int, nullable: true }) offset?: number,
   ) {
     this.logger.log({
       keyResult,
       limit,
-      skip,
+      offset,
       message: 'Fetching timeline for key result',
     })
 
     const options = {
       limit,
-      skip,
+      offset,
     }
 
     return this.domain.keyResult.getTimeline(keyResult, options)

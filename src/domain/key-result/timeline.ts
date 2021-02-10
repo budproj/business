@@ -66,7 +66,7 @@ class DomainKeyResultTimelineService implements DomainKeyResultTimelineServiceIn
         WHERE ${keyResultCommentTableName}.${keyResultIDColumnName}='${keyResult.id}'
 
       ORDER BY created_at ${options.orderBy?.createdAt ?? 'DESC'}
-      OFFSET ${options.skip ?? 0}
+      OFFSET ${options.offset ?? 0}
       ${options.limit ? `LIMIT ${options.limit}` : ''}
     `
 

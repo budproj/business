@@ -55,7 +55,7 @@ export interface DomainEntityServiceInterface<E, D> {
 
 export interface DomainServiceGetOptions<E> {
   limit?: number
-  skip?: number
+  offset?: number
   orderBy?: Partial<Record<keyof E, DOMAIN_QUERY_ORDER>>
 }
 

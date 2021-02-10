@@ -348,6 +348,8 @@ class DomainKeyResultService
     const timelineOrder = await this.timeline.buildUnionQuery(keyResult, options)
     const timelineEntries = await this.timeline.getEntriesForTimelineOrder(timelineOrder)
 
+    console.log(options, timelineOrder, timelineEntries)
+
     return timelineEntries
   }
 
