@@ -23,8 +23,8 @@ export type AuthzScopes = Record<RESOURCE, AuthzScopeGroup>
 export type AuthzScopeGroup = Record<ACTION, CONSTRAINT>
 
 export interface ActionPolicies {
-  [ACTION.CREATE]: POLICY | Promise<POLICY>
-  [ACTION.READ]: POLICY | Promise<POLICY>
-  [ACTION.UPDATE]: POLICY | Promise<POLICY>
-  [ACTION.DELETE]: POLICY | Promise<POLICY>
+  [ACTION.CREATE]: POLICY
+  [ACTION.READ]: POLICY
+  [ACTION.UPDATE]: POLICY
+  [ACTION.DELETE]: POLICY
 }

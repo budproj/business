@@ -1,0 +1,16 @@
+<RESOURCE-SLUG>:create:any (sudo) This permission allows the user to create <RESOURCE-NAME> for ANY company
+<RESOURCE-SLUG>:create:company This permission allows the user to create <RESOURCE-NAME> for companies which the user belongs to
+<RESOURCE-SLUG>:create:team This permission allows the user to create <RESOURCE-NAME> for teams which the user belongs to
+<RESOURCE-SLUG>:create:owns This permission allows the user to create <RESOURCE-NAME> for him/herself
+<RESOURCE-SLUG>:update:any (sudo) This permission allows the user to update <RESOURCE-NAME> for ANY company
+<RESOURCE-SLUG>:update:company This permission allows the user to update <RESOURCE-NAME> for companies which the user belongs to
+<RESOURCE-SLUG>:update:team This permission allows the user to update <RESOURCE-NAME> for teams which the user belongs to
+<RESOURCE-SLUG>:update:owns This permission allows the user to update <RESOURCE-NAME> that the user owns
+<RESOURCE-SLUG>:read:any (sudo) This permission allows the user to read <RESOURCE-NAME> for ANY company
+<RESOURCE-SLUG>:read:company This permission allows the user to read <RESOURCE-NAME> for companies which the user belongs to
+<RESOURCE-SLUG>:read:team This permission allows the user to read <RESOURCE-NAME> for teams which the user belongs to
+<RESOURCE-SLUG>:read:owns This permission allows the user to read <RESOURCE-NAME> that the user owns
+<RESOURCE-SLUG>:delete:any (sudo) This permission allows the user to delete <RESOURCE-NAME> for ANY company
+<RESOURCE-SLUG>:delete:company This permission allows the user to delete <RESOURCE-NAME> for companies that the user belongs to
+<RESOURCE-SLUG>:delete:team This permission allows the user to delete <RESOURCE-NAME> for teams that the user belongs to
+<RESOURCE-SLUG>:delete:owns This permission allows the user to delete <RESOURCE-NAME> that the user owns

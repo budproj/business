@@ -1,13 +1,6 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ManyToMany,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm'
+import { Column, Entity, ManyToMany, OneToMany, UpdateDateColumn } from 'typeorm'
 
+import { DomainEntity } from 'src/domain/entity'
 import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { KeyResultCustomListDTO } from 'src/domain/key-result/custom-list/dto'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
@@ -18,18 +11,12 @@ import { USER_GENDER } from 'src/domain/user/constants'
 import { UserDTO } from './dto'
 
 @Entity()
-export class User implements UserDTO {
-  @PrimaryGeneratedColumn('uuid')
-  public id: string
-
+export class User extends DomainEntity implements UserDTO {
   @Column()
   public firstName: string
 
   @Column()
   public authzSub: string
-
-  @CreateDateColumn()
-  public createdAt: Date
 
   @UpdateDateColumn()
   public updatedAt: Date
@@ -37,7 +24,7 @@ export class User implements UserDTO {
   @Column({ nullable: true })
   public lastName?: string
 
-  @Column({ type: 'enum', enum: USER_GENDER, nullable: true })
+  @Column({ type: 'simple-enum', enum: USER_GENDER, nullable: true })
   public gender?: USER_GENDER
 
   @Column({ nullable: true })

@@ -12,16 +12,13 @@ import {
 } from '@nestjs/graphql'
 import { UserInputError, ApolloError } from 'apollo-server-fastify'
 
-import { ACTION, PERMISSION, RESOURCE } from 'src/app/authz/constants'
+import { ACTION, PERMISSION, POLICY, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
-import { AuthzUser } from 'src/app/authz/types'
+import AuthzService from 'src/app/authz/service'
+import { ActionPolicies, AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
-import {
-  KeyResultCheckInInput,
-  KeyResultCheckInObject,
-} from 'src/app/graphql/key-result/check-in/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import { UserObject } from 'src/app/graphql/user'
@@ -30,23 +27,33 @@ import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import DomainService from 'src/domain/service'
 import RailwayProvider from 'src/railway'
 
+import {
+  KeyResultCheckInDeleteResultObject,
+  KeyResultCheckInInput,
+  KeyResultCheckInObject,
+} from './models'
+
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser)
 @Resolver(() => KeyResultCheckInObject)
 class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, KeyResultCheckInDTO> {
   private readonly logger = new Logger(GraphQLCheckInResolver.name)
 
-  constructor(protected readonly domain: DomainService, private readonly railway: RailwayProvider) {
-    super(RESOURCE.KEY_RESULT, domain, domain.keyResult.checkIn)
+  constructor(
+    protected readonly domain: DomainService,
+    protected readonly authzService: AuthzService,
+    private readonly railway: RailwayProvider,
+  ) {
+    super(RESOURCE.KEY_RESULT_CHECK_IN, domain, domain.keyResult.checkIn, authzService)
   }
 
-  @Permissions(PERMISSION['KEY_RESULT:READ'])
+  @Permissions(PERMISSION['KEY_RESULT_CHECK_IN:READ'])
   @Query(() => KeyResultCheckInObject, { name: 'keyResultCheckIn' })
   protected async getCheckIn(
     @Args('id', { type: () => ID }) id: KeyResultCheckInObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
-    this.logger.log(`Fetching key result check-in with id ${id.toString()}`)
+    this.logger.log(`Fetching key result check-in with id ${id}`)
 
     const checkIn = await this.getOneWithActionScopeConstraint({ id }, user)
     if (!checkIn) throw new UserInputError(`We could not found a check-in with id ${id}`)
@@ -54,7 +61,7 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     return checkIn
   }
 
-  @Permissions(PERMISSION['KEY_RESULT:UPDATE'])
+  @Permissions(PERMISSION['KEY_RESULT_CHECK_IN:CREATE'])
   @Mutation(() => KeyResultCheckInObject, { name: 'createKeyResultCheckIn' })
   protected async createKeyResultCheckIn(
     @GraphQLUser() user: AuthzUser,
@@ -88,6 +95,28 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     const createdCheckIn = createdCheckIns[0]
 
     return createdCheckIn
+  }
+
+  @Permissions(PERMISSION['KEY_RESULT_CHECK_IN:DELETE'])
+  @Mutation(() => KeyResultCheckInDeleteResultObject, { name: 'deleteKeyResultCheckIn' })
+  protected async deleteKeyResultComment(
+    @GraphQLUser() user: AuthzUser,
+    @Args('id', { type: () => ID }) keyResultCheckInID: KeyResultCheckIn['id'],
+  ) {
+    this.logger.log({
+      user,
+      keyResultCheckInID,
+      message: 'Removing key result check-in',
+    })
+
+    const selector = { id: keyResultCheckInID }
+    const result = await this.deleteWithActionScopeConstraint(selector, user)
+    if (!result)
+      throw new UserInputError(
+        `We could not find any key result check-in with ${keyResultCheckInID} to delete`,
+      )
+
+    return result
   }
 
   @ResolveField('user', () => UserObject)
@@ -154,6 +183,25 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     })
 
     return this.domain.keyResult.getCheckInRelativePercentageProgress(checkIn)
+  }
+
+  protected async customizeEntityPolicies(
+    originalPolicies: ActionPolicies,
+    keyResultCheckIn: KeyResultCheckIn,
+  ) {
+    const keyResult = await this.domain.keyResult.getOne({ id: keyResultCheckIn.keyResultId })
+    const latestCheckIn = await this.domain.keyResult.getLatestCheckInForKeyResult(keyResult)
+
+    const updatedDeletePolicy =
+      latestCheckIn.id === keyResultCheckIn.id ? POLICY.ALLOW : POLICY.DENY
+    const shouldUpdateDeletePolicy = originalPolicies.delete === POLICY.ALLOW
+
+    const policies: ActionPolicies = {
+      ...originalPolicies,
+      [ACTION.DELETE]: shouldUpdateDeletePolicy ? updatedDeletePolicy : originalPolicies.delete,
+    }
+
+    return policies
   }
 }
 

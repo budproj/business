@@ -1,13 +1,18 @@
-import { mapValues } from 'lodash'
-import { FindConditions } from 'typeorm'
+import { Args, Parent, ResolveField, Resolver } from '@nestjs/graphql'
+import { DeleteResult, FindConditions } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
-import { ACTION, POLICY, RESOURCE } from 'src/app/authz/constants'
-import { ActionPolicies, AuthzScopeGroup, AuthzUser } from 'src/app/authz/types'
-import { DomainEntityService, DomainMutationQueryResult } from 'src/domain/entity'
+import { ACTION, RESOURCE } from 'src/app/authz/constants'
+import AuthzService from 'src/app/authz/service'
+import { ActionPolicies, AuthzUser } from 'src/app/authz/types'
+import { GraphQLUser } from 'src/app/graphql/authz/decorators'
+import { PolicyObject } from 'src/app/graphql/authz/models'
+import { EntityObject } from 'src/app/graphql/models'
+import { CONSTRAINT } from 'src/domain/constants'
+import { DomainEntity, DomainEntityService } from 'src/domain/entity'
 import DomainService from 'src/domain/service'
 
-export interface GraphQLEntityResolverInterface<E, D> {
+export interface GraphQLEntityResolverInterface<E extends DomainEntity, D> {
   createWithActionScopeConstraint: (
     data: Partial<D>,
     user: AuthzUser,
@@ -30,23 +35,43 @@ export interface GraphQLEntityResolverInterface<E, D> {
     newData: QueryDeepPartialEntity<E>,
     user: AuthzUser,
     action: ACTION,
-  ) => DomainMutationQueryResult<E>
+  ) => Promise<E | E[] | null>
 
   deleteWithActionScopeConstraint: (
     selector: FindConditions<E>,
     user: AuthzUser,
     action: ACTION,
-  ) => DomainMutationQueryResult<E>
-
-  getUserPolicies: (selector: FindConditions<E>, user: AuthzUser) => Promise<ActionPolicies>
+  ) => Promise<DeleteResult>
 }
 
-abstract class GraphQLEntityResolver<E, D> implements GraphQLEntityResolverInterface<E, D> {
+@Resolver(() => EntityObject)
+abstract class GraphQLEntityResolver<E extends DomainEntity, D>
+  implements GraphQLEntityResolverInterface<E, D> {
   constructor(
     protected readonly resource: RESOURCE,
     protected readonly domainService: DomainService,
     protected readonly entityService: DomainEntityService<E, D>,
+    protected readonly authzService: AuthzService,
   ) {}
+
+  @ResolveField('policies', () => PolicyObject)
+  protected async getEntityPolicies(
+    @Parent() entity: E,
+    @GraphQLUser() authzUser: AuthzUser,
+    @Args('constraint', { type: () => CONSTRAINT, nullable: true })
+    constraint: CONSTRAINT,
+    @Args('resource', { type: () => RESOURCE, nullable: true })
+    resource: RESOURCE = this.resource,
+  ) {
+    if (!constraint) constraint = await this.getHighestConstraintForEntity(entity, authzUser)
+
+    const userPermissions = this.authzService.getUserPermissionsForScope(authzUser, constraint)
+    const resourcePolicies = userPermissions[resource]
+
+    const customizedResourcePolicies = await this.customizeEntityPolicies(resourcePolicies, entity)
+
+    return customizedResourcePolicies
+  }
 
   public async createWithActionScopeConstraint(
     data: Partial<D>,
@@ -104,25 +129,18 @@ abstract class GraphQLEntityResolver<E, D> implements GraphQLEntityResolverInter
     return this.entityService.deleteWithConstraint(selector, queryContext)
   }
 
-  public async getUserPolicies(selector: FindConditions<E>, user: AuthzUser) {
-    const actionSelectors: AuthzScopeGroup = {
-      [ACTION.CREATE]: user.scopes[this.resource][ACTION.CREATE],
-      [ACTION.READ]: user.scopes[this.resource][ACTION.READ],
-      [ACTION.UPDATE]: user.scopes[this.resource][ACTION.UPDATE],
-      [ACTION.DELETE]: user.scopes[this.resource][ACTION.DELETE],
-    }
+  protected async customizeEntityPolicies(originalPolicies: ActionPolicies, _entity: E) {
+    return originalPolicies
+  }
 
-    const policies: ActionPolicies = mapValues(
-      actionSelectors,
-      async (constraint, action: ACTION): Promise<POLICY> => {
-        if (!constraint) return POLICY.DENY
-        const foundData = await this.getOneWithActionScopeConstraint(selector, user, action)
-
-        return foundData ? POLICY.ALLOW : POLICY.DENY
-      },
+  private async getHighestConstraintForEntity(entity: E, user: AuthzUser) {
+    const queryContext = await this.domainService.team.buildTeamQueryContext(user)
+    const constraint = await this.entityService.defineResourceHighestConstraint(
+      entity,
+      queryContext,
     )
 
-    return policies
+    return constraint
   }
 }
 

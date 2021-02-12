@@ -1,30 +1,16 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  RelationId,
-  UpdateDateColumn,
-} from 'typeorm'
+import { Column, Entity, ManyToOne, OneToMany, RelationId, UpdateDateColumn } from 'typeorm'
 
 import { CycleDTO } from 'src/domain/cycle/dto'
+import { DomainEntity } from 'src/domain/entity'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
 import { ObjectiveDTO } from './dto'
 
 @Entity()
-export class Objective implements ObjectiveDTO {
-  @PrimaryGeneratedColumn('uuid')
-  public id: string
-
+export class Objective extends DomainEntity implements ObjectiveDTO {
   @Column()
   public title: string
-
-  @CreateDateColumn()
-  public createdAt: Date
 
   @UpdateDateColumn()
   public updatedAt: Date

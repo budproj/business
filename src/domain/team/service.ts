@@ -28,7 +28,7 @@ export interface DomainTeamServiceInterface {
   ) => Promise<Array<Partial<Team>>>
   getParentTeam: (team: TeamDTO) => Promise<Team>
   getUsersInTeam: (teamID: TeamDTO) => Promise<UserDTO[]>
-  buildTeamQueryContext: (user: UserDTO, constraint: CONSTRAINT) => Promise<DomainQueryContext>
+  buildTeamQueryContext: (user: UserDTO, constraint?: CONSTRAINT) => Promise<DomainQueryContext>
   getCurrentProgressForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
   getCurrentConfidenceForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['confidence']>
   getPercentageProgressIncreaseForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
@@ -117,7 +117,7 @@ class DomainTeamService
     return uniqTeamUsers
   }
 
-  public async buildTeamQueryContext(user: UserDTO, constraint: CONSTRAINT) {
+  public async buildTeamQueryContext(user: UserDTO, constraint: CONSTRAINT = CONSTRAINT.OWNS) {
     const context = this.buildContext(user, constraint)
 
     const userCompanies = await this.parseUserCompanies(user)

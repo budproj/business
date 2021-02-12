@@ -4,6 +4,7 @@ import { UserInputError } from 'apollo-server-fastify'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
+import AuthzService from 'src/app/authz/service'
 import { AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
@@ -24,8 +25,11 @@ import { ObjectiveObject } from './models'
 class GraphQLObjectiveResolver extends GraphQLEntityResolver<Objective, ObjectiveDTO> {
   private readonly logger = new Logger(GraphQLObjectiveResolver.name)
 
-  constructor(protected readonly domain: DomainService) {
-    super(RESOURCE.OBJECTIVE, domain, domain.objective)
+  constructor(
+    protected readonly domain: DomainService,
+    protected readonly authzService: AuthzService,
+  ) {
+    super(RESOURCE.OBJECTIVE, domain, domain.objective, authzService)
   }
 
   @Permissions(PERMISSION['OBJECTIVE:READ'])
@@ -34,7 +38,7 @@ class GraphQLObjectiveResolver extends GraphQLEntityResolver<Objective, Objectiv
     @Args('id', { type: () => ID }) id: ObjectiveObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
-    this.logger.log(`Fetching objective with id ${id.toString()}`)
+    this.logger.log(`Fetching objective with id ${id}`)
 
     const objective = await this.getOneWithActionScopeConstraint({ id }, user)
     if (!objective) throw new UserInputError(`We could not found an objective with id ${id}`)

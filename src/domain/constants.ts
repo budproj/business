@@ -5,6 +5,13 @@ export enum CONSTRAINT {
   OWNS = 'owns',
 }
 
+export const CONSTRAINT_ORDER = [
+  CONSTRAINT.ANY,
+  CONSTRAINT.COMPANY,
+  CONSTRAINT.TEAM,
+  CONSTRAINT.OWNS,
+]
+
 export enum TIMEFRAME_SCOPE {
   CURRENT = 'CURRENT',
   SNAPSHOT = 'SNAPSHOT',
@@ -13,4 +20,9 @@ export enum TIMEFRAME_SCOPE {
 export enum DOMAIN_QUERY_ORDER {
   DESC = 'DESC',
   ASC = 'ASC',
+}
+
+export enum MUTATION_QUERY_TYPE {
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
 }

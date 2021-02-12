@@ -39,6 +39,13 @@ class AuthzGodUser implements AuthzUser {
       permissions: Object.values(PERMISSION),
     }
     this.scopes = {
+      [RESOURCE.PERMISSION]: {
+        [ACTION.CREATE]: CONSTRAINT.ANY,
+        [ACTION.READ]: CONSTRAINT.ANY,
+        [ACTION.UPDATE]: CONSTRAINT.ANY,
+        [ACTION.DELETE]: CONSTRAINT.ANY,
+      },
+
       [RESOURCE.USER]: {
         [ACTION.CREATE]: CONSTRAINT.ANY,
         [ACTION.READ]: CONSTRAINT.ANY,
@@ -68,6 +75,27 @@ class AuthzGodUser implements AuthzUser {
       },
 
       [RESOURCE.KEY_RESULT]: {
+        [ACTION.CREATE]: CONSTRAINT.ANY,
+        [ACTION.READ]: CONSTRAINT.ANY,
+        [ACTION.UPDATE]: CONSTRAINT.ANY,
+        [ACTION.DELETE]: CONSTRAINT.ANY,
+      },
+
+      [RESOURCE.KEY_RESULT_CHECK_IN]: {
+        [ACTION.CREATE]: CONSTRAINT.ANY,
+        [ACTION.READ]: CONSTRAINT.ANY,
+        [ACTION.UPDATE]: CONSTRAINT.ANY,
+        [ACTION.DELETE]: CONSTRAINT.OWNS,
+      },
+
+      [RESOURCE.KEY_RESULT_COMMENT]: {
+        [ACTION.CREATE]: CONSTRAINT.ANY,
+        [ACTION.READ]: CONSTRAINT.ANY,
+        [ACTION.UPDATE]: CONSTRAINT.ANY,
+        [ACTION.DELETE]: CONSTRAINT.ANY,
+      },
+
+      [RESOURCE.KEY_RESULT_CUSTOM_LIST]: {
         [ACTION.CREATE]: CONSTRAINT.ANY,
         [ACTION.READ]: CONSTRAINT.ANY,
         [ACTION.UPDATE]: CONSTRAINT.ANY,

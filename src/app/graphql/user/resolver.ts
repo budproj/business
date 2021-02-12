@@ -4,6 +4,7 @@ import { UserInputError } from 'apollo-server-fastify'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
+import AuthzService from 'src/app/authz/service'
 import { AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
@@ -26,8 +27,11 @@ import { UserObject } from './models'
 class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
   private readonly logger = new Logger(GraphQLUserResolver.name)
 
-  constructor(protected readonly domain: DomainService) {
-    super(RESOURCE.USER, domain, domain.user)
+  constructor(
+    protected readonly domain: DomainService,
+    protected readonly authzService: AuthzService,
+  ) {
+    super(RESOURCE.USER, domain, domain.user, authzService)
   }
 
   @Permissions(PERMISSION['USER:READ'])
@@ -36,7 +40,7 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
     @Args('id', { type: () => ID }) id: UserObject['id'],
     @GraphQLUser() authzUser: AuthzUser,
   ) {
-    this.logger.log(`Fetching user with id ${id.toString()}`)
+    this.logger.log(`Fetching user with id ${id}`)
 
     const user = await this.getOneWithActionScopeConstraint({ id }, authzUser)
     if (!user) throw new UserInputError(`We could not found an user with id ${id}`)

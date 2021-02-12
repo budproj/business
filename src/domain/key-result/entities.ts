@@ -1,14 +1,6 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  RelationId,
-  UpdateDateColumn,
-} from 'typeorm'
+import { Column, Entity, ManyToOne, OneToMany, RelationId, UpdateDateColumn } from 'typeorm'
 
+import { DomainEntity } from 'src/domain/entity'
 import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
 import { TeamDTO } from 'src/domain/team/dto'
@@ -18,10 +10,7 @@ import { KEY_RESULT_FORMAT } from './constants'
 import { KeyResultDTO } from './dto'
 
 @Entity()
-export class KeyResult implements KeyResultDTO {
-  @PrimaryGeneratedColumn('uuid')
-  public id: string
-
+export class KeyResult extends DomainEntity implements KeyResultDTO {
   @Column()
   public title: string
 
@@ -31,11 +20,8 @@ export class KeyResult implements KeyResultDTO {
   @Column('numeric')
   public goal: number
 
-  @Column({ type: 'enum', enum: KEY_RESULT_FORMAT, default: KEY_RESULT_FORMAT.NUMBER })
+  @Column({ type: 'simple-enum', enum: KEY_RESULT_FORMAT, default: KEY_RESULT_FORMAT.NUMBER })
   public format: KEY_RESULT_FORMAT
-
-  @CreateDateColumn()
-  public createdAt: Date
 
   @UpdateDateColumn()
   public updatedAt: Date

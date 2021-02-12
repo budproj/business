@@ -4,6 +4,7 @@ import { UserInputError } from 'apollo-server-fastify'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
+import AuthzService from 'src/app/authz/service'
 import { AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
@@ -23,8 +24,11 @@ import { CycleObject } from './models'
 class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
   private readonly logger = new Logger(GraphQLCycleResolver.name)
 
-  constructor(protected readonly domain: DomainService) {
-    super(RESOURCE.CYCLE, domain, domain.cycle)
+  constructor(
+    protected readonly domain: DomainService,
+    protected readonly authzService: AuthzService,
+  ) {
+    super(RESOURCE.CYCLE, domain, domain.cycle, authzService)
   }
 
   @Permissions(PERMISSION['CYCLE:READ'])
@@ -33,7 +37,7 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
     @Args('id', { type: () => ID }) id: CycleObject['id'],
     @GraphQLUser() user: AuthzUser,
   ) {
-    this.logger.log(`Fetching cycle with id ${id.toString()}`)
+    this.logger.log(`Fetching cycle with id ${id}`)
 
     const cycle = await this.getOneWithActionScopeConstraint({ id }, user)
     if (!cycle) throw new UserInputError(`We could not found a cycle with id ${id}`)

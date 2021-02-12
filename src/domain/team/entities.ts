@@ -1,17 +1,16 @@
 import {
   Column,
-  CreateDateColumn,
   Entity,
   JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
-  PrimaryGeneratedColumn,
   RelationId,
   UpdateDateColumn,
 } from 'typeorm'
 
 import { CycleDTO } from 'src/domain/cycle/dto'
+import { DomainEntity } from 'src/domain/entity'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
@@ -19,15 +18,9 @@ import { TEAM_GENDER } from './constants'
 import { TeamDTO } from './dto'
 
 @Entity()
-export class Team implements TeamDTO {
-  @PrimaryGeneratedColumn('uuid')
-  public id: string
-
+export class Team extends DomainEntity implements TeamDTO {
   @Column()
   public name: string
-
-  @CreateDateColumn()
-  public createdAt: Date
 
   @UpdateDateColumn()
   public updatedAt: Date
@@ -56,7 +49,7 @@ export class Team implements TeamDTO {
   @Column({ type: 'text', nullable: true })
   public description?: string | null
 
-  @Column({ type: 'enum', enum: TEAM_GENDER, nullable: true })
+  @Column({ type: 'simple-enum', enum: TEAM_GENDER, nullable: true })
   public gender?: TEAM_GENDER
 
   @OneToMany('Cycle', 'team', { nullable: true })

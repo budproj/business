@@ -1,32 +1,18 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToOne,
-  PrimaryGeneratedColumn,
-  RelationId,
-} from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, RelationId } from 'typeorm'
 
+import { DomainEntity } from 'src/domain/entity'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
 import { KeyResultCheckInDTO } from './dto'
 
 @Entity()
-export class KeyResultCheckIn implements KeyResultCheckInDTO {
-  @PrimaryGeneratedColumn('uuid')
-  public id: string
-
+export class KeyResultCheckIn extends DomainEntity implements KeyResultCheckInDTO {
   @Column({ type: 'real' })
   public progress: number
 
   @Column()
   public confidence: number
-
-  @CreateDateColumn()
-  public createdAt: Date
 
   @ManyToOne('KeyResult', 'checkIns')
   public keyResult: KeyResultDTO

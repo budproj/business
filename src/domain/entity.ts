@@ -2,17 +2,17 @@ import { Logger } from '@nestjs/common'
 import { flow, mapKeys, snakeCase } from 'lodash'
 import {
   Brackets,
+  CreateDateColumn,
   DeleteResult,
   FindConditions,
+  PrimaryGeneratedColumn,
   Repository,
   SelectQueryBuilder,
   WhereExpression,
 } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
-import { Team } from 'src/domain/team/entities'
-
-import { CONSTRAINT, DOMAIN_QUERY_ORDER } from './constants'
+import { CONSTRAINT, CONSTRAINT_ORDER, DOMAIN_QUERY_ORDER, MUTATION_QUERY_TYPE } from './constants'
 import { TeamDTO } from './team/dto'
 import { UserDTO } from './user/dto'
 
@@ -41,15 +41,21 @@ export interface DomainEntityServiceInterface<E, D> {
     selector: FindConditions<E>,
     newData: QueryDeepPartialEntity<E>,
     queryContext: DomainQueryContext,
-  ) => DomainMutationQueryResult<E>
+  ) => Promise<E | E[] | null>
   deleteWithConstraint: (
     selector: FindConditions<E>,
     queryContext: DomainQueryContext,
-  ) => DomainMutationQueryResult<E>
+  ) => Promise<DeleteResult>
+  defineResourceHighestConstraint: (
+    entity: E,
+    queryContext: DomainQueryContext,
+    currentConstraint?: CONSTRAINT,
+  ) => Promise<CONSTRAINT>
 }
 
 export interface DomainServiceGetOptions<E> {
   limit?: number
+  offset?: number
   orderBy?: Partial<Record<keyof E, DOMAIN_QUERY_ORDER>>
 }
 
@@ -59,20 +65,19 @@ export interface DomainServiceContext {
 }
 
 export interface QueryContext {
-  companies: Team[]
-  teams: Team[]
-  userTeams: Team[]
+  companies: TeamDTO[]
+  teams: TeamDTO[]
+  userTeams: TeamDTO[]
 }
 
 export interface DomainQueryContext extends DomainServiceContext {
   query: QueryContext
 }
 
-export type DomainMutationQueryResult<E> = Promise<E | E[] | DeleteResult | null>
 export type DomainCreationQuery<E> = () => Promise<E[] | null>
-export type DomainMutationQuery<E> = () => DomainMutationQueryResult<E>
 
-export abstract class DomainEntityService<E, D> implements DomainEntityServiceInterface<E, D> {
+export abstract class DomainEntityService<E extends DomainEntity, D>
+  implements DomainEntityServiceInterface<E, D> {
   protected readonly logger: Logger
 
   constructor(
@@ -129,9 +134,9 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
   }
 
   public async deleteWithConstraint(selector: FindConditions<E>, queryContext: DomainQueryContext) {
-    const shouldConstrainCreation = queryContext.constraint !== CONSTRAINT.ANY
+    const shouldConstrainDeletion = queryContext.constraint !== CONSTRAINT.ANY
 
-    return shouldConstrainCreation
+    return shouldConstrainDeletion
       ? this.deleteIfWithinConstraint(selector, queryContext)
       : this.delete(selector, queryContext)
   }
@@ -154,6 +159,27 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
     const query = this.get(selector, queryContext, undefined, options)
 
     return query.getMany()
+  }
+
+  public async defineResourceHighestConstraint(
+    entity: E,
+    originalQueryContext: DomainQueryContext,
+    currentConstraint: CONSTRAINT = CONSTRAINT.ANY,
+  ) {
+    const currentConstraintIndex = CONSTRAINT_ORDER.indexOf(currentConstraint)
+    const nextConstraintIndex = currentConstraintIndex + 1
+    const isLastIndex = nextConstraintIndex + 1 === CONSTRAINT_ORDER.length
+
+    const selector = { id: entity.id } as any
+    const nextConstraint = CONSTRAINT_ORDER[nextConstraintIndex]
+    const queryContext = this.changeConstraintInQueryContext(originalQueryContext, nextConstraint)
+
+    const foundData = await this.getOneWithConstraint(selector, queryContext)
+    if (!foundData) return currentConstraint
+
+    return isLastIndex
+      ? nextConstraint
+      : this.defineResourceHighestConstraint(entity, queryContext, nextConstraint)
   }
 
   protected async create(data: Partial<D> | Array<Partial<D>>, _queryContext?: DomainQueryContext) {
@@ -179,6 +205,7 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
       [CONSTRAINT.OWNS]: async () => this.getIfUserOwnsIt(selector, queryContext),
     }
     const constrainedSelector = availableSelectors[queryContext.constraint]
+    if (!constrainedSelector) return
 
     return constrainedSelector()
   }
@@ -259,7 +286,12 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
   ) {
     const updateQuery = async () => this.update(selector, newData, queryContext)
 
-    return this.protectMutationQuery(updateQuery, selector, queryContext)
+    return this.protectMutationQuery<E>(
+      updateQuery,
+      selector,
+      queryContext,
+      MUTATION_QUERY_TYPE.UPDATE,
+    )
   }
 
   protected async delete(selector: FindConditions<E>, _queryContext: DomainQueryContext) {
@@ -272,22 +304,66 @@ export abstract class DomainEntityService<E, D> implements DomainEntityServiceIn
   ) {
     const deleteQuery = async () => this.delete(selector, queryContext)
 
-    return this.protectMutationQuery(deleteQuery, selector, queryContext)
+    return this.protectMutationQuery<DeleteResult>(
+      deleteQuery,
+      selector,
+      queryContext,
+      MUTATION_QUERY_TYPE.DELETE,
+    )
   }
 
-  protected async protectMutationQuery(
-    query: DomainMutationQuery<E>,
+  protected async protectMutationQuery<T>(
+    query: () => Promise<T>,
     selector: FindConditions<E>,
     queryContext: DomainQueryContext,
+    queryType: MUTATION_QUERY_TYPE,
   ) {
-    const validationData = await this.getWithConstraint(selector, queryContext)
+    const availableSetups = {
+      [MUTATION_QUERY_TYPE.UPDATE]: async (
+        query: SelectQueryBuilder<E>,
+        queryContext: DomainQueryContext,
+      ) => this.setupUpdateMutationQuery(query, queryContext),
+      [MUTATION_QUERY_TYPE.DELETE]: async (
+        query: SelectQueryBuilder<E>,
+        queryContext: DomainQueryContext,
+      ) => this.setupDeleteMutationQuery(query, queryContext),
+    }
+    const setup = availableSetups[queryType]
+
+    const validationQuery = await this.getWithConstraint(selector, queryContext)
+    const validationQueryAfterSetup = await setup(validationQuery, queryContext)
+    const validationData = await validationQueryAfterSetup.getOne()
     if (!validationData) return
 
     return query()
   }
 
+  protected async setupUpdateMutationQuery(
+    query: SelectQueryBuilder<E>,
+    _queryContext: DomainQueryContext,
+  ) {
+    return query
+  }
+
+  protected async setupDeleteMutationQuery(
+    query: SelectQueryBuilder<E>,
+    _queryContext: DomainQueryContext,
+  ) {
+    return query
+  }
+
+  protected changeConstraintInQueryContext(
+    originalQueryContext: DomainQueryContext,
+    constraint: CONSTRAINT,
+  ) {
+    return {
+      ...originalQueryContext,
+      constraint,
+    }
+  }
+
   protected abstract protectCreationQuery(
-    query: DomainMutationQuery<E>,
+    query: DomainCreationQuery<E>,
     data: Partial<D>,
     queryContext: DomainQueryContext,
   ): Promise<E[] | null>
@@ -297,7 +373,6 @@ export type SelectionQueryConstrain<E> = (query?: SelectQueryBuilder<E>) => Sele
 
 export interface DomainEntityRepositoryInterface<E> {
   constraintQueryToTeam: (allowedTeams: TeamDTO[], user: UserDTO) => SelectionQueryConstrain<E>
-
   constraintQueryToOwns: (user: UserDTO) => (query: SelectQueryBuilder<E>) => SelectQueryBuilder<E>
 }
 
@@ -432,4 +507,12 @@ class NotSpecification<T> extends DomainEntitySpecification<T> {
   public isSatisfiedBy(candidate: T) {
     return !this.wrapped.isSatisfiedBy(candidate)
   }
+}
+
+export abstract class DomainEntity {
+  @PrimaryGeneratedColumn('uuid')
+  public id: string
+
+  @CreateDateColumn()
+  public createdAt: Date
 }

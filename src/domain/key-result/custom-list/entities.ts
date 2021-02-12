@@ -1,15 +1,6 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  RelationId,
-  Unique,
-  UpdateDateColumn,
-} from 'typeorm'
+import { Column, Entity, ManyToOne, RelationId, Unique, UpdateDateColumn } from 'typeorm'
 
-// eslint-disable-next-line unused-imports/no-unused-imports-ts
+import { DomainEntity } from 'src/domain/entity'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
@@ -18,13 +9,7 @@ import { KeyResultCustomListDTO } from './dto'
 
 @Entity()
 @Unique(['user', 'binding'])
-export class KeyResultCustomList implements KeyResultCustomListDTO {
-  @PrimaryGeneratedColumn('uuid')
-  public id: string
-
-  @CreateDateColumn()
-  public createdAt: Date
-
+export class KeyResultCustomList extends DomainEntity implements KeyResultCustomListDTO {
   @UpdateDateColumn()
   public updatedAt: Date
 
@@ -38,7 +23,7 @@ export class KeyResultCustomList implements KeyResultCustomListDTO {
   @Column({ nullable: true })
   public title?: string
 
-  @Column({ type: 'enum', enum: KEY_RESULT_CUSTOM_LIST_BINDING, nullable: true })
+  @Column({ type: 'simple-enum', enum: KEY_RESULT_CUSTOM_LIST_BINDING, nullable: true })
   public binding?: KEY_RESULT_CUSTOM_LIST_BINDING
 
   @Column('uuid', { array: true, nullable: true })

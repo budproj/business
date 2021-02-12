@@ -1,14 +1,16 @@
 import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql'
 
+import { PolicyObject } from 'src/app/graphql/authz/models'
 import { CycleObject } from 'src/app/graphql/cycle/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
+import { EntityObject } from 'src/app/graphql/models'
 import { UserObject } from 'src/app/graphql/user/models'
 
-@ObjectType('Objective', { description: 'A group of key results that has the same focus' })
-export class ObjectiveObject {
-  @Field(() => ID, { description: 'The ID of the objective' })
-  public id: string
-
+@ObjectType('Objective', {
+  implements: () => EntityObject,
+  description: 'A group of key results that has the same focus',
+})
+export class ObjectiveObject implements EntityObject {
   @Field({ description: 'The title(name) of the objective' })
   public title: string
 
@@ -50,4 +52,7 @@ export class ObjectiveObject {
     nullable: true,
   })
   public keyResults?: KeyResultObject[]
+
+  public id: string
+  public policies: PolicyObject
 }

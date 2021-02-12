@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { sum } from 'lodash'
-import { Any } from 'typeorm'
+import { Any, SelectQueryBuilder } from 'typeorm'
 
 import { DOMAIN_QUERY_ORDER } from 'src/domain/constants'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
@@ -13,6 +13,7 @@ import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { KeyResult } from 'src/domain/key-result/entities'
 import DomainKeyResultService from 'src/domain/key-result/service'
+import { DomainKeyResultTimelineOrderEntry } from 'src/domain/key-result/timeline'
 import { DEFAULT_CONFIDENCE } from 'src/domain/team/constants'
 import { UserDTO } from 'src/domain/user/dto'
 
@@ -41,6 +42,9 @@ export interface DomainKeyResultCheckInServiceInterface {
     oldCheckIn: KeyResultCheckInDTO,
     newCheckIn: KeyResultCheckInDTO,
   ) => number
+  getForTimelineEntries: (
+    entries: DomainKeyResultTimelineOrderEntry[],
+  ) => Promise<KeyResultCheckIn[]>
 }
 
 @Injectable()
@@ -144,6 +148,13 @@ class DomainKeyResultCheckInService extends DomainEntityService<
     return deltaConfidence
   }
 
+  public async getForTimelineEntries(entries: DomainKeyResultTimelineOrderEntry[]) {
+    const checkInIDs = entries.map((entry) => entry.id)
+    const result = await this.repository.findByIds(checkInIDs)
+
+    return result
+  }
+
   protected async protectCreationQuery(
     query: DomainCreationQuery<KeyResultCheckIn>,
     data: Partial<KeyResultCheckInDTO>,
@@ -155,6 +166,22 @@ class DomainKeyResultCheckInService extends DomainEntityService<
     if (!validationData) return
 
     return query()
+  }
+
+  protected async setupDeleteMutationQuery(query: SelectQueryBuilder<KeyResultCheckIn>) {
+    const currentKeyResultCheckIn = await query
+      .leftJoinAndSelect(`${KeyResultCheckIn.name}.keyResult`, 'keyResult')
+      .getOne()
+    if (!currentKeyResultCheckIn) return query
+
+    const { keyResult } = currentKeyResultCheckIn
+    const latestCheckIn = await this.getLatestFromKeyResult(keyResult)
+
+    const constrainedQuery = query.andWhere(`${KeyResultCheckIn.name}.id = :latestCheckInID`, {
+      latestCheckInID: latestCheckIn.id,
+    })
+
+    return constrainedQuery
   }
 
   private minmax(value: number, min: number, max: number) {
