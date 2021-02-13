@@ -27,7 +27,7 @@ export const TimelineEntryUnion = createUnionType({
   name: 'TimelineEntryUnion',
   types: () => [KeyResultCheckInObject, KeyResultCommentObject],
   resolveType(value) {
-    if (value.progress) {
+    if (value.progress || value.progress === 0) {
       return KeyResultCheckInObject
     }
 
