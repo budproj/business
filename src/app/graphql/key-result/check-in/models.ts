@@ -71,7 +71,7 @@ export class KeyResultCheckInDeleteResultObject implements DeleteResultObject {
 @InputType({ description: 'The required data to create a new progress report' })
 export class KeyResultCheckInInput {
   @Field(() => Float, { description: 'The progress value you are reporting' })
-  public progress: number
+  public value: number
 
   @Field(() => Int, { description: 'The confidence value you are reporting' })
   public confidence: number
