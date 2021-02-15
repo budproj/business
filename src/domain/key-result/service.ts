@@ -72,9 +72,9 @@ export interface DomainKeyResultServiceInterface {
     checkInData: DomainKeyResultCheckInPayload,
   ) => Promise<Partial<KeyResultCheckInDTO>>
   getParentCheckInFromCheckIn: (checkIn: KeyResultCheckInDTO) => Promise<KeyResultCheckIn | null>
-  getCheckInPercentageProgressIncrease: (checkIn: KeyResultCheckIn) => Promise<number>
-  getCheckInAbsoluteConfidenceIncrease: (checkIn: KeyResultCheckIn) => Promise<number>
-  getCheckInRelativePercentageProgress: (checkIn: KeyResultCheckIn) => Promise<number>
+  getCheckInProgressIncrease: (checkIn: KeyResultCheckIn) => Promise<number>
+  getCheckInConfidenceIncrease: (checkIn: KeyResultCheckIn) => Promise<number>
+  getCheckInProgress: (checkIn: KeyResultCheckIn) => Promise<number>
   buildCommentForUser: (
     user: UserDTO,
     commentData: DomainKeyResultCommentPayload,
@@ -287,7 +287,7 @@ class DomainKeyResultService
     return this.checkIn.getOne({ id: checkIn.parentId })
   }
 
-  public async getCheckInPercentageProgressIncrease(checkIn: KeyResultCheckIn) {
+  public async getCheckInProgressIncrease(checkIn: KeyResultCheckIn) {
     const keyResult = await this.getOne({ id: checkIn.keyResultId })
     const previousCheckIn = await this.getParentCheckInFromCheckIn(checkIn)
 
@@ -310,7 +310,7 @@ class DomainKeyResultService
     return deltaProgress
   }
 
-  public async getCheckInAbsoluteConfidenceIncrease(checkIn: KeyResultCheckIn) {
+  public async getCheckInConfidenceIncrease(checkIn: KeyResultCheckIn) {
     const previousCheckIn = await this.getParentCheckInFromCheckIn(checkIn)
 
     const deltaConfidence = this.checkIn.calculateConfidenceDifference(previousCheckIn, checkIn)
@@ -318,7 +318,7 @@ class DomainKeyResultService
     return deltaConfidence
   }
 
-  public async getCheckInRelativePercentageProgress(checkIn: KeyResultCheckIn) {
+  public async getCheckInProgress(checkIn: KeyResultCheckIn) {
     const keyResult = await this.getOne({ id: checkIn.keyResultId })
     const normalizedCheckIn = this.checkIn.transformCheckInToRelativePercentage(checkIn, keyResult)
 

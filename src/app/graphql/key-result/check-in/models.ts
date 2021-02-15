@@ -10,8 +10,8 @@ import { UserObject } from 'src/app/graphql/user/models'
   description: 'A report that records new progress in a given key result',
 })
 export class KeyResultCheckInObject implements EntityObject {
-  @Field(() => Float, { description: 'The reported progress in this check-in' })
-  public progress: number
+  @Field(() => Float, { description: 'The reported value in this check-in' })
+  public value: number
 
   @Field(() => Int, { description: 'The reported confidence in this check-in' })
   public confidence: number
@@ -20,17 +20,17 @@ export class KeyResultCheckInObject implements EntityObject {
     description:
       'The relative percentage progress of this check-in. It calculates the percentage of the completion for this key result, where 0% is equal to the initial value of the key result, and 100% is the goal of that given key result. Also, this metric cannot go above 100% or below 0%',
   })
-  public relativePercentageProgress: number
+  public progress: number
 
   @Field(() => Float, {
     description: 'The percentage progress increase comparing to previous check-in',
   })
-  public percentageProgressIncrease: number
+  public progressIncrease: number
 
   @Field(() => Int, {
-    description: 'The absolute confidence increase comparing to previous check-in',
+    description: 'The confidence increase comparing to previous check-in',
   })
-  public absoluteConfidenceIncrease: number
+  public confidenceIncrease: number
 
   @Field({ description: 'The creation date of the report' })
   public createdAt: Date
@@ -71,7 +71,7 @@ export class KeyResultCheckInDeleteResultObject implements DeleteResultObject {
 @InputType({ description: 'The required data to create a new progress report' })
 export class KeyResultCheckInInput {
   @Field(() => Float, { description: 'The progress value you are reporting' })
-  public progress: number
+  public value: number
 
   @Field(() => Int, { description: 'The confidence value you are reporting' })
   public confidence: number

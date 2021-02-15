@@ -1,12 +1,4 @@
-import {
-  createUnionType,
-  Field,
-  Float,
-  ID,
-  Int,
-  ObjectType,
-  registerEnumType,
-} from '@nestjs/graphql'
+import { createUnionType, Field, Float, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { KeyResultCommentObject } from 'src/app/graphql/key-result/comment/models'
@@ -54,12 +46,6 @@ export class KeyResultObject implements EntityObject {
   @Field({ description: 'The format of the key result' })
   public format: KEY_RESULT_FORMAT
 
-  @Field(() => Float, { description: 'The current progress of this key result' })
-  public currentProgress: number
-
-  @Field(() => Int, { description: 'The current confidence of this key result' })
-  public currentConfidence: number
-
   @Field(() => [TimelineEntryUnion], {
     description:
       'The timeline for this key result. It is ordered by creation date and is composed by both check-ins and comments',
@@ -104,6 +90,12 @@ export class KeyResultObject implements EntityObject {
     nullable: true,
   })
   public keyResultComments?: KeyResultCommentObject[]
+
+  @Field(() => KeyResultCheckInObject, {
+    description: 'The latest key result check-in reported for that key result',
+    nullable: true,
+  })
+  public latestKeyResultCheckIn?: KeyResultCheckInObject
 
   public id: string
   public policies: PolicyObject

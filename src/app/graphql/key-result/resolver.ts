@@ -1,5 +1,5 @@
 import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Float, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
@@ -103,26 +103,6 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
     return this.domain.keyResult.getCheckIns(keyResult, options)
   }
 
-  @ResolveField('currentProgress', () => Float)
-  protected async getKeyResultCurrentProgress(@Parent() keyResult: KeyResultObject) {
-    this.logger.log({
-      keyResult,
-      message: 'Fetching current progress for key result',
-    })
-
-    return this.domain.keyResult.getCurrentProgressForKeyResult(keyResult)
-  }
-
-  @ResolveField('currentConfidence', () => Float)
-  protected async getKeyResultCurrentConfidence(@Parent() keyResult: KeyResultObject) {
-    this.logger.log({
-      keyResult,
-      message: 'Fetching current confidence for key result',
-    })
-
-    return this.domain.keyResult.getCurrentConfidenceForKeyResult(keyResult)
-  }
-
   @ResolveField('keyResultComments', () => [KeyResultCommentObject])
   protected async getKeyResultComments(@Parent() keyResult: KeyResultObject) {
     this.logger.log({
@@ -152,6 +132,16 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
     }
 
     return this.domain.keyResult.getTimeline(keyResult, options)
+  }
+
+  @ResolveField('latestKeyResultCheckIn', () => KeyResultCheckInObject, { nullable: true })
+  protected async getLatestKeyResultCheckIn(@Parent() keyResult: KeyResultObject) {
+    this.logger.log({
+      keyResult,
+      message: 'Fetching latest key result check-in for key result',
+    })
+
+    return this.domain.keyResult.getLatestCheckInForKeyResult(keyResult)
   }
 }
 

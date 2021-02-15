@@ -11,6 +11,7 @@ import {
   Resolver,
 } from '@nestjs/graphql'
 import { UserInputError, ApolloError } from 'apollo-server-fastify'
+import { omit } from 'lodash'
 
 import { ACTION, PERMISSION, POLICY, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
@@ -74,7 +75,15 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
       message: 'Received create check-in request',
     })
 
-    const checkIn = await this.domain.keyResult.buildCheckInForUser(user, keyResultCheckIn)
+    const translatedKeyResultCheckIn = {
+      ...omit(keyResultCheckIn, 'value'),
+      progress: keyResultCheckIn.value,
+    }
+
+    const checkIn = await this.domain.keyResult.buildCheckInForUser(
+      user,
+      translatedKeyResultCheckIn,
+    )
     const createCheckInPromise = this.createWithActionScopeConstraint(checkIn, user, ACTION.UPDATE)
 
     this.logger.log({
@@ -149,7 +158,7 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     return this.domain.keyResult.getParentCheckInFromCheckIn(checkIn)
   }
 
-  @ResolveField('percentageProgressIncrease', () => Float)
+  @ResolveField('progressIncrease', () => Float)
   protected async getKeyResultCheckInPercentageProgressIncrease(
     @Parent() checkIn: KeyResultCheckInObject,
   ) {
@@ -158,10 +167,10 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
       message: 'Fetching percentage progress increase for key result check-in',
     })
 
-    return this.domain.keyResult.getCheckInPercentageProgressIncrease(checkIn)
+    return this.domain.keyResult.getCheckInProgressIncrease(checkIn)
   }
 
-  @ResolveField('absoluteConfidenceIncrease', () => Int)
+  @ResolveField('confidenceIncrease', () => Int)
   protected async getKeyResultCheckInAbsoluteConfidenceIncrease(
     @Parent() checkIn: KeyResultCheckInObject,
   ) {
@@ -170,19 +179,28 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
       message: 'Fetching absolute confidence increase for key result check-in',
     })
 
-    return this.domain.keyResult.getCheckInAbsoluteConfidenceIncrease(checkIn)
+    return this.domain.keyResult.getCheckInConfidenceIncrease(checkIn)
   }
 
-  @ResolveField('relativePercentageProgress', () => Float)
-  protected async getKeyResultCheckInRelativePercentageProgress(
-    @Parent() checkIn: KeyResultCheckInObject,
-  ) {
+  @ResolveField('progress', () => Float)
+  protected async getKeyResultCheckInProgress(@Parent() checkIn: KeyResultCheckInObject) {
     this.logger.log({
       checkIn,
       message: 'Fetching relative percentage progress for key result check-in',
     })
 
-    return this.domain.keyResult.getCheckInRelativePercentageProgress(checkIn)
+    return this.domain.keyResult.getCheckInProgress(checkIn)
+  }
+
+  // The field resolver below should be removed after changing our domain structure
+  @ResolveField('value', () => Float)
+  protected getKeyResultCheckInValue(@Parent() checkIn: KeyResultCheckInObject) {
+    this.logger.log({
+      checkIn,
+      message: 'Fetching value for key result check-in',
+    })
+
+    return checkIn.progress
   }
 
   protected async customizeEntityPolicies(
