@@ -5,6 +5,7 @@ import { CONSTRAINT } from 'src/domain/constants'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import DomainKeyResultService from 'src/domain/key-result/service'
+import DomainTeamRankingService from 'src/domain/team/ranking'
 import { TeamEntityFilter, TeamEntityRelation } from 'src/domain/team/types'
 import { UserDTO } from 'src/domain/user/dto'
 
@@ -31,6 +32,8 @@ export interface DomainTeamServiceInterface {
   getCurrentProgressForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
   getCurrentConfidenceForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['confidence']>
   getTeamProgressIncreaseSinceLastWeek: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
+  getTeamChildTeams: (team: TeamDTO) => Promise<Team[]>
+  getTeamRankedChildTeams: (team: TeamDTO) => Promise<Team[]>
 }
 
 @Injectable()
@@ -42,6 +45,8 @@ class DomainTeamService
     protected readonly repository: DomainTeamRepository,
     @Inject(forwardRef(() => DomainKeyResultService))
     private readonly keyResultService: DomainKeyResultService,
+    @Inject(forwardRef(() => DomainTeamRankingService))
+    private readonly ranking: DomainTeamRankingService,
   ) {
     super(DomainTeamService.name, repository)
   }
@@ -158,6 +163,19 @@ class DomainTeamService
     const deltaProgress = currentProgress - lastWeekProgress
 
     return deltaProgress
+  }
+
+  public async getTeamChildTeams(team: TeamDTO) {
+    const childTeams = await this.getMany({ parentTeamId: team.id })
+
+    return childTeams
+  }
+
+  public async getTeamRankedChildTeams(team: TeamDTO) {
+    const childTeams = await this.getTeamChildTeams(team)
+    const rankedChildTeams = await this.ranking.rankTeamsByProgress(childTeams)
+
+    return rankedChildTeams
   }
 
   protected async protectCreationQuery(

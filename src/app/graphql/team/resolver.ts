@@ -109,7 +109,17 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
       message: 'Fetching child teams for team',
     })
 
-    return this.domain.team.getMany({ parentTeamId: team.id })
+    return this.domain.team.getTeamChildTeams(team)
+  }
+
+  @ResolveField('teamsRanking', () => [TeamObject], { nullable: true })
+  protected async getTeamRankedChildTeams(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching child teams for team ranked by progress',
+    })
+
+    return this.domain.team.getTeamRankedChildTeams(team)
   }
 
   @ResolveField('parentTeam', () => TeamObject, { nullable: true })
