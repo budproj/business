@@ -202,14 +202,14 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return this.domain.team.getCurrentConfidenceForTeam(team)
   }
 
-  @ResolveField('progressIncreaseSinceLastCheckInEvent', () => Float)
-  protected async getTeamProgressIncreaseSinceLastCheckInEvent(@Parent() team: TeamObject) {
+  @ResolveField('progressIncreaseSinceLastWeek', () => Float)
+  protected async getTeamProgressIncreaseSinceLastWeek(@Parent() team: TeamObject) {
     this.logger.log({
       team,
-      message: 'Fetching the progress increase for team since last check-in event',
+      message: 'Fetching the progress increase for team since last week',
     })
 
-    return this.domain.team.getTeamProgressIncreaseSinceLastCheckInEvent(team)
+    return this.domain.team.getTeamProgressIncreaseSinceLastWeek(team)
   }
 }
 

@@ -363,13 +363,13 @@ export abstract class DomainEntityService<E extends DomainEntity, D>
     }
   }
 
-  protected getFirstDayAfterLastCheckInEvent() {
+  protected getFirstDayAfterLastWeek() {
     const date = new Date()
-    const firstDayAfterLastCheckInEvent = startOfWeek(date, {
+    const firstDayAfterLastWeek = startOfWeek(date, {
       weekStartsOn: 6,
     })
 
-    return firstDayAfterLastCheckInEvent
+    return firstDayAfterLastWeek
   }
 
   protected abstract protectCreationQuery(

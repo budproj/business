@@ -20,7 +20,7 @@ export interface DomainObjectiveServiceInterface {
   getCurrentConfidenceForObjective: (
     objective: ObjectiveDTO,
   ) => Promise<KeyResultCheckIn['confidence']>
-  getObjectiveProgressIncreaseSinceLastCheckInEvent: (
+  getObjectiveProgressIncreaseSinceLastWeek: (
     objective: ObjectiveDTO,
   ) => Promise<KeyResultCheckIn['progress']>
 }
@@ -70,9 +70,9 @@ class DomainObjectiveService
     return currentCheckInGroup.confidence
   }
 
-  public async getObjectiveProgressIncreaseSinceLastCheckInEvent(objective: ObjectiveDTO) {
+  public async getObjectiveProgressIncreaseSinceLastWeek(objective: ObjectiveDTO) {
     const currentProgress = await this.getCurrentProgressForObjective(objective)
-    const lastWeekProgress = await this.getLastCheckInEventProgressForObjective(objective)
+    const lastWeekProgress = await this.getLastWeekProgressForObjective(objective)
 
     const deltaProgress = currentProgress - lastWeekProgress
 
@@ -99,11 +99,11 @@ class DomainObjectiveService
     return objectiveCheckInGroup
   }
 
-  private async getLastCheckInEventProgressForObjective(objective: ObjectiveDTO) {
-    const firstDayAfterLastCheckInEvent = this.getFirstDayAfterLastCheckInEvent()
+  private async getLastWeekProgressForObjective(objective: ObjectiveDTO) {
+    const firstDayAfterLastWeek = this.getFirstDayAfterLastWeek()
 
     const lastWeekCheckInGroup = await this.getCheckInGroupAtDateForObjective(
-      firstDayAfterLastCheckInEvent,
+      firstDayAfterLastWeek,
       objective,
     )
 

@@ -26,9 +26,9 @@ export class ObjectiveObject implements EntityObject {
 
   @Field(() => Float, {
     description:
-      'The percentage progress increase of the objective since the last check-in event. Currently we cannot customize the check-in event date, so this is basically the progress increase (in percentage) since last friday',
+      'The percentage progress increase of the objective since the last week. We consider a week as a "business" week, considering it starting on saturday and ending on friday',
   })
-  public progressIncreaseSinceLastCheckInEvent: number
+  public progressIncreaseSinceLastWeek: number
 
   @Field({ description: 'The creation date of the objective' })
   public createdAt: Date

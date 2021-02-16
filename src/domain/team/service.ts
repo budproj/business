@@ -30,9 +30,7 @@ export interface DomainTeamServiceInterface {
   buildTeamQueryContext: (user: UserDTO, constraint?: CONSTRAINT) => Promise<DomainQueryContext>
   getCurrentProgressForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
   getCurrentConfidenceForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['confidence']>
-  getTeamProgressIncreaseSinceLastCheckInEvent: (
-    team: TeamDTO,
-  ) => Promise<KeyResultCheckIn['progress']>
+  getTeamProgressIncreaseSinceLastWeek: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
 }
 
 @Injectable()
@@ -153,9 +151,9 @@ class DomainTeamService
     return currentCheckInGroup.confidence
   }
 
-  public async getTeamProgressIncreaseSinceLastCheckInEvent(team: TeamDTO) {
+  public async getTeamProgressIncreaseSinceLastWeek(team: TeamDTO) {
     const currentProgress = await this.getCurrentProgressForTeam(team)
-    const lastWeekProgress = await this.getLastCheckInEventProgressForTeam(team)
+    const lastWeekProgress = await this.getLastWeekProgressForTeam(team)
 
     const deltaProgress = currentProgress - lastWeekProgress
 
@@ -234,11 +232,11 @@ class DomainTeamService
     return teamCheckInGroup
   }
 
-  private async getLastCheckInEventProgressForTeam(team: TeamDTO) {
-    const firstDayAfterLastCheckInEvent = this.getFirstDayAfterLastCheckInEvent()
+  private async getLastWeekProgressForTeam(team: TeamDTO) {
+    const firstDayAfterLastWeek = this.getFirstDayAfterLastWeek()
 
     const lastWeekCheckInGroup = await this.getCheckInGroupAtDateForTeam(
-      firstDayAfterLastCheckInEvent,
+      firstDayAfterLastWeek,
       team,
     )
 
