@@ -192,7 +192,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return this.domain.keyResult.getLatestCheckInForTeam(team)
   }
 
-  @ResolveField('currentProgress', () => Float)
+  @ResolveField('progress', () => Float)
   protected async getTeamCurrentProgress(@Parent() team: TeamObject) {
     this.logger.log({
       team,
@@ -202,7 +202,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return this.domain.team.getCurrentProgressForTeam(team)
   }
 
-  @ResolveField('currentConfidence', () => Int)
+  @ResolveField('confidence', () => Int)
   protected async getTeamCurrentConfidence(@Parent() team: TeamObject) {
     this.logger.log({
       team,

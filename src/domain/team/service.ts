@@ -157,10 +157,10 @@ class DomainTeamService
   }
 
   public async getTeamProgressIncreaseSinceLastWeek(team: TeamDTO) {
-    const currentProgress = await this.getCurrentProgressForTeam(team)
+    const progress = await this.getCurrentProgressForTeam(team)
     const lastWeekProgress = await this.getLastWeekProgressForTeam(team)
 
-    const deltaProgress = currentProgress - lastWeekProgress
+    const deltaProgress = progress - lastWeekProgress
 
     return deltaProgress
   }

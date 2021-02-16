@@ -29,12 +29,12 @@ export class TeamObject implements EntityObject {
   @Field(() => Float, {
     description: 'The computed percentage current progress of this team',
   })
-  public currentProgress: KeyResultCheckInObject['progress']
+  public progress: KeyResultCheckInObject['progress']
 
   @Field(() => Int, {
     description: 'The computed current confidence of this team',
   })
-  public currentConfidence: KeyResultCheckInObject['confidence']
+  public confidence: KeyResultCheckInObject['confidence']
 
   @Field(() => Float, {
     description:

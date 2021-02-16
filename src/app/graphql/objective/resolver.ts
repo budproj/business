@@ -76,7 +76,7 @@ class GraphQLObjectiveResolver extends GraphQLEntityResolver<Objective, Objectiv
     return this.domain.keyResult.getFromObjective(objective)
   }
 
-  @ResolveField('currentProgress', () => Float)
+  @ResolveField('progress', () => Float)
   protected async getObjectiveCurrentProgress(@Parent() objective: ObjectiveObject) {
     this.logger.log({
       objective,
@@ -86,7 +86,7 @@ class GraphQLObjectiveResolver extends GraphQLEntityResolver<Objective, Objectiv
     return this.domain.objective.getCurrentProgressForObjective(objective)
   }
 
-  @ResolveField('currentConfidence', () => Int)
+  @ResolveField('confidence', () => Int)
   protected async getObjectiveCurrentConfidence(@Parent() objective: ObjectiveObject) {
     this.logger.log({
       objective,

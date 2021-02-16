@@ -71,10 +71,10 @@ class DomainObjectiveService
   }
 
   public async getObjectiveProgressIncreaseSinceLastWeek(objective: ObjectiveDTO) {
-    const currentProgress = await this.getCurrentProgressForObjective(objective)
+    const progress = await this.getCurrentProgressForObjective(objective)
     const lastWeekProgress = await this.getLastWeekProgressForObjective(objective)
 
-    const deltaProgress = currentProgress - lastWeekProgress
+    const deltaProgress = progress - lastWeekProgress
 
     return deltaProgress
   }

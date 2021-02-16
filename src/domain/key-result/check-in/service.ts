@@ -140,10 +140,10 @@ class DomainKeyResultCheckInService extends DomainEntityService<
     oldCheckIn: KeyResultCheckInDTO,
     newCheckIn: KeyResultCheckInDTO,
   ) {
-    const currentConfidence = newCheckIn.confidence
+    const { confidence } = newCheckIn
     const previousConfidence = oldCheckIn?.confidence ?? DEFAULT_CONFIDENCE
 
-    const deltaConfidence = currentConfidence - previousConfidence
+    const deltaConfidence = confidence - previousConfidence
 
     return deltaConfidence
   }

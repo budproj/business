@@ -7,8 +7,8 @@ query GET_OBJECTIVE_KEY_RESULTS($objectiveID: ID!) {
       format
       goal
       initialValue
-      currentConfidence
-      currentProgress
+      confidence
+      progress
       owner {
         fullName
         picture

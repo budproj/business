@@ -17,12 +17,12 @@ export class ObjectiveObject implements EntityObject {
   @Field(() => Float, {
     description: 'The computed percentage current progress of this objective',
   })
-  public currentProgress: number
+  public progress: number
 
   @Field(() => Int, {
     description: 'The computed current confidence of this objective',
   })
-  public currentConfidence: number
+  public confidence: number
 
   @Field(() => Float, {
     description:
