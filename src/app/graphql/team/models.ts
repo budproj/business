@@ -37,9 +37,10 @@ export class TeamObject implements EntityObject {
   public currentConfidence: KeyResultCheckInObject['confidence']
 
   @Field(() => Float, {
-    description: 'The percentage progress increase of the team since last monday',
+    description:
+      'The percentage progress increase of the team since the last check-in event. Currently we cannot customize the check-in event date, so this is basically the progress increase (in percentage) since last friday',
   })
-  public percentageProgressIncrease: number
+  public progressIncreaseSinceLastCheckInEvent: number
 
   @Field({ description: 'The creation date of the team' })
   public createdAt: Date

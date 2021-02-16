@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import { startOfWeek } from 'date-fns'
 import { Any } from 'typeorm'
 
 import { CycleDTO } from 'src/domain/cycle/dto'
@@ -21,7 +20,7 @@ export interface DomainObjectiveServiceInterface {
   getCurrentConfidenceForObjective: (
     objective: ObjectiveDTO,
   ) => Promise<KeyResultCheckIn['confidence']>
-  getPercentageProgressIncreaseForObjective: (
+  getObjectiveProgressIncreaseSinceLastCheckInEvent: (
     objective: ObjectiveDTO,
   ) => Promise<KeyResultCheckIn['progress']>
 }
@@ -71,9 +70,9 @@ class DomainObjectiveService
     return currentCheckInGroup.confidence
   }
 
-  public async getPercentageProgressIncreaseForObjective(objective: ObjectiveDTO) {
+  public async getObjectiveProgressIncreaseSinceLastCheckInEvent(objective: ObjectiveDTO) {
     const currentProgress = await this.getCurrentProgressForObjective(objective)
-    const lastWeekProgress = await this.getLastWeekProgressForObjective(objective)
+    const lastWeekProgress = await this.getLastCheckInEventProgressForObjective(objective)
 
     const deltaProgress = currentProgress - lastWeekProgress
 
@@ -100,12 +99,11 @@ class DomainObjectiveService
     return objectiveCheckInGroup
   }
 
-  private async getLastWeekProgressForObjective(objective: ObjectiveDTO) {
-    const date = new Date()
-    const startOfWeekDate = startOfWeek(date)
+  private async getLastCheckInEventProgressForObjective(objective: ObjectiveDTO) {
+    const firstDayAfterLastCheckInEvent = this.getFirstDayAfterLastCheckInEvent()
 
     const lastWeekCheckInGroup = await this.getCheckInGroupAtDateForObjective(
-      startOfWeekDate,
+      firstDayAfterLastCheckInEvent,
       objective,
     )
 

@@ -1,5 +1,4 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { startOfWeek } from 'date-fns'
 import { flatten, remove, uniqBy } from 'lodash'
 
 import { CONSTRAINT } from 'src/domain/constants'
@@ -31,7 +30,9 @@ export interface DomainTeamServiceInterface {
   buildTeamQueryContext: (user: UserDTO, constraint?: CONSTRAINT) => Promise<DomainQueryContext>
   getCurrentProgressForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
   getCurrentConfidenceForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['confidence']>
-  getPercentageProgressIncreaseForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
+  getTeamProgressIncreaseSinceLastCheckInEvent: (
+    team: TeamDTO,
+  ) => Promise<KeyResultCheckIn['progress']>
 }
 
 @Injectable()
@@ -152,9 +153,9 @@ class DomainTeamService
     return currentCheckInGroup.confidence
   }
 
-  public async getPercentageProgressIncreaseForTeam(team: TeamDTO) {
+  public async getTeamProgressIncreaseSinceLastCheckInEvent(team: TeamDTO) {
     const currentProgress = await this.getCurrentProgressForTeam(team)
-    const lastWeekProgress = await this.getLastWeekProgressForTeam(team)
+    const lastWeekProgress = await this.getLastCheckInEventProgressForTeam(team)
 
     const deltaProgress = currentProgress - lastWeekProgress
 
@@ -233,11 +234,13 @@ class DomainTeamService
     return teamCheckInGroup
   }
 
-  private async getLastWeekProgressForTeam(team: TeamDTO) {
-    const date = new Date()
-    const startOfWeekDate = startOfWeek(date)
+  private async getLastCheckInEventProgressForTeam(team: TeamDTO) {
+    const firstDayAfterLastCheckInEvent = this.getFirstDayAfterLastCheckInEvent()
 
-    const lastWeekCheckInGroup = await this.getCheckInGroupAtDateForTeam(startOfWeekDate, team)
+    const lastWeekCheckInGroup = await this.getCheckInGroupAtDateForTeam(
+      firstDayAfterLastCheckInEvent,
+      team,
+    )
 
     return lastWeekCheckInGroup.progress
   }

@@ -1,4 +1,5 @@
 import { Logger } from '@nestjs/common'
+import { startOfWeek } from 'date-fns'
 import { flow, mapKeys, snakeCase } from 'lodash'
 import {
   Brackets,
@@ -360,6 +361,15 @@ export abstract class DomainEntityService<E extends DomainEntity, D>
       ...originalQueryContext,
       constraint,
     }
+  }
+
+  protected getFirstDayAfterLastCheckInEvent() {
+    const date = new Date()
+    const firstDayAfterLastCheckInEvent = startOfWeek(date, {
+      weekStartsOn: 6,
+    })
+
+    return firstDayAfterLastCheckInEvent
   }
 
   protected abstract protectCreationQuery(
