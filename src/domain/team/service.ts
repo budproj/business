@@ -37,7 +37,10 @@ export interface DomainTeamServiceInterface {
     team: TeamDTO,
     filters?: TeamFilters,
   ) => Promise<KeyResultCheckIn['confidence']>
-  getTeamProgressIncreaseSinceLastWeek: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
+  getTeamProgressIncreaseSinceLastWeek: (
+    team: TeamDTO,
+    filters?: TeamFilters,
+  ) => Promise<KeyResultCheckIn['progress']>
   getTeamChildTeams: (team: TeamDTO) => Promise<Team[]>
   getTeamRankedChildTeams: (team: TeamDTO) => Promise<Team[]>
   getRankedTeamsBelowNode: (team: TeamDTO) => Promise<Team[]>
@@ -163,9 +166,9 @@ class DomainTeamService
     return currentCheckInGroup.confidence
   }
 
-  public async getTeamProgressIncreaseSinceLastWeek(team: TeamDTO) {
-    const progress = await this.getCurrentProgressForTeam(team)
-    const lastWeekProgress = await this.getLastWeekProgressForTeam(team)
+  public async getTeamProgressIncreaseSinceLastWeek(team: TeamDTO, filters?: TeamFilters) {
+    const progress = await this.getCurrentProgressForTeam(team, filters)
+    const lastWeekProgress = await this.getLastWeekProgressForTeam(team, filters)
 
     const deltaProgress = progress - lastWeekProgress
 
@@ -265,12 +268,13 @@ class DomainTeamService
     return teamCheckInGroup
   }
 
-  private async getLastWeekProgressForTeam(team: TeamDTO) {
+  private async getLastWeekProgressForTeam(team: TeamDTO, filters?: TeamFilters) {
     const firstDayAfterLastWeek = this.getFirstDayAfterLastWeek()
 
     const lastWeekCheckInGroup = await this.getCheckInGroupAtDateForTeam(
       firstDayAfterLastWeek,
       team,
+      filters,
     )
 
     return lastWeekCheckInGroup.progress
