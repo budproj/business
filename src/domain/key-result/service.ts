@@ -8,6 +8,7 @@ import {
   DomainQueryContext,
   DomainServiceGetOptions,
 } from 'src/domain/entity'
+import { KeyResultFilters } from 'src/domain/key-result/types'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
 import { TeamDTO } from 'src/domain/team/dto'
 import DomainTeamService from 'src/domain/team/service'
@@ -36,7 +37,11 @@ export interface DomainKeyResultServiceInterface {
   timeline: DomainKeyResultTimelineService
 
   getFromOwner: (owner: UserDTO) => Promise<KeyResult[]>
-  getFromTeams: (teams: TeamDTO | TeamDTO[]) => Promise<KeyResult[]>
+  getFromTeams: (
+    teams: TeamDTO | TeamDTO[],
+    filters?: KeyResultFilters,
+    select?: Array<keyof KeyResult>,
+  ) => Promise<KeyResult[]>
   getFromObjective: (objective: ObjectiveDTO) => Promise<KeyResult[]>
   getFromCustomList: (keyResultCustomList: KeyResultCustomListDTO) => Promise<KeyResult[]>
   refreshCustomListWithOwnedKeyResults: (
@@ -132,17 +137,20 @@ class DomainKeyResultService
 
   public async getFromTeams(
     teams: TeamDTO | TeamDTO[],
-    filter?: Array<keyof KeyResult>,
+    filters?: KeyResultFilters,
+    select?: Array<keyof KeyResult>,
   ): Promise<KeyResult[]> {
     const isEmptyArray = Array.isArray(teams) ? teams.length === 0 : false
     if (!teams || isEmptyArray) return
 
-    const buildSelector = (teamId: TeamDTO['id']) => ({ teamId })
-    const selector = Array.isArray(teams)
-      ? teams.map((team) => buildSelector(team.id))
-      : buildSelector(teams.id)
+    const teamsArray = Array.isArray(teams) ? teams : [teams]
 
-    return this.repository.find({ where: selector, select: filter })
+    const teamsFilters = {
+      teamIDs: teamsArray.map((team) => team.id),
+      ...filters,
+    }
+
+    return this.repository.findWithFilters(teamsFilters, select)
   }
 
   public async getFromObjective(objective: ObjectiveDTO) {

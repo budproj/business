@@ -6,13 +6,13 @@ import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'sr
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import DomainKeyResultService from 'src/domain/key-result/service'
 import DomainTeamRankingService from 'src/domain/team/ranking'
-import { TeamEntityFilter, TeamEntityRelation } from 'src/domain/team/types'
 import { UserDTO } from 'src/domain/user/dto'
 
 import { TeamDTO } from './dto'
 import { Team } from './entities'
 import DomainTeamRepository from './repository'
 import DomainTeamSpecification from './specification'
+import { TeamEntityFilter, TeamEntityRelation, TeamFilters } from './types'
 
 export interface DomainTeamServiceInterface {
   specification: DomainTeamSpecification
@@ -29,7 +29,10 @@ export interface DomainTeamServiceInterface {
   getParentTeam: (team: TeamDTO) => Promise<Team>
   getUsersInTeam: (teamID: TeamDTO) => Promise<UserDTO[]>
   buildTeamQueryContext: (user: UserDTO, constraint?: CONSTRAINT) => Promise<DomainQueryContext>
-  getCurrentProgressForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
+  getCurrentProgressForTeam: (
+    team: TeamDTO,
+    filters?: TeamFilters,
+  ) => Promise<KeyResultCheckIn['progress']>
   getCurrentConfidenceForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['confidence']>
   getTeamProgressIncreaseSinceLastWeek: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
   getTeamChildTeams: (team: TeamDTO) => Promise<Team[]>
@@ -143,9 +146,9 @@ class DomainTeamService
     return queryContext
   }
 
-  public async getCurrentProgressForTeam(team: TeamDTO) {
+  public async getCurrentProgressForTeam(team: TeamDTO, filters?: TeamFilters) {
     const date = new Date()
-    const currentCheckInGroup = await this.getCheckInGroupAtDateForTeam(date, team)
+    const currentCheckInGroup = await this.getCheckInGroupAtDateForTeam(date, team, filters)
 
     return currentCheckInGroup.progress
   }
@@ -246,9 +249,9 @@ class DomainTeamService
     return companiesTeams
   }
 
-  private async getCheckInGroupAtDateForTeam(date: Date, team: TeamDTO) {
+  private async getCheckInGroupAtDateForTeam(date: Date, team: TeamDTO, filters?: TeamFilters) {
     const childTeams = await this.getFullTeamNodesTree(team)
-    const keyResults = await this.keyResultService.getFromTeams(childTeams)
+    const keyResults = await this.keyResultService.getFromTeams(childTeams, filters)
     if (!keyResults) return this.keyResultService.buildDefaultCheckInGroup()
 
     const teamCheckInGroup = this.keyResultService.buildCheckInGroupForKeyResultListAtDate(

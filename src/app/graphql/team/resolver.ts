@@ -1,5 +1,16 @@
 import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Float, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import {
+  Args,
+  Context,
+  Float,
+  GqlExecutionContext,
+  ID,
+  Int,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 import { isUndefined, omitBy } from 'lodash'
 
@@ -20,7 +31,11 @@ import DomainService from 'src/domain/service'
 import { TeamDTO } from 'src/domain/team/dto'
 import { Team } from 'src/domain/team/entities'
 
-import { TeamObject } from './models'
+import { TeamFiltersInput, TeamObject } from './models'
+
+export interface GraphQLTeamContextType extends GqlExecutionContext {
+  filters?: TeamFiltersInput
+}
 
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -39,9 +54,13 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   @Query(() => TeamObject, { name: 'team' })
   protected async getTeam(
     @Args('id', { type: () => ID }) id: TeamObject['id'],
+    @Args('filters', { nullable: true }) filters: TeamFiltersInput,
+    @Context() context: GraphQLTeamContextType,
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log(`Fetching team with id ${id}`)
+
+    context.filters = filters
 
     const team = await this.getOneWithActionScopeConstraint({ id }, user)
     if (!team) throw new UserInputError(`We could not found a team with id ${id}`)
@@ -193,13 +212,17 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   }
 
   @ResolveField('progress', () => Float)
-  protected async getTeamCurrentProgress(@Parent() team: TeamObject) {
+  protected async getTeamProgress(
+    @Parent() team: TeamObject,
+    @Context('filters') filters: TeamFiltersInput,
+  ) {
     this.logger.log({
       team,
-      message: 'Fetching current progress for team',
+      filters,
+      message: 'Fetching progress for team',
     })
 
-    return this.domain.team.getCurrentProgressForTeam(team)
+    return this.domain.team.getCurrentProgressForTeam(team, filters)
   }
 
   @ResolveField('confidence', () => Int)

@@ -1,4 +1,4 @@
-import { Field, Float, ID, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { Field, Float, ID, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { CycleObject } from 'src/app/graphql/cycle/models'
@@ -116,4 +116,13 @@ export class TeamObject implements EntityObject {
 
   public id: string
   public policies: PolicyObject
+}
+
+@InputType({ description: 'A list of fields that we can filter our team to' })
+export class TeamFiltersInput {
+  @Field(() => ID, {
+    description: 'The ID of the cycle we want to filter in our team query',
+    nullable: true,
+  })
+  public cycleID: string
 }

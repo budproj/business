@@ -2,6 +2,8 @@ import { EntityRepository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
 import { CONSTRAINT_TYPE, DomainEntityRepository } from 'src/domain/entity'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
+import { KeyResultFilters } from 'src/domain/key-result/types'
+import { Objective } from 'src/domain/objective/entities'
 import { TeamDTO } from 'src/domain/team/dto'
 import { Team } from 'src/domain/team/entities'
 import { UserDTO } from 'src/domain/user/dto'
@@ -12,10 +14,16 @@ export interface DomainKeyResultRepositoryInterface {
   buildRankSortColumn: (rank: Array<KeyResultDTO['id']>) => string
   findByIdsRanked: (ids: Array<KeyResultDTO['id']>, rank: string) => Promise<KeyResult[]>
   getInitialValueForKeyResult: (keyResult: KeyResultDTO) => Promise<KeyResult['initialValue']>
+  findWithFilters: (
+    filters: KeyResultFilters,
+    select?: Array<keyof KeyResult>,
+  ) => Promise<KeyResult[]>
 }
 
 @EntityRepository(KeyResult)
-class DomainKeyResultRepository extends DomainEntityRepository<KeyResult> {
+class DomainKeyResultRepository
+  extends DomainEntityRepository<KeyResult>
+  implements DomainKeyResultRepositoryInterface {
   public buildRankSortColumn(rank: Array<KeyResultDTO['id']>): string {
     if (rank.length === 0) return ''
 
@@ -51,6 +59,17 @@ class DomainKeyResultRepository extends DomainEntityRepository<KeyResult> {
     })
 
     return selectedKeyResult.initialValue
+  }
+
+  public async findWithFilters(filters: KeyResultFilters, select?: Array<keyof KeyResult>) {
+    const { teamIDs, cycleID } = filters
+    const query = this.createQueryBuilder()
+      .where(`${KeyResult.name}.teamId in (:...teamIDs)`, { teamIDs })
+      .leftJoinAndSelect(`${KeyResult.name}.objective`, `${Objective.name}`)
+      .andWhere(cycleID ? `${Objective.name}.cycleId = :cycleID` : '1=1', { cycleID })
+      .select(select)
+
+    return query.getMany()
   }
 
   protected setupTeamQuery(query: SelectQueryBuilder<KeyResult>) {

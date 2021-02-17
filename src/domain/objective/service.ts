@@ -45,7 +45,7 @@ class DomainObjectiveService
   }
 
   public async getFromTeam(team: TeamDTO) {
-    const keyResults = await this.keyResultService.getFromTeams(team, ['objectiveId'])
+    const keyResults = await this.keyResultService.getFromTeams(team, undefined, ['objectiveId'])
     if (!keyResults) return []
 
     const objectiveIds = keyResults.map((keyResult) => keyResult.objectiveId)
