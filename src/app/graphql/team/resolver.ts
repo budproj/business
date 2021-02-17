@@ -119,7 +119,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
       message: 'Fetching child teams for team ranked by progress',
     })
 
-    return this.domain.team.getTeamRankedChildTeams(team)
+    return this.domain.team.getRankedTeamsBelowNode(team)
   }
 
   @ResolveField('parentTeam', () => TeamObject, { nullable: true })

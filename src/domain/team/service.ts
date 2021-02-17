@@ -21,7 +21,7 @@ export interface DomainTeamServiceInterface {
   getUserCompanies: (user: UserDTO) => Promise<Team[]>
   getUserCompaniesAndDepartments: (user: UserDTO) => Promise<Team[]>
   getWithUser: (user: UserDTO) => Promise<Team[]>
-  getAllTeamsBelowNodes: (
+  getFullTeamNodesTree: (
     nodes: TeamDTO | TeamDTO[],
     filter?: TeamEntityFilter[],
     relations?: TeamEntityRelation[],
@@ -34,6 +34,7 @@ export interface DomainTeamServiceInterface {
   getTeamProgressIncreaseSinceLastWeek: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
   getTeamChildTeams: (team: TeamDTO) => Promise<Team[]>
   getTeamRankedChildTeams: (team: TeamDTO) => Promise<Team[]>
+  getRankedTeamsBelowNode: (team: TeamDTO) => Promise<Team[]>
 }
 
 @Injectable()
@@ -70,7 +71,7 @@ class DomainTeamService
     return teams as Team[]
   }
 
-  public async getAllTeamsBelowNodes(
+  public async getFullTeamNodesTree(
     nodes: TeamDTO | TeamDTO[],
     filter?: TeamEntityFilter[],
     relations?: TeamEntityRelation[],
@@ -112,7 +113,7 @@ class DomainTeamService
   }
 
   public async getUsersInTeam(team: TeamDTO) {
-    const teamsBelowCurrentNode = await this.getAllTeamsBelowNodes(team)
+    const teamsBelowCurrentNode = await this.getFullTeamNodesTree(team)
 
     const teamUsers = await Promise.all(teamsBelowCurrentNode.map(async (team) => team.users))
     const flattenedTeamUsers = flatten(teamUsers)
@@ -178,6 +179,14 @@ class DomainTeamService
     return rankedChildTeams
   }
 
+  public async getRankedTeamsBelowNode(team: TeamDTO) {
+    const teamNodeTree = await this.getFullTeamNodesTree(team)
+    const teamsBelowTeam = teamNodeTree.slice(1)
+    const rankedChildTeams = await this.ranking.rankTeamsByProgress(teamsBelowTeam)
+
+    return rankedChildTeams
+  }
+
   protected async protectCreationQuery(
     _query: DomainCreationQuery<Team>,
     _data: Partial<TeamDTO>,
@@ -232,13 +241,13 @@ class DomainTeamService
   }
 
   private async parseUserCompaniesTeams(companies: TeamDTO[]) {
-    const companiesTeams = await this.getAllTeamsBelowNodes(companies)
+    const companiesTeams = await this.getFullTeamNodesTree(companies)
 
     return companiesTeams
   }
 
   private async getCheckInGroupAtDateForTeam(date: Date, team: TeamDTO) {
-    const childTeams = await this.getAllTeamsBelowNodes(team)
+    const childTeams = await this.getFullTeamNodesTree(team)
     const keyResults = await this.keyResultService.getFromTeams(childTeams)
     if (!keyResults) return this.keyResultService.buildDefaultCheckInGroup()
 

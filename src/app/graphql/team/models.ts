@@ -85,7 +85,7 @@ export class TeamObject implements EntityObject {
   public teams?: TeamObject[]
 
   @Field(() => [TeamObject], {
-    description: 'A list of teams that belongs to this team ordered by their progress',
+    description: "A list with all teams inside this team's tree ordered by their progress",
     nullable: true,
   })
   public teamsRanking?: TeamObject[]
