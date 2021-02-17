@@ -3,7 +3,6 @@ import {
   Args,
   Context,
   Float,
-  GqlExecutionContext,
   ID,
   Int,
   Parent,
@@ -11,6 +10,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql'
+import { Context as ApolloServerContext } from 'apollo-server-core'
 import { UserInputError } from 'apollo-server-fastify'
 import { isUndefined, omitBy } from 'lodash'
 
@@ -33,7 +33,7 @@ import { Team } from 'src/domain/team/entities'
 
 import { TeamFiltersInput, TeamObject } from './models'
 
-export interface GraphQLTeamContextType extends GqlExecutionContext {
+export interface GraphQLTeamContext {
   filters?: TeamFiltersInput
 }
 
@@ -55,7 +55,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   protected async getTeam(
     @Args('id', { type: () => ID }) id: TeamObject['id'],
     @Args('filters', { nullable: true }) filters: TeamFiltersInput,
-    @Context() context: GraphQLTeamContextType,
+    @Context() context: ApolloServerContext<GraphQLTeamContext>,
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log(`Fetching team with id ${id}`)
