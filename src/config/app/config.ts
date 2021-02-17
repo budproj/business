@@ -17,7 +17,7 @@ const {
   CORS_ALLOWED_ORIGINS,
   GOD_MODE_ENABLED,
   GOD_MODE_USER_ID,
-  GOD_MODE_TEAM_ID,
+  GOD_MODE_TEAM_IDS,
 } = process.env
 
 const config: AppConfigOptions = {
@@ -26,7 +26,7 @@ const config: AppConfigOptions = {
   godMode: {
     enabled: GOD_MODE_ENABLED === 'true',
     userID: GOD_MODE_USER_ID,
-    teamID: GOD_MODE_TEAM_ID,
+    teamIDs: GOD_MODE_TEAM_IDS?.split(','),
   },
 
   authz: {

@@ -1,5 +1,6 @@
-import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
+import { flatten, Logger, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { ApolloError } from 'apollo-server-core'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
@@ -15,6 +16,7 @@ import { TeamObject } from 'src/app/graphql/team/models'
 import { CycleDTO } from 'src/domain/cycle/dto'
 import { Cycle } from 'src/domain/cycle/entities'
 import DomainService from 'src/domain/service'
+import RailwayProvider from 'src/railway'
 
 import { CycleObject } from './models'
 
@@ -27,6 +29,7 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
   constructor(
     protected readonly domain: DomainService,
     protected readonly authzService: AuthzService,
+    private readonly railway: RailwayProvider,
   ) {
     super(RESOURCE.CYCLE, domain, domain.cycle, authzService)
   }
@@ -43,6 +46,26 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
     if (!cycle) throw new UserInputError(`We could not found a cycle with id ${id}`)
 
     return cycle
+  }
+
+  @Permissions(PERMISSION['CYCLE:READ'])
+  @Query(() => [CycleObject], { name: 'cycles', nullable: true })
+  protected async getAllCycles(@GraphQLUser() user: AuthzUser) {
+    this.logger.log({
+      message: 'Fetching cycles',
+    })
+
+    const userTeams = await user.teams
+    const cyclePromises = userTeams.map((team) => this.domain.cycle.getFromTeam(team))
+
+    const [error, result] = await this.railway.execute<Cycle[][]>(Promise.all(cyclePromises))
+    if (error) throw new ApolloError(error.message)
+
+    const cycles = flatten(result)
+    if (!cycles || cycles.length === 0)
+      throw new UserInputError('We could not find any cycles for your user')
+
+    return cycles
   }
 
   @ResolveField('team', () => TeamObject)
