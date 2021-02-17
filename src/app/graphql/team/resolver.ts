@@ -180,13 +180,17 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   }
 
   @ResolveField('keyResults', () => [KeyResultObject], { nullable: true })
-  protected async getTeamKeyResults(@Parent() team: TeamObject) {
+  protected async getTeamKeyResults(
+    @Parent() team: TeamObject,
+    @Context('filters') filters: TeamFiltersInput,
+  ) {
     this.logger.log({
       team,
+      filters,
       message: 'Fetching key results for team',
     })
 
-    return this.domain.keyResult.getFromTeams(team)
+    return this.domain.keyResult.getFromTeams(team, filters)
   }
 
   @ResolveField('objectives', () => [ObjectiveObject], { nullable: true })
