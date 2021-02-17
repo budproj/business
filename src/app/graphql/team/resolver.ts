@@ -226,13 +226,17 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   }
 
   @ResolveField('confidence', () => Int)
-  protected async getTeamCurrentConfidence(@Parent() team: TeamObject) {
+  protected async getTeamCurrentConfidence(
+    @Parent() team: TeamObject,
+    @Context('filters') filters: TeamFiltersInput,
+  ) {
     this.logger.log({
       team,
+      filters,
       message: 'Fetching current confidence for team',
     })
 
-    return this.domain.team.getCurrentConfidenceForTeam(team)
+    return this.domain.team.getCurrentConfidenceForTeam(team, filters)
   }
 
   @ResolveField('progressIncreaseSinceLastWeek', () => Float)

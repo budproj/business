@@ -33,7 +33,10 @@ export interface DomainTeamServiceInterface {
     team: TeamDTO,
     filters?: TeamFilters,
   ) => Promise<KeyResultCheckIn['progress']>
-  getCurrentConfidenceForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['confidence']>
+  getCurrentConfidenceForTeam: (
+    team: TeamDTO,
+    filters?: TeamFilters,
+  ) => Promise<KeyResultCheckIn['confidence']>
   getTeamProgressIncreaseSinceLastWeek: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
   getTeamChildTeams: (team: TeamDTO) => Promise<Team[]>
   getTeamRankedChildTeams: (team: TeamDTO) => Promise<Team[]>
@@ -153,9 +156,9 @@ class DomainTeamService
     return currentCheckInGroup.progress
   }
 
-  public async getCurrentConfidenceForTeam(team: TeamDTO) {
+  public async getCurrentConfidenceForTeam(team: TeamDTO, filters?: TeamFilters) {
     const date = new Date()
-    const currentCheckInGroup = await this.getCheckInGroupAtDateForTeam(date, team)
+    const currentCheckInGroup = await this.getCheckInGroupAtDateForTeam(date, team, filters)
 
     return currentCheckInGroup.confidence
   }
