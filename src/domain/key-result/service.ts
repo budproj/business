@@ -54,7 +54,10 @@ export interface DomainKeyResultServiceInterface {
     options?: DomainServiceGetOptions<KeyResultCheckIn>,
   ) => Promise<KeyResultCheckIn[] | null>
   getCheckInsByUser: (user: UserDTO) => Promise<KeyResultCheckIn[] | null>
-  getLatestCheckInForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn | null>
+  getLatestCheckInForTeam: (
+    team: TeamDTO,
+    filters?: KeyResultFilters,
+  ) => Promise<KeyResultCheckIn | null>
   getLatestCheckInForKeyResult: (team: KeyResultDTO) => Promise<KeyResultCheckIn | null>
   getCurrentProgressForKeyResult: (keyResult: KeyResultDTO) => Promise<KeyResultCheckIn['progress']>
   getCurrentConfidenceForKeyResult: (
@@ -214,9 +217,9 @@ class DomainKeyResultService
     return this.checkIn.getMany(selector)
   }
 
-  public async getLatestCheckInForTeam(team: TeamDTO) {
+  public async getLatestCheckInForTeam(team: TeamDTO, filters?: KeyResultFilters) {
     const users = await this.teamService.getUsersInTeam(team)
-    const latestCheckIn = await this.checkIn.getLatestFromUsers(users)
+    const latestCheckIn = await this.checkIn.getLatestFromUsers(users, filters)
 
     return latestCheckIn
   }

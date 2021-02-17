@@ -12,7 +12,7 @@ import {
 } from '@nestjs/graphql'
 import { Context as ApolloServerContext } from 'apollo-server-core'
 import { UserInputError } from 'apollo-server-fastify'
-import { isUndefined, omitBy } from 'lodash'
+import { isUndefined, omit, omitBy } from 'lodash'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
@@ -75,7 +75,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     @Context() context: ApolloServerContext<GraphQLTeamContext>,
     @GraphQLUser() user: AuthzUser,
   ) {
-    context.filters = filters
+    context.filters = omit(filters, ['onlyCompanies', 'onlyCompaniesAndDepartments'])
 
     const selector = {
       parentTeamId: filters.parentTeamId,
@@ -208,13 +208,17 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   }
 
   @ResolveField('latestKeyResultCheckIn', () => KeyResultCheckInObject, { nullable: true })
-  protected async getTeamLatestKeyResultCheckIn(@Parent() team: TeamObject) {
+  protected async getTeamLatestKeyResultCheckIn(
+    @Parent() team: TeamObject,
+    @Context('filters') filters: TeamFiltersInput,
+  ) {
     this.logger.log({
       team,
+      filters,
       message: 'Fetching latest key result check-in for team',
     })
 
-    return this.domain.keyResult.getLatestCheckInForTeam(team)
+    return this.domain.keyResult.getLatestCheckInForTeam(team, filters)
   }
 
   @ResolveField('progress', () => Float)
