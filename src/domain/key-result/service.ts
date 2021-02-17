@@ -37,11 +37,7 @@ export interface DomainKeyResultServiceInterface {
   timeline: DomainKeyResultTimelineService
 
   getFromOwner: (owner: UserDTO) => Promise<KeyResult[]>
-  getFromTeams: (
-    teams: TeamDTO | TeamDTO[],
-    filters?: KeyResultFilters,
-    select?: Array<keyof KeyResult>,
-  ) => Promise<KeyResult[]>
+  getFromTeams: (teams: TeamDTO | TeamDTO[], filters?: KeyResultFilters) => Promise<KeyResult[]>
   getFromObjective: (objective: ObjectiveDTO) => Promise<KeyResult[]>
   getFromCustomList: (keyResultCustomList: KeyResultCustomListDTO) => Promise<KeyResult[]>
   refreshCustomListWithOwnedKeyResults: (
@@ -138,7 +134,6 @@ class DomainKeyResultService
   public async getFromTeams(
     teams: TeamDTO | TeamDTO[],
     filters?: KeyResultFilters,
-    select?: Array<keyof KeyResult>,
   ): Promise<KeyResult[]> {
     const isEmptyArray = Array.isArray(teams) ? teams.length === 0 : false
     if (!teams || isEmptyArray) return
@@ -150,7 +145,7 @@ class DomainKeyResultService
       ...filters,
     }
 
-    return this.repository.findWithFilters(teamsFilters, select)
+    return this.repository.findWithFilters(teamsFilters)
   }
 
   public async getFromObjective(objective: ObjectiveDTO) {

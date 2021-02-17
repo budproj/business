@@ -121,8 +121,28 @@ export class TeamObject implements EntityObject {
 @InputType({ description: 'A list of fields that we can filter our team to' })
 export class TeamFiltersInput {
   @Field(() => ID, {
+    description: 'The ID of the parent team that you want to user on this query',
+    nullable: true,
+  })
+  public parentTeamId?: TeamObject['id']
+
+  @Field(() => Boolean, {
+    description:
+      'A flag that toggles this query to fetch only companies. A company is a team that does not have a parent',
+    nullable: true,
+  })
+  public onlyCompanies?: boolean
+
+  @Field(() => Boolean, {
+    description:
+      'A flag that toggles this query to fetch only companies and departments. A company is a team that does not have a parent, while a department is a team that has teams inside of it',
+    nullable: true,
+  })
+  public onlyCompaniesAndDepartments?: boolean
+
+  @Field(() => ID, {
     description: 'The ID of the cycle we want to filter in our team query',
     nullable: true,
   })
-  public cycleID: string
+  public cycleID?: CycleObject['id']
 }

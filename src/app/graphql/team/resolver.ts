@@ -71,38 +71,36 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   @Permissions(PERMISSION['TEAM:READ'])
   @Query(() => [TeamObject], { name: 'teams', nullable: true })
   protected async getAllTeams(
-    @Args('parentTeamId', { type: () => ID, nullable: true })
-    parentTeamId: TeamObject['parentTeamId'],
-    @Args('onlyCompanies', { type: () => Boolean, nullable: true })
-    onlyCompanies: boolean,
-    @Args('onlyCompaniesAndDepartments', { type: () => Boolean, nullable: true })
-    onlyCompaniesAndDepartments: boolean,
+    @Args('filters', { nullable: true }) filters: TeamFiltersInput,
+    @Context() context: ApolloServerContext<GraphQLTeamContext>,
     @GraphQLUser() user: AuthzUser,
   ) {
-    const filters = {
-      parentTeamId,
-      onlyCompanies,
-      onlyCompaniesAndDepartments,
+    context.filters = filters
+
+    const selector = {
+      parentTeamId: filters.parentTeamId,
+      onlyCompanies: filters.onlyCompanies,
+      onlyCompaniesAndDepartments: filters.onlyCompaniesAndDepartments,
     }
-    const cleanedFilters = omitBy(filters, isUndefined)
+    const cleanedSelector = omitBy(selector, isUndefined)
 
     this.logger.log({
-      cleanedFilters,
-      onlyCompanies,
+      filters,
+      cleanedSelector,
       message: 'Fetching teams with args',
     })
 
     const railways = {
-      default: async () => this.getManyWithActionScopeConstraint(cleanedFilters, user),
+      default: async () => this.getManyWithActionScopeConstraint(cleanedSelector, user),
       onlyCompanies: async () => this.domain.team.getUserCompanies(user),
       onlyCompaniesAndDepartments: async () =>
         this.domain.team.getUserCompaniesAndDepartments(user),
     }
 
-    const getOnlyCompaniesAndDepartmentsRailway = onlyCompaniesAndDepartments
+    const getOnlyCompaniesAndDepartmentsRailway = filters.onlyCompaniesAndDepartments
       ? railways.onlyCompaniesAndDepartments
       : railways.default
-    const getAllTeamsRailway = onlyCompanies
+    const getAllTeamsRailway = filters.onlyCompanies
       ? railways.onlyCompanies
       : getOnlyCompaniesAndDepartmentsRailway
 
@@ -192,13 +190,17 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   }
 
   @ResolveField('objectives', () => [ObjectiveObject], { nullable: true })
-  protected async getTeamObjectives(@Parent() team: TeamObject) {
+  protected async getTeamObjectives(
+    @Parent() team: TeamObject,
+    @Context('filters') filters: TeamFiltersInput,
+  ) {
     this.logger.log({
       team,
+      filters,
       message: 'Fetching objectives for team',
     })
 
-    return this.domain.objective.getFromTeam(team)
+    return this.domain.objective.getFromTeam(team, filters)
   }
 
   @ResolveField('latestKeyResultCheckIn', () => KeyResultCheckInObject, { nullable: true })

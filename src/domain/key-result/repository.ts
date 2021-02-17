@@ -14,10 +14,7 @@ export interface DomainKeyResultRepositoryInterface {
   buildRankSortColumn: (rank: Array<KeyResultDTO['id']>) => string
   findByIdsRanked: (ids: Array<KeyResultDTO['id']>, rank: string) => Promise<KeyResult[]>
   getInitialValueForKeyResult: (keyResult: KeyResultDTO) => Promise<KeyResult['initialValue']>
-  findWithFilters: (
-    filters: KeyResultFilters,
-    select?: Array<keyof KeyResult>,
-  ) => Promise<KeyResult[]>
+  findWithFilters: (filters: KeyResultFilters) => Promise<KeyResult[]>
 }
 
 @EntityRepository(KeyResult)
@@ -61,13 +58,12 @@ class DomainKeyResultRepository
     return selectedKeyResult.initialValue
   }
 
-  public async findWithFilters(filters: KeyResultFilters, select?: Array<keyof KeyResult>) {
+  public async findWithFilters(filters: KeyResultFilters) {
     const { teamIDs, cycleID } = filters
     const query = this.createQueryBuilder()
       .where(`${KeyResult.name}.teamId in (:...teamIDs)`, { teamIDs })
       .leftJoinAndSelect(`${KeyResult.name}.objective`, `${Objective.name}`)
       .andWhere(cycleID ? `${Objective.name}.cycleId = :cycleID` : '1=1', { cycleID })
-      .select(select)
 
     return query.getMany()
   }
