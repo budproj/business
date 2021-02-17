@@ -17,17 +17,18 @@ export class ObjectiveObject implements EntityObject {
   @Field(() => Float, {
     description: 'The computed percentage current progress of this objective',
   })
-  public currentProgress: number
+  public progress: number
 
   @Field(() => Int, {
     description: 'The computed current confidence of this objective',
   })
-  public currentConfidence: number
+  public confidence: number
 
   @Field(() => Float, {
-    description: 'The percentage progress increase since last monday',
+    description:
+      'The percentage progress increase of the objective since the last week. We consider a week as a "business" week, considering it starting on saturday and ending on friday',
   })
-  public percentageProgressIncrease: number
+  public progressIncreaseSinceLastWeek: number
 
   @Field({ description: 'The creation date of the objective' })
   public createdAt: Date

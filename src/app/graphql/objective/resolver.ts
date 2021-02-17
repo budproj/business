@@ -76,7 +76,7 @@ class GraphQLObjectiveResolver extends GraphQLEntityResolver<Objective, Objectiv
     return this.domain.keyResult.getFromObjective(objective)
   }
 
-  @ResolveField('currentProgress', () => Float)
+  @ResolveField('progress', () => Float)
   protected async getObjectiveCurrentProgress(@Parent() objective: ObjectiveObject) {
     this.logger.log({
       objective,
@@ -86,7 +86,7 @@ class GraphQLObjectiveResolver extends GraphQLEntityResolver<Objective, Objectiv
     return this.domain.objective.getCurrentProgressForObjective(objective)
   }
 
-  @ResolveField('currentConfidence', () => Int)
+  @ResolveField('confidence', () => Int)
   protected async getObjectiveCurrentConfidence(@Parent() objective: ObjectiveObject) {
     this.logger.log({
       objective,
@@ -96,14 +96,14 @@ class GraphQLObjectiveResolver extends GraphQLEntityResolver<Objective, Objectiv
     return this.domain.objective.getCurrentConfidenceForObjective(objective)
   }
 
-  @ResolveField('percentageProgressIncrease', () => Float)
-  protected async getObjectivePercentageProgressIncrease(@Parent() objective: ObjectiveObject) {
+  @ResolveField('progressIncreaseSinceLastWeek', () => Float)
+  protected async getObjectiveProgressIncreaseSinceLastWeek(@Parent() objective: ObjectiveObject) {
     this.logger.log({
       objective,
-      message: 'Fetching percentage progress increase for objective',
+      message: 'Fetching progress increase for objective since last week',
     })
 
-    return this.domain.objective.getPercentageProgressIncreaseForObjective(objective)
+    return this.domain.objective.getObjectiveProgressIncreaseSinceLastWeek(objective)
   }
 }
 

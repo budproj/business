@@ -6,8 +6,8 @@ query GET_COMPANY_OBJECTIVES {
     objectives {
       id
       title
-      currentProgress
-      currentConfidence
+      progress
+      confidence
       percentageProgressIncrease
     }
   }
@@ -25,8 +25,8 @@ query GET_TEAMS {
     id
     name
     description
-    currentProgress
-    currentConfidence
+    progress
+    confidence
     isCompany
     users {
       fullName
@@ -41,8 +41,8 @@ query GET_USER_PRIMARY_COMPANY {
       id
       name
       gender
-      currentProgress
-      currentConfidence
+      progress
+      confidence
       percentageProgressIncrease
       latestKeyResultCheckIn {
         id
@@ -63,8 +63,8 @@ query GET_TEAM_AND_CHILD_TEAMS_OBJECTIVES($rootTeamId: ID!) {
     objectives {
       id
       title
-      currentProgress
-      currentConfidence
+      progress
+      confidence
       percentageProgressIncrease
       cycle {
         dateEnd
@@ -76,8 +76,8 @@ query GET_TEAM_AND_CHILD_TEAMS_OBJECTIVES($rootTeamId: ID!) {
       objectives {
         id
         title
-        currentProgress
-        currentConfidence
+        progress
+        confidence
         percentageProgressIncrease
         cycle {
           dateEnd

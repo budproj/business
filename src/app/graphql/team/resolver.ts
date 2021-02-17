@@ -109,7 +109,17 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
       message: 'Fetching child teams for team',
     })
 
-    return this.domain.team.getMany({ parentTeamId: team.id })
+    return this.domain.team.getTeamChildTeams(team)
+  }
+
+  @ResolveField('teamsRanking', () => [TeamObject], { nullable: true })
+  protected async getTeamRankedChildTeams(@Parent() team: TeamObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching child teams for team ranked by progress',
+    })
+
+    return this.domain.team.getRankedTeamsBelowNode(team)
   }
 
   @ResolveField('parentTeam', () => TeamObject, { nullable: true })
@@ -182,7 +192,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return this.domain.keyResult.getLatestCheckInForTeam(team)
   }
 
-  @ResolveField('currentProgress', () => Float)
+  @ResolveField('progress', () => Float)
   protected async getTeamCurrentProgress(@Parent() team: TeamObject) {
     this.logger.log({
       team,
@@ -192,7 +202,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return this.domain.team.getCurrentProgressForTeam(team)
   }
 
-  @ResolveField('currentConfidence', () => Int)
+  @ResolveField('confidence', () => Int)
   protected async getTeamCurrentConfidence(@Parent() team: TeamObject) {
     this.logger.log({
       team,
@@ -202,14 +212,14 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return this.domain.team.getCurrentConfidenceForTeam(team)
   }
 
-  @ResolveField('percentageProgressIncrease', () => Float)
-  protected async getTeamPercentageProgressIncrease(@Parent() team: TeamObject) {
+  @ResolveField('progressIncreaseSinceLastWeek', () => Float)
+  protected async getTeamProgressIncreaseSinceLastWeek(@Parent() team: TeamObject) {
     this.logger.log({
       team,
-      message: 'Fetching percentage progress increase for team',
+      message: 'Fetching the progress increase for team since last week',
     })
 
-    return this.domain.team.getPercentageProgressIncreaseForTeam(team)
+    return this.domain.team.getTeamProgressIncreaseSinceLastWeek(team)
   }
 }
 

@@ -29,17 +29,18 @@ export class TeamObject implements EntityObject {
   @Field(() => Float, {
     description: 'The computed percentage current progress of this team',
   })
-  public currentProgress: KeyResultCheckInObject['progress']
+  public progress: KeyResultCheckInObject['progress']
 
   @Field(() => Int, {
     description: 'The computed current confidence of this team',
   })
-  public currentConfidence: KeyResultCheckInObject['confidence']
+  public confidence: KeyResultCheckInObject['confidence']
 
   @Field(() => Float, {
-    description: 'The percentage progress increase of the team since last monday',
+    description:
+      'The percentage progress increase of the objective since the last week. We consider a week as a "business" week, considering it starting on saturday and ending on friday',
   })
-  public percentageProgressIncrease: number
+  public progressIncreaseSinceLastWeek: number
 
   @Field({ description: 'The creation date of the team' })
   public createdAt: Date
@@ -82,6 +83,12 @@ export class TeamObject implements EntityObject {
     nullable: true,
   })
   public teams?: TeamObject[]
+
+  @Field(() => [TeamObject], {
+    description: "A list with all teams inside this team's tree ordered by their progress",
+    nullable: true,
+  })
+  public teamsRanking?: TeamObject[]
 
   @Field(() => [CycleObject], {
     description: 'The cycles that belongs to this team',

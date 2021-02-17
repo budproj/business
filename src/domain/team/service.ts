@@ -1,11 +1,11 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { startOfWeek } from 'date-fns'
 import { flatten, remove, uniqBy } from 'lodash'
 
 import { CONSTRAINT } from 'src/domain/constants'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import DomainKeyResultService from 'src/domain/key-result/service'
+import DomainTeamRankingService from 'src/domain/team/ranking'
 import { TeamEntityFilter, TeamEntityRelation } from 'src/domain/team/types'
 import { UserDTO } from 'src/domain/user/dto'
 
@@ -21,7 +21,7 @@ export interface DomainTeamServiceInterface {
   getUserCompanies: (user: UserDTO) => Promise<Team[]>
   getUserCompaniesAndDepartments: (user: UserDTO) => Promise<Team[]>
   getWithUser: (user: UserDTO) => Promise<Team[]>
-  getAllTeamsBelowNodes: (
+  getFullTeamNodesTree: (
     nodes: TeamDTO | TeamDTO[],
     filter?: TeamEntityFilter[],
     relations?: TeamEntityRelation[],
@@ -31,7 +31,10 @@ export interface DomainTeamServiceInterface {
   buildTeamQueryContext: (user: UserDTO, constraint?: CONSTRAINT) => Promise<DomainQueryContext>
   getCurrentProgressForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
   getCurrentConfidenceForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['confidence']>
-  getPercentageProgressIncreaseForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
+  getTeamProgressIncreaseSinceLastWeek: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
+  getTeamChildTeams: (team: TeamDTO) => Promise<Team[]>
+  getTeamRankedChildTeams: (team: TeamDTO) => Promise<Team[]>
+  getRankedTeamsBelowNode: (team: TeamDTO) => Promise<Team[]>
 }
 
 @Injectable()
@@ -43,6 +46,8 @@ class DomainTeamService
     protected readonly repository: DomainTeamRepository,
     @Inject(forwardRef(() => DomainKeyResultService))
     private readonly keyResultService: DomainKeyResultService,
+    @Inject(forwardRef(() => DomainTeamRankingService))
+    private readonly ranking: DomainTeamRankingService,
   ) {
     super(DomainTeamService.name, repository)
   }
@@ -66,7 +71,7 @@ class DomainTeamService
     return teams as Team[]
   }
 
-  public async getAllTeamsBelowNodes(
+  public async getFullTeamNodesTree(
     nodes: TeamDTO | TeamDTO[],
     filter?: TeamEntityFilter[],
     relations?: TeamEntityRelation[],
@@ -108,7 +113,7 @@ class DomainTeamService
   }
 
   public async getUsersInTeam(team: TeamDTO) {
-    const teamsBelowCurrentNode = await this.getAllTeamsBelowNodes(team)
+    const teamsBelowCurrentNode = await this.getFullTeamNodesTree(team)
 
     const teamUsers = await Promise.all(teamsBelowCurrentNode.map(async (team) => team.users))
     const flattenedTeamUsers = flatten(teamUsers)
@@ -152,13 +157,34 @@ class DomainTeamService
     return currentCheckInGroup.confidence
   }
 
-  public async getPercentageProgressIncreaseForTeam(team: TeamDTO) {
-    const currentProgress = await this.getCurrentProgressForTeam(team)
+  public async getTeamProgressIncreaseSinceLastWeek(team: TeamDTO) {
+    const progress = await this.getCurrentProgressForTeam(team)
     const lastWeekProgress = await this.getLastWeekProgressForTeam(team)
 
-    const deltaProgress = currentProgress - lastWeekProgress
+    const deltaProgress = progress - lastWeekProgress
 
     return deltaProgress
+  }
+
+  public async getTeamChildTeams(team: TeamDTO) {
+    const childTeams = await this.getMany({ parentTeamId: team.id })
+
+    return childTeams
+  }
+
+  public async getTeamRankedChildTeams(team: TeamDTO) {
+    const childTeams = await this.getTeamChildTeams(team)
+    const rankedChildTeams = await this.ranking.rankTeamsByProgress(childTeams)
+
+    return rankedChildTeams
+  }
+
+  public async getRankedTeamsBelowNode(team: TeamDTO) {
+    const teamNodeTree = await this.getFullTeamNodesTree(team)
+    const teamsBelowTeam = teamNodeTree.slice(1)
+    const rankedChildTeams = await this.ranking.rankTeamsByProgress(teamsBelowTeam)
+
+    return rankedChildTeams
   }
 
   protected async protectCreationQuery(
@@ -215,13 +241,13 @@ class DomainTeamService
   }
 
   private async parseUserCompaniesTeams(companies: TeamDTO[]) {
-    const companiesTeams = await this.getAllTeamsBelowNodes(companies)
+    const companiesTeams = await this.getFullTeamNodesTree(companies)
 
     return companiesTeams
   }
 
   private async getCheckInGroupAtDateForTeam(date: Date, team: TeamDTO) {
-    const childTeams = await this.getAllTeamsBelowNodes(team)
+    const childTeams = await this.getFullTeamNodesTree(team)
     const keyResults = await this.keyResultService.getFromTeams(childTeams)
     if (!keyResults) return this.keyResultService.buildDefaultCheckInGroup()
 
@@ -234,10 +260,12 @@ class DomainTeamService
   }
 
   private async getLastWeekProgressForTeam(team: TeamDTO) {
-    const date = new Date()
-    const startOfWeekDate = startOfWeek(date)
+    const firstDayAfterLastWeek = this.getFirstDayAfterLastWeek()
 
-    const lastWeekCheckInGroup = await this.getCheckInGroupAtDateForTeam(startOfWeekDate, team)
+    const lastWeekCheckInGroup = await this.getCheckInGroupAtDateForTeam(
+      firstDayAfterLastWeek,
+      team,
+    )
 
     return lastWeekCheckInGroup.progress
   }
