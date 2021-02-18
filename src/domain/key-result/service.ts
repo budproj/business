@@ -223,6 +223,7 @@ class DomainKeyResultService
   }
 
   public async getLatestCheckInForKeyResultAtDate(keyResult: KeyResultDTO, date?: Date) {
+    date ??= new Date()
     const latestCheckIn = await this.checkIn.getLatestFromKeyResultAtDate(keyResult, date)
 
     return latestCheckIn
