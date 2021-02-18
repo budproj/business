@@ -1,5 +1,4 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { filter, maxBy, minBy } from 'lodash'
 
 import { CONSTRAINT } from 'src/domain/constants'
 import {
@@ -20,7 +19,7 @@ import DomainKeyResultCheckInService from './check-in/service'
 import { KeyResultCommentDTO } from './comment/dto'
 import { KeyResultComment } from './comment/entities'
 import DomainKeyResultCommentService from './comment/service'
-import { DEFAULT_CONFIDENCE, DEFAULT_PERCENTAGE_PROGRESS, KEY_RESULT_FORMAT } from './constants'
+import { DEFAULT_CONFIDENCE } from './constants'
 import { KEY_RESULT_CUSTOM_LIST_BINDING } from './custom-list/constants'
 import { KeyResultCustomListDTO } from './custom-list/dto'
 import { KeyResultCustomList } from './custom-list/entities'
@@ -58,19 +57,14 @@ export interface DomainKeyResultServiceInterface {
     team: TeamDTO,
     filters?: KeyResultFilters,
   ) => Promise<KeyResultCheckIn | null>
-  getLatestCheckInForKeyResult: (team: KeyResultDTO) => Promise<KeyResultCheckIn | null>
+  getLatestCheckInForKeyResultAtDate: (
+    team: KeyResultDTO,
+    date?: Date,
+  ) => Promise<KeyResultCheckIn | null>
   getCurrentProgressForKeyResult: (keyResult: KeyResultDTO) => Promise<KeyResultCheckIn['progress']>
   getCurrentConfidenceForKeyResult: (
     keyResult: KeyResultDTO,
   ) => Promise<KeyResultCheckIn['confidence']>
-  buildCheckInGroupForKeyResultListAtDate: (
-    date: Date,
-    keyResults: KeyResult[],
-  ) => Promise<DomainKeyResultCheckInGroup>
-  buildDefaultCheckInGroup: (
-    progress?: KeyResultCheckIn['progress'],
-    confidence?: KeyResultCheckIn['confidence'],
-  ) => DomainKeyResultCheckInGroup
   buildCheckInForUser: (
     user: UserDTO,
     checkInData: DomainKeyResultCheckInPayload,
@@ -91,12 +85,16 @@ export interface DomainKeyResultServiceInterface {
     keyResult: KeyResultDTO,
     options: DomainKeyResultTimelineGetOptions,
   ) => Promise<Array<KeyResultCheckIn | KeyResultComment>>
+  calculateKeyResultCheckInListAverageProgress: (
+    keyResultCheckInList: KeyResultCheckIn[],
+    keyResults: KeyResult[],
+  ) => number
 }
 
 export interface DomainKeyResultCheckInGroup {
   progress: KeyResultCheckInDTO['progress']
   confidence: KeyResultCheckInDTO['confidence']
-  latestCheckIn?: KeyResultCheckInDTO
+  createdAt: KeyResultCheckInDTO['createdAt']
 }
 
 export interface DomainKeyResultCheckInPayload {
@@ -224,8 +222,8 @@ class DomainKeyResultService
     return latestCheckIn
   }
 
-  public async getLatestCheckInForKeyResult(keyResult: KeyResultDTO) {
-    const latestCheckIn = await this.checkIn.getLatestFromKeyResult(keyResult)
+  public async getLatestCheckInForKeyResultAtDate(keyResult: KeyResultDTO, date?: Date) {
+    const latestCheckIn = await this.checkIn.getLatestFromKeyResultAtDate(keyResult, date)
 
     return latestCheckIn
   }
@@ -242,35 +240,6 @@ class DomainKeyResultService
     if (!latestCheckIn) return DEFAULT_CONFIDENCE
 
     return latestCheckIn.confidence
-  }
-
-  public async buildCheckInGroupForKeyResultListAtDate(date: Date, keyResults: KeyResult[]) {
-    const latestCheckInAtDatePromises = keyResults.map(async (keyResult) =>
-      this.checkIn.getLatestFromKeyResultAtDate(keyResult, date),
-    )
-    const latestCheckInsAtDate = await Promise.all(latestCheckInAtDatePromises)
-    const latestNotUndefinedCheckIns = filter(latestCheckInsAtDate)
-    const latestCheckIn = maxBy(latestNotUndefinedCheckIns, (checkIn) => checkIn?.createdAt)
-
-    const checkInGroup: DomainKeyResultCheckInGroup = {
-      latestCheckIn,
-      progress: this.calculateCheckInGroupAverageProgress(latestCheckInsAtDate, keyResults),
-      confidence: this.getCheckInGroupLowestConfidenceValue(latestCheckInsAtDate),
-    }
-
-    return checkInGroup
-  }
-
-  public buildDefaultCheckInGroup(
-    progress: KeyResultCheckIn['progress'] = DEFAULT_PERCENTAGE_PROGRESS,
-    confidence: KeyResultCheckIn['confidence'] = DEFAULT_CONFIDENCE,
-  ) {
-    const defaultCheckInState: DomainKeyResultCheckInGroup = {
-      progress,
-      confidence,
-    }
-
-    return defaultCheckInState
   }
 
   public async buildCheckInForUser(user: UserDTO, checkInData: DomainKeyResultCheckInPayload) {
@@ -298,14 +267,14 @@ class DomainKeyResultService
     const previousCheckIn = await this.getParentCheckInFromCheckIn(checkIn)
 
     const normalizedCurrentCheckIn = this.checkIn.transformCheckInToRelativePercentage(
-      checkIn,
       keyResult,
+      checkIn,
     )
     if (!previousCheckIn) return normalizedCurrentCheckIn.progress
 
     const normalizedPreviousCheckIn = this.checkIn.transformCheckInToRelativePercentage(
-      previousCheckIn,
       keyResult,
+      previousCheckIn,
     )
 
     const deltaProgress = this.checkIn.calculateProgressDifference(
@@ -326,7 +295,7 @@ class DomainKeyResultService
 
   public async getCheckInProgress(checkIn: KeyResultCheckIn) {
     const keyResult = await this.getOne({ id: checkIn.keyResultId })
-    const normalizedCheckIn = this.checkIn.transformCheckInToRelativePercentage(checkIn, keyResult)
+    const normalizedCheckIn = this.checkIn.transformCheckInToRelativePercentage(keyResult, checkIn)
 
     return normalizedCheckIn.progress
   }
@@ -354,9 +323,21 @@ class DomainKeyResultService
     const timelineOrder = await this.timeline.buildUnionQuery(keyResult, options)
     const timelineEntries = await this.timeline.getEntriesForTimelineOrder(timelineOrder)
 
-    console.log(options, timelineOrder, timelineEntries)
-
     return timelineEntries
+  }
+
+  public calculateKeyResultCheckInListAverageProgress(
+    keyResultCheckInList: KeyResultCheckIn[],
+    keyResults: KeyResult[],
+  ) {
+    const normalizedKeyResultCheckInList = keyResultCheckInList.map((keyResultCheckIn, index) =>
+      this.normalizeCheckInToPercentage(keyResults[index], keyResultCheckIn),
+    )
+    const keyResultCheckInListAverageProgress = this.checkIn.calculateAverageProgressFromCheckInList(
+      normalizedKeyResultCheckInList,
+    )
+
+    return keyResultCheckInListAverageProgress
   }
 
   protected async protectCreationQuery(
@@ -367,37 +348,11 @@ class DomainKeyResultService
     return []
   }
 
-  private calculateCheckInGroupAverageProgress(
-    latestCheckIns: KeyResultCheckIn[],
-    keyResults: KeyResult[],
-  ) {
-    const normalizedCheckIns = latestCheckIns.map((checkIn, index) =>
-      this.normalizeCheckInToPercentage(checkIn, keyResults[index]),
-    )
-    const checkInGroupAverageProgress = this.checkIn.calculateAverageProgressFromCheckInList(
-      normalizedCheckIns,
-    )
-
-    return checkInGroupAverageProgress
-  }
-
-  private normalizeCheckInToPercentage(checkIn: KeyResultCheckIn, keyResult: KeyResult) {
-    if (!checkIn) return
-    if (keyResult.format === KEY_RESULT_FORMAT.PERCENTAGE) return checkIn
-
-    const percentageCheckIn = this.checkIn.transformCheckInToRelativePercentage(checkIn, keyResult)
+  private normalizeCheckInToPercentage(keyResult: KeyResult, checkIn?: KeyResultCheckIn) {
+    const percentageCheckIn = this.checkIn.transformCheckInToRelativePercentage(keyResult, checkIn)
     const percentageCheckInWithLimit = this.checkIn.limitPercentageCheckIn(percentageCheckIn)
 
     return percentageCheckInWithLimit
-  }
-
-  private getCheckInGroupLowestConfidenceValue(checkIns: KeyResultCheckIn[]) {
-    const notUndefinedCheckIns = filter(checkIns)
-    if (notUndefinedCheckIns.length === 0) return DEFAULT_CONFIDENCE
-
-    const minConfidenceCheckIn = minBy(notUndefinedCheckIns, (checkIn) => checkIn.confidence)
-
-    return minConfidenceCheckIn.confidence
   }
 }
 

@@ -34,8 +34,8 @@ export interface DomainKeyResultCheckInServiceInterface {
     date: Date,
   ) => Promise<KeyResultCheckIn | null>
   transformCheckInToRelativePercentage: (
-    checkIn: KeyResultCheckIn,
     keyResult: KeyResult,
+    checkIn?: KeyResultCheckIn,
   ) => KeyResultCheckIn
   limitPercentageCheckIn: (checkIn: KeyResultCheckIn) => KeyResultCheckIn
   calculateAverageProgressFromCheckInList: (
@@ -102,9 +102,9 @@ class DomainKeyResultCheckInService extends DomainEntityService<
     return checkIn
   }
 
-  public transformCheckInToRelativePercentage(checkIn: KeyResultCheckIn, keyResult: KeyResult) {
+  public transformCheckInToRelativePercentage(keyResult: KeyResult, checkIn?: KeyResultCheckIn) {
     const { initialValue, goal } = keyResult
-    const { progress } = checkIn
+    const progress = checkIn ? checkIn.progress : initialValue
 
     const relativePercentageProgress = ((progress - initialValue) * 100) / (goal - initialValue)
     const normalizedCheckIn: KeyResultCheckIn = {

@@ -141,7 +141,7 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
       message: 'Fetching latest key result check-in for key result',
     })
 
-    return this.domain.keyResult.getLatestCheckInForKeyResult(keyResult)
+    return this.domain.keyResult.getLatestCheckInForKeyResultAtDate(keyResult)
   }
 }
 

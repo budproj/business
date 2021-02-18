@@ -27,7 +27,8 @@ export class TeamObject implements EntityObject {
   public isCompany: boolean
 
   @Field(() => Float, {
-    description: 'The computed percentage current progress of this team',
+    description:
+      "The computed percentage current progress of this team. The team's progress is calculated as an average of all objectives of the team and it's children",
   })
   public progress: KeyResultCheckInObject['progress']
 

@@ -221,7 +221,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
       cycleID: this.parseTeamClosestCycleID(team, filters),
     }
 
-    return this.domain.objective.getFromTeam(team, domainFilters)
+    return this.domain.objective.getFromTeams(team, domainFilters)
   }
 
   @ResolveField('latestKeyResultCheckIn', () => KeyResultCheckInObject, { nullable: true })

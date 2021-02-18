@@ -15,7 +15,8 @@ export class ObjectiveObject implements EntityObject {
   public title: string
 
   @Field(() => Float, {
-    description: 'The computed percentage current progress of this objective',
+    description:
+      "The computed percentage current progress of this objective. The objective's progress is calculated as an average of it's key results",
   })
   public progress: number
 

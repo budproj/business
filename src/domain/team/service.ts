@@ -1,13 +1,16 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { filter, flatten, uniqBy } from 'lodash'
+import { filter, flatten, maxBy, meanBy, minBy, uniqBy } from 'lodash'
 
 import { CONSTRAINT } from 'src/domain/constants'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
-import DomainKeyResultService from 'src/domain/key-result/service'
+import { DomainKeyResultCheckInGroup } from 'src/domain/key-result/service'
+import { Objective } from 'src/domain/objective/entities'
+import DomainObjectiveService, { DomainObjectiveCheckInGroup } from 'src/domain/objective/service'
 import DomainTeamRankingService from 'src/domain/team/ranking'
 import { UserDTO } from 'src/domain/user/dto'
 
+import { DEFAULT_PROGRESS, DEFAULT_CONFIDENCE } from './constants'
 import { TeamDTO } from './dto'
 import { Team } from './entities'
 import DomainTeamRepository from './repository'
@@ -60,6 +63,10 @@ export interface DomainTeamServiceInterface {
   getRankedTeamsBelowNode: (team: TeamDTO) => Promise<Team[]>
 }
 
+export interface DomainTeamCheckInGroup extends DomainKeyResultCheckInGroup {
+  latestObjectiveCheckIn?: DomainObjectiveCheckInGroup
+}
+
 @Injectable()
 class DomainTeamService
   extends DomainEntityService<Team, TeamDTO>
@@ -67,8 +74,8 @@ class DomainTeamService
   constructor(
     public readonly specification: DomainTeamSpecification,
     protected readonly repository: DomainTeamRepository,
-    @Inject(forwardRef(() => DomainKeyResultService))
-    private readonly keyResultService: DomainKeyResultService,
+    @Inject(forwardRef(() => DomainObjectiveService))
+    private readonly objectiveService: DomainObjectiveService,
     @Inject(forwardRef(() => DomainTeamRankingService))
     private readonly ranking: DomainTeamRankingService,
   ) {
@@ -196,16 +203,16 @@ class DomainTeamService
 
   public async getCurrentProgressForTeam(team: TeamDTO, filters?: TeamFilters) {
     const date = new Date()
-    const currentCheckInGroup = await this.getCheckInGroupAtDateForTeam(date, team, filters)
+    const currentCheckInGroup = await this.getCheckInGroupAtDate(date, team, filters)
 
-    return currentCheckInGroup.progress
+    return currentCheckInGroup?.progress ?? DEFAULT_PROGRESS
   }
 
   public async getCurrentConfidenceForTeam(team: TeamDTO, filters?: TeamFilters) {
     const date = new Date()
-    const currentCheckInGroup = await this.getCheckInGroupAtDateForTeam(date, team, filters)
+    const currentCheckInGroup = await this.getCheckInGroupAtDate(date, team, filters)
 
-    return currentCheckInGroup.confidence
+    return currentCheckInGroup?.confidence ?? DEFAULT_CONFIDENCE
   }
 
   public async getTeamProgressIncreaseSinceLastWeek(team: TeamDTO, filters?: TeamFilters) {
@@ -297,29 +304,63 @@ class DomainTeamService
     return companiesTeams
   }
 
-  private async getCheckInGroupAtDateForTeam(date: Date, team: TeamDTO, filters?: TeamFilters) {
+  private async getCheckInGroupAtDate(date: Date, team: TeamDTO, filters?: TeamFilters) {
     const childTeams = await this.getTeamNodesTreeAfterTeam(team)
-    const keyResults = await this.keyResultService.getFromTeams(childTeams, filters)
-    if (!keyResults) return this.keyResultService.buildDefaultCheckInGroup()
+    const objectives = await this.objectiveService.getFromTeams(childTeams, filters)
+    if (!objectives) return this.buildDefaultCheckInGroup(date)
 
-    const teamCheckInGroup = await this.keyResultService.buildCheckInGroupForKeyResultListAtDate(
-      date,
-      keyResults,
-    )
+    const teamCheckInGroup = await this.buildCheckInGroupAtDate(date, objectives)
 
     return teamCheckInGroup
+  }
+
+  private async buildCheckInGroupAtDate(
+    date: Date,
+    objectives: Objective[],
+  ): Promise<DomainTeamCheckInGroup | undefined> {
+    const objectiveCheckInGroupPromises = objectives.map(async (objective) =>
+      this.objectiveService.getCheckInGroupAtDate(date, objective),
+    )
+    const objectiveCheckInGroups = await Promise.all(objectiveCheckInGroupPromises)
+    const latestObjectiveCheckIn = maxBy(objectiveCheckInGroups, 'createdAt')
+    if (!latestObjectiveCheckIn) return
+
+    const teamCheckInGroup: DomainTeamCheckInGroup = {
+      latestObjectiveCheckIn,
+      progress: meanBy(objectiveCheckInGroups, 'progress'),
+      confidence: minBy(objectiveCheckInGroups, 'confidence').confidence,
+      createdAt: latestObjectiveCheckIn.createdAt,
+    }
+
+    return teamCheckInGroup
+  }
+
+  private buildDefaultCheckInGroup(
+    date?: DomainTeamCheckInGroup['createdAt'],
+    progress: DomainTeamCheckInGroup['progress'] = DEFAULT_PROGRESS,
+    confidence: DomainTeamCheckInGroup['confidence'] = DEFAULT_CONFIDENCE,
+  ) {
+    date ??= new Date()
+
+    const defaultCheckInGroup: DomainTeamCheckInGroup = {
+      progress,
+      confidence,
+      createdAt: date,
+    }
+
+    return defaultCheckInGroup
   }
 
   private async getLastWeekProgressForTeam(team: TeamDTO, filters?: TeamFilters) {
     const firstDayAfterLastWeek = this.getFirstDayAfterLastWeek()
 
-    const lastWeekCheckInGroup = await this.getCheckInGroupAtDateForTeam(
+    const lastWeekCheckInGroup = await this.getCheckInGroupAtDate(
       firstDayAfterLastWeek,
       team,
       filters,
     )
 
-    return lastWeekCheckInGroup.progress
+    return lastWeekCheckInGroup?.progress ?? DEFAULT_PROGRESS
   }
 
   private async getNodesFromTeams(

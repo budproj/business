@@ -1,14 +1,18 @@
-import { Injectable } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
+import { maxBy, minBy } from 'lodash'
 import { Any } from 'typeorm'
 
 import { CycleDTO } from 'src/domain/cycle/dto'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
+import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
-import DomainKeyResultService from 'src/domain/key-result/service'
+import { KeyResult } from 'src/domain/key-result/entities'
+import DomainKeyResultService, { DomainKeyResultCheckInGroup } from 'src/domain/key-result/service'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
 import { TeamDTO } from 'src/domain/team/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
+import { DEFAULT_PROGRESS, DEFAULT_CONFIDENCE } from './constants'
 import { Objective } from './entities'
 import DomainObjectiveRepository from './repository'
 import { ObjectiveFilters } from './types'
@@ -16,7 +20,7 @@ import { ObjectiveFilters } from './types'
 export interface DomainObjectiveServiceInterface {
   getFromOwner: (owner: UserDTO) => Promise<Objective[]>
   getFromCycle: (cycle: CycleDTO) => Promise<Objective[]>
-  getFromTeam: (team: TeamDTO, filters?: ObjectiveFilters) => Promise<Objective[]>
+  getFromTeams: (teams: TeamDTO | TeamDTO[], filters?: ObjectiveFilters) => Promise<Objective[]>
   getCurrentProgressForObjective: (objective: ObjectiveDTO) => Promise<KeyResultCheckIn['progress']>
   getCurrentConfidenceForObjective: (
     objective: ObjectiveDTO,
@@ -24,6 +28,14 @@ export interface DomainObjectiveServiceInterface {
   getObjectiveProgressIncreaseSinceLastWeek: (
     objective: ObjectiveDTO,
   ) => Promise<KeyResultCheckIn['progress']>
+  getCheckInGroupAtDate: (
+    date: Date,
+    objective: Objective,
+  ) => Promise<DomainObjectiveCheckInGroup | undefined>
+}
+
+export interface DomainObjectiveCheckInGroup extends DomainKeyResultCheckInGroup {
+  latestKeyResultCheckIn?: KeyResultCheckInDTO
 }
 
 @Injectable()
@@ -32,6 +44,7 @@ class DomainObjectiveService
   implements DomainObjectiveServiceInterface {
   constructor(
     protected readonly repository: DomainObjectiveRepository,
+    @Inject(forwardRef(() => DomainKeyResultService))
     private readonly keyResultService: DomainKeyResultService,
   ) {
     super(DomainObjectiveService.name, repository)
@@ -45,7 +58,7 @@ class DomainObjectiveService
     return this.repository.find({ cycleId: cycle.id })
   }
 
-  public async getFromTeam(team: TeamDTO, filters?: ObjectiveFilters) {
+  public async getFromTeams(team: TeamDTO | TeamDTO[], filters?: ObjectiveFilters) {
     const keyResults = await this.keyResultService.getFromTeams(team, filters)
     if (!keyResults) return []
 
@@ -59,16 +72,16 @@ class DomainObjectiveService
 
   public async getCurrentProgressForObjective(objective: ObjectiveDTO) {
     const date = new Date()
-    const currentCheckInGroup = await this.getCheckInGroupAtDateForObjective(date, objective)
+    const currentCheckInGroup = await this.getCheckInGroupAtDate(date, objective)
 
-    return currentCheckInGroup.progress
+    return currentCheckInGroup?.progress ?? DEFAULT_PROGRESS
   }
 
   public async getCurrentConfidenceForObjective(objective: ObjectiveDTO) {
     const date = new Date()
-    const currentCheckInGroup = await this.getCheckInGroupAtDateForObjective(date, objective)
+    const currentCheckInGroup = await this.getCheckInGroupAtDate(date, objective)
 
-    return currentCheckInGroup.confidence
+    return currentCheckInGroup?.confidence ?? DEFAULT_PROGRESS
   }
 
   public async getObjectiveProgressIncreaseSinceLastWeek(objective: ObjectiveDTO) {
@@ -80,6 +93,18 @@ class DomainObjectiveService
     return deltaProgress
   }
 
+  public async getCheckInGroupAtDate(
+    date: Date,
+    objective: ObjectiveDTO,
+  ): Promise<DomainObjectiveCheckInGroup | undefined> {
+    const keyResults = await this.keyResultService.getFromObjective(objective)
+    if (!keyResults) return
+
+    const objectiveCheckInGroup = await this.buildCheckInGroupAtDate(date, keyResults)
+
+    return objectiveCheckInGroup
+  }
+
   protected async protectCreationQuery(
     _query: DomainCreationQuery<Objective>,
     _data: Partial<ObjectiveDTO>,
@@ -88,27 +113,50 @@ class DomainObjectiveService
     return []
   }
 
-  private async getCheckInGroupAtDateForObjective(date: Date, objective: ObjectiveDTO) {
-    const keyResults = await this.keyResultService.getFromObjective(objective)
-    if (!keyResults) return this.keyResultService.buildDefaultCheckInGroup()
+  private async getLastWeekProgressForObjective(objective: ObjectiveDTO) {
+    const firstDayAfterLastWeek = this.getFirstDayAfterLastWeek()
 
-    const objectiveCheckInGroup = this.keyResultService.buildCheckInGroupForKeyResultListAtDate(
-      date,
+    const lastWeekCheckInGroup = await this.getCheckInGroupAtDate(firstDayAfterLastWeek, objective)
+
+    return lastWeekCheckInGroup?.progress ?? DEFAULT_PROGRESS
+  }
+
+  private async buildCheckInGroupAtDate(date: Date, keyResults: KeyResult[]) {
+    const keyResultCheckInGroupPromises = keyResults.map(async (keyResult) =>
+      this.keyResultService.getLatestCheckInForKeyResultAtDate(keyResult, date),
+    )
+    const keyResultCheckInGroups = await Promise.all(keyResultCheckInGroupPromises)
+    const latestKeyResultCheckIn = maxBy(keyResultCheckInGroups, 'createdAt')
+    if (!latestKeyResultCheckIn) return this.buildDefaultCheckInGroup(date)
+
+    const progress = this.keyResultService.calculateKeyResultCheckInListAverageProgress(
+      keyResultCheckInGroups,
       keyResults,
     )
+    const objectiveCheckInGroup: DomainObjectiveCheckInGroup = {
+      latestKeyResultCheckIn,
+      progress,
+      confidence: minBy(keyResultCheckInGroups, 'confidence').confidence,
+      createdAt: latestKeyResultCheckIn.createdAt,
+    }
 
     return objectiveCheckInGroup
   }
 
-  private async getLastWeekProgressForObjective(objective: ObjectiveDTO) {
-    const firstDayAfterLastWeek = this.getFirstDayAfterLastWeek()
+  private buildDefaultCheckInGroup(
+    date?: DomainObjectiveCheckInGroup['createdAt'],
+    progress: DomainObjectiveCheckInGroup['progress'] = DEFAULT_PROGRESS,
+    confidence: DomainObjectiveCheckInGroup['confidence'] = DEFAULT_CONFIDENCE,
+  ) {
+    date ??= new Date()
 
-    const lastWeekCheckInGroup = await this.getCheckInGroupAtDateForObjective(
-      firstDayAfterLastWeek,
-      objective,
-    )
+    const defaultCheckInGroup: DomainObjectiveCheckInGroup = {
+      progress,
+      confidence,
+      createdAt: date,
+    }
 
-    return lastWeekCheckInGroup.progress
+    return defaultCheckInGroup
   }
 }
 

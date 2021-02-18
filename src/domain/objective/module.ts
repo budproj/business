@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { forwardRef, Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
 import databaseConfig from 'src/config/database/config'
@@ -11,7 +11,7 @@ import DomainObjectiveService from './service'
   imports: [
     TypeOrmModule.forRoot(databaseConfig),
     TypeOrmModule.forFeature([DomainObjectiveRepository]),
-    DomainKeyResultModule,
+    forwardRef(() => DomainKeyResultModule),
   ],
   providers: [DomainObjectiveService],
   exports: [DomainObjectiveService],
