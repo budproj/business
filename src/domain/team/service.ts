@@ -315,7 +315,7 @@ class DomainTeamService
   private async getStatusAtDate(date: Date, team: TeamDTO, filters?: TeamFilters) {
     const childTeams = await this.getTeamNodesTreeAfterTeam(team)
     const objectives = await this.objectiveService.getFromTeams(childTeams, filters)
-    if (!objectives) return this.buildDefaultStatus(date)
+    if (!objectives || objectives.length === 0) return this.buildDefaultStatus(date)
 
     const teamStatus = await this.buildStatusAtDate(date, objectives)
 

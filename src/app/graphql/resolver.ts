@@ -1,4 +1,5 @@
 import { Args, Parent, ResolveField, Resolver } from '@nestjs/graphql'
+import { all as merge } from 'deepmerge'
 import { fromPairs } from 'lodash'
 import { DeleteResult, FindConditions } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
@@ -149,20 +150,16 @@ abstract class GraphQLEntityResolver<
   }
 
   protected async buildTeamsFilters(teams: Team | Team[], filters?: F) {
-    const cycleID =
-      filters?.cycleID ??
-      (Array.isArray(teams) ? undefined : await this.getClosestCycleIDForTeam(teams))
-
     const teamsCycleIDPairs = Array.isArray(teams)
       ? await this.getClosestCycleIDFromTeamList(teams)
       : undefined
     const teamsCycleID = fromPairs<CycleObject['id']>(teamsCycleIDPairs)
 
-    const resolverFilters: F = {
+    const newFilters: F = {
       ...filters,
-      cycleID,
       teamsCycleID,
     }
+    const resolverFilters = merge<F>([filters ?? {}, newFilters])
 
     return resolverFilters
   }

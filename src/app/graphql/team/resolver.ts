@@ -118,33 +118,51 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   }
 
   @ResolveField('teams', () => [TeamObject], { nullable: true })
-  protected async getTeamChildTeams(@Parent() team: TeamObject) {
+  protected async getTeamChildTeams(
+    @Parent() team: TeamObject,
+    @Context() context: ApolloServerContext<GraphQLTeamContext>,
+  ) {
     this.logger.log({
       team,
       message: 'Fetching child teams for team',
     })
 
-    return this.domain.team.getTeamChildTeams(team)
+    const childTeams = await this.domain.team.getTeamChildTeams(team)
+    context.filters = await this.buildTeamsFilters(childTeams, context.filters)
+
+    return childTeams
   }
 
   @ResolveField('teamsRanking', () => [TeamObject], { nullable: true })
-  protected async getTeamRankedChildTeams(@Parent() team: TeamObject) {
+  protected async getTeamRankedChildTeams(
+    @Parent() team: TeamObject,
+    @Context() context: ApolloServerContext<GraphQLTeamContext>,
+  ) {
     this.logger.log({
       team,
       message: 'Fetching child teams for team ranked by progress',
     })
 
-    return this.domain.team.getRankedTeamsBelowNode(team)
+    const rankedTeams = await this.domain.team.getRankedTeamsBelowNode(team)
+    context.filters = await this.buildTeamsFilters(rankedTeams, context.filters)
+
+    return rankedTeams
   }
 
   @ResolveField('parentTeam', () => TeamObject, { nullable: true })
-  protected async getTeamParentTeam(@Parent() team: TeamObject) {
+  protected async getTeamParentTeam(
+    @Parent() team: TeamObject,
+    @Context() context: ApolloServerContext<GraphQLTeamContext>,
+  ) {
     this.logger.log({
       team,
       message: 'Fetching parent team for team',
     })
 
-    return this.domain.team.getOne({ id: team.parentTeamId })
+    const parentTeam = await this.domain.team.getOne({ id: team.parentTeamId })
+    context.filters = await this.buildTeamsFilters(parentTeam, context.filters)
+
+    return parentTeam
   }
 
   @ResolveField('cycles', () => [CycleObject], { nullable: true })
@@ -250,7 +268,9 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
       cycleID: this.parseTeamCycleFilter(team, filters),
     }
 
-    return this.domain.team.getCurrentStatus(team, domainFilters)
+    const status = await this.domain.team.getCurrentStatus(team, domainFilters)
+
+    return status
   }
 
   @ResolveField('progressIncreaseSinceLastWeek', () => Float)

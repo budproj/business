@@ -96,7 +96,7 @@ class DomainObjectiveService
     objective: ObjectiveDTO,
   ): Promise<DomainObjectiveStatus | undefined> {
     const keyResults = await this.keyResultService.getFromObjective(objective)
-    if (!keyResults) return
+    if (!keyResults || keyResults.length === 0) return
 
     const objectiveStatus = await this.buildStatusAtDate(date, keyResults)
 
