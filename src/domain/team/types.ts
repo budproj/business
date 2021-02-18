@@ -4,7 +4,7 @@ import { CycleDTO } from 'src/domain/cycle/dto'
 
 import { Team } from './entities'
 
-export type TeamEntityFilter = keyof Team
+export type TeamEntitySelector = keyof Team
 
 export type TeamEntityRelation =
   | 'keyResults'

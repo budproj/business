@@ -134,7 +134,9 @@ class DomainKeyResultCheckInService extends DomainEntityService<
 
   public calculateAverageProgressFromCheckInList(checkIns: KeyResultCheckIn[]) {
     const progressList = checkIns.map((checkIn) => checkIn?.progress ?? 0)
-    const averageProgress = sum(progressList) / progressList.length
+    const numberOfCheckIns = progressList.length === 0 ? 1 : progressList.length
+
+    const averageProgress = sum(progressList) / numberOfCheckIns
 
     return averageProgress
   }

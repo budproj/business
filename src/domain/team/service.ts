@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { flatten, remove, uniqBy } from 'lodash'
+import { filter, flatten, uniqBy } from 'lodash'
 
 import { CONSTRAINT } from 'src/domain/constants'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
@@ -12,7 +12,7 @@ import { TeamDTO } from './dto'
 import { Team } from './entities'
 import DomainTeamRepository from './repository'
 import DomainTeamSpecification from './specification'
-import { TeamEntityFilter, TeamEntityRelation, TeamFilters } from './types'
+import { TeamEntitySelector, TeamEntityRelation, TeamFilters } from './types'
 
 export interface DomainTeamServiceInterface {
   specification: DomainTeamSpecification
@@ -22,11 +22,25 @@ export interface DomainTeamServiceInterface {
   getUserCompaniesAndDepartments: (user: UserDTO) => Promise<Team[]>
   getWithUser: (user: UserDTO) => Promise<Team[]>
   getFullTeamNodesTree: (
-    nodes: TeamDTO | TeamDTO[],
-    filter?: TeamEntityFilter[],
+    team: TeamDTO,
+    selectors?: TeamEntitySelector[],
     relations?: TeamEntityRelation[],
   ) => Promise<Array<Partial<Team>>>
-  getParentTeam: (team: TeamDTO) => Promise<Team>
+  getTeamNodesTreeAfterTeam: (
+    nodes: TeamDTO | TeamDTO[],
+    selectors?: TeamEntitySelector[],
+    relations?: TeamEntityRelation[],
+  ) => Promise<Array<Partial<Team>>>
+  getTeamNodesTreeBeforeTeam: (
+    team: TeamDTO,
+    selectors?: TeamEntitySelector[],
+    relations?: TeamEntityRelation[],
+  ) => Promise<Array<Partial<Team>>>
+  getParentTeam: (
+    team: TeamDTO,
+    selectors?: TeamEntitySelector[],
+    relations?: TeamEntityRelation[],
+  ) => Promise<Team>
   getUsersInTeam: (teamID: TeamDTO) => Promise<UserDTO[]>
   buildTeamQueryContext: (user: UserDTO, constraint?: CONSTRAINT) => Promise<DomainQueryContext>
   getCurrentProgressForTeam: (
@@ -81,31 +95,48 @@ class DomainTeamService
   }
 
   public async getFullTeamNodesTree(
-    nodes: TeamDTO | TeamDTO[],
-    filter?: TeamEntityFilter[],
+    team: TeamDTO,
+    selectors?: TeamEntitySelector[],
     relations?: TeamEntityRelation[],
   ) {
-    const nodesAsArray = Array.isArray(nodes) ? nodes : [nodes]
+    const childTeams = await this.getTeamNodesTreeAfterTeam(team, selectors, relations)
+    const parentTeams = await this.getTeamNodesTreeBeforeTeam(team, selectors, relations)
 
-    let teams: Team[] = await Promise.all(
-      nodesAsArray.map(async (team) => this.getOne({ id: team.id })),
+    const rawNodes = [...parentTeams, ...childTeams]
+    const nodes = uniqBy(rawNodes, 'id')
+    const clearedNodes = filter(nodes)
+
+    return clearedNodes
+  }
+
+  public async getTeamNodesTreeAfterTeam(
+    teams: TeamDTO | TeamDTO[],
+    selectors?: TeamEntitySelector[],
+    relations?: TeamEntityRelation[],
+  ) {
+    const teamsAsArray = Array.isArray(teams) ? teams : [teams]
+    const initialNodes: Team[] = await Promise.all(
+      teamsAsArray.map(async (team) => this.getOne({ id: team.id })),
     )
-    let nextIterationTeams = nodesAsArray
 
-    while (nextIterationTeams.length > 0) {
-      // Since we're dealing with a linked list, where we need to evaluate each step before
-      // trying the next one, we can disable the following eslint rule
-      // eslint-disable-next-line no-await-in-loop
-      const selectedTeams = await Promise.all(
-        nextIterationTeams.map(async (team) => this.getChildTeams(team, filter, relations)),
-      )
-      const currentIterationTeams = flatten(selectedTeams)
+    const nodes = await this.getNodesFromTeams(initialNodes, 'below', selectors, relations)
 
-      teams = [...teams, ...currentIterationTeams]
-      nextIterationTeams = remove(currentIterationTeams)
-    }
+    return nodes
+  }
 
-    return teams
+  public async getTeamNodesTreeBeforeTeam(
+    teams: TeamDTO | TeamDTO[],
+    selectors?: TeamEntitySelector[],
+    relations?: TeamEntityRelation[],
+  ) {
+    const teamsAsArray = Array.isArray(teams) ? teams : [teams]
+    const initialNodes: Team[] = await Promise.all(
+      teamsAsArray.map(async (team) => this.getOne({ id: team.id })),
+    )
+
+    const nodes = await this.getNodesFromTeams(initialNodes, 'above', selectors, relations)
+
+    return nodes
   }
 
   public async getUserCompaniesAndDepartments(user: UserDTO) {
@@ -115,14 +146,25 @@ class DomainTeamService
     return [...companies, ...departments]
   }
 
-  public async getParentTeam(team: TeamDTO) {
-    const { parentTeamId } = await this.getOne({ id: team.id })
+  public async getParentTeam(
+    team: TeamDTO,
+    selectors?: TeamEntitySelector[],
+    relations?: TeamEntityRelation[],
+  ) {
+    if (!team.parentTeamId) return
+    const whereSelector = { id: team.parentTeamId }
 
-    return this.getOne({ id: parentTeamId })
+    const parentTeam = await this.repository.findOne({
+      relations,
+      select: selectors,
+      where: whereSelector,
+    })
+
+    return parentTeam
   }
 
   public async getUsersInTeam(team: TeamDTO) {
-    const teamsBelowCurrentNode = await this.getFullTeamNodesTree(team)
+    const teamsBelowCurrentNode = await this.getTeamNodesTreeAfterTeam(team)
 
     const teamUsers = await Promise.all(teamsBelowCurrentNode.map(async (team) => team.users))
     const flattenedTeamUsers = flatten(teamUsers)
@@ -189,7 +231,7 @@ class DomainTeamService
   }
 
   public async getRankedTeamsBelowNode(team: TeamDTO) {
-    const teamNodeTree = await this.getFullTeamNodesTree(team)
+    const teamNodeTree = await this.getTeamNodesTreeAfterTeam(team)
     const teamsBelowTeam = teamNodeTree.slice(1)
     const rankedChildTeams = await this.ranking.rankTeamsByProgress(teamsBelowTeam)
 
@@ -219,7 +261,7 @@ class DomainTeamService
 
   private async getChildTeams(
     teams: TeamDTO | TeamDTO[],
-    filter?: TeamEntityFilter[],
+    filter?: TeamEntitySelector[],
     relations?: TeamEntityRelation[],
   ) {
     const teamsAsArray = Array.isArray(teams) ? teams : [teams]
@@ -250,17 +292,17 @@ class DomainTeamService
   }
 
   private async parseUserCompaniesTeams(companies: TeamDTO[]) {
-    const companiesTeams = await this.getFullTeamNodesTree(companies)
+    const companiesTeams = await this.getTeamNodesTreeAfterTeam(companies)
 
     return companiesTeams
   }
 
   private async getCheckInGroupAtDateForTeam(date: Date, team: TeamDTO, filters?: TeamFilters) {
-    const childTeams = await this.getFullTeamNodesTree(team)
+    const childTeams = await this.getTeamNodesTreeAfterTeam(team)
     const keyResults = await this.keyResultService.getFromTeams(childTeams, filters)
     if (!keyResults) return this.keyResultService.buildDefaultCheckInGroup()
 
-    const teamCheckInGroup = this.keyResultService.buildCheckInGroupForKeyResultListAtDate(
+    const teamCheckInGroup = await this.keyResultService.buildCheckInGroupForKeyResultListAtDate(
       date,
       keyResults,
     )
@@ -278,6 +320,44 @@ class DomainTeamService
     )
 
     return lastWeekCheckInGroup.progress
+  }
+
+  private async getNodesFromTeams(
+    nodes: Team[],
+    direction: 'above' | 'below',
+    selectors?: TeamEntitySelector[],
+    relations?: TeamEntityRelation[],
+  ) {
+    let nextIterationNodes = nodes
+
+    const directionHandlers = {
+      below: async (
+        team: TeamDTO,
+        selectors?: TeamEntitySelector[],
+        relations?: TeamEntityRelation[],
+      ) => this.getChildTeams(team, selectors, relations),
+      above: async (
+        team: TeamDTO,
+        selectors?: TeamEntitySelector[],
+        relations?: TeamEntityRelation[],
+      ) => this.getParentTeam(team, selectors, relations),
+    }
+    const directionHandler = directionHandlers[direction]
+
+    while (nextIterationNodes.length > 0) {
+      // Since we're dealing with a linked list, where we need to evaluate each step before
+      // trying the next one, we can disable the following eslint rule
+      // eslint-disable-next-line no-await-in-loop
+      const selectedNodes = await Promise.all(
+        nextIterationNodes.map(async (node) => directionHandler(node, selectors, relations)),
+      )
+      const currentIterationNodes = flatten(selectedNodes)
+
+      nodes = [...nodes, ...currentIterationNodes]
+      nextIterationNodes = filter(currentIterationNodes)
+    }
+
+    return nodes
   }
 }
 

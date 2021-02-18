@@ -12,7 +12,7 @@ import {
 } from '@nestjs/graphql'
 import { Context as ApolloServerContext } from 'apollo-server-core'
 import { UserInputError } from 'apollo-server-fastify'
-import { isUndefined, omit, omitBy } from 'lodash'
+import { fromPairs, isUndefined, omit, omitBy } from 'lodash'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
@@ -34,7 +34,11 @@ import { Team } from 'src/domain/team/entities'
 import { TeamFiltersInput, TeamObject } from './models'
 
 export interface GraphQLTeamContext {
-  filters?: TeamFiltersInput
+  filters?: TeamResolverFilters
+}
+
+export interface TeamResolverFilters extends TeamFiltersInput {
+  teamsClosestCycleID?: Record<TeamObject['id'], CycleObject['id']>
 }
 
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
@@ -64,6 +68,8 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
 
     const team = await this.getOneWithActionScopeConstraint({ id }, user)
     if (!team) throw new UserInputError(`We could not found a team with id ${id}`)
+
+    context.filters = await this.buildResolverFilters(team, context.filters)
 
     return team
   }
@@ -105,6 +111,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
       : getOnlyCompaniesAndDepartmentsRailway
 
     const teams = await getAllTeamsRailway()
+    context.filters = await this.buildResolverFilters(teams, context.filters)
 
     return teams
   }
@@ -190,7 +197,12 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
       message: 'Fetching key results for team',
     })
 
-    return this.domain.keyResult.getFromTeams(team, filters)
+    const domainFilters = {
+      ...filters,
+      cycleID: this.parseTeamClosestCycleID(team, filters),
+    }
+
+    return this.domain.keyResult.getFromTeams(team, domainFilters)
   }
 
   @ResolveField('objectives', () => [ObjectiveObject], { nullable: true })
@@ -204,7 +216,12 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
       message: 'Fetching objectives for team',
     })
 
-    return this.domain.objective.getFromTeam(team, filters)
+    const domainFilters = {
+      ...filters,
+      cycleID: this.parseTeamClosestCycleID(team, filters),
+    }
+
+    return this.domain.objective.getFromTeam(team, domainFilters)
   }
 
   @ResolveField('latestKeyResultCheckIn', () => KeyResultCheckInObject, { nullable: true })
@@ -218,7 +235,12 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
       message: 'Fetching latest key result check-in for team',
     })
 
-    return this.domain.keyResult.getLatestCheckInForTeam(team, filters)
+    const domainFilters = {
+      ...filters,
+      cycleID: this.parseTeamClosestCycleID(team, filters),
+    }
+
+    return this.domain.keyResult.getLatestCheckInForTeam(team, domainFilters)
   }
 
   @ResolveField('progress', () => Float)
@@ -232,7 +254,12 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
       message: 'Fetching progress for team',
     })
 
-    return this.domain.team.getCurrentProgressForTeam(team, filters)
+    const domainFilters = {
+      ...filters,
+      cycleID: this.parseTeamClosestCycleID(team, filters),
+    }
+
+    return this.domain.team.getCurrentProgressForTeam(team, domainFilters)
   }
 
   @ResolveField('confidence', () => Int)
@@ -246,7 +273,12 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
       message: 'Fetching current confidence for team',
     })
 
-    return this.domain.team.getCurrentConfidenceForTeam(team, filters)
+    const domainFilters = {
+      ...filters,
+      cycleID: this.parseTeamClosestCycleID(team, filters),
+    }
+
+    return this.domain.team.getCurrentConfidenceForTeam(team, domainFilters)
   }
 
   @ResolveField('progressIncreaseSinceLastWeek', () => Float)
@@ -260,7 +292,50 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
       message: 'Fetching the progress increase for team since last week',
     })
 
-    return this.domain.team.getTeamProgressIncreaseSinceLastWeek(team, filters)
+    const domainFilters = {
+      ...filters,
+      cycleID: this.parseTeamClosestCycleID(team, filters),
+    }
+
+    return this.domain.team.getTeamProgressIncreaseSinceLastWeek(team, domainFilters)
+  }
+
+  private async buildResolverFilters(teams: Team | Team[], filters: TeamFiltersInput) {
+    const cycleID =
+      filters.cycleID ??
+      (Array.isArray(teams) ? undefined : await this.getClosestCycleIDForTeam(teams))
+
+    const teamsClosestCycleIDPairs = Array.isArray(teams)
+      ? await this.getClosestCycleIDForTeamList(teams)
+      : undefined
+    const teamsClosestCycleID = fromPairs<CycleObject['id']>(teamsClosestCycleIDPairs)
+
+    const resolverFilters: TeamResolverFilters = {
+      ...filters,
+      cycleID,
+      teamsClosestCycleID,
+    }
+
+    return resolverFilters
+  }
+
+  private async getClosestCycleIDForTeam(team: Team) {
+    const closestCycle = await this.domain.cycle.getClosestToEndFromTeam(team)
+
+    return closestCycle?.id
+  }
+
+  private async getClosestCycleIDForTeamList(teams: Team[]) {
+    const teamsClosestCycleIDPromises = teams.map(async (team) =>
+      Promise.all([team.id, this.getClosestCycleIDForTeam(team)]),
+    )
+    const teamsClosestCycleID = await Promise.all(teamsClosestCycleIDPromises)
+
+    return teamsClosestCycleID
+  }
+
+  private parseTeamClosestCycleID(team: TeamObject, filters: TeamResolverFilters) {
+    return filters.cycleID ?? filters.teamsClosestCycleID?.[team.id]
   }
 }
 

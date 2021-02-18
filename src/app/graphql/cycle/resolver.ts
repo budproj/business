@@ -56,7 +56,7 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
     })
 
     const userTeams = await user.teams
-    const cyclePromises = userTeams.map((team) => this.domain.cycle.getFromTeam(team))
+    const cyclePromises = userTeams.map(async (team) => this.domain.cycle.getFromTeam(team))
 
     const [error, result] = await this.railway.execute<Cycle[][]>(Promise.all(cyclePromises))
     if (error) throw new ApolloError(error.message)

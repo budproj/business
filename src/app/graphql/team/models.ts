@@ -141,7 +141,8 @@ export class TeamFiltersInput {
   public onlyCompaniesAndDepartments?: boolean
 
   @Field(() => ID, {
-    description: 'The ID of the cycle we want to filter in our team query',
+    description:
+      'The ID of the cycle we want to filter in our team query. By default, it uses the most recent created cycle that is closest to an end as a filter',
     nullable: true,
   })
   public cycleID?: CycleObject['id']

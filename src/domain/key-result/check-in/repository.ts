@@ -50,7 +50,7 @@ class DomainKeyResultCheckInRepository
 
   public async findWithFilters(
     filters: KeyResultCheckInFilters,
-    options: KeyResultCheckInQueryOptions,
+    options?: KeyResultCheckInQueryOptions,
   ) {
     const { userIDs, cycleID } = filters
     const query = this.createQueryBuilder()
@@ -58,10 +58,10 @@ class DomainKeyResultCheckInRepository
       .leftJoinAndSelect(`${KeyResultCheckIn.name}.keyResult`, `${KeyResult.name}`)
       .leftJoinAndSelect(`${KeyResult.name}.objective`, `${Objective.name}`)
       .andWhere(cycleID ? `${Objective.name}.cycleId = :cycleID` : '1=1', { cycleID })
-      .limit(options.limit ?? 0)
+      .limit(options?.limit ?? 0)
 
     const orderedQuery =
-      options.orderBy && options.orderBy.length > 0
+      options?.orderBy && options?.orderBy?.length > 0
         ? options.orderBy.reduce(
             (query, [field, direction]) =>
               query.addOrderBy(`${KeyResultCheckIn.name}.${field}`, direction),
