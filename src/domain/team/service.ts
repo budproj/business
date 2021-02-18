@@ -4,9 +4,9 @@ import { filter, flatten, maxBy, meanBy, minBy, uniqBy } from 'lodash'
 import { CONSTRAINT } from 'src/domain/constants'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
-import { DomainKeyResultCheckInGroup } from 'src/domain/key-result/service'
+import { DomainKeyResultStatus } from 'src/domain/key-result/service'
 import { Objective } from 'src/domain/objective/entities'
-import DomainObjectiveService, { DomainObjectiveCheckInGroup } from 'src/domain/objective/service'
+import DomainObjectiveService, { DomainObjectiveStatus } from 'src/domain/objective/service'
 import DomainTeamRankingService from 'src/domain/team/ranking'
 import { UserDTO } from 'src/domain/user/dto'
 
@@ -61,10 +61,11 @@ export interface DomainTeamServiceInterface {
   getTeamChildTeams: (team: TeamDTO) => Promise<Team[]>
   getTeamRankedChildTeams: (team: TeamDTO) => Promise<Team[]>
   getRankedTeamsBelowNode: (team: TeamDTO) => Promise<Team[]>
+  getCurrentStatus: (team: TeamDTO, filters?: TeamFilters) => Promise<DomainTeamStatus>
 }
 
-export interface DomainTeamCheckInGroup extends DomainKeyResultCheckInGroup {
-  latestObjectiveCheckIn?: DomainObjectiveCheckInGroup
+export interface DomainTeamStatus extends DomainKeyResultStatus {
+  latestObjectiveStatus?: DomainObjectiveStatus
 }
 
 @Injectable()
@@ -203,16 +204,16 @@ class DomainTeamService
 
   public async getCurrentProgressForTeam(team: TeamDTO, filters?: TeamFilters) {
     const date = new Date()
-    const currentCheckInGroup = await this.getCheckInGroupAtDate(date, team, filters)
+    const currentStatus = await this.getStatusAtDate(date, team, filters)
 
-    return currentCheckInGroup?.progress ?? DEFAULT_PROGRESS
+    return currentStatus?.progress ?? DEFAULT_PROGRESS
   }
 
   public async getCurrentConfidenceForTeam(team: TeamDTO, filters?: TeamFilters) {
     const date = new Date()
-    const currentCheckInGroup = await this.getCheckInGroupAtDate(date, team, filters)
+    const currentStatus = await this.getStatusAtDate(date, team, filters)
 
-    return currentCheckInGroup?.confidence ?? DEFAULT_CONFIDENCE
+    return currentStatus?.confidence ?? DEFAULT_CONFIDENCE
   }
 
   public async getTeamProgressIncreaseSinceLastWeek(team: TeamDTO, filters?: TeamFilters) {
@@ -243,6 +244,13 @@ class DomainTeamService
     const rankedChildTeams = await this.ranking.rankTeamsByProgress(teamsBelowTeam)
 
     return rankedChildTeams
+  }
+
+  public async getCurrentStatus(team: TeamDTO, filters?: TeamFilters) {
+    const date = new Date()
+    const teamStatus = await this.getStatusAtDate(date, team, filters)
+
+    return teamStatus
   }
 
   protected async protectCreationQuery(
@@ -304,63 +312,59 @@ class DomainTeamService
     return companiesTeams
   }
 
-  private async getCheckInGroupAtDate(date: Date, team: TeamDTO, filters?: TeamFilters) {
+  private async getStatusAtDate(date: Date, team: TeamDTO, filters?: TeamFilters) {
     const childTeams = await this.getTeamNodesTreeAfterTeam(team)
     const objectives = await this.objectiveService.getFromTeams(childTeams, filters)
-    if (!objectives) return this.buildDefaultCheckInGroup(date)
+    if (!objectives) return this.buildDefaultStatus(date)
 
-    const teamCheckInGroup = await this.buildCheckInGroupAtDate(date, objectives)
+    const teamStatus = await this.buildStatusAtDate(date, objectives)
 
-    return teamCheckInGroup
+    return teamStatus
   }
 
-  private async buildCheckInGroupAtDate(
+  private async buildStatusAtDate(
     date: Date,
     objectives: Objective[],
-  ): Promise<DomainTeamCheckInGroup | undefined> {
-    const objectiveCheckInGroupPromises = objectives.map(async (objective) =>
-      this.objectiveService.getCheckInGroupAtDate(date, objective),
+  ): Promise<DomainTeamStatus | undefined> {
+    const objectiveStatusPromises = objectives.map(async (objective) =>
+      this.objectiveService.getStatusAtDate(date, objective),
     )
-    const objectiveCheckInGroups = await Promise.all(objectiveCheckInGroupPromises)
-    const latestObjectiveCheckIn = maxBy(objectiveCheckInGroups, 'createdAt')
-    if (!latestObjectiveCheckIn) return
+    const objectiveStatuss = await Promise.all(objectiveStatusPromises)
+    const latestObjectiveStatus = maxBy(objectiveStatuss, 'createdAt')
+    if (!latestObjectiveStatus) return
 
-    const teamCheckInGroup: DomainTeamCheckInGroup = {
-      latestObjectiveCheckIn,
-      progress: meanBy(objectiveCheckInGroups, 'progress'),
-      confidence: minBy(objectiveCheckInGroups, 'confidence').confidence,
-      createdAt: latestObjectiveCheckIn.createdAt,
+    const teamStatus: DomainTeamStatus = {
+      latestObjectiveStatus,
+      progress: meanBy(objectiveStatuss, 'progress'),
+      confidence: minBy(objectiveStatuss, 'confidence').confidence,
+      createdAt: latestObjectiveStatus.createdAt,
     }
 
-    return teamCheckInGroup
+    return teamStatus
   }
 
-  private buildDefaultCheckInGroup(
-    date?: DomainTeamCheckInGroup['createdAt'],
-    progress: DomainTeamCheckInGroup['progress'] = DEFAULT_PROGRESS,
-    confidence: DomainTeamCheckInGroup['confidence'] = DEFAULT_CONFIDENCE,
+  private buildDefaultStatus(
+    date?: DomainTeamStatus['createdAt'],
+    progress: DomainTeamStatus['progress'] = DEFAULT_PROGRESS,
+    confidence: DomainTeamStatus['confidence'] = DEFAULT_CONFIDENCE,
   ) {
     date ??= new Date()
 
-    const defaultCheckInGroup: DomainTeamCheckInGroup = {
+    const defaultStatus: DomainTeamStatus = {
       progress,
       confidence,
       createdAt: date,
     }
 
-    return defaultCheckInGroup
+    return defaultStatus
   }
 
   private async getLastWeekProgressForTeam(team: TeamDTO, filters?: TeamFilters) {
     const firstDayAfterLastWeek = this.getFirstDayAfterLastWeek()
 
-    const lastWeekCheckInGroup = await this.getCheckInGroupAtDate(
-      firstDayAfterLastWeek,
-      team,
-      filters,
-    )
+    const lastWeekStatus = await this.getStatusAtDate(firstDayAfterLastWeek, team, filters)
 
-    return lastWeekCheckInGroup?.progress ?? DEFAULT_PROGRESS
+    return lastWeekStatus?.progress ?? DEFAULT_PROGRESS
   }
 
   private async getNodesFromTeams(

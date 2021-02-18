@@ -1,5 +1,5 @@
 import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Float, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, Float, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
@@ -17,7 +17,7 @@ import { ObjectiveDTO } from 'src/domain/objective/dto'
 import { Objective } from 'src/domain/objective/entities'
 import DomainService from 'src/domain/service'
 
-import { ObjectiveObject } from './models'
+import { ObjectiveObject, ObjectiveStatusObject } from './models'
 
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -76,24 +76,14 @@ class GraphQLObjectiveResolver extends GraphQLEntityResolver<Objective, Objectiv
     return this.domain.keyResult.getFromObjective(objective)
   }
 
-  @ResolveField('progress', () => Float)
-  protected async getObjectiveCurrentProgress(@Parent() objective: ObjectiveObject) {
+  @ResolveField('status', () => ObjectiveStatusObject)
+  protected async getObjectiveStatus(@Parent() objective: ObjectiveObject) {
     this.logger.log({
       objective,
-      message: 'Fetching current progress for objective',
+      message: 'Fetching current status for objective',
     })
 
-    return this.domain.objective.getCurrentProgressForObjective(objective)
-  }
-
-  @ResolveField('confidence', () => Int)
-  protected async getObjectiveCurrentConfidence(@Parent() objective: ObjectiveObject) {
-    this.logger.log({
-      objective,
-      message: 'Fetching current confidence for objective',
-    })
-
-    return this.domain.objective.getCurrentConfidenceForObjective(objective)
+    return this.domain.objective.getCurrentStatus(objective)
   }
 
   @ResolveField('progressIncreaseSinceLastWeek', () => Float)

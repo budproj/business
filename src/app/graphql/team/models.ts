@@ -1,11 +1,11 @@
-import { Field, Float, ID, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { Field, Float, ID, InputType, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { CycleObject } from 'src/app/graphql/cycle/models'
 import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
-import { EntityObject } from 'src/app/graphql/models'
-import { ObjectiveObject } from 'src/app/graphql/objective/models'
+import { EntityObject, StatusObject } from 'src/app/graphql/models'
+import { ObjectiveObject, ObjectiveStatusObject } from 'src/app/graphql/objective/models'
 import { UserObject } from 'src/app/graphql/user/models'
 import { TEAM_GENDER } from 'src/domain/team/constants'
 
@@ -13,6 +13,23 @@ registerEnumType(TEAM_GENDER, {
   name: 'TEAM_GENDER',
   description: 'Each gender represents a possible gender option for our teams',
 })
+
+@ObjectType('TeamStatus', {
+  implements: () => StatusObject,
+  description:
+    "The current status of this team. By status we mean progress, confidence, and other reported values from it's objectives and their child team's objectives",
+})
+export class TeamStatusObject implements StatusObject {
+  @Field(() => ObjectiveStatusObject, {
+    description:
+      "The most recent objective status update inside among all objectives for this team and it's child teams",
+    nullable: true,
+  })
+  public latestObjectiveStatus?: ObjectiveStatusObject
+
+  public progress: number
+  public confidence: number
+}
 
 @ObjectType('Team', {
   implements: () => EntityObject,
@@ -25,17 +42,6 @@ export class TeamObject implements EntityObject {
 
   @Field(() => Boolean, { description: 'Defines if the team is a company' })
   public isCompany: boolean
-
-  @Field(() => Float, {
-    description:
-      "The computed percentage current progress of this team. The team's progress is calculated as an average of all objectives of the team and it's children",
-  })
-  public progress: KeyResultCheckInObject['progress']
-
-  @Field(() => Int, {
-    description: 'The computed current confidence of this team',
-  })
-  public confidence: KeyResultCheckInObject['confidence']
 
   @Field(() => Float, {
     description:
@@ -114,6 +120,12 @@ export class TeamObject implements EntityObject {
     nullable: true,
   })
   public latestKeyResultCheckIn?: KeyResultCheckInObject
+
+  @Field(() => TeamStatusObject, {
+    description:
+      'The status of the given team. Here you can fetch the current progress, confidence, and other for that team',
+  })
+  public status: TeamStatusObject
 
   public id: string
   public policies: PolicyObject

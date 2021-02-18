@@ -91,7 +91,7 @@ export interface DomainKeyResultServiceInterface {
   ) => number
 }
 
-export interface DomainKeyResultCheckInGroup {
+export interface DomainKeyResultStatus {
   progress: KeyResultCheckInDTO['progress']
   confidence: KeyResultCheckInDTO['confidence']
   createdAt: KeyResultCheckInDTO['createdAt']

@@ -1,15 +1,5 @@
 import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import {
-  Args,
-  Context,
-  Float,
-  ID,
-  Int,
-  Parent,
-  Query,
-  ResolveField,
-  Resolver,
-} from '@nestjs/graphql'
+import { Args, Context, Float, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { Context as ApolloServerContext } from 'apollo-server-core'
 import { UserInputError } from 'apollo-server-fastify'
 import { fromPairs, isUndefined, omit, omitBy } from 'lodash'
@@ -31,7 +21,7 @@ import DomainService from 'src/domain/service'
 import { TeamDTO } from 'src/domain/team/dto'
 import { Team } from 'src/domain/team/entities'
 
-import { TeamFiltersInput, TeamObject } from './models'
+import { TeamFiltersInput, TeamObject, TeamStatusObject } from './models'
 
 export interface GraphQLTeamContext {
   filters?: TeamResolverFilters
@@ -243,15 +233,15 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return this.domain.keyResult.getLatestCheckInForTeam(team, domainFilters)
   }
 
-  @ResolveField('progress', () => Float)
-  protected async getTeamProgress(
+  @ResolveField('status', () => TeamStatusObject)
+  protected async getTeamStatus(
     @Parent() team: TeamObject,
     @Context('filters') filters: TeamFiltersInput,
   ) {
     this.logger.log({
       team,
       filters,
-      message: 'Fetching progress for team',
+      message: 'Fetching current status for team',
     })
 
     const domainFilters = {
@@ -259,26 +249,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
       cycleID: this.parseTeamClosestCycleID(team, filters),
     }
 
-    return this.domain.team.getCurrentProgressForTeam(team, domainFilters)
-  }
-
-  @ResolveField('confidence', () => Int)
-  protected async getTeamCurrentConfidence(
-    @Parent() team: TeamObject,
-    @Context('filters') filters: TeamFiltersInput,
-  ) {
-    this.logger.log({
-      team,
-      filters,
-      message: 'Fetching current confidence for team',
-    })
-
-    const domainFilters = {
-      ...filters,
-      cycleID: this.parseTeamClosestCycleID(team, filters),
-    }
-
-    return this.domain.team.getCurrentConfidenceForTeam(team, domainFilters)
+    return this.domain.team.getCurrentStatus(team, domainFilters)
   }
 
   @ResolveField('progressIncreaseSinceLastWeek', () => Float)
