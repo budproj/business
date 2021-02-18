@@ -41,5 +41,5 @@ export interface CorsConfigOptions {
 export interface GodModuleConfigOptions {
   enabled: boolean
   userID: UserDTO['id']
-  teamID: TeamDTO['id']
+  teamIDs: Array<TeamDTO['id']>
 }

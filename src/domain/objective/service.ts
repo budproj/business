@@ -1,21 +1,26 @@
-import { Injectable } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
+import { maxBy, minBy } from 'lodash'
 import { Any } from 'typeorm'
 
 import { CycleDTO } from 'src/domain/cycle/dto'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
+import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
-import DomainKeyResultService from 'src/domain/key-result/service'
+import { KeyResult } from 'src/domain/key-result/entities'
+import DomainKeyResultService, { DomainKeyResultStatus } from 'src/domain/key-result/service'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
 import { TeamDTO } from 'src/domain/team/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
+import { DEFAULT_PROGRESS, DEFAULT_CONFIDENCE } from './constants'
 import { Objective } from './entities'
 import DomainObjectiveRepository from './repository'
+import { ObjectiveFilters } from './types'
 
 export interface DomainObjectiveServiceInterface {
   getFromOwner: (owner: UserDTO) => Promise<Objective[]>
   getFromCycle: (cycle: CycleDTO) => Promise<Objective[]>
-  getFromTeam: (team: TeamDTO) => Promise<Objective[]>
+  getFromTeams: (teams: TeamDTO | TeamDTO[], filters?: ObjectiveFilters) => Promise<Objective[]>
   getCurrentProgressForObjective: (objective: ObjectiveDTO) => Promise<KeyResultCheckIn['progress']>
   getCurrentConfidenceForObjective: (
     objective: ObjectiveDTO,
@@ -23,6 +28,12 @@ export interface DomainObjectiveServiceInterface {
   getObjectiveProgressIncreaseSinceLastWeek: (
     objective: ObjectiveDTO,
   ) => Promise<KeyResultCheckIn['progress']>
+  getStatusAtDate: (date: Date, objective: Objective) => Promise<DomainObjectiveStatus | undefined>
+  getCurrentStatus: (objective: ObjectiveDTO) => Promise<DomainObjectiveStatus>
+}
+
+export interface DomainObjectiveStatus extends DomainKeyResultStatus {
+  latestKeyResultCheckIn?: KeyResultCheckInDTO
 }
 
 @Injectable()
@@ -31,6 +42,7 @@ class DomainObjectiveService
   implements DomainObjectiveServiceInterface {
   constructor(
     protected readonly repository: DomainObjectiveRepository,
+    @Inject(forwardRef(() => DomainKeyResultService))
     private readonly keyResultService: DomainKeyResultService,
   ) {
     super(DomainObjectiveService.name, repository)
@@ -44,8 +56,8 @@ class DomainObjectiveService
     return this.repository.find({ cycleId: cycle.id })
   }
 
-  public async getFromTeam(team: TeamDTO) {
-    const keyResults = await this.keyResultService.getFromTeams(team, ['objectiveId'])
+  public async getFromTeams(team: TeamDTO | TeamDTO[], filters?: ObjectiveFilters) {
+    const keyResults = await this.keyResultService.getFromTeams(team, filters)
     if (!keyResults) return []
 
     const objectiveIds = keyResults.map((keyResult) => keyResult.objectiveId)
@@ -58,16 +70,16 @@ class DomainObjectiveService
 
   public async getCurrentProgressForObjective(objective: ObjectiveDTO) {
     const date = new Date()
-    const currentCheckInGroup = await this.getCheckInGroupAtDateForObjective(date, objective)
+    const currentStatus = await this.getStatusAtDate(date, objective)
 
-    return currentCheckInGroup.progress
+    return currentStatus?.progress ?? DEFAULT_PROGRESS
   }
 
   public async getCurrentConfidenceForObjective(objective: ObjectiveDTO) {
     const date = new Date()
-    const currentCheckInGroup = await this.getCheckInGroupAtDateForObjective(date, objective)
+    const currentStatus = await this.getStatusAtDate(date, objective)
 
-    return currentCheckInGroup.confidence
+    return currentStatus?.confidence ?? DEFAULT_PROGRESS
   }
 
   public async getObjectiveProgressIncreaseSinceLastWeek(objective: ObjectiveDTO) {
@@ -79,6 +91,25 @@ class DomainObjectiveService
     return deltaProgress
   }
 
+  public async getStatusAtDate(
+    date: Date,
+    objective: ObjectiveDTO,
+  ): Promise<DomainObjectiveStatus | undefined> {
+    const keyResults = await this.keyResultService.getFromObjective(objective)
+    if (!keyResults || keyResults.length === 0) return
+
+    const objectiveStatus = await this.buildStatusAtDate(date, keyResults)
+
+    return objectiveStatus
+  }
+
+  public async getCurrentStatus(objective: ObjectiveDTO) {
+    const date = new Date()
+    const objectiveStatus = await this.getStatusAtDate(date, objective)
+
+    return objectiveStatus
+  }
+
   protected async protectCreationQuery(
     _query: DomainCreationQuery<Objective>,
     _data: Partial<ObjectiveDTO>,
@@ -87,27 +118,50 @@ class DomainObjectiveService
     return []
   }
 
-  private async getCheckInGroupAtDateForObjective(date: Date, objective: ObjectiveDTO) {
-    const keyResults = await this.keyResultService.getFromObjective(objective)
-    if (!keyResults) return this.keyResultService.buildDefaultCheckInGroup()
-
-    const objectiveCheckInGroup = this.keyResultService.buildCheckInGroupForKeyResultListAtDate(
-      date,
-      keyResults,
-    )
-
-    return objectiveCheckInGroup
-  }
-
   private async getLastWeekProgressForObjective(objective: ObjectiveDTO) {
     const firstDayAfterLastWeek = this.getFirstDayAfterLastWeek()
 
-    const lastWeekCheckInGroup = await this.getCheckInGroupAtDateForObjective(
-      firstDayAfterLastWeek,
-      objective,
-    )
+    const lastWeekStatus = await this.getStatusAtDate(firstDayAfterLastWeek, objective)
 
-    return lastWeekCheckInGroup.progress
+    return lastWeekStatus?.progress ?? DEFAULT_PROGRESS
+  }
+
+  private async buildStatusAtDate(date: Date, keyResults: KeyResult[]) {
+    const keyResultStatusPromises = keyResults.map(async (keyResult) =>
+      this.keyResultService.getLatestCheckInForKeyResultAtDate(keyResult, date),
+    )
+    const keyResultStatuss = await Promise.all(keyResultStatusPromises)
+    const latestKeyResultCheckIn = maxBy(keyResultStatuss, 'createdAt')
+    if (!latestKeyResultCheckIn) return this.buildDefaultStatus(date)
+
+    const progress = this.keyResultService.calculateKeyResultCheckInListAverageProgress(
+      keyResultStatuss,
+      keyResults,
+    )
+    const objectiveStatus: DomainObjectiveStatus = {
+      latestKeyResultCheckIn,
+      progress,
+      confidence: minBy(keyResultStatuss, 'confidence').confidence,
+      createdAt: latestKeyResultCheckIn.createdAt,
+    }
+
+    return objectiveStatus
+  }
+
+  private buildDefaultStatus(
+    date?: DomainObjectiveStatus['createdAt'],
+    progress: DomainObjectiveStatus['progress'] = DEFAULT_PROGRESS,
+    confidence: DomainObjectiveStatus['confidence'] = DEFAULT_CONFIDENCE,
+  ) {
+    date ??= new Date()
+
+    const defaultStatus: DomainObjectiveStatus = {
+      progress,
+      confidence,
+      createdAt: date,
+    }
+
+    return defaultStatus
   }
 }
 

@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { sum } from 'lodash'
-import { Any, SelectQueryBuilder } from 'typeorm'
+import { SelectQueryBuilder } from 'typeorm'
 
 import { DOMAIN_QUERY_ORDER } from 'src/domain/constants'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
@@ -10,6 +10,10 @@ import {
 } from 'src/domain/key-result/check-in/constants'
 import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
+import {
+  KeyResultCheckInFilters,
+  KeyResultCheckInQueryOptions,
+} from 'src/domain/key-result/check-in/types'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { KeyResult } from 'src/domain/key-result/entities'
 import DomainKeyResultService from 'src/domain/key-result/service'
@@ -20,15 +24,18 @@ import { UserDTO } from 'src/domain/user/dto'
 import DomainKeyResultCheckInRepository from './repository'
 
 export interface DomainKeyResultCheckInServiceInterface {
-  getLatestFromUsers: (users: UserDTO[]) => Promise<KeyResultCheckIn | null>
+  getLatestFromUsers: (
+    users: UserDTO[],
+    filters?: KeyResultCheckInFilters,
+  ) => Promise<KeyResultCheckIn | null>
   getLatestFromKeyResult: (keyResult: KeyResultDTO) => Promise<KeyResultCheckIn | null>
   getLatestFromKeyResultAtDate: (
     keyResult: KeyResultDTO,
     date: Date,
   ) => Promise<KeyResultCheckIn | null>
   transformCheckInToRelativePercentage: (
-    checkIn: KeyResultCheckIn,
     keyResult: KeyResult,
+    checkIn?: KeyResultCheckIn,
   ) => KeyResultCheckIn
   limitPercentageCheckIn: (checkIn: KeyResultCheckIn) => KeyResultCheckIn
   calculateAverageProgressFromCheckInList: (
@@ -60,19 +67,24 @@ class DomainKeyResultCheckInService extends DomainEntityService<
     super(DomainKeyResultCheckInService.name, repository)
   }
 
-  public async getLatestFromUsers(users: UserDTO[]) {
+  public async getLatestFromUsers(users: UserDTO[], filters?: KeyResultCheckInFilters) {
     const userIDs = users.map((user) => user.id)
+    if (!userIDs || userIDs.length === 0) return
 
-    const selector = {
-      userId: Any(userIDs),
+    const keyResultCheckInFilters = {
+      userIDs,
+      ...filters,
     }
-    const options = {
-      orderBy: {
-        createdAt: DOMAIN_QUERY_ORDER.DESC,
-      },
+    const options: KeyResultCheckInQueryOptions = {
+      limit: 1,
+      orderBy: [['createdAt', DOMAIN_QUERY_ORDER.DESC]],
     }
 
-    const latestCheckIn = await this.getOne(selector, undefined, options)
+    const latestCheckInArray = await this.repository.findWithFilters(
+      keyResultCheckInFilters,
+      options,
+    )
+    const latestCheckIn = latestCheckInArray[0]
 
     return latestCheckIn
   }
@@ -90,9 +102,9 @@ class DomainKeyResultCheckInService extends DomainEntityService<
     return checkIn
   }
 
-  public transformCheckInToRelativePercentage(checkIn: KeyResultCheckIn, keyResult: KeyResult) {
+  public transformCheckInToRelativePercentage(keyResult: KeyResult, checkIn?: KeyResultCheckIn) {
     const { initialValue, goal } = keyResult
-    const { progress } = checkIn
+    const progress = checkIn ? checkIn.progress : initialValue
 
     const relativePercentageProgress = ((progress - initialValue) * 100) / (goal - initialValue)
     const normalizedCheckIn: KeyResultCheckIn = {
@@ -122,7 +134,9 @@ class DomainKeyResultCheckInService extends DomainEntityService<
 
   public calculateAverageProgressFromCheckInList(checkIns: KeyResultCheckIn[]) {
     const progressList = checkIns.map((checkIn) => checkIn?.progress ?? 0)
-    const averageProgress = sum(progressList) / progressList.length
+    const numberOfCheckIns = progressList.length === 0 ? 1 : progressList.length
+
+    const averageProgress = sum(progressList) / numberOfCheckIns
 
     return averageProgress
   }

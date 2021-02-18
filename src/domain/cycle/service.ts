@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { orderBy, filter } from 'lodash'
 
 import { CycleDTO } from 'src/domain/cycle/dto'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
@@ -10,6 +11,7 @@ import DomainCycleRepository from './repository'
 
 export interface DomainCycleServiceInterface {
   getFromTeam: (team: TeamDTO) => Promise<Cycle[]>
+  getClosestToEndFromTeam: (team: TeamDTO, snapshot?: Date) => Promise<Cycle | undefined>
 }
 
 @Injectable()
@@ -25,9 +27,18 @@ class DomainCycleService
 
   public async getFromTeam(team: TeamDTO) {
     const cycles = await this.repository.find({ teamId: team.id })
-    if (cycles.length === 0) return this.getFromParentTeam(team)
 
     return cycles
+  }
+
+  public async getClosestToEndFromTeam(team: TeamDTO, snapshot?: Date) {
+    snapshot ??= new Date()
+    const relatedCycles = await this.getAllRelatedToTeam(team)
+
+    const cyclesAfterDate = this.filterCyclesAfterDate(relatedCycles, snapshot)
+    const closestCycle = orderBy(cyclesAfterDate, ['dateEnd', 'createdAt'], ['asc', 'desc'])[0]
+
+    return closestCycle
   }
 
   protected async protectCreationQuery(
@@ -38,10 +49,17 @@ class DomainCycleService
     return []
   }
 
-  private async getFromParentTeam(childTeam: TeamDTO) {
-    const parentTeam = await this.teamService.getParentTeam(childTeam)
+  private async getAllRelatedToTeam(team: TeamDTO) {
+    const relatedTeams = await this.teamService.getFullTeamNodesTree(team)
+    const cycles = await this.repository.findFromTeams(relatedTeams)
 
-    return this.getFromTeam(parentTeam)
+    return cycles
+  }
+
+  private filterCyclesAfterDate(cycles: Cycle[], snapshot: Date) {
+    const cyclesAfterDate = filter(cycles, (cycle) => cycle.dateEnd >= snapshot)
+
+    return cyclesAfterDate
   }
 }
 

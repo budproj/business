@@ -1,18 +1,21 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { flatten, remove, uniqBy } from 'lodash'
+import { filter, flatten, maxBy, meanBy, minBy, uniqBy } from 'lodash'
 
 import { CONSTRAINT } from 'src/domain/constants'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
-import DomainKeyResultService from 'src/domain/key-result/service'
+import { DomainKeyResultStatus } from 'src/domain/key-result/service'
+import { Objective } from 'src/domain/objective/entities'
+import DomainObjectiveService, { DomainObjectiveStatus } from 'src/domain/objective/service'
 import DomainTeamRankingService from 'src/domain/team/ranking'
-import { TeamEntityFilter, TeamEntityRelation } from 'src/domain/team/types'
 import { UserDTO } from 'src/domain/user/dto'
 
+import { DEFAULT_PROGRESS, DEFAULT_CONFIDENCE } from './constants'
 import { TeamDTO } from './dto'
 import { Team } from './entities'
 import DomainTeamRepository from './repository'
 import DomainTeamSpecification from './specification'
+import { TeamEntitySelector, TeamEntityRelation, TeamFilters } from './types'
 
 export interface DomainTeamServiceInterface {
   specification: DomainTeamSpecification
@@ -22,19 +25,47 @@ export interface DomainTeamServiceInterface {
   getUserCompaniesAndDepartments: (user: UserDTO) => Promise<Team[]>
   getWithUser: (user: UserDTO) => Promise<Team[]>
   getFullTeamNodesTree: (
-    nodes: TeamDTO | TeamDTO[],
-    filter?: TeamEntityFilter[],
+    team: TeamDTO,
+    selectors?: TeamEntitySelector[],
     relations?: TeamEntityRelation[],
   ) => Promise<Array<Partial<Team>>>
-  getParentTeam: (team: TeamDTO) => Promise<Team>
+  getTeamNodesTreeAfterTeam: (
+    nodes: TeamDTO | TeamDTO[],
+    selectors?: TeamEntitySelector[],
+    relations?: TeamEntityRelation[],
+  ) => Promise<Array<Partial<Team>>>
+  getTeamNodesTreeBeforeTeam: (
+    team: TeamDTO,
+    selectors?: TeamEntitySelector[],
+    relations?: TeamEntityRelation[],
+  ) => Promise<Array<Partial<Team>>>
+  getParentTeam: (
+    team: TeamDTO,
+    selectors?: TeamEntitySelector[],
+    relations?: TeamEntityRelation[],
+  ) => Promise<Team>
   getUsersInTeam: (teamID: TeamDTO) => Promise<UserDTO[]>
   buildTeamQueryContext: (user: UserDTO, constraint?: CONSTRAINT) => Promise<DomainQueryContext>
-  getCurrentProgressForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
-  getCurrentConfidenceForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['confidence']>
-  getTeamProgressIncreaseSinceLastWeek: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
+  getCurrentProgressForTeam: (
+    team: TeamDTO,
+    filters?: TeamFilters,
+  ) => Promise<KeyResultCheckIn['progress']>
+  getCurrentConfidenceForTeam: (
+    team: TeamDTO,
+    filters?: TeamFilters,
+  ) => Promise<KeyResultCheckIn['confidence']>
+  getTeamProgressIncreaseSinceLastWeek: (
+    team: TeamDTO,
+    filters?: TeamFilters,
+  ) => Promise<KeyResultCheckIn['progress']>
   getTeamChildTeams: (team: TeamDTO) => Promise<Team[]>
   getTeamRankedChildTeams: (team: TeamDTO) => Promise<Team[]>
   getRankedTeamsBelowNode: (team: TeamDTO) => Promise<Team[]>
+  getCurrentStatus: (team: TeamDTO, filters?: TeamFilters) => Promise<DomainTeamStatus>
+}
+
+export interface DomainTeamStatus extends DomainKeyResultStatus {
+  latestObjectiveStatus?: DomainObjectiveStatus
 }
 
 @Injectable()
@@ -44,8 +75,8 @@ class DomainTeamService
   constructor(
     public readonly specification: DomainTeamSpecification,
     protected readonly repository: DomainTeamRepository,
-    @Inject(forwardRef(() => DomainKeyResultService))
-    private readonly keyResultService: DomainKeyResultService,
+    @Inject(forwardRef(() => DomainObjectiveService))
+    private readonly objectiveService: DomainObjectiveService,
     @Inject(forwardRef(() => DomainTeamRankingService))
     private readonly ranking: DomainTeamRankingService,
   ) {
@@ -72,31 +103,48 @@ class DomainTeamService
   }
 
   public async getFullTeamNodesTree(
-    nodes: TeamDTO | TeamDTO[],
-    filter?: TeamEntityFilter[],
+    team: TeamDTO,
+    selectors?: TeamEntitySelector[],
     relations?: TeamEntityRelation[],
   ) {
-    const nodesAsArray = Array.isArray(nodes) ? nodes : [nodes]
+    const childTeams = await this.getTeamNodesTreeAfterTeam(team, selectors, relations)
+    const parentTeams = await this.getTeamNodesTreeBeforeTeam(team, selectors, relations)
 
-    let teams: Team[] = await Promise.all(
-      nodesAsArray.map(async (team) => this.getOne({ id: team.id })),
+    const rawNodes = [...parentTeams, ...childTeams]
+    const nodes = uniqBy(rawNodes, 'id')
+    const clearedNodes = filter(nodes)
+
+    return clearedNodes
+  }
+
+  public async getTeamNodesTreeAfterTeam(
+    teams: TeamDTO | TeamDTO[],
+    selectors?: TeamEntitySelector[],
+    relations?: TeamEntityRelation[],
+  ) {
+    const teamsAsArray = Array.isArray(teams) ? teams : [teams]
+    const initialNodes: Team[] = await Promise.all(
+      teamsAsArray.map(async (team) => this.getOne({ id: team.id })),
     )
-    let nextIterationTeams = nodesAsArray
 
-    while (nextIterationTeams.length > 0) {
-      // Since we're dealing with a linked list, where we need to evaluate each step before
-      // trying the next one, we can disable the following eslint rule
-      // eslint-disable-next-line no-await-in-loop
-      const selectedTeams = await Promise.all(
-        nextIterationTeams.map(async (team) => this.getChildTeams(team, filter, relations)),
-      )
-      const currentIterationTeams = flatten(selectedTeams)
+    const nodes = await this.getNodesFromTeams(initialNodes, 'below', selectors, relations)
 
-      teams = [...teams, ...currentIterationTeams]
-      nextIterationTeams = remove(currentIterationTeams)
-    }
+    return nodes
+  }
 
-    return teams
+  public async getTeamNodesTreeBeforeTeam(
+    teams: TeamDTO | TeamDTO[],
+    selectors?: TeamEntitySelector[],
+    relations?: TeamEntityRelation[],
+  ) {
+    const teamsAsArray = Array.isArray(teams) ? teams : [teams]
+    const initialNodes: Team[] = await Promise.all(
+      teamsAsArray.map(async (team) => this.getOne({ id: team.id })),
+    )
+
+    const nodes = await this.getNodesFromTeams(initialNodes, 'above', selectors, relations)
+
+    return nodes
   }
 
   public async getUserCompaniesAndDepartments(user: UserDTO) {
@@ -106,14 +154,25 @@ class DomainTeamService
     return [...companies, ...departments]
   }
 
-  public async getParentTeam(team: TeamDTO) {
-    const { parentTeamId } = await this.getOne({ id: team.id })
+  public async getParentTeam(
+    team: TeamDTO,
+    selectors?: TeamEntitySelector[],
+    relations?: TeamEntityRelation[],
+  ) {
+    if (!team.parentTeamId) return
+    const whereSelector = { id: team.parentTeamId }
 
-    return this.getOne({ id: parentTeamId })
+    const parentTeam = await this.repository.findOne({
+      relations,
+      select: selectors,
+      where: whereSelector,
+    })
+
+    return parentTeam
   }
 
   public async getUsersInTeam(team: TeamDTO) {
-    const teamsBelowCurrentNode = await this.getFullTeamNodesTree(team)
+    const teamsBelowCurrentNode = await this.getTeamNodesTreeAfterTeam(team)
 
     const teamUsers = await Promise.all(teamsBelowCurrentNode.map(async (team) => team.users))
     const flattenedTeamUsers = flatten(teamUsers)
@@ -143,23 +202,23 @@ class DomainTeamService
     return queryContext
   }
 
-  public async getCurrentProgressForTeam(team: TeamDTO) {
+  public async getCurrentProgressForTeam(team: TeamDTO, filters?: TeamFilters) {
     const date = new Date()
-    const currentCheckInGroup = await this.getCheckInGroupAtDateForTeam(date, team)
+    const currentStatus = await this.getStatusAtDate(date, team, filters)
 
-    return currentCheckInGroup.progress
+    return currentStatus?.progress ?? DEFAULT_PROGRESS
   }
 
-  public async getCurrentConfidenceForTeam(team: TeamDTO) {
+  public async getCurrentConfidenceForTeam(team: TeamDTO, filters?: TeamFilters) {
     const date = new Date()
-    const currentCheckInGroup = await this.getCheckInGroupAtDateForTeam(date, team)
+    const currentStatus = await this.getStatusAtDate(date, team, filters)
 
-    return currentCheckInGroup.confidence
+    return currentStatus?.confidence ?? DEFAULT_CONFIDENCE
   }
 
-  public async getTeamProgressIncreaseSinceLastWeek(team: TeamDTO) {
-    const progress = await this.getCurrentProgressForTeam(team)
-    const lastWeekProgress = await this.getLastWeekProgressForTeam(team)
+  public async getTeamProgressIncreaseSinceLastWeek(team: TeamDTO, filters?: TeamFilters) {
+    const progress = await this.getCurrentProgressForTeam(team, filters)
+    const lastWeekProgress = await this.getLastWeekProgressForTeam(team, filters)
 
     const deltaProgress = progress - lastWeekProgress
 
@@ -180,11 +239,18 @@ class DomainTeamService
   }
 
   public async getRankedTeamsBelowNode(team: TeamDTO) {
-    const teamNodeTree = await this.getFullTeamNodesTree(team)
+    const teamNodeTree = await this.getTeamNodesTreeAfterTeam(team)
     const teamsBelowTeam = teamNodeTree.slice(1)
     const rankedChildTeams = await this.ranking.rankTeamsByProgress(teamsBelowTeam)
 
     return rankedChildTeams
+  }
+
+  public async getCurrentStatus(team: TeamDTO, filters?: TeamFilters) {
+    const date = new Date()
+    const teamStatus = await this.getStatusAtDate(date, team, filters)
+
+    return teamStatus
   }
 
   protected async protectCreationQuery(
@@ -210,7 +276,7 @@ class DomainTeamService
 
   private async getChildTeams(
     teams: TeamDTO | TeamDTO[],
-    filter?: TeamEntityFilter[],
+    filter?: TeamEntitySelector[],
     relations?: TeamEntityRelation[],
   ) {
     const teamsAsArray = Array.isArray(teams) ? teams : [teams]
@@ -241,33 +307,102 @@ class DomainTeamService
   }
 
   private async parseUserCompaniesTeams(companies: TeamDTO[]) {
-    const companiesTeams = await this.getFullTeamNodesTree(companies)
+    const companiesTeams = await this.getTeamNodesTreeAfterTeam(companies)
 
     return companiesTeams
   }
 
-  private async getCheckInGroupAtDateForTeam(date: Date, team: TeamDTO) {
-    const childTeams = await this.getFullTeamNodesTree(team)
-    const keyResults = await this.keyResultService.getFromTeams(childTeams)
-    if (!keyResults) return this.keyResultService.buildDefaultCheckInGroup()
+  private async getStatusAtDate(date: Date, team: TeamDTO, filters?: TeamFilters) {
+    const childTeams = await this.getTeamNodesTreeAfterTeam(team)
+    const objectives = await this.objectiveService.getFromTeams(childTeams, filters)
+    if (!objectives || objectives.length === 0) return this.buildDefaultStatus(date)
 
-    const teamCheckInGroup = this.keyResultService.buildCheckInGroupForKeyResultListAtDate(
-      date,
-      keyResults,
-    )
+    const teamStatus = await this.buildStatusAtDate(date, objectives)
 
-    return teamCheckInGroup
+    return teamStatus
   }
 
-  private async getLastWeekProgressForTeam(team: TeamDTO) {
+  private async buildStatusAtDate(
+    date: Date,
+    objectives: Objective[],
+  ): Promise<DomainTeamStatus | undefined> {
+    const objectiveStatusPromises = objectives.map(async (objective) =>
+      this.objectiveService.getStatusAtDate(date, objective),
+    )
+    const objectiveStatuss = await Promise.all(objectiveStatusPromises)
+    const latestObjectiveStatus = maxBy(objectiveStatuss, 'createdAt')
+    if (!latestObjectiveStatus) return
+
+    const teamStatus: DomainTeamStatus = {
+      latestObjectiveStatus,
+      progress: meanBy(objectiveStatuss, 'progress'),
+      confidence: minBy(objectiveStatuss, 'confidence').confidence,
+      createdAt: latestObjectiveStatus.createdAt,
+    }
+
+    return teamStatus
+  }
+
+  private buildDefaultStatus(
+    date?: DomainTeamStatus['createdAt'],
+    progress: DomainTeamStatus['progress'] = DEFAULT_PROGRESS,
+    confidence: DomainTeamStatus['confidence'] = DEFAULT_CONFIDENCE,
+  ) {
+    date ??= new Date()
+
+    const defaultStatus: DomainTeamStatus = {
+      progress,
+      confidence,
+      createdAt: date,
+    }
+
+    return defaultStatus
+  }
+
+  private async getLastWeekProgressForTeam(team: TeamDTO, filters?: TeamFilters) {
     const firstDayAfterLastWeek = this.getFirstDayAfterLastWeek()
 
-    const lastWeekCheckInGroup = await this.getCheckInGroupAtDateForTeam(
-      firstDayAfterLastWeek,
-      team,
-    )
+    const lastWeekStatus = await this.getStatusAtDate(firstDayAfterLastWeek, team, filters)
 
-    return lastWeekCheckInGroup.progress
+    return lastWeekStatus?.progress ?? DEFAULT_PROGRESS
+  }
+
+  private async getNodesFromTeams(
+    nodes: Team[],
+    direction: 'above' | 'below',
+    selectors?: TeamEntitySelector[],
+    relations?: TeamEntityRelation[],
+  ) {
+    let nextIterationNodes = nodes
+
+    const directionHandlers = {
+      below: async (
+        team: TeamDTO,
+        selectors?: TeamEntitySelector[],
+        relations?: TeamEntityRelation[],
+      ) => this.getChildTeams(team, selectors, relations),
+      above: async (
+        team: TeamDTO,
+        selectors?: TeamEntitySelector[],
+        relations?: TeamEntityRelation[],
+      ) => this.getParentTeam(team, selectors, relations),
+    }
+    const directionHandler = directionHandlers[direction]
+
+    while (nextIterationNodes.length > 0) {
+      // Since we're dealing with a linked list, where we need to evaluate each step before
+      // trying the next one, we can disable the following eslint rule
+      // eslint-disable-next-line no-await-in-loop
+      const selectedNodes = await Promise.all(
+        nextIterationNodes.map(async (node) => directionHandler(node, selectors, relations)),
+      )
+      const currentIterationNodes = flatten(selectedNodes)
+
+      nodes = [...nodes, ...currentIterationNodes]
+      nextIterationNodes = filter(currentIterationNodes)
+    }
+
+    return nodes
   }
 }
 

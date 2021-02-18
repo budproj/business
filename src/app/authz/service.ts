@@ -2,6 +2,7 @@ import { Injectable, CallHandler } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { mapValues, uniq, fromPairs, Dictionary } from 'lodash'
 import { Observable } from 'rxjs'
+import { Any } from 'typeorm'
 
 import { AppRequest } from 'src/app/types'
 import { CONSTRAINT, CONSTRAINT_ORDER } from 'src/domain/constants'
@@ -34,7 +35,7 @@ class AuthzService implements AuthzServiceInterface {
     }
 
     const teamsPromise = this.domain.team.getManyWithConstraint(
-      { id: this.configService.get('godMode.teamID') },
+      { id: Any(this.configService.get('godMode.teamIDs')) },
       godContext as any,
     )
 

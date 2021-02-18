@@ -1,10 +1,27 @@
-import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql'
+import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { CycleObject } from 'src/app/graphql/cycle/models'
+import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
-import { EntityObject } from 'src/app/graphql/models'
+import { EntityObject, StatusObject } from 'src/app/graphql/models'
 import { UserObject } from 'src/app/graphql/user/models'
+
+@ObjectType('ObjectiveStatus', {
+  implements: () => StatusObject,
+  description:
+    "The current status of this objective. By status we mean progress, confidence, and other reported values from it's key results",
+})
+export class ObjectiveStatusObject implements StatusObject {
+  @Field(() => KeyResultCheckInObject, {
+    description: 'The latest reported check-in among all key results of that objective',
+    nullable: true,
+  })
+  public latestKeyResultCheckIn?: KeyResultCheckInObject
+
+  public progress: number
+  public confidence: number
+}
 
 @ObjectType('Objective', {
   implements: () => EntityObject,
@@ -13,16 +30,6 @@ import { UserObject } from 'src/app/graphql/user/models'
 export class ObjectiveObject implements EntityObject {
   @Field({ description: 'The title(name) of the objective' })
   public title: string
-
-  @Field(() => Float, {
-    description: 'The computed percentage current progress of this objective',
-  })
-  public progress: number
-
-  @Field(() => Int, {
-    description: 'The computed current confidence of this objective',
-  })
-  public confidence: number
 
   @Field(() => Float, {
     description:
@@ -53,6 +60,12 @@ export class ObjectiveObject implements EntityObject {
     nullable: true,
   })
   public keyResults?: KeyResultObject[]
+
+  @Field(() => ObjectiveStatusObject, {
+    description:
+      'The status of the given objective. Here you can fetch the current progress, confidence, and other for that objective',
+  })
+  public status: ObjectiveStatusObject
 
   public id: string
   public policies: PolicyObject

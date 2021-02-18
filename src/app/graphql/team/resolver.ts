@@ -1,7 +1,8 @@
 import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Float, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, Context, Float, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Context as ApolloServerContext } from 'apollo-server-core'
 import { UserInputError } from 'apollo-server-fastify'
-import { isUndefined, omitBy } from 'lodash'
+import { isUndefined, omit, omitBy } from 'lodash'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
@@ -14,13 +15,22 @@ import { CycleObject } from 'src/app/graphql/cycle/models'
 import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
-import GraphQLEntityResolver from 'src/app/graphql/resolver'
+import GraphQLEntityResolver, {
+  EntityResolverFilters,
+  GraphQLEntityContext,
+} from 'src/app/graphql/resolver'
 import { UserObject } from 'src/app/graphql/user'
 import DomainService from 'src/domain/service'
 import { TeamDTO } from 'src/domain/team/dto'
 import { Team } from 'src/domain/team/entities'
 
-import { TeamObject } from './models'
+import { TeamFiltersInput, TeamObject, TeamStatusObject } from './models'
+
+export interface GraphQLTeamContext extends GraphQLEntityContext {
+  filters?: TeamResolverFilters
+}
+
+export interface TeamResolverFilters extends EntityResolverFilters, TeamFiltersInput {}
 
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -39,12 +49,18 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   @Query(() => TeamObject, { name: 'team' })
   protected async getTeam(
     @Args('id', { type: () => ID }) id: TeamObject['id'],
+    @Args('filters', { nullable: true }) filters: TeamFiltersInput,
+    @Context() context: ApolloServerContext<GraphQLTeamContext>,
     @GraphQLUser() user: AuthzUser,
   ) {
     this.logger.log(`Fetching team with id ${id}`)
 
+    context.filters = filters
+
     const team = await this.getOneWithActionScopeConstraint({ id }, user)
     if (!team) throw new UserInputError(`We could not found a team with id ${id}`)
+
+    context.filters = await this.buildTeamsFilters(team, context.filters)
 
     return team
   }
@@ -52,42 +68,41 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   @Permissions(PERMISSION['TEAM:READ'])
   @Query(() => [TeamObject], { name: 'teams', nullable: true })
   protected async getAllTeams(
-    @Args('parentTeamId', { type: () => ID, nullable: true })
-    parentTeamId: TeamObject['parentTeamId'],
-    @Args('onlyCompanies', { type: () => Boolean, nullable: true })
-    onlyCompanies: boolean,
-    @Args('onlyCompaniesAndDepartments', { type: () => Boolean, nullable: true })
-    onlyCompaniesAndDepartments: boolean,
+    @Args('filters', { nullable: true }) filters: TeamFiltersInput,
+    @Context() context: ApolloServerContext<GraphQLTeamContext>,
     @GraphQLUser() user: AuthzUser,
   ) {
-    const filters = {
-      parentTeamId,
-      onlyCompanies,
-      onlyCompaniesAndDepartments,
+    context.filters = omit(filters, ['onlyCompanies', 'onlyCompaniesAndDepartments'])
+
+    const selector = {
+      parentTeamId: filters.parentTeamId,
+      onlyCompanies: filters.onlyCompanies,
+      onlyCompaniesAndDepartments: filters.onlyCompaniesAndDepartments,
     }
-    const cleanedFilters = omitBy(filters, isUndefined)
+    const cleanedSelector = omitBy(selector, isUndefined)
 
     this.logger.log({
-      cleanedFilters,
-      onlyCompanies,
+      filters,
+      cleanedSelector,
       message: 'Fetching teams with args',
     })
 
     const railways = {
-      default: async () => this.getManyWithActionScopeConstraint(cleanedFilters, user),
+      default: async () => this.getManyWithActionScopeConstraint(cleanedSelector, user),
       onlyCompanies: async () => this.domain.team.getUserCompanies(user),
       onlyCompaniesAndDepartments: async () =>
         this.domain.team.getUserCompaniesAndDepartments(user),
     }
 
-    const getOnlyCompaniesAndDepartmentsRailway = onlyCompaniesAndDepartments
+    const getOnlyCompaniesAndDepartmentsRailway = filters.onlyCompaniesAndDepartments
       ? railways.onlyCompaniesAndDepartments
       : railways.default
-    const getAllTeamsRailway = onlyCompanies
+    const getAllTeamsRailway = filters.onlyCompanies
       ? railways.onlyCompanies
       : getOnlyCompaniesAndDepartmentsRailway
 
     const teams = await getAllTeamsRailway()
+    context.filters = await this.buildTeamsFilters(teams, context.filters)
 
     return teams
   }
@@ -103,33 +118,51 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   }
 
   @ResolveField('teams', () => [TeamObject], { nullable: true })
-  protected async getTeamChildTeams(@Parent() team: TeamObject) {
+  protected async getTeamChildTeams(
+    @Parent() team: TeamObject,
+    @Context() context: ApolloServerContext<GraphQLTeamContext>,
+  ) {
     this.logger.log({
       team,
       message: 'Fetching child teams for team',
     })
 
-    return this.domain.team.getTeamChildTeams(team)
+    const childTeams = await this.domain.team.getTeamChildTeams(team)
+    context.filters = await this.buildTeamsFilters(childTeams, context.filters)
+
+    return childTeams
   }
 
   @ResolveField('teamsRanking', () => [TeamObject], { nullable: true })
-  protected async getTeamRankedChildTeams(@Parent() team: TeamObject) {
+  protected async getTeamRankedChildTeams(
+    @Parent() team: TeamObject,
+    @Context() context: ApolloServerContext<GraphQLTeamContext>,
+  ) {
     this.logger.log({
       team,
       message: 'Fetching child teams for team ranked by progress',
     })
 
-    return this.domain.team.getRankedTeamsBelowNode(team)
+    const rankedTeams = await this.domain.team.getRankedTeamsBelowNode(team)
+    context.filters = await this.buildTeamsFilters(rankedTeams, context.filters)
+
+    return rankedTeams
   }
 
   @ResolveField('parentTeam', () => TeamObject, { nullable: true })
-  protected async getTeamParentTeam(@Parent() team: TeamObject) {
+  protected async getTeamParentTeam(
+    @Parent() team: TeamObject,
+    @Context() context: ApolloServerContext<GraphQLTeamContext>,
+  ) {
     this.logger.log({
       team,
       message: 'Fetching parent team for team',
     })
 
-    return this.domain.team.getOne({ id: team.parentTeamId })
+    const parentTeam = await this.domain.team.getOne({ id: team.parentTeamId })
+    context.filters = await this.buildTeamsFilters(parentTeam, context.filters)
+
+    return parentTeam
   }
 
   @ResolveField('cycles', () => [CycleObject], { nullable: true })
@@ -163,63 +196,100 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   }
 
   @ResolveField('keyResults', () => [KeyResultObject], { nullable: true })
-  protected async getTeamKeyResults(@Parent() team: TeamObject) {
+  protected async getTeamKeyResults(
+    @Parent() team: TeamObject,
+    @Context('filters') filters: TeamFiltersInput,
+  ) {
     this.logger.log({
       team,
+      filters,
       message: 'Fetching key results for team',
     })
 
-    return this.domain.keyResult.getFromTeams(team)
+    const domainFilters = {
+      ...filters,
+      cycleID: this.parseTeamCycleFilter(team, filters),
+    }
+
+    return this.domain.keyResult.getFromTeams(team, domainFilters)
   }
 
   @ResolveField('objectives', () => [ObjectiveObject], { nullable: true })
-  protected async getTeamObjectives(@Parent() team: TeamObject) {
+  protected async getTeamObjectives(
+    @Parent() team: TeamObject,
+    @Context('filters') filters: TeamFiltersInput,
+  ) {
     this.logger.log({
       team,
+      filters,
       message: 'Fetching objectives for team',
     })
 
-    return this.domain.objective.getFromTeam(team)
+    const domainFilters = {
+      ...filters,
+      cycleID: this.parseTeamCycleFilter(team, filters),
+    }
+
+    return this.domain.objective.getFromTeams(team, domainFilters)
   }
 
   @ResolveField('latestKeyResultCheckIn', () => KeyResultCheckInObject, { nullable: true })
-  protected async getTeamLatestKeyResultCheckIn(@Parent() team: TeamObject) {
+  protected async getTeamLatestKeyResultCheckIn(
+    @Parent() team: TeamObject,
+    @Context('filters') filters: TeamFiltersInput,
+  ) {
     this.logger.log({
       team,
+      filters,
       message: 'Fetching latest key result check-in for team',
     })
 
-    return this.domain.keyResult.getLatestCheckInForTeam(team)
+    const domainFilters = {
+      ...filters,
+      cycleID: this.parseTeamCycleFilter(team, filters),
+    }
+
+    return this.domain.keyResult.getLatestCheckInForTeam(team, domainFilters)
   }
 
-  @ResolveField('progress', () => Float)
-  protected async getTeamCurrentProgress(@Parent() team: TeamObject) {
+  @ResolveField('status', () => TeamStatusObject)
+  protected async getTeamStatus(
+    @Parent() team: TeamObject,
+    @Context('filters') filters: TeamFiltersInput,
+  ) {
     this.logger.log({
       team,
-      message: 'Fetching current progress for team',
+      filters,
+      message: 'Fetching current status for team',
     })
 
-    return this.domain.team.getCurrentProgressForTeam(team)
-  }
+    const domainFilters = {
+      ...filters,
+      cycleID: this.parseTeamCycleFilter(team, filters),
+    }
 
-  @ResolveField('confidence', () => Int)
-  protected async getTeamCurrentConfidence(@Parent() team: TeamObject) {
-    this.logger.log({
-      team,
-      message: 'Fetching current confidence for team',
-    })
+    const status = await this.domain.team.getCurrentStatus(team, domainFilters)
 
-    return this.domain.team.getCurrentConfidenceForTeam(team)
+    return status
   }
 
   @ResolveField('progressIncreaseSinceLastWeek', () => Float)
-  protected async getTeamProgressIncreaseSinceLastWeek(@Parent() team: TeamObject) {
+  protected async getTeamProgressIncreaseSinceLastWeek(
+    @Parent() team: TeamObject,
+    @Context('filters') filters: TeamFiltersInput,
+  ) {
     this.logger.log({
       team,
+      filters,
       message: 'Fetching the progress increase for team since last week',
     })
 
-    return this.domain.team.getTeamProgressIncreaseSinceLastWeek(team)
+    const domainFilters = {
+      ...filters,
+      cycleID: this.parseTeamCycleFilter(team, filters),
+    }
+
+    return this.domain.team.getTeamProgressIncreaseSinceLastWeek(team, domainFilters)
   }
 }
 

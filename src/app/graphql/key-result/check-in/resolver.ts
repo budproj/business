@@ -208,7 +208,7 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     keyResultCheckIn: KeyResultCheckIn,
   ) {
     const keyResult = await this.domain.keyResult.getOne({ id: keyResultCheckIn.keyResultId })
-    const latestCheckIn = await this.domain.keyResult.getLatestCheckInForKeyResult(keyResult)
+    const latestCheckIn = await this.domain.keyResult.getLatestCheckInForKeyResultAtDate(keyResult)
 
     const updatedDeletePolicy =
       latestCheckIn.id === keyResultCheckIn.id ? POLICY.ALLOW : POLICY.DENY
