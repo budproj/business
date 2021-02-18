@@ -4,7 +4,7 @@ import { PolicyObject } from 'src/app/graphql/authz/models'
 import { CycleObject } from 'src/app/graphql/cycle/models'
 import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
-import { EntityObject, StatusObject } from 'src/app/graphql/models'
+import { EntityFiltersInput, EntityObject, StatusObject } from 'src/app/graphql/models'
 import { ObjectiveObject, ObjectiveStatusObject } from 'src/app/graphql/objective/models'
 import { UserObject } from 'src/app/graphql/user/models'
 import { TEAM_GENDER } from 'src/domain/team/constants'
@@ -132,7 +132,7 @@ export class TeamObject implements EntityObject {
 }
 
 @InputType({ description: 'A list of fields that we can filter our team to' })
-export class TeamFiltersInput {
+export class TeamFiltersInput extends EntityFiltersInput {
   @Field(() => ID, {
     description: 'The ID of the parent team that you want to user on this query',
     nullable: true,
@@ -152,11 +152,4 @@ export class TeamFiltersInput {
     nullable: true,
   })
   public onlyCompaniesAndDepartments?: boolean
-
-  @Field(() => ID, {
-    description:
-      'The ID of the cycle we want to filter in our team query. By default, it uses the most recent created cycle that is closest to an end as a filter',
-    nullable: true,
-  })
-  public cycleID?: CycleObject['id']
 }

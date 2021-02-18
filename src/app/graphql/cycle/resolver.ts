@@ -1,6 +1,6 @@
 import { flatten, Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
-import { ApolloError } from 'apollo-server-core'
+import { Args, Context, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { ApolloError, Context as ApolloServerContext } from 'apollo-server-core'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
@@ -11,7 +11,7 @@ import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
-import GraphQLEntityResolver from 'src/app/graphql/resolver'
+import GraphQLEntityResolver, { GraphQLEntityContext } from 'src/app/graphql/resolver'
 import { TeamObject } from 'src/app/graphql/team/models'
 import { CycleDTO } from 'src/domain/cycle/dto'
 import { Cycle } from 'src/domain/cycle/entities'
@@ -69,13 +69,19 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
   }
 
   @ResolveField('team', () => TeamObject)
-  protected async getCycleTeam(@Parent() cycle: CycleObject) {
+  protected async getCycleTeam(
+    @Parent() cycle: CycleObject,
+    @Context() context: ApolloServerContext<GraphQLEntityContext>,
+  ) {
     this.logger.log({
       cycle,
       message: 'Fetching team for cycle',
     })
 
-    return this.domain.team.getOne({ id: cycle.teamId })
+    const team = await this.domain.team.getOne({ id: cycle.teamId })
+    context.filters = await this.buildTeamsFilters(team, context.filters)
+
+    return team
   }
 
   @ResolveField('objectives', () => [ObjectiveObject], { nullable: true })

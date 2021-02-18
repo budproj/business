@@ -1,5 +1,6 @@
 import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, Context, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Context as ApolloServerContext } from 'apollo-server-core'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
@@ -11,7 +12,7 @@ import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/grap
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
 import { KeyResultCommentObject } from 'src/app/graphql/key-result/comment/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
-import GraphQLEntityResolver from 'src/app/graphql/resolver'
+import GraphQLEntityResolver, { GraphQLEntityContext } from 'src/app/graphql/resolver'
 import { TeamObject } from 'src/app/graphql/team/models'
 import { UserObject } from 'src/app/graphql/user'
 import { DOMAIN_QUERY_ORDER } from 'src/domain/constants'
@@ -60,13 +61,19 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
   }
 
   @ResolveField('team', () => TeamObject)
-  protected async getKeyResultTeam(@Parent() keyResult: KeyResultObject) {
+  protected async getKeyResultTeam(
+    @Parent() keyResult: KeyResultObject,
+    @Context() context: ApolloServerContext<GraphQLEntityContext>,
+  ) {
     this.logger.log({
       keyResult,
       message: 'Fetching team for key result',
     })
 
-    return this.domain.team.getOne({ id: keyResult.teamId })
+    const team = await this.domain.team.getOne({ id: keyResult.teamId })
+    context.filters = await this.buildTeamsFilters(team, context.filters)
+
+    return team
   }
 
   @ResolveField('objective', () => ObjectiveObject)
