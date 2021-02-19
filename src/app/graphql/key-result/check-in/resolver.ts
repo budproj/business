@@ -203,6 +203,16 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     return checkIn.progress
   }
 
+  @ResolveField('valueIncrease', () => Float)
+  protected async getKeyResultCheckInValueIncrease(@Parent() checkIn: KeyResultCheckInObject) {
+    this.logger.log({
+      checkIn,
+      message: 'Fetching value increase for key result check-in',
+    })
+
+    return this.domain.keyResult.getCheckInValueIncrease(checkIn)
+  }
+
   protected async customizeEntityPolicies(
     originalPolicies: ActionPolicies,
     keyResultCheckIn: KeyResultCheckIn,

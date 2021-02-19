@@ -13,6 +13,11 @@ export class KeyResultCheckInObject implements EntityObject {
   @Field(() => Float, { description: 'The reported value in this check-in' })
   public value: number
 
+  @Field(() => Float, {
+    description: 'The value increase comparing to previous check-in',
+  })
+  public valueIncrease: number
+
   @Field(() => Int, { description: 'The reported confidence in this check-in' })
   public confidence: number
 
