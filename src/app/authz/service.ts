@@ -1,5 +1,6 @@
 import { Injectable, CallHandler } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { Reflector } from '@nestjs/core'
 import { mapValues, uniq, fromPairs, Dictionary } from 'lodash'
 import { Observable } from 'rxjs'
 import { Any } from 'typeorm'
@@ -10,14 +11,20 @@ import DomainService from 'src/domain/service'
 
 import { ACTION, PERMISSION, POLICY, RESOURCE, SCOPED_PERMISSION } from './constants'
 import AuthzGodUser from './god-user'
-import { AuthzScopeGroup, AuthzScopes, AuthzUser, ActionPolicies } from './types'
+import { AuthzScopeGroup, AuthzScopes, AuthzUser, ActionPolicies, AuthzToken } from './types'
 
 export interface AuthzServiceInterface {
   godBypass: (request: AppRequest, next: CallHandler) => Promise<Observable<any>>
   parseActionScopesFromUserPermissions: (permissions: SCOPED_PERMISSION[]) => AuthzScopes
-  getUserPermissionsForScope: (user: AuthzUser, scope: CONSTRAINT) => Dictionary<ActionPolicies>
+  getUserPoliciesForConstraint: (
+    user: AuthzUser,
+    constraint: CONSTRAINT,
+    resources?: RESOURCE[],
+  ) => Dictionary<ActionPolicies>
   userHasPermission: (userPermissions: PERMISSION[], requiredPermissions: PERMISSION[]) => boolean
   drillUpScopedPermissions: (scopedPermissions: SCOPED_PERMISSION[]) => PERMISSION[]
+  parseHandlerPermissions: (handler: () => any) => PERMISSION[]
+  parseTokenPermissions: (token: AuthzToken) => PERMISSION[]
 }
 
 @Injectable()
@@ -26,6 +33,7 @@ class AuthzService implements AuthzServiceInterface {
     private readonly configService: ConfigService,
     private readonly godUser: AuthzGodUser,
     private readonly domain: DomainService,
+    private readonly reflector: Reflector,
   ) {}
 
   public async godBypass(request: AppRequest, next: CallHandler) {
@@ -96,9 +104,11 @@ class AuthzService implements AuthzServiceInterface {
     }
   }
 
-  public getUserPermissionsForScope(user: AuthzUser, constraint: CONSTRAINT) {
-    const resources = Object.values(RESOURCE)
-
+  public getUserPoliciesForConstraint(
+    user: AuthzUser,
+    constraint: CONSTRAINT,
+    resources: RESOURCE[] = Object.values(RESOURCE),
+  ) {
     const userResourcePermissionPairs = resources.map<[RESOURCE, ActionPolicies]>((resource) => [
       resource,
       this.buildActionPoliciesForUserInConstraint(user, constraint, resource),
@@ -123,6 +133,19 @@ class AuthzService implements AuthzServiceInterface {
     const permissions = scopedPermissions.map(
       (scopedPermission) => scopedPermission.split(':').slice(0, -1).join(':') as PERMISSION,
     )
+
+    return permissions
+  }
+
+  public parseHandlerPermissions(handler: () => any) {
+    const permissions = this.reflector.get<PERMISSION[]>('permissions', handler)
+
+    return permissions
+  }
+
+  public parseTokenPermissions(token: AuthzToken) {
+    const scopedPermissions = token.permissions ?? []
+    const permissions = this.drillUpScopedPermissions(scopedPermissions)
 
     return permissions
   }
