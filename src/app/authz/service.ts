@@ -23,7 +23,8 @@ export interface AuthzServiceInterface {
   ) => Dictionary<ActionPolicies>
   userHasPermission: (userPermissions: PERMISSION[], requiredPermissions: PERMISSION[]) => boolean
   drillUpScopedPermissions: (scopedPermissions: SCOPED_PERMISSION[]) => PERMISSION[]
-  parseHandlerPermissions: (handler: () => any) => PERMISSION[]
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  parseHandlerPermissions: (handler: Function) => PERMISSION[]
   parseTokenPermissions: (token: AuthzToken) => PERMISSION[]
 }
 
@@ -137,7 +138,8 @@ class AuthzService implements AuthzServiceInterface {
     return permissions
   }
 
-  public parseHandlerPermissions(handler: () => any) {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  public parseHandlerPermissions(handler: Function) {
     const permissions = this.reflector.get<PERMISSION[]>('permissions', handler)
 
     return permissions
