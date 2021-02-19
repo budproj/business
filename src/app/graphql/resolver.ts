@@ -81,7 +81,7 @@ abstract class GraphQLEntityResolver<
   ) {
     if (!constraint) constraint = await this.getHighestConstraintForEntity(entity, authzUser)
 
-    const userPermissions = this.authzService.getUserPermissionsForScope(authzUser, constraint)
+    const userPermissions = this.authzService.getUserPoliciesForConstraint(authzUser, constraint)
     const resourcePolicies = userPermissions[resource]
 
     const customizedResourcePolicies = await this.customizeEntityPolicies(resourcePolicies, entity)

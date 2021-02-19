@@ -5,6 +5,7 @@ import { CycleDTO } from 'src/domain/cycle/dto'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { TeamDTO } from 'src/domain/team/dto'
 import DomainTeamService from 'src/domain/team/service'
+import { UserDTO } from 'src/domain/user/dto'
 
 import { Cycle } from './entities'
 import DomainCycleRepository from './repository'
@@ -12,6 +13,9 @@ import DomainCycleRepository from './repository'
 export interface DomainCycleServiceInterface {
   getFromTeam: (team: TeamDTO) => Promise<Cycle[]>
   getClosestToEndFromTeam: (team: TeamDTO, snapshot?: Date) => Promise<Cycle | undefined>
+  getFromTeamListCompanies: (team: TeamDTO[]) => Promise<Cycle[]>
+  getFromUserTeams: (user: UserDTO) => Promise<Cycle[]>
+  getFromTeamList: (teams: TeamDTO[]) => Promise<Cycle[]>
 }
 
 @Injectable()
@@ -39,6 +43,28 @@ class DomainCycleService
     const closestCycle = orderBy(cyclesAfterDate, ['dateEnd', 'createdAt'], ['asc', 'desc'])[0]
 
     return closestCycle
+  }
+
+  public async getFromTeamListCompanies(_teams: TeamDTO[]) {
+    // Following https://getbud.atlassian.net/browse/BBCR-99?focusedCommentId=10061 we've decided
+    // to abort this feature for now. We're going to do it again during the cycle story
+    // PLAN
+    // Fetch companies list from teams
+    // Fetch full node list of companies
+    // Fetch cycles from any of those nodes
+    return []
+  }
+
+  public async getFromUserTeams(_user: UserDTO) {
+    // Following https://getbud.atlassian.net/browse/BBCR-99?focusedCommentId=10061 we've decided
+    // to abort this feature for now. We're going to do it again during the cycle story
+    return []
+  }
+
+  public async getFromTeamList(_teams: TeamDTO[]) {
+    // Following https://getbud.atlassian.net/browse/BBCR-99?focusedCommentId=10061 we've decided
+    // to abort this feature for now. We're going to do it again during the cycle story
+    return []
   }
 
   protected async protectCreationQuery(

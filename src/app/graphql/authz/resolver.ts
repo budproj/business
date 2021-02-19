@@ -23,14 +23,14 @@ export class GraphQLPermissionsResolver {
 
   @Permissions(PERMISSION['PERMISSION:READ'])
   @Query(() => PermissionsObject, { name: 'permissions' })
-  protected getUserPermissionsForScope(
+  protected getUserPoliciesForConstraint(
     @Args('constraint', { type: () => CONSTRAINT, defaultValue: CONSTRAINT.COMPANY })
     constraint: CONSTRAINT,
     @GraphQLUser() authzUser: AuthzUser,
   ) {
     this.logger.log(`Fetching user permissions for user with ID ${authzUser.id}`)
 
-    const permissions = this.authzService.getUserPermissionsForScope(authzUser, constraint)
+    const permissions = this.authzService.getUserPoliciesForConstraint(authzUser, constraint)
     const normalizedPermissions = mapKeys(permissions, (_, snakeCasedResource: RESOURCE) =>
       camelCase(snakeCasedResource),
     )

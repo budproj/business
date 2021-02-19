@@ -1,12 +1,10 @@
 import { CanActivate, ExecutionContext, Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { Reflector } from '@nestjs/core'
 import { ExecutionContextHost } from '@nestjs/core/helpers/execution-context-host'
 import { GqlExecutionContext } from '@nestjs/graphql'
 import { AuthGuard } from '@nestjs/passport'
 import { Observable } from 'rxjs'
 
-import { PERMISSION, SCOPED_PERMISSION } from 'src/app/authz/constants'
 import AuthzService from 'src/app/authz/service'
 
 @Injectable()
@@ -43,7 +41,6 @@ export class GraphQLAuthzPermissionGuard implements CanActivate {
 
   constructor(
     protected readonly configService: ConfigService,
-    private readonly reflector: Reflector,
     private readonly authzService: AuthzService,
   ) {
     this.godMode = configService.get<boolean>('godMode.enabled')
@@ -55,16 +52,12 @@ export class GraphQLAuthzPermissionGuard implements CanActivate {
     const gqlContext = GqlExecutionContext.create(rawContext)
     const request = gqlContext.getContext().req
 
-    const routePermissions = this.reflector.get<PERMISSION[]>(
-      'permissions',
-      gqlContext.getHandler(),
-    )
-    const userScopedPermissions: SCOPED_PERMISSION[] = request.user.token.permissions ?? []
-    const userPermissions = this.authzService.drillUpScopedPermissions(userScopedPermissions)
+    const routePermissions = this.authzService.parseHandlerPermissions(gqlContext.getHandler())
+    const userPermissions = this.authzService.parseTokenPermissions(request.user.token)
 
     this.logger.debug({
       routePermissions,
-      userScopedPermissions,
+      userPermissions,
       message: 'Checking if user is allowed in given route',
     })
 

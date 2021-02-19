@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config'
 
 import { CONSTRAINT } from 'src/domain/constants'
 
-import { ACTION, PERMISSION, RESOURCE } from './constants'
+import { ACTION, RESOURCE, SCOPED_PERMISSION } from './constants'
 import { AuthzUser } from './types'
 
 @Injectable()
@@ -36,7 +36,7 @@ class AuthzGodUser implements AuthzUser {
       exp: 99999999,
       azp: 'GOD',
       scope: 'GOD',
-      permissions: Object.values(PERMISSION),
+      permissions: Object.values(SCOPED_PERMISSION),
     }
     this.scopes = {
       [RESOURCE.PERMISSION]: {
