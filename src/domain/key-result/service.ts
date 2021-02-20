@@ -70,6 +70,7 @@ export interface DomainKeyResultServiceInterface {
     checkInData: DomainKeyResultCheckInPayload,
   ) => Promise<Partial<KeyResultCheckInDTO>>
   getParentCheckInFromCheckIn: (checkIn: KeyResultCheckInDTO) => Promise<KeyResultCheckIn | null>
+  getCheckInValueIncrease: (checkIn: KeyResultCheckIn) => Promise<number>
   getCheckInProgressIncrease: (checkIn: KeyResultCheckIn) => Promise<number>
   getCheckInConfidenceIncrease: (checkIn: KeyResultCheckIn) => Promise<number>
   getCheckInProgress: (checkIn: KeyResultCheckIn) => Promise<number>
@@ -261,6 +262,16 @@ class DomainKeyResultService
 
   public async getParentCheckInFromCheckIn(checkIn: KeyResultCheckInDTO) {
     return this.checkIn.getOne({ id: checkIn.parentId })
+  }
+
+  public async getCheckInValueIncrease(checkIn: KeyResultCheckIn) {
+    const keyResult = await this.getOne({ id: checkIn.keyResultId })
+    const previousCheckIn = await this.getParentCheckInFromCheckIn(checkIn)
+    if (!previousCheckIn) return checkIn.progress - keyResult.initialValue
+
+    const deltaValue = checkIn.progress - previousCheckIn.progress
+
+    return deltaValue
   }
 
   public async getCheckInProgressIncrease(checkIn: KeyResultCheckIn) {
