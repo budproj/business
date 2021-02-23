@@ -33,6 +33,15 @@ export class User extends DomainEntity implements UserDTO {
   @Column({ nullable: true })
   public picture?: string
 
+  @Column({ nullable: true })
+  public nickname?: string
+
+  @Column({ nullable: true })
+  public about?: string
+
+  @Column({ nullable: true })
+  public linkedInProfileAddress?: string
+
   @ManyToMany('Team', 'users', { lazy: true, nullable: true })
   public teams?: Promise<TeamDTO[]>
 
