@@ -36,7 +36,7 @@ export class User extends DomainEntity implements UserDTO {
   @Column({ nullable: true })
   public nickname?: string
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   public about?: string
 
   @Column({ nullable: true })
