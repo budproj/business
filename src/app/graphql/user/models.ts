@@ -47,6 +47,25 @@ export class UserObject implements EntityObject {
   @Field({ description: 'The picture of the user', nullable: true })
   public picture?: string
 
+  @Field(() => String, {
+    description: 'The custom nickname that user wants to be called',
+    nullable: true,
+  })
+  public nickname?: string
+
+  @Field(() => String, {
+    description:
+      'A description for that user. A more detailed information where the user tells about her/himself',
+    nullable: true,
+  })
+  public about?: string
+
+  @Field(() => String, {
+    description: "The URL for the user's LinkedIn profile",
+    nullable: true,
+  })
+  public linkedInProfileAddress?: string
+
   @Field(() => [TeamObject], {
     description: 'The creation date ordered list of companies that this user is a part of',
     nullable: true,
