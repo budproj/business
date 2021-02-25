@@ -1,5 +1,15 @@
 import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Context, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import {
+  Args,
+  Context,
+  ID,
+  Int,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql'
 import { Context as ApolloServerContext } from 'apollo-server-core'
 import { UserInputError } from 'apollo-server-fastify'
 
@@ -20,7 +30,7 @@ import DomainService from 'src/domain/service'
 import { UserDTO } from 'src/domain/user/dto'
 import { User } from 'src/domain/user/entities'
 
-import { UserObject } from './models'
+import { UserObject, UserDataInput } from './models'
 
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser)
@@ -59,6 +69,28 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
 
     const user = await this.getOneWithActionScopeConstraint({ id }, authzUser)
     if (!user) throw new UserInputError(`We could not found an user with ID ${id}`)
+
+    return user
+  }
+
+  @Permissions(PERMISSION['USER:UPDATE'])
+  @Mutation(() => UserObject, { name: 'updateUser' })
+  protected async updateUser(
+    @GraphQLUser() authzUser: AuthzUser,
+    @Args('userID', { type: () => ID })
+    userID: UserObject['id'],
+    @Args('userData', { type: () => UserDataInput })
+    newUserData: UserDataInput,
+  ) {
+    this.logger.log({
+      authzUser,
+      userID,
+      newUserData,
+      message: 'Received update user request',
+    })
+
+    const user = await this.updateWithActionScopeConstraint({ id: userID }, newUserData, authzUser)
+    if (!user) throw new UserInputError(`We could not found an user with ID ${userID}`)
 
     return user
   }

@@ -1,4 +1,4 @@
-import { Field, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { Field, InputType, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
@@ -47,6 +47,25 @@ export class UserObject implements EntityObject {
   @Field({ description: 'The picture of the user', nullable: true })
   public picture?: string
 
+  @Field(() => String, {
+    description: 'The custom nickname that user wants to be called',
+    nullable: true,
+  })
+  public nickname?: string
+
+  @Field(() => String, {
+    description:
+      'A description for that user. A more detailed information where the user tells about her/himself',
+    nullable: true,
+  })
+  public about?: string
+
+  @Field(() => String, {
+    description: "The URL for the user's LinkedIn profile",
+    nullable: true,
+  })
+  public linkedInProfileAddress?: string
+
   @Field(() => [TeamObject], {
     description: 'The creation date ordered list of companies that this user is a part of',
     nullable: true,
@@ -91,4 +110,42 @@ export class UserObject implements EntityObject {
 
   public id: string
   public policies: PolicyObject
+}
+
+@InputType({ description: 'Data that you can assign to a given user' })
+export class UserDataInput {
+  @Field(() => String, { description: 'The first name of the user', nullable: true })
+  public firstName?: string
+
+  @Field(() => String, { description: 'The last name of the user', nullable: true })
+  public lastName?: string
+
+  @Field(() => USER_GENDER, {
+    description:
+      'The gender of the user. The gender is used to define how we would call that given user',
+    nullable: true,
+  })
+  public gender?: USER_GENDER
+
+  @Field(() => String, { description: 'The role of the user in her/his company', nullable: true })
+  public role?: string
+
+  @Field(() => String, {
+    description: 'The custom nickname that user wants to be called',
+    nullable: true,
+  })
+  public nickname?: string
+
+  @Field(() => String, {
+    description:
+      'A description for that user. A more detailed information where the user tells about her/himself',
+    nullable: true,
+  })
+  public about?: string
+
+  @Field(() => String, {
+    description: "The URL for the user's LinkedIn profile",
+    nullable: true,
+  })
+  public linkedInProfileAddress?: string
 }
