@@ -4,10 +4,10 @@ export class AddsCadenceAttributesToCycle1615296809147 implements MigrationInter
   name = 'AddsCadenceAttributesToCycle1615296809147'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`CREATE TYPE "cycle_cadence_enum" AS ENUM('YEARLY', 'QUATERLY')`)
+    await queryRunner.query(`CREATE TYPE "cycle_cadence_enum" AS ENUM('YEARLY', 'QUARTERLY')`)
     await queryRunner.query(`ALTER TABLE "cycle" ADD "cadence" "cycle_cadence_enum"`)
     await queryRunner.query(
-      `UPDATE "cycle" SET cadence=(CASE WHEN (DATE_PART('month', date_end) - DATE_PART('month', date_start) > 3) then 'YEARLY'::"cycle_cadence_enum" else 'QUATERLY'::"cycle_cadence_enum" END)`,
+      `UPDATE "cycle" SET cadence=(CASE WHEN (DATE_PART('month', date_end) - DATE_PART('month', date_start) > 3) then 'YEARLY'::"cycle_cadence_enum" else 'QUARTERLY'::"cycle_cadence_enum" END)`,
     )
     await queryRunner.query(`ALTER TABLE "cycle" ALTER COLUMN "cadence" SET NOT NULL`)
     await queryRunner.query(`ALTER TABLE "cycle" ADD "active" boolean NOT NULL DEFAULT true`)

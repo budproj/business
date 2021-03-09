@@ -402,7 +402,10 @@ class DomainTeamService
       nextIterationNodes = filter(currentIterationNodes)
     }
 
-    return nodes
+    const clearedNodes = filter(nodes)
+    const uniqNodes = uniqBy(clearedNodes, 'id')
+
+    return uniqNodes
   }
 }
 
