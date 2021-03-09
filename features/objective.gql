@@ -7,12 +7,24 @@ query GET_OBJECTIVE_KEY_RESULTS($objectiveID: ID!) {
       format
       goal
       initialValue
-      confidence
-      progress
+      latestKeyResultCheckIn {
+        id
+        value
+        confidence
+      }
       owner {
+        id
+        firstName
         fullName
+        nickname
         picture
         role
+        about
+        linkedInProfileAddress
+        teams {
+          id
+          name
+        }
       }
       team {
         name
