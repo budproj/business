@@ -20,11 +20,14 @@ export class CycleObject implements EntityObject {
   @Field({ description: 'The title of the cycle' })
   public title: string
 
-  @Field(() => CADENCE, { description: 'The candence of this cycle' })
+  @Field(() => CADENCE, {
+    description:
+      'The candence of this cycle. Cadence is the frequency at which previous objectives have to be grade and new ones created.',
+  })
   public cadence: CADENCE
 
   @Field({
-    description: 'This flag defines if objectives related to this cycle can still be updated',
+    description: 'This flag defines if objectives related to this cycle can be updated',
   })
   public active: boolean
 
@@ -51,6 +54,27 @@ export class CycleObject implements EntityObject {
     nullable: true,
   })
   public objectives?: ObjectiveObject[]
+
+  @Field(() => ID, {
+    nullable: true,
+    description:
+      'Each cycle can relates with a given higher cycle, creating a for of tree-like architecture. If this cycle has any cycle above it, the ID of that will be recorded here',
+  })
+  public parentCycleId?: CycleObject['id']
+
+  @Field(() => CycleObject, {
+    nullable: true,
+    description:
+      'Each cycle can relates with a given higher cycle, creating a for of tree-like architecture. If this cycle has any cycle above it, that one will be recorded here',
+  })
+  public parentCycle?: CycleObject
+
+  @Field(() => [CycleObject], {
+    nullable: true,
+    description:
+      'Each cycle can have multiple cycles below it. If this cycle has any cycle inside of it, those will be listed here',
+  })
+  public cycles?: CycleObject[]
 
   public id: string
   public policies: PolicyObject
