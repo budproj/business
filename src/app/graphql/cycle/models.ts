@@ -1,4 +1,4 @@
-import { ArgsType, Field, ID, Int, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { ArgsType, Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { EntityObject } from 'src/app/graphql/models'
@@ -17,8 +17,8 @@ registerEnumType(CADENCE, {
     'The period of time that can contain multiple objectives. It is used to organize a team strategy',
 })
 export class CycleObject implements EntityObject {
-  @Field({ description: 'The name of the cycle' })
-  public name: string
+  @Field({ description: 'The title of the cycle' })
+  public title: string
 
   @Field(() => CADENCE, { description: 'The candence of this cycle' })
   public cadence: CADENCE
@@ -45,17 +45,6 @@ export class CycleObject implements EntityObject {
 
   @Field(() => TeamObject, { description: 'The team that this cycle belongs to' })
   public team: TeamObject
-
-  @Field(() => Int, {
-    description: 'The fiscal year of this cycle related to the team that owns it',
-  })
-  public fiscalYear: number
-
-  @Field(() => Int, {
-    description: 'The quarter of this cycle related to the team that owns it',
-    nullable: true,
-  })
-  public quarter?: number
 
   @Field(() => [ObjectiveObject], {
     description: 'The objectives inside this cycle',

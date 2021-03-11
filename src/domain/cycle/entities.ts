@@ -10,7 +10,7 @@ import { CycleDTO } from './dto'
 @Entity()
 export class Cycle extends DomainEntity implements CycleDTO {
   @Column()
-  public name: string
+  public title: string
 
   @Column({ type: 'simple-enum', enum: CADENCE })
   public cadence: CADENCE
@@ -34,12 +34,16 @@ export class Cycle extends DomainEntity implements CycleDTO {
   @RelationId((cycle: Cycle) => cycle.team)
   public teamId: TeamDTO['id']
 
-  @Column()
-  public fiscalYear: number
+  @ManyToOne('Cycle', 'cycles', { nullable: true })
+  public parentCycle?: CycleDTO
 
   @Column({ nullable: true })
-  public quarter?: number
+  @RelationId((cycle: Cycle) => cycle.parentCycle)
+  public parentCycleId?: CycleDTO['id']
 
-  @OneToMany('Objective', 'cycle')
+  @OneToMany('Objective', 'cycle', { nullable: true })
   public objectives?: ObjectiveDTO[]
+
+  @OneToMany('Cycle', 'parentCycle', { nullable: true })
+  public cycles?: CycleDTO[]
 }

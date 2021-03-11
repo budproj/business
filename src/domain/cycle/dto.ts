@@ -3,7 +3,7 @@ import { TeamDTO } from 'src/domain/team/dto'
 
 export class CycleDTO {
   public id: string
-  public name: string
+  public title: string
   public cadence: CADENCE
   public active: boolean
   public dateStart: Date
@@ -11,6 +11,5 @@ export class CycleDTO {
   public createdAt: Date
   public updatedAt: Date
   public teamId: TeamDTO['id']
-  public fiscalYear: number
-  public quarter?: number
+  public parentCycleId?: CycleDTO['id']
 }
