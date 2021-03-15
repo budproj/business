@@ -37,13 +37,13 @@ export class Team extends DomainEntity implements TeamDTO {
   public ownerId: UserDTO['id']
 
   @Column({ nullable: true })
-  @RelationId((team: Team) => team.parentTeam)
-  public parentTeamId: TeamDTO['id']
+  @RelationId((team: Team) => team.parent)
+  public parentId: TeamDTO['id']
 
   @ManyToOne('Team', 'teams')
-  public parentTeam: TeamDTO
+  public parent: TeamDTO
 
-  @OneToMany('Team', 'parentTeam')
+  @OneToMany('Team', 'parent')
   public teams: TeamDTO[]
 
   @Column({ type: 'text', nullable: true })

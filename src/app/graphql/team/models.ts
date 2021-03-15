@@ -74,10 +74,10 @@ export class TeamObject implements EntityObject {
   public company?: TeamObject
 
   @Field(() => ID, { description: 'The ID of the team that owns this team', nullable: true })
-  public parentTeamId?: TeamObject['id']
+  public parentId?: TeamObject['id']
 
   @Field(() => TeamObject, { description: 'The team that owns this team', nullable: true })
-  public parentTeam?: TeamObject
+  public parent?: TeamObject
 
   @Field(() => [UserObject], {
     description: 'A creation date ordered list of users that are members of this team',
@@ -137,7 +137,7 @@ export class TeamFilterArguments {
     description: 'The ID of the parent team that you want to user on this query',
     nullable: true,
   })
-  public parentTeamId?: TeamObject['id']
+  public parentId?: TeamObject['id']
 
   @Field(() => Boolean, {
     description:

@@ -56,7 +56,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     @GraphQLUser() user: AuthzUser,
   ) {
     const selector = {
-      parentTeamId: filters.parentTeamId,
+      parentId: filters.parentId,
       onlyCompanies: filters.onlyCompanies,
       onlyCompaniesAndDepartments: filters.onlyCompaniesAndDepartments,
     }
@@ -121,16 +121,16 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
     return rankedTeams
   }
 
-  @ResolveField('parentTeam', () => TeamObject, { nullable: true })
+  @ResolveField('parent', () => TeamObject, { nullable: true })
   protected async getTeamParentTeam(@Parent() team: TeamObject) {
     this.logger.log({
       team,
       message: 'Fetching parent team for team',
     })
 
-    const parentTeam = await this.domain.team.getOne({ id: team.parentTeamId })
+    const parent = await this.domain.team.getOne({ id: team.parentId })
 
-    return parentTeam
+    return parent
   }
 
   @ResolveField('cycles', () => [CycleObject], { nullable: true })

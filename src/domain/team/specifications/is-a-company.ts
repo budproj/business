@@ -9,7 +9,7 @@ class IsACompany extends DomainEntitySpecification<TeamDTO> {
   }
 
   private rev20210102DoNotHaveParentTeam(team: TeamDTO) {
-    return team.parentTeamId === null
+    return team.parentId === null
   }
 }
 

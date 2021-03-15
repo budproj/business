@@ -10,5 +10,5 @@ export class TeamDTO {
   public createdAt: Date
   public updatedAt: Date
   public ownerId: UserDTO['id']
-  public parentTeamId?: TeamDTO['id']
+  public parentId?: TeamDTO['id']
 }

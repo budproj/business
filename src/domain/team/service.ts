@@ -99,9 +99,9 @@ class DomainTeamService
     relations?: TeamEntityRelation[],
   ) {
     const childTeams = await this.getTeamNodesTreeAfterTeam(team, selectors, relations)
-    const parentTeams = await this.getTeamNodesTreeBeforeTeam(team, selectors, relations)
+    const parents = await this.getTeamNodesTreeBeforeTeam(team, selectors, relations)
 
-    const rawNodes = [...parentTeams, ...childTeams]
+    const rawNodes = [...parents, ...childTeams]
     const nodes = uniqBy(rawNodes, 'id')
     const clearedNodes = filter(nodes)
 
@@ -150,16 +150,16 @@ class DomainTeamService
     selectors?: TeamEntitySelector[],
     relations?: TeamEntityRelation[],
   ) {
-    if (!team.parentTeamId) return
-    const whereSelector = { id: team.parentTeamId }
+    if (!team.parentId) return
+    const whereSelector = { id: team.parentId }
 
-    const parentTeam = await this.repository.findOne({
+    const parent = await this.repository.findOne({
       relations,
       select: selectors,
       where: whereSelector,
     })
 
-    return parentTeam
+    return parent
   }
 
   public async getUsersInTeam(team: TeamDTO) {
@@ -217,7 +217,7 @@ class DomainTeamService
   }
 
   public async getTeamChildTeams(team: TeamDTO) {
-    const childTeams = await this.getMany({ parentTeamId: team.id })
+    const childTeams = await this.getMany({ parentId: team.id })
 
     return childTeams
   }
@@ -255,11 +255,11 @@ class DomainTeamService
   private async getRootTeamForTeam(team: TeamDTO) {
     let rootTeam = team as Team
 
-    while (rootTeam.parentTeamId) {
+    while (rootTeam.parentId) {
       // Since we're dealing with a linked list, where we need to evaluate each step before trying
       // the next one, we can disable the following eslint rule
       // eslint-disable-next-line no-await-in-loop
-      rootTeam = await this.getOne({ id: rootTeam.parentTeamId })
+      rootTeam = await this.getOne({ id: rootTeam.parentId })
     }
 
     return rootTeam
@@ -272,7 +272,7 @@ class DomainTeamService
   ) {
     const teamsAsArray = Array.isArray(teams) ? teams : [teams]
     const whereSelector = teamsAsArray.map((team) => ({
-      parentTeamId: team.id,
+      parentId: team.id,
     }))
 
     const childTeams = await this.repository.find({
