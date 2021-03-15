@@ -2,7 +2,6 @@ import { Column, Entity, ManyToMany, OneToMany, UpdateDateColumn } from 'typeorm
 
 import { DomainEntity } from 'src/domain/entity'
 import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
-import { KeyResultCustomListDTO } from 'src/domain/key-result/custom-list/dto'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
 import { TeamDTO } from 'src/domain/team/dto'
@@ -53,9 +52,6 @@ export class User extends DomainEntity implements UserDTO {
 
   @OneToMany('KeyResult', 'owner', { nullable: true })
   public keyResults?: KeyResultDTO[]
-
-  @OneToMany('KeyResultCustomList', 'user', { nullable: true })
-  public keyResultCustomLists?: KeyResultCustomListDTO[]
 
   @OneToMany('KeyResultCheckIn', 'user')
   public keyResultCheckIns: KeyResultCheckInDTO[]

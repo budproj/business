@@ -1,6 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 
-import { CONSTRAINT } from 'src/domain/constants'
 import {
   DomainCreationQuery,
   DomainEntityService,
@@ -20,17 +19,12 @@ import { KeyResultCommentDTO } from './comment/dto'
 import { KeyResultComment } from './comment/entities'
 import DomainKeyResultCommentService from './comment/service'
 import { DEFAULT_CONFIDENCE } from './constants'
-import { KEY_RESULT_CUSTOM_LIST_BINDING } from './custom-list/constants'
-import { KeyResultCustomListDTO } from './custom-list/dto'
-import { KeyResultCustomList } from './custom-list/entities'
-import DomainKeyResultCustomListService from './custom-list/service'
 import { KeyResultDTO } from './dto'
 import { KeyResult } from './entities'
 import DomainKeyResultRepository from './repository'
 import DomainKeyResultTimelineService, { DomainKeyResultTimelineGetOptions } from './timeline'
 
 export interface DomainKeyResultServiceInterface {
-  customList: DomainKeyResultCustomListService
   checkIn: DomainKeyResultCheckInService
   comment: DomainKeyResultCommentService
   timeline: DomainKeyResultTimelineService
@@ -38,16 +32,6 @@ export interface DomainKeyResultServiceInterface {
   getFromOwner: (owner: UserDTO) => Promise<KeyResult[]>
   getFromTeams: (teams: TeamDTO | TeamDTO[], filters?: KeyResultFilters) => Promise<KeyResult[]>
   getFromObjective: (objective: ObjectiveDTO) => Promise<KeyResult[]>
-  getFromCustomList: (keyResultCustomList: KeyResultCustomListDTO) => Promise<KeyResult[]>
-  refreshCustomListWithOwnedKeyResults: (
-    user: UserDTO,
-    keyResultCustomList?: KeyResultCustomListDTO,
-  ) => Promise<KeyResultCustomList>
-  createCustomListForBinding: (
-    binding: KEY_RESULT_CUSTOM_LIST_BINDING,
-    user: UserDTO,
-  ) => Promise<KeyResultCustomList>
-  getUserCustomLists: (user: UserDTO) => Promise<KeyResultCustomList[]>
   getCheckIns: (
     keyResult: KeyResultDTO,
     options?: DomainServiceGetOptions<KeyResultCheckIn>,
@@ -115,7 +99,6 @@ class DomainKeyResultService
   extends DomainEntityService<KeyResult, KeyResultDTO>
   implements DomainKeyResultServiceInterface {
   constructor(
-    public readonly customList: DomainKeyResultCustomListService,
     @Inject(forwardRef(() => DomainKeyResultCheckInService))
     public readonly checkIn: DomainKeyResultCheckInService,
     @Inject(forwardRef(() => DomainKeyResultCommentService))
@@ -152,53 +135,6 @@ class DomainKeyResultService
 
   public async getFromObjective(objective: ObjectiveDTO) {
     return this.repository.find({ objectiveId: objective.id })
-  }
-
-  public async getFromCustomList(keyResultCustomList: KeyResultCustomListDTO) {
-    const rankSortColumn = this.repository.buildRankSortColumn(keyResultCustomList.rank)
-    const data = this.repository.findByIdsRanked(keyResultCustomList.rank, rankSortColumn)
-
-    return data
-  }
-
-  public async refreshCustomListWithOwnedKeyResults(
-    user: UserDTO,
-    keyResultCustomList?: KeyResultCustomListDTO,
-  ) {
-    const availableKeyResults = await this.getFromOwner(user)
-    const refreshedCustomList = await this.customList.refreshWithNewKeyResults(
-      availableKeyResults,
-      keyResultCustomList,
-    )
-
-    return refreshedCustomList
-  }
-
-  public async createCustomListForBinding(binding: KEY_RESULT_CUSTOM_LIST_BINDING, user: UserDTO) {
-    const bindingContextBuilders = {
-      [KEY_RESULT_CUSTOM_LIST_BINDING.MINE]: async () =>
-        this.teamService.buildTeamQueryContext(user, CONSTRAINT.OWNS),
-    }
-
-    const contextBuilder = bindingContextBuilders[binding]
-    const context = await contextBuilder()
-
-    const bindingKeyResults = await this.getManyWithConstraint({}, context)
-    const createdCustomList = await this.customList.createForBinding(
-      binding,
-      user,
-      bindingKeyResults,
-    )
-
-    const customList = await this.customList.getOne({ id: createdCustomList.id })
-
-    return customList
-  }
-
-  public async getUserCustomLists(user: UserDTO) {
-    const customLists = await this.customList.getFromUser(user)
-
-    return customLists
   }
 
   public async getCheckIns(
