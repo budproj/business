@@ -13,7 +13,7 @@ import {
   EnhanceWithBudUser,
   EnhanceWithUserResourceConstraint,
 } from 'src/app/graphql/authz/interceptors'
-import { KeyResultObject } from 'src/app/graphql/key-result/models'
+import { KeyResultFilterArguments, KeyResultObject } from 'src/app/graphql/key-result/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import { TeamObject } from 'src/app/graphql/team/models'
@@ -99,16 +99,20 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
   }
 
   @ResolveField('keyResults', () => [KeyResultObject], { nullable: true })
-  protected async getCycleKeyResults(@Parent() cycle: CycleObject) {
+  protected async getCycleKeyResults(
+    @Args() keyResultsFilter: KeyResultFilterArguments,
+    @Parent() cycle: CycleObject,
+  ) {
     this.logger.log({
       cycle,
+      keyResultsFilter,
       message: 'Fetching key results for cycle',
     })
 
-    console.log(cycle)
-    console.log(cycle.objectives)
+    const objectives = await this.domain.objective.getFromCycle(cycle)
+    const keyResults = await this.domain.keyResult.getFromObjectives(objectives, keyResultsFilter)
 
-    return []
+    return keyResults
   }
 }
 

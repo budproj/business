@@ -1,4 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
+import { flatten, uniqBy } from 'lodash'
 import { Any } from 'typeorm'
 
 import {
@@ -31,7 +32,14 @@ export interface DomainKeyResultServiceInterface {
 
   getFromOwner: (owner: UserDTO) => Promise<KeyResult[]>
   getFromTeams: (teams: TeamDTO | TeamDTO[]) => Promise<KeyResult[]>
-  getFromObjective: (objective: ObjectiveDTO) => Promise<KeyResult[]>
+  getFromObjective: (
+    objective: ObjectiveDTO,
+    filter?: Partial<KeyResultDTO>,
+  ) => Promise<KeyResult[]>
+  getFromObjectives: (
+    objectives: ObjectiveDTO[],
+    filter?: Partial<KeyResultDTO>,
+  ) => Promise<KeyResult[]>
   getCheckIns: (
     keyResult: KeyResultDTO,
     options?: DomainServiceGetOptions<KeyResultCheckIn>,
@@ -126,8 +134,26 @@ class DomainKeyResultService
     return this.repository.find(selector)
   }
 
-  public async getFromObjective(objective: ObjectiveDTO) {
-    return this.repository.find({ objectiveId: objective.id })
+  public async getFromObjective(objective: ObjectiveDTO, filter?: Partial<KeyResultDTO>) {
+    const selector = {
+      ...filter,
+      objectiveId: objective.id,
+    }
+
+    // eslint-disable-next-line unicorn/no-fn-reference-in-iterator
+    return this.repository.find(selector)
+  }
+
+  public async getFromObjectives(objectives: ObjectiveDTO[], filter?: Partial<KeyResultDTO>) {
+    const keyResultPromises = objectives.map(async (objective) =>
+      this.getFromObjective(objective, filter),
+    )
+    const keyResults = await Promise.all(keyResultPromises)
+
+    const flattenedKeyResults = flatten(keyResults)
+    const uniqueKeyResults = uniqBy(flattenedKeyResults, 'id')
+
+    return uniqueKeyResults
   }
 
   public async getCheckIns(
