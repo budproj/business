@@ -1,6 +1,7 @@
 import { ArgsType, Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
+import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import { EntityObject } from 'src/app/graphql/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import { TeamObject } from 'src/app/graphql/team/models'
@@ -55,6 +56,12 @@ export class CycleObject implements EntityObject {
   })
   public objectives?: ObjectiveObject[]
 
+  @Field(() => [KeyResultObject], {
+    description: 'The key-results from this cycle',
+    nullable: true,
+  })
+  public keyResults?: KeyResultObject[]
+
   @Field(() => ID, {
     nullable: true,
     description:
@@ -81,7 +88,7 @@ export class CycleObject implements EntityObject {
 }
 
 @ArgsType()
-export class CycleFiltersArguments {
+export class CycleFilterArguments {
   @Field(() => Boolean, {
     description: 'If this flag is true, it will only fetch active cycles',
     defaultValue: true,

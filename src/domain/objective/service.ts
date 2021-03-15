@@ -15,12 +15,11 @@ import { UserDTO } from 'src/domain/user/dto'
 import { DEFAULT_PROGRESS, DEFAULT_CONFIDENCE } from './constants'
 import { Objective } from './entities'
 import DomainObjectiveRepository from './repository'
-import { ObjectiveFilters } from './types'
 
 export interface DomainObjectiveServiceInterface {
   getFromOwner: (owner: UserDTO) => Promise<Objective[]>
   getFromCycle: (cycle: CycleDTO) => Promise<Objective[]>
-  getFromTeams: (teams: TeamDTO | TeamDTO[], filters?: ObjectiveFilters) => Promise<Objective[]>
+  getFromTeams: (teams: TeamDTO | TeamDTO[]) => Promise<Objective[]>
   getCurrentProgressForObjective: (objective: ObjectiveDTO) => Promise<KeyResultCheckIn['progress']>
   getCurrentConfidenceForObjective: (
     objective: ObjectiveDTO,
@@ -56,8 +55,8 @@ class DomainObjectiveService
     return this.repository.find({ cycleId: cycle.id })
   }
 
-  public async getFromTeams(team: TeamDTO | TeamDTO[], filters?: ObjectiveFilters) {
-    const keyResults = await this.keyResultService.getFromTeams(team, filters)
+  public async getFromTeams(team: TeamDTO | TeamDTO[]) {
+    const keyResults = await this.keyResultService.getFromTeams(team)
     if (!keyResults) return []
 
     const objectiveIds = keyResults.map((keyResult) => keyResult.objectiveId)

@@ -2,13 +2,8 @@ import { EntityRepository, LessThanOrEqual, SelectQueryBuilder, WhereExpression 
 
 import { DOMAIN_QUERY_ORDER } from 'src/domain/constants'
 import { CONSTRAINT_TYPE, DomainEntityRepository } from 'src/domain/entity'
-import {
-  KeyResultCheckInFilters,
-  KeyResultCheckInQueryOptions,
-} from 'src/domain/key-result/check-in/types'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { KeyResult } from 'src/domain/key-result/entities'
-import { Objective } from 'src/domain/objective/entities'
 import { TeamDTO } from 'src/domain/team/dto'
 import { UserDTO } from 'src/domain/user/dto'
 
@@ -19,10 +14,6 @@ export interface DomainKeyResultCheckInRepositoryInterface {
     date: Date,
     keyResult: KeyResultDTO,
   ) => Promise<KeyResultCheckIn | null>
-  findWithFilters: (
-    filters: KeyResultCheckInFilters,
-    options?: KeyResultCheckInQueryOptions,
-  ) => Promise<KeyResultCheckIn[]>
 }
 
 @EntityRepository(KeyResultCheckIn)
@@ -46,30 +37,6 @@ class DomainKeyResultCheckInRepository
     })
 
     return checkIn
-  }
-
-  public async findWithFilters(
-    filters: KeyResultCheckInFilters,
-    options?: KeyResultCheckInQueryOptions,
-  ) {
-    const { userIDs, cycleID } = filters
-    const query = this.createQueryBuilder()
-      .where(`${KeyResultCheckIn.name}.userId in (:...userIDs)`, { userIDs })
-      .leftJoinAndSelect(`${KeyResultCheckIn.name}.keyResult`, `${KeyResult.name}`)
-      .leftJoinAndSelect(`${KeyResult.name}.objective`, `${Objective.name}`)
-      .andWhere(cycleID ? `${Objective.name}.cycleId = :cycleID` : '1=1', { cycleID })
-      .limit(options?.limit ?? 0)
-
-    const orderedQuery =
-      options?.orderBy && options?.orderBy?.length > 0
-        ? options.orderBy.reduce(
-            (query, [field, direction]) =>
-              query.addOrderBy(`${KeyResultCheckIn.name}.${field}`, direction),
-            query,
-          )
-        : query
-
-    return orderedQuery.getMany()
   }
 
   protected setupTeamQuery(query: SelectQueryBuilder<KeyResultCheckIn>) {

@@ -1,4 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
+import { Any } from 'typeorm'
 
 import {
   DomainCreationQuery,
@@ -6,7 +7,6 @@ import {
   DomainQueryContext,
   DomainServiceGetOptions,
 } from 'src/domain/entity'
-import { KeyResultFilters } from 'src/domain/key-result/types'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
 import { TeamDTO } from 'src/domain/team/dto'
 import DomainTeamService from 'src/domain/team/service'
@@ -30,17 +30,14 @@ export interface DomainKeyResultServiceInterface {
   timeline: DomainKeyResultTimelineService
 
   getFromOwner: (owner: UserDTO) => Promise<KeyResult[]>
-  getFromTeams: (teams: TeamDTO | TeamDTO[], filters?: KeyResultFilters) => Promise<KeyResult[]>
+  getFromTeams: (teams: TeamDTO | TeamDTO[]) => Promise<KeyResult[]>
   getFromObjective: (objective: ObjectiveDTO) => Promise<KeyResult[]>
   getCheckIns: (
     keyResult: KeyResultDTO,
     options?: DomainServiceGetOptions<KeyResultCheckIn>,
   ) => Promise<KeyResultCheckIn[] | null>
   getCheckInsByUser: (user: UserDTO) => Promise<KeyResultCheckIn[] | null>
-  getLatestCheckInForTeam: (
-    team: TeamDTO,
-    filters?: KeyResultFilters,
-  ) => Promise<KeyResultCheckIn | null>
+  getLatestCheckInForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn | null>
   getLatestCheckInForKeyResultAtDate: (
     team: KeyResultDTO,
     date?: Date,
@@ -116,21 +113,17 @@ class DomainKeyResultService
     return this.repository.find({ ownerId: owner.id })
   }
 
-  public async getFromTeams(
-    teams: TeamDTO | TeamDTO[],
-    filters?: KeyResultFilters,
-  ): Promise<KeyResult[]> {
+  public async getFromTeams(teams: TeamDTO | TeamDTO[]): Promise<KeyResult[]> {
     const isEmptyArray = Array.isArray(teams) ? teams.length === 0 : false
     if (!teams || isEmptyArray) return
 
     const teamsArray = Array.isArray(teams) ? teams : [teams]
-
-    const teamsFilters = {
-      teamIDs: teamsArray.map((team) => team.id),
-      ...filters,
+    const selector = {
+      teamId: Any(teamsArray.map((team) => team.id)),
     }
 
-    return this.repository.findWithFilters(teamsFilters)
+    // eslint-disable-next-line unicorn/no-fn-reference-in-iterator
+    return this.repository.find(selector)
   }
 
   public async getFromObjective(objective: ObjectiveDTO) {
@@ -152,9 +145,9 @@ class DomainKeyResultService
     return this.checkIn.getMany(selector)
   }
 
-  public async getLatestCheckInForTeam(team: TeamDTO, filters?: KeyResultFilters) {
+  public async getLatestCheckInForTeam(team: TeamDTO) {
     const users = await this.teamService.getUsersInTeam(team)
-    const latestCheckIn = await this.checkIn.getLatestFromUsers(users, filters)
+    const latestCheckIn = await this.checkIn.getLatestFromUsers(users)
 
     return latestCheckIn
   }

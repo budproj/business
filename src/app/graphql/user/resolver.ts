@@ -1,16 +1,5 @@
 import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import {
-  Args,
-  Context,
-  ID,
-  Int,
-  Mutation,
-  Parent,
-  Query,
-  ResolveField,
-  Resolver,
-} from '@nestjs/graphql'
-import { Context as ApolloServerContext } from 'apollo-server-core'
+import { Args, ID, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
@@ -23,7 +12,7 @@ import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
 import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
-import GraphQLEntityResolver, { GraphQLEntityContext } from 'src/app/graphql/resolver'
+import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import { TeamObject } from 'src/app/graphql/team/models'
 import DomainService from 'src/domain/service'
 import { UserDTO } from 'src/domain/user/dto'
@@ -107,7 +96,6 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
   @ResolveField('companies', () => [TeamObject], { nullable: true })
   protected async getUserCompanies(
     @Parent() user: UserObject,
-    @Context() context: ApolloServerContext<GraphQLEntityContext>,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
   ) {
     this.logger.log({
@@ -118,23 +106,17 @@ class GraphQLUserResolver extends GraphQLEntityResolver<User, UserDTO> {
     const companies = await this.domain.team.getUserCompanies(user)
     const companiesWithLimit = limit ? companies.slice(0, limit) : companies
 
-    context.filters = await this.buildTeamsFilters(companiesWithLimit, context.filters)
-
     return companiesWithLimit
   }
 
   @ResolveField('teams', () => [TeamObject], { nullable: true })
-  protected async getUserTeams(
-    @Parent() user: UserObject,
-    @Context() context: ApolloServerContext<GraphQLEntityContext>,
-  ) {
+  protected async getUserTeams(@Parent() user: UserObject) {
     this.logger.log({
       user,
       message: 'Fetching teams for user',
     })
 
     const teams = await this.domain.team.getWithUser(user)
-    context.filters = await this.buildTeamsFilters(teams, context.filters)
 
     return teams
   }
