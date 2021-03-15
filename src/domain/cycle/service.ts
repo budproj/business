@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common'
-import { orderBy, filter } from 'lodash'
+import { orderBy, filter, maxBy, meanBy, minBy } from 'lodash'
 import { Any } from 'typeorm'
 
 import { CycleDTO } from 'src/domain/cycle/dto'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
+import { DomainKeyResultStatus } from 'src/domain/key-result/service'
+import { Objective } from 'src/domain/objective/entities'
+import DomainObjectiveService, { DomainObjectiveStatus } from 'src/domain/objective/service'
 import { TeamDTO } from 'src/domain/team/dto'
 import DomainTeamService from 'src/domain/team/service'
 
+import { DEFAULT_PROGRESS, DEFAULT_CONFIDENCE } from './constants'
 import { Cycle } from './entities'
 import DomainCycleRepository from './repository'
 
@@ -14,6 +18,11 @@ export interface DomainCycleServiceInterface {
   getFromTeam: (team: TeamDTO) => Promise<Cycle[]>
   getClosestToEndFromTeam: (team: TeamDTO, snapshot?: Date) => Promise<Cycle | undefined>
   getFromTeamsWithFilters: (teams: TeamDTO[], filters?: Partial<CycleDTO>) => Promise<Cycle[]>
+  getCurrentStatus: (cycle: CycleDTO) => Promise<DomainCycleStatus>
+}
+
+export interface DomainCycleStatus extends DomainKeyResultStatus {
+  latestObjectiveStatus?: DomainObjectiveStatus
 }
 
 @Injectable()
@@ -23,6 +32,7 @@ class DomainCycleService
   constructor(
     protected readonly repository: DomainCycleRepository,
     private readonly teamService: DomainTeamService,
+    private readonly objectiveService: DomainObjectiveService,
   ) {
     super(DomainCycleService.name, repository)
   }
@@ -56,6 +66,13 @@ class DomainCycleService
     return cycles
   }
 
+  public async getCurrentStatus(cycle: CycleDTO) {
+    const date = new Date()
+    const cycleStatus = await this.getStatusAtDate(date, cycle)
+
+    return cycleStatus
+  }
+
   protected async protectCreationQuery(
     _query: DomainCreationQuery<Cycle>,
     _data: Partial<CycleDTO>,
@@ -75,6 +92,52 @@ class DomainCycleService
     const cyclesAfterDate = filter(cycles, (cycle) => cycle.dateEnd >= snapshot)
 
     return cyclesAfterDate
+  }
+
+  private async getStatusAtDate(date: Date, cycle: CycleDTO) {
+    const objectives = await this.objectiveService.getFromCycle(cycle)
+    if (!objectives || objectives.length === 0) return this.buildDefaultStatus(date)
+
+    const cycleStatus = await this.buildStatusAtDate(date, objectives)
+
+    return cycleStatus
+  }
+
+  private buildDefaultStatus(
+    date?: DomainCycleStatus['createdAt'],
+    progress: DomainCycleStatus['progress'] = DEFAULT_PROGRESS,
+    confidence: DomainCycleStatus['confidence'] = DEFAULT_CONFIDENCE,
+  ) {
+    date ??= new Date()
+
+    const defaultStatus: DomainCycleStatus = {
+      progress,
+      confidence,
+      createdAt: date,
+    }
+
+    return defaultStatus
+  }
+
+  private async buildStatusAtDate(
+    date: Date,
+    objectives: Objective[],
+  ): Promise<DomainCycleStatus | undefined> {
+    const objectiveStatusPromises = objectives.map(async (objective) =>
+      this.objectiveService.getStatusAtDate(date, objective),
+    )
+    const objectiveStatuss = await Promise.all(objectiveStatusPromises)
+    const latestObjectiveStatus = maxBy(objectiveStatuss, 'createdAt')
+    if (!latestObjectiveStatus) return
+
+    const cycleStatus: DomainCycleStatus = {
+      latestObjectiveStatus,
+      progress: meanBy(objectiveStatuss, 'progress'),
+      confidence: minBy(objectiveStatuss, 'confidence').confidence,
+      createdAt: latestObjectiveStatus.createdAt,
+    }
+
+    return cycleStatus
   }
 }
 

@@ -197,7 +197,7 @@ class GraphQLTeamResolver extends GraphQLEntityResolver<Team, TeamDTO> {
   protected async getTeamStatus(@Parent() team: TeamObject) {
     this.logger.log({
       team,
-      message: 'Fetching current status for team',
+      message: 'Fetching current status for this team',
     })
 
     const status = await this.domain.team.getCurrentStatus(team)

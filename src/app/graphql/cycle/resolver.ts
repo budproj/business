@@ -22,7 +22,7 @@ import { Cycle } from 'src/domain/cycle/entities'
 import DomainService from 'src/domain/service'
 import RailwayProvider from 'src/railway'
 
-import { CycleFilterArguments, CycleObject } from './models'
+import { CycleFilterArguments, CycleObject, CycleStatusObject } from './models'
 
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser, EnhanceWithUserResourceConstraint)
@@ -113,6 +113,18 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
     const keyResults = await this.domain.keyResult.getFromObjectives(objectives, keyResultsFilter)
 
     return keyResults
+  }
+
+  @ResolveField('status', () => CycleStatusObject)
+  protected async getCycleStatus(@Parent() cycle: CycleObject) {
+    this.logger.log({
+      cycle,
+      message: 'Fetching current status for this cycle',
+    })
+
+    const status = await this.domain.cycle.getCurrentStatus(cycle)
+
+    return status
   }
 }
 

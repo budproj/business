@@ -123,7 +123,7 @@ export class TeamObject implements EntityObject {
 
   @Field(() => TeamStatusObject, {
     description:
-      'The status of the given team. Here you can fetch the current progress, confidence, and other for that team',
+      'The status of the given team. Here you can fetch the current progress, confidence, and others for that team',
   })
   public status: TeamStatusObject
 

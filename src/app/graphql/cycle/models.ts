@@ -2,8 +2,8 @@ import { ArgsType, Field, ID, ObjectType, registerEnumType } from '@nestjs/graph
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
-import { EntityObject } from 'src/app/graphql/models'
-import { ObjectiveObject } from 'src/app/graphql/objective/models'
+import { EntityObject, StatusObject } from 'src/app/graphql/models'
+import { ObjectiveObject, ObjectiveStatusObject } from 'src/app/graphql/objective/models'
 import { TeamObject } from 'src/app/graphql/team/models'
 import { CADENCE } from 'src/domain/cycle/constants'
 
@@ -11,6 +11,23 @@ registerEnumType(CADENCE, {
   name: 'CADENCE',
   description: 'Each cadence represents a period of time in which your cycles can be created',
 })
+
+@ObjectType('CycleStatus', {
+  implements: () => StatusObject,
+  description:
+    "The current status of this cycle. By status we mean progress, confidence, and other reported values from it's objectives",
+})
+export class CycleStatusObject implements StatusObject {
+  @Field(() => ObjectiveStatusObject, {
+    description:
+      'The most recent objective status update inside among all objectives for this cycle',
+    nullable: true,
+  })
+  public latestObjectiveStatus?: ObjectiveStatusObject
+
+  public progress: number
+  public confidence: number
+}
 
 @ObjectType('Cycle', {
   implements: () => EntityObject,
@@ -37,6 +54,12 @@ export class CycleObject implements EntityObject {
 
   @Field({ description: 'The date that this cycle ends' })
   public dateEnd: Date
+
+  @Field(() => CycleStatusObject, {
+    description:
+      'The status of the given cycle. Here you can fetch the current progress, confidence, and others for that cycle',
+  })
+  public status: CycleStatusObject
 
   @Field({ description: 'The creation date of this cycle' })
   public createdAt: Date
