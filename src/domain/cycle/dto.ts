@@ -11,5 +11,5 @@ export class CycleDTO {
   public createdAt: Date
   public updatedAt: Date
   public teamId: TeamDTO['id']
-  public parentCycleId?: CycleDTO['id']
+  public parentId?: CycleDTO['id']
 }

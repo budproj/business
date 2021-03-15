@@ -35,15 +35,15 @@ export class Cycle extends DomainEntity implements CycleDTO {
   public teamId: TeamDTO['id']
 
   @ManyToOne('Cycle', 'cycles', { nullable: true })
-  public parentCycle?: CycleDTO
+  public parent?: CycleDTO
 
   @Column({ nullable: true })
-  @RelationId((cycle: Cycle) => cycle.parentCycle)
-  public parentCycleId?: CycleDTO['id']
+  @RelationId((cycle: Cycle) => cycle.parent)
+  public parentId?: CycleDTO['id']
 
   @OneToMany('Objective', 'cycle', { nullable: true })
   public objectives?: ObjectiveDTO[]
 
-  @OneToMany('Cycle', 'parentCycle', { nullable: true })
+  @OneToMany('Cycle', 'parent', { nullable: true })
   public cycles?: CycleDTO[]
 }

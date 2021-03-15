@@ -90,14 +90,14 @@ export class CycleObject implements EntityObject {
     description:
       'Each cycle can relates with a given higher cycle, creating a for of tree-like architecture. If this cycle has any cycle above it, the ID of that will be recorded here',
   })
-  public parentCycleId?: CycleObject['id']
+  public parentId?: CycleObject['id']
 
   @Field(() => CycleObject, {
     nullable: true,
     description:
       'Each cycle can relates with a given higher cycle, creating a for of tree-like architecture. If this cycle has any cycle above it, that one will be recorded here',
   })
-  public parentCycle?: CycleObject
+  public parent?: CycleObject
 
   @Field(() => [CycleObject], {
     nullable: true,
