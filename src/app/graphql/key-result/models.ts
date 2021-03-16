@@ -54,6 +54,12 @@ export class KeyResultObject implements EntityObject {
   @Field({ description: 'The format of the key result' })
   public format: KEY_RESULT_FORMAT
 
+  @Field({
+    description:
+      'Saying a key result is "outdated" means that the owner needs to do a new check-in to report the current key result progress',
+  })
+  public isOutdated: boolean
+
   @Field(() => [TimelineEntryUnion], {
     description:
       'The timeline for this key result. It is ordered by creation date and is composed by both check-ins and comments',

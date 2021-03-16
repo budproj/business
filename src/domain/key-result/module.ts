@@ -8,6 +8,8 @@ import DomainTeamModule from 'src/domain/team'
 import DomainKeyResultCheckInModule from './check-in'
 import DomainKeyResultRepository from './repository'
 import DomainKeyResultService from './service'
+import DomainKeyResultSpecification from './specification'
+import DomainKeyResultSpecificationsModule from './specifications/module'
 import DomainKeyResultTimelineService from './timeline'
 
 @Module({
@@ -17,8 +19,9 @@ import DomainKeyResultTimelineService from './timeline'
     forwardRef(() => DomainTeamModule),
     forwardRef(() => DomainKeyResultCheckInModule),
     forwardRef(() => DomainKeyResultCommentModule),
+    DomainKeyResultSpecificationsModule,
   ],
-  providers: [DomainKeyResultService, DomainKeyResultTimelineService],
+  providers: [DomainKeyResultService, DomainKeyResultTimelineService, DomainKeyResultSpecification],
   exports: [DomainKeyResultService],
 })
 class DomainKeyResultModule {}

@@ -7,5 +7,7 @@ export class KeyResultCommentDTO {
   public createdAt: Date
   public updatedAt: Date
   public keyResultId: KeyResultDTO['id']
+  public keyResult: KeyResultDTO
   public userId: UserDTO['id']
+  public user: UserDTO
 }

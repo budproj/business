@@ -23,6 +23,7 @@ import { DEFAULT_CONFIDENCE } from './constants'
 import { KeyResultDTO } from './dto'
 import { KeyResult } from './entities'
 import DomainKeyResultRepository from './repository'
+import DomainKeyResultSpecification from './specification'
 import DomainKeyResultTimelineService, { DomainKeyResultTimelineGetOptions } from './timeline'
 
 export interface DomainKeyResultServiceInterface {
@@ -104,6 +105,7 @@ class DomainKeyResultService
   extends DomainEntityService<KeyResult, KeyResultDTO>
   implements DomainKeyResultServiceInterface {
   constructor(
+    public readonly specifications: DomainKeyResultSpecification,
     @Inject(forwardRef(() => DomainKeyResultCheckInService))
     public readonly checkIn: DomainKeyResultCheckInService,
     @Inject(forwardRef(() => DomainKeyResultCommentService))

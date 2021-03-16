@@ -6,6 +6,7 @@ import { CycleDTO } from 'src/domain/cycle/dto'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
+import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { KeyResult } from 'src/domain/key-result/entities'
 import DomainKeyResultService, { DomainKeyResultStatus } from 'src/domain/key-result/service'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
@@ -20,6 +21,7 @@ export interface DomainObjectiveServiceInterface {
   getFromOwner: (owner: UserDTO) => Promise<Objective[]>
   getFromCycle: (cycle: CycleDTO) => Promise<Objective[]>
   getFromTeams: (teams: TeamDTO | TeamDTO[]) => Promise<Objective[]>
+  getFromKeyResult: (keyResult: KeyResultDTO) => Promise<Objective>
   getCurrentProgressForObjective: (objective: ObjectiveDTO) => Promise<KeyResultCheckIn['progress']>
   getCurrentConfidenceForObjective: (
     objective: ObjectiveDTO,
@@ -53,6 +55,10 @@ class DomainObjectiveService
 
   public async getFromCycle(cycle: CycleDTO) {
     return this.repository.find({ cycleId: cycle.id })
+  }
+
+  public async getFromKeyResult(keyResult: KeyResultDTO) {
+    return this.repository.findOne({ id: keyResult.objectiveId })
   }
 
   public async getFromTeams(team: TeamDTO | TeamDTO[]) {

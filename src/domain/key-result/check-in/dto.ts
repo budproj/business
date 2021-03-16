@@ -8,6 +8,8 @@ export class KeyResultCheckInDTO {
   public createdAt: Date
   public keyResultId: KeyResultDTO['id']
   public userId: UserDTO['id']
+  public user: UserDTO
   public comment?: string
   public parentId?: KeyResultCheckInDTO['id']
+  public parent?: KeyResultCheckInDTO
 }

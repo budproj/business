@@ -5,6 +5,7 @@ import { Any } from 'typeorm'
 import { CycleDTO } from 'src/domain/cycle/dto'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { DomainKeyResultStatus } from 'src/domain/key-result/service'
+import { ObjectiveDTO } from 'src/domain/objective/dto'
 import { Objective } from 'src/domain/objective/entities'
 import DomainObjectiveService, { DomainObjectiveStatus } from 'src/domain/objective/service'
 import { TeamDTO } from 'src/domain/team/dto'
@@ -16,6 +17,7 @@ import DomainCycleRepository from './repository'
 
 export interface DomainCycleServiceInterface {
   getFromTeam: (team: TeamDTO) => Promise<Cycle[]>
+  getFromObjective: (objective: ObjectiveDTO) => Promise<Cycle>
   getClosestToEndFromTeam: (team: TeamDTO, snapshot?: Date) => Promise<Cycle | undefined>
   getFromTeamsWithFilters: (teams: TeamDTO[], filters?: Partial<CycleDTO>) => Promise<Cycle[]>
   getCurrentStatus: (cycle: CycleDTO) => Promise<DomainCycleStatus>
@@ -41,6 +43,10 @@ class DomainCycleService
     const cycles = await this.repository.find({ teamId: team.id })
 
     return cycles
+  }
+
+  public async getFromObjective(objective: ObjectiveDTO) {
+    return this.repository.findOne({ id: objective.cycleId })
   }
 
   public async getClosestToEndFromTeam(team: TeamDTO, snapshot?: Date) {

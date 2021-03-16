@@ -78,7 +78,7 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
       message: 'Fetching objective for key result',
     })
 
-    return this.domain.objective.getOne({ id: keyResult.objectiveId })
+    return this.domain.objective.getFromKeyResult(keyResult)
   }
 
   @ResolveField('keyResultCheckIns', () => [KeyResultCheckInObject], { nullable: true })
@@ -144,6 +144,33 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
     })
 
     return this.domain.keyResult.getLatestCheckInForKeyResultAtDate(keyResult)
+  }
+
+  @ResolveField('isOutdated', () => Boolean)
+  protected async getIsOutdatedFlag(@Parent() keyResult: KeyResultObject) {
+    this.logger.log({
+      keyResult,
+      message: 'Deciding if the given key result is outdated',
+    })
+
+    const objective = await this.domain.objective.getFromKeyResult(keyResult)
+    const cycle = await this.domain.cycle.getFromObjective(objective)
+    const latestKeyResultCheckIn = await this.domain.keyResult.getLatestCheckInForKeyResultAtDate(
+      keyResult,
+    )
+
+    const enhancedObjective = {
+      ...objective,
+      cycle,
+    }
+
+    const enhancedKeyResult = {
+      ...keyResult,
+      objective: enhancedObjective,
+      checkIns: latestKeyResultCheckIn ? [latestKeyResultCheckIn] : undefined,
+    }
+
+    return this.domain.keyResult.specifications.isOutdated.isSatisfiedBy(enhancedKeyResult)
   }
 }
 
