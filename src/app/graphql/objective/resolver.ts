@@ -63,7 +63,7 @@ class GraphQLObjectiveResolver extends GraphQLEntityResolver<Objective, Objectiv
       message: 'Fetching cycle for objective',
     })
 
-    return this.domain.cycle.getOne({ id: objective.cycleId })
+    return this.domain.cycle.getFromObjective(objective)
   }
 
   @ResolveField('keyResults', () => [KeyResultObject], { nullable: true })

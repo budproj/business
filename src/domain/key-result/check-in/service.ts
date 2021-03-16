@@ -1,8 +1,8 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { sum } from 'lodash'
-import { SelectQueryBuilder } from 'typeorm'
+import { Any, SelectQueryBuilder } from 'typeorm'
 
-import { DOMAIN_QUERY_ORDER } from 'src/domain/constants'
+import { DOMAIN_SORTING } from 'src/domain/constants'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import {
   MAX_PERCENTAGE_PROGRESS,
@@ -10,10 +10,6 @@ import {
 } from 'src/domain/key-result/check-in/constants'
 import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
-import {
-  KeyResultCheckInFilters,
-  KeyResultCheckInQueryOptions,
-} from 'src/domain/key-result/check-in/types'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { KeyResult } from 'src/domain/key-result/entities'
 import DomainKeyResultService from 'src/domain/key-result/service'
@@ -24,10 +20,7 @@ import { UserDTO } from 'src/domain/user/dto'
 import DomainKeyResultCheckInRepository from './repository'
 
 export interface DomainKeyResultCheckInServiceInterface {
-  getLatestFromUsers: (
-    users: UserDTO[],
-    filters?: KeyResultCheckInFilters,
-  ) => Promise<KeyResultCheckIn | null>
+  getLatestFromUsers: (users: UserDTO[]) => Promise<KeyResultCheckIn | null>
   getLatestFromKeyResult: (keyResult: KeyResultDTO) => Promise<KeyResultCheckIn | null>
   getLatestFromKeyResultAtDate: (
     keyResult: KeyResultDTO,
@@ -67,23 +60,22 @@ class DomainKeyResultCheckInService extends DomainEntityService<
     super(DomainKeyResultCheckInService.name, repository)
   }
 
-  public async getLatestFromUsers(users: UserDTO[], filters?: KeyResultCheckInFilters) {
+  public async getLatestFromUsers(users: UserDTO[]) {
     const userIDs = users.map((user) => user.id)
     if (!userIDs || userIDs.length === 0) return
 
-    const keyResultCheckInFilters = {
-      userIDs,
-      ...filters,
-    }
-    const options: KeyResultCheckInQueryOptions = {
-      limit: 1,
-      orderBy: [['createdAt', DOMAIN_QUERY_ORDER.DESC]],
+    const selector = {
+      userId: Any(userIDs),
     }
 
-    const latestCheckInArray = await this.repository.findWithFilters(
-      keyResultCheckInFilters,
-      options,
-    )
+    const latestCheckInArray = await this.repository.find({
+      where: selector,
+      take: 1,
+      order: {
+        createdAt: DOMAIN_SORTING.DESC,
+      },
+    })
+
     const latestCheckIn = latestCheckInArray[0]
 
     return latestCheckIn

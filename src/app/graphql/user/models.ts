@@ -2,7 +2,6 @@ import { Field, InputType, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
-import { KeyResultCustomListObject } from 'src/app/graphql/key-result/custom-list/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import { EntityObject } from 'src/app/graphql/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
@@ -95,12 +94,6 @@ export class UserObject implements EntityObject {
     nullable: true,
   })
   public keyResults?: KeyResultObject[]
-
-  @Field(() => [KeyResultCustomListObject], {
-    description: 'The creation date ordered list of key result custom lists that this user owns',
-    nullable: true,
-  })
-  public keyResultCustomLists?: KeyResultCustomListObject[]
 
   @Field(() => [KeyResultCheckInObject], {
     description: 'The creation date ordered list of key result check-ins created by this user',

@@ -1,6 +1,5 @@
 import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Context, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
-import { Context as ApolloServerContext } from 'apollo-server-core'
+import { Args, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
@@ -12,10 +11,10 @@ import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/grap
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
 import { KeyResultCommentObject } from 'src/app/graphql/key-result/comment/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
-import GraphQLEntityResolver, { GraphQLEntityContext } from 'src/app/graphql/resolver'
+import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import { TeamObject } from 'src/app/graphql/team/models'
 import { UserObject } from 'src/app/graphql/user'
-import { DOMAIN_QUERY_ORDER } from 'src/domain/constants'
+import { DOMAIN_SORTING } from 'src/domain/constants'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { KeyResult } from 'src/domain/key-result/entities'
 import DomainService from 'src/domain/service'
@@ -61,17 +60,13 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
   }
 
   @ResolveField('team', () => TeamObject)
-  protected async getKeyResultTeam(
-    @Parent() keyResult: KeyResultObject,
-    @Context() context: ApolloServerContext<GraphQLEntityContext>,
-  ) {
+  protected async getKeyResultTeam(@Parent() keyResult: KeyResultObject) {
     this.logger.log({
       keyResult,
       message: 'Fetching team for key result',
     })
 
     const team = await this.domain.team.getOne({ id: keyResult.teamId })
-    context.filters = await this.buildTeamsFilters(team, context.filters)
 
     return team
   }
@@ -83,14 +78,14 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
       message: 'Fetching objective for key result',
     })
 
-    return this.domain.objective.getOne({ id: keyResult.objectiveId })
+    return this.domain.objective.getFromKeyResult(keyResult)
   }
 
   @ResolveField('keyResultCheckIns', () => [KeyResultCheckInObject], { nullable: true })
   protected async getKeyResultCheckIns(
     @Parent() keyResult: KeyResultObject,
-    @Args('order', { type: () => DOMAIN_QUERY_ORDER, defaultValue: DOMAIN_QUERY_ORDER.DESC })
-    order: DOMAIN_QUERY_ORDER,
+    @Args('order', { type: () => DOMAIN_SORTING, defaultValue: DOMAIN_SORTING.DESC })
+    order: DOMAIN_SORTING,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
   ) {
     this.logger.log({
@@ -149,6 +144,33 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
     })
 
     return this.domain.keyResult.getLatestCheckInForKeyResultAtDate(keyResult)
+  }
+
+  @ResolveField('isOutdated', () => Boolean)
+  protected async getIsOutdatedFlag(@Parent() keyResult: KeyResultObject) {
+    this.logger.log({
+      keyResult,
+      message: 'Deciding if the given key result is outdated',
+    })
+
+    const objective = await this.domain.objective.getFromKeyResult(keyResult)
+    const cycle = await this.domain.cycle.getFromObjective(objective)
+    const latestKeyResultCheckIn = await this.domain.keyResult.getLatestCheckInForKeyResultAtDate(
+      keyResult,
+    )
+
+    const enhancedObjective = {
+      ...objective,
+      cycle,
+    }
+
+    const enhancedKeyResult = {
+      ...keyResult,
+      objective: enhancedObjective,
+      checkIns: latestKeyResultCheckIn ? [latestKeyResultCheckIn] : undefined,
+    }
+
+    return this.domain.keyResult.specifications.isOutdated.isSatisfiedBy(enhancedKeyResult)
   }
 }
 

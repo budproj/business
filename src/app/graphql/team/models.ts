@@ -1,10 +1,10 @@
-import { Field, Float, ID, InputType, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { Field, Float, ID, ArgsType, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { CycleObject } from 'src/app/graphql/cycle/models'
 import { KeyResultCheckInObject } from 'src/app/graphql/key-result/check-in/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
-import { EntityFiltersInput, EntityObject, StatusObject } from 'src/app/graphql/models'
+import { EntityObject, StatusObject } from 'src/app/graphql/models'
 import { ObjectiveObject, ObjectiveStatusObject } from 'src/app/graphql/objective/models'
 import { UserObject } from 'src/app/graphql/user/models'
 import { TEAM_GENDER } from 'src/domain/team/constants'
@@ -74,10 +74,10 @@ export class TeamObject implements EntityObject {
   public company?: TeamObject
 
   @Field(() => ID, { description: 'The ID of the team that owns this team', nullable: true })
-  public parentTeamId?: TeamObject['id']
+  public parentId?: TeamObject['id']
 
   @Field(() => TeamObject, { description: 'The team that owns this team', nullable: true })
-  public parentTeam?: TeamObject
+  public parent?: TeamObject
 
   @Field(() => [UserObject], {
     description: 'A creation date ordered list of users that are members of this team',
@@ -123,7 +123,7 @@ export class TeamObject implements EntityObject {
 
   @Field(() => TeamStatusObject, {
     description:
-      'The status of the given team. Here you can fetch the current progress, confidence, and other for that team',
+      'The status of the given team. Here you can fetch the current progress, confidence, and others for that team',
   })
   public status: TeamStatusObject
 
@@ -131,13 +131,13 @@ export class TeamObject implements EntityObject {
   public policies: PolicyObject
 }
 
-@InputType({ description: 'A list of fields that we can filter our team to' })
-export class TeamFiltersInput extends EntityFiltersInput {
+@ArgsType()
+export class TeamFilterArguments {
   @Field(() => ID, {
     description: 'The ID of the parent team that you want to user on this query',
     nullable: true,
   })
-  public parentTeamId?: TeamObject['id']
+  public parentId?: TeamObject['id']
 
   @Field(() => Boolean, {
     description:

@@ -1,4 +1,12 @@
-import { createUnionType, Field, Float, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
+import {
+  ArgsType,
+  createUnionType,
+  Field,
+  Float,
+  ID,
+  ObjectType,
+  registerEnumType,
+} from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { KeyResultCommentObject } from 'src/app/graphql/key-result/comment/models'
@@ -45,6 +53,12 @@ export class KeyResultObject implements EntityObject {
 
   @Field({ description: 'The format of the key result' })
   public format: KEY_RESULT_FORMAT
+
+  @Field({
+    description:
+      'Saying a key result is "outdated" means that the owner needs to do a new check-in to report the current key result progress',
+  })
+  public isOutdated: boolean
 
   @Field(() => [TimelineEntryUnion], {
     description:
@@ -99,4 +113,13 @@ export class KeyResultObject implements EntityObject {
 
   public id: string
   public policies: PolicyObject
+}
+
+@ArgsType()
+export class KeyResultFilterArguments {
+  @Field(() => ID, {
+    description: 'The user ID that should owns the key results you are trying to fetch',
+    nullable: true,
+  })
+  public ownerId?: UserObject['id']
 }

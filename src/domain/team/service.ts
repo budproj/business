@@ -15,7 +15,7 @@ import { TeamDTO } from './dto'
 import { Team } from './entities'
 import DomainTeamRepository from './repository'
 import DomainTeamSpecification from './specification'
-import { TeamEntitySelector, TeamEntityRelation, TeamFilters } from './types'
+import { TeamEntitySelector, TeamEntityRelation } from './types'
 
 export interface DomainTeamServiceInterface {
   specification: DomainTeamSpecification
@@ -46,22 +46,13 @@ export interface DomainTeamServiceInterface {
   ) => Promise<Team>
   getUsersInTeam: (teamID: TeamDTO) => Promise<UserDTO[]>
   buildTeamQueryContext: (user: UserDTO, constraint?: CONSTRAINT) => Promise<DomainQueryContext>
-  getCurrentProgressForTeam: (
-    team: TeamDTO,
-    filters?: TeamFilters,
-  ) => Promise<KeyResultCheckIn['progress']>
-  getCurrentConfidenceForTeam: (
-    team: TeamDTO,
-    filters?: TeamFilters,
-  ) => Promise<KeyResultCheckIn['confidence']>
-  getTeamProgressIncreaseSinceLastWeek: (
-    team: TeamDTO,
-    filters?: TeamFilters,
-  ) => Promise<KeyResultCheckIn['progress']>
+  getCurrentProgressForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
+  getCurrentConfidenceForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['confidence']>
+  getTeamProgressIncreaseSinceLastWeek: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
   getTeamChildTeams: (team: TeamDTO) => Promise<Team[]>
   getTeamRankedChildTeams: (team: TeamDTO) => Promise<Team[]>
   getRankedTeamsBelowNode: (team: TeamDTO) => Promise<Team[]>
-  getCurrentStatus: (team: TeamDTO, filters?: TeamFilters) => Promise<DomainTeamStatus>
+  getCurrentStatus: (team: TeamDTO) => Promise<DomainTeamStatus>
 }
 
 export interface DomainTeamStatus extends DomainKeyResultStatus {
@@ -108,9 +99,9 @@ class DomainTeamService
     relations?: TeamEntityRelation[],
   ) {
     const childTeams = await this.getTeamNodesTreeAfterTeam(team, selectors, relations)
-    const parentTeams = await this.getTeamNodesTreeBeforeTeam(team, selectors, relations)
+    const parents = await this.getTeamNodesTreeBeforeTeam(team, selectors, relations)
 
-    const rawNodes = [...parentTeams, ...childTeams]
+    const rawNodes = [...parents, ...childTeams]
     const nodes = uniqBy(rawNodes, 'id')
     const clearedNodes = filter(nodes)
 
@@ -159,16 +150,16 @@ class DomainTeamService
     selectors?: TeamEntitySelector[],
     relations?: TeamEntityRelation[],
   ) {
-    if (!team.parentTeamId) return
-    const whereSelector = { id: team.parentTeamId }
+    if (!team.parentId) return
+    const whereSelector = { id: team.parentId }
 
-    const parentTeam = await this.repository.findOne({
+    const parent = await this.repository.findOne({
       relations,
       select: selectors,
       where: whereSelector,
     })
 
-    return parentTeam
+    return parent
   }
 
   public async getUsersInTeam(team: TeamDTO) {
@@ -202,23 +193,23 @@ class DomainTeamService
     return queryContext
   }
 
-  public async getCurrentProgressForTeam(team: TeamDTO, filters?: TeamFilters) {
+  public async getCurrentProgressForTeam(team: TeamDTO) {
     const date = new Date()
-    const currentStatus = await this.getStatusAtDate(date, team, filters)
+    const currentStatus = await this.getStatusAtDate(date, team)
 
     return currentStatus?.progress ?? DEFAULT_PROGRESS
   }
 
-  public async getCurrentConfidenceForTeam(team: TeamDTO, filters?: TeamFilters) {
+  public async getCurrentConfidenceForTeam(team: TeamDTO) {
     const date = new Date()
-    const currentStatus = await this.getStatusAtDate(date, team, filters)
+    const currentStatus = await this.getStatusAtDate(date, team)
 
     return currentStatus?.confidence ?? DEFAULT_CONFIDENCE
   }
 
-  public async getTeamProgressIncreaseSinceLastWeek(team: TeamDTO, filters?: TeamFilters) {
-    const progress = await this.getCurrentProgressForTeam(team, filters)
-    const lastWeekProgress = await this.getLastWeekProgressForTeam(team, filters)
+  public async getTeamProgressIncreaseSinceLastWeek(team: TeamDTO) {
+    const progress = await this.getCurrentProgressForTeam(team)
+    const lastWeekProgress = await this.getLastWeekProgressForTeam(team)
 
     const deltaProgress = progress - lastWeekProgress
 
@@ -226,7 +217,7 @@ class DomainTeamService
   }
 
   public async getTeamChildTeams(team: TeamDTO) {
-    const childTeams = await this.getMany({ parentTeamId: team.id })
+    const childTeams = await this.getMany({ parentId: team.id })
 
     return childTeams
   }
@@ -246,9 +237,9 @@ class DomainTeamService
     return rankedChildTeams
   }
 
-  public async getCurrentStatus(team: TeamDTO, filters?: TeamFilters) {
+  public async getCurrentStatus(team: TeamDTO) {
     const date = new Date()
-    const teamStatus = await this.getStatusAtDate(date, team, filters)
+    const teamStatus = await this.getStatusAtDate(date, team)
 
     return teamStatus
   }
@@ -264,11 +255,11 @@ class DomainTeamService
   private async getRootTeamForTeam(team: TeamDTO) {
     let rootTeam = team as Team
 
-    while (rootTeam.parentTeamId) {
+    while (rootTeam.parentId) {
       // Since we're dealing with a linked list, where we need to evaluate each step before trying
       // the next one, we can disable the following eslint rule
       // eslint-disable-next-line no-await-in-loop
-      rootTeam = await this.getOne({ id: rootTeam.parentTeamId })
+      rootTeam = await this.getOne({ id: rootTeam.parentId })
     }
 
     return rootTeam
@@ -281,7 +272,7 @@ class DomainTeamService
   ) {
     const teamsAsArray = Array.isArray(teams) ? teams : [teams]
     const whereSelector = teamsAsArray.map((team) => ({
-      parentTeamId: team.id,
+      parentId: team.id,
     }))
 
     const childTeams = await this.repository.find({
@@ -312,9 +303,9 @@ class DomainTeamService
     return companiesTeams
   }
 
-  private async getStatusAtDate(date: Date, team: TeamDTO, filters?: TeamFilters) {
+  private async getStatusAtDate(date: Date, team: TeamDTO) {
     const childTeams = await this.getTeamNodesTreeAfterTeam(team)
-    const objectives = await this.objectiveService.getFromTeams(childTeams, filters)
+    const objectives = await this.objectiveService.getFromTeams(childTeams)
     if (!objectives || objectives.length === 0) return this.buildDefaultStatus(date)
 
     const teamStatus = await this.buildStatusAtDate(date, objectives)
@@ -359,10 +350,10 @@ class DomainTeamService
     return defaultStatus
   }
 
-  private async getLastWeekProgressForTeam(team: TeamDTO, filters?: TeamFilters) {
+  private async getLastWeekProgressForTeam(team: TeamDTO) {
     const firstDayAfterLastWeek = this.getFirstDayAfterLastWeek()
 
-    const lastWeekStatus = await this.getStatusAtDate(firstDayAfterLastWeek, team, filters)
+    const lastWeekStatus = await this.getStatusAtDate(firstDayAfterLastWeek, team)
 
     return lastWeekStatus?.progress ?? DEFAULT_PROGRESS
   }
@@ -402,7 +393,10 @@ class DomainTeamService
       nextIterationNodes = filter(currentIterationNodes)
     }
 
-    return nodes
+    const clearedNodes = filter(nodes)
+    const uniqNodes = uniqBy(clearedNodes, 'id')
+
+    return uniqNodes
   }
 }
 

@@ -1,6 +1,4 @@
 import { Args, Parent, ResolveField, Resolver } from '@nestjs/graphql'
-import { all as merge } from 'deepmerge'
-import { fromPairs } from 'lodash'
 import { DeleteResult, FindConditions } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
@@ -9,13 +7,10 @@ import AuthzService from 'src/app/authz/service'
 import { ActionPolicies, AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { PolicyObject } from 'src/app/graphql/authz/models'
-import { CycleObject } from 'src/app/graphql/cycle/models'
-import { EntityFiltersInput, EntityObject } from 'src/app/graphql/models'
-import { TeamObject } from 'src/app/graphql/team/models'
+import { EntityObject } from 'src/app/graphql/models'
 import { CONSTRAINT } from 'src/domain/constants'
 import { DomainEntity, DomainEntityService } from 'src/domain/entity'
 import DomainService from 'src/domain/service'
-import { Team } from 'src/domain/team/entities'
 
 export interface GraphQLEntityResolverInterface<E extends DomainEntity, D> {
   createWithActionScopeConstraint: (
@@ -49,20 +44,9 @@ export interface GraphQLEntityResolverInterface<E extends DomainEntity, D> {
   ) => Promise<DeleteResult>
 }
 
-export interface GraphQLEntityContext {
-  filters?: EntityResolverFilters
-}
-
-export interface EntityResolverFilters extends EntityFiltersInput {
-  teamsCycleID?: Record<TeamObject['id'], CycleObject['id']>
-}
-
 @Resolver(() => EntityObject)
-abstract class GraphQLEntityResolver<
-  E extends DomainEntity,
-  D,
-  F extends EntityResolverFilters = EntityResolverFilters
-> implements GraphQLEntityResolverInterface<E, D> {
+abstract class GraphQLEntityResolver<E extends DomainEntity, D>
+  implements GraphQLEntityResolverInterface<E, D> {
   constructor(
     protected readonly resource: RESOURCE,
     protected readonly domainService: DomainService,
@@ -147,40 +131,6 @@ abstract class GraphQLEntityResolver<
 
   protected async customizeEntityPolicies(originalPolicies: ActionPolicies, _entity: E) {
     return originalPolicies
-  }
-
-  protected async buildTeamsFilters(teams: Team | Team[], filters?: F) {
-    const teamsCycleIDPairs = Array.isArray(teams)
-      ? await this.getClosestCycleIDFromTeamList(teams)
-      : undefined
-    const teamsCycleID = fromPairs<CycleObject['id']>(teamsCycleIDPairs)
-
-    const newFilters: F = {
-      ...filters,
-      teamsCycleID,
-    }
-    const resolverFilters = merge<F>([filters ?? {}, newFilters])
-
-    return resolverFilters
-  }
-
-  protected parseTeamCycleFilter(team: TeamObject, filters: F) {
-    return filters.cycleID ?? filters.teamsCycleID?.[team.id]
-  }
-
-  private async getClosestCycleIDForTeam(team: Team) {
-    const closestCycle = await this.domainService.cycle.getClosestToEndFromTeam(team)
-
-    return closestCycle?.id
-  }
-
-  private async getClosestCycleIDFromTeamList(teams: Team[]) {
-    const teamsClosestCycleIDPromises = teams.map(async (team) =>
-      Promise.all([team.id, this.getClosestCycleIDForTeam(team)]),
-    )
-    const teamsClosestCycleID = await Promise.all(teamsClosestCycleIDPromises)
-
-    return teamsClosestCycleID
   }
 
   private async getHighestConstraintForEntity(entity: E, user: AuthzUser) {

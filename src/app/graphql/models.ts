@@ -1,11 +1,10 @@
-import { Field, Float, ID, InputType, Int, InterfaceType, registerEnumType } from '@nestjs/graphql'
+import { Field, Float, ID, Int, InterfaceType, registerEnumType } from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
-import { CycleObject } from 'src/app/graphql/cycle/models'
-import { DOMAIN_QUERY_ORDER } from 'src/domain/constants'
+import { DOMAIN_SORTING } from 'src/domain/constants'
 
-registerEnumType(DOMAIN_QUERY_ORDER, {
-  name: 'QUERY_ORDER',
+registerEnumType(DOMAIN_SORTING, {
+  name: 'SORTING',
   description: 'Defines the order to return your results in a given query',
 })
 
@@ -43,14 +42,4 @@ export class StatusObject {
       "The computed current confidence of this entity. The confidence is always the lowest among the entity's children",
   })
   public confidence: number
-}
-
-@InputType({ description: 'A list of fields that we can filter our entity to' })
-export class EntityFiltersInput {
-  @Field(() => ID, {
-    description:
-      'The ID of the cycle we want to filter in our query. By default, it uses the closest cycle to an end as a filter, considering the creation date as a tie-breaker',
-    nullable: true,
-  })
-  public cycleID?: CycleObject['id']
 }

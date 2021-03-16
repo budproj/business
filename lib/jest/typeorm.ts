@@ -4,7 +4,6 @@ import { EntityTarget, getRepository, ObjectLiteral, Repository } from 'typeorm'
 import { Cycle } from 'src/domain/cycle/entities'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
 import { KeyResultComment } from 'src/domain/key-result/comment/entities'
-import { KeyResultCustomList } from 'src/domain/key-result/custom-list/entities'
 import { KeyResult } from 'src/domain/key-result/entities'
 import { Objective } from 'src/domain/objective/entities'
 import { Team } from 'src/domain/team/entities'
@@ -16,16 +15,7 @@ export const testConfig = {
   dropSchema: true,
   synchronize: true,
   logging: false,
-  entities: [
-    Cycle,
-    KeyResult,
-    KeyResultCheckIn,
-    KeyResultCustomList,
-    KeyResultComment,
-    Objective,
-    Team,
-    User,
-  ],
+  entities: [Cycle, KeyResult, KeyResultCheckIn, KeyResultComment, Objective, Team, User],
 }
 
 export interface TypeORMSeedInterface<T extends ObjectLiteral> {

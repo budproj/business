@@ -1,21 +1,32 @@
 import { Injectable } from '@nestjs/common'
-import { orderBy, filter } from 'lodash'
+import { orderBy, filter, maxBy, meanBy, minBy, omitBy } from 'lodash'
+import { Any } from 'typeorm'
 
+import { DOMAIN_SORTING, LODASH_SORTING } from 'src/domain/constants'
 import { CycleDTO } from 'src/domain/cycle/dto'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
+import { DomainKeyResultStatus } from 'src/domain/key-result/service'
+import { ObjectiveDTO } from 'src/domain/objective/dto'
+import { Objective } from 'src/domain/objective/entities'
+import DomainObjectiveService, { DomainObjectiveStatus } from 'src/domain/objective/service'
 import { TeamDTO } from 'src/domain/team/dto'
 import DomainTeamService from 'src/domain/team/service'
-import { UserDTO } from 'src/domain/user/dto'
 
+import { DEFAULT_PROGRESS, DEFAULT_CONFIDENCE, CADENCE_RANK } from './constants'
 import { Cycle } from './entities'
 import DomainCycleRepository from './repository'
 
 export interface DomainCycleServiceInterface {
   getFromTeam: (team: TeamDTO) => Promise<Cycle[]>
+  getFromObjective: (objective: ObjectiveDTO) => Promise<Cycle>
   getClosestToEndFromTeam: (team: TeamDTO, snapshot?: Date) => Promise<Cycle | undefined>
-  getFromTeamListCompanies: (team: TeamDTO[]) => Promise<Cycle[]>
-  getFromUserTeams: (user: UserDTO) => Promise<Cycle[]>
-  getFromTeamList: (teams: TeamDTO[]) => Promise<Cycle[]>
+  getFromTeamsWithFilters: (teams: TeamDTO[], filters?: Partial<CycleDTO>) => Promise<Cycle[]>
+  getCurrentStatus: (cycle: CycleDTO) => Promise<DomainCycleStatus>
+  sortCyclesByCadence: (cycles: Cycle[], sorting?: DOMAIN_SORTING) => Cycle[]
+}
+
+export interface DomainCycleStatus extends DomainKeyResultStatus {
+  latestObjectiveStatus?: DomainObjectiveStatus
 }
 
 @Injectable()
@@ -25,6 +36,7 @@ class DomainCycleService
   constructor(
     protected readonly repository: DomainCycleRepository,
     private readonly teamService: DomainTeamService,
+    private readonly objectiveService: DomainObjectiveService,
   ) {
     super(DomainCycleService.name, repository)
   }
@@ -33,6 +45,10 @@ class DomainCycleService
     const cycles = await this.repository.find({ teamId: team.id })
 
     return cycles
+  }
+
+  public async getFromObjective(objective: ObjectiveDTO) {
+    return this.repository.findOne({ id: objective.cycleId })
   }
 
   public async getClosestToEndFromTeam(team: TeamDTO, snapshot?: Date) {
@@ -45,26 +61,37 @@ class DomainCycleService
     return closestCycle
   }
 
-  public async getFromTeamListCompanies(_teams: TeamDTO[]) {
-    // Following https://getbud.atlassian.net/browse/BBCR-99?focusedCommentId=10061 we've decided
-    // to abort this feature for now. We're going to do it again during the cycle story
-    // PLAN
-    // Fetch companies list from teams
-    // Fetch full node list of companies
-    // Fetch cycles from any of those nodes
-    return []
+  public async getFromTeamsWithFilters(teams: TeamDTO[], filters?: Partial<CycleDTO>) {
+    const teamIDsFilter = Any(teams.map((team) => team.id))
+    const selector = {
+      ...filters,
+      teamId: teamIDsFilter,
+    }
+
+    // eslint-disable-next-line unicorn/no-fn-reference-in-iterator
+    const cycles = await this.repository.find(selector)
+
+    return cycles
   }
 
-  public async getFromUserTeams(_user: UserDTO) {
-    // Following https://getbud.atlassian.net/browse/BBCR-99?focusedCommentId=10061 we've decided
-    // to abort this feature for now. We're going to do it again during the cycle story
-    return []
+  public async getCurrentStatus(cycle: CycleDTO) {
+    const date = new Date()
+    const cycleStatus = await this.getStatusAtDate(date, cycle)
+
+    return cycleStatus
   }
 
-  public async getFromTeamList(_teams: TeamDTO[]) {
-    // Following https://getbud.atlassian.net/browse/BBCR-99?focusedCommentId=10061 we've decided
-    // to abort this feature for now. We're going to do it again during the cycle story
-    return []
+  public sortCyclesByCadence(cycles: Cycle[], sorting?: DOMAIN_SORTING) {
+    if (!sorting) return cycles
+
+    const rankedCycles = cycles.map((cycle) => ({
+      ...cycle,
+      rank: CADENCE_RANK[cycle.cadence],
+    }))
+    const sortedRawCycles = orderBy<Cycle>(rankedCycles, 'rank', LODASH_SORTING[sorting])
+    const sortedCycles = sortedRawCycles.map((cycle) => omitBy(cycle, 'rank') as Cycle)
+
+    return sortedCycles
   }
 
   protected async protectCreationQuery(
@@ -77,7 +104,10 @@ class DomainCycleService
 
   private async getAllRelatedToTeam(team: TeamDTO) {
     const relatedTeams = await this.teamService.getFullTeamNodesTree(team)
-    const cycles = await this.repository.findFromTeams(relatedTeams)
+    const selector = {
+      teamId: Any(relatedTeams),
+    }
+    const cycles = await this.repository.find({ where: selector })
 
     return cycles
   }
@@ -86,6 +116,52 @@ class DomainCycleService
     const cyclesAfterDate = filter(cycles, (cycle) => cycle.dateEnd >= snapshot)
 
     return cyclesAfterDate
+  }
+
+  private async getStatusAtDate(date: Date, cycle: CycleDTO) {
+    const objectives = await this.objectiveService.getFromCycle(cycle)
+    if (!objectives || objectives.length === 0) return this.buildDefaultStatus(date)
+
+    const cycleStatus = await this.buildStatusAtDate(date, objectives)
+
+    return cycleStatus
+  }
+
+  private buildDefaultStatus(
+    date?: DomainCycleStatus['createdAt'],
+    progress: DomainCycleStatus['progress'] = DEFAULT_PROGRESS,
+    confidence: DomainCycleStatus['confidence'] = DEFAULT_CONFIDENCE,
+  ) {
+    date ??= new Date()
+
+    const defaultStatus: DomainCycleStatus = {
+      progress,
+      confidence,
+      createdAt: date,
+    }
+
+    return defaultStatus
+  }
+
+  private async buildStatusAtDate(
+    date: Date,
+    objectives: Objective[],
+  ): Promise<DomainCycleStatus | undefined> {
+    const objectiveStatusPromises = objectives.map(async (objective) =>
+      this.objectiveService.getStatusAtDate(date, objective),
+    )
+    const objectiveStatuss = await Promise.all(objectiveStatusPromises)
+    const latestObjectiveStatus = maxBy(objectiveStatuss, 'createdAt')
+    if (!latestObjectiveStatus) return
+
+    const cycleStatus: DomainCycleStatus = {
+      latestObjectiveStatus,
+      progress: meanBy(objectiveStatuss, 'progress'),
+      confidence: minBy(objectiveStatuss, 'confidence').confidence,
+      createdAt: latestObjectiveStatus.createdAt,
+    }
+
+    return cycleStatus
   }
 }
 

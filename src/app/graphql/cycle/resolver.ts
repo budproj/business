@@ -1,7 +1,7 @@
-import { flatten, Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Context, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
-import { ApolloError, Context as ApolloServerContext } from 'apollo-server-core'
-import { UserInputError, AuthenticationError } from 'apollo-server-fastify'
+import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
+import { Args, ID, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { ApolloError } from 'apollo-server-core'
+import { UserInputError } from 'apollo-server-fastify'
 
 import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
@@ -13,16 +13,16 @@ import {
   EnhanceWithBudUser,
   EnhanceWithUserResourceConstraint,
 } from 'src/app/graphql/authz/interceptors'
+import { KeyResultFilterArguments, KeyResultObject } from 'src/app/graphql/key-result/models'
 import { ObjectiveObject } from 'src/app/graphql/objective/models'
-import GraphQLEntityResolver, { GraphQLEntityContext } from 'src/app/graphql/resolver'
+import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import { TeamObject } from 'src/app/graphql/team/models'
-import { CONSTRAINT } from 'src/domain/constants'
 import { CycleDTO } from 'src/domain/cycle/dto'
 import { Cycle } from 'src/domain/cycle/entities'
 import DomainService from 'src/domain/service'
 import RailwayProvider from 'src/railway'
 
-import { CycleObject } from './models'
+import { CycleQueryArguments, CycleObject, CycleStatusObject } from './models'
 
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser, EnhanceWithUserResourceConstraint)
@@ -54,55 +54,39 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
 
   @Permissions(PERMISSION['CYCLE:READ'])
   @Query(() => [CycleObject], { name: 'cycles', nullable: true })
-  protected async getAllCycles(@GraphQLUser() user: AuthzUser) {
+  protected async getAllCycles(
+    @GraphQLUser() user: AuthzUser,
+    @Args() { orderBy, ...filters }: CycleQueryArguments,
+  ) {
     this.logger.log({
+      orderBy,
+      filters,
       message: 'Fetching cycles',
     })
 
     const userTeams = await user.teams
-    const handlers = {
-      [CONSTRAINT.ANY]: async () => this.domain.cycle.getMany({}),
-      [CONSTRAINT.COMPANY]: async () => this.domain.cycle.getFromTeamListCompanies(userTeams),
-      [CONSTRAINT.TEAM]: async () => this.domain.cycle.getFromUserTeams(user),
-      [CONSTRAINT.OWNS]: async () => this.domain.cycle.getFromTeamList(userTeams),
-    }
-    const constraintHandler = handlers[user.constraint?.cycle]
-    if (!constraintHandler)
-      throw new AuthenticationError("Sorry, you don't have permission to fetch cycles")
+    const userTeamsTree = await this.domain.team.getTeamNodesTreeBeforeTeam(userTeams)
+    const cyclesPromise = this.domain.cycle.getFromTeamsWithFilters(userTeamsTree, filters)
 
-    // Following https://getbud.atlassian.net/browse/BBCR-99?focusedCommentId=10061 we've decided
-    // to abort this feature for now. We're going to do it again during the cycle story
-    //
-    // When someone tried to develop this again, here is what I was planning to do:
-    // Based on the user constraint for cycle, gets the method and fetches the cycle based on the
-    // given constraint. Maybe we should develop a custom wrapper to handle that logic, since
-    // chances are that other entities may use that logic too.
-    //
-    // const cyclesPromise = constraintHandler()
-    const cyclePromises = userTeams.map(async (team) => this.domain.cycle.getFromTeam(team))
-
-    const [error, result] = await this.railway.execute<Cycle[][]>(Promise.all(cyclePromises))
+    const [error, cycles] = await this.railway.execute<Cycle[]>(cyclesPromise)
     if (error) throw new ApolloError(error.message)
 
-    const cycles = flatten(result)
     if (!cycles || cycles.length === 0)
       throw new UserInputError('We could not find any cycles for your user')
 
-    return cycles
+    const sortedByCadenceCycles = this.domain.cycle.sortCyclesByCadence(cycles, orderBy.cadence)
+
+    return sortedByCadenceCycles
   }
 
   @ResolveField('team', () => TeamObject)
-  protected async getCycleTeam(
-    @Parent() cycle: CycleObject,
-    @Context() context: ApolloServerContext<GraphQLEntityContext>,
-  ) {
+  protected async getCycleTeam(@Parent() cycle: CycleObject) {
     this.logger.log({
       cycle,
       message: 'Fetching team for cycle',
     })
 
     const team = await this.domain.team.getOne({ id: cycle.teamId })
-    context.filters = await this.buildTeamsFilters(team, context.filters)
 
     return team
   }
@@ -115,6 +99,35 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
     })
 
     return this.domain.objective.getFromCycle(cycle)
+  }
+
+  @ResolveField('keyResults', () => [KeyResultObject], { nullable: true })
+  protected async getCycleKeyResults(
+    @Args() keyResultsFilter: KeyResultFilterArguments,
+    @Parent() cycle: CycleObject,
+  ) {
+    this.logger.log({
+      cycle,
+      keyResultsFilter,
+      message: 'Fetching key results for cycle',
+    })
+
+    const objectives = await this.domain.objective.getFromCycle(cycle)
+    const keyResults = await this.domain.keyResult.getFromObjectives(objectives, keyResultsFilter)
+
+    return keyResults
+  }
+
+  @ResolveField('status', () => CycleStatusObject)
+  protected async getCycleStatus(@Parent() cycle: CycleObject) {
+    this.logger.log({
+      cycle,
+      message: 'Fetching current status for this cycle',
+    })
+
+    const status = await this.domain.cycle.getCurrentStatus(cycle)
+
+    return status
   }
 }
 

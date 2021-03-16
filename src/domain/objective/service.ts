@@ -6,6 +6,7 @@ import { CycleDTO } from 'src/domain/cycle/dto'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { KeyResultCheckInDTO } from 'src/domain/key-result/check-in/dto'
 import { KeyResultCheckIn } from 'src/domain/key-result/check-in/entities'
+import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { KeyResult } from 'src/domain/key-result/entities'
 import DomainKeyResultService, { DomainKeyResultStatus } from 'src/domain/key-result/service'
 import { ObjectiveDTO } from 'src/domain/objective/dto'
@@ -15,12 +16,12 @@ import { UserDTO } from 'src/domain/user/dto'
 import { DEFAULT_PROGRESS, DEFAULT_CONFIDENCE } from './constants'
 import { Objective } from './entities'
 import DomainObjectiveRepository from './repository'
-import { ObjectiveFilters } from './types'
 
 export interface DomainObjectiveServiceInterface {
   getFromOwner: (owner: UserDTO) => Promise<Objective[]>
   getFromCycle: (cycle: CycleDTO) => Promise<Objective[]>
-  getFromTeams: (teams: TeamDTO | TeamDTO[], filters?: ObjectiveFilters) => Promise<Objective[]>
+  getFromTeams: (teams: TeamDTO | TeamDTO[]) => Promise<Objective[]>
+  getFromKeyResult: (keyResult: KeyResultDTO) => Promise<Objective>
   getCurrentProgressForObjective: (objective: ObjectiveDTO) => Promise<KeyResultCheckIn['progress']>
   getCurrentConfidenceForObjective: (
     objective: ObjectiveDTO,
@@ -56,8 +57,12 @@ class DomainObjectiveService
     return this.repository.find({ cycleId: cycle.id })
   }
 
-  public async getFromTeams(team: TeamDTO | TeamDTO[], filters?: ObjectiveFilters) {
-    const keyResults = await this.keyResultService.getFromTeams(team, filters)
+  public async getFromKeyResult(keyResult: KeyResultDTO) {
+    return this.repository.findOne({ id: keyResult.objectiveId })
+  }
+
+  public async getFromTeams(team: TeamDTO | TeamDTO[]) {
+    const keyResults = await this.keyResultService.getFromTeams(team)
     if (!keyResults) return []
 
     const objectiveIds = keyResults.map((keyResult) => keyResult.objectiveId)

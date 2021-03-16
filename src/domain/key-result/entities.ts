@@ -48,7 +48,7 @@ export class KeyResult extends DomainEntity implements KeyResultDTO {
   public teamId: TeamDTO['id']
 
   @OneToMany('KeyResultCheckIn', 'keyResult', { nullable: true })
-  public checkIns?: KeyResultCheckInDTO
+  public checkIns?: KeyResultCheckInDTO[]
 
   @Column({ type: 'text', nullable: true })
   public description?: string

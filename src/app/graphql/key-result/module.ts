@@ -7,7 +7,6 @@ import DomainModule from 'src/domain/module'
 
 import GraphQLKeyResultCheckInModule from './check-in'
 import GraphQLKeyResultCommentModule from './comment'
-import GraphQLKeyResultCustomListModule from './custom-list'
 import GraphQLKeyResultResolver from './resolver'
 
 @Module({
@@ -15,12 +14,11 @@ import GraphQLKeyResultResolver from './resolver'
     ConfigModule.forFeature(appConfig),
     DomainModule,
     GraphQLAuthzModule,
-    GraphQLKeyResultCustomListModule,
     GraphQLKeyResultCheckInModule,
     GraphQLKeyResultCommentModule,
   ],
   providers: [GraphQLKeyResultResolver],
-  exports: [GraphQLKeyResultCustomListModule, GraphQLKeyResultCheckInModule],
+  exports: [GraphQLKeyResultCheckInModule],
 })
 class GraphQLKeyResultsModule {}
 

@@ -13,7 +13,7 @@ import {
 } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
-import { CONSTRAINT, CONSTRAINT_ORDER, DOMAIN_QUERY_ORDER, MUTATION_QUERY_TYPE } from './constants'
+import { CONSTRAINT, CONSTRAINT_ORDER, DOMAIN_SORTING, MUTATION_QUERY_TYPE } from './constants'
 import { TeamDTO } from './team/dto'
 import { UserDTO } from './user/dto'
 
@@ -57,7 +57,7 @@ export interface DomainEntityServiceInterface<E, D> {
 export interface DomainServiceGetOptions<E> {
   limit?: number
   offset?: number
-  orderBy?: Partial<Record<keyof E, DOMAIN_QUERY_ORDER>>
+  orderBy?: Partial<Record<keyof E, DOMAIN_SORTING>>
 }
 
 export interface DomainServiceContext {
