@@ -1,6 +1,6 @@
 import { EntityRepository, LessThanOrEqual, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
-import { DOMAIN_QUERY_ORDER } from 'src/domain/constants'
+import { DOMAIN_SORTING } from 'src/domain/constants'
 import { CONSTRAINT_TYPE, DomainEntityRepository } from 'src/domain/entity'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { KeyResult } from 'src/domain/key-result/entities'
@@ -28,7 +28,7 @@ class DomainKeyResultCheckInRepository
       createdAt: LessThanOrEqual(isoDate),
     }
     const order = {
-      createdAt: DOMAIN_QUERY_ORDER.DESC,
+      createdAt: DOMAIN_SORTING.DESC,
     }
 
     const checkIn = await this.findOne({

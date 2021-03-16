@@ -2,7 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { sum } from 'lodash'
 import { Any, SelectQueryBuilder } from 'typeorm'
 
-import { DOMAIN_QUERY_ORDER } from 'src/domain/constants'
+import { DOMAIN_SORTING } from 'src/domain/constants'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import {
   MAX_PERCENTAGE_PROGRESS,
@@ -72,7 +72,7 @@ class DomainKeyResultCheckInService extends DomainEntityService<
       where: selector,
       take: 1,
       order: {
-        createdAt: DOMAIN_QUERY_ORDER.DESC,
+        createdAt: DOMAIN_SORTING.DESC,
       },
     })
 

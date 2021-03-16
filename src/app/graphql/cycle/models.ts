@@ -1,10 +1,11 @@
-import { ArgsType, Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
+import { ArgsType, Field, ID, ObjectType, InputType, registerEnumType } from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import { EntityObject, StatusObject } from 'src/app/graphql/models'
 import { ObjectiveObject, ObjectiveStatusObject } from 'src/app/graphql/objective/models'
 import { TeamObject } from 'src/app/graphql/team/models'
+import { DOMAIN_SORTING } from 'src/domain/constants'
 import { CADENCE } from 'src/domain/cycle/constants'
 
 registerEnumType(CADENCE, {
@@ -110,8 +111,20 @@ export class CycleObject implements EntityObject {
   public policies: PolicyObject
 }
 
+@InputType({
+  description: 'In this object the user can define a custom ordering',
+})
+export class CycleOrderByInput {
+  @Field(() => DOMAIN_SORTING, {
+    description:
+      'This key defines how our cycles should be ordered based on their cadence key. Desc sorting means higher cadences first (year-quarter-month-...)',
+    nullable: true,
+  })
+  public cadence?: DOMAIN_SORTING
+}
+
 @ArgsType()
-export class CycleFilterArguments {
+export class CycleQueryArguments {
   @Field(() => Boolean, {
     description: 'If this flag is true, it will only fetch active cycles',
     defaultValue: true,
@@ -123,4 +136,11 @@ export class CycleFilterArguments {
     nullable: true,
   })
   public cadence?: CADENCE
+
+  @Field(() => CycleOrderByInput, {
+    defaultValue: {
+      cadence: DOMAIN_SORTING.DESC,
+    },
+  })
+  public orderBy?: CycleOrderByInput
 }

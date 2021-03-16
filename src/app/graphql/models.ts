@@ -1,10 +1,10 @@
 import { Field, Float, ID, Int, InterfaceType, registerEnumType } from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
-import { DOMAIN_QUERY_ORDER } from 'src/domain/constants'
+import { DOMAIN_SORTING } from 'src/domain/constants'
 
-registerEnumType(DOMAIN_QUERY_ORDER, {
-  name: 'QUERY_ORDER',
+registerEnumType(DOMAIN_SORTING, {
+  name: 'SORTING',
   description: 'Defines the order to return your results in a given query',
 })
 

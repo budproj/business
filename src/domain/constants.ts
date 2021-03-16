@@ -17,9 +17,14 @@ export enum TIMEFRAME_SCOPE {
   SNAPSHOT = 'SNAPSHOT',
 }
 
-export enum DOMAIN_QUERY_ORDER {
+export enum DOMAIN_SORTING {
   DESC = 'DESC',
   ASC = 'ASC',
+}
+
+export const LODASH_SORTING: Record<DOMAIN_SORTING, 'asc' | 'desc'> = {
+  [DOMAIN_SORTING.DESC]: 'desc',
+  [DOMAIN_SORTING.ASC]: 'asc',
 }
 
 export enum MUTATION_QUERY_TYPE {

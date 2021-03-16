@@ -14,7 +14,7 @@ import { ObjectiveObject } from 'src/app/graphql/objective/models'
 import GraphQLEntityResolver from 'src/app/graphql/resolver'
 import { TeamObject } from 'src/app/graphql/team/models'
 import { UserObject } from 'src/app/graphql/user'
-import { DOMAIN_QUERY_ORDER } from 'src/domain/constants'
+import { DOMAIN_SORTING } from 'src/domain/constants'
 import { KeyResultDTO } from 'src/domain/key-result/dto'
 import { KeyResult } from 'src/domain/key-result/entities'
 import DomainService from 'src/domain/service'
@@ -84,8 +84,8 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
   @ResolveField('keyResultCheckIns', () => [KeyResultCheckInObject], { nullable: true })
   protected async getKeyResultCheckIns(
     @Parent() keyResult: KeyResultObject,
-    @Args('order', { type: () => DOMAIN_QUERY_ORDER, defaultValue: DOMAIN_QUERY_ORDER.DESC })
-    order: DOMAIN_QUERY_ORDER,
+    @Args('order', { type: () => DOMAIN_SORTING, defaultValue: DOMAIN_SORTING.DESC })
+    order: DOMAIN_SORTING,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
   ) {
     this.logger.log({

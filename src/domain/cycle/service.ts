@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { orderBy, filter, maxBy, meanBy, minBy } from 'lodash'
+import { orderBy, filter, maxBy, meanBy, minBy, omitBy } from 'lodash'
 import { Any } from 'typeorm'
 
+import { DOMAIN_SORTING, LODASH_SORTING } from 'src/domain/constants'
 import { CycleDTO } from 'src/domain/cycle/dto'
 import { DomainCreationQuery, DomainEntityService, DomainQueryContext } from 'src/domain/entity'
 import { DomainKeyResultStatus } from 'src/domain/key-result/service'
@@ -11,7 +12,7 @@ import DomainObjectiveService, { DomainObjectiveStatus } from 'src/domain/object
 import { TeamDTO } from 'src/domain/team/dto'
 import DomainTeamService from 'src/domain/team/service'
 
-import { DEFAULT_PROGRESS, DEFAULT_CONFIDENCE } from './constants'
+import { DEFAULT_PROGRESS, DEFAULT_CONFIDENCE, CADENCE_RANK } from './constants'
 import { Cycle } from './entities'
 import DomainCycleRepository from './repository'
 
@@ -21,6 +22,7 @@ export interface DomainCycleServiceInterface {
   getClosestToEndFromTeam: (team: TeamDTO, snapshot?: Date) => Promise<Cycle | undefined>
   getFromTeamsWithFilters: (teams: TeamDTO[], filters?: Partial<CycleDTO>) => Promise<Cycle[]>
   getCurrentStatus: (cycle: CycleDTO) => Promise<DomainCycleStatus>
+  sortCyclesByCadence: (cycles: Cycle[], sorting?: DOMAIN_SORTING) => Cycle[]
 }
 
 export interface DomainCycleStatus extends DomainKeyResultStatus {
@@ -79,6 +81,19 @@ class DomainCycleService
     return cycleStatus
   }
 
+  public sortCyclesByCadence(cycles: Cycle[], sorting?: DOMAIN_SORTING) {
+    if (!sorting) return cycles
+
+    const rankedCycles = cycles.map((cycle) => ({
+      ...cycle,
+      rank: CADENCE_RANK[cycle.cadence],
+    }))
+    const sortedRawCycles = orderBy<Cycle>(rankedCycles, 'rank', LODASH_SORTING[sorting])
+    const sortedCycles = sortedRawCycles.map((cycle) => omitBy(cycle, 'rank') as Cycle)
+
+    return sortedCycles
+  }
+
   protected async protectCreationQuery(
     _query: DomainCreationQuery<Cycle>,
     _data: Partial<CycleDTO>,
@@ -89,7 +104,10 @@ class DomainCycleService
 
   private async getAllRelatedToTeam(team: TeamDTO) {
     const relatedTeams = await this.teamService.getFullTeamNodesTree(team)
-    const cycles = await this.repository.findFromTeams(relatedTeams)
+    const selector = {
+      teamId: Any(relatedTeams),
+    }
+    const cycles = await this.repository.find({ where: selector })
 
     return cycles
   }

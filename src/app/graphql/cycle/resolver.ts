@@ -22,7 +22,7 @@ import { Cycle } from 'src/domain/cycle/entities'
 import DomainService from 'src/domain/service'
 import RailwayProvider from 'src/railway'
 
-import { CycleFilterArguments, CycleObject, CycleStatusObject } from './models'
+import { CycleQueryArguments, CycleObject, CycleStatusObject } from './models'
 
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser, EnhanceWithUserResourceConstraint)
@@ -56,9 +56,10 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
   @Query(() => [CycleObject], { name: 'cycles', nullable: true })
   protected async getAllCycles(
     @GraphQLUser() user: AuthzUser,
-    @Args() filters: CycleFilterArguments,
+    @Args() { orderBy, ...filters }: CycleQueryArguments,
   ) {
     this.logger.log({
+      orderBy,
       filters,
       message: 'Fetching cycles',
     })
@@ -73,7 +74,9 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
     if (!cycles || cycles.length === 0)
       throw new UserInputError('We could not find any cycles for your user')
 
-    return cycles
+    const sortedByCadenceCycles = this.domain.cycle.sortCyclesByCadence(cycles, orderBy.cadence)
+
+    return sortedByCadenceCycles
   }
 
   @ResolveField('team', () => TeamObject)
