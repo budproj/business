@@ -51,7 +51,9 @@ export interface DomainKeyResultServiceInterface {
     team: KeyResultDTO,
     date?: Date,
   ) => Promise<KeyResultCheckIn | null>
-  getCurrentProgressForKeyResult: (keyResult: KeyResultDTO) => Promise<KeyResultCheckIn['progress']>
+  getCurrentProgressForKeyResult: (
+    keyResult: KeyResultDTO,
+  ) => Promise<DomainKeyResultStatus['progress']>
   getCurrentConfidenceForKeyResult: (
     keyResult: KeyResultDTO,
   ) => Promise<KeyResultCheckIn['confidence']>
@@ -83,13 +85,13 @@ export interface DomainKeyResultServiceInterface {
 }
 
 export interface DomainKeyResultStatus {
-  progress: KeyResultCheckInDTO['progress']
+  progress: number
   confidence: KeyResultCheckInDTO['confidence']
   createdAt: KeyResultCheckInDTO['createdAt']
 }
 
 export interface DomainKeyResultCheckInPayload {
-  progress: KeyResultCheckIn['progress']
+  value: KeyResultCheckIn['value']
   confidence: KeyResultCheckIn['confidence']
   keyResultId: KeyResultCheckIn['keyResultId']
   comment?: KeyResultCheckIn['comment']
@@ -191,7 +193,7 @@ class DomainKeyResultService
     const latestCheckIn = await this.checkIn.getLatestFromKeyResult(keyResult)
     if (!latestCheckIn) return this.repository.getInitialValueForKeyResult(keyResult)
 
-    return latestCheckIn.progress
+    return latestCheckIn.value
   }
 
   public async getCurrentConfidenceForKeyResult(keyResult: KeyResultDTO) {
@@ -208,7 +210,7 @@ class DomainKeyResultService
     const checkIn: Partial<KeyResultCheckInDTO> = {
       userId: user.id,
       keyResultId: checkInData.keyResultId,
-      progress: checkInData.progress,
+      value: checkInData.value,
       confidence: checkInData.confidence,
       comment: checkInData.comment,
       parentId: previousCheckIn?.id,
@@ -224,9 +226,9 @@ class DomainKeyResultService
   public async getCheckInValueIncrease(checkIn: KeyResultCheckIn) {
     const keyResult = await this.getOne({ id: checkIn.keyResultId })
     const previousCheckIn = await this.getParentCheckInFromCheckIn(checkIn)
-    if (!previousCheckIn) return checkIn.progress - keyResult.initialValue
+    if (!previousCheckIn) return checkIn.value - keyResult.initialValue
 
-    const deltaValue = checkIn.progress - previousCheckIn.progress
+    const deltaValue = checkIn.value - previousCheckIn.value
 
     return deltaValue
   }
@@ -239,14 +241,14 @@ class DomainKeyResultService
       keyResult,
       checkIn,
     )
-    if (!previousCheckIn) return normalizedCurrentCheckIn.progress
+    if (!previousCheckIn) return normalizedCurrentCheckIn.value
 
     const normalizedPreviousCheckIn = this.checkIn.transformCheckInToRelativePercentage(
       keyResult,
       previousCheckIn,
     )
 
-    const deltaProgress = this.checkIn.calculateProgressDifference(
+    const deltaProgress = this.checkIn.calculateValueDifference(
       normalizedPreviousCheckIn,
       normalizedCurrentCheckIn,
     )
@@ -266,7 +268,7 @@ class DomainKeyResultService
     const keyResult = await this.getOne({ id: checkIn.keyResultId })
     const normalizedCheckIn = this.checkIn.transformCheckInToRelativePercentage(keyResult, checkIn)
 
-    return normalizedCheckIn.progress
+    return normalizedCheckIn.value
   }
 
   public async buildCommentForUser(user: UserDTO, commentData: DomainKeyResultCommentPayload) {
@@ -302,7 +304,7 @@ class DomainKeyResultService
     const normalizedKeyResultCheckInList = keyResultCheckInList.map((keyResultCheckIn, index) =>
       this.normalizeCheckInToPercentage(keyResults[index], keyResultCheckIn),
     )
-    const keyResultCheckInListAverageProgress = this.checkIn.calculateAverageProgressFromCheckInList(
+    const keyResultCheckInListAverageProgress = this.checkIn.calculateAverageValueFromCheckInList(
       normalizedKeyResultCheckInList,
     )
 

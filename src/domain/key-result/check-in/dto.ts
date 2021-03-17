@@ -3,7 +3,7 @@ import { UserDTO } from 'src/domain/user/dto'
 
 export class KeyResultCheckInDTO {
   public id: string
-  public progress: number
+  public value: number
   public confidence: number
   public createdAt: Date
   public keyResultId: KeyResultDTO['id']

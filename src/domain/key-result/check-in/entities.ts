@@ -9,7 +9,7 @@ import { KeyResultCheckInDTO } from './dto'
 @Entity()
 export class KeyResultCheckIn extends DomainEntity implements KeyResultCheckInDTO {
   @Column({ type: 'real' })
-  public progress: number
+  public value: number
 
   @Column()
   public confidence: number
