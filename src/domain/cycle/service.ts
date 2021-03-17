@@ -23,6 +23,7 @@ export interface DomainCycleServiceInterface {
   getFromTeamsWithFilters: (teams: TeamDTO[], filters?: Partial<CycleDTO>) => Promise<Cycle[]>
   getCurrentStatus: (cycle: CycleDTO) => Promise<DomainCycleStatus>
   sortCyclesByCadence: (cycles: Cycle[], sorting?: DOMAIN_SORTING) => Cycle[]
+  getChildCycles: (parentCycle: CycleDTO) => Promise<Cycle[]>
 }
 
 export interface DomainCycleStatus extends DomainKeyResultStatus {
@@ -92,6 +93,12 @@ class DomainCycleService
     const sortedCycles = sortedRawCycles.map((cycle) => omitBy(cycle, 'rank') as Cycle)
 
     return sortedCycles
+  }
+
+  public async getChildCycles(parentCycle: CycleDTO) {
+    const cycles = await this.repository.find({ parentId: parentCycle.id })
+
+    return cycles
   }
 
   protected async protectCreationQuery(

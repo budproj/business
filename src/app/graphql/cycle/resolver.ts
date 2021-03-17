@@ -129,6 +129,30 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
 
     return status
   }
+
+  @ResolveField('parent', () => CycleObject, { nullable: true })
+  protected async getParentCycle(@Parent() cycle: CycleObject) {
+    this.logger.log({
+      cycle,
+      message: 'Fetching parent cycle for cycle',
+    })
+
+    const parentCycle = await this.domain.cycle.getOne({ id: cycle.parentId })
+
+    return parentCycle
+  }
+
+  @ResolveField('cycles', () => [CycleObject], { nullable: true })
+  protected async getChildCycles(@Parent() cycle: CycleObject) {
+    this.logger.log({
+      cycle,
+      message: 'Fetching child cycles for cycle',
+    })
+
+    const childCycles = await this.domain.cycle.getChildCycles(cycle)
+
+    return childCycles
+  }
 }
 
 export default GraphQLCycleResolver
