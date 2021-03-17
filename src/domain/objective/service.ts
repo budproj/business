@@ -22,13 +22,15 @@ export interface DomainObjectiveServiceInterface {
   getFromCycle: (cycle: CycleDTO) => Promise<Objective[]>
   getFromTeams: (teams: TeamDTO | TeamDTO[]) => Promise<Objective[]>
   getFromKeyResult: (keyResult: KeyResultDTO) => Promise<Objective>
-  getCurrentProgressForObjective: (objective: ObjectiveDTO) => Promise<KeyResultCheckIn['progress']>
+  getCurrentProgressForObjective: (
+    objective: ObjectiveDTO,
+  ) => Promise<DomainObjectiveStatus['progress']>
   getCurrentConfidenceForObjective: (
     objective: ObjectiveDTO,
   ) => Promise<KeyResultCheckIn['confidence']>
   getObjectiveProgressIncreaseSinceLastWeek: (
     objective: ObjectiveDTO,
-  ) => Promise<KeyResultCheckIn['progress']>
+  ) => Promise<DomainObjectiveStatus['progress']>
   getStatusAtDate: (date: Date, objective: Objective) => Promise<DomainObjectiveStatus | undefined>
   getCurrentStatus: (objective: ObjectiveDTO) => Promise<DomainObjectiveStatus>
 }

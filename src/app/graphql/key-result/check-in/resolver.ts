@@ -11,7 +11,6 @@ import {
   Resolver,
 } from '@nestjs/graphql'
 import { UserInputError, ApolloError } from 'apollo-server-fastify'
-import { omit } from 'lodash'
 
 import { ACTION, PERMISSION, POLICY, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
@@ -75,15 +74,7 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
       message: 'Received create check-in request',
     })
 
-    const translatedKeyResultCheckIn = {
-      ...omit(keyResultCheckIn, 'value'),
-      progress: keyResultCheckIn.value,
-    }
-
-    const checkIn = await this.domain.keyResult.buildCheckInForUser(
-      user,
-      translatedKeyResultCheckIn,
-    )
+    const checkIn = await this.domain.keyResult.buildCheckInForUser(user, keyResultCheckIn)
     const createCheckInPromise = this.createWithActionScopeConstraint(checkIn, user, ACTION.UPDATE)
 
     this.logger.log({
@@ -190,17 +181,6 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
     })
 
     return this.domain.keyResult.getCheckInProgress(checkIn)
-  }
-
-  // The field resolver below should be removed after changing our domain structure
-  @ResolveField('value', () => Float)
-  protected getKeyResultCheckInValue(@Parent() checkIn: KeyResultCheckInObject) {
-    this.logger.log({
-      checkIn,
-      message: 'Fetching value for key result check-in',
-    })
-
-    return checkIn.progress
   }
 
   @ResolveField('valueIncrease', () => Float)

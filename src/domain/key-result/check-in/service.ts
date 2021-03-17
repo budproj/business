@@ -31,10 +31,10 @@ export interface DomainKeyResultCheckInServiceInterface {
     checkIn?: KeyResultCheckIn,
   ) => KeyResultCheckIn
   limitPercentageCheckIn: (checkIn: KeyResultCheckIn) => KeyResultCheckIn
-  calculateAverageProgressFromCheckInList: (
+  calculateAverageValueFromCheckInList: (
     checkIns: KeyResultCheckIn[],
-  ) => KeyResultCheckInDTO['progress']
-  calculateProgressDifference: (
+  ) => KeyResultCheckInDTO['value']
+  calculateValueDifference: (
     oldCheckIn: KeyResultCheckInDTO,
     newCheckIn: KeyResultCheckInDTO,
   ) => number
@@ -96,12 +96,12 @@ class DomainKeyResultCheckInService extends DomainEntityService<
 
   public transformCheckInToRelativePercentage(keyResult: KeyResult, checkIn?: KeyResultCheckIn) {
     const { initialValue, goal } = keyResult
-    const progress = checkIn ? checkIn.progress : initialValue
+    const value = checkIn ? checkIn.value : initialValue
 
-    const relativePercentageProgress = ((progress - initialValue) * 100) / (goal - initialValue)
+    const relativePercentageProgress = ((value - initialValue) * 100) / (goal - initialValue)
     const normalizedCheckIn: KeyResultCheckIn = {
       ...checkIn,
-      progress: relativePercentageProgress,
+      value: relativePercentageProgress,
     }
 
     const limitedNormalizedCheckIn = this.limitPercentageCheckIn(normalizedCheckIn)
@@ -110,36 +110,36 @@ class DomainKeyResultCheckInService extends DomainEntityService<
   }
 
   public limitPercentageCheckIn(checkIn: KeyResultCheckIn) {
-    const limitedProgress = this.minmax(
-      checkIn.progress,
+    const limitedValue = this.minmax(
+      checkIn.value,
       MIN_PERCENTAGE_PROGRESS,
       MAX_PERCENTAGE_PROGRESS,
     )
 
     const limitedCheckIn: KeyResultCheckIn = {
       ...checkIn,
-      progress: limitedProgress,
+      value: limitedValue,
     }
 
     return limitedCheckIn
   }
 
-  public calculateAverageProgressFromCheckInList(checkIns: KeyResultCheckIn[]) {
-    const progressList = checkIns.map((checkIn) => checkIn?.progress ?? 0)
-    const numberOfCheckIns = progressList.length === 0 ? 1 : progressList.length
+  public calculateAverageValueFromCheckInList(checkIns: KeyResultCheckIn[]) {
+    const valueList = checkIns.map((checkIn) => checkIn?.value ?? 0)
+    const numberOfCheckIns = valueList.length === 0 ? 1 : valueList.length
 
-    const averageProgress = sum(progressList) / numberOfCheckIns
+    const averageValue = sum(valueList) / numberOfCheckIns
 
-    return averageProgress
+    return averageValue
   }
 
-  public calculateProgressDifference(
+  public calculateValueDifference(
     oldCheckIn: KeyResultCheckInDTO,
     newCheckIn: KeyResultCheckInDTO,
   ) {
-    const deltaProgress = newCheckIn.progress - oldCheckIn.progress
+    const deltaValue = newCheckIn.value - oldCheckIn.value
 
-    return deltaProgress
+    return deltaValue
   }
 
   public calculateConfidenceDifference(

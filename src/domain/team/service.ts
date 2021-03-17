@@ -46,9 +46,9 @@ export interface DomainTeamServiceInterface {
   ) => Promise<Team>
   getUsersInTeam: (teamID: TeamDTO) => Promise<UserDTO[]>
   buildTeamQueryContext: (user: UserDTO, constraint?: CONSTRAINT) => Promise<DomainQueryContext>
-  getCurrentProgressForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
+  getCurrentProgressForTeam: (team: TeamDTO) => Promise<DomainTeamStatus['progress']>
   getCurrentConfidenceForTeam: (team: TeamDTO) => Promise<KeyResultCheckIn['confidence']>
-  getTeamProgressIncreaseSinceLastWeek: (team: TeamDTO) => Promise<KeyResultCheckIn['progress']>
+  getTeamProgressIncreaseSinceLastWeek: (team: TeamDTO) => Promise<DomainTeamStatus['progress']>
   getTeamChildTeams: (team: TeamDTO) => Promise<Team[]>
   getTeamRankedChildTeams: (team: TeamDTO) => Promise<Team[]>
   getRankedTeamsBelowNode: (team: TeamDTO) => Promise<Team[]>
@@ -320,14 +320,14 @@ class DomainTeamService
     const objectiveStatusPromises = objectives.map(async (objective) =>
       this.objectiveService.getStatusAtDate(date, objective),
     )
-    const objectiveStatuss = await Promise.all(objectiveStatusPromises)
-    const latestObjectiveStatus = maxBy(objectiveStatuss, 'createdAt')
+    const objectiveStatus = await Promise.all(objectiveStatusPromises)
+    const latestObjectiveStatus = maxBy(objectiveStatus, 'createdAt')
     if (!latestObjectiveStatus) return
 
     const teamStatus: DomainTeamStatus = {
       latestObjectiveStatus,
-      progress: meanBy(objectiveStatuss, 'progress'),
-      confidence: minBy(objectiveStatuss, 'confidence').confidence,
+      progress: meanBy(objectiveStatus, 'progress'),
+      confidence: minBy(objectiveStatus, 'confidence').confidence,
       createdAt: latestObjectiveStatus.createdAt,
     }
 
