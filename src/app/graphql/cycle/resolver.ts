@@ -79,6 +79,33 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
     return sortedByCadenceCycles
   }
 
+  @Permissions(PERMISSION['CYCLE:READ'])
+  @Query(() => [CycleObject], { name: 'sameTitleCyclesChildren', nullable: true })
+  protected async getSameTitleCyclesChildren(
+    @GraphQLUser() user: AuthzUser,
+    @Args('parentIds', { type: () => [ID] }) parentIds: Array<CycleObject['id']>,
+  ) {
+    this.logger.log({
+      parentIds,
+      message: 'Fetching cycles children same title cycles',
+    })
+
+    const userTeams = await user.teams
+    const userTeamsTree = await this.domain.team.getTeamNodesTreeBeforeTeam(userTeams)
+    const cyclesPromise = this.domain.cycle.getSameTitleCyclesFromTeamsAndParentIDs(
+      userTeamsTree,
+      parentIds,
+    )
+
+    const [error, cycles] = await this.railway.execute<Cycle[]>(cyclesPromise)
+    if (error) throw new ApolloError(error.message)
+
+    if (!cycles || cycles.length === 0)
+      throw new UserInputError('We could not find any of the provided parent cycles for your user')
+
+    return cycles
+  }
+
   @ResolveField('team', () => TeamObject)
   protected async getCycleTeam(@Parent() cycle: CycleObject) {
     this.logger.log({

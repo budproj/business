@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { orderBy, filter, maxBy, meanBy, minBy, omitBy } from 'lodash'
+import { orderBy, filter, maxBy, meanBy, minBy, omitBy, groupBy, mapValues, flatten } from 'lodash'
 import { Any } from 'typeorm'
 
 import { DOMAIN_SORTING, LODASH_SORTING } from 'src/domain/constants'
@@ -24,6 +24,10 @@ export interface DomainCycleServiceInterface {
   getCurrentStatus: (cycle: CycleDTO) => Promise<DomainCycleStatus>
   sortCyclesByCadence: (cycles: Cycle[], sorting?: DOMAIN_SORTING) => Cycle[]
   getChildCycles: (parentCycle: CycleDTO) => Promise<Cycle[]>
+  getSameTitleCyclesFromTeamsAndParentIDs: (
+    teams: TeamDTO[],
+    parentIDs: Array<CycleDTO['id']>,
+  ) => Promise<Cycle[]>
 }
 
 export interface DomainCycleStatus extends DomainKeyResultStatus {
@@ -101,6 +105,27 @@ class DomainCycleService
     return cycles
   }
 
+  public async getSameTitleCyclesFromTeamsAndParentIDs(
+    teams: TeamDTO[],
+    parentIDs: Array<CycleDTO['id']>,
+  ) {
+    const parentsCycles = await this.getFromTeamsAndParentIDs(teams, parentIDs)
+    const groupedByTitleCycles = groupBy(parentsCycles, 'title')
+    const commonCyclesGroupedByTitle = filter(
+      mapValues(groupedByTitleCycles, (cycles) => {
+        const hasCyclesInAllParents = parentIDs.every((parentID) =>
+          cycles.some((cycle) => cycle.parentId === parentID),
+        )
+
+        return hasCyclesInAllParents ? cycles : undefined
+      }),
+    )
+
+    const cycles = flatten(commonCyclesGroupedByTitle)
+
+    return cycles
+  }
+
   protected async protectCreationQuery(
     _query: DomainCreationQuery<Cycle>,
     _data: Partial<CycleDTO>,
@@ -169,6 +194,20 @@ class DomainCycleService
     }
 
     return cycleStatus
+  }
+
+  private async getFromTeamsAndParentIDs(teams: TeamDTO[], parentIDs: Array<CycleDTO['id']>) {
+    const parentIDsFilter = Any(parentIDs)
+    const teamIDsFilter = Any(teams.map((team) => team.id))
+    const selector = {
+      parentId: parentIDsFilter,
+      teamId: teamIDsFilter,
+    }
+
+    // eslint-disable-next-line unicorn/no-fn-reference-in-iterator
+    const cycles = await this.repository.find(selector)
+
+    return cycles
   }
 }
 
