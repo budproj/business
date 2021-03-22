@@ -9,6 +9,7 @@ tasks:
     init: npm install
     command: >
       source <(grep -v '^#' .env | sed -E 's|^(.+)=(.*)$|: ${\1=\2}; export \1|g') &&
+      export URL=$(gp url 3000) &&
       npm run start:dev
 
 ports:
