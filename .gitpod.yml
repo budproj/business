@@ -4,6 +4,9 @@ image:
 tasks:
   - name: Apply GPG keys
     before: curl -s https://raw.githubusercontent.com/budproj/gist/main/gitpod/gpg-sync.sh | bash -
+
+  - name: Seed data
+    command: ./scripts/seed.sh
       
   - name: Server
     init: npm install
