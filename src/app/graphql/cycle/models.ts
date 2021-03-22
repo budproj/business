@@ -144,3 +144,11 @@ export class CycleQueryArguments {
   })
   public orderBy?: CycleOrderByInput
 }
+
+@ArgsType()
+export class CycleSameTitleQueryArguments extends CycleQueryArguments {
+  @Field(() => [ID], {
+    description: 'Defines the parent cycles we are going to fetch children from',
+  })
+  public parentIds: Array<CycleObject['id']>
+}

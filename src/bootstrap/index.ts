@@ -40,8 +40,11 @@ async function bootstrap() {
     origin: allowedOrigins,
   })
 
+  const serverEndpoint =
+    appConfig.url?.toString() ?? `https://localhost:${appConfig.port.toString()}`
+
   await app.listen(configService.get('port'), '0.0.0.0')
-  logger.log(`Started server listening to port ${appConfig.port.toString()}`)
+  logger.log(`Started server listening on ${serverEndpoint}`)
 }
 
 const buildHttpsConfig = () => {

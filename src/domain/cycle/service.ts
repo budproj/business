@@ -27,6 +27,7 @@ export interface DomainCycleServiceInterface {
   getSameTitleCyclesFromTeamsAndParentIDs: (
     teams: TeamDTO[],
     parentIDs: Array<CycleDTO['id']>,
+    filters?: Partial<CycleDTO>,
   ) => Promise<Cycle[]>
 }
 
@@ -108,8 +109,9 @@ class DomainCycleService
   public async getSameTitleCyclesFromTeamsAndParentIDs(
     teams: TeamDTO[],
     parentIDs: Array<CycleDTO['id']>,
+    filters?: Partial<CycleDTO>,
   ) {
-    const parentsCycles = await this.getFromTeamsAndParentIDs(teams, parentIDs)
+    const parentsCycles = await this.getFromTeamsAndParentIDs(teams, parentIDs, filters)
     const groupedByTitleCycles = groupBy(parentsCycles, 'title')
     const commonCyclesGroupedByTitle = filter(
       mapValues(groupedByTitleCycles, (cycles) => {
@@ -196,12 +198,17 @@ class DomainCycleService
     return cycleStatus
   }
 
-  private async getFromTeamsAndParentIDs(teams: TeamDTO[], parentIDs: Array<CycleDTO['id']>) {
+  private async getFromTeamsAndParentIDs(
+    teams: TeamDTO[],
+    parentIDs: Array<CycleDTO['id']>,
+    filters?: Partial<CycleDTO>,
+  ) {
     const parentIDsFilter = Any(parentIDs)
     const teamIDsFilter = Any(teams.map((team) => team.id))
     const selector = {
       parentId: parentIDsFilter,
       teamId: teamIDsFilter,
+      ...filters,
     }
 
     // eslint-disable-next-line unicorn/no-fn-reference-in-iterator

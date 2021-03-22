@@ -22,7 +22,12 @@ import { Cycle } from 'src/domain/cycle/entities'
 import DomainService from 'src/domain/service'
 import RailwayProvider from 'src/railway'
 
-import { CycleQueryArguments, CycleObject, CycleStatusObject } from './models'
+import {
+  CycleQueryArguments,
+  CycleObject,
+  CycleStatusObject,
+  CycleSameTitleQueryArguments,
+} from './models'
 
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser, EnhanceWithUserResourceConstraint)
@@ -83,10 +88,12 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
   @Query(() => [CycleObject], { name: 'sameTitleCyclesChildren', nullable: true })
   protected async getSameTitleCyclesChildren(
     @GraphQLUser() user: AuthzUser,
-    @Args('parentIds', { type: () => [ID] }) parentIds: Array<CycleObject['id']>,
+    @Args() { orderBy, parentIds, ...filters }: CycleSameTitleQueryArguments,
   ) {
     this.logger.log({
       parentIds,
+      orderBy,
+      filters,
       message: 'Fetching cycles children same title cycles',
     })
 
@@ -95,6 +102,7 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
     const cyclesPromise = this.domain.cycle.getSameTitleCyclesFromTeamsAndParentIDs(
       userTeamsTree,
       parentIds,
+      filters,
     )
 
     const [error, cycles] = await this.railway.execute<Cycle[]>(cyclesPromise)
