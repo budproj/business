@@ -149,6 +149,16 @@ export class CycleQueryArguments {
 export class CycleSameTitleQueryArguments extends CycleQueryArguments {
   @Field(() => [ID], {
     description: 'Defines the parent cycles we are going to fetch children from',
+    nullable: true,
   })
-  public parentIds: Array<CycleObject['id']>
+  public parentIds?: Array<CycleObject['id']>
+}
+
+@ArgsType()
+export class CycleAllQueryArguments extends CycleQueryArguments {
+  @Field(() => [ID], {
+    description: 'Defines the cycles we want to fetch data from',
+    nullable: true,
+  })
+  public ids?: Array<CycleObject['id']>
 }

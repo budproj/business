@@ -27,6 +27,7 @@ import {
   CycleObject,
   CycleStatusObject,
   CycleSameTitleQueryArguments,
+  CycleAllQueryArguments,
 } from './models'
 
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
@@ -61,11 +62,12 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
   @Query(() => [CycleObject], { name: 'cycles', nullable: true })
   protected async getAllCycles(
     @GraphQLUser() user: AuthzUser,
-    @Args() { orderBy, ...filters }: CycleQueryArguments,
+    @Args() { orderBy, ids, ...filters }: CycleAllQueryArguments,
   ) {
     this.logger.log({
       orderBy,
       filters,
+      ids,
       message: 'Fetching cycles',
     })
 
@@ -79,7 +81,11 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
     if (!cycles || cycles.length === 0)
       throw new UserInputError('We could not find any cycles for your user')
 
-    const sortedByCadenceCycles = this.domain.cycle.sortCyclesByCadence(cycles, orderBy.cadence)
+    const filteredByIDCycles = ids ? cycles.filter((cycle) => ids.includes(cycle.id)) : cycles
+    const sortedByCadenceCycles = this.domain.cycle.sortCyclesByCadence(
+      filteredByIDCycles,
+      orderBy.cadence,
+    )
 
     return sortedByCadenceCycles
   }
