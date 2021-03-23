@@ -1,11 +1,10 @@
-import { ArgsType, Field, ID, ObjectType, InputType, registerEnumType } from '@nestjs/graphql'
+import { ArgsType, Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql'
 
 import { PolicyObject } from 'src/app/graphql/authz/models'
 import { KeyResultObject } from 'src/app/graphql/key-result/models'
 import { EntityObject, StatusObject } from 'src/app/graphql/models'
 import { ObjectiveObject, ObjectiveStatusObject } from 'src/app/graphql/objective/models'
 import { TeamObject } from 'src/app/graphql/team/models'
-import { DOMAIN_SORTING } from 'src/domain/constants'
 import { CADENCE } from 'src/domain/cycle/constants'
 
 registerEnumType(CADENCE, {
@@ -36,8 +35,8 @@ export class CycleStatusObject implements StatusObject {
     'The period of time that can contain multiple objectives. It is used to organize a team strategy',
 })
 export class CycleObject implements EntityObject {
-  @Field({ description: 'The title of the cycle' })
-  public title: string
+  @Field({ description: 'The period of the cycle' })
+  public period: string
 
   @Field(() => CADENCE, {
     description:
@@ -49,11 +48,6 @@ export class CycleObject implements EntityObject {
     description: 'This flag defines if objectives related to this cycle can be updated',
   })
   public active: boolean
-
-  @Field({
-    description: 'This flag is true if any children from this cycle is not active',
-  })
-  public hasNotActiveChildren: boolean
 
   @Field({ description: 'The date that this cycle starts' })
   public dateStart: Date
@@ -116,54 +110,25 @@ export class CycleObject implements EntityObject {
   public policies: PolicyObject
 }
 
-@InputType({
-  description: 'In this object the user can define a custom ordering',
-})
-export class CycleOrderByInput {
-  @Field(() => DOMAIN_SORTING, {
-    description:
-      'This key defines how our cycles should be ordered based on their cadence key. Desc sorting means higher cadences first (year-quarter-month-...)',
-    nullable: true,
-  })
-  public cadence?: DOMAIN_SORTING
-}
-
 @ArgsType()
-export class CycleQueryArguments {
+export class CycleObjectFilters {
   @Field(() => Boolean, {
     description: 'If this flag is true, it will only fetch active cycles',
-    defaultValue: true,
+    nullable: true,
   })
-  public active: boolean
+  public active?: boolean
 
   @Field(() => CADENCE, {
     description: 'This key filters all queries to a given cadence',
     nullable: true,
   })
   public cadence?: CADENCE
-
-  @Field(() => CycleOrderByInput, {
-    defaultValue: {
-      cadence: DOMAIN_SORTING.DESC,
-    },
-  })
-  public orderBy?: CycleOrderByInput
 }
 
 @ArgsType()
-export class CycleSameTitleQueryArguments extends CycleQueryArguments {
+export class CyclesTreeQueryArguments extends CycleObjectFilters {
   @Field(() => [ID], {
-    description: 'Defines the parent cycles we are going to fetch children from',
-    nullable: true,
+    description: 'Defines a list of cycle IDs we are going to fetch from',
   })
-  public parentIds?: Array<CycleObject['id']>
-}
-
-@ArgsType()
-export class CycleAllQueryArguments extends CycleQueryArguments {
-  @Field(() => [ID], {
-    description: 'Defines the cycles we want to fetch data from',
-    nullable: true,
-  })
-  public ids?: Array<CycleObject['id']>
+  public fromCycles: Array<CycleObject['id']>
 }

@@ -10,7 +10,7 @@ import { CycleDTO } from './dto'
 @Entity()
 export class Cycle extends DomainEntity implements CycleDTO {
   @Column()
-  public title: string
+  public period: string
 
   @Column({ type: 'simple-enum', enum: CADENCE })
   public cadence: CADENCE

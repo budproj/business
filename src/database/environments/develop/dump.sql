@@ -1,9 +1,9 @@
 --
--- gitpodQL database dump
+-- PostgreSQL database dump
 --
 
--- Dumped from database version 13.2 (Debian 13.2-1.pgdg100+1)
--- Dumped by pg_dump version 13.2
+-- Dumped from database version 12.6 (Ubuntu 12.6-0ubuntu0.20.04.1)
+-- Dumped by pg_dump version 12.6 (Ubuntu 12.6-0ubuntu0.20.04.1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -106,7 +106,7 @@ CREATE TABLE public.cycle (
     updated_at timestamp without time zone DEFAULT now() NOT NULL,
     id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
     team_id uuid NOT NULL,
-    title character varying NOT NULL,
+    period character varying NOT NULL,
     cadence public.cycle_cadence_enum NOT NULL,
     parent_id uuid,
     active boolean DEFAULT true NOT NULL
@@ -284,7 +284,7 @@ ALTER TABLE ONLY public.migrations ALTER COLUMN id SET DEFAULT nextval('public.m
 -- Data for Name: cycle; Type: TABLE DATA; Schema: public; Owner: gitpod
 --
 
-COPY public.cycle (date_start, date_end, created_at, updated_at, id, team_id, title, cadence, parent_id, active) FROM stdin;
+COPY public.cycle (date_start, date_end, created_at, updated_at, id, team_id, period, cadence, parent_id, active) FROM stdin;
 2021-01-01 00:00:00	2020-12-31 00:00:00	2021-01-22 18:03:12.860225	2021-01-22 18:03:12.860225	8930091c-58ff-4998-9bc4-b3193ad01409	92c82e64-836c-44a5-a8c1-0db63cd340b3	2021	YEARLY	\N	t
 2021-01-01 00:00:00	2021-03-31 00:00:00	2021-01-22 18:03:12.854502	2021-01-22 18:03:12.854502	8311f810-120b-4a06-a62a-d1937dba2cbf	0788abd6-4996-4224-8f24-094b2d3c0d3a	Q1	QUARTERLY	8930091c-58ff-4998-9bc4-b3193ad01409	t
 2020-12-12 00:00:00	2021-03-02 00:00:00	2021-03-18 19:56:13.162328	2021-03-18 19:56:13.162328	2343197f-6bd7-4336-b276-dd94a4a7951d	d6310cc8-cc17-499b-a28c-5c600dd9714a	Q2	QUARTERLY	14b945eb-1121-48be-835a-4cf3ea96ba83	f
@@ -430,6 +430,7 @@ COPY public.migrations (id, "timestamp", name) FROM stdin;
 65	1615835656993	ChangesParentTeamColumnTitle1615835656993
 66	1615988871285	UpdatesKeyResultCheckInFromProgressToValue1615988871285
 67	1616010887736	RemoveKeyResultCustomList1616010887736
+68	1616531113612	ChangesCycleTitleToPeriod1616531113612
 \.
 
 
@@ -487,7 +488,7 @@ auth0|5fd773cfd16a7c00694ae5ff	2021-01-22 18:03:12.798091	2021-03-08 16:55:27.16
 -- Name: migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: gitpod
 --
 
-SELECT pg_catalog.setval('public.migrations_id_seq', 67, true);
+SELECT pg_catalog.setval('public.migrations_id_seq', 68, true);
 
 
 --
@@ -713,5 +714,6 @@ ALTER TABLE ONLY public.key_result_check_in
 
 
 --
--- gitpodQL database dump complete
+-- PostgreSQL database dump complete
 --
+

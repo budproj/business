@@ -24,9 +24,14 @@ export interface DomainCycleServiceInterface {
   getCurrentStatus: (cycle: CycleDTO) => Promise<DomainCycleStatus>
   sortCyclesByCadence: (cycles: Cycle[], sorting?: DOMAIN_SORTING) => Cycle[]
   getChildCycles: (parentCycle: CycleDTO, filters?: Partial<CycleDTO>) => Promise<Cycle[]>
-  getSameTitleCyclesFromTeamsAndParentIDs: (
+  getCyclesInSamePeriodFromTeamsAndParentIDsWithFilters: (
     teams: TeamDTO[],
-    parentIDs: Array<CycleDTO['id']>,
+    parentIDs?: Array<CycleDTO['id']>,
+    filters?: Partial<CycleDTO>,
+  ) => Promise<Cycle[]>
+  getParentsFromTeamsAndChildIDsWithFilters: (
+    teams: TeamDTO[],
+    childIDs?: Array<CycleDTO['id']>,
     filters?: Partial<CycleDTO>,
   ) => Promise<Cycle[]>
 }
@@ -109,15 +114,23 @@ class DomainCycleService
     return cycles
   }
 
-  public async getSameTitleCyclesFromTeamsAndParentIDs(
+  public async getCyclesInSamePeriodFromTeamsAndParentIDsWithFilters(
     teams: TeamDTO[],
     parentIDs: Array<CycleDTO['id']>,
     filters?: Partial<CycleDTO>,
   ) {
-    const parentsCycles = await this.getFromTeamsAndParentIDs(teams, parentIDs, filters)
-    const groupedByTitleCycles = groupBy(parentsCycles, 'title')
-    const commonCyclesGroupedByTitle = filter(
-      mapValues(groupedByTitleCycles, (cycles) => {
+    const parentIDsFilter = Any(parentIDs)
+    const teamIDsFilter = Any(teams.map((team) => team.id))
+
+    const selectedCycles = await this.repository.find({
+      parentId: parentIDsFilter,
+      teamId: teamIDsFilter,
+      ...filters,
+    })
+
+    const groupedByPeriodCycles = groupBy(selectedCycles, 'period')
+    const commonCyclesGroupedByPeriod = filter(
+      mapValues(groupedByPeriodCycles, (cycles) => {
         const hasCyclesInAllParents = parentIDs.every((parentID) =>
           cycles.some((cycle) => cycle.parentId === parentID),
         )
@@ -126,9 +139,32 @@ class DomainCycleService
       }),
     )
 
-    const cycles = flatten(commonCyclesGroupedByTitle)
+    const cycles = flatten(commonCyclesGroupedByPeriod)
 
     return cycles
+  }
+
+  public async getParentsFromTeamsAndChildIDsWithFilters(
+    teams: TeamDTO[],
+    childIDs: Array<CycleDTO['id']>,
+    filters?: Partial<CycleDTO>,
+  ) {
+    const idsFilter = Any(childIDs)
+    const teamIDsFilter = Any(teams.map((team) => team.id))
+
+    const selectedChildCycles = await this.repository.find({
+      id: idsFilter,
+      teamId: teamIDsFilter,
+    })
+
+    const parentIDsFilter = Any(selectedChildCycles.map((cycle) => cycle.parentId))
+    const selectedParentCycles = await this.repository.find({
+      id: parentIDsFilter,
+      teamId: teamIDsFilter,
+      ...filters,
+    })
+
+    return selectedParentCycles
   }
 
   protected async protectCreationQuery(
@@ -199,25 +235,6 @@ class DomainCycleService
     }
 
     return cycleStatus
-  }
-
-  private async getFromTeamsAndParentIDs(
-    teams: TeamDTO[],
-    parentIDs: Array<CycleDTO['id']>,
-    filters?: Partial<CycleDTO>,
-  ) {
-    const parentIDsFilter = Any(parentIDs)
-    const teamIDsFilter = Any(teams.map((team) => team.id))
-    const selector = {
-      parentId: parentIDsFilter,
-      teamId: teamIDsFilter,
-      ...filters,
-    }
-
-    // eslint-disable-next-line unicorn/no-fn-reference-in-iterator
-    const cycles = await this.repository.find(selector)
-
-    return cycles
   }
 }
 
