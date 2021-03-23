@@ -10,6 +10,7 @@ export interface AppConfigOptions {
   logging: LoggingConfigOptions
   https: HttpsConfigOptions
   cors: CorsConfigOptions
+  environment: string
   url?: string
 }
 

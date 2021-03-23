@@ -34,10 +34,11 @@ async function bootstrap() {
     }),
   )
 
+  const environment = configService.get('environment')
   const allowedOrigins = configService.get('cors.allowedOrigins')
   app.enableCors({
     credentials: true,
-    origin: allowedOrigins,
+    origin: environment === 'production' ? allowedOrigins : '*',
   })
 
   const serverEndpoint =
