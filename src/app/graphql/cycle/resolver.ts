@@ -178,15 +178,24 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
   }
 
   @ResolveField('cycles', () => [CycleObject], { nullable: true })
-  protected async getChildCycles(@Parent() cycle: CycleObject) {
+  protected async getChildCycles(
+    @Parent() cycle: CycleObject,
+    @Args() { orderBy, ...filters }: CycleQueryArguments,
+  ) {
     this.logger.log({
       cycle,
+      orderBy,
+      filters,
       message: 'Fetching child cycles for cycle',
     })
 
-    const childCycles = await this.domain.cycle.getChildCycles(cycle)
+    const childCycles = await this.domain.cycle.getChildCycles(cycle, filters)
+    const sortedByCadenceChildCycles = this.domain.cycle.sortCyclesByCadence(
+      childCycles,
+      orderBy.cadence,
+    )
 
-    return childCycles
+    return sortedByCadenceChildCycles
   }
 }
 

@@ -23,7 +23,7 @@ export interface DomainCycleServiceInterface {
   getFromTeamsWithFilters: (teams: TeamDTO[], filters?: Partial<CycleDTO>) => Promise<Cycle[]>
   getCurrentStatus: (cycle: CycleDTO) => Promise<DomainCycleStatus>
   sortCyclesByCadence: (cycles: Cycle[], sorting?: DOMAIN_SORTING) => Cycle[]
-  getChildCycles: (parentCycle: CycleDTO) => Promise<Cycle[]>
+  getChildCycles: (parentCycle: CycleDTO, filters?: Partial<CycleDTO>) => Promise<Cycle[]>
   getSameTitleCyclesFromTeamsAndParentIDs: (
     teams: TeamDTO[],
     parentIDs: Array<CycleDTO['id']>,
@@ -100,8 +100,11 @@ class DomainCycleService
     return sortedCycles
   }
 
-  public async getChildCycles(parentCycle: CycleDTO) {
-    const cycles = await this.repository.find({ parentId: parentCycle.id })
+  public async getChildCycles(parentCycle: CycleDTO, filters?: Partial<CycleDTO>) {
+    const cycles = await this.repository.find({
+      ...filters,
+      parentId: parentCycle.id,
+    })
 
     return cycles
   }
