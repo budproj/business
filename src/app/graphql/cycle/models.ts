@@ -50,6 +50,11 @@ export class CycleObject implements EntityObject {
   })
   public active: boolean
 
+  @Field({
+    description: 'This flag is true if any children from this cycle is not active',
+  })
+  public hasNotActiveChildren: boolean
+
   @Field({ description: 'The date that this cycle starts' })
   public dateStart: Date
 

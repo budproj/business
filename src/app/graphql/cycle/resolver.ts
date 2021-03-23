@@ -203,6 +203,19 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
 
     return sortedByCadenceChildCycles
   }
+
+  @ResolveField('hasNotActiveChildren', () => Boolean)
+  protected async getHasNotActiveChildrenCycle(@Parent() cycle: CycleObject) {
+    this.logger.log({
+      cycle,
+      message: 'Fetchin hasNotActiveChildren for cycle',
+    })
+
+    const children = await this.domain.cycle.getChildCycles(cycle)
+    const hasNotActiveChildren = children.some((child) => !child.active)
+
+    return hasNotActiveChildren
+  }
 }
 
 export default GraphQLCycleResolver
