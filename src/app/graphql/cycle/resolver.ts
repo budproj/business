@@ -112,35 +112,6 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
     return cycles
   }
 
-  @Permissions(PERMISSION['CYCLE:READ'])
-  @Query(() => [CycleObject], { name: 'cyclesParents', nullable: true })
-  protected async getCyclesParents(
-    @GraphQLUser() user: AuthzUser,
-    @Args() { fromCycles, ...filters }: CyclesTreeQueryArguments,
-  ) {
-    this.logger.log({
-      fromCycles,
-      filters,
-      message: 'Fetching cycles parents',
-    })
-
-    const userTeams = await user.teams
-    const userTeamsTree = await this.domain.team.getTeamNodesTreeBeforeTeam(userTeams)
-    const cyclesPromise = this.domain.cycle.getParentsFromTeamsAndChildIDsWithFilters(
-      userTeamsTree,
-      fromCycles,
-      filters,
-    )
-
-    const [error, cycles] = await this.railway.execute<Cycle[]>(cyclesPromise)
-    if (error) throw new ApolloError(error.message)
-
-    if (!cycles || cycles.length === 0)
-      throw new UserInputError('We could not find any of the provided parent cycles for your user')
-
-    return cycles
-  }
-
   @ResolveField('team', () => TeamObject)
   protected async getCycleTeam(@Parent() cycle: CycleObject) {
     this.logger.log({

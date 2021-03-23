@@ -29,11 +29,6 @@ export interface DomainCycleServiceInterface {
     parentIDs?: Array<CycleDTO['id']>,
     filters?: Partial<CycleDTO>,
   ) => Promise<Cycle[]>
-  getParentsFromTeamsAndChildIDsWithFilters: (
-    teams: TeamDTO[],
-    childIDs?: Array<CycleDTO['id']>,
-    filters?: Partial<CycleDTO>,
-  ) => Promise<Cycle[]>
 }
 
 export interface DomainCycleStatus extends DomainKeyResultStatus {
@@ -142,29 +137,6 @@ class DomainCycleService
     const cycles = flatten(commonCyclesGroupedByPeriod)
 
     return cycles
-  }
-
-  public async getParentsFromTeamsAndChildIDsWithFilters(
-    teams: TeamDTO[],
-    childIDs: Array<CycleDTO['id']>,
-    filters?: Partial<CycleDTO>,
-  ) {
-    const idsFilter = Any(childIDs)
-    const teamIDsFilter = Any(teams.map((team) => team.id))
-
-    const selectedChildCycles = await this.repository.find({
-      id: idsFilter,
-      teamId: teamIDsFilter,
-    })
-
-    const parentIDsFilter = Any(selectedChildCycles.map((cycle) => cycle.parentId))
-    const selectedParentCycles = await this.repository.find({
-      id: parentIDsFilter,
-      teamId: teamIDsFilter,
-      ...filters,
-    })
-
-    return selectedParentCycles
   }
 
   protected async protectCreationQuery(
