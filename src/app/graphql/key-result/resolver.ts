@@ -1,11 +1,12 @@
 import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
+import { uniq } from 'lodash'
 
-import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
+import { PERMISSION, POLICY, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
 import AuthzService from 'src/app/authz/service'
-import { AuthzUser } from 'src/app/authz/types'
+import { ActionPolicies, AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
@@ -171,6 +172,28 @@ class GraphQLKeyResultResolver extends GraphQLEntityResolver<KeyResult, KeyResul
     }
 
     return this.domain.keyResult.specifications.isOutdated.isSatisfiedBy(enhancedKeyResult)
+  }
+
+  protected async customizeEntityPolicies(originalPolicies: ActionPolicies, keyResult: KeyResult) {
+    const restrictedToActivePolicies = await this.restrictPoliciesToActiveKeyResult(
+      originalPolicies,
+      keyResult,
+    )
+
+    return restrictedToActivePolicies
+  }
+
+  private async restrictPoliciesToActiveKeyResult(
+    originalPolicies: ActionPolicies,
+    keyResult: KeyResult,
+  ) {
+    const parsedPolicyValues = uniq(Object.values(originalPolicies))
+    if (parsedPolicyValues === [POLICY.DENY]) return originalPolicies
+
+    const objective = await this.domain.objective.getFromKeyResult(keyResult)
+    const cycle = await this.domain.cycle.getFromObjective(objective)
+
+    return cycle.active ? originalPolicies : this.denyAllPolicies(originalPolicies)
   }
 }
 

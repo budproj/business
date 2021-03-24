@@ -64,6 +64,14 @@ class GraphQLCommentResolver extends GraphQLEntityResolver<KeyResultComment, Key
       message: 'Received create comment request',
     })
 
+    const keyResult = await this.domain.keyResult.getOne({ id: keyResultComment.keyResultId })
+    const objective = await this.domain.objective.getFromKeyResult(keyResult)
+    const cycle = await this.domain.cycle.getFromObjective(objective)
+    if (!cycle.active)
+      throw new UserInputError(
+        'You cannot create this comment, because that cycle is not active anymore',
+      )
+
     const comment = await this.domain.keyResult.buildCommentForUser(user, keyResultComment)
     const createCommentPromise = this.createWithActionScopeConstraint(comment, user)
 
@@ -98,6 +106,14 @@ class GraphQLCommentResolver extends GraphQLEntityResolver<KeyResultComment, Key
       keyResultCommentID,
       message: 'Removing key result comment',
     })
+
+    const keyResult = await this.domain.keyResult.getFromKeyResultCommentID(keyResultCommentID)
+    const objective = await this.domain.objective.getFromKeyResult(keyResult)
+    const cycle = await this.domain.cycle.getFromObjective(objective)
+    if (!cycle.active)
+      throw new UserInputError(
+        'You cannot delete this comment, because that cycle is not active anymore',
+      )
 
     const selector = { id: keyResultCommentID }
     const result = await this.deleteWithActionScopeConstraint(selector, user)

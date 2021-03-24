@@ -2,7 +2,7 @@ import { Args, Parent, ResolveField, Resolver } from '@nestjs/graphql'
 import { DeleteResult, FindConditions } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
-import { ACTION, RESOURCE } from 'src/app/authz/constants'
+import { ACTION, POLICY, RESOURCE } from 'src/app/authz/constants'
 import AuthzService from 'src/app/authz/service'
 import { ActionPolicies, AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
@@ -11,6 +11,7 @@ import { EntityObject } from 'src/app/graphql/models'
 import { CONSTRAINT } from 'src/domain/constants'
 import { DomainEntity, DomainEntityService } from 'src/domain/entity'
 import DomainService from 'src/domain/service'
+import { mapValues } from 'lodash'
 
 export interface GraphQLEntityResolverInterface<E extends DomainEntity, D> {
   createWithActionScopeConstraint: (
@@ -131,6 +132,10 @@ abstract class GraphQLEntityResolver<E extends DomainEntity, D>
 
   protected async customizeEntityPolicies(originalPolicies: ActionPolicies, _entity: E) {
     return originalPolicies
+  }
+  
+  protected denyAllPolicies(originalPolicies: ActionPolicies) {
+    return mapValues(originalPolicies, () => POLICY.DENY)
   }
 
   private async getHighestConstraintForEntity(entity: E, user: AuthzUser) {
