@@ -1,0 +1,8 @@
+{
+  "name": "business",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/business",
+  "forwardPorts": [3000, 5432],
+  "postCreateCommand": ["npm install", "npm run db:seed"]
+}

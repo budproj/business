@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  app:
+    container_name: business-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes: 
+       - ..:/workspace:cached
+    network_mode: host
+
+  postgres:
+    image: postgres
+    container_name: business-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DATA: ${POSTGRES_DATA:-/data/postgres}
+    volumes:
+      - type: volume
+        source: postgres
+        target: ${POSTGRES_DATA:-/data/postgres}
+    ports:
+      - 5432:${POSTGRES_PORT:-5432}
+    restart: unless-stopped
+    network_mode: host
+
+volumes:
+  postgres:
