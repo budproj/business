@@ -4,5 +4,12 @@
   "service": "app",
   "workspaceFolder": "/business",
   "forwardPorts": [3000, 5432],
-  "postCreateCommand": ["npm install", "npm run db:seed"]
+  "initializeCommand": [
+    "nvm install v15.5.1",
+    "nvm use --delete-prefix v15.5.1",
+    "npm install",
+    "npm run build",
+    "docker build -t budproj/business ."
+  ],
+  "postCreateCommand": ["npm run db:seed"]
 }

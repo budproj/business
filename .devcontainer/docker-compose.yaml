@@ -1,13 +1,14 @@
 version: '3.8'
 services:
-  app:
-    container_name: business-app
+  dev-app:
+    container_name: business-dev-app
     build:
       context: .
       dockerfile: Dockerfile
-    volumes: 
-       - ..:/workspace:cached
-    network_mode: host
+      args:
+        - NODE_ENV=${NODE_ENV:-development}
+    volumes:
+      - ..:/workspace:cached
 
   postgres:
     image: postgres
@@ -23,7 +24,6 @@ services:
     ports:
       - 5432:${POSTGRES_PORT:-5432}
     restart: unless-stopped
-    network_mode: host
 
 volumes:
   postgres:
