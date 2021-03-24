@@ -11,6 +11,7 @@ import {
   Resolver,
 } from '@nestjs/graphql'
 import { UserInputError, ApolloError } from 'apollo-server-fastify'
+import { uniq } from 'lodash'
 
 import { ACTION, PERMISSION, POLICY, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
@@ -210,6 +211,36 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
   }
 
   protected async customizeEntityPolicies(
+    originalPolicies: ActionPolicies,
+    keyResultCheckIn: KeyResultCheckIn,
+  ) {
+    const restrictedToActivePolicies = await this.restrictPoliciesToActiveKeyResult(
+      originalPolicies,
+      keyResultCheckIn,
+    )
+    const restrictedDeletionToLatestCheckIn = await this.restrictDeletePolicyToAllowOnlyLatestCheckIn(
+      restrictedToActivePolicies,
+      keyResultCheckIn,
+    )
+
+    return restrictedDeletionToLatestCheckIn
+  }
+
+  private async restrictPoliciesToActiveKeyResult(
+    originalPolicies: ActionPolicies,
+    keyResultCheckIn: KeyResultCheckIn,
+  ) {
+    const parsedPolicyValues = uniq(Object.values(originalPolicies))
+    if (parsedPolicyValues === [POLICY.DENY]) return originalPolicies
+
+    const keyResult = await this.domain.keyResult.getOne({ id: keyResultCheckIn.keyResultId })
+    const objective = await this.domain.objective.getFromKeyResult(keyResult)
+    const cycle = await this.domain.cycle.getFromObjective(objective)
+
+    return cycle.active ? originalPolicies : this.denyAllPolicies(originalPolicies)
+  }
+
+  private async restrictDeletePolicyToAllowOnlyLatestCheckIn(
     originalPolicies: ActionPolicies,
     keyResultCheckIn: KeyResultCheckIn,
   ) {
