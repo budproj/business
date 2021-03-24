@@ -82,6 +82,8 @@ export interface DomainKeyResultServiceInterface {
     keyResultCheckInList: KeyResultCheckIn[],
     keyResults: KeyResult[],
   ) => number
+  getFromKeyResultCheckInID: (keyResultCheckInID: KeyResultCheckInDTO['id']) => Promise<KeyResult>
+  getFromKeyResultCommentID: (keyResultCommentID: KeyResultCommentDTO['id']) => Promise<KeyResult>
 }
 
 export interface DomainKeyResultStatus {
@@ -309,6 +311,20 @@ class DomainKeyResultService
     )
 
     return keyResultCheckInListAverageProgress
+  }
+
+  public async getFromKeyResultCheckInID(keyResultCheckInID: KeyResultCheckInDTO['id']) {
+    const keyResultCheckIn = await this.checkIn.getOne({ id: keyResultCheckInID })
+    const keyResult = await this.getOne({ id: keyResultCheckIn.keyResultId })
+
+    return keyResult
+  }
+
+  public async getFromKeyResultCommentID(keyResultCommentID: KeyResultCommentDTO['id']) {
+    const keyResultComment = await this.comment.getOne({ id: keyResultCommentID })
+    const keyResult = await this.getOne({ id: keyResultComment.keyResultId })
+
+    return keyResult
   }
 
   protected async protectCreationQuery(

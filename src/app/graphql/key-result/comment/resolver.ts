@@ -1,11 +1,12 @@
 import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, ID, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { UserInputError, ApolloError } from 'apollo-server-fastify'
+import { uniq } from 'lodash'
 
-import { PERMISSION, RESOURCE } from 'src/app/authz/constants'
+import { PERMISSION, POLICY, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
 import AuthzService from 'src/app/authz/service'
-import { AuthzUser } from 'src/app/authz/types'
+import { ActionPolicies, AuthzUser } from 'src/app/authz/types'
 import { GraphQLUser } from 'src/app/graphql/authz/decorators'
 import { GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard } from 'src/app/graphql/authz/guards'
 import { EnhanceWithBudUser } from 'src/app/graphql/authz/interceptors'
@@ -64,6 +65,14 @@ class GraphQLCommentResolver extends GraphQLEntityResolver<KeyResultComment, Key
       message: 'Received create comment request',
     })
 
+    const keyResult = await this.domain.keyResult.getOne({ id: keyResultComment.keyResultId })
+    const objective = await this.domain.objective.getFromKeyResult(keyResult)
+    const cycle = await this.domain.cycle.getFromObjective(objective)
+    if (!cycle.active)
+      throw new UserInputError(
+        'You cannot create this comment, because that cycle is not active anymore',
+      )
+
     const comment = await this.domain.keyResult.buildCommentForUser(user, keyResultComment)
     const createCommentPromise = this.createWithActionScopeConstraint(comment, user)
 
@@ -99,6 +108,14 @@ class GraphQLCommentResolver extends GraphQLEntityResolver<KeyResultComment, Key
       message: 'Removing key result comment',
     })
 
+    const keyResult = await this.domain.keyResult.getFromKeyResultCommentID(keyResultCommentID)
+    const objective = await this.domain.objective.getFromKeyResult(keyResult)
+    const cycle = await this.domain.cycle.getFromObjective(objective)
+    if (!cycle.active)
+      throw new UserInputError(
+        'You cannot delete this comment, because that cycle is not active anymore',
+      )
+
     const selector = { id: keyResultCommentID }
     const result = await this.deleteWithActionScopeConstraint(selector, user)
     if (!result)
@@ -127,6 +144,32 @@ class GraphQLCommentResolver extends GraphQLEntityResolver<KeyResultComment, Key
     })
 
     return this.domain.keyResult.getOne({ id: comment.keyResultId })
+  }
+
+  protected async customizeEntityPolicies(
+    originalPolicies: ActionPolicies,
+    keyResultComment: KeyResultComment,
+  ) {
+    const restrictedToActivePolicies = await this.restrictPoliciesToActiveKeyResult(
+      originalPolicies,
+      keyResultComment,
+    )
+
+    return restrictedToActivePolicies
+  }
+
+  private async restrictPoliciesToActiveKeyResult(
+    originalPolicies: ActionPolicies,
+    keyResultComment: KeyResultComment,
+  ) {
+    const parsedPolicyValues = uniq(Object.values(originalPolicies))
+    if (parsedPolicyValues === [POLICY.DENY]) return originalPolicies
+
+    const keyResult = await this.domain.keyResult.getOne({ id: keyResultComment.keyResultId })
+    const objective = await this.domain.objective.getFromKeyResult(keyResult)
+    const cycle = await this.domain.cycle.getFromObjective(objective)
+
+    return cycle.active ? originalPolicies : this.denyAllPolicies(originalPolicies)
   }
 }
 

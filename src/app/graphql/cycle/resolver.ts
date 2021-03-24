@@ -22,7 +22,12 @@ import { Cycle } from 'src/domain/cycle/entities'
 import DomainService from 'src/domain/service'
 import RailwayProvider from 'src/railway'
 
-import { CycleQueryArguments, CycleObject, CycleStatusObject } from './models'
+import {
+  CycleObject,
+  CycleStatusObject,
+  CycleObjectFilters,
+  CyclesTreeQueryArguments,
+} from './models'
 
 @UseGuards(GraphQLAuthzAuthGuard, GraphQLAuthzPermissionGuard)
 @UseInterceptors(EnhanceWithBudUser, EnhanceWithUserResourceConstraint)
@@ -56,12 +61,11 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
   @Query(() => [CycleObject], { name: 'cycles', nullable: true })
   protected async getAllCycles(
     @GraphQLUser() user: AuthzUser,
-    @Args() { orderBy, ...filters }: CycleQueryArguments,
+    @Args() filters: CycleObjectFilters,
   ) {
     this.logger.log({
-      orderBy,
       filters,
-      message: 'Fetching cycles',
+      message: 'Fetching all cycles with filters',
     })
 
     const userTeams = await user.teams
@@ -74,9 +78,38 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
     if (!cycles || cycles.length === 0)
       throw new UserInputError('We could not find any cycles for your user')
 
-    const sortedByCadenceCycles = this.domain.cycle.sortCyclesByCadence(cycles, orderBy.cadence)
+    const sortedByCadenceCycles = this.domain.cycle.sortCyclesByCadence(cycles)
 
     return sortedByCadenceCycles
+  }
+
+  @Permissions(PERMISSION['CYCLE:READ'])
+  @Query(() => [CycleObject], { name: 'cyclesInSamePeriod', nullable: true })
+  protected async getCyclesInSamePeriod(
+    @GraphQLUser() user: AuthzUser,
+    @Args() { fromCycles, ...filters }: CyclesTreeQueryArguments,
+  ) {
+    this.logger.log({
+      fromCycles,
+      filters,
+      message: 'Fetching cycles in same period',
+    })
+
+    const userTeams = await user.teams
+    const userTeamsTree = await this.domain.team.getTeamNodesTreeBeforeTeam(userTeams)
+    const cyclesPromise = this.domain.cycle.getCyclesInSamePeriodFromTeamsAndParentIDsWithFilters(
+      userTeamsTree,
+      fromCycles,
+      filters,
+    )
+
+    const [error, cycles] = await this.railway.execute<Cycle[]>(cyclesPromise)
+    if (error) throw new ApolloError(error.message)
+
+    if (!cycles || cycles.length === 0)
+      throw new UserInputError('We could not find any of the provided parent cycles for your user')
+
+    return cycles
   }
 
   @ResolveField('team', () => TeamObject)
@@ -143,15 +176,20 @@ class GraphQLCycleResolver extends GraphQLEntityResolver<Cycle, CycleDTO> {
   }
 
   @ResolveField('cycles', () => [CycleObject], { nullable: true })
-  protected async getChildCycles(@Parent() cycle: CycleObject) {
+  protected async getChildCycles(
+    @Parent() cycle: CycleObject,
+    @Args() filters: CycleObjectFilters,
+  ) {
     this.logger.log({
       cycle,
+      filters,
       message: 'Fetching child cycles for cycle',
     })
 
-    const childCycles = await this.domain.cycle.getChildCycles(cycle)
+    const childCycles = await this.domain.cycle.getChildCycles(cycle, filters)
+    const sortedByCadenceChildCycles = this.domain.cycle.sortCyclesByCadence(childCycles)
 
-    return childCycles
+    return sortedByCadenceChildCycles
   }
 }
 

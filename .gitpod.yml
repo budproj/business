@@ -1,0 +1,19 @@
+image:
+  file: .gitpod.Dockerfile
+
+tasks:
+  - name: Apply GPG keys
+    before: curl -s https://raw.githubusercontent.com/budproj/gist/main/gitpod/gpg-sync.sh | bash -
+
+  - name: Seed data
+    before: ./scripts/seed.sh
+      
+  - name: Server
+    init: npm install
+    command: >
+      source <(grep -v '^#' .env | sed -E 's|^(.+)=(.*)$|: ${\1=\2}; export \1|g') &&
+      export URL=$(gp url 3000) &&
+      npm run start:dev
+
+ports:
+  - port: 3000

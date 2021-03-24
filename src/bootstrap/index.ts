@@ -34,14 +34,18 @@ async function bootstrap() {
     }),
   )
 
+  const environment = configService.get('environment')
   const allowedOrigins = configService.get('cors.allowedOrigins')
   app.enableCors({
     credentials: true,
-    origin: allowedOrigins,
+    origin: environment === 'production' ? allowedOrigins : '*',
   })
 
+  const serverEndpoint =
+    appConfig.url?.toString() ?? `https://localhost:${appConfig.port.toString()}`
+
   await app.listen(configService.get('port'), '0.0.0.0')
-  logger.log(`Started server listening to port ${appConfig.port.toString()}`)
+  logger.log(`Started server listening on ${serverEndpoint}`)
 }
 
 const buildHttpsConfig = () => {

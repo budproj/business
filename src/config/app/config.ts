@@ -3,6 +3,8 @@ import { LogLevel } from 'lib/logger'
 import { AppConfigOptions } from './types'
 
 const {
+  APP_ENV,
+  URL,
   PORT,
   AUTH0_CLIENT_ID,
   AUTH0_CLIENT_SECRET,
@@ -23,6 +25,8 @@ const {
 const config: AppConfigOptions = {
   port: Number.parseInt(PORT, 10) ?? 3000,
   globalPrefix: GLOBAL_PREFIX ?? '',
+  url: URL,
+  environment: APP_ENV ?? 'production',
   godMode: {
     enabled: GOD_MODE_ENABLED === 'true',
     userID: GOD_MODE_USER_ID,

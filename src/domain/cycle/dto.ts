@@ -4,7 +4,7 @@ import { TeamDTO } from 'src/domain/team/dto'
 
 export class CycleDTO {
   public id: string
-  public title: string
+  public period: string
   public cadence: CADENCE
   public active: boolean
   public dateStart: Date

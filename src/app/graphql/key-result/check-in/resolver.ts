@@ -11,6 +11,7 @@ import {
   Resolver,
 } from '@nestjs/graphql'
 import { UserInputError, ApolloError } from 'apollo-server-fastify'
+import { uniq } from 'lodash'
 
 import { ACTION, PERMISSION, POLICY, RESOURCE } from 'src/app/authz/constants'
 import { Permissions } from 'src/app/authz/decorators'
@@ -74,6 +75,14 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
       message: 'Received create check-in request',
     })
 
+    const keyResult = await this.domain.keyResult.getOne({ id: keyResultCheckIn.keyResultId })
+    const objective = await this.domain.objective.getFromKeyResult(keyResult)
+    const cycle = await this.domain.cycle.getFromObjective(objective)
+    if (!cycle.active)
+      throw new UserInputError(
+        'You cannot create this check-in, because that cycle is not active anymore',
+      )
+
     const checkIn = await this.domain.keyResult.buildCheckInForUser(user, keyResultCheckIn)
     const createCheckInPromise = this.createWithActionScopeConstraint(checkIn, user, ACTION.UPDATE)
 
@@ -99,7 +108,7 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
 
   @Permissions(PERMISSION['KEY_RESULT_CHECK_IN:DELETE'])
   @Mutation(() => KeyResultCheckInDeleteResultObject, { name: 'deleteKeyResultCheckIn' })
-  protected async deleteKeyResultComment(
+  protected async deleteKeyResultCheckIn(
     @GraphQLUser() user: AuthzUser,
     @Args('id', { type: () => ID }) keyResultCheckInID: KeyResultCheckIn['id'],
   ) {
@@ -108,6 +117,14 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
       keyResultCheckInID,
       message: 'Removing key result check-in',
     })
+
+    const keyResult = await this.domain.keyResult.getFromKeyResultCheckInID(keyResultCheckInID)
+    const objective = await this.domain.objective.getFromKeyResult(keyResult)
+    const cycle = await this.domain.cycle.getFromObjective(objective)
+    if (!cycle.active)
+      throw new UserInputError(
+        'You cannot delete this check-in, because that cycle is not active anymore',
+      )
 
     const selector = { id: keyResultCheckInID }
     const result = await this.deleteWithActionScopeConstraint(selector, user)
@@ -194,6 +211,36 @@ class GraphQLCheckInResolver extends GraphQLEntityResolver<KeyResultCheckIn, Key
   }
 
   protected async customizeEntityPolicies(
+    originalPolicies: ActionPolicies,
+    keyResultCheckIn: KeyResultCheckIn,
+  ) {
+    const restrictedToActivePolicies = await this.restrictPoliciesToActiveKeyResult(
+      originalPolicies,
+      keyResultCheckIn,
+    )
+    const restrictedDeletionToLatestCheckIn = await this.restrictDeletePolicyToAllowOnlyLatestCheckIn(
+      restrictedToActivePolicies,
+      keyResultCheckIn,
+    )
+
+    return restrictedDeletionToLatestCheckIn
+  }
+
+  private async restrictPoliciesToActiveKeyResult(
+    originalPolicies: ActionPolicies,
+    keyResultCheckIn: KeyResultCheckIn,
+  ) {
+    const parsedPolicyValues = uniq(Object.values(originalPolicies))
+    if (parsedPolicyValues === [POLICY.DENY]) return originalPolicies
+
+    const keyResult = await this.domain.keyResult.getOne({ id: keyResultCheckIn.keyResultId })
+    const objective = await this.domain.objective.getFromKeyResult(keyResult)
+    const cycle = await this.domain.cycle.getFromObjective(objective)
+
+    return cycle.active ? originalPolicies : this.denyAllPolicies(originalPolicies)
+  }
+
+  private async restrictDeletePolicyToAllowOnlyLatestCheckIn(
     originalPolicies: ActionPolicies,
     keyResultCheckIn: KeyResultCheckIn,
   ) {

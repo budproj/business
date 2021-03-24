@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { orderBy, filter, maxBy, meanBy, minBy, omitBy } from 'lodash'
+import { orderBy, filter, maxBy, meanBy, minBy, omitBy, groupBy, mapValues, flatten } from 'lodash'
 import { Any } from 'typeorm'
 
 import { DOMAIN_SORTING, LODASH_SORTING } from 'src/domain/constants'
@@ -23,7 +23,12 @@ export interface DomainCycleServiceInterface {
   getFromTeamsWithFilters: (teams: TeamDTO[], filters?: Partial<CycleDTO>) => Promise<Cycle[]>
   getCurrentStatus: (cycle: CycleDTO) => Promise<DomainCycleStatus>
   sortCyclesByCadence: (cycles: Cycle[], sorting?: DOMAIN_SORTING) => Cycle[]
-  getChildCycles: (parentCycle: CycleDTO) => Promise<Cycle[]>
+  getChildCycles: (parentCycle: CycleDTO, filters?: Partial<CycleDTO>) => Promise<Cycle[]>
+  getCyclesInSamePeriodFromTeamsAndParentIDsWithFilters: (
+    teams: TeamDTO[],
+    parentIDs?: Array<CycleDTO['id']>,
+    filters?: Partial<CycleDTO>,
+  ) => Promise<Cycle[]>
 }
 
 export interface DomainCycleStatus extends DomainKeyResultStatus {
@@ -95,8 +100,41 @@ class DomainCycleService
     return sortedCycles
   }
 
-  public async getChildCycles(parentCycle: CycleDTO) {
-    const cycles = await this.repository.find({ parentId: parentCycle.id })
+  public async getChildCycles(parentCycle: CycleDTO, filters?: Partial<CycleDTO>) {
+    const cycles = await this.repository.find({
+      ...filters,
+      parentId: parentCycle.id,
+    })
+
+    return cycles
+  }
+
+  public async getCyclesInSamePeriodFromTeamsAndParentIDsWithFilters(
+    teams: TeamDTO[],
+    parentIDs: Array<CycleDTO['id']>,
+    filters?: Partial<CycleDTO>,
+  ) {
+    const parentIDsFilter = Any(parentIDs)
+    const teamIDsFilter = Any(teams.map((team) => team.id))
+
+    const selectedCycles = await this.repository.find({
+      parentId: parentIDsFilter,
+      teamId: teamIDsFilter,
+      ...filters,
+    })
+
+    const groupedByPeriodCycles = groupBy(selectedCycles, 'period')
+    const commonCyclesGroupedByPeriod = filter(
+      mapValues(groupedByPeriodCycles, (cycles) => {
+        const hasCyclesInAllParents = parentIDs.every((parentID) =>
+          cycles.some((cycle) => cycle.parentId === parentID),
+        )
+
+        return hasCyclesInAllParents ? cycles : undefined
+      }),
+    )
+
+    const cycles = flatten(commonCyclesGroupedByPeriod)
 
     return cycles
   }
