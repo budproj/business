@@ -1,8 +1,16 @@
 version: '3.8'
+
+networks:
+  codespace:
+    driver: bridge
+
+volumes:
+  postgres:
+
 services:
   dev-app:
     container_name: business-dev-app
-    network_mode: service:db-postgres
+    network_mode: host
     build:
       context: .
       dockerfile: Dockerfile
@@ -22,6 +30,7 @@ services:
   db-postgres:
     image: postgres
     container_name: business-db-postgres
+    network_mode: host
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-codespace}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
@@ -31,10 +40,4 @@ services:
       - type: volume
         source: postgres
         target: ${POSTGRES_DATA:-/data/postgres}
-    ports:
-      - 3000:${PORT:-3000}
-      - 5432:${POSTGRES_PORT:-5432}
     restart: unless-stopped
-
-volumes:
-  postgres:
