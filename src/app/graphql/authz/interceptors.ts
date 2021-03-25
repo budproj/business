@@ -74,12 +74,12 @@ export class EnhanceWithUserResourceConstraint implements NestInterceptor {
 
     const handlerConstraint = fromPairs<CONSTRAINT>(handlerResourceConstraintPairs)
     request.user = {
-      ...request.user,
+      ...user,
       constraint: handlerConstraint,
     }
 
     this.logger.debug({
-      user: request.user,
+      user,
       handlerConstraint,
       message: 'Enhanced request with user constraint for resource',
     })

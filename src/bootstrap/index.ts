@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
+import * as localtunnel from 'localtunnel'
 
 import buildLogger from 'lib/logger'
 import appConfig from 'src/config/app/config'
@@ -41,11 +42,14 @@ async function bootstrap() {
     origin: environment === 'production' ? allowedOrigins : '*',
   })
 
-  const serverEndpoint =
-    appConfig.url?.toString() ?? `https://localhost:${appConfig.port.toString()}`
+  const tunnel = appConfig.isCodespace && (await localtunnel({ port: appConfig.port }))
+  const endpoint = tunnel
+    ? tunnel.url
+    : appConfig.url?.toString() ?? `https://localhost:${appConfig.port.toString()}`
 
-  await app.listen(configService.get('port'), '0.0.0.0')
-  logger.log(`Started server listening on ${serverEndpoint}`)
+  await app.listen(appConfig.port, '0.0.0.0')
+
+  logger.log(`Started server listening on ${endpoint}`)
 }
 
 const buildHttpsConfig = () => {

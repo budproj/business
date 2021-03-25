@@ -1,4 +1,5 @@
 import { Args, Parent, ResolveField, Resolver } from '@nestjs/graphql'
+import { mapValues } from 'lodash'
 import { DeleteResult, FindConditions } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
@@ -11,7 +12,6 @@ import { EntityObject } from 'src/app/graphql/models'
 import { CONSTRAINT } from 'src/domain/constants'
 import { DomainEntity, DomainEntityService } from 'src/domain/entity'
 import DomainService from 'src/domain/service'
-import { mapValues } from 'lodash'
 
 export interface GraphQLEntityResolverInterface<E extends DomainEntity, D> {
   createWithActionScopeConstraint: (
@@ -133,7 +133,7 @@ abstract class GraphQLEntityResolver<E extends DomainEntity, D>
   protected async customizeEntityPolicies(originalPolicies: ActionPolicies, _entity: E) {
     return originalPolicies
   }
-  
+
   protected denyAllPolicies(originalPolicies: ActionPolicies) {
     return mapValues(originalPolicies, () => POLICY.DENY)
   }

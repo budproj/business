@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+
+# DEPENDENCIES
+# -------------------------------------------------------------------------------------------------
+# - bash 4
+# - nvm 0.35
+
+# Global flags
+# -------------------------------------------------------------------------------------------------
+set +m
+
+# Global variables
+# -------------------------------------------------------------------------------------------------
+
+ROOT_DIR=$(git rev-parse --show-toplevel)
+
+# Imports
+# -------------------------------------------------------------------------------------------------
+source $NVM_DIR/nvm.sh
+
+# Entrypoint
+# -------------------------------------------------------------------------------------------------
+
+function main {
+  validate_requirements
+  install_dependencies
+  seed_database
+}
+
+# Validate requirements
+# -------------------------------------------------------------------------------------------------
+
+function validate_requirements {
+  validate_bash_dependency
+  validate_nvm_dependency
+}
+
+function validate_bash_dependency {
+  major_version="$(bash --version | head -1 | cut -d ' ' -f 4 | cut -d '.' -f 1)"
+  min_major_version="4"
+
+  if [ "${major_version}" -lt "${min_major_version}" ]; then
+    throw_error "Your bash major version must be ${min_major_version} or greater"
+  fi
+}
+
+function validate_nvm_dependency {
+  minor_version="$(nvm --version | head -1 | cut -d '.' -f 2)"
+  min_minor="35"
+
+  if [ "${minor_version}" -lt "${min_minor_version}" ]; then
+    throw_error "Your nvm minor version must be ${min_minor_version} or greater"
+  fi
+}
+
+# Install dependencies
+# -------------------------------------------------------------------------------------------------
+
+function install_dependencies {
+  install_pg_client
+  set_node_version
+  install_node_dependencies
+}
+
+function install_pg_client {
+  log "Installing Postgres client" "Setup dependencies"
+
+  sudo apt-get -y update
+  sudo apt-get install -y postgresql-client
+}
+
+function set_node_version {
+  log "Installing Node version" "Install dependencies"
+
+  nvm install v15.5.1
+  nvm use --delete-prefix v15.5.1
+}
+
+function install_node_dependencies {
+  log "Installing Node dependencies" "Install dependencies"
+
+  npm install
+}
+
+# Install dependencies
+# -------------------------------------------------------------------------------------------------
+
+function seed_database {
+  source "${ROOT_DIR}/bin/database-seed"
+}
+
+# Helpers
+# -------------------------------------------------------------------------------------------------
+
+function log {
+  message=$1
+  category=${2:-Waiting}
+
+  bold=$(tput bold)
+  reset=$(tput sgr0)
+  cyan=$(tput setaf 6)
+
+  echo
+  echo "${bold}${cyan}➤ ${category}:${reset} ${message}"
+}
+
+function throw_error {
+  message=$1
+
+  bold=$(tput bold)
+  reset=$(tput sgr0)
+  red=$(tput setaf 1)
+
+  echo "${bold}${red}Error:${reset}"
+  echo "${red}  ${message}${reset}"
+  exit 1
+}
+
+# Execute
+# -------------------------------------------------------------------------------------------------
+
+main

@@ -11,6 +11,7 @@ export interface AppConfigOptions {
   https: HttpsConfigOptions
   cors: CorsConfigOptions
   environment: string
+  isCodespace: boolean
   url?: string
 }
 

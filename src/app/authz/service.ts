@@ -124,7 +124,7 @@ class AuthzService implements AuthzServiceInterface {
 
     const hasPermission = () =>
       requiredPermissions.every((requiredPermission) =>
-        userPermissions.some((userPermission) => userPermission === requiredPermission),
+        userPermissions.includes(requiredPermission),
       )
 
     return hasPermission()

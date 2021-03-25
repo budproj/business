@@ -1,33 +1,25 @@
 #!/usr/bin/env bash
 
-# WHAT DOES THIS SCRIPT DO
+# DEPENDENCIES
 # -------------------------------------------------------------------------------------------------
-#
-# It seeds develop data to our database. It uses the current dump to do so. In a nutshell, it
-# executes the following steps:
-# - Remove the previous database
-# - Creates a new database
-# - Load the current dump data
-#
-# REQUIRED DEPENDENCIES
-# -------------------------------------------------------------------------------------------------
-#
 # To run this script, you must have the following tools installed:
 # - bash 4
-# - psql 12
+# - psql 11
 
 # Global variables
 # -------------------------------------------------------------------------------------------------
 
-DB_NAME='business_local'
+DB_USER="${POSTGRES_USER:-codespace}"
+DB_PASSWORD="${POSTGRES_PASSWORD:-changeme}"
+DB_NAME="${POSTGRES_DB:-business_codespace}"
 ROOT_DIR=$(git rev-parse --show-toplevel)
-
 
 # Entrypoint
 # -------------------------------------------------------------------------------------------------
 
 function main {
   validate_requirements
+  authenticate_pg_client
   clear_database
   create_database
   load_updated_data
@@ -54,60 +46,60 @@ function validate_bash_dependency {
 
 function validate_psql_dependency {
   major_version="$(psql --version | head -1 | cut -d ' ' -f 3 | cut -d '.' -f 1)"
-  min_major_version="12"
+  min_major_version="11"
 
   if [ "${major_version}" -lt "${min_major_version}" ]; then
     throw_error "Your psql major version must be ${min_major_version} or greater"
   fi
 }
 
+# Authenticate Postgres client
+# -------------------------------------------------------------------------------------------------
+
+function authenticate_pg_client {
+  export PGPASSWORD=$DB_PASSWORD
+}
+
 # Clear database
 # -------------------------------------------------------------------------------------------------
 
 function clear_database {
-  psql postgres -c "DROP DATABASE ${DB_NAME}" &> /dev/null &
-  pid=$!
+  log "Clearing" "Clear database"
 
-  wait_with_spinner "${pid}" "Clearing" "Clear database"
+  psql -h localhost -U ${DB_USER} postgres -c "DROP DATABASE ${DB_NAME}"
 }
 
 # Create database
 # -------------------------------------------------------------------------------------------------
 
 function create_database {
-  psql postgres -c "CREATE DATABASE ${DB_NAME}" &> /dev/null &
-  pid=$!
+  log "Creating" "Create database"
 
-  wait_with_spinner "${pid}" "Creating" "Create database"
+  psql -h localhost -U ${DB_USER} postgres -c "CREATE DATABASE ${DB_NAME}"
 }
 
 # Load updated data
 # -------------------------------------------------------------------------------------------------
 
 function load_updated_data {
-  psql $DB_NAME < $ROOT_DIR/src/database/environments/develop/dump.sql &> /dev/null &
-  pid=$!
+  log "Loading" "Load updated data"
 
-  wait_with_spinner "${pid}" "Loading" "Load updated data"
+  psql -h localhost -U ${DB_USER} $DB_NAME < $ROOT_DIR/src/database/environments/develop/dump.sql
 }
 
 # Helpers
 # -------------------------------------------------------------------------------------------------
 
-function wait_with_spinner {
-  pid=$1
-  message=$2
-  category=${3:-Waiting}
-  spin='⣾⣽⣻⢿⡿⣟⣯⣷'
+function log {
+  message=$1
+  category=${2:-Waiting}
+
+  bold=$(tput bold)
+  reset=$(tput sgr0)
+  cyan=$(tput setaf 6)
 
   echo
-
-  id=0
-  while kill -0 $pid 2>/dev/null; do
-    i=$(( (i+1) %8 ))
-    printf "\x1B[36m\r${spin:$i:1}\e[1m ${category}:\x1B[0m ${message}"
-    sleep .1
-  done
+  echo "${bold}${cyan}➤ ${category}:${reset} ${message}"
 }
 
 function throw_error {

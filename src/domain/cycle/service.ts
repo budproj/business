@@ -69,13 +69,10 @@ class DomainCycleService
 
   public async getFromTeamsWithFilters(teams: TeamDTO[], filters?: Partial<CycleDTO>) {
     const teamIDsFilter = Any(teams.map((team) => team.id))
-    const selector = {
+    const cycles = await this.repository.find({
       ...filters,
       teamId: teamIDsFilter,
-    }
-
-    // eslint-disable-next-line unicorn/no-fn-reference-in-iterator
-    const cycles = await this.repository.find(selector)
+    })
 
     return cycles
   }
