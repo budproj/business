@@ -2,3 +2,5 @@ version: '3.7'
 services:
   app:
     image: mcr.microsoft.com/vscode/devcontainers/typescript-node:14
+    volumes:
+      - ..:/workspace:cached
