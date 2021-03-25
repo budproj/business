@@ -72,7 +72,7 @@ function set_node_version {
   nvm use --delete-prefix v15.5.1
 }
 
-function set_node_dependencies {
+function install_node_dependencies {
   log "Installing Node dependencies" "Install dependencies"
 
   npm install
