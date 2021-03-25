@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+
+# DEPENDENCIES
+# -------------------------------------------------------------------------------------------------
+# To run this script, you must have the following tools installed:
+# - bash 4
+# - psql 12
+
+# Global variables
+# -------------------------------------------------------------------------------------------------
+
+DB_USER="${POSTGRES_USER:-codespace}"
+DB_PASSWORD="${POSTGRES_PASSWORD:-changeme}"
+DB_NAME="${POSTGRES_DB:-business_codespace}"
+ROOT_DIR=$(git rev-parse --show-toplevel)
+
+# Entrypoint
+# -------------------------------------------------------------------------------------------------
+
+function main {
+  validate_requirements
+  authenticate_pg_client
+  clear_database
+  create_database
+  load_updated_data
+
+  echo
+}
+
+# Validate requirements
+# -------------------------------------------------------------------------------------------------
+
+function validate_requirements {
+  validate_bash_dependency
+  validate_psql_dependency
+}
+
+function validate_bash_dependency {
+  major_version="$(bash --version | head -1 | cut -d ' ' -f 4 | cut -d '.' -f 1)"
+  min_major_version="4"
+
+  if [ "${major_version}" -lt "${min_major_version}" ]; then
+    throw_error "Your bash major version must be ${min_major_version} or greater"
+  fi
+}
+
+function validate_psql_dependency {
+  major_version="$(psql --version | head -1 | cut -d ' ' -f 3 | cut -d '.' -f 1)"
+  min_major_version="12"
+
+  if [ "${major_version}" -lt "${min_major_version}" ]; then
+    throw_error "Your psql major version must be ${min_major_version} or greater"
+  fi
+}
+
+# Authenticate Postgres client
+# -------------------------------------------------------------------------------------------------
+
+function authenticate_pg_client {
+  export PGPASSWORD=$DB_PASSWORD
+}
+
+
+# Clear database
+# -------------------------------------------------------------------------------------------------
+
+function clear_database {
+  psql -h localhost postgres -c "DROP DATABASE ${DB_NAME}" &> /dev/null &
+  pid=$!
+
+  wait_with_spinner "${pid}" "Clearing" "Clear database"
+}
+
+# Create database
+# -------------------------------------------------------------------------------------------------
+
+function create_database {
+  psql -h localhost postgres -c "CREATE DATABASE ${DB_NAME}" &> /dev/null &
+  pid=$!
+
+  wait_with_spinner "${pid}" "Creating" "Create database"
+}
+
+# Load updated data
+# -------------------------------------------------------------------------------------------------
+
+function load_updated_data {
+  psql -h localhost $DB_NAME < $ROOT_DIR/src/database/environments/develop/dump.sql &> /dev/null &
+  pid=$!
+
+  wait_with_spinner "${pid}" "Loading" "Load updated data"
+}
+
+# Helpers
+# -------------------------------------------------------------------------------------------------
+
+function wait_with_spinner {
+  pid=$1
+  message=$2
+  category=${3:-Waiting}
+  spin='⣾⣽⣻⢿⡿⣟⣯⣷'
+
+  echo
+
+  id=0
+  while kill -0 $pid 2>/dev/null; do
+    i=$(( (i+1) %8 ))
+    printf "\x1B[36m\r${spin:$i:1}\e[1m ${category}:\x1B[0m ${message}"
+    sleep .1
+  done
+}
+
+function throw_error {
+  message=$1
+
+  bold=$(tput bold)
+  reset=$(tput sgr0)
+  red=$(tput setaf 1)
+
+  echo "${bold}${red}Error:${reset}"
+  echo "${red}  ${message}${reset}"
+  exit 1
+}
+
+# Execute
+# -------------------------------------------------------------------------------------------------
+
+main

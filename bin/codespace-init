@@ -42,20 +42,12 @@ function validate_bash_dependency {
 
 function setup_dependencies {
   install_pg_client
-  define_node_version
 }
 
 function install_pg_client {
   log "Installing Postgres client" "Setup dependencies"
 
   sudo apt-get install -y postgresql-client
-}
-
-function define_node_version {
-  log "Installing Node version" "Setup dependencies"
-
-  nvm install v15.5.1
-  nvm use --delete-prefix v15.5.1
 }
 
 # Helpers
