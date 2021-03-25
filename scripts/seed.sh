@@ -1,17 +1,7 @@
 #!/usr/bin/env bash
 
-# WHAT DOES THIS SCRIPT DO
+# DEPENDENCIES
 # -------------------------------------------------------------------------------------------------
-#
-# It seeds develop data to our database. It uses the current dump to do so. In a nutshell, it
-# executes the following steps:
-# - Remove the previous database
-# - Creates a new database
-# - Load the current dump data
-#
-# REQUIRED DEPENDENCIES
-# -------------------------------------------------------------------------------------------------
-#
 # To run this script, you must have the following tools installed:
 # - bash 4
 # - psql 12

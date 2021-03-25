@@ -1,4 +1,4 @@
-FROM budproj/business
+FROM node:15.5.1-alpine3.10
 
 ARG NODE_ENV
 

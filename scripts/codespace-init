@@ -19,7 +19,6 @@ ROOT_DIR=$(git rev-parse --show-toplevel)
 function main {
   validate_requirements
   setup_dependencies
-  setup_base_image
 }
 
 # Validate requirements
@@ -57,33 +56,6 @@ function define_node_version {
 
   nvm install v15.5.1
   nvm use --delete-prefix v15.5.1
-}
-
-# Setup base image
-# -------------------------------------------------------------------------------------------------
-
-function setup_base_image {
-  install_application_dependencies
-  build_application
-  build_base_image
-}
-
-function install_application_dependencies {
-  log "Installing application dependencies" "Setup base image"
-
-  npm install
-}
-
-function build_application {
-  log "Building application" "Setup base image"
-
-  npm run build
-}
-
-function build_base_image {
-  log "Building Docker base image" "Setup base image"
-
-  docker build -t budproj/business .
 }
 
 # Helpers
