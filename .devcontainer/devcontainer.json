@@ -2,10 +2,7 @@
   "dockerComposeFile": "docker-compose.yaml",
   "service": "dev-app",
   "workspaceFolder": "/workspace",
-  "postCreateCommand": [
-    "bin/codespace-init",
-    "npm run start:dev"
-  ],
+  "postCreateCommand": "bin/codespace-init",
   "forwardPorts": [3000, 5432],
   "settings": {
     "terminal.integrated.shell.linux": "/bin/bash"
