@@ -8,21 +8,17 @@ services:
     image: mcr.microsoft.com/vscode/devcontainers/typescript-node:14
     command: tail -f /dev/null
     network_mode: host
+    env_file: .env
     volumes:
       - ..:/workspace:cached
-    environment:
-      - AUTH0_CLIENT_SECRET=${AUTH0_CLIENT_SECRET}
-      - TYPEORM_USER=${TYPEORM_USER}
-      - TYPEORM_PASSWORD=${TYPEORM_PASSWORD}
-    env_file: .env
     
   db-postgres:
     image: postgres
     container_name: business-db-postgres
     network_mode: host
     env_file: .env
+    restart: unless-stopped
     volumes:
       - type: volume
         source: postgres
         target: ${POSTGRES_DATA:-/data/postgres}
-    restart: unless-stopped
