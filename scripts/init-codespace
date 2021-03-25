@@ -47,19 +47,16 @@ function setup_dependencies {
 }
 
 function install_pg_client {
-  sudo apt-get install -y postgresql-client &> /dev/null &
-  pid=$!
+  log "Installing Postgres client" "Setup dependencies"
 
-  wait_with_spinner "${pid}" "Installing Postgres client" "Setup dependencies"
+  sudo apt-get install -y postgresql-client
 }
 
 function define_node_version {
-  nvm install v15.5.1 &> /dev/null &
-  pid=$!
+  log "Installing Node version" "Setup dependencies"
 
-  wait_with_spinner "${pid}" "Installing Node version" "Setup dependencies"
-
-  nvm use --delete-prefix v15.5.1 &> /dev/null
+  nvm install v15.5.1
+  nvm use --delete-prefix v15.5.1
 }
 
 # Setup base image
@@ -72,43 +69,36 @@ function setup_base_image {
 }
 
 function install_application_dependencies {
-  npm install &> /dev/null &
-  pid=$!
+  log "Installing application dependencies" "Setup base image"
 
-  wait_with_spinner "${pid}" "Installing application dependencies" "Setup base image"
+  npm install
 }
 
 function build_application {
-  npm run build &> /dev/null &
-  pid=$!
+  log "Building application" "Setup base image"
 
-  wait_with_spinner "${pid}" "Building application" "Setup base image"
+  npm run build
 }
 
 function build_base_image {
-  docker build -t budproj/business . &> /dev/null &
-  pid=$!
+  log "Building Docker base image" "Setup base image"
 
-  wait_with_spinner "${pid}" "Building Docker base image" "Setup base image"
+  docker build -t budproj/business .
 }
 
 # Helpers
 # -------------------------------------------------------------------------------------------------
 
-function wait_with_spinner {
-  pid=$1
-  message=$2
-  category=${3:-Waiting}
-  spin='⣾⣽⣻⢿⡿⣟⣯⣷'
+function log {
+  message=$1
+  category=${2:-Waiting}
 
-  id=0
-  while kill -0 $pid 2>/dev/null; do
-    i=$(( (i+1) %8 ))
-    printf "\x1B[36m\r${spin:$i:1}\e[1m ${category}:\x1B[0m ${message}"
-    sleep .1
-  done
+  bold=$(tput bold)
+  reset=$(tput sgr0)
+  cyan=$(tput setaf 6)
 
   echo
+  echo "${bold}${cyan}➤ ${category}:${reset} ${message}"
 }
 
 function throw_error {
