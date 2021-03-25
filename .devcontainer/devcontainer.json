@@ -11,5 +11,8 @@
     "npm run build",
     "docker build -t budproj/business ."
   ],
-  "postCreateCommand": ["npm run db:seed"]
+  "postCreateCommand": [
+    "sudo apt-get install -y postgresql-client",
+    "npm run db:seed"
+  ]
 }

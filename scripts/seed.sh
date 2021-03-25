@@ -19,7 +19,9 @@
 # Global variables
 # -------------------------------------------------------------------------------------------------
 
-DB_NAME='business_local'
+DB_USER="${POSTGRES_USER:-codespace}"
+DB_PASSWORD="${POSTGRES_PASSWORD:-changeme}"
+DB_NAME="${POSTGRES_DB:-business_codespace}"
 ROOT_DIR=$(git rev-parse --show-toplevel)
 
 
@@ -28,6 +30,7 @@ ROOT_DIR=$(git rev-parse --show-toplevel)
 
 function main {
   validate_requirements
+  authenticate_pg_client
   clear_database
   create_database
   load_updated_data
@@ -61,11 +64,19 @@ function validate_psql_dependency {
   fi
 }
 
+# Authenticate Postgres client
+# -------------------------------------------------------------------------------------------------
+
+function authenticate_pg_client {
+  export PGPASSWORD=$DB_PASSWORD
+}
+
+
 # Clear database
 # -------------------------------------------------------------------------------------------------
 
 function clear_database {
-  psql postgres -c "DROP DATABASE ${DB_NAME}" &> /dev/null &
+  psql -h localhost postgres -c "DROP DATABASE ${DB_NAME}" &> /dev/null &
   pid=$!
 
   wait_with_spinner "${pid}" "Clearing" "Clear database"
@@ -75,7 +86,7 @@ function clear_database {
 # -------------------------------------------------------------------------------------------------
 
 function create_database {
-  psql postgres -c "CREATE DATABASE ${DB_NAME}" &> /dev/null &
+  psql -h localhost postgres -c "CREATE DATABASE ${DB_NAME}" &> /dev/null &
   pid=$!
 
   wait_with_spinner "${pid}" "Creating" "Create database"
@@ -85,7 +96,7 @@ function create_database {
 # -------------------------------------------------------------------------------------------------
 
 function load_updated_data {
-  psql $DB_NAME < $ROOT_DIR/src/database/environments/develop/dump.sql &> /dev/null &
+  psql -h localhost $DB_NAME < $ROOT_DIR/src/database/environments/develop/dump.sql &> /dev/null &
   pid=$!
 
   wait_with_spinner "${pid}" "Loading" "Load updated data"

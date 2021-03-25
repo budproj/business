@@ -9,13 +9,15 @@ services:
         - NODE_ENV=${NODE_ENV:-development}
     volumes:
       - ..:/workspace:cached
+    network_mode: service:db-postgres
 
-  postgres:
+  db-postgres:
     image: postgres
-    container_name: business-db
+    container_name: business-db-postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-codespace}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DATABASE:-business_codespace}
       POSTGRES_DATA: ${POSTGRES_DATA:-/data/postgres}
     volumes:
       - type: volume
