@@ -1,7 +1,7 @@
 {
   "name": "business",
   "dockerComposeFile": "docker-compose.yml",
-  "service": "app",
+  "service": "dev-app",
   "workspaceFolder": "/business",
   "forwardPorts": [3000, 5432],
 }
