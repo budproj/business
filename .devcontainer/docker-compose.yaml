@@ -1,13 +1,29 @@
 version: '3.7'
+
+x-env-files:
+  &default-env-files
+  - .env
+  - .env.codespace
+  - .env.user
+
 services:
-  app:
+  dev-app:
     image: mcr.microsoft.com/vscode/devcontainers/typescript-node:14
     command: tail -f /dev/null
+    network_mode: host
     volumes:
       - ..:/workspace:cached
     environment:
       - AUTH0_CLIENT_SECRET=${AUTH0_CLIENT_SECRET}
-    env_file:
-      - .env
-      - .env.codespace
-      - .env.user
+    env_file: [*default-env-files]
+    
+  db-postgres:
+    image: postgres
+    container_name: business-db-postgres
+    network_mode: host
+    env_file: [*default-env-files]
+    volumes:
+      - type: volume
+        source: postgres
+        target: ${POSTGRES_DATA:-/data/postgres}
+    restart: unless-stopped
