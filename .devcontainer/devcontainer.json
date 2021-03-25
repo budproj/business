@@ -3,5 +3,8 @@
   "dockerComposeFile": "docker-compose.yml",
   "service": "dev-app",
   "workspaceFolder": "/workspace",
-  "forwardPorts": [3000, 5432]
+  "forwardPorts": [3000, 5432],
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash"
+  }
 }

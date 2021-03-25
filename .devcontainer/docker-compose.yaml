@@ -11,11 +11,7 @@ services:
   dev-app:
     container_name: business-dev-app
     network_mode: host
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - NODE_ENV=${NODE_ENV:-development}
+    image: mcr.microsoft.com/vscode/devcontainers/typescript-node:14
     volumes:
       - ..:/workspace:cached
     environment:
