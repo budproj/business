@@ -31,11 +31,10 @@ services:
     image: postgres
     container_name: business-db-postgres
     network_mode: host
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-codespace}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
-      POSTGRES_DB: ${POSTGRES_DATABASE:-business_codespace}
-      POSTGRES_DATA: ${POSTGRES_DATA:-/data/postgres}
+    env_file:
+      - .env
+      - .env.codespace
+      - .env.user
     volumes:
       - type: volume
         source: postgres
