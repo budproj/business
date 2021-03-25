@@ -132,22 +132,17 @@ class DomainKeyResultService
     if (!teams || isEmptyArray) return
 
     const teamsArray = Array.isArray(teams) ? teams : [teams]
-    const selector = {
-      teamId: Any(teamsArray.map((team) => team.id)),
-    }
 
-    // eslint-disable-next-line unicorn/no-fn-reference-in-iterator
-    return this.repository.find(selector)
+    return this.repository.find({
+      teamId: Any(teamsArray.map((team) => team.id)),
+    })
   }
 
   public async getFromObjective(objective: ObjectiveDTO, filter?: Partial<KeyResultDTO>) {
-    const selector = {
+    return this.repository.find({
       ...filter,
       objectiveId: objective.id,
-    }
-
-    // eslint-disable-next-line unicorn/no-fn-reference-in-iterator
-    return this.repository.find(selector)
+    })
   }
 
   public async getFromObjectives(objectives: ObjectiveDTO[], filter?: Partial<KeyResultDTO>) {
