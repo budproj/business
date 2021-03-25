@@ -1,23 +1,23 @@
 version: '3.8'
 services:
-  dev-app:
-    container_name: business-dev-app
-    network_mode: service:db-postgres
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - NODE_ENV=${NODE_ENV:-development}
-    volumes:
-      - ..:/workspace:cached
-    environment:
-      - AUTH0_CLIENT_SECRET=${AUTH0_CLIENT_SECRET}
-    env_file:
-      - .env
-      - .env.codespace
-      - .env.user
-    depends_on:
-      - db-postgres
+  # dev-app:
+  #   container_name: business-dev-app
+  #   network_mode: service:db-postgres
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #     args:
+  #       - NODE_ENV=${NODE_ENV:-development}
+  #   volumes:
+  #     - ..:/workspace:cached
+  #   environment:
+  #     - AUTH0_CLIENT_SECRET=${AUTH0_CLIENT_SECRET}
+  #   env_file:
+  #     - .env
+  #     - .env.codespace
+  #     - .env.user
+  #   depends_on:
+  #     - db-postgres
 
   db-postgres:
     image: postgres
