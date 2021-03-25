@@ -1,5 +1,7 @@
 {
-  "image": "mcr.microsoft.com/vscode/devcontainers/typescript-node:14",
+  "dockerComposeFile": "docker-compose.yaml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
   "forwardPorts": [3000],
   "settings": {
     "terminal.integrated.shell.linux": "/bin/bash"
