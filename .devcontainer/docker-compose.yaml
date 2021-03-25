@@ -4,3 +4,4 @@ services:
     image: mcr.microsoft.com/vscode/devcontainers/typescript-node:14
     volumes:
       - ..:/workspace:cached
+    command: tail -f /dev/null
