@@ -2,6 +2,12 @@ version: '3.7'
 services:
   app:
     image: mcr.microsoft.com/vscode/devcontainers/typescript-node:14
+    command: tail -f /dev/null
     volumes:
       - ..:/workspace:cached
-    command: tail -f /dev/null
+    environment:
+      - AUTH0_CLIENT_SECRET=${AUTH0_CLIENT_SECRET}
+    env_file:
+      - .env
+      - .env.codespace
+      - .env.user
