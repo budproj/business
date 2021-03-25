@@ -1,21 +1,7 @@
 #!/usr/bin/env bash
 
-# WHAT DOES THIS SCRIPT DO
+# DEPENDENCIES
 # -------------------------------------------------------------------------------------------------
-#
-# It executes all required commands to setup a proper development codespace. You can check the list
-# below to understand the order of commands:
-# - Defines codespace default user variables
-# - Install pg_client binaries (if they are not installed yet)
-# - Setup NVM to the expected Node version
-# - Install the application Node dependencies
-# - Build the application for production
-# - Builds the production latest image
-#
-# REQUIRED DEPENDENCIES
-# -------------------------------------------------------------------------------------------------
-#
-# To run this script, you must have the following tools installed:
 # - bash 4
 
 # Global flags
@@ -26,7 +12,6 @@ set +m
 # -------------------------------------------------------------------------------------------------
 
 ROOT_DIR=$(git rev-parse --show-toplevel)
-
 
 # Entrypoint
 # -------------------------------------------------------------------------------------------------
@@ -57,16 +42,8 @@ function validate_bash_dependency {
 # -------------------------------------------------------------------------------------------------
 
 function setup_dependencies {
-  define_codespace_environment_variables
   install_pg_client
   define_node_version
-}
-
-function define_codespace_environment_variables {
-  local codespace_env_file_name='.env.codespace'
-  local codespace_env_file_path="${ROOT_DIR}/${codespace_env_file_name}"
-
-  source <(grep -v '^#' ${codespace_env_file_path} | sed -E 's|^(.+)=(.*)$|: ${\1=\2}; export \1|g')
 }
 
 function install_pg_client {

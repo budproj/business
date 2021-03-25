@@ -38,8 +38,7 @@
     "git:tag:stable": "git tag stable -f && git push origin stable -f",
     "waypoint:build": "waypoint build",
     "waypoint:deploy": "waypoint deploy",
-    "waypoint:up": "waypoint up",
-    "codespace:init": ". ./scripts/init-codespace"
+    "waypoint:up": "waypoint up"
   },
   "author": "delucca <delucca@pm.me>",
   "license": "Apache-2.0",
