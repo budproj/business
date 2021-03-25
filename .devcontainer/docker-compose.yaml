@@ -4,7 +4,6 @@ services:
     container_name: business-dev-app
     network_mode: service:db-postgres
     build:
-      context: .
       dockerfile: Dockerfile
       args:
         - NODE_ENV=${NODE_ENV:-development}
