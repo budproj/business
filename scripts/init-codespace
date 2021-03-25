@@ -1,0 +1,152 @@
+#!/usr/bin/env bash
+
+# WHAT DOES THIS SCRIPT DO
+# -------------------------------------------------------------------------------------------------
+#
+# It executes all required commands to setup a proper development codespace. You can check the list
+# below to understand the order of commands:
+# - Defines codespace default user variables
+# - Install pg_client binaries (if they are not installed yet)
+# - Setup NVM to the expected Node version
+# - Install the application Node dependencies
+# - Build the application for production
+# - Builds the production latest image
+#
+# REQUIRED DEPENDENCIES
+# -------------------------------------------------------------------------------------------------
+#
+# To run this script, you must have the following tools installed:
+# - bash 4
+
+# Global flags
+# -------------------------------------------------------------------------------------------------
+set +m
+
+# Global variables
+# -------------------------------------------------------------------------------------------------
+
+ROOT_DIR=$(git rev-parse --show-toplevel)
+
+
+# Entrypoint
+# -------------------------------------------------------------------------------------------------
+
+function main {
+  validate_requirements
+  setup_dependencies
+  setup_base_image
+}
+
+# Validate requirements
+# -------------------------------------------------------------------------------------------------
+
+function validate_requirements {
+  validate_bash_dependency
+}
+
+function validate_bash_dependency {
+  major_version="$(bash --version | head -1 | cut -d ' ' -f 4 | cut -d '.' -f 1)"
+  min_major_version="4"
+
+  if [ "${major_version}" -lt "${min_major_version}" ]; then
+    throw_error "Your bash major version must be ${min_major_version} or greater"
+  fi
+}
+
+# Setup dependencies
+# -------------------------------------------------------------------------------------------------
+
+function setup_dependencies {
+  define_codespace_environment_variables
+  install_pg_client
+  define_node_version
+}
+
+function define_codespace_environment_variables {
+  local codespace_env_file_name='.env.codespace'
+  local codespace_env_file_path="${ROOT_DIR}/${codespace_env_file_name}"
+
+  source <(grep -v '^#' ${codespace_env_file_path} | sed -E 's|^(.+)=(.*)$|: ${\1=\2}; export \1|g')
+}
+
+function install_pg_client {
+  sudo apt-get install -y postgresql-client &> /dev/null &
+  pid=$!
+
+  wait_with_spinner "${pid}" "Installing Postgres client" "Setup dependencies"
+}
+
+function define_node_version {
+  nvm install v15.5.1 &> /dev/null &
+  pid=$!
+
+  wait_with_spinner "${pid}" "Installing Node version" "Setup dependencies"
+
+  nvm use --delete-prefix v15.5.1 &> /dev/null
+}
+
+# Setup base image
+# -------------------------------------------------------------------------------------------------
+
+function setup_base_image {
+  install_application_dependencies
+  build_application
+  build_base_image
+}
+
+function install_application_dependencies {
+  npm install &> /dev/null &
+  pid=$!
+
+  wait_with_spinner "${pid}" "Installing application dependencies" "Setup base image"
+}
+
+function build_application {
+  npm run build &> /dev/null &
+  pid=$!
+
+  wait_with_spinner "${pid}" "Building application" "Setup base image"
+}
+
+function build_base_image {
+  docker build -t budproj/business . &> /dev/null &
+  pid=$!
+
+  wait_with_spinner "${pid}" "Building application" "Building Docker base image"
+}
+
+# Helpers
+# -------------------------------------------------------------------------------------------------
+
+function wait_with_spinner {
+  pid=$1
+  message=$2
+  category=${3:-Waiting}
+  spin='⣾⣽⣻⢿⡿⣟⣯⣷'
+
+  id=0
+  while kill -0 $pid 2>/dev/null; do
+    i=$(( (i+1) %8 ))
+    printf "\x1B[36m\r${spin:$i:1}\e[1m ${category}:\x1B[0m ${message}"
+    sleep .1
+  done
+
+  echo
+}
+
+function throw_error {
+  message=$1
+
+  bold=$(tput bold)
+  reset=$(tput sgr0)
+  red=$(tput setaf 1)
+
+  echo "${bold}${red}Error:${reset}"
+  echo "${red}  ${message}${reset}"
+  exit 1
+}
+
+# Execute
+# -------------------------------------------------------------------------------------------------
+
+main

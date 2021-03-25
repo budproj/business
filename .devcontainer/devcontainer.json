@@ -4,15 +4,6 @@
   "service": "app",
   "workspaceFolder": "/business",
   "forwardPorts": [3000, 5432],
-  "initializeCommand": [
-    "nvm install v15.5.1",
-    "nvm use --delete-prefix v15.5.1",
-    "npm install",
-    "npm run build",
-    "docker build -t budproj/business ."
-  ],
-  "postCreateCommand": [
-    "sudo apt-get install -y postgresql-client",
-    "npm run db:seed"
-  ]
+  "initializeCommand": ["npm run codespace:init"],
+  "postCreateCommand": ["npm run db:seed"]
 }
