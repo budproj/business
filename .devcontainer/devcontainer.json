@@ -1,8 +1,5 @@
 {
-  "name": "business",
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "app",
-  "workspaceFolder": "/workspace",
+  "image": "mcr.microsoft.com/vscode/devcontainers/typescript-node:14",
   "forwardPorts": [3000],
   "settings": {
     "terminal.integrated.shell.linux": "/bin/bash"
