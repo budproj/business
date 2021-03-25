@@ -1,40 +1,4 @@
 version: '3.8'
 services:
   dev-app:
-    container_name: business-dev-app
-    network_mode: service:db-postgres
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - NODE_ENV=${NODE_ENV:-development}
-    volumes:
-      - ..:/workspace:cached
-    environment:
-      - AUTH0_CLIENT_SECRET=${AUTH0_CLIENT_SECRET}
-    env_file:
-      - .env
-      - .env.codespace
-      - .env.user
-    depends_on:
-      - db-postgres
-
-  db-postgres:
-    image: postgres
-    container_name: business-db-postgres
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-codespace}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
-      POSTGRES_DB: ${POSTGRES_DATABASE:-business_codespace}
-      POSTGRES_DATA: ${POSTGRES_DATA:-/data/postgres}
-    volumes:
-      - type: volume
-        source: postgres
-        target: ${POSTGRES_DATA:-/data/postgres}
-    ports:
-      - 3000:${PORT:-3000}
-      - 5432:${POSTGRES_PORT:-5432}
-    restart: unless-stopped
-
-volumes:
-  postgres:
+    image: hello-world
