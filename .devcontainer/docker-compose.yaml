@@ -1,7 +1,4 @@
 version: '3.8'
 services:
-  dev-app:
-    container_name: business-dev-app
+  app:
     image: mcr.microsoft.com/vscode/devcontainers/typescript-node:14
-    volumes:
-      - ..:/workspace:cached
