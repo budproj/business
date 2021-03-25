@@ -4,6 +4,6 @@
   "service": "app",
   "workspaceFolder": "/business",
   "forwardPorts": [3000, 5432],
-  "initializeCommand": ["npm run codespace:init"],
+  "initializeCommand": ["bin/codespace-init"],
   "postCreateCommand": ["npm run db:seed"]
 }
