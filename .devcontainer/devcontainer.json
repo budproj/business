@@ -1,6 +1,6 @@
 {
   "dockerComposeFile": "docker-compose.yaml",
-  "service": "app",
+  "service": "dev-app",
   "workspaceFolder": "/workspace",
   "forwardPorts": [3000],
   "settings": {
