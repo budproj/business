@@ -1,10 +1,12 @@
 version: '3.7'
 
-x-env-files:
-  &default-env-files
+x-env-files: &default-env-files
   - .env
   - .env.codespace
   - .env.user
+
+volumes:
+  postgres:
 
 services:
   dev-app:
@@ -15,13 +17,19 @@ services:
       - ..:/workspace:cached
     environment:
       - AUTH0_CLIENT_SECRET=${AUTH0_CLIENT_SECRET}
-    env_file: [*default-env-files]
+    env_file: 
+      - .env
+      - .env.codespace
+      - .env.user
     
   db-postgres:
     image: postgres
     container_name: business-db-postgres
     network_mode: host
-    env_file: [*default-env-files]
+    env_file:
+      - .env
+      - .env.codespace
+      - .env.user
     volumes:
       - type: volume
         source: postgres
