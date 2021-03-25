@@ -12,17 +12,15 @@ services:
       - ..:/workspace:cached
     environment:
       - AUTH0_CLIENT_SECRET=${AUTH0_CLIENT_SECRET}
-    env_file: 
-      - .env
-      - .env.user
+      - TYPEORM_USER=${TYPEORM_USER}
+      - TYPEORM_PASSWORD=${TYPEORM_PASSWORD}
+    env_file: .env
     
   db-postgres:
     image: postgres
     container_name: business-db-postgres
     network_mode: host
-    env_file:
-      - .env
-      - .env.user
+    env_file: .env
     volumes:
       - type: volume
         source: postgres
