@@ -112,7 +112,7 @@ function build_base_image {
   docker build -t budproj/business . &> /dev/null &
   pid=$!
 
-  wait_with_spinner "${pid}" "Building application" "Building Docker base image"
+  wait_with_spinner "${pid}" "Building Docker base image" "Setup base image"
 }
 
 # Helpers
