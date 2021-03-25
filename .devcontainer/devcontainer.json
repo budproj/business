@@ -4,6 +4,4 @@
   "service": "app",
   "workspaceFolder": "/business",
   "forwardPorts": [3000, 5432],
-  "initializeCommand": ["bin/codespace-init"],
-  "postCreateCommand": ["bin/codespace-setup"]
 }
