@@ -3,6 +3,7 @@
 # DEPENDENCIES
 # -------------------------------------------------------------------------------------------------
 # - bash 4
+# - nvm 0.35
 
 # Global flags
 # -------------------------------------------------------------------------------------------------
@@ -18,7 +19,8 @@ ROOT_DIR=$(git rev-parse --show-toplevel)
 
 function main {
   validate_requirements
-  setup_dependencies
+  install_dependencies
+  seed_database
 }
 
 # Validate requirements
@@ -26,6 +28,7 @@ function main {
 
 function validate_requirements {
   validate_bash_dependency
+  validate_nvm_dependency
 }
 
 function validate_bash_dependency {
@@ -37,17 +40,49 @@ function validate_bash_dependency {
   fi
 }
 
-# Setup dependencies
+function validate_nvm_dependency {
+  minor_version="$(nvm --version | head -1 | cut -d '.' -f 2)"
+  min_minor="35"
+
+  if [ "${minor_version}" -lt "${min_minor_version}" ]; then
+    throw_error "Your nvm minor version must be ${min_minor_version} or greater"
+  fi
+}
+
+# Install dependencies
 # -------------------------------------------------------------------------------------------------
 
-function setup_dependencies {
+function install_dependencies {
   install_pg_client
+  set_node_version
+  install_node_dependencies
 }
 
 function install_pg_client {
   log "Installing Postgres client" "Setup dependencies"
 
+  sudo apt-get -y update
   sudo apt-get install -y postgresql-client
+}
+
+function set_node_version {
+  log "Installing Node version" "Install dependencies"
+
+  nvm install v15.5.1
+  nvm use --delete-prefix v15.5.1
+}
+
+function set_node_dependencies {
+  log "Installing Node dependencies" "Install dependencies"
+
+  npm install
+}
+
+# Install dependencies
+# -------------------------------------------------------------------------------------------------
+
+function seed_database {
+  source "${ROOT_DIR}/bin/database-seed"
 }
 
 # Helpers
