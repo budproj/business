@@ -14,7 +14,6 @@ services:
       - AUTH0_CLIENT_SECRET=${AUTH0_CLIENT_SECRET}
     env_file: 
       - .env
-      - .env.codespace
       - .env.user
     
   db-postgres:
@@ -23,7 +22,6 @@ services:
     network_mode: host
     env_file:
       - .env
-      - .env.codespace
       - .env.user
     volumes:
       - type: volume
