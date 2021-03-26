@@ -8,7 +8,9 @@ services:
     image: mcr.microsoft.com/vscode/devcontainers/typescript-node:14
     command: tail -f /dev/null
     network_mode: host
-    env_file: .env
+    env_file:
+      - ../.env
+      - ../.env.development
     volumes:
       - ..:/workspace:cached
     

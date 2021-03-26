@@ -102,6 +102,7 @@
     "@types/eslint-config-prettier": "^6",
     "@types/eslint-plugin-prettier": "^3",
     "@types/faker": "^5.1.6",
+    "@types/jest": "^26.0.22",
     "@types/localtunnel": "^2.0.0",
     "@types/passport": "^0",
     "@types/prettier": "^2",
