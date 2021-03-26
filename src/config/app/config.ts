@@ -20,13 +20,13 @@ const {
   GOD_MODE_ENABLED,
   GOD_MODE_USER_ID,
   GOD_MODE_TEAM_IDS,
-  CODESPACE,
+  CODESPACES,
 } = process.env
 
 const config: AppConfigOptions = {
   port: Number.parseInt(PORT, 10) ?? 3000,
   globalPrefix: GLOBAL_PREFIX ?? '',
-  isCodespace: CODESPACE?.toUpperCase() === 'TRUE',
+  isCodespace: CODESPACES?.toUpperCase() === 'TRUE',
   url: URL,
   environment: APP_ENV ?? 'production',
   godMode: {
