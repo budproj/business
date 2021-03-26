@@ -3,8 +3,5 @@
   "service": "dev-app",
   "workspaceFolder": "/workspace",
   "postCreateCommand": "bin/codespace-init",
-  "forwardPorts": [3000, 5432],
-  "settings": {
-    "terminal.integrated.shell.linux": "/bin/bash"
-  }
+  "forwardPorts": [3000, 5432]
 }
