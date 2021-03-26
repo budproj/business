@@ -6,7 +6,7 @@ volumes:
 services:
   dev-app:
     image: mcr.microsoft.com/vscode/devcontainers/typescript-node:14
-    command: npm run start:dev
+    command: tail -f /dev/null
     network_mode: host
     env_file: .env
     volumes:
