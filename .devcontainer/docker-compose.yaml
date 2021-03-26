@@ -18,7 +18,9 @@ services:
     image: postgres
     container_name: business-db-postgres
     network_mode: host
-    env_file: .env
+    env_file:
+      - ../.env
+      - ../.env.development
     restart: unless-stopped
     volumes:
       - type: volume
