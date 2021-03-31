@@ -18,7 +18,7 @@ interface UserDraft {
   team: string
 }
 
-type AuthzRoleName = 'Stakeholder' | 'Squad Member' | 'Leader' | 'Team Member'
+type AuthzRoleName = 'Squad Member' | 'Leader' | 'Team Member'
 
 const { AUTH0_ISSUER } = process.env
 
