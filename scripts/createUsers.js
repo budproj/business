@@ -2,6 +2,7 @@ const { join } = require('path')
 const fs = require('fs')
 const csv = require('fast-csv')
 const { createConnection } = require('typeorm')
+const Promise = require('bluebird')
 
 const dbConfig = require('../dist/src/config/database/config').default
 const Auth0 = require('../dist/lib/auth0').default
@@ -32,7 +33,7 @@ const main = () =>
 
             createDatabaseUser(userDraft, user).then(resolve).catch(reject)
           })
-          .catch(reject),
+          .catch(reject)
       )
 
     const createDatabaseUser = (userDraft, authzUser) => {
@@ -62,11 +63,12 @@ const main = () =>
       return queryPromise
     }
 
-    const handleUserDrafts = (userDrafts) => {
-      const createUserPromises = userDrafts.map(createUser)
-
-      Promise.all(createUserPromises).then(() => dbConnection.close()).catch(console.error)
-    }
+    const handleUserDrafts = (userDrafts) =>
+      Promise.map(
+        userDrafts,
+        createUser,
+        { concurrency: 1 }
+      ).then(() => dbConnection.close()).catch(console.error)
 
     const userDrafts = []
     fs.createReadStream(filePath)
