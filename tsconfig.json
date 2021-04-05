@@ -12,12 +12,14 @@
     "baseUrl": "./",
     "paths": {
       "lib/*": ["./lib/*"],
-      "src/*": ["./src/*"]
+      "src/*": ["./src/*"],
+      "@interface/*": ["src/interface/*"],
+      "@config/*": ["./config/*"]
     },
     "incremental": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "lib/**/*.ts"],
+  "include": ["src/**/*.ts", "config/**/*.ts", "lib/**/*.ts"],
   "preferences": {
     "importModuleSpecifierPreference": "non-relative"
   }

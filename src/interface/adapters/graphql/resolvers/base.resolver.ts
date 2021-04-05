@@ -13,41 +13,8 @@ import { CONSTRAINT } from 'src/domain/constants'
 import { DomainEntity, DomainEntityService } from 'src/domain/entity'
 import DomainService from 'src/domain/service'
 
-export interface GraphQLEntityResolverInterface<E extends DomainEntity, D> {
-  createWithActionScopeConstraint: (
-    data: Partial<D>,
-    user: AuthzUser,
-    action: ACTION,
-  ) => Promise<E[]>
-
-  getOneWithActionScopeConstraint: (
-    selector: FindConditions<E>,
-    user: AuthzUser,
-    action: ACTION,
-  ) => Promise<E | null>
-  getManyWithActionScopeConstraint: (
-    selector: FindConditions<E>,
-    user: AuthzUser,
-    action: ACTION,
-  ) => Promise<E[] | null>
-
-  updateWithActionScopeConstraint: (
-    selector: FindConditions<E>,
-    newData: QueryDeepPartialEntity<E>,
-    user: AuthzUser,
-    action: ACTION,
-  ) => Promise<E | E[] | null>
-
-  deleteWithActionScopeConstraint: (
-    selector: FindConditions<E>,
-    user: AuthzUser,
-    action: ACTION,
-  ) => Promise<DeleteResult>
-}
-
 @Resolver(() => EntityObject)
-abstract class GraphQLEntityResolver<E extends DomainEntity, D>
-  implements GraphQLEntityResolverInterface<E, D> {
+export abstract class BaseGraphQLResolver<E extends DomainEntity, D> {
   constructor(
     protected readonly resource: RESOURCE,
     protected readonly domainService: DomainService,
@@ -78,7 +45,7 @@ abstract class GraphQLEntityResolver<E extends DomainEntity, D>
     data: Partial<D>,
     user: AuthzUser,
     action: ACTION = ACTION.CREATE,
-  ) {
+  ): Promise<E[]> {
     const scopeConstraint = user.scopes[this.resource][action]
     const queryContext = await this.domainService.team.buildTeamQueryContext(user, scopeConstraint)
 
@@ -89,7 +56,7 @@ abstract class GraphQLEntityResolver<E extends DomainEntity, D>
     selector: FindConditions<E>,
     user: AuthzUser,
     action: ACTION = ACTION.READ,
-  ) {
+  ): Promise<E | null> {
     const scopeConstraint = user.scopes[this.resource][action]
     const queryContext = await this.domainService.team.buildTeamQueryContext(user, scopeConstraint)
 
@@ -100,7 +67,7 @@ abstract class GraphQLEntityResolver<E extends DomainEntity, D>
     selector: FindConditions<E>,
     user: AuthzUser,
     action: ACTION = ACTION.READ,
-  ) {
+  ): Promise<E[] | null> {
     const scopeConstraint = user.scopes[this.resource][action]
     const queryContext = await this.domainService.team.buildTeamQueryContext(user, scopeConstraint)
 
@@ -112,7 +79,7 @@ abstract class GraphQLEntityResolver<E extends DomainEntity, D>
     newData: QueryDeepPartialEntity<E>,
     user: AuthzUser,
     action: ACTION = ACTION.UPDATE,
-  ) {
+  ): Promise<E | E[] | null> {
     const scopeConstraint = user.scopes[this.resource][action]
     const queryContext = await this.domainService.team.buildTeamQueryContext(user, scopeConstraint)
 
@@ -123,7 +90,7 @@ abstract class GraphQLEntityResolver<E extends DomainEntity, D>
     selector: FindConditions<E>,
     user: AuthzUser,
     action: ACTION = ACTION.DELETE,
-  ) {
+  ): Promise<DeleteResult> {
     const scopeConstraint = user.scopes[this.resource][action]
     const queryContext = await this.domainService.team.buildTeamQueryContext(user, scopeConstraint)
 
@@ -148,5 +115,3 @@ abstract class GraphQLEntityResolver<E extends DomainEntity, D>
     return constraint
   }
 }
-
-export default GraphQLEntityResolver
