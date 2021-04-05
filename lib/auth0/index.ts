@@ -1,8 +1,6 @@
 import { ManagementClient, AuthenticationClient, User, CreateUserData } from 'auth0'
 import { randomPassword } from 'secure-random-password'
 
-import { USER_GENDER } from 'src/domain/user/constants'
-
 interface Auth0Interface {
   domain: string
 }
@@ -13,7 +11,7 @@ interface UserDraft {
   email: string
   company_role: string
   picture: string
-  gender: USER_GENDER
+  gender: string
   authz_role: AuthzRoleName
   team: string
 }

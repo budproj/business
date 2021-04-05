@@ -6,10 +6,10 @@ import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import * as localtunnel from 'localtunnel'
 
-import { createConfig } from '@config'
-import { LoggingConfig } from '@config/logging'
-import { ServerConfig } from '@config/server'
-import { buildLogger } from '@lib/logger'
+import { LoggingConfigInterface } from '@config/logging/logging.interface'
+import { createServerConfig } from '@config/server/server.factory'
+import { ServerConfigInterface } from '@config/server/server.interface'
+import { buildLogger } from '@lib/logger/logger.factory'
 
 import { BootstrapModule } from './bootstrap.module'
 
@@ -23,7 +23,7 @@ type CustomFastifyServerHTTPSOptions = {
 }
 
 async function bootstrap(): Promise<void> {
-  const serverConfig = createConfig().server
+  const serverConfig = createServerConfig()
   const fastifyServerOptions = buildFastifyServerOptions(serverConfig)
 
   const application = await NestFactory.create<NestFastifyApplication>(
@@ -32,7 +32,7 @@ async function bootstrap(): Promise<void> {
   )
 
   const configService = application.get<ConfigService>(ConfigService)
-  const loggingConfig = configService.get<LoggingConfig>('logging')
+  const loggingConfig = configService.get<LoggingConfigInterface>('logging')
 
   const logger = buildLogger(loggingConfig?.level, loggingConfig?.serviceName)
 
@@ -41,7 +41,7 @@ async function bootstrap(): Promise<void> {
 }
 
 function buildFastifyServerOptions(
-  serverConfig: ServerConfig,
+  serverConfig: ServerConfigInterface,
 ): CustomFastifyServerOptions | undefined {
   const httpsConfig = buildHttpsConfig(serverConfig)
   if (!httpsConfig) return
@@ -51,7 +51,9 @@ function buildFastifyServerOptions(
   }
 }
 
-function buildHttpsConfig({ https }: ServerConfig): CustomFastifyServerHTTPSOptions | undefined {
+function buildHttpsConfig({
+  https,
+}: ServerConfigInterface): CustomFastifyServerHTTPSOptions | undefined {
   const isHttpsEnabled = https.enabled
   if (!isHttpsEnabled) return
   if (!https || !https?.credentialFilePaths) return
@@ -69,7 +71,7 @@ function buildHttpsConfig({ https }: ServerConfig): CustomFastifyServerHTTPSOpti
 function setupServer(
   application: NestFastifyApplication,
   logger: LoggerService,
-  serverConfig: ServerConfig,
+  serverConfig: ServerConfigInterface,
 ): void {
   const defaultGlobalPrefix = ''
 
@@ -89,7 +91,7 @@ function setupServer(
 async function launchServer(
   application: NestFastifyApplication,
   logger: LoggerService,
-  serverConfig: ServerConfig,
+  serverConfig: ServerConfigInterface,
 ): Promise<void> {
   const endpoint = await getServerEndpoint(serverConfig)
 
@@ -97,14 +99,14 @@ async function launchServer(
   logger.log(`Started server listening on ${endpoint}`)
 }
 
-async function getServerEndpoint(serverConfig: ServerConfig) {
-  const tunnel = serverConfig.isCodespace && (await localtunnel({ port: serverConfig.port }))
+async function getServerEndpoint(serverConfig: ServerConfigInterface) {
+  const tunnel = serverConfig.isCodespaces && (await localtunnel({ port: serverConfig.port }))
   const endpoint = tunnel?.url ?? buildServerEndpoint(serverConfig)
 
   return endpoint
 }
 
-function buildServerEndpoint(serverConfig: ServerConfig) {
+function buildServerEndpoint(serverConfig: ServerConfigInterface) {
   const endpoint = `http://${serverConfig.host}:${serverConfig.port}`
 
   return endpoint

@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
 
-import { GraphQLAdapterModule } from './adapters/graphql/graphql.module'
+import { GraphQLModule } from './graphql/graphql.module'
 
 @Module({
-  imports: [GraphQLAdapterModule],
+  imports: [GraphQLModule],
 })
 export class InterfaceModule {}
