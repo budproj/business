@@ -1,18 +1,17 @@
-import { TransformableInfo } from 'logform'
 import { WinstonModule, utilities } from 'nest-winston'
 import { transports, format } from 'winston'
 
 const { Console } = transports
 const { combine, timestamp } = format
 
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
-
-export interface BudTransformableInfo extends TransformableInfo {
-  timestamp: string
-  label: string
+export enum LOG_LEVEL {
+  DEBUG = 'debug',
+  INFO = 'info',
+  WARN = 'warn',
+  ERROR = 'error',
 }
 
-const buildLogger = (level: LogLevel, serviceName: string) => {
+export function buildLogger(level?: LOG_LEVEL, serviceName?: string) {
   const logger = WinstonModule.createLogger({
     level,
     defaultMeta: { service: serviceName },
@@ -25,5 +24,3 @@ const buildLogger = (level: LogLevel, serviceName: string) => {
 
   return logger
 }
-
-export default buildLogger

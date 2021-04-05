@@ -11,10 +11,10 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
-      "lib/*": ["./lib/*"],
-      "src/*": ["./src/*"],
       "@interface/*": ["src/interface/*"],
-      "@config/*": ["./config/*"]
+      "@config/*": ["./config/*"],
+      "@config": ["config/index"],
+      "@lib/*": ["./lib/*"]
     },
     "incremental": true,
     "skipLibCheck": true
