@@ -24,7 +24,6 @@ source $NVM_DIR/nvm.sh
 function main {
   validate_requirements
   install_dependencies
-  seed_database
 }
 
 # Validate requirements
@@ -61,6 +60,7 @@ function install_dependencies {
   set_node_version
   install_node_dependencies
   install_global_dependencies
+  seed_database
 }
 
 function install_pg_client {
@@ -92,9 +92,6 @@ function install_global_dependencies {
 function install_localtunnel {
   npm install -g localtunnel
 }
-
-# Install dependencies
-# -------------------------------------------------------------------------------------------------
 
 function seed_database {
   source "${ROOT_DIR}/bin/database-seed"
