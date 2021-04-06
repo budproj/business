@@ -1,15 +1,15 @@
 import { uniq, zipObject } from 'lodash'
 
-import { Action } from './enums/action.enum'
+import { Command } from './enums/command.enum'
 import { Effect } from './enums/effect.enum'
 import { Resource } from './enums/resource.enum'
 import { Scope } from './enums/scope.enum'
 import { AuthorizationUser } from './interfaces/user.interface'
-import { ActionStatement } from './types/action-statement.type'
+import { Action } from './types/action.type'
+import { CommandPolicy } from './types/command-policy.type'
 import { Permission } from './types/permission.type'
-import { Policy } from './types/policy.type'
-import { ResourceStatement } from './types/resource-statement.type'
-import { ScopeStatement } from './types/scope-statement.type'
+import { ResourcePolicy } from './types/resource-policy.type'
+import { ScopePolicy } from './types/scope-policy'
 
 export class AuthzAdapter {
   private readonly resources = [
@@ -26,79 +26,79 @@ export class AuthzAdapter {
   public marshalPermissions(
     permissions: Permission[],
     resources: Resource[] = this.resources,
-  ): ResourceStatement {
-    const actionStatements = resources.map((resource) =>
-      this.getResourceActionStatementFromPermissions(resource, permissions),
+  ): ResourcePolicy {
+    const commandPolicies = resources.map((resource) =>
+      this.getCommandPoliciesForResourceFromPermissions(resource, permissions),
     )
-    const resourceStatement = zipObject<Resource, ActionStatement>(resources, actionStatements)
+    const resourcePolicies = zipObject<Resource, CommandPolicy>(resources, commandPolicies)
 
-    return resourceStatement
+    return resourcePolicies
   }
 
-  public userHasRequiredPolicies(user: AuthorizationUser, requiredPolicies?: Policy[]): boolean {
-    if (!requiredPolicies || requiredPolicies.length === 0) return true
+  public canUserExecuteActions(user: AuthorizationUser, actions?: Action[]): boolean {
+    if (!actions || actions.length === 0) return true
 
-    const userAllowedPolicies = this.getPoliciesFromPermissions(user.token.permissions)
-    if (userAllowedPolicies.length === 0) return false
+    const userAllowedActions = this.getActionsFromPermissions(user.token.permissions)
+    if (userAllowedActions.length === 0) return false
 
-    const hasAllRequiredPolicies = requiredPolicies.every((requiredPolicy) =>
-      userAllowedPolicies.includes(requiredPolicy),
+    const canExecuteAllRequiredActions = actions.every((action) =>
+      userAllowedActions.includes(action),
     )
 
-    return hasAllRequiredPolicies
+    return canExecuteAllRequiredActions
   }
 
-  private getResourceActionStatementFromPermissions(
+  private getCommandPoliciesForResourceFromPermissions(
     resource: Resource,
     permissions: Permission[],
-  ): ActionStatement {
-    const actions = [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]
-    const scopeStatements = actions.map((action) =>
-      this.getScopeStatementForResourceActionFromPermissions(resource, action, permissions),
+  ): CommandPolicy {
+    const commands = [Command.CREATE, Command.READ, Command.UPDATE, Command.DELETE]
+    const scopePolicies = commands.map((command) =>
+      this.getScopePoliciesForResourceCommandFromPermissions(resource, command, permissions),
     )
 
-    const actionStatement = zipObject<Action, ScopeStatement>(actions, scopeStatements)
+    const commandPolicies = zipObject<Command, ScopePolicy>(commands, scopePolicies)
 
-    return actionStatement
+    return commandPolicies
   }
 
-  private getScopeStatementForResourceActionFromPermissions(
+  private getScopePoliciesForResourceCommandFromPermissions(
     resource: Resource,
+    command: Command,
+    permissions: Permission[],
+  ): ScopePolicy {
+    const action: Action = `${resource}:${command}` as const
+    const actionPermissions = this.filterActionPermissionsFromPermissions(action, permissions)
+    const scopes = [Scope.ANY, Scope.COMPANY, Scope.TEAM, Scope.OWNS]
+    const effectPolicies = scopes.map((scope) =>
+      this.getEffectPolicyForActionScopeFromPermissions(scope, action, actionPermissions),
+    )
+
+    const scopePolicies = zipObject<Scope, Effect>(scopes, effectPolicies)
+
+    return scopePolicies
+  }
+
+  private getEffectPolicyForActionScopeFromPermissions(
+    scope: Scope,
     action: Action,
     permissions: Permission[],
-  ): ScopeStatement {
-    const policy: Policy = `${resource}:${action}` as const
-    const policyPermissions = this.filterPolicyPermissions(policy, permissions)
-    const scopes = [Scope.ANY, Scope.COMPANY, Scope.TEAM, Scope.OWNS]
-    const effects = scopes.map((scope) =>
-      this.getScopeEffectForPolicyFromPermissions(scope, policy, policyPermissions),
-    )
-
-    const scopeStatement = zipObject<Scope, Effect>(scopes, effects)
-
-    return scopeStatement
-  }
-
-  private getScopeEffectForPolicyFromPermissions(
-    scope: Scope,
-    policy: Policy,
-    permissions: Permission[],
   ): Effect {
-    const requiredPermission = `${policy}:${scope}`
-    const hasPermission = permissions.some((permission) => permission.includes(requiredPermission))
+    const expectedPermission = `${action}:${scope}`
+    const hasPermission = permissions.some((permission) => permission.includes(expectedPermission))
 
     return hasPermission ? Effect.ALLOW : Effect.DENY
   }
 
-  private filterPolicyPermissions(policy: Policy, permissions: Permission[]) {
-    return permissions.filter((permission) => permission.includes(policy))
+  private filterActionPermissionsFromPermissions(action: Action, permissions: Permission[]) {
+    return permissions.filter((permission) => permission.includes(action))
   }
 
-  private getPoliciesFromPermissions(permissions: Permission[]): Policy[] {
-    const policies: Policy[] = permissions.map((permission) => this.drillUp<Policy>(permission))
-    const uniqPolicies = uniq(policies)
+  private getActionsFromPermissions(permissions: Permission[]): Action[] {
+    const actions: Action[] = permissions.map((permission) => this.drillUp<Action>(permission))
+    const uniqActions = uniq(actions)
 
-    return uniqPolicies
+    return uniqActions
   }
 
   private drillUp<T extends string = string>(value: string): T {

@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core'
 import { GqlExecutionContext } from '@nestjs/graphql'
 
 import { AuthzAdapter } from '@adapters/authorization/authz.adapter'
-import { Policy } from '@adapters/authorization/types/policy.type'
+import { Action } from '@adapters/authorization/types/action.type'
 
 @Injectable()
 export class GraphQLRequiredPoliciesGuard implements CanActivate {
@@ -16,21 +16,21 @@ export class GraphQLRequiredPoliciesGuard implements CanActivate {
     const graphqlExecutionContext = GqlExecutionContext.create(executionContext)
     const request = graphqlExecutionContext.getContext().req
 
-    const resolverRequiredPolicies = this.getResolverRequiredPolicies(graphqlExecutionContext)
+    const resolverRequiredActions = this.getResolverRequiredActions(graphqlExecutionContext)
 
     this.logger.debug({
-      resolverRequiredPolicies,
+      resolverRequiredActions,
       user: request.user,
       message: 'Checking if user is allowed in given route',
     })
 
-    const hasRequiredPolicies = this.authz.userHasRequiredPolicies(
+    const hasRequiredPolicies = this.authz.canUserExecuteActions(
       request.user,
-      resolverRequiredPolicies,
+      resolverRequiredActions,
     )
     if (!hasRequiredPolicies)
       this.logger.error({
-        resolverRequiredPolicies,
+        resolverRequiredActions,
         token: request.user.token,
         message:
           'User is not allowed to use this resolver, since the user does not have all required policies',
@@ -39,9 +39,9 @@ export class GraphQLRequiredPoliciesGuard implements CanActivate {
     return hasRequiredPolicies
   }
 
-  private getResolverRequiredPolicies(graphqlExecutionContext: GqlExecutionContext) {
+  private getResolverRequiredActions(graphqlExecutionContext: GqlExecutionContext) {
     const handler = graphqlExecutionContext.getHandler()
-    const permissions = this.reflector.get<Policy[]>('requiredPolicies', handler)
+    const permissions = this.reflector.get<Action[]>('requiredActions', handler)
 
     return permissions
   }

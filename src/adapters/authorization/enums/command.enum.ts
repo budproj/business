@@ -1,4 +1,4 @@
-export enum Action {
+export enum Command {
   CREATE = 'create',
   READ = 'read',
   UPDATE = 'update',

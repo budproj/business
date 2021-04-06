@@ -1,5 +1,5 @@
 import { Scope } from '@adapters/authorization/enums/scope.enum'
 
-import { Policy } from './policy.type'
+import { Action } from './action.type'
 
-export type Permission = `${Policy}:${Scope}`
+export type Permission = `${Action}:${Scope}`
