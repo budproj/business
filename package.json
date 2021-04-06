@@ -55,6 +55,7 @@
     "node": ">=15.5.1"
   },
   "dependencies": {
+    "@hapi/joi": "^17.1.1",
     "@nestjs/cli": "^7.5.3",
     "@nestjs/common": "^7.5.2",
     "@nestjs/config": "^0.5.0",
@@ -102,6 +103,7 @@
     "@types/eslint-config-prettier": "^6",
     "@types/eslint-plugin-prettier": "^3",
     "@types/faker": "^5.1.6",
+    "@types/hapi__joi": "^17.1.6",
     "@types/jest": "^26.0.22",
     "@types/passport": "^0",
     "@types/prettier": "^2",

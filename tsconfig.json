@@ -11,17 +11,17 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
-      "@core/*": ["src/core/*"],
       "@adapters/*": ["src/adapters/*"],
+      "@config/*": ["src/config/*"],
+      "@core/*": ["src/core/*"],
       "@interface/*": ["src/interface/*"],
       "@infrastructure/*": ["src/infrastructure/*"],
-      "@config/*": ["./config/*"],
-      "@lib/*": ["./lib/*"]
+      "@lib/*": ["lib/*"]
     },
     "incremental": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "config/**/*.ts", "lib/**/*.ts"],
+  "include": ["src/**/*.ts", "lib/**/*.ts"],
   "preferences": {
     "importModuleSpecifierPreference": "non-relative"
   }
