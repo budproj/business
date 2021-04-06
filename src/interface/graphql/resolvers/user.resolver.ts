@@ -5,9 +5,10 @@ import { UserGraphQLObject } from '@interface/graphql/objects/user.object'
 import { UserFiltersRequest } from '@interface/graphql/requests/user/user-filters.request'
 import { UsersGraphQLResponse } from '@interface/graphql/responses/users.response'
 
+import { GraphQLRequiredPoliciesGuard } from './guards/required-policies.guard'
 import { GraphQLTokenGuard } from './guards/token.guard'
 
-@UseGuards(GraphQLTokenGuard)
+@UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @Resolver(() => UserGraphQLObject)
 export class UserGraphQLResolver {
   private readonly logger = new Logger(UserGraphQLResolver.name)
