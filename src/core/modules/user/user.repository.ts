@@ -1,37 +1,39 @@
-import { CONSTRAINT_TYPE } from 'src/domain/entity'
-import { TeamDTO } from 'src/domain/team/dto'
-import { Team } from 'src/domain/team/entities'
-import { UserDTO } from 'src/domain/user/dto'
 import { EntityRepository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
-import { User } from './entities'
+import { CoreEntityRepository } from '@core/core.repository'
+import { ConstrainType } from '@core/enums/contrain-type.enum'
 
-@EntityRepository(User)
-export class UserRepository extends EntityRepository<User> {
-  protected setupTeamQuery(query: SelectQueryBuilder<User>) {
-    return query.leftJoinAndSelect(`${User.name}.teams`, Team.name)
+import { TeamInterface } from '../team/team.interface'
+
+import { UserEntity } from './user.entity'
+import { UserInterface } from './user.interface'
+
+@EntityRepository(UserEntity)
+export class UserRepository extends CoreEntityRepository<UserEntity> {
+  protected setupTeamQuery(query: SelectQueryBuilder<UserEntity>) {
+    return query.leftJoinAndSelect('User.teams', 'Team')
   }
 
   protected addTeamWhereExpression(
     query: WhereExpression,
-    allowedTeams: Array<TeamDTO['id']>,
-    constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,
+    allowedTeams: Array<TeamInterface['id']>,
+    constraintType: ConstrainType = ConstrainType.OR,
   ) {
     const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
 
-    return query[constraintMethodName](`${Team.name}.id IN (:...allowedTeams)`, {
+    return query[constraintMethodName]('Team.id IN (:...allowedTeams)', {
       allowedTeams,
     })
   }
 
   protected addOwnsWhereExpression(
     query: WhereExpression,
-    user: UserDTO,
-    constraintType: CONSTRAINT_TYPE = CONSTRAINT_TYPE.OR,
+    user: UserInterface,
+    constraintType: ConstrainType = ConstrainType.OR,
   ) {
     const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
 
-    return query[constraintMethodName](`${User.name}.id = :userID`, {
+    return query[constraintMethodName]('User.id = :userID', {
       userID: user.id,
     })
   }

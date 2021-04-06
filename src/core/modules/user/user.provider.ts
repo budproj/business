@@ -1,33 +1,31 @@
 import { Injectable } from '@nestjs/common'
-import { DomainCreationQuery, DomainQueryContext } from 'src/domain/entity'
-import { UserDTO } from 'src/domain/user/dto'
 
-import { User } from './entities'
-import DomainUserRepository from './repository'
+import { CoreEntityProvider } from '@core/entity.provider'
+import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
+import { CreationQuery } from '@core/types/creation-query.type'
 
-export interface DomainUserServiceInterface {
-  buildUserFullName: (user: UserDTO) => string
-  getUserFromSubjectWithTeamRelation: (authzSub: UserDTO['authzSub']) => Promise<User>
-}
+import { UserEntity } from './user.entity'
+import { UserInterface } from './user.interface'
+import { UserRepository } from './user.repository'
 
 @Injectable()
-export class UserProvider extends EntityProvider<User, UserDTO> {
-  constructor(protected readonly repository: DomainUserRepository) {
-    super(DomainUserService.name, repository)
+export class UserProvider extends CoreEntityProvider<UserEntity, UserInterface> {
+  constructor(protected readonly repository: UserRepository) {
+    super(UserProvider.name, repository)
   }
 
-  public buildUserFullName(user: UserDTO) {
+  public buildUserFullName(user: UserInterface) {
     return `${user.firstName} ${user.lastName}`
   }
 
-  public async getUserFromSubjectWithTeamRelation(authzSub: UserDTO['authzSub']) {
+  public async getUserFromSubjectWithTeamRelation(authzSub: UserInterface['authzSub']) {
     return this.repository.findOne({ authzSub }, { relations: ['teams'] })
   }
 
   protected async protectCreationQuery(
-    _query: DomainCreationQuery<User>,
-    _data: Partial<UserDTO>,
-    _queryContext: DomainQueryContext,
+    _query: CreationQuery<UserEntity>,
+    _data: Partial<UserInterface>,
+    _queryContext: CoreQueryContext,
   ) {
     return []
   }
