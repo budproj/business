@@ -31,10 +31,10 @@ export class AuthzProvider {
     permissions: Permission[],
     resources: Resource[] = this.resources,
   ): ResourceStatement {
-    const resourceStatementPairs = resources.map((resource) =>
+    const actionStatements = resources.map((resource) =>
       this.getResourceActionStatementFromPermissions(resource, permissions),
     )
-    const resourceStatement = zipObject(resources, resourceStatementPairs)
+    const resourceStatement = zipObject<Resource, ActionStatement>(resources, actionStatements)
 
     return resourceStatement
   }
@@ -44,11 +44,11 @@ export class AuthzProvider {
     permissions: Permission[],
   ): ActionStatement {
     const actions = [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]
-    const actionStatementPairs = actions.map((action) =>
+    const scopeStatements = actions.map((action) =>
       this.getScopeStatementForResourceActionFromPermissions(resource, action, permissions),
     )
 
-    const actionStatement = zipObject(actions, actionStatementPairs)
+    const actionStatement = zipObject<Action, ScopeStatement>(actions, scopeStatements)
 
     return actionStatement
   }
@@ -58,14 +58,14 @@ export class AuthzProvider {
     action: Action,
     permissions: Permission[],
   ): ScopeStatement {
-    const scopes = [Scope.ANY, Scope.COMPANY, Scope.TEAM, Scope.OWNS]
     const policy = `${resource}:${action}` as Policy
     const policyPermissions = this.filterPolicyPermissions(policy, permissions)
-    const scopeStatements = scopes.map((scope) =>
+    const scopes = [Scope.ANY, Scope.COMPANY, Scope.TEAM, Scope.OWNS]
+    const effects = scopes.map((scope) =>
       this.getScopeEffectForPolicyFromPermissions(scope, policy, policyPermissions),
     )
 
-    const scopeStatement = zipObject(scopes, scopeStatements)
+    const scopeStatement = zipObject<Scope, Effect>(scopes, effects)
 
     return scopeStatement
   }
