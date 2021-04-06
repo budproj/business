@@ -11,8 +11,8 @@ export class GraphQLTokenGuard extends AuthGuard('jwt') {
   public canActivate(
     executionContext: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const graphqlContext = GqlExecutionContext.create(executionContext)
-    const request = graphqlContext.getContext().req
+    const graphqlExecutionContext = GqlExecutionContext.create(executionContext)
+    const request = graphqlExecutionContext.getContext().req
     const guardRequest = () => super.canActivate(new ExecutionContextHost([request]))
 
     this.logger.debug({

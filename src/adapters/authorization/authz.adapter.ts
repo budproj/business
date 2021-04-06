@@ -1,19 +1,17 @@
-import { Injectable } from '@nestjs/common'
-import { Reflector } from '@nestjs/core'
-import { zipObject } from 'lodash'
+import { uniq, zipObject } from 'lodash'
 
-import { ActionStatement } from '@adapters/authorization/action-statement.interface'
-import { Action } from '@adapters/authorization/enums/action.enum'
-import { Effect } from '@adapters/authorization/enums/effect.enum'
-import { Resource } from '@adapters/authorization/enums/resource.enum'
-import { Scope } from '@adapters/authorization/enums/scope.enum'
-import { Permission } from '@adapters/authorization/permission.interface'
-import { Policy } from '@adapters/authorization/policy.interface'
-import { ResourceStatement } from '@adapters/authorization/resource-statement.interface'
-import { ScopeStatement } from '@adapters/authorization/scope-statement.interface'
+import { Action } from './enums/action.enum'
+import { Effect } from './enums/effect.enum'
+import { Resource } from './enums/resource.enum'
+import { Scope } from './enums/scope.enum'
+import { AuthorizationUser } from './interfaces/user.interface'
+import { ActionStatement } from './types/action-statement.type'
+import { Permission } from './types/permission.type'
+import { Policy } from './types/policy.type'
+import { ResourceStatement } from './types/resource-statement.type'
+import { ScopeStatement } from './types/scope-statement.type'
 
-@Injectable()
-export class AuthzProvider {
+export class AuthzAdapter {
   private readonly resources = [
     Resource.PERMISSION,
     Resource.USER,
@@ -25,8 +23,6 @@ export class AuthzProvider {
     Resource.KEY_RESULT_COMMENT,
   ]
 
-  constructor(private readonly reflector: Reflector) {}
-
   public marshalPermissions(
     permissions: Permission[],
     resources: Resource[] = this.resources,
@@ -37,6 +33,19 @@ export class AuthzProvider {
     const resourceStatement = zipObject<Resource, ActionStatement>(resources, actionStatements)
 
     return resourceStatement
+  }
+
+  public userHasRequiredPolicies(user: AuthorizationUser, requiredPolicies?: Policy[]): boolean {
+    if (!requiredPolicies || requiredPolicies.length === 0) return true
+
+    const userAllowedPolicies = this.getPoliciesFromPermissions(user.token.permissions)
+    if (userAllowedPolicies.length === 0) return false
+
+    const hasAllRequiredPolicies = requiredPolicies.every((requiredPolicy) =>
+      userAllowedPolicies.includes(requiredPolicy),
+    )
+
+    return hasAllRequiredPolicies
   }
 
   private getResourceActionStatementFromPermissions(
@@ -83,5 +92,16 @@ export class AuthzProvider {
 
   private filterPolicyPermissions(policy: Policy, permissions: Permission[]) {
     return permissions.filter((permission) => permission.includes(policy))
+  }
+
+  private getPoliciesFromPermissions(permissions: Permission[]): Policy[] {
+    const policies: Policy[] = permissions.map((permission) => this.drillUp<Policy>(permission))
+    const uniqPolicies = uniq(policies)
+
+    return uniqPolicies
+  }
+
+  private drillUp<T extends string = string>(value: string): T {
+    return value.split(':').slice(0, -1).join(':') as T
   }
 }
