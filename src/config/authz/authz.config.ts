@@ -1,8 +1,11 @@
+import { registerAs } from '@nestjs/config'
+
 import { AuthzConfigInterface } from './authz.interface'
 
-const { AUTHZ_ISSUER, AUTHZ_AUDIENCE } = process.env
-
-export const authzConfig: AuthzConfigInterface = {
-  issuer: AUTHZ_ISSUER,
-  audience: AUTHZ_AUDIENCE,
-}
+export const authzConfig = registerAs(
+  'authz',
+  (): AuthzConfigInterface => ({
+    issuer: process.env.AUTHZ_ISSUER,
+    audience: process.env.AUTHZ_AUDIENCE,
+  }),
+)

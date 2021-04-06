@@ -1,4 +1,4 @@
 export interface AuthzConfigInterface {
-  issuer?: string
-  audience?: string
+  issuer: string
+  audience: string
 }

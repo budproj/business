@@ -1,23 +1,22 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
 import { PassportStrategy } from '@nestjs/passport'
 import { passportJwtSecret } from 'jwks-rsa'
 import { ExtractJwt, Strategy } from 'passport-jwt'
 
-import { AuthzConfigInterface } from '@config/authz/authz.interface'
+import { AuthzConfigProvider } from '@config/authz/authz.provider'
 
 @Injectable()
 export class AuthzStrategyProvider extends PassportStrategy(Strategy) {
   private readonly logger = new Logger(AuthzStrategyProvider.name)
 
-  constructor(protected readonly authzConfigService: ConfigService<AuthzConfigInterface>) {
+  constructor(protected readonly config: AuthzConfigProvider) {
     super({
       secretOrKeyProvider: passportJwtSecret({
-        jwksUri: `${authzConfigService.get<string>('issuer')}.well-known/jwks.json`,
+        jwksUri: `${config.issuer}.well-known/jwks.json`,
       }),
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      audience: authzConfigService.get<string>('audience'),
-      issuer: authzConfigService.get<string>('issuer'),
+      audience: config.audience,
+      issuer: config.issuer,
       algorithms: ['RS256'],
     })
   }
