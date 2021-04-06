@@ -1,24 +1,18 @@
 import { Injectable } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
 import { GqlOptionsFactory } from '@nestjs/graphql'
 
-import { GraphQLConfigInterface } from '@config/graphql/graphql.interface'
+import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 
 @Injectable()
 export class GraphQLOptionsFactory implements GqlOptionsFactory {
-  constructor(private readonly graphqlConfigService: ConfigService<GraphQLConfigInterface>) {}
+  constructor(private readonly config: GraphQLConfigProvider) {}
 
   public createGqlOptions() {
-    const debug = this.graphqlConfigService.get('debug')
-    const playground = this.graphqlConfigService.get('playground')
-    const introspection = this.graphqlConfigService.get('introspection')
-    const schema = this.graphqlConfigService.get('schema')
-
     return {
-      debug: debug.enabled,
-      playground: playground.enabled,
-      introspection: introspection.enabled,
-      autoSchemaFile: schema.filePath,
+      debug: this.config.debug.enabled,
+      playground: this.config.playground.enabled,
+      introspection: this.config.introspection.enabled,
+      autoSchemaFile: this.config.schema.filePath,
       useGlobalPrefix: true,
     }
   }

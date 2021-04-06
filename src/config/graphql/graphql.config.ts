@@ -1,32 +1,24 @@
+import { registerAs } from '@nestjs/config'
+
 import { GraphQLConfigInterface } from './graphql.interface'
 
-const {
-  GRAPHQL_DEBUG_ENABLED,
-  GRAPHQL_PLAYGROUND_ENABLED,
-  GRAPHQL_INSTROSPECTION_ENABLED,
-  GRAPHQL_SCHEMA_FILE_PATH,
-} = process.env
+export const graphqlConfig = registerAs(
+  'graphql',
+  (): GraphQLConfigInterface => ({
+    debug: {
+      enabled: process.env.GRAPHQL_DEBUG_ENABLED === 'true',
+    },
 
-const DEFAULT_DEBUG_ENABLED = false
-const DEFAULT_PLAYGROUND_ENABLED = false
-const DEFAULT_INSTROSPECTION_ENABLED = false
-const DEFAULT_SCHEMA_FILEPATH = './dist/src/interface/adapters/graphql/schema.gql'
+    playground: {
+      enabled: process.env.GRAPHQL_PLAYGROUND_ENABLED === 'true',
+    },
 
-export const graphqlConfig: GraphQLConfigInterface = {
-  debug: {
-    enabled: GRAPHQL_DEBUG_ENABLED?.toUpperCase() === 'TRUE' ?? DEFAULT_DEBUG_ENABLED,
-  },
+    introspection: {
+      enabled: process.env.GRAPHQL_INSTROSPECTION_ENABLED === 'true',
+    },
 
-  playground: {
-    enabled: GRAPHQL_PLAYGROUND_ENABLED?.toUpperCase() === 'TRUE' ?? DEFAULT_PLAYGROUND_ENABLED,
-  },
-
-  introspection: {
-    enabled:
-      GRAPHQL_INSTROSPECTION_ENABLED?.toUpperCase() === 'TRUE' ?? DEFAULT_INSTROSPECTION_ENABLED,
-  },
-
-  schema: {
-    filePath: GRAPHQL_SCHEMA_FILE_PATH ?? DEFAULT_SCHEMA_FILEPATH,
-  },
-}
+    schema: {
+      filePath: process.env.GRAPHQL_SCHEMA_FILE_PATH,
+    },
+  }),
+)

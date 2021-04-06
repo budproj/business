@@ -1,22 +1,22 @@
 export interface GraphQLConfigInterface {
   debug: GraphQLDebugConfigInterface
   playground: GraphQLPlaygroundConfigInterface
-  introspection: GraphQLInstrospectionConfigInterface
+  introspection: GraphQLIntrospectionConfigInterface
   schema: GraphQLSchemaConfigInterface
 }
 
-interface GraphQLDebugConfigInterface {
+export interface GraphQLDebugConfigInterface {
   enabled: boolean
 }
 
-interface GraphQLPlaygroundConfigInterface {
+export interface GraphQLPlaygroundConfigInterface {
   enabled: boolean
 }
 
-interface GraphQLInstrospectionConfigInterface {
+export interface GraphQLIntrospectionConfigInterface {
   enabled: boolean
 }
 
-interface GraphQLSchemaConfigInterface {
+export interface GraphQLSchemaConfigInterface {
   filePath: string
 }
