@@ -5,12 +5,12 @@ import { ConstrainType } from '@core/enums/contrain-type.enum'
 
 import { TeamInterface } from '../team/team.interface'
 
-import { UserEntity } from './user.entity'
 import { UserInterface } from './user.interface'
+import { UserORMEntity } from './user.orm-entity'
 
-@EntityRepository(UserEntity)
-export class UserRepository extends CoreEntityRepository<UserEntity> {
-  protected setupTeamQuery(query: SelectQueryBuilder<UserEntity>) {
+@EntityRepository(UserORMEntity)
+export class UserRepository extends CoreEntityRepository<UserORMEntity> {
+  protected setupTeamQuery(query: SelectQueryBuilder<UserORMEntity>) {
     return query.leftJoinAndSelect('User.teams', 'Team')
   }
 

@@ -1,6 +1,8 @@
 import { ManagementClient, AuthenticationClient, User, CreateUserData } from 'auth0'
 import { randomPassword } from 'secure-random-password'
 
+import { UserGender } from '@core/modules/user/enums/user-gender.enum'
+
 interface Auth0Interface {
   domain: string
 }
@@ -11,7 +13,7 @@ interface UserDraft {
   email: string
   company_role: string
   picture: string
-  gender: string
+  gender: UserGender
   authz_role: AuthzRoleName
   team: string
 }

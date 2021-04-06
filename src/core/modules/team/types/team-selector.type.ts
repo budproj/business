@@ -1,8 +1,8 @@
 import { FindConditions } from 'typeorm'
 
-import { TeamEntity } from '@core/modules/team/team.entity'
+import { TeamORMEntity } from '@core/modules/team/team.orm-entity'
 
-export interface TeamSelector extends FindConditions<TeamEntity> {
-  parentId?: TeamEntity['parentId']
+export interface TeamSelector extends FindConditions<TeamORMEntity> {
+  parentId?: TeamORMEntity['parentId']
   onlyCompanies?: boolean
 }

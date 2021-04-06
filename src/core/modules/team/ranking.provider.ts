@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { orderBy } from 'lodash'
 
-import { TeamEntity } from './team.entity'
+import { TeamORMEntity } from './team.orm-entity'
 import { TeamProvider } from './team.provider'
 
 @Injectable()
@@ -11,7 +11,7 @@ export class TeamRankingProvider {
     private readonly teamProvider: TeamProvider,
   ) {}
 
-  public async rankTeamsByProgress(teams: TeamEntity[]): Promise<TeamEntity[]> {
+  public async rankTeamsByProgress(teams: TeamORMEntity[]): Promise<TeamORMEntity[]> {
     const enhanceTeamPromises = teams.map(async (team) => this.enhanceTeamWithProgress(team))
     const enhancedTeams = await Promise.all(enhanceTeamPromises)
 
@@ -20,7 +20,7 @@ export class TeamRankingProvider {
     return rankedTeams
   }
 
-  private async enhanceTeamWithProgress(team: TeamEntity) {
+  private async enhanceTeamWithProgress(team: TeamORMEntity) {
     const progress = 0 // Await this.teamProvider.getCurrentProgressForTeam(team)
 
     return {

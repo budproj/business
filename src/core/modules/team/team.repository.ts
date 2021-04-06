@@ -4,11 +4,11 @@ import { CoreEntityRepository } from '@core/core.repository'
 import { ConstrainType } from '@core/enums/contrain-type.enum'
 import { UserInterface } from '@core/modules/user/user.interface'
 
-import { TeamEntity } from './team.entity'
 import { TeamInterface } from './team.interface'
+import { TeamORMEntity } from './team.orm-entity'
 
-@EntityRepository(TeamEntity)
-export class TeamRepository extends CoreEntityRepository<TeamEntity> {
+@EntityRepository(TeamORMEntity)
+export class TeamRepository extends CoreEntityRepository<TeamORMEntity> {
   protected addTeamWhereExpression(
     query: WhereExpression,
     allowedTeams: Array<TeamInterface['id']>,

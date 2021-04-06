@@ -1,12 +1,14 @@
 import { AppConfigInterface } from './app.interface'
-import { authzConfig } from './authz/authz.config'
-import { graphqlConfig } from './graphql/graphql.config'
-import { loggingConfig } from './logging/logging.config'
-import { serverConfig } from './server/server.config'
+import { createAuthzConfig } from './authz/authz.factory'
+import { createGraphQLConfig } from './graphql/graphql.factory'
+import { createLoggingConfig } from './logging/logging.factory'
+import { createServerConfig } from './server/server.factory'
+import { createTypeORMConfig } from './typeorm/typeorm.factory'
 
 export const appConfig: AppConfigInterface = {
-  authz: authzConfig,
-  server: serverConfig,
-  graphql: graphqlConfig,
-  logging: loggingConfig,
+  authz: createAuthzConfig(),
+  server: createServerConfig(),
+  graphql: createGraphQLConfig(),
+  logging: createLoggingConfig(),
+  typeorm: createTypeORMConfig(),
 }
