@@ -4,6 +4,7 @@ import { PassportModule } from '@nestjs/passport'
 
 import { createAuthzConfig } from '@config/authz/authz.factory'
 
+import { AuthzProvider } from './authz.provider'
 import { AuthzStrategyProvider } from './strategy.provider'
 
 @Module({
@@ -11,6 +12,7 @@ import { AuthzStrategyProvider } from './strategy.provider'
     PassportModule.register({ defaultStrategy: 'jwt' }),
     ConfigModule.forFeature(createAuthzConfig),
   ],
-  providers: [AuthzStrategyProvider],
+  providers: [AuthzStrategyProvider, AuthzProvider],
+  exports: [AuthzProvider],
 })
 export class AuthzModule {}

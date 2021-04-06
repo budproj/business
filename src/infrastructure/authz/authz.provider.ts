@@ -58,7 +58,7 @@ export class AuthzProvider {
     action: Action,
     permissions: Permission[],
   ): ScopeStatement {
-    const policy = `${resource}:${action}` as Policy
+    const policy: Policy = `${resource}:${action}` as const
     const policyPermissions = this.filterPolicyPermissions(policy, permissions)
     const scopes = [Scope.ANY, Scope.COMPANY, Scope.TEAM, Scope.OWNS]
     const effects = scopes.map((scope) =>
