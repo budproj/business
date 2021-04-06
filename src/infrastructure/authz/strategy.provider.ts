@@ -13,11 +13,11 @@ export class AuthzStrategyProvider extends PassportStrategy(Strategy) {
   constructor(protected readonly authzConfigService: ConfigService<AuthzConfigInterface>) {
     super({
       secretOrKeyProvider: passportJwtSecret({
-        jwksUri: `https://${authzConfigService.get<string>('issuer')}/.well-known/jwks.json`,
+        jwksUri: `${authzConfigService.get<string>('issuer')}.well-known/jwks.json`,
       }),
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       audience: authzConfigService.get<string>('audience'),
-      issuer: `https://${authzConfigService.get<string>('issuer')}/`,
+      issuer: authzConfigService.get<string>('issuer'),
       algorithms: ['RS256'],
     })
   }

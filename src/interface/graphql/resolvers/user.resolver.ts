@@ -1,10 +1,13 @@
-import { Logger } from '@nestjs/common'
+import { Logger, UseGuards } from '@nestjs/common'
 import { Args, Query, Resolver } from '@nestjs/graphql'
 
 import { UserGraphQLObject } from '@interface/graphql/objects/user.object'
 import { UserFiltersRequest } from '@interface/graphql/requests/user/user-filters.request'
 import { UsersGraphQLResponse } from '@interface/graphql/responses/users.response'
 
+import { GraphQLTokenGuard } from './guards/token.guard'
+
+@UseGuards(GraphQLTokenGuard)
 @Resolver(() => UserGraphQLObject)
 export class UserGraphQLResolver {
   private readonly logger = new Logger(UserGraphQLResolver.name)

@@ -4,7 +4,6 @@ import { LoggerService, ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
-import * as localtunnel from 'localtunnel'
 
 import { LoggingConfigInterface } from '@config/logging/logging.interface'
 import { createServerConfig } from '@config/server/server.factory'
@@ -93,20 +92,13 @@ async function launchServer(
   logger: LoggerService,
   serverConfig: ServerConfigInterface,
 ): Promise<void> {
-  const endpoint = await getServerEndpoint(serverConfig)
+  const endpoint = getServerEndpoint(serverConfig)
 
   await application.listen(serverConfig.port, serverConfig.networkAddress)
   logger.log(`Started server listening on ${endpoint}`)
 }
 
-async function getServerEndpoint(serverConfig: ServerConfigInterface) {
-  const tunnel = serverConfig.isCodespaces && (await localtunnel({ port: serverConfig.port }))
-  const endpoint = tunnel?.url ?? buildServerEndpoint(serverConfig)
-
-  return endpoint
-}
-
-function buildServerEndpoint(serverConfig: ServerConfigInterface) {
+function getServerEndpoint(serverConfig: ServerConfigInterface) {
   const endpoint = `http://${serverConfig.host}:${serverConfig.port}`
 
   return endpoint
