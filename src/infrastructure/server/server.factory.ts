@@ -36,7 +36,7 @@ export class ServerFactory {
       }),
     )
     application.enableCors({
-      credentials: config.cors.credentialsFlag,
+      credentials: config.cors.credentialsEnabled,
       origin: config.cors.allowedOrigins,
     })
   }

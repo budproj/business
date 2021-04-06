@@ -6,21 +6,21 @@ export interface TypeORMConfigInterface {
   authentication: TypeORMAuthenticationConfigInterface
   pattern: TypeORMPatternConfigInterface
   logging: TypeORMLoggingConfigInterface
-  convention: TypeORMConventionConfigInterface
+  conventions: TypeORMConventionsConfigInterface
 }
 
-interface TypeORMEndpointConfigInterface {
+export interface TypeORMEndpointConfigInterface {
   host: string
   port: number
   database: string
 }
 
-interface TypeORMAuthenticationConfigInterface {
+export interface TypeORMAuthenticationConfigInterface {
   user?: string
   password?: string
 }
 
-interface TypeORMPatternConfigInterface {
+export interface TypeORMPatternConfigInterface {
   file: TypeORMFilePatternConfigInterface
   directory: TypeORMDirectoryPatternConfigInterface
 }
@@ -34,10 +34,10 @@ interface TypeORMDirectoryPatternConfigInterface {
   migrations: string
 }
 
-interface TypeORMLoggingConfigInterface {
+export interface TypeORMLoggingConfigInterface {
   enabled: boolean
 }
 
-interface TypeORMConventionConfigInterface {
+export interface TypeORMConventionsConfigInterface {
   naming?: NamingStrategyInterface
 }

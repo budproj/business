@@ -14,7 +14,7 @@ export const serverConfig = registerAs(
     prefix: process.env.SERVER_PREFIX,
 
     cors: {
-      credentialsFlag: process.env.SERVER_CORS_CREDENTIALS_FLAG === 'true',
+      credentialsEnabled: process.env.SERVER_CORS_CREDENTIALS_ENABLED === 'true',
       allowedOrigins: process.env.SERVER_CORS_ALLOWED_ORIGINS?.split(','),
     },
 
