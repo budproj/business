@@ -10,14 +10,14 @@ import { QueryGuardAdapter } from '@adapters/authorization/query-guard.adapter'
 import { CoreEntity } from '@core/core.entity'
 import { CoreProvider } from '@core/core.provider'
 import { CoreEntityProvider } from '@core/entity.provider'
+import { ResourceGraphQLEnum } from '@interface/graphql/enums/resource.enum'
+import { ScopeGraphQLEnum } from '@interface/graphql/enums/scope.enum'
+import { EntityGraphQLObject } from '@interface/graphql/objects/entity.object'
 import { PolicyGraphQLObject } from '@interface/graphql/objects/policy.object'
-
-import { ResourceGraphQLEnum } from '../enums/resource.enum'
-import { ScopeGraphQLEnum } from '../enums/scope.enum'
 
 import { GraphQLUser } from './decorators/graphql-user'
 
-@Resolver(() => CoreEntity)
+@Resolver(() => EntityGraphQLObject)
 export abstract class BaseGraphQLResolver<E extends CoreEntity, D> {
   protected readonly queryGuard: QueryGuardAdapter<E, D>
   protected readonly authz: AuthzAdapter
