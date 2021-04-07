@@ -1,6 +1,6 @@
 import { ArgsType, Field, ID } from '@nestjs/graphql'
 
-import { CursorPaginationRequest } from './cursor-pagination.request'
+import { CursorPaginationRequest } from '@interface/graphql/requests/cursor-pagination.request'
 
 @ArgsType()
 export class UserFiltersRequest extends CursorPaginationRequest {
