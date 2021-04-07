@@ -13,12 +13,11 @@ import { CoreEntityProvider } from '@core/entity.provider'
 import { ResourceGraphQLEnum } from '@interface/graphql/enums/resource.enum'
 import { ScopeGraphQLEnum } from '@interface/graphql/enums/scope.enum'
 import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interface'
+import { QueryResultGraphQLInterface } from '@interface/graphql/interfaces/query-result.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/objects/policy.object'
-
-import { QueryResultGraphQLInterface } from '../interfaces/query-result.interface'
-import { MetadataGraphQLResponse } from '../responses/metadata.response'
-import { PageInfoGraphQLResponse } from '../responses/page-info.reponse'
-import { QueryResultGraphQLResponse } from '../responses/query-result.response'
+import { MetadataGraphQLResponse } from '@interface/graphql/responses/metadata.response'
+import { PageInfoGraphQLResponse } from '@interface/graphql/responses/page-info.reponse'
+import { QueryResultGraphQLResponse } from '@interface/graphql/responses/query-result.response'
 
 import { GraphQLUser } from './decorators/graphql-user'
 

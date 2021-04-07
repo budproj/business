@@ -4,9 +4,8 @@ import { mapKeys, snakeCase } from 'lodash'
 import { DeleteResult, FindConditions, SelectQueryBuilder } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
+import { SCOPE_PRIORITY } from '@adapters/authorization/authorization.constants'
 import { Scope } from '@adapters/authorization/enums/scope.enum'
-
-import { SCOPE_PRIORITY } from '../adapters/authorization/authorization.constants'
 
 import { CoreEntity } from './core.entity'
 import { CoreEntityRepository } from './core.repository'
