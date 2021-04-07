@@ -5,9 +5,8 @@ import { AuthzAdapter } from '@adapters/authorization/authz.adapter'
 import { Scope } from '@adapters/authorization/enums/scope.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
-import { PermissionsGraphQLObject } from '@interface/graphql/objects/permissions.object'
-
-import { ScopeGraphQLEnum } from '../enums/scope.enum'
+import { ScopeGraphQLEnum } from '@interface/graphql/enums/scope.enum'
+import { PermissionsGraphQLObject } from '@interface/graphql/responses/permissions.response'
 
 import { GraphQLUser } from './decorators/graphql-user'
 import { GraphQLRequiredPoliciesGuard } from './guards/required-policies.guard'
@@ -30,10 +29,15 @@ export class PermissionsGraphQLResolver {
   ) {
     this.logger.log(`Fetching user permissions for user with ID ${graphqlUser.id}`)
 
-    // Const permissions = this.authz.getUserPoliciesForConstraint(graphqlUser, constraint)
-    // const normalizedPermissions = mapKeys(permissions, (_, snakeCasedResource: RESOURCE) =>
-    //   camelCase(snakeCasedResource),
-    // )
+    const resourcePolicy = this.authz.getResourcePolicyFromPermissions(
+      graphqlUser.token.permissions,
+    )
+    const resourcesCommandStatement = this.authz.getResourcesCommandStatementsForScopeFromPolicy(
+      resourcePolicy,
+      scope,
+    )
+
+    console.log(resourcesCommandStatement)
 
     return {}
   }

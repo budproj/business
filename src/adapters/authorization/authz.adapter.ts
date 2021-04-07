@@ -1,4 +1,4 @@
-import { uniq, zipObject } from 'lodash'
+import { mapValues, uniq, zipObject } from 'lodash'
 
 import { SCOPE_PRIORITY } from './authorization.constants'
 import { Command } from './enums/command.enum'
@@ -8,8 +8,10 @@ import { Scope } from './enums/scope.enum'
 import { AuthorizationUser } from './interfaces/user.interface'
 import { Action } from './types/action.type'
 import { CommandPolicy } from './types/command-policy.type'
+import { CommandStatement } from './types/command-statement.type'
 import { Permission } from './types/permission.type'
 import { ResourcePolicy } from './types/resource-policy.type'
+import { ResourceStatement } from './types/resource-statement.type copy'
 import { ScopePolicy } from './types/scope-policy'
 
 export class AuthzAdapter {
@@ -24,16 +26,16 @@ export class AuthzAdapter {
     Resource.KEY_RESULT_COMMENT,
   ]
 
-  public getResourcePoliciesFromPermissions(
+  public getResourcePolicyFromPermissions(
     permissions: Permission[],
     resources: Resource[] = this.resources,
   ): ResourcePolicy {
     const commandPolicies = resources.map((resource) =>
       this.getCommandPoliciesForResourceFromPermissions(resource, permissions),
     )
-    const resourcePolicies = zipObject<Resource, CommandPolicy>(resources, commandPolicies)
+    const resourcePolicy = zipObject<Resource, CommandPolicy>(resources, commandPolicies)
 
-    return resourcePolicies
+    return resourcePolicy
   }
 
   public canUserExecuteActions(user: AuthorizationUser, actions?: Action[]): boolean {
@@ -60,6 +62,15 @@ export class AuthzAdapter {
     return scope
   }
 
+  public getResourcesCommandStatementsForScopeFromPolicy(
+    policy: ResourcePolicy,
+    scope: Scope,
+  ): ResourceStatement<CommandStatement> {
+    return mapValues(policy, (commandPolicy) =>
+      this.getCommandStatementsForScopeFromPolicy(commandPolicy, scope),
+    )
+  }
+
   private getCommandPoliciesForResourceFromPermissions(
     resource: Resource,
     permissions: Permission[],
@@ -69,9 +80,9 @@ export class AuthzAdapter {
       this.getScopePoliciesForResourceCommandFromPermissions(resource, command, permissions),
     )
 
-    const commandPolicies = zipObject<Command, ScopePolicy>(commands, scopePolicies)
+    const commandPolicy = zipObject<Command, ScopePolicy>(commands, scopePolicies)
 
-    return commandPolicies
+    return commandPolicy
   }
 
   private getScopePoliciesForResourceCommandFromPermissions(
@@ -86,9 +97,9 @@ export class AuthzAdapter {
       this.getEffectPolicyForActionScopeFromPermissions(scope, action, actionPermissions),
     )
 
-    const scopePolicies = zipObject<Scope, Effect>(scopes, effectPolicies)
+    const scopePolicy = zipObject<Scope, Effect>(scopes, effectPolicies)
 
-    return scopePolicies
+    return scopePolicy
   }
 
   private getEffectPolicyForActionScopeFromPermissions(
@@ -140,5 +151,12 @@ export class AuthzAdapter {
 
   private buildPermissionFromAction(action: Action, scope: Scope): Permission {
     return `${action}:${scope}` as const
+  }
+
+  private getCommandStatementsForScopeFromPolicy(
+    policy: CommandPolicy,
+    scope: Scope,
+  ): CommandStatement {
+    return mapValues(policy, (effectPolicy) => effectPolicy[scope])
   }
 }

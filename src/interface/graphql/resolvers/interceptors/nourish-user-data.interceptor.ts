@@ -23,7 +23,7 @@ export class NourishUserDataInterceptor implements NestInterceptor {
     }: UserInterface = await this.core.user.getUserFromSubjectWithTeamRelation(
       request.user.token.sub,
     )
-    const resourcePolicies = this.authz.getResourcePoliciesFromPermissions(
+    const resourcePolicy = this.authz.getResourcePolicyFromPermissions(
       request.user.token.permissions,
     )
 
@@ -31,7 +31,7 @@ export class NourishUserDataInterceptor implements NestInterceptor {
       ...request.user,
       ...user,
       teams,
-      resourcePolicies,
+      resourcePolicy,
     }
 
     this.logger.debug({

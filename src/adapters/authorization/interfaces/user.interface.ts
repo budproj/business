@@ -5,5 +5,5 @@ import { AuthzToken } from './authz-token.interface'
 
 export interface AuthorizationUser extends UserInterface {
   token: AuthzToken
-  resourcePolicies: ResourcePolicy
+  resourcePolicy: ResourcePolicy
 }
