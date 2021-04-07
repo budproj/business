@@ -38,9 +38,9 @@ export class UserORMEntity extends CoreEntity implements UserInterface {
   @Column({ nullable: true })
   public linkedInProfileAddress?: string
 
-  @ManyToMany('Team', 'users', { lazy: true, nullable: true })
+  @ManyToMany('TeamORMEntity', 'users', { lazy: true, nullable: true })
   public teams?: Promise<TeamInterface[]>
 
-  @OneToMany('Team', 'owner', { nullable: true })
+  @OneToMany('TeamORMEntity', 'owner', { nullable: true })
   public ownedTeams?: TeamInterface[]
 }

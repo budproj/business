@@ -24,10 +24,10 @@ export class TeamORMEntity extends CoreEntity implements TeamInterface {
   public updatedAt: Date
 
   @Column()
-  @RelationId((team: TeamORMEntity) => team.owner)
+  @RelationId((team: TeamInterface) => team.owner)
   public ownerId: UserInterface['id']
 
-  @ManyToOne('User', 'ownedTeams')
+  @ManyToOne('UserORMEntity', 'ownedTeams')
   public owner: UserInterface
 
   @Column({ type: 'text', nullable: true })
@@ -37,16 +37,16 @@ export class TeamORMEntity extends CoreEntity implements TeamInterface {
   public gender?: TeamGender
 
   @Column({ nullable: true })
-  @RelationId((team: TeamORMEntity) => team.parent)
+  @RelationId((team: TeamInterface) => team.parent)
   public parentId?: TeamInterface['id']
 
-  @ManyToOne('Team', 'teams')
+  @ManyToOne('TeamORMEntity', 'teams')
   public parent?: TeamInterface
 
-  @OneToMany('Team', 'parent', { nullable: true })
+  @OneToMany('TeamORMEntity', 'parent', { nullable: true })
   public teams?: TeamInterface[]
 
-  @ManyToMany('User', 'teams', { lazy: true, nullable: true })
+  @ManyToMany('UserORMEntity', 'teams', { lazy: true, nullable: true })
   @JoinTable()
   public users?: Promise<UserInterface[]>
 }
