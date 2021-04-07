@@ -1,11 +1,11 @@
-import { EntityGraphQLInterface } from '@interface/graphql/interfaces/entity.interface'
+import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interface'
 import { PageInfoGraphQLObject } from '@interface/graphql/objects/page-info.object'
 
 export class PageInfoGraphQLResponse {
   private readonly startCursor: string
   private readonly endCursor: string
 
-  constructor(nodes: EntityGraphQLInterface[]) {
+  constructor(nodes: NodeGraphQLInterface[]) {
     this.startCursor = this.getStartCursor(nodes)
     this.endCursor = this.getEndCursor(nodes)
   }
@@ -14,14 +14,17 @@ export class PageInfoGraphQLResponse {
     return {
       startCursor: this.startCursor,
       endCursor: this.endCursor,
-    } as any
+      hasNextPage: false,
+      hasPreviousPage: false,
+      // TECH DEBT: Develop the pagination logic
+    }
   }
 
-  private getStartCursor(nodes: EntityGraphQLInterface[]) {
+  private getStartCursor(nodes: NodeGraphQLInterface[]) {
     return nodes[0].id
   }
 
-  private getEndCursor(nodes: EntityGraphQLInterface[]) {
+  private getEndCursor(nodes: NodeGraphQLInterface[]) {
     return nodes.slice(-1)[0].id
   }
 }

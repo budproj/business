@@ -1,15 +1,15 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
-import { EntityGraphQLInterface } from '@interface/graphql/interfaces/entity.interface'
+import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interface'
 
 import { PolicyGraphQLObject } from './policy.object'
 
 @ObjectType('User', {
-  implements: () => EntityGraphQLInterface,
+  implements: () => NodeGraphQLInterface,
   description:
     'User is an entity inside a given root team (a.k.a. company). It is associated with many teams, progress reports, and others.',
 })
-export class UserGraphQLObject implements EntityGraphQLInterface {
+export class UserGraphQLObject implements NodeGraphQLInterface {
   @Field({ description: 'The name of the user' })
   public firstName: string
 

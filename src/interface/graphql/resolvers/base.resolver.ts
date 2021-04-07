@@ -12,12 +12,17 @@ import { CoreProvider } from '@core/core.provider'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { ResourceGraphQLEnum } from '@interface/graphql/enums/resource.enum'
 import { ScopeGraphQLEnum } from '@interface/graphql/enums/scope.enum'
-import { EntityGraphQLInterface } from '@interface/graphql/interfaces/entity.interface'
+import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/objects/policy.object'
+
+import { QueryResultGraphQLInterface } from '../interfaces/query-result.interface'
+import { MetadataGraphQLResponse } from '../responses/metadata.response'
+import { PageInfoGraphQLResponse } from '../responses/page-info.reponse'
+import { QueryResultGraphQLResponse } from '../responses/query-result.response'
 
 import { GraphQLUser } from './decorators/graphql-user'
 
-@Resolver(() => EntityGraphQLInterface)
+@Resolver(() => NodeGraphQLInterface)
 export abstract class BaseGraphQLResolver<E extends CoreEntity, D> {
   protected readonly queryGuard: QueryGuardAdapter<E, D>
   protected readonly authz: AuthzAdapter
@@ -58,6 +63,16 @@ export abstract class BaseGraphQLResolver<E extends CoreEntity, D> {
 
   protected denyAllPolicies(originalPolicies: PolicyGraphQLObject) {
     return mapValues(originalPolicies, () => Effect.DENY)
+  }
+
+  protected marshalQueryResult<N extends NodeGraphQLInterface = NodeGraphQLInterface>(
+    nodes: N[],
+  ): QueryResultGraphQLInterface {
+    const queryPageInfo = new PageInfoGraphQLResponse(nodes)
+    const queryMetadata = new MetadataGraphQLResponse(nodes, queryPageInfo.marshal())
+    const queryResult = new QueryResultGraphQLResponse<N>(nodes, queryMetadata.marshal())
+
+    return queryResult.marshal()
   }
 
   private async getHighestScopeForEntity(entity: E, user: AuthorizationUser) {

@@ -1,12 +1,12 @@
 import { Field, ID, InterfaceType } from '@nestjs/graphql'
 
-import { PolicyGraphQLObject } from '../objects/policy.object'
+import { PolicyGraphQLObject } from '@interface/graphql/objects/policy.object'
 
-@InterfaceType('Entity', {
+@InterfaceType('Node', {
   description:
-    'An entity relates directly with our domain structure. It is a relevent object in our domain architecture',
+    'An GraphQL node relates directly with our domain structure. It is a relevent object in our domain architecture',
 })
-export abstract class EntityGraphQLInterface {
+export abstract class NodeGraphQLInterface {
   @Field(() => ID, { description: 'The ID of this entity' })
   public id: string
 

@@ -11,10 +11,6 @@ import { UsersQueryResultGraphQLObject } from '@interface/graphql/objects/user-q
 import { UserGraphQLObject } from '@interface/graphql/objects/user.object'
 import { UserFiltersRequest } from '@interface/graphql/requests/user/user-filters.request'
 
-import { MetadataGraphQLResponse } from '../responses/metadata.response'
-import { PageInfoGraphQLResponse } from '../responses/page-info.reponse'
-import { QueryResultGraphQLResponse } from '../responses/query-result.response'
-
 import { BaseGraphQLResolver } from './base.resolver'
 import { GraphQLUser } from './decorators/graphql-user'
 import { GraphQLRequiredPoliciesGuard } from './guards/required-policies.guard'
@@ -48,13 +44,8 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
       graphqlUser,
     )
 
-    const queryPageInfo = new PageInfoGraphQLResponse(selectedUsers)
-    const queryMetadata = new MetadataGraphQLResponse(selectedUsers, queryPageInfo.marshal())
-    const queryResult = new QueryResultGraphQLResponse<UserGraphQLObject>(
-      selectedUsers,
-      queryMetadata.marshal(),
-    )
+    const queryResult = this.marshalQueryResult(selectedUsers)
 
-    return queryResult.marshal()
+    return queryResult
   }
 }
