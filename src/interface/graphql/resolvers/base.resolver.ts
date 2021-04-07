@@ -47,18 +47,29 @@ export abstract class BaseGraphQLResolver<E extends CoreEntity, D> {
   ) {
     scope ??= await this.getHighestScopeForEntity(entity, graphqlUser)
 
-    console.log(scope, resource, graphqlUser)
+    const resourcePolicy = this.authz.getResourcePolicyFromPermissions(
+      graphqlUser.token.permissions,
+    )
 
-    // Const userPermissions = this.authz.getUserPoliciesForConstraint(authzUser, constraint)
-    // const resourcePolicy = userPermissions[resource]
+    const resourcesCommandStatement = this.authz.getResourcesCommandStatementsForScopeFromPolicy(
+      resourcePolicy,
+      scope,
+    )
 
-    // const customizedResourcePolicy = await this.customizeEntityPolicies(resourcePolicy, entity)
+    const commandStatement = resourcesCommandStatement[resource]
+    const customizedCommandStatement = await this.customizeEntityCommandStatement(
+      commandStatement,
+      entity,
+    )
 
-    return {}
+    return customizedCommandStatement
   }
 
-  protected async customizeEntityPolicies(originalPolicies: PolicyGraphQLObject, _entity: E) {
-    return originalPolicies
+  protected async customizeEntityCommandStatement(
+    originalStatement: PolicyGraphQLObject,
+    _entity: E,
+  ) {
+    return originalStatement
   }
 
   protected denyAllPolicies(originalPolicies: PolicyGraphQLObject) {
