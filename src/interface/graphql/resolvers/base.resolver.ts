@@ -14,7 +14,7 @@ import { ResourceGraphQLEnum } from '@interface/graphql/enums/resource.enum'
 import { ScopeGraphQLEnum } from '@interface/graphql/enums/scope.enum'
 import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interface'
 import { QueryResultGraphQLInterface } from '@interface/graphql/interfaces/query-result.interface'
-import { PolicyGraphQLObject } from '@interface/graphql/objects/policy.object'
+import { PolicyGraphQLObject } from '@interface/graphql/objects/authorization/policy.object'
 import { PageInfoGraphQLResponse } from '@interface/graphql/responses/page-info.reponse'
 import { QueryResultGraphQLResponse } from '@interface/graphql/responses/query-result.response'
 

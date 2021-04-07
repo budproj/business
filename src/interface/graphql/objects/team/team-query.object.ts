@@ -2,7 +2,8 @@ import { Field, ObjectType } from '@nestjs/graphql'
 
 import { QueryResultGraphQLInterface } from '@interface/graphql/interfaces/query-result.interface'
 
-import { PageInfoGraphQLObject } from './page-info.object'
+import { PageInfoGraphQLObject } from '../page-info.object'
+
 import { TeamEdgesGraphQLObject } from './team-edges.object'
 
 @ObjectType('TeamQueryResult', {

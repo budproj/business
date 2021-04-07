@@ -3,10 +3,9 @@ import { Field, ID, ObjectType } from '@nestjs/graphql'
 import { TeamGender } from '@core/modules/team/enums/team-gender.enum'
 import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interface'
 
-import { TeamGenderGraphQLEnum } from '../enums/team-gender.enum'
-
-import { PolicyGraphQLObject } from './policy.object'
-import { UserNodeGraphQLObject } from './user-node.object'
+import { TeamGenderGraphQLEnum } from '../../enums/team-gender.enum'
+import { PolicyGraphQLObject } from '../authorization/policy.object'
+import { UserNodeGraphQLObject } from '../user/user-node.object'
 
 @ObjectType('Team', {
   implements: () => NodeGraphQLInterface,

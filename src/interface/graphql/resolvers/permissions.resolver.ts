@@ -10,7 +10,7 @@ import { RequiredActions } from '@adapters/authorization/required-actions.decora
 import { CommandStatement } from '@adapters/authorization/types/command-statement.type'
 import { ResourceStatement } from '@adapters/authorization/types/resource-statement.type copy'
 import { ScopeGraphQLEnum } from '@interface/graphql/enums/scope.enum'
-import { PermissionsGraphQLObject } from '@interface/graphql/objects/permissions.object'
+import { PermissionsGraphQLObject } from '@interface/graphql/objects/authorization/permissions.object'
 
 import { GraphQLUser } from './decorators/graphql-user'
 import { GraphQLRequiredPoliciesGuard } from './guards/required-policies.guard'

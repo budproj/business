@@ -4,8 +4,8 @@ import { UserGender } from '@core/modules/user/enums/user-gender.enum'
 import { UserGenderGraphQLEnum } from '@interface/graphql/enums/user-gender.enum'
 import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interface'
 
-import { PolicyGraphQLObject } from './policy.object'
-import { TeamNodeGraphQLObject } from './team-nodes.object'
+import { PolicyGraphQLObject } from '../authorization/policy.object'
+import { TeamNodeGraphQLObject } from '../team/team-nodes.object'
 
 @ObjectType('User', {
   implements: () => NodeGraphQLInterface,
