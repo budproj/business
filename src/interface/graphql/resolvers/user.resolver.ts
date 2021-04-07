@@ -1,5 +1,5 @@
 import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
@@ -8,10 +8,11 @@ import { RequiredActions } from '@adapters/authorization/required-actions.decora
 import { CoreProvider } from '@core/core.provider'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
+import { UserNodeGraphQLObject } from '@interface/graphql/objects/user-node.object'
 import { UsersQueryResultGraphQLObject } from '@interface/graphql/objects/user-query.object'
-import { UserGraphQLObject } from '@interface/graphql/objects/user.object'
 import { UserFiltersRequest } from '@interface/graphql/requests/user/user-filters.request'
 
+import { TeamGraphQLObject } from '../objects/team.object'
 import { UserUpdateRequest } from '../requests/user/user-update.request'
 
 import { BaseGraphQLResolver } from './base.resolver'
@@ -22,7 +23,7 @@ import { NourishUserDataInterceptor } from './interceptors/nourish-user-data.int
 
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @UseInterceptors(NourishUserDataInterceptor)
-@Resolver(() => UserGraphQLObject)
+@Resolver(() => UserNodeGraphQLObject)
 export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface> {
   private readonly logger = new Logger(UserGraphQLResolver.name)
 
@@ -53,7 +54,7 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
   }
 
   @RequiredActions('user:read')
-  @Query(() => UserGraphQLObject, { name: 'me' })
+  @Query(() => UserNodeGraphQLObject, { name: 'me' })
   protected async getMyUser(@GraphQLUser() graphqlUser: AuthorizationUser) {
     const { id } = graphqlUser
     this.logger.log(
@@ -67,7 +68,7 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
   }
 
   @RequiredActions('user:update')
-  @Mutation(() => UserGraphQLObject, { name: 'updateUser' })
+  @Mutation(() => UserNodeGraphQLObject, { name: 'updateUser' })
   protected async updateUser(
     @GraphQLUser() graphqlUser: AuthorizationUser,
     @Args() request: UserUpdateRequest,
@@ -89,12 +90,50 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
   }
 
   @ResolveField('fullName', () => String)
-  protected async getUserFullName(@Parent() user: UserGraphQLObject) {
+  protected async getUserFullName(@Parent() user: UserNodeGraphQLObject) {
     this.logger.log({
       user,
       message: 'Fetching user full name',
     })
 
     return this.core.user.buildUserFullName(user)
+  }
+
+  @ResolveField('companies', () => [TeamGraphQLObject], { nullable: true })
+  protected async getUserCompanies(
+    @Parent() user: UserNodeGraphQLObject,
+    @Args('limit', { type: () => Int, nullable: true }) limit?: number,
+  ) {
+    this.logger.log({
+      user,
+      message: 'Fetching companies for user',
+    })
+
+    const companies = await this.core.team.getUserCompanies(user)
+    const companiesWithLimit = limit ? companies.slice(0, limit) : companies
+
+    return companiesWithLimit
+  }
+
+  @ResolveField('teams', () => [TeamGraphQLObject], { nullable: true })
+  protected async getUserTeams(@Parent() user: UserNodeGraphQLObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching teams for user',
+    })
+
+    const teams = await this.core.team.getWithUser(user)
+
+    return teams
+  }
+
+  @ResolveField('ownedTeams', () => [TeamGraphQLObject], { nullable: true })
+  protected async getUserOwnedTeams(@Parent() user: UserNodeGraphQLObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching owned teams for user',
+    })
+
+    return this.core.team.getFromOwner(user)
   }
 }

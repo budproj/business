@@ -1,15 +1,17 @@
 import { Field, InterfaceType } from '@nestjs/graphql'
 
-import { MetadataGraphQLObject } from '@interface/graphql/objects/metadata.object'
+import { PageInfoGraphQLObject } from '@interface/graphql/objects/page-info.object'
 
-import { NodeGraphQLInterface } from './node.interface'
+import { EdgesGraphQLInterface } from './edges.interface'
 
 @InterfaceType('QueryResult', {
   description: 'This interface wraps all query results from our schema',
 })
-export abstract class QueryResultGraphQLInterface<N extends NodeGraphQLInterface = any> {
-  @Field(() => MetadataGraphQLObject)
-  public metadata: MetadataGraphQLObject
+export abstract class QueryResultGraphQLInterface<
+  E extends EdgesGraphQLInterface = EdgesGraphQLInterface
+> {
+  @Field(() => PageInfoGraphQLObject)
+  public pageInfo: PageInfoGraphQLObject
 
-  public nodes: N[]
+  public edges: E
 }

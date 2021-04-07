@@ -15,9 +15,11 @@ import { ScopeGraphQLEnum } from '@interface/graphql/enums/scope.enum'
 import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interface'
 import { QueryResultGraphQLInterface } from '@interface/graphql/interfaces/query-result.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/objects/policy.object'
-import { MetadataGraphQLResponse } from '@interface/graphql/responses/metadata.response'
 import { PageInfoGraphQLResponse } from '@interface/graphql/responses/page-info.reponse'
 import { QueryResultGraphQLResponse } from '@interface/graphql/responses/query-result.response'
+
+import { EdgesGraphQLInterface } from '../interfaces/edges.interface'
+import { EdgesGraphQLResponse } from '../responses/edges.response'
 
 import { GraphQLUser } from './decorators/graphql-user'
 
@@ -78,9 +80,12 @@ export abstract class BaseGraphQLResolver<E extends CoreEntity, D> {
   protected marshalQueryResult<N extends NodeGraphQLInterface = NodeGraphQLInterface>(
     nodes: N[],
   ): QueryResultGraphQLInterface {
+    const queryEdges = new EdgesGraphQLResponse<N>(nodes)
     const queryPageInfo = new PageInfoGraphQLResponse(nodes)
-    const queryMetadata = new MetadataGraphQLResponse(nodes, queryPageInfo.marshal())
-    const queryResult = new QueryResultGraphQLResponse<N>(nodes, queryMetadata.marshal())
+    const queryResult = new QueryResultGraphQLResponse<EdgesGraphQLInterface<N>>(
+      queryEdges.marshal(),
+      queryPageInfo.marshal(),
+    )
 
     return queryResult.marshal()
   }

@@ -1,14 +1,15 @@
-import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interface'
 import { QueryResultGraphQLInterface } from '@interface/graphql/interfaces/query-result.interface'
-import { MetadataGraphQLObject } from '@interface/graphql/objects/metadata.object'
 
-export class QueryResultGraphQLResponse<N extends NodeGraphQLInterface = NodeGraphQLInterface> {
-  constructor(private readonly nodes: N[], private readonly metadata: MetadataGraphQLObject) {}
+import { EdgesGraphQLInterface } from '../interfaces/edges.interface'
+import { PageInfoGraphQLObject } from '../objects/page-info.object'
+
+export class QueryResultGraphQLResponse<E extends EdgesGraphQLInterface = EdgesGraphQLInterface> {
+  constructor(private readonly edges: E, private readonly pageInfo: PageInfoGraphQLObject) {}
 
   public marshal(): QueryResultGraphQLInterface {
     return {
-      nodes: this.nodes,
-      metadata: this.metadata,
+      edges: this.edges,
+      pageInfo: this.pageInfo,
     }
   }
 }

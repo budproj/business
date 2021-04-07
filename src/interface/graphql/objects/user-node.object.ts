@@ -1,23 +1,23 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
+import { UserGender } from '@core/modules/user/enums/user-gender.enum'
+import { UserGenderGraphQLEnum } from '@interface/graphql/enums/user-gender.enum'
 import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interface'
 
 import { PolicyGraphQLObject } from './policy.object'
+import { TeamGraphQLObject } from './team.object'
 
 @ObjectType('User', {
   implements: () => NodeGraphQLInterface,
   description:
     'User is an entity inside a given root team (a.k.a. company). It is associated with many teams, progress reports, and others.',
 })
-export class UserGraphQLObject implements NodeGraphQLInterface {
+export class UserNodeGraphQLObject implements NodeGraphQLInterface {
   @Field({ description: 'The name of the user' })
   public firstName: string
 
   @Field({ description: 'The sub field in Auth0 (their ID)' })
   public authzSub: string
-
-  @Field({ description: 'The creation date of the user' })
-  public createdAt: Date
 
   @Field({ description: 'The last update date of this user' })
   public updatedAt: Date
@@ -27,6 +27,9 @@ export class UserGraphQLObject implements NodeGraphQLInterface {
 
   @Field({ description: 'The last name of the user', nullable: true })
   public lastName?: string
+
+  @Field(() => UserGenderGraphQLEnum, { description: 'The gender of the user', nullable: true })
+  public gender?: UserGender
 
   @Field({ description: 'The user role in the company', nullable: true })
   public role?: string
@@ -53,6 +56,25 @@ export class UserGraphQLObject implements NodeGraphQLInterface {
   })
   public linkedInProfileAddress?: string
 
+  @Field(() => [TeamGraphQLObject], {
+    description: 'The creation date ordered list of companies that this user is a part of',
+    nullable: true,
+  })
+  public companies?: TeamGraphQLObject[]
+
+  @Field(() => [TeamGraphQLObject], {
+    description: 'The creation date ordered list of teams that this user is part of',
+    nullable: true,
+  })
+  public teams?: Promise<TeamGraphQLObject[]>
+
+  @Field(() => [TeamGraphQLObject], {
+    description: 'The creation date ordered list of teams that this user owns',
+    nullable: true,
+  })
+  public ownedTeams?: TeamGraphQLObject[]
+
   public id: string
+  public createdAt: Date
   public policies?: PolicyGraphQLObject
 }
