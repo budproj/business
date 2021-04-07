@@ -5,10 +5,10 @@ import { ConstrainType } from '@core/enums/contrain-type.enum'
 import { UserInterface } from '@core/modules/user/user.interface'
 
 import { TeamInterface } from './team.interface'
-import { TeamORMEntity } from './team.orm-entity'
+import { Team } from './team.orm-entity'
 
-@EntityRepository(TeamORMEntity)
-export class TeamRepository extends CoreEntityRepository<TeamORMEntity> {
+@EntityRepository(Team)
+export class TeamRepository extends CoreEntityRepository<Team> {
   protected addTeamWhereExpression(
     query: WhereExpression,
     allowedTeams: Array<TeamInterface['id']>,
@@ -16,7 +16,7 @@ export class TeamRepository extends CoreEntityRepository<TeamORMEntity> {
   ) {
     const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
 
-    return query[constraintMethodName](`${TeamORMEntity.name}.id IN (:...allowedTeams)`, {
+    return query[constraintMethodName](`${Team.name}.id IN (:...allowedTeams)`, {
       allowedTeams,
     })
   }
@@ -28,7 +28,7 @@ export class TeamRepository extends CoreEntityRepository<TeamORMEntity> {
   ) {
     const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
 
-    return query[constraintMethodName](`${TeamORMEntity.name}.ownerId = :userID`, {
+    return query[constraintMethodName](`${Team.name}.ownerId = :userID`, {
       userID: user.id,
     })
   }

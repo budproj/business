@@ -6,10 +6,14 @@ import { AuthorizationUser } from '@adapters/authorization/interfaces/user.inter
 import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CoreProvider } from '@core/core.provider'
 import { UserInterface } from '@core/modules/user/user.interface'
-import { UserORMEntity } from '@core/modules/user/user.orm-entity'
+import { User } from '@core/modules/user/user.orm-entity'
+import { UsersQueryResultGraphQLObject } from '@interface/graphql/objects/user-query.object'
 import { UserGraphQLObject } from '@interface/graphql/objects/user.object'
 import { UserFiltersRequest } from '@interface/graphql/requests/user/user-filters.request'
-import { UsersGraphQLResponse } from '@interface/graphql/responses/users.response'
+
+import { MetadataGraphQLResponse } from '../responses/metadata.response'
+import { PageInfoGraphQLResponse } from '../responses/page-info.reponse'
+import { QueryResultGraphQLResponse } from '../responses/query-result.response'
 
 import { BaseGraphQLResolver } from './base.resolver'
 import { GraphQLUser } from './decorators/graphql-user'
@@ -20,7 +24,7 @@ import { NourishUserDataInterceptor } from './interceptors/nourish-user-data.int
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @UseInterceptors(NourishUserDataInterceptor)
 @Resolver(() => UserGraphQLObject)
-export class UserGraphQLResolver extends BaseGraphQLResolver<UserORMEntity, UserInterface> {
+export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface> {
   private readonly logger = new Logger(UserGraphQLResolver.name)
 
   constructor(protected readonly core: CoreProvider) {
@@ -28,7 +32,7 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<UserORMEntity, User
   }
 
   @RequiredActions('user:read')
-  @Query(() => UsersGraphQLResponse, { name: 'users' })
+  @Query(() => UsersQueryResultGraphQLObject, { name: 'users' })
   protected async getUsers(
     @Args() filters: UserFiltersRequest,
     @GraphQLUser() graphqlUser: AuthorizationUser,
@@ -39,10 +43,18 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<UserORMEntity, User
       message: 'Fetching user with filters',
     })
 
-    const selectedUsers = this.queryGuard.getManyWithActionScopeConstraint(filters, graphqlUser)
+    const selectedUsers = await this.queryGuard.getManyWithActionScopeConstraint(
+      filters,
+      graphqlUser,
+    )
 
-    console.log(selectedUsers)
+    const queryPageInfo = new PageInfoGraphQLResponse(selectedUsers)
+    const queryMetadata = new MetadataGraphQLResponse(selectedUsers, queryPageInfo.marshal())
+    const queryResult = new QueryResultGraphQLResponse<UserGraphQLObject>(
+      selectedUsers,
+      queryMetadata.marshal(),
+    )
 
-    return {}
+    return queryResult.marshal()
   }
 }

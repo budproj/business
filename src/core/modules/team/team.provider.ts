@@ -9,14 +9,14 @@ import { CreationQuery } from '@core/types/creation-query.type'
 
 import { TeamRankingProvider } from './ranking.provider'
 import { TeamInterface } from './team.interface'
-import { TeamORMEntity } from './team.orm-entity'
+import { Team } from './team.orm-entity'
 import { TeamRepository } from './team.repository'
 import { TeamSpecification } from './team.specification'
 import { TeamEntityKey } from './types/team-entity-key.type'
 import { TeamEntityRelation } from './types/team-entity-relation.type'
 
 @Injectable()
-export class TeamProvider extends CoreEntityProvider<TeamORMEntity, TeamInterface> {
+export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
   public readonly specification = new TeamSpecification()
 
   constructor(
@@ -27,11 +27,11 @@ export class TeamProvider extends CoreEntityProvider<TeamORMEntity, TeamInterfac
     super(TeamProvider.name, repository)
   }
 
-  public async getFromOwner(owner: UserInterface): Promise<TeamORMEntity[]> {
+  public async getFromOwner(owner: UserInterface): Promise<Team[]> {
     return this.repository.find({ ownerId: owner.id })
   }
 
-  public async getUserCompanies(user: UserInterface): Promise<TeamORMEntity[]> {
+  public async getUserCompanies(user: UserInterface): Promise<Team[]> {
     const teams = await this.getWithUser(user)
     const companyPromises = teams.map(async (team) => this.getRootTeamForTeam(team))
 
@@ -40,17 +40,17 @@ export class TeamProvider extends CoreEntityProvider<TeamORMEntity, TeamInterfac
     return companies
   }
 
-  public async getWithUser(user: UserInterface): Promise<TeamORMEntity[]> {
+  public async getWithUser(user: UserInterface): Promise<Team[]> {
     const teams = await user.teams
 
-    return teams as TeamORMEntity[]
+    return teams as Team[]
   }
 
   public async getFullTeamNodesTree(
     team: TeamInterface,
     selectors?: TeamEntityKey[],
     relations?: TeamEntityRelation[],
-  ): Promise<TeamORMEntity[]> {
+  ): Promise<Team[]> {
     const childTeams = await this.getTeamNodesTreeAfterTeam(team, selectors, relations)
     const parents = await this.getTeamNodesTreeBeforeTeam(team, selectors, relations)
 
@@ -65,9 +65,9 @@ export class TeamProvider extends CoreEntityProvider<TeamORMEntity, TeamInterfac
     teams: TeamInterface | TeamInterface[],
     selectors?: TeamEntityKey[],
     relations?: TeamEntityRelation[],
-  ): Promise<TeamORMEntity[]> {
+  ): Promise<Team[]> {
     const teamsAsArray = Array.isArray(teams) ? teams : [teams]
-    const initialNodes: TeamORMEntity[] = await Promise.all(
+    const initialNodes: Team[] = await Promise.all(
       teamsAsArray.map(async (team) => this.getOne({ id: team.id })),
     )
 
@@ -80,9 +80,9 @@ export class TeamProvider extends CoreEntityProvider<TeamORMEntity, TeamInterfac
     teams: TeamInterface | TeamInterface[],
     selectors?: TeamEntityKey[],
     relations?: TeamEntityRelation[],
-  ): Promise<TeamORMEntity[]> {
+  ): Promise<Team[]> {
     const teamsAsArray = Array.isArray(teams) ? teams : [teams]
-    const initialNodes: TeamORMEntity[] = await Promise.all(
+    const initialNodes: Team[] = await Promise.all(
       teamsAsArray.map(async (team) => this.getOne({ id: team.id })),
     )
 
@@ -91,7 +91,7 @@ export class TeamProvider extends CoreEntityProvider<TeamORMEntity, TeamInterfac
     return nodes
   }
 
-  public async getUserCompaniesAndDepartments(user: UserInterface): Promise<TeamORMEntity[]> {
+  public async getUserCompaniesAndDepartments(user: UserInterface): Promise<Team[]> {
     const companies = await this.getUserCompanies(user)
     const departments = await this.getUserCompaniesDepartments(user)
 
@@ -102,7 +102,7 @@ export class TeamProvider extends CoreEntityProvider<TeamORMEntity, TeamInterfac
     team: TeamInterface,
     selectors?: TeamEntityKey[],
     relations?: TeamEntityRelation[],
-  ): Promise<TeamORMEntity> {
+  ): Promise<Team> {
     if (!team.parentId) return
     const whereSelector = { id: team.parentId }
 
@@ -149,20 +149,20 @@ export class TeamProvider extends CoreEntityProvider<TeamORMEntity, TeamInterfac
     return queryContext
   }
 
-  public async getTeamChildTeams(team: TeamInterface): Promise<TeamORMEntity[]> {
+  public async getTeamChildTeams(team: TeamInterface): Promise<Team[]> {
     const childTeams = await this.getMany({ parentId: team.id })
 
     return childTeams
   }
 
-  public async getTeamRankedChildTeams(team: TeamInterface): Promise<TeamORMEntity[]> {
+  public async getTeamRankedChildTeams(team: TeamInterface): Promise<Team[]> {
     const childTeams = await this.getTeamChildTeams(team)
     const rankedChildTeams = await this.ranking.rankTeamsByProgress(childTeams)
 
     return rankedChildTeams
   }
 
-  public async getRankedTeamsBelowNode(team: TeamInterface): Promise<TeamORMEntity[]> {
+  public async getRankedTeamsBelowNode(team: TeamInterface): Promise<Team[]> {
     const teamNodeTree = await this.getTeamNodesTreeAfterTeam(team)
     const teamsBelowTeam = teamNodeTree.slice(1)
     const rankedChildTeams = await this.ranking.rankTeamsByProgress(teamsBelowTeam)
@@ -171,7 +171,7 @@ export class TeamProvider extends CoreEntityProvider<TeamORMEntity, TeamInterfac
   }
 
   protected async protectCreationQuery(
-    _query: CreationQuery<TeamORMEntity>,
+    _query: CreationQuery<Team>,
     _data: Partial<TeamInterface>,
     _queryContext: CoreQueryContext,
   ) {
@@ -230,7 +230,7 @@ export class TeamProvider extends CoreEntityProvider<TeamORMEntity, TeamInterfac
   }
 
   private async getNodesFromTeams(
-    nodes: TeamORMEntity[],
+    nodes: Team[],
     direction: 'above' | 'below',
     selectors?: TeamEntityKey[],
     relations?: TeamEntityRelation[],

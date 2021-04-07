@@ -5,11 +5,11 @@ import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 
 import { UserInterface } from './user.interface'
-import { UserORMEntity } from './user.orm-entity'
+import { User } from './user.orm-entity'
 import { UserRepository } from './user.repository'
 
 @Injectable()
-export class UserProvider extends CoreEntityProvider<UserORMEntity, UserInterface> {
+export class UserProvider extends CoreEntityProvider<User, UserInterface> {
   constructor(protected readonly repository: UserRepository) {
     super(UserProvider.name, repository)
   }
@@ -23,7 +23,7 @@ export class UserProvider extends CoreEntityProvider<UserORMEntity, UserInterfac
   }
 
   protected async protectCreationQuery(
-    _query: CreationQuery<UserORMEntity>,
+    _query: CreationQuery<User>,
     _data: Partial<UserInterface>,
     _queryContext: CoreQueryContext,
   ) {

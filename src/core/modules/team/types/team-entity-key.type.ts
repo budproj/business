@@ -1,3 +1,3 @@
-import { TeamORMEntity } from '@core/modules/team/team.orm-entity'
+import { Team } from '@core/modules/team/team.orm-entity'
 
-export type TeamEntityKey = keyof TeamORMEntity
+export type TeamEntityKey = keyof Team

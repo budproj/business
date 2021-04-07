@@ -10,7 +10,7 @@ import { RequiredActions } from '@adapters/authorization/required-actions.decora
 import { CommandStatement } from '@adapters/authorization/types/command-statement.type'
 import { ResourceStatement } from '@adapters/authorization/types/resource-statement.type copy'
 import { ScopeGraphQLEnum } from '@interface/graphql/enums/scope.enum'
-import { PermissionsGraphQLResponse } from '@interface/graphql/responses/permissions.response'
+import { PermissionsGraphQLObject } from '@interface/graphql/objects/permissions.object'
 
 import { GraphQLUser } from './decorators/graphql-user'
 import { GraphQLRequiredPoliciesGuard } from './guards/required-policies.guard'
@@ -19,13 +19,13 @@ import { NourishUserDataInterceptor } from './interceptors/nourish-user-data.int
 
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @UseInterceptors(NourishUserDataInterceptor)
-@Resolver(() => PermissionsGraphQLResponse)
+@Resolver(() => PermissionsGraphQLObject)
 export class PermissionsGraphQLResolver {
   private readonly logger = new Logger(PermissionsGraphQLResolver.name)
   private readonly authz = new AuthzAdapter()
 
   @RequiredActions('permission:read')
-  @Query(() => PermissionsGraphQLResponse, { name: 'permissions' })
+  @Query(() => PermissionsGraphQLObject, { name: 'permissions' })
   protected getUserPermissionsForScope(
     @Args('scope', { type: () => ScopeGraphQLEnum, defaultValue: Scope.COMPANY })
     scope: Scope,
@@ -50,8 +50,8 @@ export class PermissionsGraphQLResolver {
 
   private normalizeResourceStatementKeys<E = Effect>(
     statement: ResourceStatement<E>,
-  ): PermissionsGraphQLResponse {
-    return mapKeys<ResourceStatement<E>, PermissionsGraphQLResponse>(statement, (_, key) =>
+  ): PermissionsGraphQLObject {
+    return mapKeys<ResourceStatement<E>, PermissionsGraphQLObject>(statement, (_, key) =>
       camelCase(key),
     )
   }

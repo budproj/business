@@ -4,7 +4,7 @@ import { Field, Float, Int, InterfaceType } from '@nestjs/graphql'
   description:
     "The current status of an entity. By status we mean progress, confidence, and other reported values from it's children",
 })
-export abstract class StatusGraphQLObject {
+export abstract class StatusGraphQLInterface {
   @Field(() => Float, {
     description:
       'The computed percentage current progress of this entity. The entity progress calculation vary based on the entity',

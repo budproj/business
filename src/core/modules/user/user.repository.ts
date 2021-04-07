@@ -3,15 +3,15 @@ import { EntityRepository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 import { CoreEntityRepository } from '@core/core.repository'
 import { ConstrainType } from '@core/enums/contrain-type.enum'
 import { TeamInterface } from '@core/modules/team/team.interface'
-import { TeamORMEntity } from '@core/modules/team/team.orm-entity'
+import { Team } from '@core/modules/team/team.orm-entity'
 
 import { UserInterface } from './user.interface'
-import { UserORMEntity } from './user.orm-entity'
+import { User } from './user.orm-entity'
 
-@EntityRepository(UserORMEntity)
-export class UserRepository extends CoreEntityRepository<UserORMEntity> {
-  protected setupTeamQuery(query: SelectQueryBuilder<UserORMEntity>) {
-    return query.leftJoinAndSelect(`${UserORMEntity.name}.teams`, 'Team')
+@EntityRepository(User)
+export class UserRepository extends CoreEntityRepository<User> {
+  protected setupTeamQuery(query: SelectQueryBuilder<User>) {
+    return query.leftJoinAndSelect(`${User.name}.teams`, 'Team')
   }
 
   protected addTeamWhereExpression(
@@ -21,7 +21,7 @@ export class UserRepository extends CoreEntityRepository<UserORMEntity> {
   ) {
     const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
 
-    return query[constraintMethodName](`${TeamORMEntity.name}.id IN (:...allowedTeams)`, {
+    return query[constraintMethodName](`${Team.name}.id IN (:...allowedTeams)`, {
       allowedTeams,
     })
   }
@@ -33,7 +33,7 @@ export class UserRepository extends CoreEntityRepository<UserORMEntity> {
   ) {
     const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
 
-    return query[constraintMethodName]('User.id = :userID', {
+    return query[constraintMethodName](`${User.name}.id = :userID`, {
       userID: user.id,
     })
   }

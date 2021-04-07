@@ -1,19 +1,17 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
-import { EntityGraphQLObject } from './entity.object'
+import { EntityGraphQLInterface } from '@interface/graphql/interfaces/entity.interface'
+
 import { PolicyGraphQLObject } from './policy.object'
 
 @ObjectType('User', {
-  implements: () => EntityGraphQLObject,
+  implements: () => EntityGraphQLInterface,
   description:
     'User is an entity inside a given root team (a.k.a. company). It is associated with many teams, progress reports, and others.',
 })
-export class UserGraphQLObject implements EntityGraphQLObject {
+export class UserGraphQLObject implements EntityGraphQLInterface {
   @Field({ description: 'The name of the user' })
   public firstName: string
-
-  @Field({ description: 'The full name of the user' })
-  public fullName: string
 
   @Field({ description: 'The sub field in Auth0 (their ID)' })
   public authzSub: string
@@ -23,6 +21,9 @@ export class UserGraphQLObject implements EntityGraphQLObject {
 
   @Field({ description: 'The last update date of this user' })
   public updatedAt: Date
+
+  @Field({ description: 'The full name of the user' })
+  public fullName?: string
 
   @Field({ description: 'The last name of the user', nullable: true })
   public lastName?: string
@@ -53,5 +54,5 @@ export class UserGraphQLObject implements EntityGraphQLObject {
   public linkedInProfileAddress?: string
 
   public id: string
-  public policies: PolicyGraphQLObject
+  public policies?: PolicyGraphQLObject
 }

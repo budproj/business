@@ -6,8 +6,8 @@ import { TeamInterface } from '@core/modules/team/team.interface'
 import { UserGender } from './enums/user-gender.enum'
 import { UserInterface } from './user.interface'
 
-@Entity('user')
-export class UserORMEntity extends CoreEntity implements UserInterface {
+@Entity()
+export class User extends CoreEntity implements UserInterface {
   @Column()
   public firstName: string
 
@@ -38,9 +38,9 @@ export class UserORMEntity extends CoreEntity implements UserInterface {
   @Column({ nullable: true })
   public linkedInProfileAddress?: string
 
-  @ManyToMany('TeamORMEntity', 'users', { lazy: true, nullable: true })
+  @ManyToMany('Team', 'users', { lazy: true, nullable: true })
   public teams?: Promise<TeamInterface[]>
 
-  @OneToMany('TeamORMEntity', 'owner', { nullable: true })
+  @OneToMany('Team', 'owner', { nullable: true })
   public ownedTeams?: TeamInterface[]
 }

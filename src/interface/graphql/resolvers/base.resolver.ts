@@ -12,12 +12,12 @@ import { CoreProvider } from '@core/core.provider'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { ResourceGraphQLEnum } from '@interface/graphql/enums/resource.enum'
 import { ScopeGraphQLEnum } from '@interface/graphql/enums/scope.enum'
-import { EntityGraphQLObject } from '@interface/graphql/objects/entity.object'
+import { EntityGraphQLInterface } from '@interface/graphql/interfaces/entity.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/objects/policy.object'
 
 import { GraphQLUser } from './decorators/graphql-user'
 
-@Resolver(() => EntityGraphQLObject)
+@Resolver(() => EntityGraphQLInterface)
 export abstract class BaseGraphQLResolver<E extends CoreEntity, D> {
   protected readonly queryGuard: QueryGuardAdapter<E, D>
   protected readonly authz: AuthzAdapter

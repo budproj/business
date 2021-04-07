@@ -15,8 +15,8 @@ import { UserInterface } from '@core/modules/user/user.interface'
 import { TeamGender } from './enums/team-gender.enum'
 import { TeamInterface } from './team.interface'
 
-@Entity('team')
-export class TeamORMEntity extends CoreEntity implements TeamInterface {
+@Entity()
+export class Team extends CoreEntity implements TeamInterface {
   @Column()
   public name: string
 
@@ -27,7 +27,7 @@ export class TeamORMEntity extends CoreEntity implements TeamInterface {
   @RelationId((team: TeamInterface) => team.owner)
   public ownerId: UserInterface['id']
 
-  @ManyToOne('UserORMEntity', 'ownedTeams')
+  @ManyToOne('User', 'ownedTeams')
   public owner: UserInterface
 
   @Column({ type: 'text', nullable: true })
@@ -40,13 +40,13 @@ export class TeamORMEntity extends CoreEntity implements TeamInterface {
   @RelationId((team: TeamInterface) => team.parent)
   public parentId?: TeamInterface['id']
 
-  @ManyToOne('TeamORMEntity', 'teams')
+  @ManyToOne('Team', 'teams')
   public parent?: TeamInterface
 
-  @OneToMany('TeamORMEntity', 'parent', { nullable: true })
+  @OneToMany('Team', 'parent', { nullable: true })
   public teams?: TeamInterface[]
 
-  @ManyToMany('UserORMEntity', 'teams', { lazy: true, nullable: true })
+  @ManyToMany('User', 'teams', { lazy: true, nullable: true })
   @JoinTable()
   public users?: Promise<UserInterface[]>
 }
