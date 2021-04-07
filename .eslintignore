@@ -6,4 +6,4 @@ dist
 manifests
 node_modules
 scripts
-src/database/migrations
+src/infrastructure/orm/migrations
