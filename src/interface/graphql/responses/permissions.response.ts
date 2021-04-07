@@ -5,7 +5,7 @@ import { PolicyGraphQLObject } from '@interface/graphql/objects/policy.object'
 @ObjectType('Permissions', {
   description: 'Defines all user permissions for each entity in our domain',
 })
-export class PermissionsGraphQLObject {
+export class PermissionsGraphQLResponse {
   @Field(() => PolicyGraphQLObject)
   public user: PolicyGraphQLObject
 

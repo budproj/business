@@ -1,12 +1,16 @@
 import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Resolver, Query, Args } from '@nestjs/graphql'
+import { camelCase, mapKeys } from 'lodash'
 
 import { AuthzAdapter } from '@adapters/authorization/authz.adapter'
+import { Effect } from '@adapters/authorization/enums/effect.enum'
 import { Scope } from '@adapters/authorization/enums/scope.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
+import { CommandStatement } from '@adapters/authorization/types/command-statement.type'
+import { ResourceStatement } from '@adapters/authorization/types/resource-statement.type copy'
 import { ScopeGraphQLEnum } from '@interface/graphql/enums/scope.enum'
-import { PermissionsGraphQLObject } from '@interface/graphql/responses/permissions.response'
+import { PermissionsGraphQLResponse } from '@interface/graphql/responses/permissions.response'
 
 import { GraphQLUser } from './decorators/graphql-user'
 import { GraphQLRequiredPoliciesGuard } from './guards/required-policies.guard'
@@ -15,13 +19,13 @@ import { NourishUserDataInterceptor } from './interceptors/nourish-user-data.int
 
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @UseInterceptors(NourishUserDataInterceptor)
-@Resolver(() => PermissionsGraphQLObject)
+@Resolver(() => PermissionsGraphQLResponse)
 export class PermissionsGraphQLResolver {
   private readonly logger = new Logger(PermissionsGraphQLResolver.name)
   private readonly authz = new AuthzAdapter()
 
   @RequiredActions('permission:read')
-  @Query(() => PermissionsGraphQLObject, { name: 'permissions' })
+  @Query(() => PermissionsGraphQLResponse, { name: 'permissions' })
   protected getUserPermissionsForScope(
     @Args('scope', { type: () => ScopeGraphQLEnum, defaultValue: Scope.COMPANY })
     scope: Scope,
@@ -37,8 +41,18 @@ export class PermissionsGraphQLResolver {
       scope,
     )
 
-    console.log(resourcesCommandStatement)
+    const permissions = this.normalizeResourceStatementKeys<CommandStatement>(
+      resourcesCommandStatement,
+    )
 
-    return {}
+    return permissions
+  }
+
+  private normalizeResourceStatementKeys<E = Effect>(
+    statement: ResourceStatement<E>,
+  ): PermissionsGraphQLResponse {
+    return mapKeys<ResourceStatement<E>, PermissionsGraphQLResponse>(statement, (_, key) =>
+      camelCase(key),
+    )
   }
 }

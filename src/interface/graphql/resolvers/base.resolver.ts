@@ -1,5 +1,5 @@
 import { Args, Parent, ResolveField, Resolver } from '@nestjs/graphql'
-import { camelCase, mapKeys, mapValues } from 'lodash'
+import { mapValues } from 'lodash'
 
 import { AuthzAdapter } from '@adapters/authorization/authz.adapter'
 import { Effect } from '@adapters/authorization/enums/effect.enum'
@@ -7,7 +7,6 @@ import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { Scope } from '@adapters/authorization/enums/scope.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { QueryGuardAdapter } from '@adapters/authorization/query-guard.adapter'
-import { ResourcePolicy } from '@adapters/authorization/types/resource-policy.type'
 import { CoreEntity } from '@core/core.entity'
 import { CoreProvider } from '@core/core.provider'
 import { CoreEntityProvider } from '@core/entity.provider'
@@ -15,7 +14,6 @@ import { ResourceGraphQLEnum } from '@interface/graphql/enums/resource.enum'
 import { ScopeGraphQLEnum } from '@interface/graphql/enums/scope.enum'
 import { EntityGraphQLObject } from '@interface/graphql/objects/entity.object'
 import { PolicyGraphQLObject } from '@interface/graphql/objects/policy.object'
-import { PermissionsGraphQLObject } from '@interface/graphql/responses/permissions.response'
 
 import { GraphQLUser } from './decorators/graphql-user'
 
@@ -60,10 +58,6 @@ export abstract class BaseGraphQLResolver<E extends CoreEntity, D> {
 
   protected denyAllPolicies(originalPolicies: PolicyGraphQLObject) {
     return mapValues(originalPolicies, () => Effect.DENY)
-  }
-
-  protected normalizeResourcePolicyKeys(policy: ResourcePolicy): PermissionsGraphQLObject {
-    return mapKeys<ResourcePolicy, PermissionsGraphQLObject>(policy, (_, key) => camelCase(key))
   }
 
   private async getHighestScopeForEntity(entity: E, user: AuthorizationUser) {
