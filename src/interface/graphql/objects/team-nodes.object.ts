@@ -17,9 +17,6 @@ export class TeamNodeGraphQLObject implements NodeGraphQLInterface {
   @Field({ description: 'The name of the team' })
   public name: string
 
-  @Field({ description: 'Defines if the team is a company' })
-  public isCompany: boolean
-
   @Field({ description: 'The last update date of the team' })
   public updatedAt: Date
 
@@ -31,6 +28,9 @@ export class TeamNodeGraphQLObject implements NodeGraphQLInterface {
 
   @Field({ nullable: true, description: 'The description about the team' })
   public description?: string
+
+  @Field({ description: 'Defines if the team is a company' })
+  public isCompany?: boolean
 
   @Field(() => TeamGenderGraphQLEnum, { nullable: true, description: 'The gender of the team' })
   public gender?: TeamGender

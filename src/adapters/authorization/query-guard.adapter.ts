@@ -1,4 +1,4 @@
-import { FindConditions } from 'typeorm'
+import { DeleteResult, FindConditions } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
 import { CoreEntity } from '@core/core.entity'
@@ -11,20 +11,20 @@ import { Command } from './enums/command.enum'
 import { Resource } from './enums/resource.enum'
 import { AuthorizationUser } from './interfaces/user.interface'
 
-export class QueryGuardAdapter<E extends CoreEntity, D> {
+export class QueryGuardAdapter<E extends CoreEntity, I> {
   protected readonly authz = new AuthzAdapter()
 
   constructor(
     protected readonly resource: Resource,
     protected readonly core: CoreProvider,
-    protected readonly entity: CoreEntityProvider<E, D>,
+    protected readonly entity: CoreEntityProvider<E, I>,
   ) {}
 
   public async createWithActionScopeConstraint(
-    data: Partial<D>,
+    data: Partial<I>,
     user: AuthorizationUser,
     command: Command = Command.CREATE,
-  ) {
+  ): Promise<E[]> {
     const queryScope = this.authz.getResourceCommandScopeForUser(this.resource, command, user)
     const queryContext = await this.core.team.buildTeamQueryContext(user, queryScope)
 
@@ -35,7 +35,7 @@ export class QueryGuardAdapter<E extends CoreEntity, D> {
     selector: FindConditions<E>,
     user: AuthorizationUser,
     command: Command = Command.READ,
-  ) {
+  ): Promise<E> {
     const queryScope = this.authz.getResourceCommandScopeForUser(this.resource, command, user)
     const queryContext = await this.core.team.buildTeamQueryContext(user, queryScope)
 
@@ -47,7 +47,7 @@ export class QueryGuardAdapter<E extends CoreEntity, D> {
     user: AuthorizationUser,
     options?: GetOptions<E>,
     command: Command = Command.READ,
-  ) {
+  ): Promise<E[]> {
     const queryScope = this.authz.getResourceCommandScopeForUser(this.resource, command, user)
     const queryContext = await this.core.team.buildTeamQueryContext(user, queryScope)
 
@@ -59,7 +59,7 @@ export class QueryGuardAdapter<E extends CoreEntity, D> {
     newData: QueryDeepPartialEntity<E>,
     user: AuthorizationUser,
     command: Command = Command.UPDATE,
-  ) {
+  ): Promise<E> {
     const queryScope = this.authz.getResourceCommandScopeForUser(this.resource, command, user)
     const queryContext = await this.core.team.buildTeamQueryContext(user, queryScope)
 
@@ -70,7 +70,7 @@ export class QueryGuardAdapter<E extends CoreEntity, D> {
     selector: FindConditions<E>,
     user: AuthorizationUser,
     command: Command = Command.DELETE,
-  ) {
+  ): Promise<DeleteResult> {
     const queryScope = this.authz.getResourceCommandScopeForUser(this.resource, command, user)
     const queryContext = await this.core.team.buildTeamQueryContext(user, queryScope)
 

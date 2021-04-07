@@ -10,7 +10,7 @@ import { GetOptions } from '@core/interfaces/get-options'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 import { UserNodeGraphQLObject } from '@interface/graphql/objects/user-node.object'
-import { UsersQueryResultGraphQLObject } from '@interface/graphql/objects/user-query.object'
+import { UserQueryResultGraphQLObject } from '@interface/graphql/objects/user-query.object'
 import { UserFiltersRequest } from '@interface/graphql/requests/user/user-filters.request'
 
 import { TeamNodeGraphQLObject } from '../objects/team-nodes.object'
@@ -33,7 +33,7 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
   }
 
   @RequiredActions('user:read')
-  @Query(() => UsersQueryResultGraphQLObject, { name: 'users' })
+  @Query(() => UserQueryResultGraphQLObject, { name: 'users' })
   protected async getUsers(
     @Args() { first, ...filters }: UserFiltersRequest,
     @GraphQLUser() graphqlUser: AuthorizationUser,
@@ -42,7 +42,7 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
       first,
       filters,
       graphqlUser,
-      message: 'Fetching user with filters',
+      message: 'Fetching users with filters',
     })
 
     const queryOptions: GetOptions<User> = {
@@ -54,7 +54,7 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
       queryOptions,
     )
 
-    const response = this.marshalQueryResponse(queryResult)
+    const response = this.marshalQueryResponse<UserNodeGraphQLObject>(queryResult)
 
     return response
   }

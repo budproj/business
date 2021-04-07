@@ -6,6 +6,7 @@ import { CoreModule } from '@core/core.module'
 
 import { GraphQLOptionsFactory } from './options.factory'
 import { PermissionsGraphQLResolver } from './resolvers/permissions.resolver'
+import { TeamGraphQLResolver } from './resolvers/team.resolver'
 import { UserGraphQLResolver } from './resolvers/user.resolver'
 
 @Module({
@@ -16,6 +17,6 @@ import { UserGraphQLResolver } from './resolvers/user.resolver'
     }),
     CoreModule,
   ],
-  providers: [UserGraphQLResolver, PermissionsGraphQLResolver],
+  providers: [PermissionsGraphQLResolver, TeamGraphQLResolver, UserGraphQLResolver],
 })
 export class GraphQLModule {}

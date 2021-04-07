@@ -24,14 +24,14 @@ import { EdgesGraphQLResponse } from '../responses/edges.response'
 import { GraphQLUser } from './decorators/graphql-user'
 
 @Resolver(() => NodeGraphQLInterface)
-export abstract class BaseGraphQLResolver<E extends CoreEntity, D> {
-  protected readonly queryGuard: QueryGuardAdapter<E, D>
+export abstract class BaseGraphQLResolver<E extends CoreEntity, I> {
+  protected readonly queryGuard: QueryGuardAdapter<E, I>
   protected readonly authz: AuthzAdapter
 
   constructor(
     protected readonly resource: Resource,
     protected readonly core: CoreProvider,
-    protected readonly entity: CoreEntityProvider<E, D>,
+    protected readonly entity: CoreEntityProvider<E, I>,
   ) {
     this.queryGuard = new QueryGuardAdapter(resource, core, entity)
     this.authz = new AuthzAdapter()

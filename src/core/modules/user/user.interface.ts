@@ -15,6 +15,6 @@ export interface UserInterface {
   nickname?: string
   about?: string
   linkedInProfileAddress?: string
-  teams?: Promise<TeamInterface[]> | TeamInterface[]
+  teams?: Promise<TeamInterface[]>
   ownedTeams?: TeamInterface[]
 }

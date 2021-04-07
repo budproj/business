@@ -17,7 +17,7 @@ import { UserInterface } from './modules/user/user.interface'
 import { CreationQuery } from './types/creation-query.type'
 import { SelectionQueryConstrain } from './types/selection-query-constrain.type'
 
-export abstract class CoreEntityProvider<E extends CoreEntity, D> {
+export abstract class CoreEntityProvider<E extends CoreEntity, I> {
   protected readonly logger: Logger
 
   constructor(
@@ -27,7 +27,7 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     this.logger = new Logger(loggerName ?? CoreEntityProvider.name)
   }
 
-  public buildContext(user: UserInterface, constraint: Scope) {
+  public buildContext(user: UserInterface, constraint: Scope): CoreContext {
     const context: CoreContext = {
       user,
       constraint,
@@ -36,7 +36,10 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     return context
   }
 
-  public async createWithConstraint(data: Partial<D>, queryContext: CoreQueryContext) {
+  public async createWithConstraint(
+    data: Partial<I>,
+    queryContext: CoreQueryContext,
+  ): Promise<E[]> {
     const shouldConstrainCreation = queryContext.constraint !== Scope.ANY
 
     return shouldConstrainCreation
@@ -44,7 +47,10 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
       : this.create(data, queryContext)
   }
 
-  public async getOneWithConstraint(selector: FindConditions<E>, queryContext: CoreQueryContext) {
+  public async getOneWithConstraint(
+    selector: FindConditions<E>,
+    queryContext: CoreQueryContext,
+  ): Promise<E> {
     const query = await this.getWithConstraint(selector, queryContext)
     const data = this.getOneInQuery(query, queryContext)
 
@@ -55,7 +61,7 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     selector: FindConditions<E>,
     queryContext: CoreQueryContext,
     options?: GetOptions<E>,
-  ) {
+  ): Promise<E[]> {
     const query = await this.getWithConstraint(selector, queryContext, options)
     const data = this.getManyInQuery(query, queryContext)
 
@@ -66,7 +72,7 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     selector: FindConditions<E>,
     newData: QueryDeepPartialEntity<E>,
     queryContext: CoreQueryContext,
-  ) {
+  ): Promise<E> {
     const shouldConstrainCreation = queryContext.constraint !== Scope.ANY
 
     return shouldConstrainCreation
@@ -86,8 +92,8 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     selector: FindConditions<E>,
     queryContext?: CoreQueryContext,
     options?: GetOptions<E>,
-  ) {
-    const query = this.get(selector, queryContext, undefined, options)
+  ): Promise<E> {
+    const query = await this.get(selector, queryContext, undefined, options)
 
     return query.getOne()
   }
@@ -96,8 +102,8 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     selector: FindConditions<E>,
     queryContext?: CoreQueryContext,
     options?: GetOptions<E>,
-  ) {
-    const query = this.get(selector, queryContext, undefined, options)
+  ): Promise<E[]> {
+    const query = await this.get(selector, queryContext, undefined, options)
 
     return query.getMany()
   }
@@ -106,7 +112,7 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     entity: E,
     originalQueryContext: CoreQueryContext,
     currentConstraint: Scope = Scope.ANY,
-  ) {
+  ): Promise<Scope> {
     const currentConstraintIndex = SCOPE_PRIORITY.indexOf(currentConstraint)
     const nextConstraintIndex = currentConstraintIndex + 1
     const isLastIndex = nextConstraintIndex + 1 === SCOPE_PRIORITY.length
@@ -123,7 +129,10 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
       : this.defineResourceHighestConstraint(entity, queryContext, nextConstraint)
   }
 
-  protected async create(data: Partial<D> | Array<Partial<D>>, _queryContext?: CoreQueryContext) {
+  protected async create(
+    data: Partial<I> | Array<Partial<I>>,
+    _queryContext?: CoreQueryContext,
+  ): Promise<E[]> {
     const result = await this.repository.insert(data as QueryDeepPartialEntity<E>)
     const createdIDs = result.identifiers.map((data) => data.id)
 
@@ -132,7 +141,10 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     return createdData
   }
 
-  protected async createIfWithinConstraint(data: Partial<D>, queryContext: CoreQueryContext) {
+  protected async createIfWithinConstraint(
+    data: Partial<I>,
+    queryContext: CoreQueryContext,
+  ): Promise<E[]> {
     const creationQuery = async () => this.create(data, queryContext)
 
     return this.protectCreationQuery(creationQuery, data, queryContext)
@@ -142,7 +154,7 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     selector: FindConditions<E>,
     queryContext: CoreQueryContext,
     options?: GetOptions<E>,
-  ) {
+  ): Promise<SelectQueryBuilder<E>> {
     const availableSelectors = {
       [Scope.ANY]: async () => this.get(selector, queryContext, undefined, options),
       [Scope.COMPANY]: async () => this.getIfUserIsInCompany(selector, queryContext, options),
@@ -155,12 +167,12 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     return constrainedSelector()
   }
 
-  protected get(
+  protected async get(
     selector: FindConditions<E>,
     _queryContext: CoreQueryContext,
     constrainQuery?: SelectionQueryConstrain<E>,
     options?: GetOptions<E>,
-  ) {
+  ): Promise<SelectQueryBuilder<E>> {
     const orderBy = mapKeys(options?.orderBy, (_, key) => snakeCase(key))
 
     const query = this.repository
@@ -176,7 +188,7 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     selector: FindConditions<E>,
     queryContext: CoreQueryContext,
     options?: GetOptions<E>,
-  ) {
+  ): Promise<SelectQueryBuilder<E>> {
     const { query, user } = queryContext
     const constrainQuery = this.repository.constraintQueryToTeam(query.teams, user)
 
@@ -187,7 +199,7 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     selector: FindConditions<E>,
     queryContext: CoreQueryContext,
     options?: GetOptions<E>,
-  ) {
+  ): Promise<SelectQueryBuilder<E>> {
     const { query, user } = queryContext
     const constrainQuery = this.repository.constraintQueryToTeam(query.userTeams, user)
 
@@ -198,14 +210,17 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     selector: FindConditions<E>,
     queryContext: CoreQueryContext,
     options?: GetOptions<E>,
-  ) {
+  ): Promise<SelectQueryBuilder<E>> {
     const { user } = queryContext
     const constrainQuery = this.repository.constraintQueryToOwns(user)
 
     return this.get(selector, queryContext, constrainQuery, options)
   }
 
-  protected async getOneInQuery(query: SelectQueryBuilder<E>, queryContext?: CoreQueryContext) {
+  protected async getOneInQuery(
+    query: SelectQueryBuilder<E>,
+    queryContext?: CoreQueryContext,
+  ): Promise<E> {
     this.logger.debug({
       queryContext,
       message: `Getting one for request`,
@@ -214,7 +229,10 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     return query.getOne()
   }
 
-  protected async getManyInQuery(query: SelectQueryBuilder<E>, queryContext?: CoreQueryContext) {
+  protected async getManyInQuery(
+    query: SelectQueryBuilder<E>,
+    queryContext?: CoreQueryContext,
+  ): Promise<E[]> {
     this.logger.debug({
       queryContext,
       message: `Getting many for request`,
@@ -227,7 +245,7 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     selector: FindConditions<E>,
     newData: QueryDeepPartialEntity<E>,
     queryContext?: CoreQueryContext,
-  ) {
+  ): Promise<E> {
     await this.repository.update(selector, newData)
 
     return this.getOne(selector, queryContext)
@@ -237,7 +255,7 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     selector: FindConditions<E>,
     newData: QueryDeepPartialEntity<E>,
     queryContext: CoreQueryContext,
-  ) {
+  ): Promise<E> {
     const updateQuery = async () => this.update(selector, newData, queryContext)
 
     return this.protectMutationQuery<E>(
@@ -248,14 +266,17 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     )
   }
 
-  protected async delete(selector: FindConditions<E>, _queryContext: CoreQueryContext) {
+  protected async delete(
+    selector: FindConditions<E>,
+    _queryContext: CoreQueryContext,
+  ): Promise<DeleteResult> {
     return this.repository.delete(selector)
   }
 
   protected async deleteIfWithinConstraint(
     selector: FindConditions<E>,
     queryContext: CoreQueryContext,
-  ) {
+  ): Promise<DeleteResult> {
     const deleteQuery = async () => this.delete(selector, queryContext)
 
     return this.protectMutationQuery<DeleteResult>(
@@ -271,7 +292,7 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     selector: FindConditions<E>,
     queryContext: CoreQueryContext,
     queryType: MutationQueryType,
-  ) {
+  ): Promise<T> {
     const availableSetups = {
       [MutationQueryType.UPDATE]: async (
         query: SelectQueryBuilder<E>,
@@ -295,28 +316,28 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
   protected async setupUpdateMutationQuery(
     query: SelectQueryBuilder<E>,
     _queryContext: CoreQueryContext,
-  ) {
+  ): Promise<SelectQueryBuilder<E>> {
     return query
   }
 
   protected async setupDeleteMutationQuery(
     query: SelectQueryBuilder<E>,
     _queryContext: CoreQueryContext,
-  ) {
+  ): Promise<SelectQueryBuilder<E>> {
     return query
   }
 
   protected changeConstraintInQueryContext(
     originalQueryContext: CoreQueryContext,
     constraint: Scope,
-  ) {
+  ): CoreQueryContext {
     return {
       ...originalQueryContext,
       constraint,
     }
   }
 
-  protected getFirstDayAfterLastWeek() {
+  protected getFirstDayAfterLastWeek(): Date {
     const date = new Date()
     const firstDayAfterLastWeek = startOfWeek(date, {
       weekStartsOn: 6,
@@ -327,7 +348,7 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
 
   protected abstract protectCreationQuery(
     query: CreationQuery<E>,
-    data: Partial<D>,
+    data: Partial<I>,
     queryContext: CoreQueryContext,
   ): Promise<E[] | null>
 }
