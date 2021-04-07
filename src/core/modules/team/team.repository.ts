@@ -16,7 +16,7 @@ export class TeamRepository extends CoreEntityRepository<TeamORMEntity> {
   ) {
     const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
 
-    return query[constraintMethodName]('Team.id IN (:...allowedTeams)', {
+    return query[constraintMethodName](`${TeamORMEntity.name}.id IN (:...allowedTeams)`, {
       allowedTeams,
     })
   }
@@ -28,7 +28,7 @@ export class TeamRepository extends CoreEntityRepository<TeamORMEntity> {
   ) {
     const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
 
-    return query[constraintMethodName]('Team.ownerId = :userID', {
+    return query[constraintMethodName](`${TeamORMEntity.name}.ownerId = :userID`, {
       userID: user.id,
     })
   }

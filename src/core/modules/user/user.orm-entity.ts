@@ -6,7 +6,7 @@ import { TeamInterface } from '@core/modules/team/team.interface'
 import { UserGender } from './enums/user-gender.enum'
 import { UserInterface } from './user.interface'
 
-@Entity('User')
+@Entity('user')
 export class UserORMEntity extends CoreEntity implements UserInterface {
   @Column()
   public firstName: string

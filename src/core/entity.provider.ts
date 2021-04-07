@@ -6,7 +6,8 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 
 import { Scope } from '@adapters/authorization/enums/scope.enum'
 
-import { CONSTRAINT_ORDER } from './core.constants'
+import { SCOPE_PRIORITY } from '../adapters/authorization/authorization.constants'
+
 import { CoreEntity } from './core.entity'
 import { CoreEntityRepository } from './core.repository'
 import { MutationQueryType } from './enums/mutation-query-type.enum'
@@ -103,12 +104,12 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     originalQueryContext: CoreQueryContext,
     currentConstraint: Scope = Scope.ANY,
   ) {
-    const currentConstraintIndex = CONSTRAINT_ORDER.indexOf(currentConstraint)
+    const currentConstraintIndex = SCOPE_PRIORITY.indexOf(currentConstraint)
     const nextConstraintIndex = currentConstraintIndex + 1
-    const isLastIndex = nextConstraintIndex + 1 === CONSTRAINT_ORDER.length
+    const isLastIndex = nextConstraintIndex + 1 === SCOPE_PRIORITY.length
 
     const selector = { id: entity.id } as any
-    const nextConstraint = CONSTRAINT_ORDER[nextConstraintIndex]
+    const nextConstraint = SCOPE_PRIORITY[nextConstraintIndex]
     const queryContext = this.changeConstraintInQueryContext(originalQueryContext, nextConstraint)
 
     const foundData = await this.getOneWithConstraint(selector, queryContext)

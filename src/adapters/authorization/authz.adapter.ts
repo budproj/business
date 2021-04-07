@@ -1,5 +1,6 @@
 import { uniq, zipObject } from 'lodash'
 
+import { SCOPE_PRIORITY } from './authorization.constants'
 import { Command } from './enums/command.enum'
 import { Effect } from './enums/effect.enum'
 import { Resource } from './enums/resource.enum'
@@ -23,7 +24,7 @@ export class AuthzAdapter {
     Resource.KEY_RESULT_COMMENT,
   ]
 
-  public marshalPermissions(
+  public getResourcePoliciesFromPermissions(
     permissions: Permission[],
     resources: Resource[] = this.resources,
   ): ResourcePolicy {
@@ -46,6 +47,17 @@ export class AuthzAdapter {
     )
 
     return canExecuteAllRequiredActions
+  }
+
+  public getResourceCommandScopeForUser(
+    resource: Resource,
+    command: Command,
+    user: AuthorizationUser,
+  ): Scope {
+    const action = this.buildAction(resource, command)
+    const scope = this.getHighestScopeForActionFromUser(action, user)
+
+    return scope
   }
 
   private getCommandPoliciesForResourceFromPermissions(
@@ -103,5 +115,30 @@ export class AuthzAdapter {
 
   private drillUp<T extends string = string>(value: string): T {
     return value.split(':').slice(0, -1).join(':') as T
+  }
+
+  private buildAction(resource: Resource, command: Command): Action {
+    return `${resource}:${command}` as const
+  }
+
+  private getHighestScopeForActionFromUser(
+    action: Action,
+    user: AuthorizationUser,
+  ): Scope | undefined {
+    const highestScope = SCOPE_PRIORITY.find((scope) => {
+      const permission = this.buildPermissionFromAction(action, scope)
+
+      return this.userHasPermission(user, permission)
+    })
+
+    return highestScope
+  }
+
+  private userHasPermission(user: AuthorizationUser, permission: Permission): boolean {
+    return user.token.permissions.includes(permission)
+  }
+
+  private buildPermissionFromAction(action: Action, scope: Scope): Permission {
+    return `${action}:${scope}` as const
   }
 }
