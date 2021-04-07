@@ -6,13 +6,14 @@ import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CoreProvider } from '@core/core.provider'
+import { GetOptions } from '@core/interfaces/get-options'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 import { UserNodeGraphQLObject } from '@interface/graphql/objects/user-node.object'
 import { UsersQueryResultGraphQLObject } from '@interface/graphql/objects/user-query.object'
 import { UserFiltersRequest } from '@interface/graphql/requests/user/user-filters.request'
 
-import { TeamGraphQLObject } from '../objects/team.object'
+import { TeamNodeGraphQLObject } from '../objects/team-nodes.object'
 import { UserUpdateRequest } from '../requests/user/user-update.request'
 
 import { BaseGraphQLResolver } from './base.resolver'
@@ -34,23 +35,28 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
   @RequiredActions('user:read')
   @Query(() => UsersQueryResultGraphQLObject, { name: 'users' })
   protected async getUsers(
-    @Args() filters: UserFiltersRequest,
+    @Args() { first, ...filters }: UserFiltersRequest,
     @GraphQLUser() graphqlUser: AuthorizationUser,
   ) {
     this.logger.log({
+      first,
       filters,
       graphqlUser,
       message: 'Fetching user with filters',
     })
 
-    const selectedUsers = await this.queryGuard.getManyWithActionScopeConstraint(
+    const queryOptions: GetOptions<User> = {
+      limit: first,
+    }
+    const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,
       graphqlUser,
+      queryOptions,
     )
 
-    const queryResult = this.marshalQueryResult(selectedUsers)
+    const response = this.marshalQueryResponse(queryResult)
 
-    return queryResult
+    return response
   }
 
   @RequiredActions('user:read')
@@ -99,7 +105,7 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
     return this.core.user.buildUserFullName(user)
   }
 
-  @ResolveField('companies', () => [TeamGraphQLObject], { nullable: true })
+  @ResolveField('companies', () => [TeamNodeGraphQLObject], { nullable: true })
   protected async getUserCompanies(
     @Parent() user: UserNodeGraphQLObject,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
@@ -115,7 +121,7 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
     return companiesWithLimit
   }
 
-  @ResolveField('teams', () => [TeamGraphQLObject], { nullable: true })
+  @ResolveField('teams', () => [TeamNodeGraphQLObject], { nullable: true })
   protected async getUserTeams(@Parent() user: UserNodeGraphQLObject) {
     this.logger.log({
       user,
@@ -127,7 +133,7 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
     return teams
   }
 
-  @ResolveField('ownedTeams', () => [TeamGraphQLObject], { nullable: true })
+  @ResolveField('ownedTeams', () => [TeamNodeGraphQLObject], { nullable: true })
   protected async getUserOwnedTeams(@Parent() user: UserNodeGraphQLObject) {
     this.logger.log({
       user,

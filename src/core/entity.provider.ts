@@ -51,8 +51,12 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     return data
   }
 
-  public async getManyWithConstraint(selector: FindConditions<E>, queryContext: CoreQueryContext) {
-    const query = await this.getWithConstraint(selector, queryContext)
+  public async getManyWithConstraint(
+    selector: FindConditions<E>,
+    queryContext: CoreQueryContext,
+    options?: GetOptions<E>,
+  ) {
+    const query = await this.getWithConstraint(selector, queryContext, options)
     const data = this.getManyInQuery(query, queryContext)
 
     return data
@@ -134,12 +138,16 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
     return this.protectCreationQuery(creationQuery, data, queryContext)
   }
 
-  protected async getWithConstraint(selector: FindConditions<E>, queryContext: CoreQueryContext) {
+  protected async getWithConstraint(
+    selector: FindConditions<E>,
+    queryContext: CoreQueryContext,
+    options?: GetOptions<E>,
+  ) {
     const availableSelectors = {
-      [Scope.ANY]: async () => this.get(selector, queryContext),
-      [Scope.COMPANY]: async () => this.getIfUserIsInCompany(selector, queryContext),
-      [Scope.TEAM]: async () => this.getIfUserIsInTeam(selector, queryContext),
-      [Scope.OWNS]: async () => this.getIfUserOwnsIt(selector, queryContext),
+      [Scope.ANY]: async () => this.get(selector, queryContext, undefined, options),
+      [Scope.COMPANY]: async () => this.getIfUserIsInCompany(selector, queryContext, options),
+      [Scope.TEAM]: async () => this.getIfUserIsInTeam(selector, queryContext, options),
+      [Scope.OWNS]: async () => this.getIfUserOwnsIt(selector, queryContext, options),
     }
     const constrainedSelector = availableSelectors[queryContext.constraint]
     if (!constrainedSelector) return
@@ -167,25 +175,34 @@ export abstract class CoreEntityProvider<E extends CoreEntity, D> {
   protected async getIfUserIsInCompany(
     selector: FindConditions<E>,
     queryContext: CoreQueryContext,
+    options?: GetOptions<E>,
   ) {
     const { query, user } = queryContext
     const constrainQuery = this.repository.constraintQueryToTeam(query.teams, user)
 
-    return this.get(selector, queryContext, constrainQuery)
+    return this.get(selector, queryContext, constrainQuery, options)
   }
 
-  protected async getIfUserIsInTeam(selector: FindConditions<E>, queryContext: CoreQueryContext) {
+  protected async getIfUserIsInTeam(
+    selector: FindConditions<E>,
+    queryContext: CoreQueryContext,
+    options?: GetOptions<E>,
+  ) {
     const { query, user } = queryContext
     const constrainQuery = this.repository.constraintQueryToTeam(query.userTeams, user)
 
-    return this.get(selector, queryContext, constrainQuery)
+    return this.get(selector, queryContext, constrainQuery, options)
   }
 
-  protected async getIfUserOwnsIt(selector: FindConditions<E>, queryContext: CoreQueryContext) {
+  protected async getIfUserOwnsIt(
+    selector: FindConditions<E>,
+    queryContext: CoreQueryContext,
+    options?: GetOptions<E>,
+  ) {
     const { user } = queryContext
     const constrainQuery = this.repository.constraintQueryToOwns(user)
 
-    return this.get(selector, queryContext, constrainQuery)
+    return this.get(selector, queryContext, constrainQuery, options)
   }
 
   protected async getOneInQuery(query: SelectQueryBuilder<E>, queryContext?: CoreQueryContext) {

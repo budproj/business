@@ -13,7 +13,7 @@ import { UserNodeGraphQLObject } from './user-node.object'
   description:
     'A collection of users. It can be either inside another team, or a root team (a.k.a. company)',
 })
-export class TeamGraphQLObject implements NodeGraphQLInterface {
+export class TeamNodeGraphQLObject implements NodeGraphQLInterface {
   @Field({ description: 'The name of the team' })
   public name: string
 
@@ -35,17 +35,20 @@ export class TeamGraphQLObject implements NodeGraphQLInterface {
   @Field(() => TeamGenderGraphQLEnum, { nullable: true, description: 'The gender of the team' })
   public gender?: TeamGender
 
-  @Field(() => TeamGraphQLObject, {
+  @Field(() => TeamNodeGraphQLObject, {
     description: 'The team that is the company of this team. This is also known as "rootTeam"',
     nullable: true,
   })
-  public company?: TeamGraphQLObject
+  public company?: TeamNodeGraphQLObject
 
   @Field(() => ID, { description: 'The ID of the team that owns this team', nullable: true })
-  public parentId?: TeamGraphQLObject['id']
+  public parentId?: TeamNodeGraphQLObject['id']
 
-  @Field(() => TeamGraphQLObject, { description: 'The team that owns this team', nullable: true })
-  public parent?: TeamGraphQLObject
+  @Field(() => TeamNodeGraphQLObject, {
+    description: 'The team that owns this team',
+    nullable: true,
+  })
+  public parent?: TeamNodeGraphQLObject
 
   @Field(() => [UserNodeGraphQLObject], {
     description: 'A creation date ordered list of users that are members of this team',
@@ -53,17 +56,17 @@ export class TeamGraphQLObject implements NodeGraphQLInterface {
   })
   public users?: UserNodeGraphQLObject[]
 
-  @Field(() => [TeamGraphQLObject], {
+  @Field(() => [TeamNodeGraphQLObject], {
     description: 'A list of teams that belongs to this team',
     nullable: true,
   })
-  public teams?: TeamGraphQLObject[]
+  public teams?: TeamNodeGraphQLObject[]
 
-  @Field(() => [TeamGraphQLObject], {
+  @Field(() => [TeamNodeGraphQLObject], {
     description: "A list with all teams inside this team's tree ordered by their progress",
     nullable: true,
   })
-  public teamsRanking?: TeamGraphQLObject[]
+  public teamsRanking?: TeamNodeGraphQLObject[]
 
   public id: string
   public createdAt: Date

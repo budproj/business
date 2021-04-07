@@ -6,7 +6,7 @@ import { UserNodeGraphQLObject } from './user-node.object'
 
 @ObjectType('UserEdges', {
   implements: () => EdgesGraphQLInterface,
-  description: 'The edges from our user query interface',
+  description: 'The edges for our user query interface',
 })
 export class UserEdgesGraphQLObject implements EdgesGraphQLInterface<UserNodeGraphQLObject> {
   @Field(() => [UserNodeGraphQLObject])

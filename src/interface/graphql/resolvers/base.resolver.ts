@@ -77,7 +77,7 @@ export abstract class BaseGraphQLResolver<E extends CoreEntity, D> {
     return mapValues(originalPolicies, () => Effect.DENY)
   }
 
-  protected marshalQueryResult<N extends NodeGraphQLInterface = NodeGraphQLInterface>(
+  protected marshalQueryResponse<N extends NodeGraphQLInterface = NodeGraphQLInterface>(
     nodes: N[],
   ): QueryResultGraphQLInterface {
     const queryEdges = new EdgesGraphQLResponse<N>(nodes)

@@ -4,6 +4,7 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 import { CoreEntity } from '@core/core.entity'
 import { CoreProvider } from '@core/core.provider'
 import { CoreEntityProvider } from '@core/entity.provider'
+import { GetOptions } from '@core/interfaces/get-options'
 
 import { AuthzAdapter } from './authz.adapter'
 import { Command } from './enums/command.enum'
@@ -44,12 +45,13 @@ export class QueryGuardAdapter<E extends CoreEntity, D> {
   public async getManyWithActionScopeConstraint(
     selector: FindConditions<E>,
     user: AuthorizationUser,
+    options?: GetOptions<E>,
     command: Command = Command.READ,
   ) {
     const queryScope = this.authz.getResourceCommandScopeForUser(this.resource, command, user)
     const queryContext = await this.core.team.buildTeamQueryContext(user, queryScope)
 
-    return this.entity.getManyWithConstraint(selector, queryContext)
+    return this.entity.getManyWithConstraint(selector, queryContext, options)
   }
 
   public async updateWithActionScopeConstraint(

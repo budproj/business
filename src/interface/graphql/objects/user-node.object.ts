@@ -5,7 +5,7 @@ import { UserGenderGraphQLEnum } from '@interface/graphql/enums/user-gender.enum
 import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interface'
 
 import { PolicyGraphQLObject } from './policy.object'
-import { TeamGraphQLObject } from './team.object'
+import { TeamNodeGraphQLObject } from './team-nodes.object'
 
 @ObjectType('User', {
   implements: () => NodeGraphQLInterface,
@@ -56,23 +56,23 @@ export class UserNodeGraphQLObject implements NodeGraphQLInterface {
   })
   public linkedInProfileAddress?: string
 
-  @Field(() => [TeamGraphQLObject], {
+  @Field(() => [TeamNodeGraphQLObject], {
     description: 'The creation date ordered list of companies that this user is a part of',
     nullable: true,
   })
-  public companies?: TeamGraphQLObject[]
+  public companies?: TeamNodeGraphQLObject[]
 
-  @Field(() => [TeamGraphQLObject], {
+  @Field(() => [TeamNodeGraphQLObject], {
     description: 'The creation date ordered list of teams that this user is part of',
     nullable: true,
   })
-  public teams?: Promise<TeamGraphQLObject[]>
+  public teams?: Promise<TeamNodeGraphQLObject[]>
 
-  @Field(() => [TeamGraphQLObject], {
+  @Field(() => [TeamNodeGraphQLObject], {
     description: 'The creation date ordered list of teams that this user owns',
     nullable: true,
   })
-  public ownedTeams?: TeamGraphQLObject[]
+  public ownedTeams?: TeamNodeGraphQLObject[]
 
   public id: string
   public createdAt: Date
