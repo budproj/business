@@ -1,7 +1,7 @@
 import { EntityRepository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
 import { CoreEntityRepository } from '@core/core.repository'
-import { ConstrainType } from '@core/enums/contrain-type.enum'
+import { ConstraintType } from '@core/enums/contrain-type.enum'
 import { TeamInterface } from '@core/modules/team/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 
@@ -17,7 +17,7 @@ export class UserRepository extends CoreEntityRepository<User> {
   protected addTeamWhereExpression(
     query: WhereExpression,
     allowedTeams: Array<TeamInterface['id']>,
-    constraintType: ConstrainType = ConstrainType.OR,
+    constraintType: ConstraintType = ConstraintType.OR,
   ) {
     const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
 
@@ -29,7 +29,7 @@ export class UserRepository extends CoreEntityRepository<User> {
   protected addOwnsWhereExpression(
     query: WhereExpression,
     user: UserInterface,
-    constraintType: ConstrainType = ConstrainType.OR,
+    constraintType: ConstraintType = ConstraintType.OR,
   ) {
     const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
 

@@ -1,14 +1,19 @@
-import { EntityRepository, WhereExpression } from 'typeorm'
+import { EntityRepository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
 import { CoreEntityRepository } from '@core/core.repository'
 import { ConstraintType } from '@core/enums/contrain-type.enum'
+import { TeamInterface } from '@core/modules/team/team.interface'
+import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 
-import { TeamInterface } from './team.interface'
-import { Team } from './team.orm-entity'
+import { Cycle } from './cycle.orm-entity'
 
-@EntityRepository(Team)
-export class TeamRepository extends CoreEntityRepository<Team> {
+@EntityRepository(Cycle)
+export class CycleRepository extends CoreEntityRepository<Cycle> {
+  protected setupOwnsQuery(query: SelectQueryBuilder<Cycle>) {
+    return query.leftJoinAndSelect(`${Cycle.name}.team`, Team.name)
+  }
+
   protected addTeamWhereExpression(
     query: WhereExpression,
     allowedTeams: Array<TeamInterface['id']>,
@@ -16,7 +21,7 @@ export class TeamRepository extends CoreEntityRepository<Team> {
   ) {
     const constraintMethodName = this.selectConditionMethodNameBasedOnConstraintType(constraintType)
 
-    return query[constraintMethodName](`${Team.name}.id IN (:...allowedTeams)`, {
+    return query[constraintMethodName](`${Cycle.name}.teamId IN (:...allowedTeams)`, {
       allowedTeams,
     })
   }

@@ -2,7 +2,7 @@ import { Field, ObjectType } from '@nestjs/graphql'
 
 import { EdgesGraphQLInterface } from '@interface/graphql/interfaces/edges.interface'
 
-import { TeamNodeGraphQLObject } from './team-nodes.object'
+import { TeamNodeGraphQLObject } from './team-node.object'
 
 @ObjectType('TeamEdges', {
   implements: () => EdgesGraphQLInterface,

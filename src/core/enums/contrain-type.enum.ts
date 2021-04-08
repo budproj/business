@@ -1,4 +1,4 @@
-export enum ConstrainType {
+export enum ConstraintType {
   AND = 'and',
   OR = 'or',
 }

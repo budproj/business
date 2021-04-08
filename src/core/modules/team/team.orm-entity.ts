@@ -10,6 +10,7 @@ import {
 } from 'typeorm'
 
 import { CoreEntity } from '@core/core.entity'
+import { CycleInterface } from '@core/modules/cycle/cycle.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 
 import { TeamGender } from './enums/team-gender.enum'
@@ -49,4 +50,7 @@ export class Team extends CoreEntity implements TeamInterface {
   @ManyToMany('User', 'teams', { lazy: true, nullable: true })
   @JoinTable()
   public users?: Promise<UserInterface[]>
+
+  @OneToMany('Cycle', 'team', { nullable: true })
+  public cycles?: CycleInterface[]
 }

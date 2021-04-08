@@ -2,7 +2,7 @@ import { flow } from 'lodash'
 import { Brackets, Repository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
 import { ConditionalMethodNames } from './enums/conditional-method-names.enum'
-import { ConstrainType } from './enums/contrain-type.enum'
+import { ConstraintType } from './enums/contrain-type.enum'
 import { TeamInterface } from './modules/team/team.interface'
 import { UserInterface } from './modules/user/user.interface'
 import { SelectionQueryConstrain } from './types/selection-query-constrain.type'
@@ -56,10 +56,10 @@ export abstract class CoreEntityRepository<E> extends Repository<E> {
     return query
   }
 
-  protected selectConditionMethodNameBasedOnConstraintType(constraintType: ConstrainType) {
+  protected selectConditionMethodNameBasedOnConstraintType(constraintType: ConstraintType) {
     const methodNames = {
-      [ConstrainType.AND]: ConditionalMethodNames.AND_WHERE,
-      [ConstrainType.OR]: ConditionalMethodNames.OR_WHERE,
+      [ConstraintType.AND]: ConditionalMethodNames.AND_WHERE,
+      [ConstraintType.OR]: ConditionalMethodNames.OR_WHERE,
     }
     const constraintTypeMethodName = methodNames[constraintType]
 
@@ -69,12 +69,12 @@ export abstract class CoreEntityRepository<E> extends Repository<E> {
   protected abstract addTeamWhereExpression(
     query: WhereExpression,
     allowedTeams: Array<TeamInterface['id']>,
-    constraintType?: ConstrainType,
+    constraintType?: ConstraintType,
   ): WhereExpression
 
   protected abstract addOwnsWhereExpression(
     query: WhereExpression,
     user: UserInterface,
-    constraintType?: ConstrainType,
+    constraintType?: ConstraintType,
   ): WhereExpression
 }

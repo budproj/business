@@ -1,11 +1,11 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql'
 
 import { TeamGender } from '@core/modules/team/enums/team-gender.enum'
+import { TeamGenderGraphQLEnum } from '@interface/graphql/enums/team-gender.enum'
 import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interface'
-
-import { TeamGenderGraphQLEnum } from '../../enums/team-gender.enum'
-import { PolicyGraphQLObject } from '../authorization/policy.object'
-import { UserNodeGraphQLObject } from '../user/user-node.object'
+import { PolicyGraphQLObject } from '@interface/graphql/objects/authorization/policy.object'
+import { CycleNodeGraphQLObject } from '@interface/graphql/objects/cycle/cycle-node.object'
+import { UserNodeGraphQLObject } from '@interface/graphql/objects/user/user-node.object'
 
 @ObjectType('Team', {
   implements: () => NodeGraphQLInterface,
@@ -66,6 +66,12 @@ export class TeamNodeGraphQLObject implements NodeGraphQLInterface {
     nullable: true,
   })
   public rankedTeams?: TeamNodeGraphQLObject[]
+
+  @Field(() => [CycleNodeGraphQLObject], {
+    description: 'The cycles that belongs to this team',
+    nullable: true,
+  })
+  public cycles?: CycleNodeGraphQLObject[]
 
   public id: string
   public createdAt: Date

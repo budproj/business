@@ -1,7 +1,7 @@
 import { ArgsType, Field, ID } from '@nestjs/graphql'
 
 import { TeamLevelGraphQLEnum } from '@interface/graphql/enums/team-level.enum'
-import { TeamNodeGraphQLObject } from '@interface/graphql/objects/team/team-nodes.object'
+import { TeamNodeGraphQLObject } from '@interface/graphql/objects/team/team-node.object'
 import { CursorPaginationRequest } from '@interface/graphql/requests/cursor-pagination.request'
 
 @ArgsType()

@@ -8,12 +8,12 @@ import { CoreProvider } from '@core/core.provider'
 import { GetOptions } from '@core/interfaces/get-options'
 import { TeamInterface } from '@core/modules/team/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
-import { TeamNodeGraphQLObject } from '@interface/graphql/objects/team/team-nodes.object'
+import { TeamLevelGraphQLEnum } from '@interface/graphql/enums/team-level.enum'
+import { CycleNodeGraphQLObject } from '@interface/graphql/objects/cycle/cycle-node.object'
+import { TeamNodeGraphQLObject } from '@interface/graphql/objects/team/team-node.object'
 import { TeamQueryResultGraphQLObject } from '@interface/graphql/objects/team/team-query.object'
+import { UserNodeGraphQLObject } from '@interface/graphql/objects/user/user-node.object'
 import { TeamFiltersRequest } from '@interface/graphql/requests/team/team-filters.request'
-
-import { TeamLevelGraphQLEnum } from '../enums/team-level.enum'
-import { UserNodeGraphQLObject } from '../objects/user/user-node.object'
 
 import { BaseGraphQLResolver } from './base.resolver'
 import { GraphQLUser } from './decorators/graphql-user'
@@ -128,5 +128,15 @@ export class TeamGraphQLResolver extends BaseGraphQLResolver<Team, TeamInterface
     })
 
     return this.core.team.specification.isACompany.isSatisfiedBy(team)
+  }
+
+  @ResolveField('cycles', () => [CycleNodeGraphQLObject], { nullable: true })
+  protected async getTeamCycles(@Parent() team: TeamNodeGraphQLObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching cycles for team',
+    })
+
+    return this.core.cycle.getFromTeam(team)
   }
 }
