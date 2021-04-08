@@ -17,6 +17,8 @@ import { CursorPaginationRequest } from '@interface/graphql/requests/cursor-pagi
 import { UserFiltersRequest } from '@interface/graphql/requests/user/user-filters.request'
 import { UserUpdateRequest } from '@interface/graphql/requests/user/user-update.request'
 
+import { ObjectiveNodeGraphQLObject } from '../objects/objetive/objective-node.object'
+
 import { BaseGraphQLResolver } from './base.resolver'
 import { GraphQLUser } from './decorators/graphql-user'
 import { GraphQLRequiredPoliciesGuard } from './guards/required-policies.guard'
@@ -145,5 +147,15 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
     })
 
     return this.core.team.getFromOwner(user)
+  }
+
+  @ResolveField('objectives', () => [ObjectiveNodeGraphQLObject], { nullable: true })
+  protected async getUserObjectives(@Parent() user: UserNodeGraphQLObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching objectives for user',
+    })
+
+    return this.core.objective.getFromOwner(user)
   }
 }

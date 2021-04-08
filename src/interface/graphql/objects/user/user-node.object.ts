@@ -4,6 +4,7 @@ import { UserGender } from '@core/modules/user/enums/user-gender.enum'
 import { UserGenderGraphQLEnum } from '@interface/graphql/enums/user-gender.enum'
 import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/objects/authorization/policy.object'
+import { ObjectiveNodeGraphQLObject } from '@interface/graphql/objects/objetive/objective-node.object'
 import { TeamNodeGraphQLObject } from '@interface/graphql/objects/team/team-node.object'
 
 @ObjectType('User', {
@@ -72,6 +73,12 @@ export class UserNodeGraphQLObject implements NodeGraphQLInterface {
     nullable: true,
   })
   public ownedTeams?: TeamNodeGraphQLObject[]
+
+  @Field(() => [ObjectiveNodeGraphQLObject], {
+    description: 'The creation date ordered list of objectives that this user owns',
+    nullable: true,
+  })
+  public objectives?: ObjectiveNodeGraphQLObject[]
 
   public id: string
   public createdAt: Date
