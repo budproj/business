@@ -5,6 +5,7 @@ import { GraphQLConfigModule } from '@config/graphql/graphql.module'
 import { CoreModule } from '@core/core.module'
 
 import { GraphQLOptionsFactory } from './options.factory'
+import { CycleGraphQLResolver } from './resolvers/cycle.resolver'
 import { PermissionsGraphQLResolver } from './resolvers/permissions.resolver'
 import { TeamGraphQLResolver } from './resolvers/team.resolver'
 import { UserGraphQLResolver } from './resolvers/user.resolver'
@@ -17,6 +18,11 @@ import { UserGraphQLResolver } from './resolvers/user.resolver'
     }),
     CoreModule,
   ],
-  providers: [PermissionsGraphQLResolver, TeamGraphQLResolver, UserGraphQLResolver],
+  providers: [
+    PermissionsGraphQLResolver,
+    TeamGraphQLResolver,
+    UserGraphQLResolver,
+    CycleGraphQLResolver,
+  ],
 })
 export class GraphQLModule {}

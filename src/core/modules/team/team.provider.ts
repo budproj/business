@@ -215,18 +215,17 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     options?: GetOptions<Team>,
   ) {
     const teamsAsArray = Array.isArray(teams) ? teams : [teams]
+    const getOptions = this.repository.marshalGetOptions(options)
     const whereSelector = teamsAsArray.map((team) => ({
       ...filters,
       parentId: team.id,
     }))
 
     const childTeams = await this.repository.find({
+      ...getOptions,
       relations,
       select: selector,
       where: whereSelector,
-      take: options?.limit,
-      skip: options?.offset,
-      order: options?.orderBy,
     })
 
     return childTeams

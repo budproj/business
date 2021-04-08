@@ -6,6 +6,8 @@ import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interfa
 import { PolicyGraphQLObject } from '@interface/graphql/objects/authorization/policy.object'
 import { TeamNodeGraphQLObject } from '@interface/graphql/objects/team/team-node.object'
 
+import { ObjectiveNodeGraphQLObject } from '../objetive/objective-node.object'
+
 @ObjectType('Cycle', {
   implements: () => NodeGraphQLInterface,
   description:
@@ -61,6 +63,12 @@ export class CycleNodeGraphQLObject implements NodeGraphQLInterface {
       'Each cycle can have multiple cycles below it. If this cycle has any cycle inside of it, those will be listed here',
   })
   public cycles?: CycleNodeGraphQLObject[]
+
+  @Field(() => [ObjectiveNodeGraphQLObject], {
+    description: 'The objectives inside this cycle',
+    nullable: true,
+  })
+  public objectives?: ObjectiveNodeGraphQLObject[]
 
   public id: string
   public createdAt: Date

@@ -3,6 +3,7 @@ import { Brackets, Repository, SelectQueryBuilder, WhereExpression } from 'typeo
 
 import { ConditionalMethodNames } from './enums/conditional-method-names.enum'
 import { ConstraintType } from './enums/contrain-type.enum'
+import { GetOptions } from './interfaces/get-options'
 import { TeamInterface } from './modules/team/team.interface'
 import { UserInterface } from './modules/user/user.interface'
 import { SelectionQueryConstrain } from './types/selection-query-constrain.type'
@@ -46,6 +47,14 @@ export abstract class CoreEntityRepository<E> extends Repository<E> {
     }
 
     return addConstraintToQuery
+  }
+
+  public marshalGetOptions(options?: GetOptions<E>) {
+    return {
+      take: options?.limit,
+      skip: options?.offset,
+      order: options?.orderBy,
+    }
   }
 
   protected setupTeamQuery(query: SelectQueryBuilder<E>) {

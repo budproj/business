@@ -6,6 +6,7 @@ import { CoreEntityProvider } from '@core/entity.provider'
 import { LodashSorting } from '@core/enums/lodash-sorting'
 import { Sorting } from '@core/enums/sorting'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
+import { GetOptions } from '@core/interfaces/get-options'
 import { TeamInterface } from '@core/modules/team/team.interface'
 import { TeamProvider } from '@core/modules/team/team.provider'
 import { CreationQuery } from '@core/types/creation-query.type'
@@ -46,11 +47,18 @@ export class CycleProvider extends CoreEntityProvider<Cycle, CycleInterface> {
   public async getFromTeamsWithFilters(
     teams: TeamInterface[],
     filters?: Partial<CycleInterface>,
+    options?: GetOptions<Cycle>,
   ): Promise<Cycle[]> {
     const teamIDsFilter = Any(teams.map((team) => team.id))
-    const cycles = await this.repository.find({
+    const getOptions = this.repository.marshalGetOptions(options)
+    const whereSelector = {
       ...filters,
       teamId: teamIDsFilter,
+    }
+
+    const cycles = await this.repository.find({
+      ...getOptions,
+      where: whereSelector,
     })
 
     return cycles
@@ -85,14 +93,20 @@ export class CycleProvider extends CoreEntityProvider<Cycle, CycleInterface> {
     teams: TeamInterface[],
     parentIDs: Array<CycleInterface['id']>,
     filters?: Partial<CycleInterface>,
+    options?: GetOptions<Cycle>,
   ): Promise<Cycle[]> {
     const parentIDsFilter = Any(parentIDs)
     const teamIDsFilter = Any(teams.map((team) => team.id))
-
-    const selectedCycles = await this.repository.find({
+    const getOptions = this.repository.marshalGetOptions(options)
+    const whereSelector = {
       parentId: parentIDsFilter,
       teamId: teamIDsFilter,
       ...filters,
+    }
+
+    const selectedCycles = await this.repository.find({
+      ...getOptions,
+      where: whereSelector,
     })
 
     const groupedByPeriodCycles = groupBy(selectedCycles, 'period')

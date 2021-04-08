@@ -1,12 +1,6 @@
-import { ArgsType, Field, ID } from '@nestjs/graphql'
+import { ArgsType } from '@nestjs/graphql'
 
-import { CursorPaginationRequest } from '@interface/graphql/requests/cursor-pagination.request'
+import { NodeFiltersRequest } from '@interface/graphql/requests/node-filters.request'
 
 @ArgsType()
-export class UserFiltersRequest extends CursorPaginationRequest {
-  @Field(() => ID, {
-    description: 'The ID of the user you want to filter in your query',
-    nullable: true,
-  })
-  public id?: string
-}
+export class UserFiltersRequest extends NodeFiltersRequest {}

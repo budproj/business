@@ -10,7 +10,7 @@ export abstract class EdgesGraphQLInterface<N extends NodeGraphQLInterface = Nod
     description: 'The last ID value returned from the current query',
     nullable: true,
   })
-  public cursor: string
+  public cursor?: string
 
   public nodes: N[]
 }
