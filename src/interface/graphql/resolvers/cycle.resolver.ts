@@ -57,7 +57,7 @@ export class CycleGraphQLResolver extends BaseGraphQLResolver<Cycle, CycleInterf
       queryOptions,
     )
 
-    const response = this.marshalQueryResponse(queryResult)
+    const response = this.marshalQueryResponse<CycleNodeGraphQLObject>(queryResult)
 
     return response
   }
@@ -88,7 +88,7 @@ export class CycleGraphQLResolver extends BaseGraphQLResolver<Cycle, CycleInterf
       queryOptions,
     )
 
-    const response = this.marshalQueryResponse(queryResult)
+    const response = this.marshalQueryResponse<CycleNodeGraphQLObject>(queryResult)
 
     return response
   }

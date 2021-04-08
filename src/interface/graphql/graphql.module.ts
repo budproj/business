@@ -6,6 +6,7 @@ import { CoreModule } from '@core/core.module'
 
 import { GraphQLOptionsFactory } from './options.factory'
 import { CycleGraphQLResolver } from './resolvers/cycle.resolver'
+import { ObjectiveGraphQLResolver } from './resolvers/objective.resolver'
 import { PermissionsGraphQLResolver } from './resolvers/permissions.resolver'
 import { TeamGraphQLResolver } from './resolvers/team.resolver'
 import { UserGraphQLResolver } from './resolvers/user.resolver'
@@ -23,6 +24,7 @@ import { UserGraphQLResolver } from './resolvers/user.resolver'
     TeamGraphQLResolver,
     UserGraphQLResolver,
     CycleGraphQLResolver,
+    ObjectiveGraphQLResolver,
   ],
 })
 export class GraphQLModule {}

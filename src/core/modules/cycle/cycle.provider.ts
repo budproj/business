@@ -11,6 +11,8 @@ import { TeamInterface } from '@core/modules/team/team.interface'
 import { TeamProvider } from '@core/modules/team/team.provider'
 import { CreationQuery } from '@core/types/creation-query.type'
 
+import { ObjectiveInterface } from '../objective/objective.interface'
+
 import { CADENCE_RANK } from './cycle.constants'
 import { CycleInterface } from './cycle.interface'
 import { Cycle } from './cycle.orm-entity'
@@ -123,6 +125,10 @@ export class CycleProvider extends CoreEntityProvider<Cycle, CycleInterface> {
     const cycles = flatten(commonCyclesGroupedByPeriod)
 
     return cycles
+  }
+
+  public async getFromObjective(objective: ObjectiveInterface): Promise<Cycle> {
+    return this.repository.findOne({ id: objective.cycleId })
   }
 
   protected async protectCreationQuery(

@@ -59,7 +59,7 @@ export class TeamGraphQLResolver extends BaseGraphQLResolver<Team, TeamInterface
     const queryHandler = queryLeveledHandlers[level ?? 'default']
 
     const queryResult = await queryHandler()
-    const response = this.marshalQueryResponse(queryResult)
+    const response = this.marshalQueryResponse<TeamNodeGraphQLObject>(queryResult)
 
     return response
   }

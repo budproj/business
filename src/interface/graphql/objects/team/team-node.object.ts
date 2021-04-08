@@ -53,7 +53,7 @@ export class TeamNodeGraphQLObject implements NodeGraphQLInterface {
     description: 'A creation date ordered list of users that are members of this team',
     nullable: true,
   })
-  public users?: UserNodeGraphQLObject[]
+  public users?: Promise<UserNodeGraphQLObject[]>
 
   @Field(() => [TeamNodeGraphQLObject], {
     description: 'A list of teams that belongs to this team',
