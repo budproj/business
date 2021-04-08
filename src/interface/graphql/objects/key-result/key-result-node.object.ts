@@ -30,7 +30,7 @@ export class KeyResultNodeGraphQLObject implements NodeGraphQLInterface {
     description:
       'Saying a key result is "outdated" means that the owner needs to do a new check-in to report the current key result progress',
   })
-  public isOutdated: boolean
+  public isOutdated?: boolean
 
   @Field({ description: 'The last update date of the key result' })
   public updatedAt: Date

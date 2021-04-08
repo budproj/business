@@ -8,7 +8,7 @@ import { CoreProvider } from '@core/core.provider'
 import { GetOptions } from '@core/interfaces/get-options'
 import { CycleInterface } from '@core/modules/cycle/cycle.interface'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
-import { KeyResultInterface } from '@core/modules/key-result/key-result.interface'
+import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { CycleNodeGraphQLObject } from '@interface/graphql/objects/cycle/cycle-node.object'
 import { CycleQueryResultGraphQLObject } from '@interface/graphql/objects/cycle/cycle-query.object'
 import { KeyResultNodeGraphQLObject } from '@interface/graphql/objects/key-result/key-result-node.object'
@@ -158,7 +158,7 @@ export class CycleGraphQLResolver extends BaseGraphQLResolver<Cycle, CycleInterf
       message: 'Fetching key results for cycle',
     })
 
-    const queryOptions: GetOptions<KeyResultInterface> = {
+    const queryOptions: GetOptions<KeyResult> = {
       limit: first,
     }
 

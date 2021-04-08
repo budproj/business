@@ -28,7 +28,7 @@ export class ObjectiveGraphQLResolver extends BaseGraphQLResolver<Objective, Obj
   private readonly logger = new Logger(ObjectiveGraphQLResolver.name)
 
   constructor(protected readonly core: CoreProvider) {
-    super(Resource.TEAM, core, core.objective)
+    super(Resource.OBJECTIVE, core, core.objective)
   }
 
   @RequiredActions('objective:read')
