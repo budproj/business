@@ -7,11 +7,10 @@ import { LodashSorting } from '@core/enums/lodash-sorting'
 import { Sorting } from '@core/enums/sorting'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
+import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
 import { TeamInterface } from '@core/modules/team/team.interface'
 import { TeamProvider } from '@core/modules/team/team.provider'
 import { CreationQuery } from '@core/types/creation-query.type'
-
-import { ObjectiveInterface } from '../objective/objective.interface'
 
 import { CADENCE_RANK } from './cycle.constants'
 import { CycleInterface } from './cycle.interface'

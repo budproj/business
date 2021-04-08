@@ -4,9 +4,8 @@ import { Cadence } from '@core/modules/cycle/enums/cadence.enum'
 import { CadenceGraphQLEnum } from '@interface/graphql/enums/cadence.enum'
 import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/objects/authorization/policy.object'
+import { ObjectiveNodeGraphQLObject } from '@interface/graphql/objects/objetive/objective-node.object'
 import { TeamNodeGraphQLObject } from '@interface/graphql/objects/team/team-node.object'
-
-import { ObjectiveNodeGraphQLObject } from '../objetive/objective-node.object'
 
 @ObjectType('Cycle', {
   implements: () => NodeGraphQLInterface,

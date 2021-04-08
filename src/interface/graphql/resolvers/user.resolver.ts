@@ -10,6 +10,7 @@ import { GetOptions } from '@core/interfaces/get-options'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
+import { ObjectiveNodeGraphQLObject } from '@interface/graphql/objects/objetive/objective-node.object'
 import { TeamNodeGraphQLObject } from '@interface/graphql/objects/team/team-node.object'
 import { UserNodeGraphQLObject } from '@interface/graphql/objects/user/user-node.object'
 import { UserQueryResultGraphQLObject } from '@interface/graphql/objects/user/user-query.object'
@@ -17,7 +18,7 @@ import { CursorPaginationRequest } from '@interface/graphql/requests/cursor-pagi
 import { UserFiltersRequest } from '@interface/graphql/requests/user/user-filters.request'
 import { UserUpdateRequest } from '@interface/graphql/requests/user/user-update.request'
 
-import { ObjectiveNodeGraphQLObject } from '../objects/objetive/objective-node.object'
+import { KeyResultNodeGraphQLObject } from '../objects/key-result/key-result-node.object'
 
 import { BaseGraphQLResolver } from './base.resolver'
 import { GraphQLUser } from './decorators/graphql-user'
@@ -157,5 +158,15 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
     })
 
     return this.core.objective.getFromOwner(user)
+  }
+
+  @ResolveField('keyResults', () => [KeyResultNodeGraphQLObject], { nullable: true })
+  protected async getUserKeyResults(@Parent() user: UserNodeGraphQLObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching key results for user',
+    })
+
+    return this.core.keyResult.getFromOwner(user)
   }
 }
