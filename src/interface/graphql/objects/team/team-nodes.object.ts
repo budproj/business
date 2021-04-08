@@ -65,7 +65,7 @@ export class TeamNodeGraphQLObject implements NodeGraphQLInterface {
     description: "A list with all teams inside this team's tree ordered by their progress",
     nullable: true,
   })
-  public teamsRanking?: TeamNodeGraphQLObject[]
+  public rankedTeams?: TeamNodeGraphQLObject[]
 
   public id: string
   public createdAt: Date

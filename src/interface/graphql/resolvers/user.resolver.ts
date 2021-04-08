@@ -1,5 +1,5 @@
 import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
@@ -7,6 +7,7 @@ import { AuthorizationUser } from '@adapters/authorization/interfaces/user.inter
 import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CoreProvider } from '@core/core.provider'
 import { GetOptions } from '@core/interfaces/get-options'
+import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 import { UserNodeGraphQLObject } from '@interface/graphql/objects/user/user-node.object'
@@ -14,6 +15,7 @@ import { UserQueryResultGraphQLObject } from '@interface/graphql/objects/user/us
 import { UserFiltersRequest } from '@interface/graphql/requests/user/user-filters.request'
 
 import { TeamNodeGraphQLObject } from '../objects/team/team-nodes.object'
+import { CursorPaginationRequest } from '../requests/cursor-pagination.request'
 import { UserUpdateRequest } from '../requests/user/user-update.request'
 
 import { BaseGraphQLResolver } from './base.resolver'
@@ -108,17 +110,20 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
   @ResolveField('companies', () => [TeamNodeGraphQLObject], { nullable: true })
   protected async getUserCompanies(
     @Parent() user: UserNodeGraphQLObject,
-    @Args('limit', { type: () => Int, nullable: true }) limit?: number,
+    @Args() pagination?: CursorPaginationRequest,
   ) {
     this.logger.log({
       user,
+      pagination,
       message: 'Fetching companies for user',
     })
 
-    const companies = await this.core.team.getUserCompanies(user)
-    const companiesWithLimit = limit ? companies.slice(0, limit) : companies
+    const queryOptions: GetOptions<Team> = {
+      limit: pagination.first,
+    }
+    const companies = await this.core.team.getUserCompanies(user, undefined, queryOptions)
 
-    return companiesWithLimit
+    return companies
   }
 
   @ResolveField('teams', () => [TeamNodeGraphQLObject], { nullable: true })

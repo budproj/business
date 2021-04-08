@@ -1,9 +1,11 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { filter, flatten, uniqBy } from 'lodash'
+import { FindConditions } from 'typeorm'
 
 import { Scope } from '@adapters/authorization/enums/scope.enum'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
+import { GetOptions } from '@core/interfaces/get-options'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 
@@ -31,9 +33,15 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return this.repository.find({ ownerId: owner.id })
   }
 
-  public async getUserCompanies(user: UserInterface): Promise<Team[]> {
+  public async getUserCompanies(
+    user: UserInterface,
+    filters?: FindConditions<Team>,
+    options?: GetOptions<Team>,
+  ): Promise<Team[]> {
     const teams = await this.getWithUser(user)
-    const companyPromises = teams.map(async (team) => this.getRootTeamForTeam(team))
+    const companyPromises = teams.map(async (team) =>
+      this.getRootTeamForTeam(team, filters, options),
+    )
 
     const companies = Promise.all(companyPromises)
 
@@ -91,9 +99,13 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return nodes
   }
 
-  public async getUserCompaniesAndDepartments(user: UserInterface): Promise<Team[]> {
-    const companies = await this.getUserCompanies(user)
-    const departments = await this.getUserCompaniesDepartments(user)
+  public async getUserCompaniesAndDepartments(
+    user: UserInterface,
+    filters?: FindConditions<Team>,
+    options?: GetOptions<Team>,
+  ): Promise<Team[]> {
+    const companies = await this.getUserCompanies(user, filters, options)
+    const departments = await this.getUserCompaniesDepartments(user, filters, options)
 
     return [...companies, ...departments]
   }
@@ -178,14 +190,18 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return []
   }
 
-  private async getRootTeamForTeam(team: TeamInterface) {
+  private async getRootTeamForTeam(
+    team: TeamInterface,
+    filters?: FindConditions<Team>,
+    options?: GetOptions<Team>,
+  ) {
     let rootTeam = team
 
     while (rootTeam.parentId) {
       // Since we're dealing with a linked list, where we need to evaluate each step before trying
       // the next one, we can disable the following eslint rule
       // eslint-disable-next-line no-await-in-loop
-      rootTeam = await this.getOne({ id: rootTeam.parentId })
+      rootTeam = await this.getOne({ ...filters, id: rootTeam.parentId }, undefined, options)
     }
 
     return rootTeam
@@ -193,26 +209,36 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
 
   private async getChildTeams(
     teams: TeamInterface | TeamInterface[],
-    filter?: TeamEntityKey[],
+    selector?: TeamEntityKey[],
     relations?: TeamEntityRelation[],
+    filters?: FindConditions<Team>,
+    options?: GetOptions<Team>,
   ) {
     const teamsAsArray = Array.isArray(teams) ? teams : [teams]
     const whereSelector = teamsAsArray.map((team) => ({
+      ...filters,
       parentId: team.id,
     }))
 
     const childTeams = await this.repository.find({
       relations,
-      select: filter,
+      select: selector,
       where: whereSelector,
+      take: options?.limit,
+      skip: options?.offset,
+      order: options?.orderBy,
     })
 
     return childTeams
   }
 
-  private async getUserCompaniesDepartments(user: UserInterface) {
+  private async getUserCompaniesDepartments(
+    user: UserInterface,
+    filters?: FindConditions<Team>,
+    options?: GetOptions<Team>,
+  ) {
     const companies = await this.getUserCompanies(user)
-    const departments = this.getChildTeams(companies)
+    const departments = this.getChildTeams(companies, undefined, undefined, filters, options)
 
     return departments
   }
