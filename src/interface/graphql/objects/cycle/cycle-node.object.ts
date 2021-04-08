@@ -4,6 +4,7 @@ import { Cadence } from '@core/modules/cycle/enums/cadence.enum'
 import { CadenceGraphQLEnum } from '@interface/graphql/enums/cadence.enum'
 import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/objects/authorization/policy.object'
+import { KeyResultNodeGraphQLObject } from '@interface/graphql/objects/key-result/key-result-node.object'
 import { ObjectiveNodeGraphQLObject } from '@interface/graphql/objects/objetive/objective-node.object'
 import { TeamNodeGraphQLObject } from '@interface/graphql/objects/team/team-node.object'
 
@@ -68,6 +69,12 @@ export class CycleNodeGraphQLObject implements NodeGraphQLInterface {
     nullable: true,
   })
   public objectives?: ObjectiveNodeGraphQLObject[]
+
+  @Field(() => [KeyResultNodeGraphQLObject], {
+    description: 'The key-results from this cycle',
+    nullable: true,
+  })
+  public keyResults?: KeyResultNodeGraphQLObject[]
 
   public id: string
   public createdAt: Date

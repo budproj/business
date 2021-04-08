@@ -1,15 +1,15 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { flatten, uniqBy } from 'lodash'
+import { uniqBy } from 'lodash'
 import { Any } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
+import { GetOptions } from '@core/interfaces/get-options'
+import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
+import { TeamInterface } from '@core/modules/team/team.interface'
 import { TeamProvider } from '@core/modules/team/team.provider'
+import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
-
-import { ObjectiveInterface } from '../objective/objective.interface'
-import { TeamInterface } from '../team/team.interface'
-import { UserInterface } from '../user/user.interface'
 
 import { KeyResultInterface } from './key-result.interface'
 import { KeyResult } from './key-result.orm-entity'
@@ -42,25 +42,40 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
   public async getFromObjective(
     objective: ObjectiveInterface,
-    filter?: Partial<KeyResultInterface>,
+    filters?: Partial<KeyResultInterface>,
+    options?: GetOptions<KeyResult>,
   ) {
-    return this.repository.find({
-      ...filter,
+    const queryOptions = this.repository.marshalGetOptions(options)
+    const whereSelector = {
+      ...filters,
       objectiveId: objective.id,
+    }
+
+    return this.repository.find({
+      ...queryOptions,
+      where: whereSelector,
     })
   }
 
   public async getFromObjectives(
     objectives: ObjectiveInterface[],
-    filter?: Partial<KeyResultInterface>,
+    filters?: Partial<KeyResultInterface>,
+    options?: GetOptions<KeyResult>,
   ) {
-    const keyResultPromises = objectives.map(async (objective) =>
-      this.getFromObjective(objective, filter),
-    )
-    const keyResults = await Promise.all(keyResultPromises)
+    const objectiveIDs = objectives.map((objective) => objective.id)
 
-    const flattenedKeyResults = flatten(keyResults)
-    const uniqueKeyResults = uniqBy(flattenedKeyResults, 'id')
+    const queryOptions = this.repository.marshalGetOptions(options)
+    const whereSelector = {
+      ...filters,
+      objectiveId: Any(objectiveIDs),
+    }
+
+    const keyResults = await this.repository.find({
+      ...queryOptions,
+      where: whereSelector,
+    })
+
+    const uniqueKeyResults = uniqBy(keyResults, 'id')
 
     return uniqueKeyResults
   }

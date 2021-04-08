@@ -8,12 +8,15 @@ import { CoreProvider } from '@core/core.provider'
 import { GetOptions } from '@core/interfaces/get-options'
 import { CycleInterface } from '@core/modules/cycle/cycle.interface'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
+import { KeyResultInterface } from '@core/modules/key-result/key-result.interface'
 import { CycleNodeGraphQLObject } from '@interface/graphql/objects/cycle/cycle-node.object'
 import { CycleQueryResultGraphQLObject } from '@interface/graphql/objects/cycle/cycle-query.object'
+import { KeyResultNodeGraphQLObject } from '@interface/graphql/objects/key-result/key-result-node.object'
 import { ObjectiveNodeGraphQLObject } from '@interface/graphql/objects/objetive/objective-node.object'
 import { TeamNodeGraphQLObject } from '@interface/graphql/objects/team/team-node.object'
 import { CycleFiltersRequest } from '@interface/graphql/requests/cycle/cycle-filters.request'
 import { CyclesInSamePeriodRequest } from '@interface/graphql/requests/cycle/cycles-in-same-period.request'
+import { KeyResultFiltersRequest } from '@interface/graphql/requests/key-result/key-result.request'
 
 import { BaseGraphQLResolver } from './base.resolver'
 import { GraphQLUser } from './decorators/graphql-user'
@@ -141,5 +144,31 @@ export class CycleGraphQLResolver extends BaseGraphQLResolver<Cycle, CycleInterf
     const sortedByCadenceChildCycles = this.core.cycle.sortCyclesByCadence(childCycles)
 
     return sortedByCadenceChildCycles
+  }
+
+  @ResolveField('keyResults', () => [KeyResultNodeGraphQLObject], { nullable: true })
+  protected async getCycleKeyResults(
+    @Args() { first, ...filters }: KeyResultFiltersRequest,
+    @Parent() cycle: CycleNodeGraphQLObject,
+  ) {
+    this.logger.log({
+      cycle,
+      first,
+      filters,
+      message: 'Fetching key results for cycle',
+    })
+
+    const queryOptions: GetOptions<KeyResultInterface> = {
+      limit: first,
+    }
+
+    const objectives = await this.core.objective.getFromCycle(cycle)
+    const keyResults = await this.core.keyResult.getFromObjectives(
+      objectives,
+      filters,
+      queryOptions,
+    )
+
+    return keyResults
   }
 }

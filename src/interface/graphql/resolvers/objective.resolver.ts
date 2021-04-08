@@ -9,6 +9,7 @@ import { GetOptions } from '@core/interfaces/get-options'
 import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { CycleNodeGraphQLObject } from '@interface/graphql/objects/cycle/cycle-node.object'
+import { KeyResultNodeGraphQLObject } from '@interface/graphql/objects/key-result/key-result-node.object'
 import { ObjectiveNodeGraphQLObject } from '@interface/graphql/objects/objetive/objective-node.object'
 import { ObjectiveQueryResultGraphQLObject } from '@interface/graphql/objects/objetive/objective-query.object'
 import { UserNodeGraphQLObject } from '@interface/graphql/objects/user/user-node.object'
@@ -75,5 +76,15 @@ export class ObjectiveGraphQLResolver extends BaseGraphQLResolver<Objective, Obj
     })
 
     return this.core.cycle.getFromObjective(objective)
+  }
+
+  @ResolveField('keyResults', () => [KeyResultNodeGraphQLObject], { nullable: true })
+  protected async getObjectiveKeyResults(@Parent() objective: ObjectiveNodeGraphQLObject) {
+    this.logger.log({
+      objective,
+      message: 'Fetching key results for objective',
+    })
+
+    return this.core.keyResult.getFromObjective(objective)
   }
 }

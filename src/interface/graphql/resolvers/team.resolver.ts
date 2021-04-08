@@ -10,6 +10,7 @@ import { TeamInterface } from '@core/modules/team/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { TeamLevelGraphQLEnum } from '@interface/graphql/enums/team-level.enum'
 import { CycleNodeGraphQLObject } from '@interface/graphql/objects/cycle/cycle-node.object'
+import { KeyResultNodeGraphQLObject } from '@interface/graphql/objects/key-result/key-result-node.object'
 import { TeamNodeGraphQLObject } from '@interface/graphql/objects/team/team-node.object'
 import { TeamQueryResultGraphQLObject } from '@interface/graphql/objects/team/team-query.object'
 import { UserNodeGraphQLObject } from '@interface/graphql/objects/user/user-node.object'
@@ -138,5 +139,15 @@ export class TeamGraphQLResolver extends BaseGraphQLResolver<Team, TeamInterface
     })
 
     return this.core.cycle.getFromTeam(team)
+  }
+
+  @ResolveField('keyResults', () => [KeyResultNodeGraphQLObject], { nullable: true })
+  protected async getTeamKeyResults(@Parent() team: TeamNodeGraphQLObject) {
+    this.logger.log({
+      team,
+      message: 'Fetching key results for team',
+    })
+
+    return this.core.keyResult.getFromTeams(team)
   }
 }

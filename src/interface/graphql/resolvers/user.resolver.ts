@@ -10,6 +10,7 @@ import { GetOptions } from '@core/interfaces/get-options'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
+import { KeyResultNodeGraphQLObject } from '@interface/graphql/objects/key-result/key-result-node.object'
 import { ObjectiveNodeGraphQLObject } from '@interface/graphql/objects/objetive/objective-node.object'
 import { TeamNodeGraphQLObject } from '@interface/graphql/objects/team/team-node.object'
 import { UserNodeGraphQLObject } from '@interface/graphql/objects/user/user-node.object'
@@ -17,8 +18,6 @@ import { UserQueryResultGraphQLObject } from '@interface/graphql/objects/user/us
 import { CursorPaginationRequest } from '@interface/graphql/requests/cursor-pagination.request'
 import { UserFiltersRequest } from '@interface/graphql/requests/user/user-filters.request'
 import { UserUpdateRequest } from '@interface/graphql/requests/user/user-update.request'
-
-import { KeyResultNodeGraphQLObject } from '../objects/key-result/key-result-node.object'
 
 import { BaseGraphQLResolver } from './base.resolver'
 import { GraphQLUser } from './decorators/graphql-user'

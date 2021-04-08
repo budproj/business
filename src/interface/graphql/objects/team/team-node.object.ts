@@ -5,6 +5,7 @@ import { TeamGenderGraphQLEnum } from '@interface/graphql/enums/team-gender.enum
 import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/objects/authorization/policy.object'
 import { CycleNodeGraphQLObject } from '@interface/graphql/objects/cycle/cycle-node.object'
+import { KeyResultNodeGraphQLObject } from '@interface/graphql/objects/key-result/key-result-node.object'
 import { UserNodeGraphQLObject } from '@interface/graphql/objects/user/user-node.object'
 
 @ObjectType('Team', {
@@ -72,6 +73,12 @@ export class TeamNodeGraphQLObject implements NodeGraphQLInterface {
     nullable: true,
   })
   public cycles?: CycleNodeGraphQLObject[]
+
+  @Field(() => [KeyResultNodeGraphQLObject], {
+    description: 'The creation date ordered list of key results that belongs to that team',
+    nullable: true,
+  })
+  public keyResults?: KeyResultNodeGraphQLObject[]
 
   public id: string
   public createdAt: Date
