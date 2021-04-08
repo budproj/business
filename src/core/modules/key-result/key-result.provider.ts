@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { uniqBy } from 'lodash'
 import { Any } from 'typeorm'
 
@@ -7,10 +7,11 @@ import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
 import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
 import { TeamInterface } from '@core/modules/team/team.interface'
-import { TeamProvider } from '@core/modules/team/team.provider'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 
+import { KeyResultComment } from './comment/key-result-comment.orm-entity'
+import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
 import { KeyResultInterface } from './key-result.interface'
 import { KeyResult } from './key-result.orm-entity'
 import { KeyResultRepository } from './key-result.repository'
@@ -19,8 +20,7 @@ import { KeyResultRepository } from './key-result.repository'
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
   constructor(
     protected readonly repository: KeyResultRepository,
-    @Inject(forwardRef(() => TeamProvider))
-    private readonly teamProvider: TeamProvider,
+    private readonly keyResultCommentProvider: KeyResultCommentProvider,
   ) {
     super(KeyResultProvider.name, repository)
   }
@@ -78,6 +78,15 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const uniqueKeyResults = uniqBy(keyResults, 'id')
 
     return uniqueKeyResults
+  }
+
+  public async getComments(
+    keyResult: KeyResultInterface,
+    options?: GetOptions<KeyResultComment>,
+  ): Promise<KeyResultComment[]> {
+    const selector = { keyResultId: keyResult.id }
+
+    return this.keyResultCommentProvider.getMany(selector, undefined, options)
   }
 
   protected async protectCreationQuery(

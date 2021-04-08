@@ -1,7 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
-import { QueryResultGraphQLInterface } from '@interface/graphql/interfaces/query-result.interface'
-import { PageInfoGraphQLObject } from '@interface/graphql/objects/page-info.object'
+import { QueryResultGraphQLInterface } from '../../interfaces/query-result.interface'
+import { PageInfoGraphQLObject } from '../page-info.object'
 
 import { KeyResultEdgesGraphQLObject } from './key-result-edges.object'
 

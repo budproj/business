@@ -1,4 +1,4 @@
-import { Permission } from '@adapters/authorization/types/permission.type'
+import { Permission } from '../types/permission.type'
 
 export interface AuthzToken {
   iss: string

@@ -10,13 +10,15 @@ import { CoreProvider } from '@core/core.provider'
 import { GetOptions } from '@core/interfaces/get-options'
 import { KeyResultInterface } from '@core/modules/key-result/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
-import { PolicyGraphQLObject } from '@interface/graphql/objects/authorization/policy.object'
-import { KeyResultNodeGraphQLObject } from '@interface/graphql/objects/key-result/key-result-node.object'
-import { KeyResultQueryResultGraphQLObject } from '@interface/graphql/objects/key-result/key-result-query.object'
-import { ObjectiveNodeGraphQLObject } from '@interface/graphql/objects/objetive/objective-node.object'
-import { TeamNodeGraphQLObject } from '@interface/graphql/objects/team/team-node.object'
-import { UserNodeGraphQLObject } from '@interface/graphql/objects/user/user-node.object'
-import { KeyResultFiltersRequest } from '@interface/graphql/requests/key-result/key-result.request'
+
+import { PolicyGraphQLObject } from '../objects/authorization/policy.object'
+import { KeyResultCommentNodeGraphQLObject } from '../objects/key-result/comment/key-result-comment-node.object'
+import { KeyResultNodeGraphQLObject } from '../objects/key-result/key-result-node.object'
+import { KeyResultQueryResultGraphQLObject } from '../objects/key-result/key-result-query.object'
+import { ObjectiveNodeGraphQLObject } from '../objects/objetive/objective-node.object'
+import { TeamNodeGraphQLObject } from '../objects/team/team-node.object'
+import { UserNodeGraphQLObject } from '../objects/user/user-node.object'
+import { KeyResultFiltersRequest } from '../requests/key-result/key-result.request'
 
 import { BaseGraphQLResolver } from './base.resolver'
 import { GraphQLUser } from './decorators/graphql-user'
@@ -93,6 +95,16 @@ export class KeyResultGraphQLResolver extends BaseGraphQLResolver<KeyResult, Key
     })
 
     return this.core.objective.getFromKeyResult(keyResult)
+  }
+
+  @ResolveField('keyResultComments', () => [KeyResultCommentNodeGraphQLObject])
+  protected async getKeyResultComments(@Parent() keyResult: KeyResultNodeGraphQLObject) {
+    this.logger.log({
+      keyResult,
+      message: 'Fetching comments for key result',
+    })
+
+    return this.core.keyResult.getComments(keyResult)
   }
 
   protected async customizeEntityCommandStatement(

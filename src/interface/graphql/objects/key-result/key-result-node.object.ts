@@ -1,12 +1,15 @@
 import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
 
 import { KeyResultFormat } from '@core/modules/key-result/enums/key-result-format.enum'
-import { KeyResultFormatGraphQLEnum } from '@interface/graphql/enums/key-result-format.enum'
-import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interface'
-import { PolicyGraphQLObject } from '@interface/graphql/objects/authorization/policy.object'
-import { ObjectiveNodeGraphQLObject } from '@interface/graphql/objects/objetive/objective-node.object'
-import { TeamNodeGraphQLObject } from '@interface/graphql/objects/team/team-node.object'
-import { UserNodeGraphQLObject } from '@interface/graphql/objects/user/user-node.object'
+
+import { KeyResultFormatGraphQLEnum } from '../../enums/key-result-format.enum'
+import { NodeGraphQLInterface } from '../../interfaces/node.interface'
+import { PolicyGraphQLObject } from '../authorization/policy.object'
+import { ObjectiveNodeGraphQLObject } from '../objetive/objective-node.object'
+import { TeamNodeGraphQLObject } from '../team/team-node.object'
+import { UserNodeGraphQLObject } from '../user/user-node.object'
+
+import { KeyResultCommentNodeGraphQLObject } from './comment/key-result-comment-node.object'
 
 @ObjectType('KeyResult', {
   implements: () => NodeGraphQLInterface,
@@ -57,6 +60,12 @@ export class KeyResultNodeGraphQLObject implements NodeGraphQLInterface {
 
   @Field({ description: 'The description explaining the key result', nullable: true })
   public description?: string
+
+  @Field(() => [KeyResultCommentNodeGraphQLObject], {
+    description: 'A created date ordered list of key result comments for this key result',
+    nullable: true,
+  })
+  public keyResultComments?: KeyResultCommentNodeGraphQLObject[]
 
   public id: string
   public createdAt: Date

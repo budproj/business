@@ -1,4 +1,4 @@
-import { Sorting } from '@core/enums/sorting'
+import { Sorting } from '../enums/sorting'
 
 export interface GetOptions<E> {
   limit?: number

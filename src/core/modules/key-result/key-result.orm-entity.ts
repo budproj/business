@@ -1,10 +1,11 @@
-import { Column, Entity, ManyToOne, RelationId, UpdateDateColumn } from 'typeorm'
+import { Column, Entity, ManyToOne, OneToMany, RelationId, UpdateDateColumn } from 'typeorm'
 
 import { CoreEntity } from '@core/core.entity'
 import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
 import { TeamInterface } from '@core/modules/team/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 
+import { KeyResultCommentInterface } from './comment/key-result-comment.interface'
 import { KeyResultFormat } from './enums/key-result-format.enum'
 import { KeyResultInterface } from './key-result.interface'
 
@@ -25,27 +26,30 @@ export class KeyResult extends CoreEntity implements KeyResultInterface {
   @UpdateDateColumn()
   public updatedAt: Date
 
-  @ManyToOne('User', 'keyResults')
-  public owner: UserInterface
-
   @Column()
   @RelationId((keyResult: KeyResult) => keyResult.owner)
   public ownerId: UserInterface['id']
 
-  @ManyToOne('Objective', 'keyResults')
-  public objective: ObjectiveInterface
+  @ManyToOne('User', 'keyResults')
+  public owner: UserInterface
 
   @Column()
   @RelationId((keyResult: KeyResult) => keyResult.objective)
   public objectiveId: ObjectiveInterface['id']
 
-  @ManyToOne('Team', 'keyResults')
-  public team: TeamInterface
+  @ManyToOne('Objective', 'keyResults')
+  public objective: ObjectiveInterface
 
   @Column()
   @RelationId((keyResult: KeyResult) => keyResult.team)
   public teamId: TeamInterface['id']
 
+  @ManyToOne('Team', 'keyResults')
+  public team: TeamInterface
+
   @Column({ type: 'text', nullable: true })
   public description?: string
+
+  @OneToMany('KeyResultComment', 'keyResult', { nullable: true })
+  public comments?: KeyResultCommentInterface[]
 }

@@ -1,4 +1,5 @@
 import { CycleInterface } from '@core/modules/cycle/cycle.interface'
+import { KeyResultInterface } from '@core/modules/key-result/key-result.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 
 export interface ObjectiveInterface {
@@ -10,4 +11,5 @@ export interface ObjectiveInterface {
   cycle: CycleInterface
   ownerId: UserInterface['id']
   owner: UserInterface
+  keyResults?: KeyResultInterface[]
 }

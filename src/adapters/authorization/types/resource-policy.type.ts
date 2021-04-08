@@ -1,4 +1,4 @@
-import { Resource } from '@adapters/authorization/enums/resource.enum'
+import { Resource } from '../enums/resource.enum'
 
 import { CommandPolicy } from './command-policy.type'
 

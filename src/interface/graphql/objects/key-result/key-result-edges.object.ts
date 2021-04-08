@@ -1,6 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
-import { EdgesGraphQLInterface } from '@interface/graphql/interfaces/edges.interface'
+import { EdgesGraphQLInterface } from '../../interfaces/edges.interface'
 
 import { KeyResultNodeGraphQLObject } from './key-result-node.object'
 

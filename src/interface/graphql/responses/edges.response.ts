@@ -1,5 +1,5 @@
-import { EdgesGraphQLInterface } from '@interface/graphql/interfaces/edges.interface'
-import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interface'
+import { EdgesGraphQLInterface } from '../interfaces/edges.interface'
+import { NodeGraphQLInterface } from '../interfaces/node.interface'
 
 export class EdgesGraphQLResponse<N extends NodeGraphQLInterface = NodeGraphQLInterface> {
   private readonly cursor?: string

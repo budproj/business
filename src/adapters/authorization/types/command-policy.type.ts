@@ -1,4 +1,4 @@
-import { Command } from '@adapters/authorization/enums/command.enum'
+import { Command } from '../enums/command.enum'
 
 import { ScopePolicy } from './scope-policy'
 

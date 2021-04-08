@@ -1,7 +1,8 @@
-import { Column, Entity, ManyToOne, RelationId, UpdateDateColumn } from 'typeorm'
+import { Column, Entity, ManyToOne, OneToMany, RelationId, UpdateDateColumn } from 'typeorm'
 
 import { CoreEntity } from '@core/core.entity'
 import { CycleInterface } from '@core/modules/cycle/cycle.interface'
+import { KeyResultInterface } from '@core/modules/key-result/key-result.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 
 import { ObjectiveInterface } from './objective.interface'
@@ -14,17 +15,20 @@ export class Objective extends CoreEntity implements ObjectiveInterface {
   @UpdateDateColumn()
   public updatedAt: Date
 
-  @ManyToOne('Cycle', 'objectives')
-  public cycle: CycleInterface
-
   @Column()
   @RelationId((objective: Objective) => objective.cycle)
   public cycleId: CycleInterface['id']
 
-  @ManyToOne('User', 'objectives')
-  public owner: UserInterface
+  @ManyToOne('Cycle', 'objectives')
+  public cycle: CycleInterface
 
   @Column()
   @RelationId((objective: Objective) => objective.owner)
   public ownerId: UserInterface['id']
+
+  @ManyToOne('User', 'objectives')
+  public owner: UserInterface
+
+  @OneToMany('KeyResult', 'objective', { nullable: true })
+  public keyResults?: KeyResultInterface[]
 }

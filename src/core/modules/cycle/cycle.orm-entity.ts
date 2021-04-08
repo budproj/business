@@ -26,19 +26,19 @@ export class Cycle extends CoreEntity implements CycleInterface {
   @UpdateDateColumn()
   public updatedAt: Date
 
-  @ManyToOne('Team', 'cycles')
-  public team: TeamInterface
-
   @Column()
   @RelationId((cycle: Cycle) => cycle.team)
   public teamId: TeamInterface['id']
 
-  @ManyToOne('Cycle', 'cycles', { nullable: true })
-  public parent?: CycleInterface
+  @ManyToOne('Team', 'cycles')
+  public team: TeamInterface
 
   @Column({ nullable: true })
   @RelationId((cycle: Cycle) => cycle.parent)
   public parentId?: CycleInterface['id']
+
+  @ManyToOne('Cycle', 'cycles', { nullable: true })
+  public parent?: CycleInterface
 
   @OneToMany('Cycle', 'parent', { nullable: true })
   public cycles?: CycleInterface[]

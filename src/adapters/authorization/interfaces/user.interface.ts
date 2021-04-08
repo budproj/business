@@ -1,5 +1,6 @@
-import { ResourcePolicy } from '@adapters/authorization/types/resource-policy.type'
 import { UserInterface } from '@core/modules/user/user.interface'
+
+import { ResourcePolicy } from '../types/resource-policy.type'
 
 import { AuthzToken } from './authz-token.interface'
 

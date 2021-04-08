@@ -1,6 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
-import { PolicyGraphQLObject } from '@interface/graphql/objects/authorization/policy.object'
+import { PolicyGraphQLObject } from '../authorization/policy.object'
 
 @ObjectType('Permissions', {
   description: 'Defines all user permissions for each entity in our domain',

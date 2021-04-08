@@ -1,5 +1,5 @@
-import { NodeGraphQLInterface } from '@interface/graphql/interfaces/node.interface'
-import { PageInfoGraphQLObject } from '@interface/graphql/objects/page-info.object'
+import { NodeGraphQLInterface } from '../interfaces/node.interface'
+import { PageInfoGraphQLObject } from '../objects/page-info.object'
 
 export class PageInfoGraphQLResponse {
   private readonly count: number

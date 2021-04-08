@@ -11,6 +11,7 @@ import {
 
 import { CoreEntity } from '@core/core.entity'
 import { CycleInterface } from '@core/modules/cycle/cycle.interface'
+import { KeyResultInterface } from '@core/modules/key-result/key-result.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 
 import { TeamGender } from './enums/team-gender.enum'
@@ -53,4 +54,7 @@ export class Team extends CoreEntity implements TeamInterface {
 
   @OneToMany('Cycle', 'team', { nullable: true })
   public cycles?: CycleInterface[]
+
+  @OneToMany('KeyResult', 'team', { nullable: true })
+  public keyResults?: KeyResultInterface[]
 }

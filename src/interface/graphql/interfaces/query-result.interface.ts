@@ -1,6 +1,6 @@
 import { Field, InterfaceType } from '@nestjs/graphql'
 
-import { PageInfoGraphQLObject } from '@interface/graphql/objects/page-info.object'
+import { PageInfoGraphQLObject } from '../objects/page-info.object'
 
 import { EdgesGraphQLInterface } from './edges.interface'
 

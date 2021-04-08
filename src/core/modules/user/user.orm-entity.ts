@@ -1,6 +1,9 @@
 import { Column, Entity, ManyToMany, OneToMany, UpdateDateColumn } from 'typeorm'
 
 import { CoreEntity } from '@core/core.entity'
+import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
+import { KeyResultInterface } from '@core/modules/key-result/key-result.interface'
+import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
 import { TeamInterface } from '@core/modules/team/team.interface'
 
 import { UserGender } from './enums/user-gender.enum'
@@ -43,4 +46,13 @@ export class User extends CoreEntity implements UserInterface {
 
   @OneToMany('Team', 'owner', { nullable: true })
   public ownedTeams?: TeamInterface[]
+
+  @OneToMany('Objective', 'owner', { nullable: true })
+  public objectives: ObjectiveInterface[]
+
+  @OneToMany('KeyResult', 'owner', { nullable: true })
+  public keyResults?: KeyResultInterface[]
+
+  @OneToMany('KeyResultComment', 'user', { nullable: true })
+  public keyResultComments?: KeyResultCommentInterface[]
 }

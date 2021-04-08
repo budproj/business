@@ -1,8 +1,9 @@
 import { ArgsType, Field } from '@nestjs/graphql'
 
 import { Cadence } from '@core/modules/cycle/enums/cadence.enum'
-import { CadenceGraphQLEnum } from '@interface/graphql/enums/cadence.enum'
-import { NodeFiltersRequest } from '@interface/graphql/requests/node-filters.request'
+
+import { CadenceGraphQLEnum } from '../../enums/cadence.enum'
+import { NodeFiltersRequest } from '../node-filters.request'
 
 @ArgsType()
 export class CycleFiltersRequest extends NodeFiltersRequest {

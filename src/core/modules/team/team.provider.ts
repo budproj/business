@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { filter, flatten, uniqBy } from 'lodash'
 import { FindConditions } from 'typeorm'
 
@@ -23,7 +23,6 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
 
   constructor(
     protected readonly repository: TeamRepository,
-    @Inject(forwardRef(() => TeamRankingProvider))
     private readonly ranking: TeamRankingProvider,
   ) {
     super(TeamProvider.name, repository)

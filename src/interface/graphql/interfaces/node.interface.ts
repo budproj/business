@@ -1,6 +1,6 @@
 import { Field, ID, InterfaceType } from '@nestjs/graphql'
 
-import { PolicyGraphQLObject } from '@interface/graphql/objects/authorization/policy.object'
+import { PolicyGraphQLObject } from '../objects/authorization/policy.object'
 
 @InterfaceType('Node', {
   description:
