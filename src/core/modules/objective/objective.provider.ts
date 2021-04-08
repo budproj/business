@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { CycleInterface } from '@core/modules/cycle/cycle.interface'
+import { KeyResultInterface } from '@core/modules/key-result/key-result.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 
@@ -22,6 +23,10 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
 
   public async getFromCycle(cycle: CycleInterface): Promise<Objective[]> {
     return this.repository.find({ cycleId: cycle.id })
+  }
+
+  public async getFromKeyResult(keyResult: KeyResultInterface): Promise<Objective> {
+    return this.repository.findOne({ id: keyResult.objectiveId })
   }
 
   protected async protectCreationQuery(
