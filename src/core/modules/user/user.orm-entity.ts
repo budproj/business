@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToMany, OneToMany, UpdateDateColumn } from 'typeorm'
 
 import { CoreEntity } from '@core/core.entity'
+import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
 import { KeyResultInterface } from '@core/modules/key-result/key-result.interface'
 import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
@@ -55,4 +56,7 @@ export class User extends CoreEntity implements UserInterface {
 
   @OneToMany('KeyResultComment', 'user', { nullable: true })
   public keyResultComments?: KeyResultCommentInterface[]
+
+  @OneToMany('KeyResultCheckIn', 'user', { nullable: true })
+  public keyResultCheckIns?: KeyResultCheckInInterface[]
 }

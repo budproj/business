@@ -5,6 +5,7 @@ import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
 import { TeamInterface } from '@core/modules/team/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 
+import { KeyResultCheckInInterface } from './check-in/key-result-check-in.interface'
 import { KeyResultCommentInterface } from './comment/key-result-comment.interface'
 import { KeyResultFormat } from './enums/key-result-format.enum'
 import { KeyResultInterface } from './key-result.interface'
@@ -52,4 +53,7 @@ export class KeyResult extends CoreEntity implements KeyResultInterface {
 
   @OneToMany('KeyResultComment', 'keyResult', { nullable: true })
   public comments?: KeyResultCommentInterface[]
+
+  @OneToMany('KeyResultCheckIn', 'keyResult', { nullable: true })
+  public checkIns?: KeyResultCheckInInterface[]
 }
