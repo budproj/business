@@ -10,13 +10,12 @@ import { RequiredActions } from '@adapters/authorization/required-actions.decora
 import { CommandStatement } from '@adapters/authorization/types/command-statement.type'
 import { ResourceStatement } from '@adapters/authorization/types/resource-statement.type copy'
 
-import { ScopeGraphQLEnum } from '../enums/scope.enum'
-import { PermissionsGraphQLObject } from '../objects/authorization/permissions.object'
-
-import { GraphQLUser } from './decorators/graphql-user'
-import { GraphQLRequiredPoliciesGuard } from './guards/required-policies.guard'
-import { GraphQLTokenGuard } from './guards/token.guard'
-import { NourishUserDataInterceptor } from './interceptors/nourish-user-data.interceptor'
+import { ScopeGraphQLEnum } from '../../enums/scope.enum'
+import { PermissionsGraphQLObject } from '../../objects/authorization/permissions.object'
+import { GraphQLUser } from '../decorators/graphql-user'
+import { GraphQLRequiredPoliciesGuard } from '../guards/required-policies.guard'
+import { GraphQLTokenGuard } from '../guards/token.guard'
+import { NourishUserDataInterceptor } from '../interceptors/nourish-user-data.interceptor'
 
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @UseInterceptors(NourishUserDataInterceptor)
