@@ -12,13 +12,12 @@ import { CoreEntityProvider } from '@core/entity.provider'
 
 import { ResourceGraphQLEnum } from '../enums/resource.enum'
 import { ScopeGraphQLEnum } from '../enums/scope.enum'
-import { EdgesGraphQLInterface } from '../interfaces/edges.interface'
+import { ListGraphQLInterface } from '../interfaces/list.interface'
 import { NodeGraphQLInterface } from '../interfaces/node.interface'
-import { QueryResultGraphQLInterface } from '../interfaces/query-result.interface'
 import { PolicyGraphQLObject } from '../objects/authorization/policy.object'
-import { EdgesGraphQLResponse } from '../responses/edges.response'
+import { EdgeGraphQLResponse } from '../responses/edge.response'
+import { ListGraphQLResponse } from '../responses/list.response'
 import { PageInfoGraphQLResponse } from '../responses/page-info.reponse'
-import { QueryResultGraphQLResponse } from '../responses/query-result.response'
 
 import { GraphQLUser } from './decorators/graphql-user'
 
@@ -68,15 +67,9 @@ export abstract class BaseGraphQLResolver<E extends CoreEntity, I> {
     return originalPolicy
   }
 
-  protected marshalQueryResponse<N extends NodeGraphQLInterface = NodeGraphQLInterface>(
-    nodes: N[],
-  ): QueryResultGraphQLInterface {
-    const queryEdges = new EdgesGraphQLResponse<N>(nodes)
-    const queryPageInfo = new PageInfoGraphQLResponse(nodes)
-    const queryResult = new QueryResultGraphQLResponse<EdgesGraphQLInterface<N>>(
-      queryEdges.marshal(),
-      queryPageInfo.marshal(),
-    )
+  protected marshalListResponse<E extends EdgeGraphQLResponse>(edges: E[]): ListGraphQLInterface {
+    const pageInfo = new PageInfoGraphQLResponse<E>({ edges })
+    const queryResult = new ListGraphQLResponse<E>({ edges, pageInfo })
 
     return queryResult.marshal()
   }

@@ -10,14 +10,15 @@ import { CycleInterface } from '@core/modules/cycle/cycle.interface'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 
+import { CycleListGraphQLObject } from '../objects/cycle/cycle-list.object'
 import { CycleNodeGraphQLObject } from '../objects/cycle/cycle-node.object'
-import { CycleQueryResultGraphQLObject } from '../objects/cycle/cycle-query.object'
 import { KeyResultNodeGraphQLObject } from '../objects/key-result/key-result-node.object'
 import { ObjectiveNodeGraphQLObject } from '../objects/objetive/objective-node.object'
 import { TeamNodeGraphQLObject } from '../objects/team/team-node.object'
 import { CycleFiltersRequest } from '../requests/cycle/cycle-filters.request'
 import { CyclesInSamePeriodRequest } from '../requests/cycle/cycles-in-same-period.request'
 import { KeyResultFiltersRequest } from '../requests/key-result/key-result.request'
+import { CycleRootEdgeGraphQLResponse } from '../responses/cycle/cycle-root-edge.response'
 
 import { BaseGraphQLResolver } from './base.resolver'
 import { GraphQLUser } from './decorators/graphql-user'
@@ -36,7 +37,7 @@ export class CycleGraphQLResolver extends BaseGraphQLResolver<Cycle, CycleInterf
   }
 
   @RequiredActions('cycle:read')
-  @Query(() => CycleQueryResultGraphQLObject, { name: 'cycles' })
+  @Query(() => CycleListGraphQLObject, { name: 'cycles' })
   protected async getCycles(
     @Args() { first, ...filters }: CycleFiltersRequest,
     @GraphQLUser() graphqlUser: AuthorizationUser,
@@ -60,13 +61,14 @@ export class CycleGraphQLResolver extends BaseGraphQLResolver<Cycle, CycleInterf
       queryOptions,
     )
 
-    const response = this.marshalQueryResponse<CycleNodeGraphQLObject>(queryResult)
+    const edges = queryResult?.map((node) => new CycleRootEdgeGraphQLResponse({ node }))
+    const response = this.marshalListResponse<CycleRootEdgeGraphQLResponse>(edges)
 
     return response
   }
 
   @RequiredActions('cycle:read')
-  @Query(() => CycleQueryResultGraphQLObject, { name: 'cyclesInSamePeriod', nullable: true })
+  @Query(() => CycleListGraphQLObject, { name: 'cyclesInSamePeriod', nullable: true })
   protected async getCyclesInSamePeriod(
     @GraphQLUser() graphqlUser: AuthorizationUser,
     @Args() { first, fromCycles, ...filters }: CyclesInSamePeriodRequest,
@@ -91,7 +93,8 @@ export class CycleGraphQLResolver extends BaseGraphQLResolver<Cycle, CycleInterf
       queryOptions,
     )
 
-    const response = this.marshalQueryResponse<CycleNodeGraphQLObject>(queryResult)
+    const edges = queryResult?.map((node) => new CycleRootEdgeGraphQLResponse({ node }))
+    const response = this.marshalListResponse<CycleRootEdgeGraphQLResponse>(edges)
 
     return response
   }

@@ -11,10 +11,11 @@ import { Objective } from '@core/modules/objective/objective.orm-entity'
 
 import { CycleNodeGraphQLObject } from '../objects/cycle/cycle-node.object'
 import { KeyResultNodeGraphQLObject } from '../objects/key-result/key-result-node.object'
+import { ObjectiveListGraphQLObject } from '../objects/objetive/objective-list.object'
 import { ObjectiveNodeGraphQLObject } from '../objects/objetive/objective-node.object'
-import { ObjectiveQueryResultGraphQLObject } from '../objects/objetive/objective-query.object'
 import { UserNodeGraphQLObject } from '../objects/user/user-node.object'
 import { ObjectiveFiltersRequest } from '../requests/objective/objective-filters.request'
+import { ObjectiveRootEdgeGraphQLResponse } from '../responses/objective/objective-root-edge.response'
 
 import { BaseGraphQLResolver } from './base.resolver'
 import { GraphQLUser } from './decorators/graphql-user'
@@ -33,7 +34,7 @@ export class ObjectiveGraphQLResolver extends BaseGraphQLResolver<Objective, Obj
   }
 
   @RequiredActions('objective:read')
-  @Query(() => ObjectiveQueryResultGraphQLObject, { name: 'objectives' })
+  @Query(() => ObjectiveListGraphQLObject, { name: 'objectives' })
   protected async getObjectives(
     @Args() { first, ...filters }: ObjectiveFiltersRequest,
     @GraphQLUser() graphqlUser: AuthorizationUser,
@@ -54,7 +55,8 @@ export class ObjectiveGraphQLResolver extends BaseGraphQLResolver<Objective, Obj
       queryOptions,
     )
 
-    const response = this.marshalQueryResponse<ObjectiveNodeGraphQLObject>(queryResult)
+    const edges = queryResult?.map((node) => new ObjectiveRootEdgeGraphQLResponse({ node }))
+    const response = this.marshalListResponse<ObjectiveRootEdgeGraphQLResponse>(edges)
 
     return response
   }

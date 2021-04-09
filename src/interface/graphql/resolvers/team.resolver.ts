@@ -12,10 +12,11 @@ import { Team } from '@core/modules/team/team.orm-entity'
 import { TeamLevelGraphQLEnum } from '../enums/team-level.enum'
 import { CycleNodeGraphQLObject } from '../objects/cycle/cycle-node.object'
 import { KeyResultNodeGraphQLObject } from '../objects/key-result/key-result-node.object'
+import { TeamListGraphQLObject } from '../objects/team/team-list.object'
 import { TeamNodeGraphQLObject } from '../objects/team/team-node.object'
-import { TeamQueryResultGraphQLObject } from '../objects/team/team-query.object'
 import { UserNodeGraphQLObject } from '../objects/user/user-node.object'
 import { TeamFiltersRequest } from '../requests/team/team-filters.request'
+import { TeamRootEdgeGraphQLResponse } from '../responses/team/team-root-edge.response'
 
 import { BaseGraphQLResolver } from './base.resolver'
 import { GraphQLUser } from './decorators/graphql-user'
@@ -34,7 +35,7 @@ export class TeamGraphQLResolver extends BaseGraphQLResolver<Team, TeamInterface
   }
 
   @RequiredActions('team:read')
-  @Query(() => TeamQueryResultGraphQLObject, { name: 'teams' })
+  @Query(() => TeamListGraphQLObject, { name: 'teams' })
   protected async getTeams(
     @Args() { first, level, ...filters }: TeamFiltersRequest,
     @GraphQLUser() graphqlUser: AuthorizationUser,
@@ -58,10 +59,12 @@ export class TeamGraphQLResolver extends BaseGraphQLResolver<Team, TeamInterface
       [TeamLevelGraphQLEnum.COMPANY_OR_DEPARTMENT]: async () =>
         this.core.team.getUserCompaniesAndDepartments(graphqlUser, filters, queryOptions),
     }
-    const queryHandler = queryLeveledHandlers[level ?? 'default']
 
+    const queryHandler = queryLeveledHandlers[level ?? 'default']
     const queryResult = await queryHandler()
-    const response = this.marshalQueryResponse<TeamNodeGraphQLObject>(queryResult)
+
+    const edges = queryResult?.map((node) => new TeamRootEdgeGraphQLResponse({ node }))
+    const response = this.marshalListResponse<TeamRootEdgeGraphQLResponse>(edges)
 
     return response
   }

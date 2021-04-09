@@ -11,12 +11,13 @@ import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 
 import { PolicyGraphQLObject } from '../objects/authorization/policy.object'
 import { KeyResultCommentNodeGraphQLObject } from '../objects/key-result/comment/key-result-comment-node.object'
+import { KeyResultListGraphQLObject } from '../objects/key-result/key-result-list.object'
 import { KeyResultNodeGraphQLObject } from '../objects/key-result/key-result-node.object'
-import { KeyResultQueryResultGraphQLObject } from '../objects/key-result/key-result-query.object'
 import { ObjectiveNodeGraphQLObject } from '../objects/objetive/objective-node.object'
 import { TeamNodeGraphQLObject } from '../objects/team/team-node.object'
 import { UserNodeGraphQLObject } from '../objects/user/user-node.object'
 import { KeyResultFiltersRequest } from '../requests/key-result/key-result.request'
+import { KeyResultRootEdgeGraphQLResponse } from '../responses/key-result/key-result-root-edge.response'
 
 import { BaseGraphQLResolver } from './base.resolver'
 import { GraphQLUser } from './decorators/graphql-user'
@@ -35,7 +36,7 @@ export class KeyResultGraphQLResolver extends BaseGraphQLResolver<KeyResult, Key
   }
 
   @RequiredActions('key-result:read')
-  @Query(() => KeyResultQueryResultGraphQLObject, { name: 'keyResults' })
+  @Query(() => KeyResultListGraphQLObject, { name: 'keyResults' })
   protected async getKeyResults(
     @Args() { first, ...filters }: KeyResultFiltersRequest,
     @GraphQLUser() graphqlUser: AuthorizationUser,
@@ -56,7 +57,8 @@ export class KeyResultGraphQLResolver extends BaseGraphQLResolver<KeyResult, Key
       queryOptions,
     )
 
-    const response = this.marshalQueryResponse<KeyResultNodeGraphQLObject>(queryResult)
+    const edges = queryResult?.map((node) => new KeyResultRootEdgeGraphQLResponse({ node }))
+    const response = this.marshalListResponse<KeyResultRootEdgeGraphQLResponse>(edges)
 
     return response
   }

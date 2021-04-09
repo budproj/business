@@ -15,11 +15,12 @@ import { KeyResultCheckInNodeGraphQLObject } from '../objects/key-result/check-i
 import { KeyResultNodeGraphQLObject } from '../objects/key-result/key-result-node.object'
 import { ObjectiveNodeGraphQLObject } from '../objects/objetive/objective-node.object'
 import { TeamNodeGraphQLObject } from '../objects/team/team-node.object'
+import { UserListGraphQLObject } from '../objects/user/user-list.object'
 import { UserNodeGraphQLObject } from '../objects/user/user-node.object'
-import { UserQueryResultGraphQLObject } from '../objects/user/user-query.object'
 import { CursorPaginationRequest } from '../requests/cursor-pagination.request'
 import { UserFiltersRequest } from '../requests/user/user-filters.request'
 import { UserUpdateRequest } from '../requests/user/user-update.request'
+import { UserRootEdgeGraphQLResponse } from '../responses/user/user-root-edge.response'
 
 import { BaseGraphQLResolver } from './base.resolver'
 import { GraphQLUser } from './decorators/graphql-user'
@@ -38,7 +39,7 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
   }
 
   @RequiredActions('user:read')
-  @Query(() => UserQueryResultGraphQLObject, { name: 'users' })
+  @Query(() => UserListGraphQLObject, { name: 'users' })
   protected async getUsers(
     @Args() { first, ...filters }: UserFiltersRequest,
     @GraphQLUser() graphqlUser: AuthorizationUser,
@@ -59,7 +60,8 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
       queryOptions,
     )
 
-    const response = this.marshalQueryResponse<UserNodeGraphQLObject>(queryResult)
+    const edges = queryResult?.map((node) => new UserRootEdgeGraphQLResponse({ node }))
+    const response = this.marshalListResponse<UserRootEdgeGraphQLResponse>(edges)
 
     return response
   }

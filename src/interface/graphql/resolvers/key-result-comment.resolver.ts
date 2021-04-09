@@ -10,11 +10,12 @@ import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-
 import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
 
 import { PolicyGraphQLObject } from '../objects/authorization/policy.object'
+import { KeyResultCommentListGraphQLObject } from '../objects/key-result/comment/key-result-comment-list.object'
 import { KeyResultCommentNodeGraphQLObject } from '../objects/key-result/comment/key-result-comment-node.object'
-import { KeyResultCommentQueryResultGraphQLObject } from '../objects/key-result/comment/key-result-comment-query.object'
 import { KeyResultNodeGraphQLObject } from '../objects/key-result/key-result-node.object'
 import { UserNodeGraphQLObject } from '../objects/user/user-node.object'
 import { KeyResultCommentFiltersRequest } from '../requests/key-result/comment/key-result-comment.request'
+import { KeyResultCommentRootEdgeGraphQLResponse } from '../responses/key-result/comment/key-result-comment-root-edge.response'
 
 import { BaseGraphQLResolver } from './base.resolver'
 import { GraphQLUser } from './decorators/graphql-user'
@@ -36,7 +37,7 @@ export class KeyResultCommentGraphQLResolver extends BaseGraphQLResolver<
   }
 
   @RequiredActions('key-result-comment:read')
-  @Query(() => KeyResultCommentQueryResultGraphQLObject, { name: 'keyResultComments' })
+  @Query(() => KeyResultCommentListGraphQLObject, { name: 'keyResultComments' })
   protected async getKeyResultComments(
     @Args() { first, ...filters }: KeyResultCommentFiltersRequest,
     @GraphQLUser() graphqlUser: AuthorizationUser,
@@ -57,7 +58,8 @@ export class KeyResultCommentGraphQLResolver extends BaseGraphQLResolver<
       queryOptions,
     )
 
-    const response = this.marshalQueryResponse<KeyResultCommentNodeGraphQLObject>(queryResult)
+    const edges = queryResult?.map((node) => new KeyResultCommentRootEdgeGraphQLResponse({ node }))
+    const response = this.marshalListResponse<KeyResultCommentRootEdgeGraphQLResponse>(edges)
 
     return response
   }
