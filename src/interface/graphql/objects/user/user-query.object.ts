@@ -11,7 +11,7 @@ import { UserEdgesGraphQLObject } from './user-edges.object'
 })
 export class UserQueryResultGraphQLObject
   implements QueryResultGraphQLInterface<UserEdgesGraphQLObject> {
-  @Field(() => UserEdgesGraphQLObject)
+  @Field(() => UserEdgesGraphQLObject, { complexity: 0 })
   public edges: UserEdgesGraphQLObject
 
   public pageInfo: PageInfoGraphQLObject

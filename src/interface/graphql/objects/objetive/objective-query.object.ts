@@ -11,7 +11,7 @@ import { ObjectiveEdgesGraphQLObject } from './objective-edges.object'
 })
 export class ObjectiveQueryResultGraphQLObject
   implements QueryResultGraphQLInterface<ObjectiveEdgesGraphQLObject> {
-  @Field(() => ObjectiveEdgesGraphQLObject)
+  @Field(() => ObjectiveEdgesGraphQLObject, { complexity: 0 })
   public edges: ObjectiveEdgesGraphQLObject
 
   public pageInfo: PageInfoGraphQLObject

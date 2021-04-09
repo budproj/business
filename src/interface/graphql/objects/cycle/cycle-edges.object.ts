@@ -9,7 +9,7 @@ import { CycleNodeGraphQLObject } from './cycle-node.object'
   description: 'The edges for our cycle query interface',
 })
 export class CycleEdgesGraphQLObject implements EdgesGraphQLInterface<CycleNodeGraphQLObject> {
-  @Field(() => [CycleNodeGraphQLObject])
+  @Field(() => [CycleNodeGraphQLObject], { complexity: 1 })
   public nodes: CycleNodeGraphQLObject[]
 
   public cursor: string

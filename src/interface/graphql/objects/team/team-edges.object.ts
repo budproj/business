@@ -9,7 +9,7 @@ import { TeamNodeGraphQLObject } from './team-node.object'
   description: 'The edges for our team query interface',
 })
 export class TeamEdgesGraphQLObject implements EdgesGraphQLInterface<TeamNodeGraphQLObject> {
-  @Field(() => [TeamNodeGraphQLObject])
+  @Field(() => [TeamNodeGraphQLObject], { complexity: 1 })
   public nodes: TeamNodeGraphQLObject[]
 
   public cursor: string

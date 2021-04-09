@@ -10,7 +10,7 @@ import { KeyResultNodeGraphQLObject } from './key-result-node.object'
 })
 export class KeyResultEdgesGraphQLObject
   implements EdgesGraphQLInterface<KeyResultNodeGraphQLObject> {
-  @Field(() => [KeyResultNodeGraphQLObject])
+  @Field(() => [KeyResultNodeGraphQLObject], { complexity: 1 })
   public nodes: KeyResultNodeGraphQLObject[]
 
   public cursor: string

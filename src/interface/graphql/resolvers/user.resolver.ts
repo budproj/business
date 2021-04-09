@@ -11,6 +11,7 @@ import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 
+import { KeyResultCheckInNodeGraphQLObject } from '../objects/key-result/check-in/key-result-check-in-node.object'
 import { KeyResultNodeGraphQLObject } from '../objects/key-result/key-result-node.object'
 import { ObjectiveNodeGraphQLObject } from '../objects/objetive/objective-node.object'
 import { TeamNodeGraphQLObject } from '../objects/team/team-node.object'
@@ -168,5 +169,15 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
     })
 
     return this.core.keyResult.getFromOwner(user)
+  }
+
+  @ResolveField('keyResultCheckIns', () => [KeyResultCheckInNodeGraphQLObject], { nullable: true })
+  protected async getUserKeyResultCheckIns(@Parent() user: UserNodeGraphQLObject) {
+    this.logger.log({
+      user,
+      message: 'Fetching check-ins by user',
+    })
+
+    return this.core.keyResult.getCheckInsByUser(user)
   }
 }

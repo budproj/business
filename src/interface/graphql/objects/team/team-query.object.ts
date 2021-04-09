@@ -11,7 +11,7 @@ import { TeamEdgesGraphQLObject } from './team-edges.object'
 })
 export class TeamQueryResultGraphQLObject
   implements QueryResultGraphQLInterface<TeamEdgesGraphQLObject> {
-  @Field(() => TeamEdgesGraphQLObject)
+  @Field(() => TeamEdgesGraphQLObject, { complexity: 0 })
   public edges: TeamEdgesGraphQLObject
 
   public pageInfo: PageInfoGraphQLObject

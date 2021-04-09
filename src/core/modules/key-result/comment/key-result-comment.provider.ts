@@ -25,7 +25,7 @@ export class KeyResultCommentProvider extends CoreEntityProvider<
     super(KeyResultCommentProvider.name, repository)
   }
 
-  protected onModuleInit() {
+  protected onModuleInit(): void {
     this.keyResultProvider = this.moduleReference.get(KeyResultProvider)
   }
 

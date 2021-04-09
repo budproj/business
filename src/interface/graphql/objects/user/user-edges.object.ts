@@ -9,7 +9,7 @@ import { UserNodeGraphQLObject } from './user-node.object'
   description: 'The edges for our user query interface',
 })
 export class UserEdgesGraphQLObject implements EdgesGraphQLInterface<UserNodeGraphQLObject> {
-  @Field(() => [UserNodeGraphQLObject])
+  @Field(() => [UserNodeGraphQLObject], { complexity: 1 })
   public nodes: UserNodeGraphQLObject[]
 
   public cursor: string

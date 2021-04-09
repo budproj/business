@@ -11,7 +11,7 @@ import { CycleEdgesGraphQLObject } from './cycle-edges.object'
 })
 export class CycleQueryResultGraphQLObject
   implements QueryResultGraphQLInterface<CycleEdgesGraphQLObject> {
-  @Field(() => CycleEdgesGraphQLObject)
+  @Field(() => CycleEdgesGraphQLObject, { complexity: 0 })
   public edges: CycleEdgesGraphQLObject
 
   public pageInfo: PageInfoGraphQLObject

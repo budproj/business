@@ -10,7 +10,7 @@ import { EdgesGraphQLInterface } from './edges.interface'
 export abstract class QueryResultGraphQLInterface<
   E extends EdgesGraphQLInterface = EdgesGraphQLInterface
 > {
-  @Field(() => PageInfoGraphQLObject)
+  @Field(() => PageInfoGraphQLObject, { complexity: 0 })
   public pageInfo: PageInfoGraphQLObject
 
   public edges: E

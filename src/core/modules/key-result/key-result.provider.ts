@@ -10,6 +10,8 @@ import { TeamInterface } from '@core/modules/team/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 
+import { KeyResultCheckIn } from './check-in/key-result-check-in.orm-entity'
+import { KeyResultCheckInProvider } from './check-in/key-result-check-in.provider'
 import { KeyResultComment } from './comment/key-result-comment.orm-entity'
 import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
 import { KeyResultInterface } from './key-result.interface'
@@ -20,6 +22,7 @@ import { KeyResultRepository } from './key-result.repository'
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
   constructor(
     public readonly keyResultCommentProvider: KeyResultCommentProvider,
+    public readonly keyResultCheckInProvider: KeyResultCheckInProvider,
     protected readonly repository: KeyResultRepository,
   ) {
     super(KeyResultProvider.name, repository)
@@ -87,6 +90,12 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const selector = { keyResultId: keyResult.id }
 
     return this.keyResultCommentProvider.getMany(selector, undefined, options)
+  }
+
+  public async getCheckInsByUser(user: UserInterface): Promise<KeyResultCheckIn[]> {
+    const selector = { userId: user.id }
+
+    return this.keyResultCheckInProvider.getMany(selector)
   }
 
   protected async protectCreationQuery(

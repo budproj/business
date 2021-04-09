@@ -9,15 +9,15 @@ import { EffectGraphQLEnum } from '../../enums/effect.enum'
     'Defines the current available resource policies. You can use it to build read/create/update/delete logic on your application',
 })
 export class PolicyGraphQLObject {
-  @Field(() => EffectGraphQLEnum, { defaultValue: Effect.DENY })
+  @Field(() => EffectGraphQLEnum, { defaultValue: Effect.DENY, complexity: 0 })
   public create: Effect
 
-  @Field(() => EffectGraphQLEnum, { defaultValue: Effect.DENY })
+  @Field(() => EffectGraphQLEnum, { defaultValue: Effect.DENY, complexity: 0 })
   public read: Effect
 
-  @Field(() => EffectGraphQLEnum, { defaultValue: Effect.DENY })
+  @Field(() => EffectGraphQLEnum, { defaultValue: Effect.DENY, complexity: 0 })
   public update: Effect
 
-  @Field(() => EffectGraphQLEnum, { defaultValue: Effect.DENY })
+  @Field(() => EffectGraphQLEnum, { defaultValue: Effect.DENY, complexity: 0 })
   public delete: Effect
 }

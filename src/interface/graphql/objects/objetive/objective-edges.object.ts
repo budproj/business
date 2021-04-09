@@ -10,7 +10,7 @@ import { ObjectiveNodeGraphQLObject } from './objective-node.object'
 })
 export class ObjectiveEdgesGraphQLObject
   implements EdgesGraphQLInterface<ObjectiveNodeGraphQLObject> {
-  @Field(() => [ObjectiveNodeGraphQLObject])
+  @Field(() => [ObjectiveNodeGraphQLObject], { complexity: 1 })
   public nodes: ObjectiveNodeGraphQLObject[]
 
   public cursor: string

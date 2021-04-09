@@ -12,29 +12,48 @@ import { UserNodeGraphQLObject } from '../user/user-node.object'
     'The current status of this objective. By status we mean progress, confidence, and other reported values from it',
 })
 export class ObjectiveNodeGraphQLObject implements NodeGraphQLInterface {
-  @Field({ description: 'The title of the objective' })
+  @Field({ complexity: 0, description: 'The title of the objective' })
   public title: string
 
-  @Field({ description: 'The last update date of the objective' })
+  @Field({ complexity: 0, description: 'The last update date of the objective' })
   public updatedAt: Date
 
-  @Field(() => ID, { description: 'The cycle ID that owns this objective' })
+  @Field(() => ID, { complexity: 0, description: 'The cycle ID that owns this objective' })
   public cycleId: CycleNodeGraphQLObject['id']
 
-  @Field(() => CycleNodeGraphQLObject, { description: 'The cycle that owns this objective' })
-  public cycle: CycleNodeGraphQLObject
-
-  @Field(() => ID, { description: 'The user ID that owns this objective' })
+  @Field(() => ID, { complexity: 0, description: 'The user ID that owns this objective' })
   public ownerId: UserNodeGraphQLObject['id']
 
-  @Field(() => UserNodeGraphQLObject, { description: 'The user that owns this objective' })
+  // **********************************************************************************************
+  // RESOLVED FIELDS
+  // **********************************************************************************************
+
+  @Field(() => CycleNodeGraphQLObject, {
+    complexity: 1,
+    description: 'The cycle that owns this objective',
+  })
+  public cycle: CycleNodeGraphQLObject
+
+  @Field(() => UserNodeGraphQLObject, {
+    complexity: 1,
+    description: 'The user that owns this objective',
+  })
   public owner: UserNodeGraphQLObject
 
+  // **********************************************************************************************
+  // EDGE FIELDS
+  // **********************************************************************************************
+
   @Field(() => [KeyResultNodeGraphQLObject], {
-    description: 'A creation date ordered list of key results that belongs to this objective',
+    complexity: 0,
     nullable: true,
+    description: 'A creation date ordered list of key results that belongs to this objective',
   })
   public keyResults?: KeyResultNodeGraphQLObject[]
+
+  // **********************************************************************************************
+  // ABSTRACTED FIELDS
+  // **********************************************************************************************
 
   public id: string
   public createdAt: Date

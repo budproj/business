@@ -12,7 +12,7 @@ import { KeyResultEdgesGraphQLObject } from './key-result-edges.object'
 })
 export class KeyResultQueryResultGraphQLObject
   implements QueryResultGraphQLInterface<KeyResultEdgesGraphQLObject> {
-  @Field(() => KeyResultEdgesGraphQLObject)
+  @Field(() => KeyResultEdgesGraphQLObject, { complexity: 0 })
   public edges: KeyResultEdgesGraphQLObject
 
   public pageInfo: PageInfoGraphQLObject

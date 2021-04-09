@@ -7,8 +7,9 @@ import { NodeGraphQLInterface } from './node.interface'
 })
 export abstract class EdgesGraphQLInterface<N extends NodeGraphQLInterface = NodeGraphQLInterface> {
   @Field(() => ID, {
-    description: 'The last ID value returned from the current query',
+    complexity: 0,
     nullable: true,
+    description: 'The last ID value returned from the current query',
   })
   public cursor?: string
 

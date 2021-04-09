@@ -8,6 +8,7 @@ export interface KeyResultCheckInInterface {
   confidence: number
   createdAt: Date
   keyResultId: KeyResultInterface['id']
+  keyResult: KeyResultInterface
   userId: UserInterface['id']
   user: UserInterface
   comment?: string

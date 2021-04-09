@@ -6,27 +6,27 @@ import { PolicyGraphQLObject } from '../authorization/policy.object'
   description: 'Defines all user permissions for each entity in our domain',
 })
 export class PermissionsGraphQLObject {
-  @Field(() => PolicyGraphQLObject)
+  @Field(() => PolicyGraphQLObject, { complexity: 0 })
   public user: PolicyGraphQLObject
 
-  @Field(() => PolicyGraphQLObject)
+  @Field(() => PolicyGraphQLObject, { complexity: 0 })
   public team: PolicyGraphQLObject
 
-  @Field(() => PolicyGraphQLObject)
+  @Field(() => PolicyGraphQLObject, { complexity: 0 })
   public cycle: PolicyGraphQLObject
 
-  @Field(() => PolicyGraphQLObject)
+  @Field(() => PolicyGraphQLObject, { complexity: 0 })
   public objective: PolicyGraphQLObject
 
-  @Field(() => PolicyGraphQLObject)
+  @Field(() => PolicyGraphQLObject, { complexity: 0 })
   public keyResult: PolicyGraphQLObject
 
-  @Field(() => PolicyGraphQLObject)
+  @Field(() => PolicyGraphQLObject, { complexity: 0 })
   public keyResultCheckIn: PolicyGraphQLObject
 
-  @Field(() => PolicyGraphQLObject)
+  @Field(() => PolicyGraphQLObject, { complexity: 0 })
   public keyResultComment: PolicyGraphQLObject
 
-  @Field(() => PolicyGraphQLObject)
+  @Field(() => PolicyGraphQLObject, { complexity: 0 })
   public keyResultCustomList: PolicyGraphQLObject
 }

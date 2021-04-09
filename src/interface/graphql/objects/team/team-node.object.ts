@@ -15,71 +15,101 @@ import { UserNodeGraphQLObject } from '../user/user-node.object'
     'A collection of users. It can be either inside another team, or a root team (a.k.a. company)',
 })
 export class TeamNodeGraphQLObject implements NodeGraphQLInterface {
-  @Field({ description: 'The name of the team' })
+  @Field({ complexity: 0, description: 'The name of the team' })
   public name: string
 
-  @Field({ description: 'The last update date of the team' })
+  @Field({ complexity: 0, description: 'The last update date of the team' })
   public updatedAt: Date
 
-  @Field(() => ID, { description: 'The user ID that owns this team' })
+  @Field(() => ID, { complexity: 0, description: 'The user ID that owns this team' })
   public ownerId: UserNodeGraphQLObject['id']
 
-  @Field(() => UserNodeGraphQLObject, { description: 'The user that owns this team' })
-  public owner: UserNodeGraphQLObject
-
-  @Field({ nullable: true, description: 'The description about the team' })
+  @Field({ complexity: 0, nullable: true, description: 'The description about the team' })
   public description?: string
 
-  @Field({ description: 'Defines if the team is a company' })
-  public isCompany?: boolean
-
-  @Field(() => TeamGenderGraphQLEnum, { nullable: true, description: 'The gender of the team' })
+  @Field(() => TeamGenderGraphQLEnum, {
+    complexity: 0,
+    nullable: true,
+    description: 'The gender of the team',
+  })
   public gender?: TeamGender
 
-  @Field(() => TeamNodeGraphQLObject, {
-    description: 'The team that is the company of this team. This is also known as "rootTeam"',
+  @Field(() => ID, {
+    complexity: 0,
+    description: 'The ID of the team that owns this team',
     nullable: true,
+  })
+  public parentId?: TeamNodeGraphQLObject['id']
+
+  // **********************************************************************************************
+  // RESOLVED FIELDS
+  // **********************************************************************************************
+
+  @Field(() => UserNodeGraphQLObject, {
+    complexity: 1,
+    description: 'The user that owns this team',
+  })
+  public owner: UserNodeGraphQLObject
+
+  @Field({ complexity: 1, description: 'Defines if the team is a company' })
+  public isCompany?: boolean
+
+  @Field(() => TeamNodeGraphQLObject, {
+    complexity: 1,
+    nullable: true,
+    description: 'The team that is the company of this team. This is also known as "rootTeam"',
   })
   public company?: TeamNodeGraphQLObject
 
-  @Field(() => ID, { description: 'The ID of the team that owns this team', nullable: true })
-  public parentId?: TeamNodeGraphQLObject['id']
-
   @Field(() => TeamNodeGraphQLObject, {
-    description: 'The team that owns this team',
+    complexity: 1,
     nullable: true,
+    description: 'The team that owns this team',
   })
   public parent?: TeamNodeGraphQLObject
 
+  // **********************************************************************************************
+  // EDGE FIELDS
+  // **********************************************************************************************
+
   @Field(() => [UserNodeGraphQLObject], {
-    description: 'A creation date ordered list of users that are members of this team',
+    complexity: 0,
     nullable: true,
+    description: 'A creation date ordered list of users that are members of this team',
   })
   public users?: Promise<UserNodeGraphQLObject[]>
 
   @Field(() => [TeamNodeGraphQLObject], {
-    description: 'A list of teams that belongs to this team',
+    complexity: 0,
     nullable: true,
+    description: 'A list of teams that belongs to this team',
   })
   public teams?: TeamNodeGraphQLObject[]
 
   @Field(() => [TeamNodeGraphQLObject], {
-    description: "A list with all teams inside this team's tree ordered by their progress",
+    complexity: 0,
     nullable: true,
+    description: "A list with all teams inside this team's tree ordered by their progress",
   })
   public rankedTeams?: TeamNodeGraphQLObject[]
 
   @Field(() => [CycleNodeGraphQLObject], {
-    description: 'The cycles that belongs to this team',
+    complexity: 0,
     nullable: true,
+    description: 'The cycles that belongs to this team',
   })
   public cycles?: CycleNodeGraphQLObject[]
 
   @Field(() => [KeyResultNodeGraphQLObject], {
-    description: 'The creation date ordered list of key results that belongs to that team',
+    complexity: 0,
     nullable: true,
+    description: 'The creation date ordered list of key results that belongs to that team',
   })
   public keyResults?: KeyResultNodeGraphQLObject[]
+
+  // **********************************************************************************************
+  // ABSTRACTED FIELDS
+  // **********************************************************************************************
 
   public id: string
   public createdAt: Date
