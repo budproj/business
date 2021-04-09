@@ -1,8 +1,6 @@
 import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
-import { uniq } from 'lodash'
 
-import { Effect } from '@adapters/authorization/enums/effect.enum'
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
@@ -107,28 +105,24 @@ export class KeyResultGraphQLResolver extends BaseGraphQLResolver<KeyResult, Key
     return this.core.keyResult.getComments(keyResult)
   }
 
-  protected async customizeEntityCommandStatement(
-    originalStatement: PolicyGraphQLObject,
-    keyResult: KeyResult,
-  ) {
-    const restrictedToActiveStatement = await this.restrictPoliciesToActiveKeyResult(
-      originalStatement,
+  protected async customizeEntityPolicy(originalPolicy: PolicyGraphQLObject, keyResult: KeyResult) {
+    const restrictedToActivePolicy = await this.restrictPolicyToActiveKeyResult(
+      originalPolicy,
       keyResult,
     )
 
-    return restrictedToActiveStatement
+    return restrictedToActivePolicy
   }
 
-  private async restrictPoliciesToActiveKeyResult(
-    originalStatement: PolicyGraphQLObject,
+  private async restrictPolicyToActiveKeyResult(
+    originalPolicy: PolicyGraphQLObject,
     keyResult: KeyResult,
   ) {
-    const statementValues = uniq(Object.values(originalStatement))
-    if (statementValues === [Effect.DENY]) return originalStatement
+    if (this.policy.commandStatementIsDenyingAll(originalPolicy)) return originalPolicy
 
     const objective = await this.core.objective.getFromKeyResult(keyResult)
     const cycle = await this.core.cycle.getFromObjective(objective)
 
-    return cycle.active ? originalStatement : this.denyAllPolicies(originalStatement)
+    return cycle.active ? originalPolicy : this.policy.denyCommandStatement(originalPolicy)
   }
 }

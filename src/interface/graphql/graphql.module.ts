@@ -6,6 +6,7 @@ import { CoreModule } from '@core/core.module'
 
 import { GraphQLOptionsFactory } from './options.factory'
 import { CycleGraphQLResolver } from './resolvers/cycle.resolver'
+import { KeyResultCommentGraphQLResolver } from './resolvers/key-result-comment.resolver'
 import { KeyResultGraphQLResolver } from './resolvers/key-result.resolver'
 import { ObjectiveGraphQLResolver } from './resolvers/objective.resolver'
 import { PermissionsGraphQLResolver } from './resolvers/permissions.resolver'
@@ -27,6 +28,7 @@ import { UserGraphQLResolver } from './resolvers/user.resolver'
     CycleGraphQLResolver,
     ObjectiveGraphQLResolver,
     KeyResultGraphQLResolver,
+    KeyResultCommentGraphQLResolver,
   ],
 })
 export class GraphQLModule {}

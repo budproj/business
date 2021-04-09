@@ -19,8 +19,8 @@ import { KeyResultRepository } from './key-result.repository'
 @Injectable()
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
   constructor(
+    public readonly keyResultCommentProvider: KeyResultCommentProvider,
     protected readonly repository: KeyResultRepository,
-    private readonly keyResultCommentProvider: KeyResultCommentProvider,
   ) {
     super(KeyResultProvider.name, repository)
   }

@@ -1,11 +1,10 @@
 import { Args, Parent, ResolveField, Resolver } from '@nestjs/graphql'
-import { mapValues } from 'lodash'
 
 import { AuthzAdapter } from '@adapters/authorization/authz.adapter'
-import { Effect } from '@adapters/authorization/enums/effect.enum'
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { Scope } from '@adapters/authorization/enums/scope.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { PolicyAdapter } from '@adapters/authorization/policy.adapter'
 import { QueryGuardAdapter } from '@adapters/authorization/query-guard.adapter'
 import { CoreEntity } from '@core/core.entity'
 import { CoreProvider } from '@core/core.provider'
@@ -26,6 +25,7 @@ import { GraphQLUser } from './decorators/graphql-user'
 @Resolver(() => NodeGraphQLInterface)
 export abstract class BaseGraphQLResolver<E extends CoreEntity, I> {
   protected readonly queryGuard: QueryGuardAdapter<E, I>
+  protected readonly policy: PolicyAdapter
   protected readonly authz: AuthzAdapter
 
   constructor(
@@ -35,6 +35,7 @@ export abstract class BaseGraphQLResolver<E extends CoreEntity, I> {
   ) {
     this.queryGuard = new QueryGuardAdapter(resource, core, entity)
     this.authz = new AuthzAdapter()
+    this.policy = new PolicyAdapter()
   }
 
   @ResolveField('policies', () => PolicyGraphQLObject)
@@ -58,23 +59,13 @@ export abstract class BaseGraphQLResolver<E extends CoreEntity, I> {
     )
 
     const commandStatement = resourcesCommandStatement[resource]
-    const customizedCommandStatement = await this.customizeEntityCommandStatement(
-      commandStatement,
-      entity,
-    )
+    const customizedCommandStatement = await this.customizeEntityPolicy(commandStatement, entity)
 
     return customizedCommandStatement
   }
 
-  protected async customizeEntityCommandStatement(
-    originalStatement: PolicyGraphQLObject,
-    _entity: E,
-  ) {
-    return originalStatement
-  }
-
-  protected denyAllPolicies(originalPolicies: PolicyGraphQLObject) {
-    return mapValues(originalPolicies, () => Effect.DENY)
+  protected async customizeEntityPolicy(originalPolicy: PolicyGraphQLObject, _entity: E) {
+    return originalPolicy
   }
 
   protected marshalQueryResponse<N extends NodeGraphQLInterface = NodeGraphQLInterface>(
