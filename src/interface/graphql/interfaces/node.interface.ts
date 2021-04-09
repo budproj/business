@@ -18,9 +18,9 @@ export abstract class NodeGraphQLInterface {
   // **********************************************************************************************
 
   @Field(() => PolicyGraphQLObject, {
-    complexity: 2,
+    complexity: 1,
     description:
-      'Group of policies regarding the given entity. Those policies decribe actions that your user can perform with that given resource',
+      'The policy for this node. It decribes actions that your user can perform with that given resource',
   })
-  public policies?: PolicyGraphQLObject
+  public policy?: PolicyGraphQLObject
 }
