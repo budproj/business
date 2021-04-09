@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql'
 
 import { GraphQLConfigModule } from '@config/graphql/graphql.module'
+import { CoreModule } from '@core/core.module'
 
 import { PermissionsGraphQLResolver } from './authorization/resolvers/permissions.resolver'
 import { CycleGraphQLModule } from './modules/cycle/cycle.module'
@@ -17,6 +18,7 @@ import { GraphQLOptionsFactory } from './options.factory'
       imports: [GraphQLConfigModule],
       useClass: GraphQLOptionsFactory,
     }),
+    CoreModule,
     UserGraphQLModule,
     TeamGraphQLModule,
     CycleGraphQLModule,
