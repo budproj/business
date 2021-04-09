@@ -6,8 +6,8 @@ import { Sorting } from '@core/enums/sorting'
 import { TeamInterface } from '@core/modules/team/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 
-import { KeyResultInterface } from '../key-result.interface'
-import { KeyResult } from '../key-result.orm-entity'
+import { KeyResultInterface } from '../../key-result.interface'
+import { KeyResult } from '../../key-result.orm-entity'
 
 import { KeyResultCheckIn } from './key-result-check-in.orm-entity'
 

@@ -10,13 +10,13 @@ import { TeamInterface } from '@core/modules/team/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 
-import { KeyResultCheckIn } from './check-in/key-result-check-in.orm-entity'
-import { KeyResultCheckInProvider } from './check-in/key-result-check-in.provider'
-import { KeyResultComment } from './comment/key-result-comment.orm-entity'
-import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
 import { KeyResultInterface } from './key-result.interface'
 import { KeyResult } from './key-result.orm-entity'
 import { KeyResultRepository } from './key-result.repository'
+import { KeyResultCheckIn } from './modules/check-in/key-result-check-in.orm-entity'
+import { KeyResultCheckInProvider } from './modules/check-in/key-result-check-in.provider'
+import { KeyResultComment } from './modules/comment/key-result-comment.orm-entity'
+import { KeyResultCommentProvider } from './modules/comment/key-result-comment.provider'
 
 @Injectable()
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {

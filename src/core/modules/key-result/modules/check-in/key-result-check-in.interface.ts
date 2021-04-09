@@ -1,6 +1,6 @@
 import { UserInterface } from '@core/modules/user/user.interface'
 
-import { KeyResultInterface } from '../key-result.interface'
+import { KeyResultInterface } from '../../key-result.interface'
 
 export interface KeyResultCheckInInterface {
   id: string

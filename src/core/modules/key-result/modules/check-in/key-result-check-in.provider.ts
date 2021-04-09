@@ -9,8 +9,8 @@ import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 
-import { KeyResultInterface } from '../key-result.interface'
-import { KeyResultProvider } from '../key-result.provider'
+import { KeyResultInterface } from '../../key-result.interface'
+import { KeyResultProvider } from '../../key-result.provider'
 
 import {
   DEFAULT_CONFIDENCE,

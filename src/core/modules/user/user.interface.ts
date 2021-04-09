@@ -1,6 +1,6 @@
-import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
-import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
 import { KeyResultInterface } from '@core/modules/key-result/key-result.interface'
+import { KeyResultCheckInInterface } from '@core/modules/key-result/modules/check-in/key-result-check-in.interface'
+import { KeyResultCommentInterface } from '@core/modules/key-result/modules/comment/key-result-comment.interface'
 import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
 import { TeamInterface } from '@core/modules/team/team.interface'
 
