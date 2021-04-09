@@ -2,16 +2,14 @@ import { Module } from '@nestjs/common'
 import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql'
 
 import { GraphQLConfigModule } from '@config/graphql/graphql.module'
-import { CoreModule } from '@core/core.module'
 
+import { PermissionsGraphQLResolver } from './authorization/resolvers/permissions.resolver'
+import { CycleGraphQLModule } from './modules/cycle/cycle.module'
+import { KeyResultGraphQLModule } from './modules/key-result/key-result.module'
+import { ObjectiveGraphQLModule } from './modules/objective/objective.module'
+import { TeamGraphQLModule } from './modules/team/team.module'
+import { UserGraphQLModule } from './modules/user/user.module'
 import { GraphQLOptionsFactory } from './options.factory'
-import { CycleGraphQLResolver } from './resolvers/cycle/cycle.resolver'
-import { KeyResultCommentGraphQLResolver } from './resolvers/key-result/comment/key-result-comment.resolver'
-import { KeyResultGraphQLResolver } from './resolvers/key-result/key-result.resolver'
-import { ObjectiveGraphQLResolver } from './resolvers/objective/objective.resolver'
-import { PermissionsGraphQLResolver } from './resolvers/permissions/permissions.resolver'
-import { TeamGraphQLResolver } from './resolvers/team/team.resolver'
-import { UserGraphQLResolver } from './resolvers/user/user.resolver'
 
 @Module({
   imports: [
@@ -19,16 +17,12 @@ import { UserGraphQLResolver } from './resolvers/user/user.resolver'
       imports: [GraphQLConfigModule],
       useClass: GraphQLOptionsFactory,
     }),
-    CoreModule,
+    UserGraphQLModule,
+    TeamGraphQLModule,
+    CycleGraphQLModule,
+    ObjectiveGraphQLModule,
+    KeyResultGraphQLModule,
   ],
-  providers: [
-    PermissionsGraphQLResolver,
-    TeamGraphQLResolver,
-    UserGraphQLResolver,
-    CycleGraphQLResolver,
-    ObjectiveGraphQLResolver,
-    KeyResultGraphQLResolver,
-    KeyResultCommentGraphQLResolver,
-  ],
+  providers: [PermissionsGraphQLResolver],
 })
 export class GraphQLModule {}
