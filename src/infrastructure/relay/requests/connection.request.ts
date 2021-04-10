@@ -9,17 +9,17 @@ export class ConnectionRelayRequest implements ConnectionArguments {
     nullable: true,
     description: 'Paginate before opaque cursor',
   })
-  public before?: ConnectionCursor
+  public readonly before?: ConnectionCursor
 
   @Field({
     nullable: true,
     description: 'Paginate after opaque cursor',
   })
-  public after?: ConnectionCursor
+  public readonly after?: ConnectionCursor
 
   @Field(() => Int, { nullable: true, description: 'Paginate first' })
-  public first?: number
+  public readonly first?: number
 
   @Field(() => Int, { nullable: true, description: 'Paginate last' })
-  public last?: number
+  public readonly last?: number
 }

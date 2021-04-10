@@ -13,11 +13,11 @@ import { KeyResultCheckInGraphQLNode } from './key-result-check-in.node'
 export class KeyResultCheckInsGraphQLConnection
   implements ConnectionRelayInterface<KeyResultCheckInGraphQLNode> {
   @Field(() => [KeyResultCheckInRootEdgeGraphQLObject], { complexity: 0 })
-  public edges!: KeyResultCheckInRootEdgeGraphQLObject[]
+  public readonly edges!: KeyResultCheckInRootEdgeGraphQLObject[]
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS
   // **********************************************************************************************
 
-  public pageInfo!: PageInfoRelayObject
+  public readonly pageInfo!: PageInfoRelayObject
 }

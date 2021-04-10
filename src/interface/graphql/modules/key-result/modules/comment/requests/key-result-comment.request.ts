@@ -9,5 +9,5 @@ export class KeyResultCommentFiltersRequest extends NodeFiltersRequest {
     description: 'Fetches key-result comments from a given user',
     nullable: true,
   })
-  public userId?: UserGraphQLNode['id']
+  public readonly userId?: UserGraphQLNode['id']
 }

@@ -9,5 +9,5 @@ export class KeyResultFiltersRequest extends NodeFiltersRequest {
     description: 'The user ID that should owns the key results you are trying to fetch',
     nullable: true,
   })
-  public ownerId?: UserGraphQLNode['id']
+  public readonly ownerId?: UserGraphQLNode['id']
 }

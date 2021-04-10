@@ -10,11 +10,11 @@ export class CycleFiltersRequest extends NodeFiltersRequest {
     description: 'If this flag is true, it will only fetch active cycles',
     nullable: true,
   })
-  public active?: boolean
+  public readonly active?: boolean
 
   @Field(() => CadenceGraphQLEnum, {
     description: 'This key filters all queries to a given cadence',
     nullable: true,
   })
-  public cadence?: Cadence
+  public readonly cadence?: Cadence
 }

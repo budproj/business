@@ -5,5 +5,5 @@ import { Field, Int, InterfaceType } from '@nestjs/graphql'
 })
 export abstract class DeleteResultGraphQLInterface {
   @Field(() => Int, { complexity: 0, description: 'The amount of entities removed' })
-  public affected!: number
+  public readonly affected!: number
 }

@@ -12,11 +12,11 @@ import { KeyResultGraphQLNode } from './key-result.node'
 })
 export class KeyResultsGraphQLConnection implements ConnectionRelayInterface<KeyResultGraphQLNode> {
   @Field(() => [KeyResultRootEdgeGraphQLObject], { complexity: 0 })
-  public edges!: KeyResultRootEdgeGraphQLObject[]
+  public readonly edges!: KeyResultRootEdgeGraphQLObject[]
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS
   // **********************************************************************************************
 
-  public pageInfo!: PageInfoRelayObject
+  public readonly pageInfo!: PageInfoRelayObject
 }

@@ -13,11 +13,11 @@ import { KeyResultCommentGraphQLNode } from './key-result-comment.node'
 export class KeyResultCommentsGraphQLConnection
   implements ConnectionRelayInterface<KeyResultCommentGraphQLNode> {
   @Field(() => [KeyResultCommentRootEdgeGraphQLObject], { complexity: 0 })
-  public edges!: KeyResultCommentRootEdgeGraphQLObject[]
+  public readonly edges!: KeyResultCommentRootEdgeGraphQLObject[]
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS
   // **********************************************************************************************
 
-  public pageInfo!: PageInfoRelayObject
+  public readonly pageInfo!: PageInfoRelayObject
 }

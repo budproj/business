@@ -11,11 +11,11 @@ import { NodeRelayInterface } from './node.interface'
 export abstract class ConnectionRelayInterface<N extends NodeRelayInterface>
   implements Connection<N> {
   @Field(() => PageInfoRelayObject, { complexity: 0 })
-  public pageInfo!: PageInfoRelayObject
+  public readonly pageInfo!: PageInfoRelayObject
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS
   // **********************************************************************************************
 
-  public edges!: Array<Edge<N>>
+  public readonly edges!: Array<Edge<N>>
 }

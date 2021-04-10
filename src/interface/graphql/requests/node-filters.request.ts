@@ -8,5 +8,5 @@ export class NodeFiltersRequest extends ConnectionRelayRequest {
     description: 'The ID of the node you want to filter in your query',
     nullable: true,
   })
-  public id?: string
+  public readonly id?: string
 }

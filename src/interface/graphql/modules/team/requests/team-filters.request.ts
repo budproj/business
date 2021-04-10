@@ -11,11 +11,11 @@ export class TeamFiltersRequest extends NodeFiltersRequest {
     description: 'The ID of the parent team that you want to user on this query',
     nullable: true,
   })
-  public parentId?: TeamGraphQLNode['id']
+  public readonly parentId?: TeamGraphQLNode['id']
 
   @Field(() => TeamLevelGraphQLEnum, {
     description: 'Defines the level of the team you want to query',
     nullable: true,
   })
-  public level?: TeamLevelGraphQLEnum
+  public readonly level?: TeamLevelGraphQLEnum
 }

@@ -12,11 +12,11 @@ import { CycleGraphQLNode } from './cycle.node'
 })
 export class CyclesGraphQLConnection implements ConnectionRelayInterface<CycleGraphQLNode> {
   @Field(() => [CycleRootEdgeGraphQLObject], { complexity: 0 })
-  public edges!: CycleRootEdgeGraphQLObject[]
+  public readonly edges!: CycleRootEdgeGraphQLObject[]
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS
   // **********************************************************************************************
 
-  public pageInfo!: PageInfoRelayObject
+  public readonly pageInfo!: PageInfoRelayObject
 }

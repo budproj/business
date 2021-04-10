@@ -12,11 +12,11 @@ import { KeyResultCheckInGraphQLNode } from './key-result-check-in.node'
 export class KeyResultCheckInRootEdgeGraphQLObject
   implements GuardedEdgeGraphQLInterface<KeyResultCheckInGraphQLNode> {
   @Field(() => KeyResultCheckInGraphQLNode, { complexity: 1 })
-  public node!: KeyResultCheckInGraphQLNode
+  public readonly node!: KeyResultCheckInGraphQLNode
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS
   // **********************************************************************************************
 
-  public cursor!: ConnectionCursor
+  public readonly cursor!: ConnectionCursor
 }

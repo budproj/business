@@ -12,11 +12,11 @@ import { TeamGraphQLNode } from './team.node'
 })
 export class TeamsGraphQLConnection implements ConnectionRelayInterface<TeamGraphQLNode> {
   @Field(() => [TeamRootEdgeGraphQLObject], { complexity: 0 })
-  public edges!: TeamRootEdgeGraphQLObject[]
+  public readonly edges!: TeamRootEdgeGraphQLObject[]
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS
   // **********************************************************************************************
 
-  public pageInfo!: PageInfoRelayObject
+  public readonly pageInfo!: PageInfoRelayObject
 }

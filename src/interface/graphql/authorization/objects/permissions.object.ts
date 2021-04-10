@@ -7,26 +7,26 @@ import { PolicyGraphQLObject } from './policy.object'
 })
 export class PermissionsGraphQLObject {
   @Field(() => PolicyGraphQLObject, { complexity: 0 })
-  public user!: PolicyGraphQLObject
+  public readonly user!: PolicyGraphQLObject
 
   @Field(() => PolicyGraphQLObject, { complexity: 0 })
-  public team!: PolicyGraphQLObject
+  public readonly team!: PolicyGraphQLObject
 
   @Field(() => PolicyGraphQLObject, { complexity: 0 })
-  public cycle!: PolicyGraphQLObject
+  public readonly cycle!: PolicyGraphQLObject
 
   @Field(() => PolicyGraphQLObject, { complexity: 0 })
-  public objective!: PolicyGraphQLObject
+  public readonly objective!: PolicyGraphQLObject
 
   @Field(() => PolicyGraphQLObject, { complexity: 0 })
-  public keyResult!: PolicyGraphQLObject
+  public readonly keyResult!: PolicyGraphQLObject
 
   @Field(() => PolicyGraphQLObject, { complexity: 0 })
-  public keyResultCheckIn!: PolicyGraphQLObject
+  public readonly keyResultCheckIn!: PolicyGraphQLObject
 
   @Field(() => PolicyGraphQLObject, { complexity: 0 })
-  public keyResultComment!: PolicyGraphQLObject
+  public readonly keyResultComment!: PolicyGraphQLObject
 
   @Field(() => PolicyGraphQLObject, { complexity: 0 })
-  public keyResultCustomList!: PolicyGraphQLObject
+  public readonly keyResultCustomList!: PolicyGraphQLObject
 }

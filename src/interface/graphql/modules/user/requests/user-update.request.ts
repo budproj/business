@@ -5,8 +5,8 @@ import { UserInputRequest } from './user-input.request'
 @ArgsType()
 export class UserUpdateRequest {
   @Field(() => ID)
-  public id: string
+  public readonly id: string
 
   @Field(() => UserInputRequest)
-  public data: UserInputRequest
+  public readonly data: UserInputRequest
 }

@@ -12,11 +12,11 @@ import { ObjectiveGraphQLNode } from './objective.node'
 })
 export class ObjectivesGraphQLConnection implements ConnectionRelayInterface<ObjectiveGraphQLNode> {
   @Field(() => [ObjectiveRootEdgeGraphQLObject], { complexity: 0 })
-  public edges!: ObjectiveRootEdgeGraphQLObject[]
+  public readonly edges!: ObjectiveRootEdgeGraphQLObject[]
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS
   // **********************************************************************************************
 
-  public pageInfo!: PageInfoRelayObject
+  public readonly pageInfo!: PageInfoRelayObject
 }

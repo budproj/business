@@ -12,11 +12,11 @@ import { UserGraphQLNode } from './user.node'
 })
 export class UsersGraphQLConnection implements ConnectionRelayInterface<UserGraphQLNode> {
   @Field(() => [UserRootEdgeGraphQLObject], { complexity: 0 })
-  public edges!: UserRootEdgeGraphQLObject[]
+  public readonly edges!: UserRootEdgeGraphQLObject[]
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS
   // **********************************************************************************************
 
-  public pageInfo!: PageInfoRelayObject
+  public readonly pageInfo!: PageInfoRelayObject
 }
