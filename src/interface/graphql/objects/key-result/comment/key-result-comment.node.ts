@@ -22,10 +22,10 @@ export class KeyResultCommentGraphQLNode implements GuardedNodeGraphQLInterface 
     complexity: 0,
     description: 'The key result ID that this comment is related to',
   })
-  public readonly keyResultId!: KeyResultGraphQLNode['id']
+  public readonly keyResultId!: string
 
   @Field(() => ID, { complexity: 0, description: 'The user ID that owns this comment' })
-  public readonly userId!: UserGraphQLNode['id']
+  public readonly userId!: string
 
   // **********************************************************************************************
   // RESOLVED FIELDS

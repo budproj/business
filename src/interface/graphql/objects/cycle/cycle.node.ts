@@ -42,7 +42,7 @@ export class CycleGraphQLNode implements GuardedNodeGraphQLInterface {
   public readonly updatedAt!: Date
 
   @Field(() => ID, { complexity: 0, description: 'The team ID that this cycle belongs to' })
-  public readonly teamId!: TeamGraphQLNode['id']
+  public readonly teamId!: string
 
   @Field(() => ID, {
     complexity: 0,
@@ -50,7 +50,7 @@ export class CycleGraphQLNode implements GuardedNodeGraphQLInterface {
     description:
       'Each cycle can relates with a given higher cycle, creating a for of tree-like architecture. If this cycle has any cycle above it, the ID of that will be recorded here',
   })
-  public readonly parentId?: CycleGraphQLNode['id']
+  public readonly parentId?: string
 
   // **********************************************************************************************
   // RESOLVED FIELDS

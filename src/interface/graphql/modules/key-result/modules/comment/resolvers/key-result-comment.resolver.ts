@@ -57,7 +57,7 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
       queryOptions,
     )
 
-    return this.relay.marshalResponse<KeyResultCommentGraphQLNode>(queryResult, connection)
+    return this.relay.marshalResponse<KeyResultComment>(queryResult, connection)
   }
 
   @ResolveField('user', () => UserGraphQLNode)

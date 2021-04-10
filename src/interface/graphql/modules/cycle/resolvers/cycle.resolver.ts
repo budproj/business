@@ -48,19 +48,18 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
 
     const [connection, filters] = this.relay.unmarshalRequest(request)
 
-    const userTeams = await graphqlUser.teams
     const queryOptions: GetOptions<Cycle> = {
       limit: connection.first,
     }
 
-    const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(userTeams)
+    const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(graphqlUser.teams)
     const queryResult = await this.core.cycle.getFromTeamsWithFilters(
       userTeamsTree,
       filters,
       queryOptions,
     )
 
-    return this.relay.marshalResponse<CycleGraphQLNode>(queryResult, connection)
+    return this.relay.marshalResponse<Cycle>(queryResult, connection)
   }
 
   @RequiredActions('cycle:read')
@@ -76,12 +75,11 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
 
     const [connection, { fromCycles, ...filters }] = this.relay.unmarshalRequest(request)
 
-    const userTeams = await graphqlUser.teams
     const queryOptions: GetOptions<Cycle> = {
       limit: connection.first,
     }
 
-    const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(userTeams)
+    const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(graphqlUser.teams)
     const queryResult = await this.core.cycle.getCyclesInSamePeriodFromTeamsAndParentIDsWithFilters(
       userTeamsTree,
       fromCycles,
@@ -89,7 +87,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       queryOptions,
     )
 
-    return this.relay.marshalResponse<CycleGraphQLNode>(queryResult, connection)
+    return this.relay.marshalResponse<Cycle>(queryResult, connection)
   }
 
   @ResolveField('team', () => TeamGraphQLNode)

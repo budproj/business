@@ -9,6 +9,8 @@ import { GetOptions } from '@core/interfaces/get-options'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 
+import { UserProvider } from '../user/user.provider'
+
 import { TeamRankingProvider } from './ranking.provider'
 import { TeamInterface } from './team.interface'
 import { Team } from './team.orm-entity'
@@ -24,6 +26,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
   constructor(
     protected readonly repository: TeamRepository,
     private readonly ranking: TeamRankingProvider,
+    private readonly userProvider: UserProvider,
   ) {
     super(TeamProvider.name, repository)
   }
@@ -37,7 +40,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     filters?: FindConditions<Team>,
     options?: GetOptions<Team>,
   ): Promise<Team[]> {
-    const teams = await this.getWithUser(user)
+    const teams = await this.userProvider.getUserTeams(user)
     const companyPromises = teams.map(async (team) =>
       this.getRootTeamForTeam(team, filters, options),
     )
@@ -45,12 +48,6 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     const companies = Promise.all(companyPromises)
 
     return companies
-  }
-
-  public async getWithUser(user: UserInterface): Promise<Team[]> {
-    const teams = await user.teams
-
-    return teams as Team[]
   }
 
   public async getFullTeamNodesTree(
@@ -144,7 +141,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
 
     const userCompanies = await this.parseUserCompanies(user)
     const userCompaniesTeams = await this.parseUserCompaniesTeams(userCompanies)
-    const userTeams = await this.getWithUser(user)
+    const userTeams = await this.userProvider.getUserTeams(user)
 
     const query = {
       companies: userCompanies,
@@ -193,8 +190,8 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     team: TeamInterface,
     filters?: FindConditions<Team>,
     options?: GetOptions<Team>,
-  ) {
-    let rootTeam = team
+  ): Promise<Team> {
+    let rootTeam = await this.getOne({ id: team.id })
 
     while (rootTeam.parentId) {
       // Since we're dealing with a linked list, where we need to evaluate each step before trying

@@ -55,6 +55,6 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
       queryOptions,
     )
 
-    return this.relay.marshalResponse<UserGraphQLNode>(queryResult, connection)
+    return this.relay.marshalResponse<User>(queryResult, connection)
   }
 }

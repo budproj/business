@@ -7,17 +7,16 @@ import { GuardedConnectionGraphQLInterface } from '../../authorization/interface
 import { PolicyGraphQLObject } from '../../authorization/objects/policy.object'
 import { TeamGraphQLNode } from '../team/team.node'
 
-import { UserCompanyEdgeGraphQLObject } from './user-company.edge'
+import { UserTeamEdgeGraphQLObject } from './user-team.edge'
 
-@ObjectType('UserCompanies', {
+@ObjectType('UserTeams', {
   implements: () => [ConnectionRelayInterface, GuardedConnectionGraphQLInterface],
-  description:
-    'A list containing a given user companies based on the provided filters and arguments',
+  description: 'A list containing a given user teams based on the provided filters and arguments',
 })
-export class UserCompaniesGraphQLConnection
+export class UserTeamsGraphQLConnection
   implements GuardedConnectionGraphQLInterface<TeamGraphQLNode> {
-  @Field(() => [UserCompanyEdgeGraphQLObject], { complexity: 0 })
-  public readonly edges!: UserCompanyEdgeGraphQLObject[]
+  @Field(() => [UserTeamEdgeGraphQLObject], { complexity: 0 })
+  public readonly edges!: UserTeamEdgeGraphQLObject[]
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS

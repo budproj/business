@@ -61,7 +61,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     const queryHandler = queryLeveledHandlers[level ?? 'default']
     const queryResult = await queryHandler()
 
-    return this.relay.marshalResponse<TeamGraphQLNode>(queryResult, connection)
+    return this.relay.marshalResponse<Team>(queryResult, connection)
   }
 
   @ResolveField('owner', () => UserGraphQLNode)

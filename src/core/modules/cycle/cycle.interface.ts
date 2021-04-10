@@ -1,5 +1,4 @@
 import { CoreEntityInterface } from '@core/core-entity.interface'
-import { TeamInterface } from '@core/modules/team/team.interface'
 
 import { Cadence } from './enums/cadence.enum'
 
@@ -10,9 +9,6 @@ export interface CycleInterface extends CoreEntityInterface {
   dateStart: Date
   dateEnd: Date
   updatedAt: Date
-  teamId: TeamInterface['id']
-  team: TeamInterface
-  parentId?: CycleInterface['id']
-  parent?: CycleInterface
-  cycles?: CycleInterface[]
+  teamId: string
+  parentId?: string
 }

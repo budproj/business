@@ -7,6 +7,7 @@ import { AuthorizationUser } from '@adapters/authorization/interfaces/user.inter
 import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CoreProvider } from '@core/core.provider'
 import { GetOptions } from '@core/interfaces/get-options'
+import { TeamInterface } from '@core/modules/team/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
@@ -18,7 +19,7 @@ import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-resu
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
-import { UserCompaniesGraphQLConnection } from '@interface/graphql/objects/user/user-company.connection'
+import { UserTeamsGraphQLConnection } from '@interface/graphql/objects/user/user-teams.connection'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
@@ -38,13 +39,15 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   @RequiredActions('user:read')
   @Query(() => UserGraphQLNode, { name: 'me' })
   protected async getMyUser(@GraphQLUser() graphqlUser: AuthorizationUser) {
-    const { id } = graphqlUser
     this.logger.log(
-      `Fetching data about the user that is executing the request. Provided user ID: ${id.toString()}`,
+      `Fetching data about the user that is executing the request. Provided user ID: ${graphqlUser.id}`,
     )
 
-    const user = await this.queryGuard.getOneWithActionScopeConstraint({ id }, graphqlUser)
-    if (!user) throw new UserInputError(`We could not found an user with ID ${id}`)
+    const user = await this.queryGuard.getOneWithActionScopeConstraint(
+      { id: graphqlUser.id },
+      graphqlUser,
+    )
+    if (!user) throw new UserInputError(`We could not found an user with ID ${graphqlUser.id}`)
 
     return user
   }
@@ -81,7 +84,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return this.core.user.buildUserFullName(user)
   }
 
-  @ResolveField('companies', () => UserCompaniesGraphQLConnection, { nullable: true })
+  @ResolveField('companies', () => UserTeamsGraphQLConnection, { nullable: true })
   protected async getUserCompanies(
     @Parent() user: UserGraphQLNode,
     @Args() request?: TeamFiltersRequest,
@@ -99,19 +102,28 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     }
     const queryResult = await this.core.team.getUserCompanies(user, filters, queryOptions)
 
-    return this.relay.marshalResponse<TeamGraphQLNode>(queryResult, connection)
+    return this.relay.marshalResponse<Team>(queryResult, connection)
   }
 
-  @ResolveField('teams', () => [TeamGraphQLNode], { nullable: true })
-  protected async getUserTeams(@Parent() user: UserGraphQLNode) {
+  @ResolveField('teams', () => UserTeamsGraphQLConnection, { nullable: true })
+  protected async getUserTeams(
+    @Parent() user: UserGraphQLNode,
+    @Args() request?: TeamFiltersRequest,
+  ) {
     this.logger.log({
       user,
+      request,
       message: 'Fetching teams for user',
     })
 
-    const teams = await this.core.team.getWithUser(user)
+    const [connection, filters] = this.relay.unmarshalRequest(request)
 
-    return teams
+    const queryOptions: GetOptions<Team> = {
+      limit: connection.first,
+    }
+    const queryResult = await this.core.user.getUserTeams(user, filters, queryOptions)
+
+    return this.relay.marshalResponse<TeamInterface>(queryResult, connection)
   }
 
   @ResolveField('ownedTeams', () => [TeamGraphQLNode], { nullable: true })
@@ -121,7 +133,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching owned teams for user',
     })
 
-    return this.core.team.getFromOwner(user)
+    return this.core.user.getUserTeams(user)
   }
 
   @ResolveField('objectives', () => [ObjectiveGraphQLNode], { nullable: true })

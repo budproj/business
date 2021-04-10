@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common'
 
 import { CoreModule } from '@core/core.module'
 
+import { UserTeamsConnectionGraphQLResolver } from './resolvers/user-teams-connection.resolver'
 import { UserGraphQLResolver } from './resolvers/user.resolver'
-import { UserCompaniesConnectionGraphQLResolver } from './resolvers/users-companies-connection.resolver'
 import { UsersConnectionGraphQLResolver } from './resolvers/users-connection.resolver'
 
 @Module({
@@ -11,7 +11,7 @@ import { UsersConnectionGraphQLResolver } from './resolvers/users-connection.res
   providers: [
     UserGraphQLResolver,
     UsersConnectionGraphQLResolver,
-    UserCompaniesConnectionGraphQLResolver,
+    UserTeamsConnectionGraphQLResolver,
   ],
 })
 export class UserGraphQLModule {}

@@ -21,10 +21,10 @@ export class ObjectiveGraphQLNode implements GuardedNodeGraphQLInterface {
   public readonly updatedAt!: Date
 
   @Field(() => ID, { complexity: 0, description: 'The cycle ID that owns this objective' })
-  public readonly cycleId!: CycleGraphQLNode['id']
+  public readonly cycleId!: string
 
   @Field(() => ID, { complexity: 0, description: 'The user ID that owns this objective' })
-  public readonly ownerId!: UserGraphQLNode['id']
+  public readonly ownerId!: string
 
   // **********************************************************************************************
   // RESOLVED FIELDS

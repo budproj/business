@@ -23,7 +23,7 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   public readonly updatedAt!: Date
 
   @Field(() => ID, { complexity: 0, description: 'The user ID that owns this team' })
-  public readonly ownerId!: UserGraphQLNode['id']
+  public readonly ownerId!: string
 
   @Field({ complexity: 0, nullable: true, description: 'The description about the team' })
   public readonly description?: string
@@ -40,7 +40,7 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
     description: 'The ID of the team that owns this team',
     nullable: true,
   })
-  public readonly parentId?: TeamGraphQLNode['id']
+  public readonly parentId?: string
 
   // **********************************************************************************************
   // RESOLVED FIELDS

@@ -11,7 +11,7 @@ import { KeyResultGraphQLNode } from '../key-result/key-result.node'
 import { ObjectiveGraphQLNode } from '../objective/objective.node'
 import { TeamGraphQLNode } from '../team/team.node'
 
-import { UserCompaniesGraphQLConnection } from './user-company.connection'
+import { UserTeamsGraphQLConnection } from './user-teams.connection'
 
 @ObjectType('User', {
   implements: () => [NodeRelayInterface, GuardedNodeGraphQLInterface],
@@ -77,19 +77,19 @@ export class UserGraphQLNode implements GuardedNodeGraphQLInterface {
   // CONNECTION FIELDS
   // **********************************************************************************************
 
-  @Field(() => [UserCompaniesGraphQLConnection], {
+  @Field(() => UserTeamsGraphQLConnection, {
     complexity: 0,
     nullable: true,
     description: 'The creation date ordered list of companies that this user is a part of',
   })
-  public readonly companies?: UserCompaniesGraphQLConnection[]
+  public readonly companies?: UserTeamsGraphQLConnection
 
-  @Field(() => [TeamGraphQLNode], {
+  @Field(() => UserTeamsGraphQLConnection, {
     complexity: 0,
     nullable: true,
     description: 'The creation date ordered list of teams that this user is part of',
   })
-  public readonly teams?: Promise<TeamGraphQLNode[]>
+  public readonly teams?: UserTeamsGraphQLConnection
 
   @Field(() => [TeamGraphQLNode], {
     complexity: 0,

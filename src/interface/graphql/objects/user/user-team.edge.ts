@@ -5,11 +5,11 @@ import { EdgeRelayInterface } from '@infrastructure/relay/interfaces/edge.interf
 
 import { TeamGraphQLNode } from '../team/team.node'
 
-@ObjectType('UserCompanyEdge', {
+@ObjectType('UserTeamEdge', {
   implements: () => EdgeRelayInterface,
-  description: 'This edge represents the relation between a user and their companies',
+  description: 'This edge represents the relation between users and their teams',
 })
-export class UserCompanyEdgeGraphQLObject implements EdgeRelayInterface<TeamGraphQLNode> {
+export class UserTeamEdgeGraphQLObject implements EdgeRelayInterface<TeamGraphQLNode> {
   @Field(() => TeamGraphQLNode, { complexity: 1 })
   public readonly node!: TeamGraphQLNode
 

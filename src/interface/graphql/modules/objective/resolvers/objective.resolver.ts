@@ -57,7 +57,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
       queryOptions,
     )
 
-    return this.relay.marshalResponse<ObjectiveGraphQLNode>(queryResult, connection)
+    return this.relay.marshalResponse<Objective>(queryResult, connection)
   }
 
   @ResolveField('owner', () => UserGraphQLNode)

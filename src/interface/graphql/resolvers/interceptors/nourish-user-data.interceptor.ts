@@ -4,7 +4,6 @@ import { GqlExecutionContext } from '@nestjs/graphql'
 import { AuthzAdapter } from '@adapters/authorization/authz.adapter'
 import { ServerRequest } from '@adapters/context/server-request.interface'
 import { CoreProvider } from '@core/core.provider'
-import { UserInterface } from '@core/modules/user/user.interface'
 
 @Injectable()
 export class NourishUserDataInterceptor implements NestInterceptor {
@@ -17,10 +16,7 @@ export class NourishUserDataInterceptor implements NestInterceptor {
     const graphqlContext = GqlExecutionContext.create(executionContext)
     const request: ServerRequest = graphqlContext.getContext().req
 
-    const {
-      teams,
-      ...user
-    }: UserInterface = await this.core.user.getUserFromSubjectWithTeamRelation(
+    const { teams, ...user } = await this.core.user.getUserFromSubjectWithTeamRelation(
       request.user.token.sub,
     )
     const resourcePolicy = this.authz.getResourcePolicyFromPermissions(

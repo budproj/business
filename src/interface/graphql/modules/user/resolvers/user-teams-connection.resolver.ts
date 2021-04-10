@@ -9,13 +9,13 @@ import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/g
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
 import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
-import { UserCompaniesGraphQLConnection } from '@interface/graphql/objects/user/user-company.connection'
+import { UserTeamsGraphQLConnection } from '@interface/graphql/objects/user/user-teams.connection'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @UseInterceptors(NourishUserDataInterceptor)
-@Resolver(() => UserCompaniesGraphQLConnection)
-export class UserCompaniesConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
+@Resolver(() => UserTeamsGraphQLConnection)
+export class UserTeamsConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
   Team,
   TeamInterface,
   TeamGraphQLNode

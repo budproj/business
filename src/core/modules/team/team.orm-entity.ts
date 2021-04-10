@@ -26,7 +26,7 @@ export class Team extends CoreEntity implements TeamInterface {
   public updatedAt: Date
 
   @Column()
-  @RelationId((team: TeamInterface) => team.owner)
+  @RelationId((team: Team) => team.owner)
   public ownerId: UserInterface['id']
 
   @ManyToOne('User', 'ownedTeams')
@@ -39,7 +39,7 @@ export class Team extends CoreEntity implements TeamInterface {
   public gender?: TeamGender
 
   @Column({ nullable: true })
-  @RelationId((team: TeamInterface) => team.parent)
+  @RelationId((team: Team) => team.parent)
   public parentId?: TeamInterface['id']
 
   @ManyToOne('Team', 'teams')
