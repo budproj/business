@@ -72,7 +72,7 @@ export class UserGraphQLNode implements GuardedNodeGraphQLInterface {
   public readonly fullName?: string
 
   // **********************************************************************************************
-  // EDGE FIELDS
+  // CONNECTION FIELDS
   // **********************************************************************************************
 
   @Field(() => [TeamGraphQLNode], {

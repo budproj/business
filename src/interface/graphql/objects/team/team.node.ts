@@ -70,7 +70,7 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   public readonly parent?: TeamGraphQLNode
 
   // **********************************************************************************************
-  // EDGE FIELDS
+  // CONNECTION FIELDS
   // **********************************************************************************************
 
   @Field(() => [UserGraphQLNode], {

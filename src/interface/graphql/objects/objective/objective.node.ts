@@ -43,7 +43,7 @@ export class ObjectiveGraphQLNode implements GuardedNodeGraphQLInterface {
   public readonly owner!: UserGraphQLNode
 
   // **********************************************************************************************
-  // EDGE FIELDS
+  // CONNECTION FIELDS
   // **********************************************************************************************
 
   @Field(() => [KeyResultGraphQLNode], {

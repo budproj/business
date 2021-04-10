@@ -79,7 +79,7 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
   public readonly isOutdated?: boolean
 
   // **********************************************************************************************
-  // EDGE FIELDS
+  // CONNECTION FIELDS
   // **********************************************************************************************
 
   @Field(() => [KeyResultCommentGraphQLNode], {

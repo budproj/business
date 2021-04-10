@@ -19,7 +19,6 @@ import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-
 import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
-import { UsersGraphQLConnection } from '@interface/graphql/objects/user/users.connection'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
 import { UserFiltersRequest } from '../requests/user-filters.request'
@@ -33,32 +32,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
   constructor(protected readonly core: CoreProvider) {
     super(Resource.USER, core, core.user)
-  }
-
-  @RequiredActions('user:read')
-  @Query(() => UsersGraphQLConnection, { name: 'users' })
-  protected async getUsers(
-    @Args() request: UserFiltersRequest,
-    @GraphQLUser() graphqlUser: AuthorizationUser,
-  ) {
-    this.logger.log({
-      request,
-      graphqlUser,
-      message: 'Fetching users with filters',
-    })
-
-    const [connection, filters] = this.relay.unmarshalRequest(request)
-
-    const queryOptions: GetOptions<User> = {
-      limit: connection.first,
-    }
-    const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
-      filters,
-      graphqlUser,
-      queryOptions,
-    )
-
-    return this.relay.marshalResponse<UserGraphQLNode>(queryResult, connection)
   }
 
   @RequiredActions('user:read')

@@ -71,7 +71,7 @@ export class CycleGraphQLNode implements GuardedNodeGraphQLInterface {
   public readonly parent?: CycleGraphQLNode
 
   // **********************************************************************************************
-  // EDGE FIELDS
+  // CONNECTION FIELDS
   // **********************************************************************************************
 
   @Field(() => [CycleGraphQLNode], {
