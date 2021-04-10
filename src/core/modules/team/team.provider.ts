@@ -31,8 +31,21 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     super(TeamProvider.name, repository)
   }
 
-  public async getFromOwner(owner: UserInterface): Promise<Team[]> {
-    return this.repository.find({ ownerId: owner.id })
+  public async getFromOwner(
+    user: UserInterface,
+    filters?: FindConditions<Team>,
+    options?: GetOptions<Team>,
+  ): Promise<Team[]> {
+    const queryOptions = this.repository.marshalGetOptions(options)
+    const whereSelector = {
+      ...filters,
+      ownerId: user.id,
+    }
+
+    return this.repository.find({
+      ...queryOptions,
+      where: whereSelector,
+    })
   }
 
   public async getUserCompanies(

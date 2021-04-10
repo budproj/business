@@ -7,6 +7,10 @@ import { AuthorizationUser } from '@adapters/authorization/interfaces/user.inter
 import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CoreProvider } from '@core/core.provider'
 import { GetOptions } from '@core/interfaces/get-options'
+import { KeyResultInterface } from '@core/modules/key-result/key-result.interface'
+import { KeyResultCheckInInterface } from '@core/modules/key-result/modules/check-in/key-result-check-in.interface'
+import { KeyResultCommentInterface } from '@core/modules/key-result/modules/comment/key-result-comment.interface'
+import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
 import { TeamInterface } from '@core/modules/team/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
@@ -15,14 +19,18 @@ import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/g
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
 import { GraphQLUser } from '@interface/graphql/decorators/graphql-user'
-import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
-import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
-import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
-import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
+import { UserKeyResultCheckInsGraphQLConnection } from '@interface/graphql/objects/user/user-key-result-check-ins.connection'
+import { UserKeyResultCommentsGraphQLConnection } from '@interface/graphql/objects/user/user-key-result-comments.connection'
+import { UserKeyResultsGraphQLConnection } from '@interface/graphql/objects/user/user-key-results.connection'
+import { UserObjectivesGraphQLConnection } from '@interface/graphql/objects/user/user-objectives.connection'
 import { UserTeamsGraphQLConnection } from '@interface/graphql/objects/user/user-teams.connection'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
+import { KeyResultCheckInFiltersRequest } from '../../key-result/modules/check-in/requests/key-result-check-in.request'
+import { KeyResultCommentFiltersRequest } from '../../key-result/modules/comment/requests/key-result-comment.request'
+import { KeyResultFiltersRequest } from '../../key-result/requests/key-result.request'
+import { ObjectiveFiltersRequest } from '../../objective/requests/objective-filters.request'
 import { TeamFiltersRequest } from '../../team/requests/team-filters.request'
 import { UserUpdateRequest } from '../requests/user-update.request'
 
@@ -126,43 +134,120 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return this.relay.marshalResponse<TeamInterface>(queryResult, connection)
   }
 
-  @ResolveField('ownedTeams', () => [TeamGraphQLNode], { nullable: true })
-  protected async getUserOwnedTeams(@Parent() user: UserGraphQLNode) {
+  @ResolveField('ownedTeams', () => UserTeamsGraphQLConnection, { nullable: true })
+  protected async getUserOwnedTeams(
+    @Parent() user: UserGraphQLNode,
+    @Args() request?: TeamFiltersRequest,
+  ) {
     this.logger.log({
       user,
+      request,
       message: 'Fetching owned teams for user',
     })
 
-    return this.core.user.getUserTeams(user)
+    const [connection, filters] = this.relay.unmarshalRequest(request)
+
+    const queryOptions: GetOptions<Team> = {
+      limit: connection.first,
+    }
+    const queryResult = await this.core.team.getFromOwner(user, filters, queryOptions)
+
+    return this.relay.marshalResponse<TeamInterface>(queryResult, connection)
   }
 
-  @ResolveField('objectives', () => [ObjectiveGraphQLNode], { nullable: true })
-  protected async getUserObjectives(@Parent() user: UserGraphQLNode) {
+  @ResolveField('objectives', () => UserObjectivesGraphQLConnection, { nullable: true })
+  protected async getUserObjectives(
+    @Parent() user: UserGraphQLNode,
+    @Args() request?: ObjectiveFiltersRequest,
+  ) {
     this.logger.log({
       user,
+      request,
       message: 'Fetching objectives for user',
     })
 
-    return this.core.objective.getFromOwner(user)
+    const [connection, filters] = this.relay.unmarshalRequest(request)
+
+    const queryOptions: GetOptions<Team> = {
+      limit: connection.first,
+    }
+    const queryResult = await this.core.objective.getFromOwner(user, filters, queryOptions)
+
+    return this.relay.marshalResponse<ObjectiveInterface>(queryResult, connection)
   }
 
-  @ResolveField('keyResults', () => [KeyResultGraphQLNode], { nullable: true })
-  protected async getUserKeyResults(@Parent() user: UserGraphQLNode) {
+  @ResolveField('keyResults', () => UserKeyResultsGraphQLConnection, { nullable: true })
+  protected async getUserKeyResults(
+    @Parent() user: UserGraphQLNode,
+    @Args() request?: KeyResultFiltersRequest,
+  ) {
     this.logger.log({
       user,
+      request,
       message: 'Fetching key results for user',
     })
 
-    return this.core.keyResult.getFromOwner(user)
+    const [connection, filters] = this.relay.unmarshalRequest(request)
+
+    const queryOptions: GetOptions<Team> = {
+      limit: connection.first,
+    }
+    const queryResult = await this.core.keyResult.getFromOwner(user, filters, queryOptions)
+
+    return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection)
   }
 
-  @ResolveField('keyResultCheckIns', () => [KeyResultCheckInGraphQLNode], { nullable: true })
-  protected async getUserKeyResultCheckIns(@Parent() user: UserGraphQLNode) {
+  @ResolveField('keyResultComments', () => UserKeyResultCommentsGraphQLConnection, {
+    nullable: true,
+  })
+  protected async getUserKeyResultComments(
+    @Parent() user: UserGraphQLNode,
+    @Args() request?: KeyResultCommentFiltersRequest,
+  ) {
     this.logger.log({
       user,
+      request,
+      message: 'Fetching comments by user',
+    })
+
+    const [connection, filters] = this.relay.unmarshalRequest(request)
+
+    const queryOptions: GetOptions<Team> = {
+      limit: connection.first,
+    }
+    const queryResult = await this.core.keyResult.getCommentsCreatedByUser(
+      user,
+      filters,
+      queryOptions,
+    )
+
+    return this.relay.marshalResponse<KeyResultCommentInterface>(queryResult, connection)
+  }
+
+  @ResolveField('keyResultCheckIns', () => UserKeyResultCheckInsGraphQLConnection, {
+    nullable: true,
+  })
+  protected async getUserKeyResultCheckIns(
+    @Parent() user: UserGraphQLNode,
+    @Args() request?: KeyResultCheckInFiltersRequest,
+  ) {
+    this.logger.log({
+      user,
+      request,
       message: 'Fetching check-ins by user',
     })
 
-    return this.core.keyResult.getCheckInsByUser(user)
+    const [connection, filters] = this.relay.unmarshalRequest(request)
+
+    const queryOptions: GetOptions<Team> = {
+      limit: connection.first,
+    }
+    const queryResult = await this.core.keyResult.getCheckInsCreatedByUser(
+      user,
+      filters,
+      queryOptions,
+    )
+
+    return this.relay.marshalResponse<KeyResultCheckInInterface>(queryResult, connection)
   }
 }

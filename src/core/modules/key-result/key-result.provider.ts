@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { uniqBy } from 'lodash'
-import { Any } from 'typeorm'
+import { Any, FindConditions } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
@@ -28,8 +28,21 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     super(KeyResultProvider.name, repository)
   }
 
-  public async getFromOwner(owner: UserInterface): Promise<KeyResult[]> {
-    return this.repository.find({ ownerId: owner.id })
+  public async getFromOwner(
+    user: UserInterface,
+    filters?: FindConditions<KeyResult>,
+    options?: GetOptions<KeyResult>,
+  ): Promise<KeyResult[]> {
+    const queryOptions = this.repository.marshalGetOptions(options)
+    const whereSelector = {
+      ...filters,
+      ownerId: user.id,
+    }
+
+    return this.repository.find({
+      ...queryOptions,
+      where: whereSelector,
+    })
   }
 
   public async getFromTeams(teams: TeamInterface | TeamInterface[]): Promise<KeyResult[]> {
@@ -92,10 +105,30 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return this.keyResultCommentProvider.getMany(selector, undefined, options)
   }
 
-  public async getCheckInsByUser(user: UserInterface): Promise<KeyResultCheckIn[]> {
-    const selector = { userId: user.id }
+  public async getCommentsCreatedByUser(
+    user: UserInterface,
+    filters?: FindConditions<KeyResultComment>,
+    options?: GetOptions<KeyResultComment>,
+  ): Promise<KeyResultComment[]> {
+    const selector = {
+      ...filters,
+      userId: user.id,
+    }
 
-    return this.keyResultCheckInProvider.getMany(selector)
+    return this.keyResultCommentProvider.getMany(selector, undefined, options)
+  }
+
+  public async getCheckInsCreatedByUser(
+    user: UserInterface,
+    filters?: FindConditions<KeyResultCheckIn>,
+    options?: GetOptions<KeyResultCheckIn>,
+  ): Promise<KeyResultCheckIn[]> {
+    const selector = {
+      ...filters,
+      userId: user.id,
+    }
+
+    return this.keyResultCheckInProvider.getMany(selector, undefined, options)
   }
 
   protected async protectCreationQuery(

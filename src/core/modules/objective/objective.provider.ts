@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common'
+import { FindConditions } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
+import { GetOptions } from '@core/interfaces/get-options'
 import { CycleInterface } from '@core/modules/cycle/cycle.interface'
 import { KeyResultInterface } from '@core/modules/key-result/key-result.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
@@ -17,8 +19,21 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     super(ObjectiveProvider.name, repository)
   }
 
-  public async getFromOwner(owner: UserInterface): Promise<Objective[]> {
-    return this.repository.find({ ownerId: owner.id })
+  public async getFromOwner(
+    user: UserInterface,
+    filters?: FindConditions<Objective>,
+    options?: GetOptions<Objective>,
+  ): Promise<Objective[]> {
+    const queryOptions = this.repository.marshalGetOptions(options)
+    const whereSelector = {
+      ...filters,
+      ownerId: user.id,
+    }
+
+    return this.repository.find({
+      ...queryOptions,
+      where: whereSelector,
+    })
   }
 
   public async getFromCycle(cycle: CycleInterface): Promise<Objective[]> {

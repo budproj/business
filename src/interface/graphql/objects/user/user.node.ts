@@ -6,11 +6,10 @@ import { GuardedNodeGraphQLInterface } from '@interface/graphql/authorization/in
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
 import { UserGenderGraphQLEnum } from '@interface/graphql/enums/user-gender.enum'
 
-import { KeyResultCheckInGraphQLNode } from '../key-result/check-in/key-result-check-in.node'
-import { KeyResultGraphQLNode } from '../key-result/key-result.node'
-import { ObjectiveGraphQLNode } from '../objective/objective.node'
-import { TeamGraphQLNode } from '../team/team.node'
-
+import { UserKeyResultCheckInsGraphQLConnection } from './user-key-result-check-ins.connection'
+import { UserKeyResultCommentsGraphQLConnection } from './user-key-result-comments.connection'
+import { UserKeyResultsGraphQLConnection } from './user-key-results.connection'
+import { UserObjectivesGraphQLConnection } from './user-objectives.connection'
 import { UserTeamsGraphQLConnection } from './user-teams.connection'
 
 @ObjectType('User', {
@@ -91,33 +90,40 @@ export class UserGraphQLNode implements GuardedNodeGraphQLInterface {
   })
   public readonly teams?: UserTeamsGraphQLConnection
 
-  @Field(() => [TeamGraphQLNode], {
+  @Field(() => UserTeamsGraphQLConnection, {
     complexity: 0,
     nullable: true,
     description: 'The creation date ordered list of teams that this user owns',
   })
-  public readonly ownedTeams?: TeamGraphQLNode[]
+  public readonly ownedTeams?: UserTeamsGraphQLConnection
 
-  @Field(() => [ObjectiveGraphQLNode], {
+  @Field(() => UserObjectivesGraphQLConnection, {
     complexity: 0,
     nullable: true,
     description: 'The creation date ordered list of objectives that this user owns',
   })
-  public readonly objectives?: ObjectiveGraphQLNode[]
+  public readonly objectives?: UserObjectivesGraphQLConnection
 
-  @Field(() => [KeyResultGraphQLNode], {
+  @Field(() => UserKeyResultsGraphQLConnection, {
     complexity: 0,
     nullable: true,
     description: 'The creation date ordered list of key results that this user owns',
   })
-  public readonly keyResults?: KeyResultGraphQLNode[]
+  public readonly keyResults?: UserKeyResultsGraphQLConnection
 
-  @Field(() => [KeyResultCheckInGraphQLNode], {
+  @Field(() => UserKeyResultCommentsGraphQLConnection, {
+    complexity: 0,
+    nullable: true,
+    description: 'The creation date ordered list of key result comments created by this user',
+  })
+  public readonly keyResultComments?: UserKeyResultCommentsGraphQLConnection
+
+  @Field(() => UserKeyResultCheckInsGraphQLConnection, {
     complexity: 0,
     nullable: true,
     description: 'The creation date ordered list of key result check-ins created by this user',
   })
-  public readonly keyResultCheckIns?: KeyResultCheckInGraphQLNode[]
+  public readonly keyResultCheckIns?: UserKeyResultCheckInsGraphQLConnection
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS
