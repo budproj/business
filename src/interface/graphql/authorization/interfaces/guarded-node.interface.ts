@@ -4,7 +4,7 @@ import { NodeRelayInterface } from '@infrastructure/relay/interfaces/node.interf
 
 import { PolicyGraphQLObject } from '../objects/policy.object'
 
-@InterfaceType('GuardedNode', {
+@InterfaceType('GuardedNodeInterface', {
   implements: () => NodeRelayInterface,
   description: 'A guarded node is like a common node, but with an extra policy field',
 })

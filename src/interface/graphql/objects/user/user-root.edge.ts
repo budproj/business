@@ -2,15 +2,14 @@ import { Field, ObjectType } from '@nestjs/graphql'
 import { ConnectionCursor } from 'graphql-relay'
 
 import { EdgeRelayInterface } from '@infrastructure/relay/interfaces/edge.interface'
-import { GuardedEdgeGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-edge.interface'
 
 import { UserGraphQLNode } from './user.node'
 
 @ObjectType('UserRootEdge', {
-  implements: () => [EdgeRelayInterface, GuardedEdgeGraphQLInterface],
+  implements: () => EdgeRelayInterface,
   description: 'The edge for our user query interface',
 })
-export class UserRootEdgeGraphQLObject implements GuardedEdgeGraphQLInterface<UserGraphQLNode> {
+export class UserRootEdgeGraphQLObject implements EdgeRelayInterface<UserGraphQLNode> {
   @Field(() => UserGraphQLNode, { complexity: 1 })
   public readonly node!: UserGraphQLNode
 

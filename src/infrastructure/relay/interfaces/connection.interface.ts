@@ -5,7 +5,7 @@ import { PageInfoRelayObject } from '../objects/page-info.object'
 
 import { NodeRelayInterface } from './node.interface'
 
-@InterfaceType('Connection', {
+@InterfaceType('ConnectionInterface', {
   description: 'This interface wraps all list connections from our schema',
 })
 export abstract class ConnectionRelayInterface<N extends NodeRelayInterface>

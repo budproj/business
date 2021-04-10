@@ -1,6 +1,6 @@
 import { Field, ID, InterfaceType } from '@nestjs/graphql'
 
-@InterfaceType('Node', {
+@InterfaceType('NodeInterface', {
   description: 'A node represents an unit in our edge list',
 })
 export abstract class NodeRelayInterface {

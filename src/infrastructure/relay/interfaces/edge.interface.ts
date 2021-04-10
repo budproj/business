@@ -3,7 +3,7 @@ import { ConnectionCursor, Edge } from 'graphql-relay'
 
 import { NodeRelayInterface } from './node.interface'
 
-@InterfaceType('Edge', {
+@InterfaceType('EdgeInterface', {
   description: 'An edge is used for proper pagination in nodes',
 })
 export abstract class EdgeRelayInterface<N extends NodeRelayInterface> implements Edge<N> {

@@ -1,16 +1,16 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 import { ConnectionCursor } from 'graphql-relay'
 
-import { GuardedEdgeGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-edge.interface'
+import { EdgeRelayInterface } from '@infrastructure/relay/interfaces/edge.interface'
 
 import { KeyResultCheckInGraphQLNode } from './key-result-check-in.node'
 
 @ObjectType('KeyResultCheckInRootEdge', {
-  implements: () => GuardedEdgeGraphQLInterface,
+  implements: () => EdgeRelayInterface,
   description: 'The edge for our key-result comment query interface',
 })
 export class KeyResultCheckInRootEdgeGraphQLObject
-  implements GuardedEdgeGraphQLInterface<KeyResultCheckInGraphQLNode> {
+  implements EdgeRelayInterface<KeyResultCheckInGraphQLNode> {
   @Field(() => KeyResultCheckInGraphQLNode, { complexity: 1 })
   public readonly node!: KeyResultCheckInGraphQLNode
 
