@@ -11,18 +11,17 @@ import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
-import { KeyResultCommentGraphQLNode } from '@interface/graphql/nodes/key-result-comment.node'
-import { KeyResultGraphQLNode } from '@interface/graphql/nodes/key-result.node'
-import { ObjectiveGraphQLNode } from '@interface/graphql/nodes/objective.node'
-import { TeamGraphQLNode } from '@interface/graphql/nodes/team.node'
-import { UserGraphQLNode } from '@interface/graphql/nodes/user.node'
+import { KeyResultCommentGraphQLNode } from '@interface/graphql/objects/key-result/comment/key-result-comment.node'
+import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
+import { KeyResultsGraphQLConnection } from '@interface/graphql/objects/key-result/key-results.connection'
+import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
+import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
+import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 import { BaseGraphQLResolver } from '@interface/graphql/resolvers/base.resolver'
 import { GraphQLUser } from '@interface/graphql/resolvers/decorators/graphql-user'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
-import { KeyResultListGraphQLObject } from '../objects/key-result-list.object'
 import { KeyResultFiltersRequest } from '../requests/key-result.request'
-import { KeyResultRootEdgeGraphQLResponse } from '../responses/key-result-root-edge.response'
 
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @UseInterceptors(NourishUserDataInterceptor)
@@ -35,20 +34,21 @@ export class KeyResultGraphQLResolver extends BaseGraphQLResolver<KeyResult, Key
   }
 
   @RequiredActions('key-result:read')
-  @Query(() => KeyResultListGraphQLObject, { name: 'keyResults' })
+  @Query(() => KeyResultsGraphQLConnection, { name: 'keyResults' })
   protected async getKeyResults(
-    @Args() { first, ...filters }: KeyResultFiltersRequest,
+    @Args() request: KeyResultFiltersRequest,
     @GraphQLUser() graphqlUser: AuthorizationUser,
   ) {
     this.logger.log({
-      first,
-      filters,
+      request,
       graphqlUser,
       message: 'Fetching key-results with filters',
     })
 
+    const [connection, filters] = this.relay.unmarshalRequest(request)
+
     const queryOptions: GetOptions<KeyResult> = {
-      limit: first,
+      limit: connection.first,
     }
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,
@@ -56,10 +56,7 @@ export class KeyResultGraphQLResolver extends BaseGraphQLResolver<KeyResult, Key
       queryOptions,
     )
 
-    const edges = queryResult?.map((node) => new KeyResultRootEdgeGraphQLResponse({ node }))
-    const response = this.marshalListResponse<KeyResultRootEdgeGraphQLResponse>(edges)
-
-    return response
+    return this.relay.marshalResponse<KeyResultGraphQLNode>(queryResult, connection)
   }
 
   @ResolveField('owner', () => UserGraphQLNode)

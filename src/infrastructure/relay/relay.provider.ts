@@ -1,20 +1,31 @@
+import { Connection, connectionFromArray } from 'graphql-relay'
 import { omit, pick } from 'lodash'
 
-import { ConnectionRequest } from './interfaces/connection-request.interface'
+import { NodeRelayInterface } from './interfaces/node.interface'
+import { ConnectionRelayRequest } from './requests/connection.request'
 import { NodeRequest } from './types/node-request.type'
 
 export class RelayProvider {
-  public getNodeRequest<R extends ConnectionRequest>(request: R): NodeRequest<R> {
+  public getNodeRequest<R extends ConnectionRelayRequest>(request: R): NodeRequest<R> {
     return omit(request, ['before', 'after', 'first', 'last'])
   }
 
-  public getConnectionRequest<R extends ConnectionRequest>(request: R): ConnectionRequest {
+  public getConnectionRelayRequest<R extends ConnectionRelayRequest>(
+    request: R,
+  ): ConnectionRelayRequest {
     return pick(request, ['before', 'after', 'first', 'last'])
   }
 
-  public unmarshalRequest<R extends ConnectionRequest>(
+  public unmarshalRequest<R extends ConnectionRelayRequest>(
     request: R,
-  ): [ConnectionRequest, NodeRequest<R>] {
-    return [this.getConnectionRequest(request), this.getNodeRequest(request)]
+  ): [ConnectionRelayRequest, NodeRequest<R>] {
+    return [this.getConnectionRelayRequest(request), this.getNodeRequest(request)]
+  }
+
+  public marshalResponse<N extends NodeRelayInterface>(
+    nodes: N[],
+    connectionRequest: ConnectionRelayRequest,
+  ): Connection<N> {
+    return connectionFromArray(nodes, connectionRequest)
   }
 }

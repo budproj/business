@@ -11,18 +11,14 @@ import { CoreProvider } from '@core/core.provider'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { RelayProvider } from '@infrastructure/relay/relay.provider'
 
+import { GuardedNodeGraphQLInterface } from '../authorization/interfaces/guarded-node.interface'
 import { PolicyGraphQLObject } from '../authorization/objects/policy.object'
 import { ResourceGraphQLEnum } from '../enums/resource.enum'
 import { ScopeGraphQLEnum } from '../enums/scope.enum'
-import { ConnectionGraphQLInterface } from '../interfaces/connection.interface'
-import { NodeGraphQLInterface } from '../interfaces/node.interface'
-import { EdgeGraphQLResponse } from '../responses/edge.response'
-import { ListGraphQLResponse } from '../responses/list.response'
-import { PageInfoGraphQLResponse } from '../responses/page-info.reponse'
 
 import { GraphQLUser } from './decorators/graphql-user'
 
-@Resolver(() => NodeGraphQLInterface)
+@Resolver(() => GuardedNodeGraphQLInterface)
 export abstract class BaseGraphQLResolver<E extends CoreEntity, I> {
   protected readonly queryGuard: QueryGuardAdapter<E, I>
   protected readonly policy: PolicyAdapter
@@ -68,15 +64,6 @@ export abstract class BaseGraphQLResolver<E extends CoreEntity, I> {
 
   protected async customizeEntityPolicy(originalPolicy: PolicyGraphQLObject, _entity: E) {
     return originalPolicy
-  }
-
-  protected marshalListResponse<E extends EdgeGraphQLResponse>(
-    edges: E[],
-  ): ConnectionGraphQLInterface {
-    const pageInfo = new PageInfoGraphQLResponse<E>({ edges })
-    const queryResult = new ListGraphQLResponse<E>({ edges, pageInfo })
-
-    return queryResult.marshal()
   }
 
   private async getHighestScopeForEntity(entity: E, user: AuthorizationUser) {

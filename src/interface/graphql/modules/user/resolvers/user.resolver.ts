@@ -12,19 +12,18 @@ import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
-import { KeyResultCheckInGraphQLNode } from '@interface/graphql/nodes/key-result-check-in.node'
-import { KeyResultGraphQLNode } from '@interface/graphql/nodes/key-result.node'
-import { ObjectiveGraphQLNode } from '@interface/graphql/nodes/objective.node'
-import { TeamGraphQLNode } from '@interface/graphql/nodes/team.node'
-import { UserGraphQLNode } from '@interface/graphql/nodes/user.node'
+import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
+import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
+import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
+import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
+import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
+import { UsersGraphQLConnection } from '@interface/graphql/objects/user/users.connection'
 import { BaseGraphQLResolver } from '@interface/graphql/resolvers/base.resolver'
 import { GraphQLUser } from '@interface/graphql/resolvers/decorators/graphql-user'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
-import { UserListGraphQLObject } from '../objects/user-list.object'
 import { UserFiltersRequest } from '../requests/user-filters.request'
 import { UserUpdateRequest } from '../requests/user-update.request'
-import { UserRootEdgeGraphQLResponse } from '../responses/user-root-edge.response'
 
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @UseInterceptors(NourishUserDataInterceptor)
@@ -37,7 +36,7 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
   }
 
   @RequiredActions('user:read')
-  @Query(() => UserListGraphQLObject, { name: 'users' })
+  @Query(() => UsersGraphQLConnection, { name: 'users' })
   protected async getUsers(
     @Args() request: UserFiltersRequest,
     @GraphQLUser() graphqlUser: AuthorizationUser,
@@ -59,10 +58,7 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
       queryOptions,
     )
 
-    const edges = queryResult?.map((node) => new UserRootEdgeGraphQLResponse({ node }))
-    const response = this.marshalListResponse<UserRootEdgeGraphQLResponse>(edges)
-
-    return response
+    return this.relay.marshalResponse<UserGraphQLNode>(queryResult, connection)
   }
 
   @RequiredActions('user:read')

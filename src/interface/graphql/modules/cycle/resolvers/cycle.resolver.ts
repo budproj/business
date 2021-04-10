@@ -11,19 +11,18 @@ import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
-import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/requests/key-result.request'
-import { CycleGraphQLNode } from '@interface/graphql/nodes/cycle.node'
-import { KeyResultGraphQLNode } from '@interface/graphql/nodes/key-result.node'
-import { ObjectiveGraphQLNode } from '@interface/graphql/nodes/objective.node'
-import { TeamGraphQLNode } from '@interface/graphql/nodes/team.node'
+import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
+import { CyclesGraphQLConnection } from '@interface/graphql/objects/cycle/cycles.connection'
+import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
+import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
+import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
 import { BaseGraphQLResolver } from '@interface/graphql/resolvers/base.resolver'
 import { GraphQLUser } from '@interface/graphql/resolvers/decorators/graphql-user'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
-import { CycleListGraphQLObject } from '../objects/cycle-list.object'
+import { KeyResultFiltersRequest } from '../../key-result/requests/key-result.request'
 import { CycleFiltersRequest } from '../requests/cycle-filters.request'
 import { CyclesInSamePeriodRequest } from '../requests/cycles-in-same-period.request'
-import { CycleRootEdgeGraphQLResponse } from '../responses/cycle-root-edge.response'
 
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @UseInterceptors(NourishUserDataInterceptor)
@@ -36,21 +35,22 @@ export class CycleGraphQLResolver extends BaseGraphQLResolver<Cycle, CycleInterf
   }
 
   @RequiredActions('cycle:read')
-  @Query(() => CycleListGraphQLObject, { name: 'cycles' })
+  @Query(() => CyclesGraphQLConnection, { name: 'cycles' })
   protected async getCycles(
-    @Args() { first, ...filters }: CycleFiltersRequest,
+    @Args() request: CycleFiltersRequest,
     @GraphQLUser() graphqlUser: AuthorizationUser,
   ) {
     this.logger.log({
-      first,
-      filters,
+      request,
       graphqlUser,
       message: 'Fetching teams with filters',
     })
 
+    const [connection, filters] = this.relay.unmarshalRequest(request)
+
     const userTeams = await graphqlUser.teams
     const queryOptions: GetOptions<Cycle> = {
-      limit: first,
+      limit: connection.first,
     }
 
     const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(userTeams)
@@ -60,28 +60,25 @@ export class CycleGraphQLResolver extends BaseGraphQLResolver<Cycle, CycleInterf
       queryOptions,
     )
 
-    const edges = queryResult?.map((node) => new CycleRootEdgeGraphQLResponse({ node }))
-    const response = this.marshalListResponse<CycleRootEdgeGraphQLResponse>(edges)
-
-    return response
+    return this.relay.marshalResponse<CycleGraphQLNode>(queryResult, connection)
   }
 
   @RequiredActions('cycle:read')
-  @Query(() => CycleListGraphQLObject, { name: 'cyclesInSamePeriod', nullable: true })
+  @Query(() => CyclesGraphQLConnection, { name: 'cyclesInSamePeriod', nullable: true })
   protected async getCyclesInSamePeriod(
     @GraphQLUser() graphqlUser: AuthorizationUser,
-    @Args() { first, fromCycles, ...filters }: CyclesInSamePeriodRequest,
+    @Args() request: CyclesInSamePeriodRequest,
   ) {
     this.logger.log({
-      fromCycles,
-      first,
-      filters,
+      request,
       message: 'Fetching cycles in same period',
     })
 
+    const [connection, { fromCycles, ...filters }] = this.relay.unmarshalRequest(request)
+
     const userTeams = await graphqlUser.teams
     const queryOptions: GetOptions<Cycle> = {
-      limit: first,
+      limit: connection.first,
     }
 
     const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(userTeams)
@@ -92,10 +89,7 @@ export class CycleGraphQLResolver extends BaseGraphQLResolver<Cycle, CycleInterf
       queryOptions,
     )
 
-    const edges = queryResult?.map((node) => new CycleRootEdgeGraphQLResponse({ node }))
-    const response = this.marshalListResponse<CycleRootEdgeGraphQLResponse>(edges)
-
-    return response
+    return this.relay.marshalResponse<CycleGraphQLNode>(queryResult, connection)
   }
 
   @ResolveField('team', () => TeamGraphQLNode)
@@ -151,18 +145,19 @@ export class CycleGraphQLResolver extends BaseGraphQLResolver<Cycle, CycleInterf
 
   @ResolveField('keyResults', () => [KeyResultGraphQLNode], { nullable: true })
   protected async getCycleKeyResults(
-    @Args() { first, ...filters }: KeyResultFiltersRequest,
+    @Args() request: KeyResultFiltersRequest,
     @Parent() cycle: CycleGraphQLNode,
   ) {
     this.logger.log({
+      request,
       cycle,
-      first,
-      filters,
       message: 'Fetching key results for cycle',
     })
 
+    const [connection, filters] = this.relay.unmarshalRequest(request)
+
     const queryOptions: GetOptions<KeyResult> = {
-      limit: first,
+      limit: connection.first,
     }
 
     const objectives = await this.core.objective.getFromCycle(cycle)

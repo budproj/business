@@ -10,18 +10,17 @@ import { TeamInterface } from '@core/modules/team/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
-import { CycleGraphQLNode } from '@interface/graphql/nodes/cycle.node'
-import { KeyResultGraphQLNode } from '@interface/graphql/nodes/key-result.node'
-import { TeamGraphQLNode } from '@interface/graphql/nodes/team.node'
-import { UserGraphQLNode } from '@interface/graphql/nodes/user.node'
+import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
+import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
+import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
+import { TeamsGraphQLConnection } from '@interface/graphql/objects/team/teams.connection'
+import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 import { BaseGraphQLResolver } from '@interface/graphql/resolvers/base.resolver'
 import { GraphQLUser } from '@interface/graphql/resolvers/decorators/graphql-user'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
 import { TeamLevelGraphQLEnum } from '../enums/team-level.enum'
-import { TeamListGraphQLObject } from '../objects/team-list.object'
 import { TeamFiltersRequest } from '../requests/team-filters.request'
-import { TeamRootEdgeGraphQLResponse } from '../responses/team-root-edge.response'
 
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @UseInterceptors(NourishUserDataInterceptor)
@@ -34,21 +33,21 @@ export class TeamGraphQLResolver extends BaseGraphQLResolver<Team, TeamInterface
   }
 
   @RequiredActions('team:read')
-  @Query(() => TeamListGraphQLObject, { name: 'teams' })
+  @Query(() => TeamsGraphQLConnection, { name: 'teams' })
   protected async getTeams(
-    @Args() { first, level, ...filters }: TeamFiltersRequest,
+    @Args() request: TeamFiltersRequest,
     @GraphQLUser() graphqlUser: AuthorizationUser,
   ) {
     this.logger.log({
-      first,
-      level,
-      filters,
+      request,
       graphqlUser,
       message: 'Fetching teams with filters',
     })
 
+    const [connection, { level, ...filters }] = this.relay.unmarshalRequest(request)
+
     const queryOptions: GetOptions<Team> = {
-      limit: first,
+      limit: connection.first,
     }
     const queryLeveledHandlers = {
       default: async () =>
@@ -62,10 +61,7 @@ export class TeamGraphQLResolver extends BaseGraphQLResolver<Team, TeamInterface
     const queryHandler = queryLeveledHandlers[level ?? 'default']
     const queryResult = await queryHandler()
 
-    const edges = queryResult?.map((node) => new TeamRootEdgeGraphQLResponse({ node }))
-    const response = this.marshalListResponse<TeamRootEdgeGraphQLResponse>(edges)
-
-    return response
+    return this.relay.marshalResponse<TeamGraphQLNode>(queryResult, connection)
   }
 
   @ResolveField('owner', () => UserGraphQLNode)

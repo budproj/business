@@ -11,16 +11,15 @@ import { KeyResultComment } from '@core/modules/key-result/modules/comment/key-r
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
-import { KeyResultCommentGraphQLNode } from '@interface/graphql/nodes/key-result-comment.node'
-import { KeyResultGraphQLNode } from '@interface/graphql/nodes/key-result.node'
-import { UserGraphQLNode } from '@interface/graphql/nodes/user.node'
+import { KeyResultCommentGraphQLNode } from '@interface/graphql/objects/key-result/comment/key-result-comment.node'
+import { KeyResultCommentsGraphQLConnection } from '@interface/graphql/objects/key-result/comment/key-result-comments.connection'
+import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
+import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 import { BaseGraphQLResolver } from '@interface/graphql/resolvers/base.resolver'
 import { GraphQLUser } from '@interface/graphql/resolvers/decorators/graphql-user'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
-import { KeyResultCommentListGraphQLObject } from '../objects/key-result-comment-list.object'
 import { KeyResultCommentFiltersRequest } from '../requests/key-result-comment.request'
-import { KeyResultCommentRootEdgeGraphQLResponse } from '../responses/key-result-comment-root-edge.response'
 
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @UseInterceptors(NourishUserDataInterceptor)
@@ -36,20 +35,21 @@ export class KeyResultCommentGraphQLResolver extends BaseGraphQLResolver<
   }
 
   @RequiredActions('key-result-comment:read')
-  @Query(() => KeyResultCommentListGraphQLObject, { name: 'keyResultComments' })
+  @Query(() => KeyResultCommentsGraphQLConnection, { name: 'keyResultComments' })
   protected async getKeyResultComments(
-    @Args() { first, ...filters }: KeyResultCommentFiltersRequest,
+    @Args() request: KeyResultCommentFiltersRequest,
     @GraphQLUser() graphqlUser: AuthorizationUser,
   ) {
     this.logger.log({
-      first,
-      filters,
+      request,
       graphqlUser,
       message: 'Fetching key-result comments with filters',
     })
 
+    const [connection, filters] = this.relay.unmarshalRequest(request)
+
     const queryOptions: GetOptions<KeyResultComment> = {
-      limit: first,
+      limit: connection.first,
     }
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,
@@ -57,10 +57,7 @@ export class KeyResultCommentGraphQLResolver extends BaseGraphQLResolver<
       queryOptions,
     )
 
-    const edges = queryResult?.map((node) => new KeyResultCommentRootEdgeGraphQLResponse({ node }))
-    const response = this.marshalListResponse<KeyResultCommentRootEdgeGraphQLResponse>(edges)
-
-    return response
+    return this.relay.marshalResponse<KeyResultCommentGraphQLNode>(queryResult, connection)
   }
 
   @ResolveField('user', () => UserGraphQLNode)

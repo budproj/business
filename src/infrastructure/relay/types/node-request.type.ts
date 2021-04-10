@@ -1,8 +1,8 @@
 import { Except } from 'type-fest'
 
-import { ConnectionRequest } from '../interfaces/connection-request.interface'
+import { ConnectionRelayRequest } from '../requests/connection.request'
 
-export type NodeRequest<A extends ConnectionRequest> = Except<
+export type NodeRequest<A extends ConnectionRelayRequest> = Except<
   A,
   'before' | 'after' | 'first' | 'last'
 >

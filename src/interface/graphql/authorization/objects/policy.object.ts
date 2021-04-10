@@ -10,14 +10,14 @@ import { EffectGraphQLEnum } from '../../enums/effect.enum'
 })
 export class PolicyGraphQLObject {
   @Field(() => EffectGraphQLEnum, { defaultValue: Effect.DENY, complexity: 0 })
-  public create: Effect
+  public create!: Effect
 
   @Field(() => EffectGraphQLEnum, { defaultValue: Effect.DENY, complexity: 0 })
-  public read: Effect
+  public read!: Effect
 
   @Field(() => EffectGraphQLEnum, { defaultValue: Effect.DENY, complexity: 0 })
-  public update: Effect
+  public update!: Effect
 
   @Field(() => EffectGraphQLEnum, { defaultValue: Effect.DENY, complexity: 0 })
-  public delete: Effect
+  public delete!: Effect
 }

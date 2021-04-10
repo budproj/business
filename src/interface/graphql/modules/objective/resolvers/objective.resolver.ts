@@ -10,17 +10,16 @@ import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
-import { CycleGraphQLNode } from '@interface/graphql/nodes/cycle.node'
-import { KeyResultGraphQLNode } from '@interface/graphql/nodes/key-result.node'
-import { ObjectiveGraphQLNode } from '@interface/graphql/nodes/objective.node'
-import { UserGraphQLNode } from '@interface/graphql/nodes/user.node'
+import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
+import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
+import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
+import { ObjectivesGraphQLConnection } from '@interface/graphql/objects/objective/objectives.connection'
+import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 import { BaseGraphQLResolver } from '@interface/graphql/resolvers/base.resolver'
 import { GraphQLUser } from '@interface/graphql/resolvers/decorators/graphql-user'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
-import { ObjectiveListGraphQLObject } from '../objects/objective-list.object'
 import { ObjectiveFiltersRequest } from '../requests/objective-filters.request'
-import { ObjectiveRootEdgeGraphQLResponse } from '../responses/objective-root-edge.response'
 
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @UseInterceptors(NourishUserDataInterceptor)
@@ -33,20 +32,21 @@ export class ObjectiveGraphQLResolver extends BaseGraphQLResolver<Objective, Obj
   }
 
   @RequiredActions('objective:read')
-  @Query(() => ObjectiveListGraphQLObject, { name: 'objectives' })
+  @Query(() => ObjectivesGraphQLConnection, { name: 'objectives' })
   protected async getObjectives(
-    @Args() { first, ...filters }: ObjectiveFiltersRequest,
+    @Args() request: ObjectiveFiltersRequest,
     @GraphQLUser() graphqlUser: AuthorizationUser,
   ) {
     this.logger.log({
-      first,
-      filters,
+      request,
       graphqlUser,
       message: 'Fetching objectives with filters',
     })
 
+    const [connection, filters] = this.relay.unmarshalRequest(request)
+
     const queryOptions: GetOptions<Objective> = {
-      limit: first,
+      limit: connection.first,
     }
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,
@@ -54,10 +54,7 @@ export class ObjectiveGraphQLResolver extends BaseGraphQLResolver<Objective, Obj
       queryOptions,
     )
 
-    const edges = queryResult?.map((node) => new ObjectiveRootEdgeGraphQLResponse({ node }))
-    const response = this.marshalListResponse<ObjectiveRootEdgeGraphQLResponse>(edges)
-
-    return response
+    return this.relay.marshalResponse<ObjectiveGraphQLNode>(queryResult, connection)
   }
 
   @ResolveField('owner', () => UserGraphQLNode)
