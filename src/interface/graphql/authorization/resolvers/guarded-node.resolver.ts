@@ -13,7 +13,7 @@ import { CoreEntityProvider } from '@core/entity.provider'
 import { RelayProvider } from '@infrastructure/relay/relay.provider'
 
 import { ScopeGraphQLEnum } from '../../enums/scope.enum'
-import { AuthorizedRequestUser } from '../decorators/authorized-request-user'
+import { AuthorizedRequestUser } from '../decorators/authorized-request-user.decorator'
 import { GuardedNodeGraphQLInterface } from '../interfaces/guarded-node.interface'
 import { PolicyGraphQLObject } from '../objects/policy.object'
 

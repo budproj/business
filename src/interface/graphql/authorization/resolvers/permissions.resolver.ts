@@ -12,7 +12,7 @@ import { ResourceStatement } from '@adapters/authorization/types/resource-statem
 
 import { ScopeGraphQLEnum } from '../../enums/scope.enum'
 import { NourishUserDataInterceptor } from '../../resolvers/interceptors/nourish-user-data.interceptor'
-import { AuthorizedRequestUser } from '../decorators/authorized-request-user'
+import { AuthorizedRequestUser } from '../decorators/authorized-request-user.decorator'
 import { GraphQLRequiredPoliciesGuard } from '../guards/required-policies.guard'
 import { GraphQLTokenGuard } from '../guards/token.guard'
 import { PermissionsGraphQLObject } from '../objects/permissions.object'
