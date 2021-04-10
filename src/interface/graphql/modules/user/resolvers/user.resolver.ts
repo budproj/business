@@ -12,14 +12,14 @@ import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
+import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
+import { GraphQLUser } from '@interface/graphql/decorators/graphql-user'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 import { UsersGraphQLConnection } from '@interface/graphql/objects/user/users.connection'
-import { BaseGraphQLResolver } from '@interface/graphql/resolvers/base.resolver'
-import { GraphQLUser } from '@interface/graphql/resolvers/decorators/graphql-user'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
 import { UserFiltersRequest } from '../requests/user-filters.request'
@@ -28,7 +28,7 @@ import { UserUpdateRequest } from '../requests/user-update.request'
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @UseInterceptors(NourishUserDataInterceptor)
 @Resolver(() => UserGraphQLNode)
-export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface> {
+export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserInterface> {
   private readonly logger = new Logger(UserGraphQLResolver.name)
 
   constructor(protected readonly core: CoreProvider) {

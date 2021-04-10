@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, OneToMany, RelationId, UpdateDateColumn } from 'typeorm'
 
-import { CoreEntity } from '@core/core.entity'
+import { CoreEntity } from '@core/core.orm-entity'
 import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
 import { TeamInterface } from '@core/modules/team/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'

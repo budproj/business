@@ -10,13 +10,13 @@ import { TeamInterface } from '@core/modules/team/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
+import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
+import { GraphQLUser } from '@interface/graphql/decorators/graphql-user'
 import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
 import { TeamsGraphQLConnection } from '@interface/graphql/objects/team/teams.connection'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
-import { BaseGraphQLResolver } from '@interface/graphql/resolvers/base.resolver'
-import { GraphQLUser } from '@interface/graphql/resolvers/decorators/graphql-user'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
 import { TeamLevelGraphQLEnum } from '../enums/team-level.enum'
@@ -25,7 +25,7 @@ import { TeamFiltersRequest } from '../requests/team-filters.request'
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @UseInterceptors(NourishUserDataInterceptor)
 @Resolver(() => TeamGraphQLNode)
-export class TeamGraphQLResolver extends BaseGraphQLResolver<Team, TeamInterface> {
+export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamInterface> {
   private readonly logger = new Logger(TeamGraphQLResolver.name)
 
   constructor(protected readonly core: CoreProvider) {

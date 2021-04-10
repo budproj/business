@@ -11,14 +11,14 @@ import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
+import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
+import { GraphQLUser } from '@interface/graphql/decorators/graphql-user'
 import { KeyResultCommentGraphQLNode } from '@interface/graphql/objects/key-result/comment/key-result-comment.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { KeyResultsGraphQLConnection } from '@interface/graphql/objects/key-result/key-results.connection'
 import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
-import { BaseGraphQLResolver } from '@interface/graphql/resolvers/base.resolver'
-import { GraphQLUser } from '@interface/graphql/resolvers/decorators/graphql-user'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
 import { KeyResultFiltersRequest } from '../requests/key-result.request'
@@ -26,7 +26,10 @@ import { KeyResultFiltersRequest } from '../requests/key-result.request'
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @UseInterceptors(NourishUserDataInterceptor)
 @Resolver(() => KeyResultGraphQLNode)
-export class KeyResultGraphQLResolver extends BaseGraphQLResolver<KeyResult, KeyResultInterface> {
+export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
+  KeyResult,
+  KeyResultInterface
+> {
   private readonly logger = new Logger(KeyResultGraphQLResolver.name)
 
   constructor(protected readonly core: CoreProvider) {

@@ -10,13 +10,13 @@ import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
+import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
+import { GraphQLUser } from '@interface/graphql/decorators/graphql-user'
 import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
 import { ObjectivesGraphQLConnection } from '@interface/graphql/objects/objective/objectives.connection'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
-import { BaseGraphQLResolver } from '@interface/graphql/resolvers/base.resolver'
-import { GraphQLUser } from '@interface/graphql/resolvers/decorators/graphql-user'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
 import { ObjectiveFiltersRequest } from '../requests/objective-filters.request'
@@ -24,7 +24,10 @@ import { ObjectiveFiltersRequest } from '../requests/objective-filters.request'
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @UseInterceptors(NourishUserDataInterceptor)
 @Resolver(() => ObjectiveGraphQLNode)
-export class ObjectiveGraphQLResolver extends BaseGraphQLResolver<Objective, ObjectiveInterface> {
+export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
+  Objective,
+  ObjectiveInterface
+> {
   private readonly logger = new Logger(ObjectiveGraphQLResolver.name)
 
   constructor(protected readonly core: CoreProvider) {

@@ -10,8 +10,8 @@ import { RequiredActions } from '@adapters/authorization/required-actions.decora
 import { CommandStatement } from '@adapters/authorization/types/command-statement.type'
 import { ResourceStatement } from '@adapters/authorization/types/resource-statement.type copy'
 
+import { GraphQLUser } from '../../decorators/graphql-user'
 import { ScopeGraphQLEnum } from '../../enums/scope.enum'
-import { GraphQLUser } from '../../resolvers/decorators/graphql-user'
 import { NourishUserDataInterceptor } from '../../resolvers/interceptors/nourish-user-data.interceptor'
 import { GraphQLRequiredPoliciesGuard } from '../guards/required-policies.guard'
 import { GraphQLTokenGuard } from '../guards/token.guard'

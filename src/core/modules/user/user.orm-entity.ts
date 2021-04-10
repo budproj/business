@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToMany, OneToMany, UpdateDateColumn } from 'typeorm'
 
-import { CoreEntity } from '@core/core.entity'
+import { CoreEntity } from '@core/core.orm-entity'
 import { KeyResultInterface } from '@core/modules/key-result/key-result.interface'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/modules/check-in/key-result-check-in.interface'
 import { KeyResultCommentInterface } from '@core/modules/key-result/modules/comment/key-result-comment.interface'

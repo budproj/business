@@ -1,3 +1,4 @@
+import { CoreEntityInterface } from '@core/core-entity.interface'
 import { KeyResultInterface } from '@core/modules/key-result/key-result.interface'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/modules/check-in/key-result-check-in.interface'
 import { KeyResultCommentInterface } from '@core/modules/key-result/modules/comment/key-result-comment.interface'
@@ -6,11 +7,9 @@ import { TeamInterface } from '@core/modules/team/team.interface'
 
 import { UserGender } from './enums/user-gender.enum'
 
-export interface UserInterface {
-  id: string
+export interface UserInterface extends CoreEntityInterface {
   firstName: string
   authzSub: string
-  createdAt: Date
   updatedAt: Date
   lastName?: string
   gender?: UserGender

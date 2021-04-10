@@ -84,5 +84,5 @@ export class KeyResultCheckInGraphQLNode implements GuardedNodeGraphQLInterface 
 
   public readonly id!: string
   public readonly createdAt!: Date
-  public readonly policies?: PolicyGraphQLObject
+  public readonly policy?: PolicyGraphQLObject
 }

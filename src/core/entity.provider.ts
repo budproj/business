@@ -7,7 +7,7 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 import { SCOPE_PRIORITY } from '@adapters/authorization/authorization.constants'
 import { Scope } from '@adapters/authorization/enums/scope.enum'
 
-import { CoreEntity } from './core.entity'
+import { CoreEntity } from './core.orm-entity'
 import { CoreEntityRepository } from './core.repository'
 import { MutationQueryType } from './enums/mutation-query-type.enum'
 import { CoreContext } from './interfaces/core-context.interface'
@@ -108,25 +108,25 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
     return query.getMany()
   }
 
-  public async defineResourceHighestConstraint(
+  public async defineResourceHighestScope(
     entity: E,
     originalQueryContext: CoreQueryContext,
-    currentConstraint: Scope = Scope.ANY,
+    currentScope: Scope = Scope.ANY,
   ): Promise<Scope> {
-    const currentConstraintIndex = SCOPE_PRIORITY.indexOf(currentConstraint)
-    const nextConstraintIndex = currentConstraintIndex + 1
-    const isLastIndex = nextConstraintIndex + 1 === SCOPE_PRIORITY.length
+    const currentScopeIndex = SCOPE_PRIORITY.indexOf(currentScope)
+    const nextScopeIndex = currentScopeIndex + 1
+    const isLastIndex = nextScopeIndex + 1 === SCOPE_PRIORITY.length
 
     const selector = { id: entity.id } as any
-    const nextConstraint = SCOPE_PRIORITY[nextConstraintIndex]
-    const queryContext = this.changeConstraintInQueryContext(originalQueryContext, nextConstraint)
+    const nextScope = SCOPE_PRIORITY[nextScopeIndex]
+    const queryContext = this.changeConstraintInQueryContext(originalQueryContext, nextScope)
 
     const foundData = await this.getOneWithConstraint(selector, queryContext)
-    if (!foundData) return currentConstraint
+    if (!foundData) return currentScope
 
     return isLastIndex
-      ? nextConstraint
-      : this.defineResourceHighestConstraint(entity, queryContext, nextConstraint)
+      ? nextScope
+      : this.defineResourceHighestScope(entity, queryContext, nextScope)
   }
 
   protected async create(

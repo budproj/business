@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne, RelationId } from 'typeorm'
 
-import { CoreEntity } from '@core/core.entity'
+import { CoreEntity } from '@core/core.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 
 import { KeyResultInterface } from '../../key-result.interface'

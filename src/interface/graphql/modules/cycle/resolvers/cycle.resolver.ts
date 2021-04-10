@@ -11,13 +11,13 @@ import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
+import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
+import { GraphQLUser } from '@interface/graphql/decorators/graphql-user'
 import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
 import { CyclesGraphQLConnection } from '@interface/graphql/objects/cycle/cycles.connection'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
-import { BaseGraphQLResolver } from '@interface/graphql/resolvers/base.resolver'
-import { GraphQLUser } from '@interface/graphql/resolvers/decorators/graphql-user'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
 import { KeyResultFiltersRequest } from '../../key-result/requests/key-result.request'
@@ -27,7 +27,7 @@ import { CyclesInSamePeriodRequest } from '../requests/cycles-in-same-period.req
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @UseInterceptors(NourishUserDataInterceptor)
 @Resolver(() => CycleGraphQLNode)
-export class CycleGraphQLResolver extends BaseGraphQLResolver<Cycle, CycleInterface> {
+export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, CycleInterface> {
   private readonly logger = new Logger(CycleGraphQLResolver.name)
 
   constructor(protected readonly core: CoreProvider) {
