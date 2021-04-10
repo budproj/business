@@ -1,9 +1,9 @@
-import { Field, Int, InterfaceType } from '@nestjs/graphql'
+import { Field, Int, ObjectType } from '@nestjs/graphql'
 
-@InterfaceType('DeleteResult', {
+@ObjectType('DeleteResult', {
   description: 'The delete result from a delete mutation',
 })
-export abstract class DeleteResultGraphQLInterface {
+export class DeleteResultGraphQLObject {
   @Field(() => Int, { complexity: 0, description: 'The amount of entities removed' })
   public readonly affected!: number
 }

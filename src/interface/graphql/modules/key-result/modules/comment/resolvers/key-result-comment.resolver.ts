@@ -1,7 +1,6 @@
 import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
-import { DeleteResult } from 'typeorm'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
@@ -15,6 +14,7 @@ import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
 import { GraphQLUser } from '@interface/graphql/decorators/graphql-user'
+import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
 import { KeyResultCommentGraphQLNode } from '@interface/graphql/objects/key-result/comment/key-result-comment.node'
 import { KeyResultCommentsGraphQLConnection } from '@interface/graphql/objects/key-result/comment/key-result-comments.connection'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
@@ -89,7 +89,8 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
       comment,
       graphqlUser,
     )
-    if(!createdComments || createdComments.length === 0) throw new UserInputError('We were not able to create your comment')
+    if (!createdComments || createdComments.length === 0)
+      throw new UserInputError('We were not able to create your comment')
 
     const createdComment = createdComments[0]
 
@@ -97,7 +98,7 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @RequiredActions('key-result-comment:delete')
-  @Mutation(() => DeleteResult, { name: 'deleteKeyResultComment' })
+  @Mutation(() => DeleteResultGraphQLObject, { name: 'deleteKeyResultComment' })
   protected async deleteKeyResultComment(
     @GraphQLUser() graphqlUser: AuthorizationUser,
     @Args() request: KeyResultCommentDeleteRequest,
@@ -109,6 +110,8 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     })
 
     const keyResult = await this.core.keyResult.getFromKeyResultCommentID(request.id)
+    if (!keyResult) throw new UserInputError('We were not able to find your key-result comment')
+
     const objective = await this.core.objective.getFromKeyResult(keyResult)
     const cycle = await this.core.cycle.getFromObjective(objective)
     if (!cycle.active)
@@ -118,7 +121,7 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
 
     const selector = { id: request.id }
     const result = await this.queryGuard.deleteWithActionScopeConstraint(selector, graphqlUser)
-    if(!result) throw new UserInputError('We were not able to find that comment to exclude')
+    if (!result) throw new UserInputError('We were not able to find that comment to exclude')
 
     return result
   }

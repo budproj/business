@@ -145,8 +145,12 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return comment
   }
 
-  public async getFromKeyResultCommentID(keyResultCommentID: string): Promise<KeyResult> {
+  public async getFromKeyResultCommentID(
+    keyResultCommentID: string,
+  ): Promise<KeyResult | undefined> {
     const keyResultComment = await this.keyResultCommentProvider.getOne({ id: keyResultCommentID })
+    if (!keyResultComment) return
+
     const keyResult = await this.getOne({ id: keyResultComment.keyResultId })
 
     return keyResult
