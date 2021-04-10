@@ -15,6 +15,7 @@ import { KeyResult } from './key-result.orm-entity'
 import { KeyResultRepository } from './key-result.repository'
 import { KeyResultCheckIn } from './modules/check-in/key-result-check-in.orm-entity'
 import { KeyResultCheckInProvider } from './modules/check-in/key-result-check-in.provider'
+import { KeyResultCommentInterface } from './modules/comment/key-result-comment.interface'
 import { KeyResultComment } from './modules/comment/key-result-comment.orm-entity'
 import { KeyResultCommentProvider } from './modules/comment/key-result-comment.provider'
 
@@ -129,6 +130,19 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     }
 
     return this.keyResultCheckInProvider.getMany(selector, undefined, options)
+  }
+
+  public createUserCommentData(
+    user: UserInterface,
+    data: Partial<KeyResultCommentInterface>,
+  ): Partial<KeyResultCommentInterface> {
+    const comment: Partial<KeyResultCommentInterface> = {
+      text: data.text,
+      userId: user.id,
+      keyResultId: data.keyResultId,
+    }
+
+    return comment
   }
 
   protected async protectCreationQuery(

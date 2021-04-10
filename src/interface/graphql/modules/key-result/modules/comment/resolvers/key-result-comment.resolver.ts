@@ -1,5 +1,6 @@
 import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Args, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { UserInputError } from 'apollo-server-fastify'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
@@ -19,6 +20,7 @@ import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
+import { KeyResultCommentCreateRequest } from '../requests/key-result-comment-create.request'
 import { KeyResultCommentFiltersRequest } from '../requests/key-result-comment.request'
 
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
@@ -58,6 +60,37 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     )
 
     return this.relay.marshalResponse<KeyResultComment>(queryResult, connection)
+  }
+
+  @RequiredActions('key-result-comment:create')
+  @Mutation(() => KeyResultCommentGraphQLNode, { name: 'createKeyResultComment' })
+  protected async createKeyResultComment(
+    @GraphQLUser() graphqlUser: AuthorizationUser,
+    @Args() request: KeyResultCommentCreateRequest,
+  ) {
+    this.logger.log({
+      graphqlUser,
+      request,
+      message: 'Received create comment request',
+    })
+
+    const keyResult = await this.core.keyResult.getOne({ id: request.data.keyResultId })
+    const objective = await this.core.objective.getFromKeyResult(keyResult)
+    const cycle = await this.core.cycle.getFromObjective(objective)
+    if (!cycle.active)
+      throw new UserInputError(
+        'You cannot create this comment, because that cycle is not active anymore',
+      )
+
+    const comment = this.core.keyResult.createUserCommentData(graphqlUser, request.data)
+    const createdComments = await this.queryGuard.createWithActionScopeConstraint(
+      comment,
+      graphqlUser,
+    )
+
+    const createdComment = createdComments[0]
+
+    return createdComment
   }
 
   @ResolveField('user', () => UserGraphQLNode)
