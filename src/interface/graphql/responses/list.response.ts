@@ -1,5 +1,5 @@
 import { EdgeGraphQLInterface } from '../interfaces/edge.interface'
-import { ListGraphQLInterface } from '../interfaces/list.interface'
+import { ConnectionGraphQLInterface } from '../interfaces/connection.interface'
 
 import { EdgeGraphQLResponse } from './edge.response'
 import { PageInfoGraphQLResponse } from './page-info.reponse'
@@ -26,7 +26,7 @@ export class ListGraphQLResponse<
     return this.properties.pageInfo
   }
 
-  public marshal(): ListGraphQLInterface {
+  public marshal(): ConnectionGraphQLInterface {
     return {
       edges: this.marshalEdges(),
       pageInfo: this.pageInfo.marshal(),

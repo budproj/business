@@ -4,10 +4,10 @@ import { PageInfoGraphQLObject } from '../objects/page-info.object'
 
 import { EdgeGraphQLInterface } from './edge.interface'
 
-@InterfaceType('List', {
-  description: 'This interface wraps all lists from our schema',
+@InterfaceType('Connection', {
+  description: 'This interface wraps all list connections from our schema',
 })
-export abstract class ListGraphQLInterface<E extends EdgeGraphQLInterface = EdgeGraphQLInterface> {
+export abstract class ConnectionGraphQLInterface<E extends EdgeGraphQLInterface = EdgeGraphQLInterface> {
   @Field(() => PageInfoGraphQLObject, { complexity: 0 })
   public pageInfo: PageInfoGraphQLObject
 

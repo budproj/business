@@ -1,16 +1,16 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
-import { ListGraphQLInterface } from '@interface/graphql/interfaces/list.interface'
+import { ConnectionGraphQLInterface } from '@interface/graphql/interfaces/connection.interface'
 import { PageInfoGraphQLObject } from '@interface/graphql/objects/page-info.object'
 
 import { KeyResultCheckInRootEdgeGraphQLObject } from '../edges/key-result-check-in-root.edge'
 
 @ObjectType('KeyResultCheckInList', {
-  implements: () => ListGraphQLInterface,
+  implements: () => ConnectionGraphQLInterface,
   description: 'A list containing key-result comments based on the provided filters and arguments',
 })
 export class KeyResultCheckInListGraphQLObject
-  implements ListGraphQLInterface<KeyResultCheckInRootEdgeGraphQLObject> {
+  implements ConnectionGraphQLInterface<KeyResultCheckInRootEdgeGraphQLObject> {
   @Field(() => [KeyResultCheckInRootEdgeGraphQLObject], { complexity: 0 })
   public edges: KeyResultCheckInRootEdgeGraphQLObject[]
 

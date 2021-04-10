@@ -40,15 +40,16 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
   @RequiredActions('user:read')
   @Query(() => UserListGraphQLObject, { name: 'users' })
   protected async getUsers(
-    @Args() { first, ...filters }: UserFiltersRequest,
+    @Args() args: UserFiltersRequest,
     @GraphQLUser() graphqlUser: AuthorizationUser,
   ) {
     this.logger.log({
-      first,
-      filters,
+      args,
       graphqlUser,
       message: 'Fetching users with filters',
     })
+
+    const filters = this.relay.clearConnectionArguments(args)
 
     const queryOptions: GetOptions<User> = {
       limit: first,
