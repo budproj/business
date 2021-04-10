@@ -5,6 +5,7 @@ import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { Scope } from '@adapters/authorization/enums/scope.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { PolicyAdapter } from '@adapters/authorization/policy.adapter'
+import { QueryGuardAdapter } from '@adapters/authorization/query-guard.adapter'
 import { CoreEntityInterface } from '@core/core-entity.interface'
 import { CoreEntity } from '@core/core.orm-entity'
 import { CoreProvider } from '@core/core.provider'
@@ -22,7 +23,8 @@ import { GuardedGraphQLResolver } from './guarded.resolver'
 export abstract class GuardedNodeGraphQLResolver<
   E extends CoreEntity,
   I extends CoreEntityInterface
-> extends GuardedGraphQLResolver<E, I> {
+> extends GuardedGraphQLResolver<E> {
+  protected readonly queryGuard: QueryGuardAdapter<E, I>
   protected readonly policy: PolicyAdapter
   protected readonly authz: AuthzAdapter
   protected readonly relay: RelayProvider
@@ -32,7 +34,9 @@ export abstract class GuardedNodeGraphQLResolver<
     protected readonly core: CoreProvider,
     private readonly coreEntityProvider: CoreEntityProvider<E, I>,
   ) {
-    super(resource, core, coreEntityProvider)
+    super(resource)
+
+    this.queryGuard = new QueryGuardAdapter(resource, core, coreEntityProvider)
   }
 
   @ResolveField('policy', () => PolicyGraphQLObject)

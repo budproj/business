@@ -11,6 +11,8 @@ import { KeyResultGraphQLNode } from '../key-result/key-result.node'
 import { ObjectiveGraphQLNode } from '../objective/objective.node'
 import { TeamGraphQLNode } from '../team/team.node'
 
+import { UserCompaniesGraphQLConnection } from './user-company.connection'
+
 @ObjectType('User', {
   implements: () => [NodeRelayInterface, GuardedNodeGraphQLInterface],
   description:
@@ -75,12 +77,12 @@ export class UserGraphQLNode implements GuardedNodeGraphQLInterface {
   // CONNECTION FIELDS
   // **********************************************************************************************
 
-  @Field(() => [TeamGraphQLNode], {
+  @Field(() => [UserCompaniesGraphQLConnection], {
     complexity: 0,
     nullable: true,
     description: 'The creation date ordered list of companies that this user is a part of',
   })
-  public readonly companies?: TeamGraphQLNode[]
+  public readonly companies?: UserCompaniesGraphQLConnection[]
 
   @Field(() => [TeamGraphQLNode], {
     complexity: 0,

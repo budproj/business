@@ -1,0 +1,26 @@
+import { UseGuards, UseInterceptors } from '@nestjs/common'
+import { Resolver } from '@nestjs/graphql'
+
+import { Resource } from '@adapters/authorization/enums/resource.enum'
+import { CoreProvider } from '@core/core.provider'
+import { TeamInterface } from '@core/modules/team/team.interface'
+import { Team } from '@core/modules/team/team.orm-entity'
+import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
+import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
+import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
+import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
+import { UserCompaniesGraphQLConnection } from '@interface/graphql/objects/user/user-company.connection'
+import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
+
+@UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
+@UseInterceptors(NourishUserDataInterceptor)
+@Resolver(() => UserCompaniesGraphQLConnection)
+export class UserCompaniesConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
+  Team,
+  TeamInterface,
+  TeamGraphQLNode
+> {
+  constructor(protected readonly core: CoreProvider) {
+    super(Resource.TEAM, core, core.team)
+  }
+}

@@ -18,10 +18,11 @@ import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-resu
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
+import { UserCompaniesGraphQLConnection } from '@interface/graphql/objects/user/user-company.connection'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
-import { UserFiltersRequest } from '../requests/user-filters.request'
+import { TeamFiltersRequest } from '../../team/requests/team-filters.request'
 import { UserUpdateRequest } from '../requests/user-update.request'
 
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
@@ -80,10 +81,10 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return this.core.user.buildUserFullName(user)
   }
 
-  @ResolveField('companies', () => [TeamGraphQLNode], { nullable: true })
+  @ResolveField('companies', () => UserCompaniesGraphQLConnection, { nullable: true })
   protected async getUserCompanies(
     @Parent() user: UserGraphQLNode,
-    @Args() request?: UserFiltersRequest,
+    @Args() request?: TeamFiltersRequest,
   ) {
     this.logger.log({
       user,
@@ -91,12 +92,14 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching companies for user',
     })
 
-    const queryOptions: GetOptions<Team> = {
-      limit: request.first,
-    }
-    const companies = await this.core.team.getUserCompanies(user, undefined, queryOptions)
+    const [connection, filters] = this.relay.unmarshalRequest(request)
 
-    return companies
+    const queryOptions: GetOptions<Team> = {
+      limit: connection.first,
+    }
+    const queryResult = await this.core.team.getUserCompanies(user, filters, queryOptions)
+
+    return this.relay.marshalResponse<TeamGraphQLNode>(queryResult, connection)
   }
 
   @ResolveField('teams', () => [TeamGraphQLNode], { nullable: true })

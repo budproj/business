@@ -23,7 +23,8 @@ import { UserFiltersRequest } from '../requests/user-filters.request'
 @Resolver(() => UsersGraphQLConnection)
 export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
   User,
-  UserInterface
+  UserInterface,
+  UserGraphQLNode
 > {
   private readonly logger = new Logger(UsersConnectionGraphQLResolver.name)
 
