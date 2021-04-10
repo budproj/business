@@ -21,7 +21,7 @@ import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
-import { KeyResultFiltersRequest } from '../requests/key-result.request'
+import { KeyResultFiltersRequest } from '../requests/key-result-filters.request'
 
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @UseInterceptors(NourishUserDataInterceptor)

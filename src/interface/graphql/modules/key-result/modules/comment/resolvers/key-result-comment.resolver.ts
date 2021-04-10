@@ -1,6 +1,7 @@
 import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
+import { DeleteResult } from 'typeorm'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
@@ -21,7 +22,8 @@ import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
 import { KeyResultCommentCreateRequest } from '../requests/key-result-comment-create.request'
-import { KeyResultCommentFiltersRequest } from '../requests/key-result-comment.request'
+import { KeyResultCommentDeleteRequest } from '../requests/key-result-comment-delete.request'
+import { KeyResultCommentFiltersRequest } from '../requests/key-result-comment-filters.request'
 
 @UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
 @UseInterceptors(NourishUserDataInterceptor)
@@ -87,10 +89,38 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
       comment,
       graphqlUser,
     )
+    if(!createdComments || createdComments.length === 0) throw new UserInputError('We were not able to create your comment')
 
     const createdComment = createdComments[0]
 
     return createdComment
+  }
+
+  @RequiredActions('key-result-comment:delete')
+  @Mutation(() => DeleteResult, { name: 'deleteKeyResultComment' })
+  protected async deleteKeyResultComment(
+    @GraphQLUser() graphqlUser: AuthorizationUser,
+    @Args() request: KeyResultCommentDeleteRequest,
+  ) {
+    this.logger.log({
+      graphqlUser,
+      request,
+      message: 'Removing key result comment',
+    })
+
+    const keyResult = await this.core.keyResult.getFromKeyResultCommentID(request.id)
+    const objective = await this.core.objective.getFromKeyResult(keyResult)
+    const cycle = await this.core.cycle.getFromObjective(objective)
+    if (!cycle.active)
+      throw new UserInputError(
+        'You cannot delete this comment, because that cycle is not active anymore',
+      )
+
+    const selector = { id: request.id }
+    const result = await this.queryGuard.deleteWithActionScopeConstraint(selector, graphqlUser)
+    if(!result) throw new UserInputError('We were not able to find that comment to exclude')
+
+    return result
   }
 
   @ResolveField('user', () => UserGraphQLNode)

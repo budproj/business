@@ -20,7 +20,7 @@ import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objec
 import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
-import { KeyResultFiltersRequest } from '../../key-result/requests/key-result.request'
+import { KeyResultFiltersRequest } from '../../key-result/requests/key-result-filters.request'
 import { CycleFiltersRequest } from '../requests/cycle-filters.request'
 import { CyclesInSamePeriodRequest } from '../requests/cycles-in-same-period.request'
 

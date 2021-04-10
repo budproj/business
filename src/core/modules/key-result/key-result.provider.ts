@@ -145,6 +145,13 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return comment
   }
 
+  public async getFromKeyResultCommentID(keyResultCommentID: string): Promise<KeyResult> {
+    const keyResultComment = await this.keyResultCommentProvider.getOne({ id: keyResultCommentID })
+    const keyResult = await this.getOne({ id: keyResultComment.keyResultId })
+
+    return keyResult
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<KeyResult>,
     _data: Partial<KeyResultInterface>,
