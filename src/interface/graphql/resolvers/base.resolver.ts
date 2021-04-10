@@ -9,6 +9,7 @@ import { QueryGuardAdapter } from '@adapters/authorization/query-guard.adapter'
 import { CoreEntity } from '@core/core.entity'
 import { CoreProvider } from '@core/core.provider'
 import { CoreEntityProvider } from '@core/entity.provider'
+import { RelayProvider } from '@infrastructure/relay/relay.provider'
 
 import { PolicyGraphQLObject } from '../authorization/objects/policy.object'
 import { ResourceGraphQLEnum } from '../enums/resource.enum'
@@ -20,7 +21,6 @@ import { ListGraphQLResponse } from '../responses/list.response'
 import { PageInfoGraphQLResponse } from '../responses/page-info.reponse'
 
 import { GraphQLUser } from './decorators/graphql-user'
-import { RelayProvider } from '@infrastructure/relay/relay.provider'
 
 @Resolver(() => NodeGraphQLInterface)
 export abstract class BaseGraphQLResolver<E extends CoreEntity, I> {
@@ -70,7 +70,9 @@ export abstract class BaseGraphQLResolver<E extends CoreEntity, I> {
     return originalPolicy
   }
 
-  protected marshalListResponse<E extends EdgeGraphQLResponse>(edges: E[]): ConnectionGraphQLInterface {
+  protected marshalListResponse<E extends EdgeGraphQLResponse>(
+    edges: E[],
+  ): ConnectionGraphQLInterface {
     const pageInfo = new PageInfoGraphQLResponse<E>({ edges })
     const queryResult = new ListGraphQLResponse<E>({ edges, pageInfo })
 

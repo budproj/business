@@ -1,10 +1,20 @@
-import { omit } from "lodash";
-import { ConnectionArguments } from "./interfaces/connection-arguments.interface";
+import { omit, pick } from 'lodash'
+
+import { ConnectionRequest } from './interfaces/connection-request.interface'
+import { NodeRequest } from './types/node-request.type'
 
 export class RelayProvider {
-  public clearConnectionArguments<A extends ConnectionArguments>(connectionArguments: A): Omit<A, 'before' | 'after' | 'first' | 'last'> {
-    const clearedArguments = omit(connectionArguments, ['before', 'after', 'first', 'last'])
+  public getNodeRequest<R extends ConnectionRequest>(request: R): NodeRequest<R> {
+    return omit(request, ['before', 'after', 'first', 'last'])
+  }
 
-    return clearedArguments
+  public getConnectionRequest<R extends ConnectionRequest>(request: R): ConnectionRequest {
+    return pick(request, ['before', 'after', 'first', 'last'])
+  }
+
+  public unmarshalRequest<R extends ConnectionRequest>(
+    request: R,
+  ): [ConnectionRequest, NodeRequest<R>] {
+    return [this.getConnectionRequest(request), this.getNodeRequest(request)]
   }
 }

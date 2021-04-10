@@ -9,7 +9,8 @@ import { UserRootEdgeGraphQLObject } from '../edges/user-root.edge'
   implements: () => ConnectionGraphQLInterface,
   description: 'A list containing users based on the provided filters and arguments',
 })
-export class UserListGraphQLObject implements ConnectionGraphQLInterface<UserRootEdgeGraphQLObject> {
+export class UserListGraphQLObject
+  implements ConnectionGraphQLInterface<UserRootEdgeGraphQLObject> {
   @Field(() => [UserRootEdgeGraphQLObject], { complexity: 0 })
   public edges: UserRootEdgeGraphQLObject[]
 

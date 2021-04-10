@@ -9,7 +9,8 @@ import { CycleRootEdgeGraphQLObject } from '../edges/cycle-root.edge'
   implements: () => ConnectionGraphQLInterface,
   description: 'A list containing cycles based on the provided filters and arguments',
 })
-export class CycleListGraphQLObject implements ConnectionGraphQLInterface<CycleRootEdgeGraphQLObject> {
+export class CycleListGraphQLObject
+  implements ConnectionGraphQLInterface<CycleRootEdgeGraphQLObject> {
   @Field(() => [CycleRootEdgeGraphQLObject], { complexity: 0 })
   public edges: CycleRootEdgeGraphQLObject[]
 

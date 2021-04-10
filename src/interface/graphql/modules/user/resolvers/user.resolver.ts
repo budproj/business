@@ -17,7 +17,6 @@ import { KeyResultGraphQLNode } from '@interface/graphql/nodes/key-result.node'
 import { ObjectiveGraphQLNode } from '@interface/graphql/nodes/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/nodes/team.node'
 import { UserGraphQLNode } from '@interface/graphql/nodes/user.node'
-import { CursorPaginationRequest } from '@interface/graphql/requests/cursor-pagination.request'
 import { BaseGraphQLResolver } from '@interface/graphql/resolvers/base.resolver'
 import { GraphQLUser } from '@interface/graphql/resolvers/decorators/graphql-user'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
@@ -40,19 +39,19 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
   @RequiredActions('user:read')
   @Query(() => UserListGraphQLObject, { name: 'users' })
   protected async getUsers(
-    @Args() args: UserFiltersRequest,
+    @Args() request: UserFiltersRequest,
     @GraphQLUser() graphqlUser: AuthorizationUser,
   ) {
     this.logger.log({
-      args,
+      request,
       graphqlUser,
       message: 'Fetching users with filters',
     })
 
-    const filters = this.relay.clearConnectionArguments(args)
+    const [connection, filters] = this.relay.unmarshalRequest(request)
 
     const queryOptions: GetOptions<User> = {
-      limit: first,
+      limit: connection.first,
     }
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,
@@ -115,16 +114,16 @@ export class UserGraphQLResolver extends BaseGraphQLResolver<User, UserInterface
   @ResolveField('companies', () => [TeamGraphQLNode], { nullable: true })
   protected async getUserCompanies(
     @Parent() user: UserGraphQLNode,
-    @Args() pagination?: CursorPaginationRequest,
+    @Args() request?: UserFiltersRequest,
   ) {
     this.logger.log({
       user,
-      pagination,
+      request,
       message: 'Fetching companies for user',
     })
 
     const queryOptions: GetOptions<Team> = {
-      limit: pagination.first,
+      limit: request.first,
     }
     const companies = await this.core.team.getUserCompanies(user, undefined, queryOptions)
 

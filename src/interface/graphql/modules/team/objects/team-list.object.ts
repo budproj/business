@@ -9,7 +9,8 @@ import { TeamRootEdgeGraphQLObject } from '../edges/team-root.edge'
   implements: () => ConnectionGraphQLInterface,
   description: 'A list containing teams based on the provided filters and arguments',
 })
-export class TeamListGraphQLObject implements ConnectionGraphQLInterface<TeamRootEdgeGraphQLObject> {
+export class TeamListGraphQLObject
+  implements ConnectionGraphQLInterface<TeamRootEdgeGraphQLObject> {
   @Field(() => [TeamRootEdgeGraphQLObject], { complexity: 0 })
   public edges: TeamRootEdgeGraphQLObject[]
 

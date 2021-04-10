@@ -1,5 +1,5 @@
-import { EdgeGraphQLInterface } from '../interfaces/edge.interface'
 import { ConnectionGraphQLInterface } from '../interfaces/connection.interface'
+import { EdgeGraphQLInterface } from '../interfaces/edge.interface'
 
 import { EdgeGraphQLResponse } from './edge.response'
 import { PageInfoGraphQLResponse } from './page-info.reponse'
