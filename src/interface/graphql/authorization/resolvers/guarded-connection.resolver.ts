@@ -12,8 +12,8 @@ import { CoreProvider } from '@core/core.provider'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { RelayProvider } from '@infrastructure/relay/relay.provider'
 
-import { GraphQLUser } from '../../decorators/graphql-user'
 import { ScopeGraphQLEnum } from '../../enums/scope.enum'
+import { AuthorizedRequestUser } from '../decorators/authorized-request-user'
 import { GuardedConnectionGraphQLInterface } from '../interfaces/guarded-connection.interface'
 import { GuardedNodeGraphQLInterface } from '../interfaces/guarded-node.interface'
 import { PolicyGraphQLObject } from '../objects/policy.object'
@@ -45,10 +45,10 @@ export abstract class GuardedConnectionGraphQLResolver<
   @ResolveField('policy', () => PolicyGraphQLObject)
   protected async getConnectionPolicies(
     @Parent() parent: C,
-    @GraphQLUser() graphqlUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
     @Args('scope', { type: () => ScopeGraphQLEnum })
     scope: Scope,
   ) {
-    return this.getPolicyForUserInScope(graphqlUser, scope, parent)
+    return this.getPolicyForUserInScope(authorizedRequestUser, scope, parent)
   }
 }

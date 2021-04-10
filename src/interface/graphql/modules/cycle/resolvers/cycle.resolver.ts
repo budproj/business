@@ -9,10 +9,10 @@ import { GetOptions } from '@core/interfaces/get-options'
 import { CycleInterface } from '@core/modules/cycle/cycle.interface'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user'
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
-import { GraphQLUser } from '@interface/graphql/decorators/graphql-user'
 import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
 import { CyclesGraphQLConnection } from '@interface/graphql/objects/cycle/cycles.connection'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
@@ -38,11 +38,11 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   @Query(() => CyclesGraphQLConnection, { name: 'cycles' })
   protected async getCycles(
     @Args() request: CycleFiltersRequest,
-    @GraphQLUser() graphqlUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
   ) {
     this.logger.log({
       request,
-      graphqlUser,
+      authorizedRequestUser,
       message: 'Fetching teams with filters',
     })
 
@@ -52,7 +52,9 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       limit: connection.first,
     }
 
-    const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(graphqlUser.teams)
+    const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(
+      authorizedRequestUser.teams,
+    )
     const queryResult = await this.core.cycle.getFromTeamsWithFilters(
       userTeamsTree,
       filters,
@@ -65,7 +67,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   @RequiredActions('cycle:read')
   @Query(() => CyclesGraphQLConnection, { name: 'cyclesInSamePeriod', nullable: true })
   protected async getCyclesInSamePeriod(
-    @GraphQLUser() graphqlUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
     @Args() request: CyclesInSamePeriodRequest,
   ) {
     this.logger.log({
@@ -79,7 +81,9 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       limit: connection.first,
     }
 
-    const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(graphqlUser.teams)
+    const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(
+      authorizedRequestUser.teams,
+    )
     const queryResult = await this.core.cycle.getCyclesInSamePeriodFromTeamsAndParentIDsWithFilters(
       userTeamsTree,
       fromCycles,

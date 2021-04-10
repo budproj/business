@@ -8,10 +8,10 @@ import { CoreProvider } from '@core/core.provider'
 import { GetOptions } from '@core/interfaces/get-options'
 import { TeamInterface } from '@core/modules/team/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
+import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user'
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
-import { GraphQLUser } from '@interface/graphql/decorators/graphql-user'
 import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
@@ -36,11 +36,11 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   @Query(() => TeamsGraphQLConnection, { name: 'teams' })
   protected async getTeams(
     @Args() request: TeamFiltersRequest,
-    @GraphQLUser() graphqlUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
   ) {
     this.logger.log({
       request,
-      graphqlUser,
+      authorizedRequestUser,
       message: 'Fetching teams with filters',
     })
 
@@ -51,11 +51,15 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     }
     const queryLeveledHandlers = {
       default: async () =>
-        this.queryGuard.getManyWithActionScopeConstraint(filters, graphqlUser, queryOptions),
+        this.queryGuard.getManyWithActionScopeConstraint(
+          filters,
+          authorizedRequestUser,
+          queryOptions,
+        ),
       [TeamLevelGraphQLEnum.COMPANY]: async () =>
-        this.core.team.getUserCompanies(graphqlUser, filters, queryOptions),
+        this.core.team.getUserCompanies(authorizedRequestUser, filters, queryOptions),
       [TeamLevelGraphQLEnum.COMPANY_OR_DEPARTMENT]: async () =>
-        this.core.team.getUserCompaniesAndDepartments(graphqlUser, filters, queryOptions),
+        this.core.team.getUserCompaniesAndDepartments(authorizedRequestUser, filters, queryOptions),
     }
 
     const queryHandler = queryLeveledHandlers[level ?? 'default']

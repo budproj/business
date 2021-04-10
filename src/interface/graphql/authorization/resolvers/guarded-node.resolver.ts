@@ -12,8 +12,8 @@ import { CoreProvider } from '@core/core.provider'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { RelayProvider } from '@infrastructure/relay/relay.provider'
 
-import { GraphQLUser } from '../../decorators/graphql-user'
 import { ScopeGraphQLEnum } from '../../enums/scope.enum'
+import { AuthorizedRequestUser } from '../decorators/authorized-request-user'
 import { GuardedNodeGraphQLInterface } from '../interfaces/guarded-node.interface'
 import { PolicyGraphQLObject } from '../objects/policy.object'
 
@@ -42,13 +42,13 @@ export abstract class GuardedNodeGraphQLResolver<
   @ResolveField('policy', () => PolicyGraphQLObject)
   protected async getConnectionPolicies(
     @Parent() node: E,
-    @GraphQLUser() graphqlUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
     @Args('scope', { type: () => ScopeGraphQLEnum, nullable: true })
     scope?: Scope,
   ) {
-    scope ??= await this.getHighestScopeForNodeInUserContext(node, graphqlUser)
+    scope ??= await this.getHighestScopeForNodeInUserContext(node, authorizedRequestUser)
 
-    return this.getPolicyForUserInScope(graphqlUser, scope, node)
+    return this.getPolicyForUserInScope(authorizedRequestUser, scope, node)
   }
 
   private async getHighestScopeForNodeInUserContext(node: E, user: AuthorizationUser) {

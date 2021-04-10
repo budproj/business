@@ -10,9 +10,9 @@ import { RequiredActions } from '@adapters/authorization/required-actions.decora
 import { CommandStatement } from '@adapters/authorization/types/command-statement.type'
 import { ResourceStatement } from '@adapters/authorization/types/resource-statement.type copy'
 
-import { GraphQLUser } from '../../decorators/graphql-user'
 import { ScopeGraphQLEnum } from '../../enums/scope.enum'
 import { NourishUserDataInterceptor } from '../../resolvers/interceptors/nourish-user-data.interceptor'
+import { AuthorizedRequestUser } from '../decorators/authorized-request-user'
 import { GraphQLRequiredPoliciesGuard } from '../guards/required-policies.guard'
 import { GraphQLTokenGuard } from '../guards/token.guard'
 import { PermissionsGraphQLObject } from '../objects/permissions.object'
@@ -29,12 +29,12 @@ export class PermissionsGraphQLResolver {
   protected getUserPermissionsForScope(
     @Args('scope', { type: () => ScopeGraphQLEnum, defaultValue: Scope.COMPANY })
     scope: Scope,
-    @GraphQLUser() graphqlUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
   ) {
-    this.logger.log(`Fetching user permissions for user with ID ${graphqlUser.id}`)
+    this.logger.log(`Fetching user permissions for user with ID ${authorizedRequestUser.id}`)
 
     const resourcePolicy = this.authz.getResourcePolicyFromPermissions(
-      graphqlUser.token.permissions,
+      authorizedRequestUser.token.permissions,
     )
     const resourcesCommandStatement = this.authz.getResourcesCommandStatementsForScopeFromPolicy(
       resourcePolicy,

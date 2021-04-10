@@ -8,11 +8,11 @@ import { CoreProvider } from '@core/core.provider'
 import { GetOptions } from '@core/interfaces/get-options'
 import { KeyResultInterface } from '@core/modules/key-result/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user'
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
-import { GraphQLUser } from '@interface/graphql/decorators/graphql-user'
 import { KeyResultCommentGraphQLNode } from '@interface/graphql/objects/key-result/comment/key-result-comment.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { KeyResultsGraphQLConnection } from '@interface/graphql/objects/key-result/key-results.connection'
@@ -40,11 +40,11 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   @Query(() => KeyResultsGraphQLConnection, { name: 'keyResults' })
   protected async getKeyResults(
     @Args() request: KeyResultFiltersRequest,
-    @GraphQLUser() graphqlUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
   ) {
     this.logger.log({
       request,
-      graphqlUser,
+      authorizedRequestUser,
       message: 'Fetching key-results with filters',
     })
 
@@ -55,7 +55,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     }
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,
-      graphqlUser,
+      authorizedRequestUser,
       queryOptions,
     )
 

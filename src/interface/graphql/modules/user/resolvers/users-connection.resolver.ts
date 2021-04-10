@@ -8,10 +8,10 @@ import { CoreProvider } from '@core/core.provider'
 import { GetOptions } from '@core/interfaces/get-options'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
+import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user'
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
-import { GraphQLUser } from '@interface/graphql/decorators/graphql-user'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 import { UsersGraphQLConnection } from '@interface/graphql/objects/user/users.connection'
 import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
@@ -36,11 +36,11 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
   @Query(() => UsersGraphQLConnection, { name: 'users' })
   protected async getUsers(
     @Args() request: UserFiltersRequest,
-    @GraphQLUser() graphqlUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
   ) {
     this.logger.log({
       request,
-      graphqlUser,
+      authorizedRequestUser,
       message: 'Fetching users with filters',
     })
 
@@ -51,7 +51,7 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
     }
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,
-      graphqlUser,
+      authorizedRequestUser,
       queryOptions,
     )
 

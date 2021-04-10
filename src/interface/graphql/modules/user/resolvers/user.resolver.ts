@@ -15,10 +15,10 @@ import { TeamInterface } from '@core/modules/team/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
+import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user'
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
-import { GraphQLUser } from '@interface/graphql/decorators/graphql-user'
 import { UserKeyResultCheckInsGraphQLConnection } from '@interface/graphql/objects/user/user-key-result-check-ins.connection'
 import { UserKeyResultCommentsGraphQLConnection } from '@interface/graphql/objects/user/user-key-result-comments.connection'
 import { UserKeyResultsGraphQLConnection } from '@interface/graphql/objects/user/user-key-results.connection'
@@ -46,16 +46,17 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
   @RequiredActions('user:read')
   @Query(() => UserGraphQLNode, { name: 'me' })
-  protected async getMyUser(@GraphQLUser() graphqlUser: AuthorizationUser) {
+  protected async getMyUser(@AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser) {
     this.logger.log(
-      `Fetching data about the user that is executing the request. Provided user ID: ${graphqlUser.id}`,
+      `Fetching data about the user that is executing the request. Provided user ID: ${authorizedRequestUser.id}`,
     )
 
     const user = await this.queryGuard.getOneWithActionScopeConstraint(
-      { id: graphqlUser.id },
-      graphqlUser,
+      { id: authorizedRequestUser.id },
+      authorizedRequestUser,
     )
-    if (!user) throw new UserInputError(`We could not found an user with ID ${graphqlUser.id}`)
+    if (!user)
+      throw new UserInputError(`We could not found an user with ID ${authorizedRequestUser.id}`)
 
     return user
   }
@@ -63,11 +64,11 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   @RequiredActions('user:update')
   @Mutation(() => UserGraphQLNode, { name: 'updateUser' })
   protected async updateUser(
-    @GraphQLUser() graphqlUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
     @Args() request: UserUpdateRequest,
   ) {
     this.logger.log({
-      graphqlUser,
+      authorizedRequestUser,
       request,
       message: 'Received update user request',
     })
@@ -75,7 +76,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     const user = await this.queryGuard.updateWithActionScopeConstraint(
       { id: request.id },
       request.data,
-      graphqlUser,
+      authorizedRequestUser,
     )
     if (!user) throw new UserInputError(`We could not found an user with ID ${request.id}`)
 

@@ -8,10 +8,10 @@ import { CoreProvider } from '@core/core.provider'
 import { GetOptions } from '@core/interfaces/get-options'
 import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
+import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user'
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
-import { GraphQLUser } from '@interface/graphql/decorators/graphql-user'
 import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
@@ -38,11 +38,11 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   @Query(() => ObjectivesGraphQLConnection, { name: 'objectives' })
   protected async getObjectives(
     @Args() request: ObjectiveFiltersRequest,
-    @GraphQLUser() graphqlUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
   ) {
     this.logger.log({
       request,
-      graphqlUser,
+      authorizedRequestUser,
       message: 'Fetching objectives with filters',
     })
 
@@ -53,7 +53,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     }
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,
-      graphqlUser,
+      authorizedRequestUser,
       queryOptions,
     )
 
