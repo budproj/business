@@ -1,10 +1,9 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
-import { ConnectionRelayInterface } from '@infrastructure/relay/interfaces/connection.interface'
-import { PageInfoRelayObject } from '@infrastructure/relay/objects/page-info.object'
-
 import { GuardedConnectionGraphQLInterface } from '../../authorization/interfaces/guarded-connection.interface'
 import { PolicyGraphQLObject } from '../../authorization/objects/policy.object'
+import { ConnectionRelayInterface } from '../../relay/interfaces/connection.interface'
+import { PageInfoRelayObject } from '../../relay/objects/page-info.object'
 
 import { UserRootEdgeGraphQLObject } from './user-root.edge'
 import { UserGraphQLNode } from './user.node'

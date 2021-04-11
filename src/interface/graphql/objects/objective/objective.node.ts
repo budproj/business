@@ -1,9 +1,9 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql'
 
-import { NodeRelayInterface } from '@infrastructure/relay/interfaces/node.interface'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-node.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
 
+import { NodeRelayInterface } from '../../relay/interfaces/node.interface'
 import { CycleGraphQLNode } from '../cycle/cycle.node'
 import { KeyResultGraphQLNode } from '../key-result/key-result.node'
 import { UserGraphQLNode } from '../user/user.node'

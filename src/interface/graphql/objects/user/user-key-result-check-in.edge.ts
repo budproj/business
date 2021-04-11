@@ -1,8 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 import { ConnectionCursor } from 'graphql-relay'
 
-import { EdgeRelayInterface } from '@infrastructure/relay/interfaces/edge.interface'
-
+import { EdgeRelayInterface } from '../../relay/interfaces/edge.interface'
 import { KeyResultCheckInGraphQLNode } from '../key-result/check-in/key-result-check-in.node'
 
 @ObjectType('UserKeyResultCheckInEdge', {

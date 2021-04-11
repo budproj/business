@@ -1,9 +1,8 @@
 import { Field, InterfaceType } from '@nestjs/graphql'
 import { Edge } from 'graphql-relay'
 
-import { ConnectionRelayInterface } from '@infrastructure/relay/interfaces/connection.interface'
-import { PageInfoRelayObject } from '@infrastructure/relay/objects/page-info.object'
-
+import { ConnectionRelayInterface } from '../../relay/interfaces/connection.interface'
+import { PageInfoRelayObject } from '../../relay/objects/page-info.object'
 import { PolicyGraphQLObject } from '../objects/policy.object'
 
 import { GuardedNodeGraphQLInterface } from './guarded-node.interface'

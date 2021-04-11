@@ -1,7 +1,6 @@
 import { Field, InterfaceType } from '@nestjs/graphql'
 
-import { NodeRelayInterface } from '@infrastructure/relay/interfaces/node.interface'
-
+import { NodeRelayInterface } from '../../relay/interfaces/node.interface'
 import { PolicyGraphQLObject } from '../objects/policy.object'
 
 @InterfaceType('GuardedNodeInterface', {

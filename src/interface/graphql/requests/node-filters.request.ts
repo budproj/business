@@ -1,6 +1,6 @@
 import { ArgsType, Field, ID } from '@nestjs/graphql'
 
-import { ConnectionRelayRequest } from '@infrastructure/relay/requests/connection.request'
+import { ConnectionRelayRequest } from '../relay/requests/connection.request'
 
 @ArgsType()
 export class NodeFiltersRequest extends ConnectionRelayRequest {

@@ -1,4 +1,4 @@
-import { RelayProvider } from '@infrastructure/relay/relay.provider'
+import { RelayProvider } from '../relay/relay.provider'
 
 export abstract class BaseGraphQLResolver {
   protected readonly relay: RelayProvider

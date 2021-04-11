@@ -3,9 +3,9 @@ import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { Scope } from '@adapters/authorization/enums/scope.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { PolicyAdapter } from '@adapters/authorization/policy.adapter'
-import { RelayProvider } from '@infrastructure/relay/relay.provider'
-import { BaseGraphQLResolver } from '@interface/graphql/resolvers/base.resolver'
 
+import { RelayProvider } from '../../relay/relay.provider'
+import { BaseGraphQLResolver } from '../../resolvers/base.resolver'
 import { PolicyGraphQLObject } from '../objects/policy.object'
 
 export abstract class GuardedGraphQLResolver<P> extends BaseGraphQLResolver {
