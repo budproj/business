@@ -1,16 +1,10 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql'
+import { Field, ObjectType } from '@nestjs/graphql'
 import { ConnectionCursor } from 'graphql-relay'
 
 @ObjectType('PageInfo', {
   description: 'This object contains information regarding the pagination of a given node list',
 })
 export class PageInfoRelayObject {
-  @Field(() => Int, {
-    complexity: 0,
-    description: 'Defines how many nodes we have in the give response',
-  })
-  public readonly count!: number
-
   @Field(() => Boolean, {
     complexity: 0,
     description: 'If there is a next page, this key is set to true',
