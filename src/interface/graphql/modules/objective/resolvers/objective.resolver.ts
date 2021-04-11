@@ -5,7 +5,6 @@ import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CoreProvider } from '@core/core.provider'
-import { GetOptions } from '@core/interfaces/get-options'
 import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
@@ -46,11 +45,11 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching objectives with filters',
     })
 
-    const [connection, filters] = this.relay.unmarshalRequest(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      ObjectiveFiltersRequest,
+      Objective
+    >(request)
 
-    const queryOptions: GetOptions<Objective> = {
-      limit: connection.first,
-    }
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,
       authorizedRequestUser,

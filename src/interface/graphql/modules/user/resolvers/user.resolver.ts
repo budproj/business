@@ -6,11 +6,14 @@ import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CoreProvider } from '@core/core.provider'
-import { GetOptions } from '@core/interfaces/get-options'
 import { KeyResultInterface } from '@core/modules/key-result/key-result.interface'
+import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/modules/check-in/key-result-check-in.interface'
+import { KeyResultCheckIn } from '@core/modules/key-result/modules/check-in/key-result-check-in.orm-entity'
 import { KeyResultCommentInterface } from '@core/modules/key-result/modules/comment/key-result-comment.interface'
+import { KeyResultComment } from '@core/modules/key-result/modules/comment/key-result-comment.orm-entity'
 import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
+import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { TeamInterface } from '@core/modules/team/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
@@ -104,11 +107,11 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching companies for user',
     })
 
-    const [connection, filters] = this.relay.unmarshalRequest(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      TeamFiltersRequest,
+      Team
+    >(request)
 
-    const queryOptions: GetOptions<Team> = {
-      limit: connection.first,
-    }
     const queryResult = await this.core.team.getUserCompanies(user, filters, queryOptions)
 
     return this.relay.marshalResponse<Team>(queryResult, connection)
@@ -125,11 +128,11 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching teams for user',
     })
 
-    const [connection, filters] = this.relay.unmarshalRequest(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      TeamFiltersRequest,
+      Team
+    >(request)
 
-    const queryOptions: GetOptions<Team> = {
-      limit: connection.first,
-    }
     const queryResult = await this.core.user.getUserTeams(user, filters, queryOptions)
 
     return this.relay.marshalResponse<TeamInterface>(queryResult, connection)
@@ -146,11 +149,11 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching owned teams for user',
     })
 
-    const [connection, filters] = this.relay.unmarshalRequest(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      TeamFiltersRequest,
+      Team
+    >(request)
 
-    const queryOptions: GetOptions<Team> = {
-      limit: connection.first,
-    }
     const queryResult = await this.core.team.getFromOwner(user, filters, queryOptions)
 
     return this.relay.marshalResponse<TeamInterface>(queryResult, connection)
@@ -167,11 +170,11 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching objectives for user',
     })
 
-    const [connection, filters] = this.relay.unmarshalRequest(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      ObjectiveFiltersRequest,
+      Objective
+    >(request)
 
-    const queryOptions: GetOptions<Team> = {
-      limit: connection.first,
-    }
     const queryResult = await this.core.objective.getFromOwner(user, filters, queryOptions)
 
     return this.relay.marshalResponse<ObjectiveInterface>(queryResult, connection)
@@ -188,11 +191,11 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching key results for user',
     })
 
-    const [connection, filters] = this.relay.unmarshalRequest(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      KeyResultFiltersRequest,
+      KeyResult
+    >(request)
 
-    const queryOptions: GetOptions<Team> = {
-      limit: connection.first,
-    }
     const queryResult = await this.core.keyResult.getFromOwner(user, filters, queryOptions)
 
     return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection)
@@ -211,11 +214,11 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching comments by user',
     })
 
-    const [connection, filters] = this.relay.unmarshalRequest(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      KeyResultCommentFiltersRequest,
+      KeyResultComment
+    >(request)
 
-    const queryOptions: GetOptions<Team> = {
-      limit: connection.first,
-    }
     const queryResult = await this.core.keyResult.getCommentsCreatedByUser(
       user,
       filters,
@@ -238,11 +241,11 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching check-ins by user',
     })
 
-    const [connection, filters] = this.relay.unmarshalRequest(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      KeyResultCheckInFiltersRequest,
+      KeyResultCheckIn
+    >(request)
 
-    const queryOptions: GetOptions<Team> = {
-      limit: connection.first,
-    }
     const queryResult = await this.core.keyResult.getCheckInsCreatedByUser(
       user,
       filters,

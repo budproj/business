@@ -5,7 +5,6 @@ import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CoreProvider } from '@core/core.provider'
-import { GetOptions } from '@core/interfaces/get-options'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/modules/check-in//key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/modules/check-in//key-result-check-in.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
@@ -45,18 +44,16 @@ export class KeyResultCheckInsConnectionGraphQLResolver extends GuardedConnectio
       message: 'Fetching key-result check-ins with filters',
     })
 
-    const [connection, filters] = this.relay.unmarshalRequest(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      KeyResultCheckInFiltersRequest,
+      KeyResultCheckIn
+    >(request)
 
-    const queryOptions: GetOptions<KeyResultCheckIn> = {
-      limit: connection.first,
-    }
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,
       authorizedRequestKeyResultCheckIn,
       queryOptions,
     )
-
-    console.log(connection)
 
     return this.relay.marshalResponse<KeyResultCheckIn>(queryResult, connection)
   }

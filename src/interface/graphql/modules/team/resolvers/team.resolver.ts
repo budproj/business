@@ -5,7 +5,6 @@ import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CoreProvider } from '@core/core.provider'
-import { GetOptions } from '@core/interfaces/get-options'
 import { TeamInterface } from '@core/modules/team/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
@@ -44,11 +43,11 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching teams with filters',
     })
 
-    const [connection, { level, ...filters }] = this.relay.unmarshalRequest(request)
+    const [{ level, ...filters }, queryOptions, connection] = this.relay.unmarshalRequest<
+      TeamFiltersRequest,
+      Team
+    >(request)
 
-    const queryOptions: GetOptions<Team> = {
-      limit: connection.first,
-    }
     const queryLeveledHandlers = {
       default: async () =>
         this.queryGuard.getManyWithActionScopeConstraint(

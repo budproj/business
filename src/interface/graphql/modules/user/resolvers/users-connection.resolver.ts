@@ -5,7 +5,6 @@ import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CoreProvider } from '@core/core.provider'
-import { GetOptions } from '@core/interfaces/get-options'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
@@ -44,11 +43,11 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
       message: 'Fetching users with filters',
     })
 
-    const [connection, filters] = this.relay.unmarshalRequest(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      UserFiltersRequest,
+      User
+    >(request)
 
-    const queryOptions: GetOptions<User> = {
-      limit: connection.first,
-    }
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,
       authorizedRequestUser,

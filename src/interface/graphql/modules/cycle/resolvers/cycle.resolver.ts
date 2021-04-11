@@ -5,10 +5,8 @@ import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CoreProvider } from '@core/core.provider'
-import { GetOptions } from '@core/interfaces/get-options'
 import { CycleInterface } from '@core/modules/cycle/cycle.interface'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
-import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
@@ -46,11 +44,10 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       message: 'Fetching teams with filters',
     })
 
-    const [connection, filters] = this.relay.unmarshalRequest(request)
-
-    const queryOptions: GetOptions<Cycle> = {
-      limit: connection.first,
-    }
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      CycleFiltersRequest,
+      Cycle
+    >(request)
 
     const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(
       authorizedRequestUser.teams,
@@ -75,11 +72,10 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       message: 'Fetching cycles in same period',
     })
 
-    const [connection, { fromCycles, ...filters }] = this.relay.unmarshalRequest(request)
-
-    const queryOptions: GetOptions<Cycle> = {
-      limit: connection.first,
-    }
+    const [{ fromCycles, ...filters }, queryOptions, connection] = this.relay.unmarshalRequest<
+      CyclesInSamePeriodRequest,
+      Cycle
+    >(request)
 
     const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(
       authorizedRequestUser.teams,
@@ -156,11 +152,9 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       message: 'Fetching key results for cycle',
     })
 
-    const [connection, filters] = this.relay.unmarshalRequest(request)
-
-    const queryOptions: GetOptions<KeyResult> = {
-      limit: connection.first,
-    }
+    const [filters, queryOptions] = this.relay.unmarshalRequest<KeyResultFiltersRequest, Cycle>(
+      request,
+    )
 
     const objectives = await this.core.objective.getFromCycle(cycle)
     const keyResults = await this.core.keyResult.getFromObjectives(
