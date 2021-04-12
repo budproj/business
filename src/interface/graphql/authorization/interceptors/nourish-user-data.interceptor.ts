@@ -3,15 +3,21 @@ import { GqlExecutionContext } from '@nestjs/graphql'
 import { Observable } from 'rxjs'
 
 import { AuthzAdapter } from '@adapters/authorization/authz.adapter'
+import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { ServerRequest } from '@adapters/context/server-request.interface'
+import { GodmodeProvider } from '@adapters/godmode/godmode.provider'
+import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 import { CoreProvider } from '@core/core.provider'
 
 @Injectable()
 export class NourishUserDataInterceptor implements NestInterceptor {
+  protected readonly godmode: GodmodeProvider
   private readonly logger = new Logger(NourishUserDataInterceptor.name)
   private readonly authz = new AuthzAdapter()
 
-  constructor(private readonly core: CoreProvider) {}
+  constructor(private readonly core: CoreProvider, private readonly config: GraphQLConfigProvider) {
+    this.godmode = new GodmodeProvider(this.config.godmode)
+  }
 
   public async intercept(
     executionContext: ExecutionContext,
@@ -20,6 +26,19 @@ export class NourishUserDataInterceptor implements NestInterceptor {
     const graphqlContext = GqlExecutionContext.create(executionContext)
     const request: ServerRequest = graphqlContext.getContext().req
 
+    request.user = this.godmode.enabled
+      ? await this.godmode.getGodUser(this.core)
+      : await this.getRequestUser(request)
+
+    this.logger.debug({
+      requestUser: request.user,
+      message: `Selected user with ID ${request.user.id} for current request`,
+    })
+
+    return next.handle()
+  }
+
+  private async getRequestUser(request: ServerRequest): Promise<AuthorizationUser> {
     const { teams, ...user } = await this.core.user.getUserFromSubjectWithTeamRelation(
       request.user.token.sub,
     )
@@ -27,18 +46,11 @@ export class NourishUserDataInterceptor implements NestInterceptor {
       request.user.token.permissions,
     )
 
-    request.user = {
+    return {
       ...request.user,
       ...user,
       teams,
       resourcePolicy,
     }
-
-    this.logger.debug({
-      requestUser: request.user,
-      message: `Selected user with ID ${user.id} for current request`,
-    })
-
-    return next.handle()
   }
 }

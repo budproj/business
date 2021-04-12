@@ -4,14 +4,24 @@ import { GqlExecutionContext } from '@nestjs/graphql'
 
 import { AuthzAdapter } from '@adapters/authorization/authz.adapter'
 import { Action } from '@adapters/authorization/types/action.type'
+import { GodBypass } from '@adapters/godmode/decorators/god-bypass.decorator'
+import { GodmodeProvider } from '@adapters/godmode/godmode.provider'
+import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 
 @Injectable()
 export class GraphQLRequiredPoliciesGuard implements CanActivate {
+  protected readonly godmode: GodmodeProvider
   private readonly logger = new Logger(GraphQLRequiredPoliciesGuard.name)
   private readonly authz = new AuthzAdapter()
 
-  constructor(private readonly reflector: Reflector) {}
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly config: GraphQLConfigProvider,
+  ) {
+    this.godmode = new GodmodeProvider(this.config.godmode)
+  }
 
+  @GodBypass(true)
   public canActivate(executionContext: ExecutionContext) {
     const graphqlExecutionContext = GqlExecutionContext.create(executionContext)
     const request = graphqlExecutionContext.getContext().req

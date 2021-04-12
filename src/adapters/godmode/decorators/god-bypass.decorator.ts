@@ -1,13 +1,13 @@
 import { GodmodeClassInterface } from '../interfaces/godmode-class.interface'
 
-export function GodBypass() {
+export function GodBypass(value: any) {
   return function (_: unknown, key: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value
 
     descriptor.value = function (this: GodmodeClassInterface, ...methodArguments: any[]) {
       if (this.godmode.enabled) {
         this.logger.debug(`Godmode enabled, bypassing ${key} method`)
-        return
+        return value
       }
 
       return method.apply(this, methodArguments)

@@ -19,7 +19,7 @@ export class GraphQLTokenGuard extends AuthGuard('jwt') {
     this.godmode = new GodmodeProvider(this.config.godmode)
   }
 
-  @GodBypass()
+  @GodBypass(true)
   public canActivate(
     executionContext: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
