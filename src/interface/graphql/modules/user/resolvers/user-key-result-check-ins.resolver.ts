@@ -7,8 +7,8 @@ import { KeyResultCheckInInterface } from '@core/modules/key-result/modules/chec
 import { KeyResultCheckIn } from '@core/modules/key-result/modules/check-in/key-result-check-in.orm-entity'
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
+import { NourishUserDataInterceptor } from '@interface/graphql/authorization/interceptors/nourish-user-data.interceptor'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
-import { NourishUserDataInterceptor } from '@interface/graphql/interceptors/nourish-user-data.interceptor'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
 import { UserKeyResultCheckInsGraphQLConnection } from '@interface/graphql/objects/user/user-key-result-check-ins.connection'
 

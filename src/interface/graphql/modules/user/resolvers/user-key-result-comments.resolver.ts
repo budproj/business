@@ -7,8 +7,8 @@ import { KeyResultCommentInterface } from '@core/modules/key-result/modules/comm
 import { KeyResultComment } from '@core/modules/key-result/modules/comment/key-result-comment.orm-entity'
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
+import { NourishUserDataInterceptor } from '@interface/graphql/authorization/interceptors/nourish-user-data.interceptor'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
-import { NourishUserDataInterceptor } from '@interface/graphql/interceptors/nourish-user-data.interceptor'
 import { KeyResultCommentGraphQLNode } from '@interface/graphql/objects/key-result/comment/key-result-comment.node'
 import { UserKeyResultCommentsGraphQLConnection } from '@interface/graphql/objects/user/user-key-result-comments.connection'
 
