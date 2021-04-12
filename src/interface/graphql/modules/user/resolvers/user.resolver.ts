@@ -29,8 +29,8 @@ import { UserObjectivesGraphQLConnection } from '@interface/graphql/objects/user
 import { UserTeamsGraphQLConnection } from '@interface/graphql/objects/user/user-teams.connection'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 
-import { KeyResultCheckInFiltersRequest } from '../../key-result/modules/check-in/requests/key-result-check-in-filters.request'
-import { KeyResultCommentFiltersRequest } from '../../key-result/modules/comment/requests/key-result-comment-filters.request'
+import { KeyResultCheckInFiltersRequest } from '../../key-result/check-in/requests/key-result-check-in-filters.request'
+import { KeyResultCommentFiltersRequest } from '../../key-result/comment/requests/key-result-comment-filters.request'
 import { KeyResultFiltersRequest } from '../../key-result/requests/key-result-filters.request'
 import { ObjectiveFiltersRequest } from '../../objective/requests/objective-filters.request'
 import { TeamFiltersRequest } from '../../team/requests/team-filters.request'
