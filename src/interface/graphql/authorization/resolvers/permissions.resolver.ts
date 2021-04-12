@@ -11,7 +11,7 @@ import { CommandStatement } from '@adapters/authorization/types/command-statemen
 import { ResourceStatement } from '@adapters/authorization/types/resource-statement.type copy'
 
 import { ScopeGraphQLEnum } from '../../enums/scope.enum'
-import { NourishUserDataInterceptor } from '../../resolvers/interceptors/nourish-user-data.interceptor'
+import { NourishUserDataInterceptor } from '../../interceptors/nourish-user-data.interceptor'
 import { AuthorizedRequestUser } from '../decorators/authorized-request-user.decorator'
 import { GraphQLRequiredPoliciesGuard } from '../guards/required-policies.guard'
 import { GraphQLTokenGuard } from '../guards/token.guard'

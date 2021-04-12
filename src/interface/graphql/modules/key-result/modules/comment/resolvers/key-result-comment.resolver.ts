@@ -13,12 +13,12 @@ import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/g
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
+import { NourishUserDataInterceptor } from '@interface/graphql/interceptors/nourish-user-data.interceptor'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
 import { KeyResultCommentGraphQLNode } from '@interface/graphql/objects/key-result/comment/key-result-comment.node'
 import { KeyResultCommentsGraphQLConnection } from '@interface/graphql/objects/key-result/comment/key-result-comments.connection'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
-import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
 import { KeyResultCommentCreateRequest } from '../requests/key-result-comment-create.request'
 import { KeyResultCommentDeleteRequest } from '../requests/key-result-comment-delete.request'

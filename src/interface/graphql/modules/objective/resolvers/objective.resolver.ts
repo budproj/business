@@ -11,12 +11,12 @@ import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorato
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
+import { NourishUserDataInterceptor } from '@interface/graphql/interceptors/nourish-user-data.interceptor'
 import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
 import { ObjectivesGraphQLConnection } from '@interface/graphql/objects/objective/objectives.connection'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
-import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
 import { ObjectiveFiltersRequest } from '../requests/objective-filters.request'
 

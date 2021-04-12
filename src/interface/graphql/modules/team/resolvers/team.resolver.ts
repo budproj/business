@@ -11,12 +11,12 @@ import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorato
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
+import { NourishUserDataInterceptor } from '@interface/graphql/interceptors/nourish-user-data.interceptor'
 import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
 import { TeamsGraphQLConnection } from '@interface/graphql/objects/team/teams.connection'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
-import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
 import { TeamLevelGraphQLEnum } from '../enums/team-level.enum'
 import { TeamFiltersRequest } from '../requests/team-filters.request'

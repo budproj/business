@@ -11,9 +11,9 @@ import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorato
 import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
 import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
+import { NourishUserDataInterceptor } from '@interface/graphql/interceptors/nourish-user-data.interceptor'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
 import { KeyResultCheckInsGraphQLConnection } from '@interface/graphql/objects/key-result/check-in/key-result-check-ins.connection'
-import { NourishUserDataInterceptor } from '@interface/graphql/resolvers/interceptors/nourish-user-data.interceptor'
 
 import { KeyResultCheckInFiltersRequest } from '../requests/key-result-check-in-filters.request'
 
