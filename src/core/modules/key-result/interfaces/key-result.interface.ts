@@ -1,6 +1,6 @@
 import { CoreEntityInterface } from '@core/core-entity.interface'
 
-import { KeyResultFormat } from './enums/key-result-format.enum'
+import { KeyResultFormat } from '../enums/key-result-format.enum'
 
 export interface KeyResultInterface extends CoreEntityInterface {
   title: string

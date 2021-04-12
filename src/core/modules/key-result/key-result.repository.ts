@@ -6,7 +6,7 @@ import { TeamInterface } from '@core/modules/team/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 
-import { KeyResultInterface } from './key-result.interface'
+import { KeyResultInterface } from './interfaces/key-result.interface'
 import { KeyResult } from './key-result.orm-entity'
 
 @EntityRepository(KeyResult)

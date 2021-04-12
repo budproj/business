@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { forwardRef, Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { ObjectiveModule } from '../objective/objective.module'
@@ -17,7 +17,7 @@ import { KeyResultRepository } from './key-result.repository'
       KeyResultCommentRepository,
       KeyResultCheckInRepository,
     ]),
-    ObjectiveModule,
+    forwardRef(() => ObjectiveModule),
   ],
   providers: [KeyResultProvider, KeyResultCommentProvider, KeyResultCheckInProvider],
   exports: [KeyResultProvider],

@@ -2,10 +2,10 @@ import { Column, Entity, ManyToOne, OneToMany, RelationId, UpdateDateColumn } fr
 
 import { CoreEntity } from '@core/core.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/cycle.interface'
-import { KeyResultInterface } from '@core/modules/key-result/key-result.interface'
+import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 
-import { ObjectiveInterface } from './objective.interface'
+import { ObjectiveInterface } from './interfaces/objective.interface'
 
 @Entity()
 export class Objective extends CoreEntity implements ObjectiveInterface {

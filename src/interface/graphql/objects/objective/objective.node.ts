@@ -8,6 +8,8 @@ import { CycleGraphQLNode } from '../cycle/cycle.node'
 import { KeyResultGraphQLNode } from '../key-result/key-result.node'
 import { UserGraphQLNode } from '../user/user.node'
 
+import { ObjectiveStatusObject } from './objective-status.object'
+
 @ObjectType('Objective', {
   implements: () => [NodeRelayInterface, GuardedNodeGraphQLInterface],
   description:
@@ -29,6 +31,12 @@ export class ObjectiveGraphQLNode implements GuardedNodeGraphQLInterface {
   // **********************************************************************************************
   // RESOLVED FIELDS
   // **********************************************************************************************
+
+  @Field(() => ObjectiveStatusObject, {
+    description:
+      'The status of the given objective. Here you can fetch the current progress, confidence, and other for that objective',
+  })
+  public status: ObjectiveStatusObject
 
   @Field(() => CycleGraphQLNode, {
     complexity: 1,

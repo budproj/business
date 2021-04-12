@@ -4,7 +4,7 @@ import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
-import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
+import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
 import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
@@ -12,6 +12,7 @@ import { GuardedResolver } from '@interface/graphql/authorization/decorators/gua
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
 import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
+import { ObjectiveStatusObject } from '@interface/graphql/objects/objective/objective-status.object'
 import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
 import { ObjectivesGraphQLConnection } from '@interface/graphql/objects/objective/objectives.connection'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
@@ -82,5 +83,15 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     })
 
     return this.core.keyResult.getFromObjective(objective)
+  }
+
+  @ResolveField('status', () => ObjectiveStatusObject)
+  protected async getObjectiveStatus(@Parent() objective: ObjectiveGraphQLNode) {
+    this.logger.log({
+      objective,
+      message: 'Fetching current status for objective',
+    })
+
+    return this.core.objective.getCurrentStatus(objective)
   }
 }

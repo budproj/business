@@ -9,7 +9,8 @@ import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 
-import { KeyResultInterface } from '../key-result.interface'
+import { KeyResultInterface } from '../interfaces/key-result.interface'
+import { KeyResult } from '../key-result.orm-entity'
 import { KeyResultProvider } from '../key-result.provider'
 
 import {
@@ -135,6 +136,13 @@ export class KeyResultCheckInProvider extends CoreEntityProvider<
     const deltaConfidence = confidence - previousConfidence
 
     return deltaConfidence
+  }
+
+  public normalizeCheckInToPercentage(keyResult: KeyResult, keyResultCheckIn?: KeyResultCheckIn) {
+    const percentageCheckIn = this.transformCheckInToRelativePercentage(keyResult, keyResultCheckIn)
+    const percentageCheckInWithLimit = this.limitPercentageCheckIn(percentageCheckIn)
+
+    return percentageCheckInWithLimit
   }
 
   protected onModuleInit(): void {

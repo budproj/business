@@ -3,7 +3,7 @@ import { Column, Entity, ManyToOne, RelationId, UpdateDateColumn } from 'typeorm
 import { CoreEntity } from '@core/core.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 
-import { KeyResultInterface } from '../key-result.interface'
+import { KeyResultInterface } from '../interfaces/key-result.interface'
 
 import { KeyResultCommentInterface } from './key-result-comment.interface'
 

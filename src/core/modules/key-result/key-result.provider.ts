@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { uniqBy } from 'lodash'
 import { Any, FindConditions } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
-import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
+import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { TeamInterface } from '@core/modules/team/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
@@ -18,7 +18,7 @@ import { KeyResultCheckInProvider } from './check-in/key-result-check-in.provide
 import { KeyResultCommentInterface } from './comment/key-result-comment.interface'
 import { KeyResultComment } from './comment/key-result-comment.orm-entity'
 import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
-import { KeyResultInterface } from './key-result.interface'
+import { KeyResultInterface } from './interfaces/key-result.interface'
 import { KeyResult } from './key-result.orm-entity'
 import { KeyResultRepository } from './key-result.repository'
 
@@ -28,6 +28,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     public readonly keyResultCommentProvider: KeyResultCommentProvider,
     public readonly keyResultCheckInProvider: KeyResultCheckInProvider,
     protected readonly repository: KeyResultRepository,
+    @Inject(forwardRef(() => ObjectiveProvider))
     private readonly objectiveProvider: ObjectiveProvider,
   ) {
     super(KeyResultProvider.name, repository)
@@ -252,6 +253,36 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const deltaValue = keyResultCheckIn.value - previousCheckIn.value
 
     return deltaValue
+  }
+
+  public async getLatestCheckInForKeyResultAtDate(
+    keyResult: KeyResultInterface,
+    date?: Date,
+  ): Promise<KeyResultCheckIn> {
+    date ??= new Date()
+    const latestCheckIn = await this.keyResultCheckInProvider.getLatestFromKeyResultAtDate(
+      keyResult,
+      date,
+    )
+
+    return latestCheckIn
+  }
+
+  public calculateKeyResultCheckInListAverageProgress(
+    keyResultCheckInList: KeyResultCheckIn[],
+    keyResults: KeyResult[],
+  ) {
+    const normalizedKeyResultCheckInList = keyResultCheckInList.map((keyResultCheckIn, index) =>
+      this.keyResultCheckInProvider.normalizeCheckInToPercentage(
+        keyResults[index],
+        keyResultCheckIn,
+      ),
+    )
+    const keyResultCheckInListAverageProgress = this.keyResultCheckInProvider.calculateAverageValueFromCheckInList(
+      normalizedKeyResultCheckInList,
+    )
+
+    return keyResultCheckInListAverageProgress
   }
 
   protected async protectCreationQuery(

@@ -1,14 +1,14 @@
 import { Column, Entity, ManyToOne, OneToMany, RelationId, UpdateDateColumn } from 'typeorm'
 
 import { CoreEntity } from '@core/core.orm-entity'
-import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
+import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { TeamInterface } from '@core/modules/team/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 
 import { KeyResultCheckInInterface } from './check-in/key-result-check-in.interface'
 import { KeyResultCommentInterface } from './comment/key-result-comment.interface'
 import { KeyResultFormat } from './enums/key-result-format.enum'
-import { KeyResultInterface } from './key-result.interface'
+import { KeyResultInterface } from './interfaces/key-result.interface'
 
 @Entity()
 export class KeyResult extends CoreEntity implements KeyResultInterface {
