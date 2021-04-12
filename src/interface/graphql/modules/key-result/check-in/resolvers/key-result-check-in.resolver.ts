@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common'
-import { Args } from '@nestjs/graphql'
+import { Args, Float, Int, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
@@ -11,8 +11,11 @@ import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorato
 import { GuardedMutation } from '@interface/graphql/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
+import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
+import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
+import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { KeyResultCheckInCreateRequest } from '../requests/key-result-check-in-create.request'
@@ -41,14 +44,14 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching key result check-in with provided indexes',
     })
 
-    const checkIn = await this.queryGuard.getOneWithActionScopeConstraint(
+    const keyResultCheckIn = await this.queryGuard.getOneWithActionScopeConstraint(
       request,
       authorizationUser,
     )
-    if (!checkIn)
+    if (!keyResultCheckIn)
       throw new UserInputError(`We could not found a check-in with the provided arguments`)
 
-    return checkIn
+    return keyResultCheckIn
   }
 
   @GuardedMutation(KeyResultCheckInGraphQLNode, 'key-result-check-in:create', {
@@ -72,15 +75,18 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
         'You cannot create this check-in, because that key-result is not active anymore',
       )
 
-    const checkIn = await this.core.keyResult.buildCheckInForUser(authorizationUser, request.data)
+    const keyResultCheckIn = await this.core.keyResult.buildCheckInForUser(
+      authorizationUser,
+      request.data,
+    )
     const createdCheckIns = await this.queryGuard.createWithActionScopeConstraint(
-      checkIn,
+      keyResultCheckIn,
       authorizationUser,
     )
 
     this.logger.log({
       authorizationUser,
-      checkIn,
+      keyResultCheckIn,
       message: 'Creating a new check-in in our database',
     })
 
@@ -127,5 +133,112 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
       )
 
     return result
+  }
+
+  @ResolveField('progress', () => Float)
+  protected async getKeyResultCheckInProgress(
+    @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
+  ) {
+    this.logger.log({
+      keyResultCheckIn,
+      message: 'Fetching relative percentage progress for key result check-in',
+    })
+
+    return this.core.keyResult.getCheckInProgress(keyResultCheckIn)
+  }
+
+  @ResolveField('progressIncrease', () => Float)
+  protected async getKeyResultCheckInPercentageProgressIncrease(
+    @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
+  ) {
+    this.logger.log({
+      keyResultCheckIn,
+      message: 'Fetching percentage progress increase for key result check-in',
+    })
+
+    return this.core.keyResult.getCheckInProgressIncrease(keyResultCheckIn)
+  }
+
+  @ResolveField('confidenceIncrease', () => Int)
+  protected async getKeyResultCheckInAbsoluteConfidenceIncrease(
+    @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
+  ) {
+    this.logger.log({
+      keyResultCheckIn,
+      message: 'Fetching absolute confidence increase for key result check-in',
+    })
+
+    return this.core.keyResult.getCheckInConfidenceIncrease(keyResultCheckIn)
+  }
+
+  @ResolveField('valueIncrease', () => Float)
+  protected async getKeyResultCheckInValueIncrease(
+    @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
+  ) {
+    this.logger.log({
+      keyResultCheckIn,
+      message: 'Fetching value increase for key result check-in',
+    })
+
+    return this.core.keyResult.getCheckInValueIncrease(keyResultCheckIn)
+  }
+
+  @ResolveField('user', () => UserGraphQLNode)
+  protected async getKeyResultCheckInUser(@Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode) {
+    this.logger.log({
+      keyResultCheckIn,
+      message: 'Fetching user for key result check-in',
+    })
+
+    return this.core.user.getOne({ id: keyResultCheckIn.userId })
+  }
+
+  @ResolveField('keyResult', () => KeyResultGraphQLNode)
+  protected async getKeyResultCheckInKeyResult(
+    @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
+  ) {
+    this.logger.log({
+      keyResultCheckIn,
+      message: 'Fetching key result for key result check-in',
+    })
+
+    return this.core.keyResult.getOne({ id: keyResultCheckIn.keyResultId })
+  }
+
+  @ResolveField('parent', () => KeyResultCheckInGraphQLNode, { nullable: true })
+  protected async getKeyResultCheckInParent(
+    @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
+  ) {
+    this.logger.log({
+      keyResultCheckIn,
+      message: 'Fetching parent for key result check-in',
+    })
+
+    return this.core.keyResult.getParentCheckInFromCheckIn(keyResultCheckIn)
+  }
+
+  protected async customizeEntityPolicy(
+    originalPolicy: PolicyGraphQLObject,
+    keyResultCheckIn: KeyResultCheckInGraphQLNode,
+  ) {
+    const restrictedToActivePolicy = await this.restrictPolicyToActiveKeyResult(
+      originalPolicy,
+      keyResultCheckIn,
+    )
+
+    return restrictedToActivePolicy
+  }
+
+  private async restrictPolicyToActiveKeyResult(
+    originalPolicy: PolicyGraphQLObject,
+    keyResultCheckIn: KeyResultCheckInGraphQLNode,
+  ) {
+    if (this.policy.commandStatementIsDenyingAll(originalPolicy)) return originalPolicy
+
+    const isKeyResultActive = await this.core.keyResult.isActiveFromIndexes({
+      id: keyResultCheckIn.keyResultId,
+    })
+
+    return isKeyResultActive ? originalPolicy : this.policy.denyCommandStatement(originalPolicy)
   }
 }

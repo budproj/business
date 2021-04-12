@@ -194,6 +194,66 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return keyResult
   }
 
+  public async getParentCheckInFromCheckIn(
+    keyResultCheckIn: KeyResultCheckInInterface,
+  ): Promise<KeyResultCheckIn> {
+    return this.keyResultCheckInProvider.getOne({ id: keyResultCheckIn.parentId })
+  }
+
+  public async getCheckInProgress(keyResultCheckIn: KeyResultCheckIn): Promise<number> {
+    const keyResult = await this.getOne({ id: keyResultCheckIn.keyResultId })
+    const normalizedCheckIn = this.keyResultCheckInProvider.transformCheckInToRelativePercentage(
+      keyResult,
+      keyResultCheckIn,
+    )
+
+    return normalizedCheckIn.value
+  }
+
+  public async getCheckInProgressIncrease(keyResultCheckIn: KeyResultCheckIn): Promise<number> {
+    const keyResult = await this.getOne({ id: keyResultCheckIn.keyResultId })
+    const previousCheckIn = await this.getParentCheckInFromCheckIn(keyResultCheckIn)
+
+    const normalizedCurrentCheckIn = this.keyResultCheckInProvider.transformCheckInToRelativePercentage(
+      keyResult,
+      keyResultCheckIn,
+    )
+    if (!previousCheckIn) return normalizedCurrentCheckIn.value
+
+    const normalizedPreviousCheckIn = this.keyResultCheckInProvider.transformCheckInToRelativePercentage(
+      keyResult,
+      previousCheckIn,
+    )
+
+    const deltaProgress = this.keyResultCheckInProvider.calculateValueDifference(
+      normalizedPreviousCheckIn,
+      normalizedCurrentCheckIn,
+    )
+
+    return deltaProgress
+  }
+
+  public async getCheckInConfidenceIncrease(keyResultCheckIn: KeyResultCheckIn): Promise<number> {
+    const previousCheckIn = await this.getParentCheckInFromCheckIn(keyResultCheckIn)
+
+    const deltaConfidence = this.keyResultCheckInProvider.calculateConfidenceDifference(
+      previousCheckIn,
+      keyResultCheckIn,
+    )
+
+    return deltaConfidence
+  }
+
+  public async getCheckInValueIncrease(keyResultCheckIn: KeyResultCheckIn): Promise<number> {
+    const keyResult = await this.getOne({ id: keyResultCheckIn.keyResultId })
+    const previousCheckIn = await this.getParentCheckInFromCheckIn(keyResultCheckIn)
+    if (!previousCheckIn) return keyResultCheckIn.value - keyResult.initialValue
+
+    const deltaValue = keyResultCheckIn.value - previousCheckIn.value
+
+    return deltaValue
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<KeyResult>,
     _data: Partial<KeyResultInterface>,
