@@ -1,10 +1,11 @@
-import { AuthzAdapter } from '@adapters/authorization/authz.adapter'
-import { AuthzToken } from '@adapters/authorization/interfaces/authz-token.interface'
-import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
-import { Permission } from '@adapters/authorization/types/permission.type'
 import { CoreProvider } from '@core/core.provider'
 import { TeamInterface } from '@core/modules/team/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
+
+import { AuthzAdapter } from '../authz.adapter'
+import { AuthzToken } from '../interfaces/authz-token.interface'
+import { AuthorizationUser } from '../interfaces/user.interface'
+import { Permission } from '../types/permission.type'
 
 import { GodmodePropertiesInterface } from './interfaces/godmode-properties.interface'
 

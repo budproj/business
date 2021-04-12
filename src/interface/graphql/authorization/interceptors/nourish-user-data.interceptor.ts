@@ -3,9 +3,9 @@ import { GqlExecutionContext } from '@nestjs/graphql'
 import { Observable } from 'rxjs'
 
 import { AuthzAdapter } from '@adapters/authorization/authz.adapter'
+import { GodmodeProvider } from '@adapters/authorization/godmode/godmode.provider'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { ServerRequest } from '@adapters/context/server-request.interface'
-import { GodmodeProvider } from '@adapters/godmode/godmode.provider'
 import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 import { CoreProvider } from '@core/core.provider'
 

@@ -1,4 +1,4 @@
-import { GodmodePropertiesInterface } from '@adapters/godmode/interfaces/godmode-properties.interface'
+import { GodmodePropertiesInterface } from '@adapters/authorization/godmode/interfaces/godmode-properties.interface'
 
 export interface GraphQLConfigInterface {
   debug: GraphQLDebugConfigInterface

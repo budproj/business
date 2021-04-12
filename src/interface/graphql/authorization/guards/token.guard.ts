@@ -4,8 +4,8 @@ import { GqlExecutionContext } from '@nestjs/graphql'
 import { AuthGuard } from '@nestjs/passport'
 import { Observable } from 'rxjs'
 
-import { GodBypass } from '@adapters/godmode/decorators/god-bypass.decorator'
-import { GodmodeProvider } from '@adapters/godmode/godmode.provider'
+import { GodBypass } from '@adapters/authorization/godmode/decorators/god-bypass.decorator'
+import { GodmodeProvider } from '@adapters/authorization/godmode/godmode.provider'
 import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 
 @Injectable()

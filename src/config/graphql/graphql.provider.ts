@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
-import { GodmodePropertiesInterface } from '@adapters/godmode/interfaces/godmode-properties.interface'
+import { GodmodePropertiesInterface } from '@adapters/authorization/godmode/interfaces/godmode-properties.interface'
 
 import {
   GraphQLDebugConfigInterface,
