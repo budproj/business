@@ -4,12 +4,13 @@ import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
-import { CycleInterface } from '@core/modules/cycle/cycle.interface'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
+import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
 import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
+import { CycleStatusObject } from '@interface/graphql/objects/cycle/cycle-status.object'
 import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
 import { CyclesGraphQLConnection } from '@interface/graphql/objects/cycle/cycles.connection'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
@@ -78,6 +79,18 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     )
 
     return this.relay.marshalResponse<Cycle>(queryResult, connection)
+  }
+
+  @ResolveField('status', () => CycleStatusObject)
+  protected async getCycleStatus(@Parent() cycle: CycleGraphQLNode) {
+    this.logger.log({
+      cycle,
+      message: 'Fetching current status for this cycle',
+    })
+
+    const status = await this.core.cycle.getCurrentStatus(cycle)
+
+    return status
   }
 
   @ResolveField('team', () => TeamGraphQLNode)

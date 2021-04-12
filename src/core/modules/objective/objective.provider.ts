@@ -5,7 +5,7 @@ import { FindConditions } from 'typeorm'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
-import { CycleInterface } from '@core/modules/cycle/cycle.interface'
+import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
@@ -24,6 +24,7 @@ import { ObjectiveRepository } from './objective.repository'
 export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveInterface> {
   constructor(
     protected readonly repository: ObjectiveRepository,
+    @Inject(forwardRef(() => CycleProvider))
     private readonly cycleProvider: CycleProvider,
     @Inject(forwardRef(() => KeyResultProvider))
     private readonly keyResultProvider: KeyResultProvider,

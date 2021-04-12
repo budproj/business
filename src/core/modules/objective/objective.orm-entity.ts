@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, OneToMany, RelationId, UpdateDateColumn } from 'typeorm'
 
 import { CoreEntity } from '@core/core.orm-entity'
-import { CycleInterface } from '@core/modules/cycle/cycle.interface'
+import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 

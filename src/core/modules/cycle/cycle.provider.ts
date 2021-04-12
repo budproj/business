@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common'
-import { orderBy, filter, omitBy, groupBy, mapValues, flatten } from 'lodash'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
+import { orderBy, filter, omitBy, groupBy, mapValues, flatten, maxBy, meanBy, minBy } from 'lodash'
 import { Any } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
@@ -12,11 +12,15 @@ import { TeamInterface } from '@core/modules/team/team.interface'
 import { TeamProvider } from '@core/modules/team/team.provider'
 import { CreationQuery } from '@core/types/creation-query.type'
 
-import { CADENCE_RANK } from './cycle.constants'
-import { CycleInterface } from './cycle.interface'
+import { Objective } from '../objective/objective.orm-entity'
+import { ObjectiveProvider } from '../objective/objective.provider'
+
+import { CADENCE_RANK, DEFAULT_CONFIDENCE, DEFAULT_PROGRESS } from './cycle.constants'
 import { Cycle } from './cycle.orm-entity'
 import { CycleRepository } from './cycle.repository'
 import { CycleSpecification } from './cycle.specification'
+import { CycleStatus } from './interfaces/cycle-status.interface'
+import { CycleInterface } from './interfaces/cycle.interface'
 
 @Injectable()
 export class CycleProvider extends CoreEntityProvider<Cycle, CycleInterface> {
@@ -25,6 +29,8 @@ export class CycleProvider extends CoreEntityProvider<Cycle, CycleInterface> {
   constructor(
     protected readonly repository: CycleRepository,
     private readonly teamProvider: TeamProvider,
+    @Inject(forwardRef(() => ObjectiveProvider))
+    private readonly objectiveProvider: ObjectiveProvider,
   ) {
     super(CycleProvider.name, repository)
   }
@@ -139,6 +145,13 @@ export class CycleProvider extends CoreEntityProvider<Cycle, CycleInterface> {
     return this.specification.isActive.isSatisfiedBy(cycle)
   }
 
+  public async getCurrentStatus(cycle: CycleInterface): Promise<CycleStatus> {
+    const date = new Date()
+    const cycleStatus = await this.getStatusAtDate(date, cycle)
+
+    return cycleStatus
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<Cycle>,
     _data: Partial<CycleInterface>,
@@ -161,5 +174,51 @@ export class CycleProvider extends CoreEntityProvider<Cycle, CycleInterface> {
     const cyclesAfterDate = filter(cycles, (cycle) => cycle.dateEnd >= snapshot)
 
     return cyclesAfterDate
+  }
+
+  private async getStatusAtDate(date: Date, cycle: CycleInterface) {
+    const objectives = await this.objectiveProvider.getFromCycle(cycle)
+    if (!objectives || objectives.length === 0) return this.buildDefaultStatus(date)
+
+    const cycleStatus = await this.buildStatusAtDate(date, objectives)
+
+    return cycleStatus
+  }
+
+  private async buildStatusAtDate(
+    date: Date,
+    objectives: Objective[],
+  ): Promise<CycleStatus | undefined> {
+    const objectiveStatusPromises = objectives.map(async (objective) =>
+      this.objectiveProvider.getStatusAtDate(date, objective),
+    )
+    const objectiveStatuss = await Promise.all(objectiveStatusPromises)
+    const latestObjectiveStatus = maxBy(objectiveStatuss, 'createdAt')
+    if (!latestObjectiveStatus) return
+
+    const cycleStatus: CycleStatus = {
+      latestObjectiveStatus,
+      progress: meanBy(objectiveStatuss, 'progress'),
+      confidence: minBy(objectiveStatuss, 'confidence').confidence,
+      createdAt: latestObjectiveStatus.createdAt,
+    }
+
+    return cycleStatus
+  }
+
+  private buildDefaultStatus(
+    date?: Date,
+    progress: number = DEFAULT_PROGRESS,
+    confidence: number = DEFAULT_CONFIDENCE,
+  ) {
+    date ??= new Date()
+
+    const defaultStatus: CycleStatus = {
+      progress,
+      confidence,
+      createdAt: date,
+    }
+
+    return defaultStatus
   }
 }

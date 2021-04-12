@@ -12,7 +12,7 @@ import { ObjectiveRepository } from './objective.repository'
   imports: [
     TypeOrmModule.forFeature([ObjectiveRepository]),
     TeamModule,
-    CycleModule,
+    forwardRef(() => CycleModule),
     forwardRef(() => KeyResultModule),
   ],
   providers: [ObjectiveProvider],

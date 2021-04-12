@@ -1,6 +1,6 @@
 import { CoreEntitySpecification } from '@core/core.specification'
 
-import { CycleInterface } from '../cycle.interface'
+import { CycleInterface } from '../interfaces/cycle.interface'
 
 export class IsActiveSpecification extends CoreEntitySpecification<CycleInterface> {
   currentRevision = this.rev20210412IsActiveParameterTrue

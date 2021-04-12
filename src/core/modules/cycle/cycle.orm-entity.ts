@@ -3,8 +3,8 @@ import { Column, Entity, ManyToOne, OneToMany, RelationId, UpdateDateColumn } fr
 import { CoreEntity } from '@core/core.orm-entity'
 import { TeamInterface } from '@core/modules/team/team.interface'
 
-import { CycleInterface } from './cycle.interface'
 import { Cadence } from './enums/cadence.enum'
+import { CycleInterface } from './interfaces/cycle.interface'
 
 @Entity()
 export class Cycle extends CoreEntity implements CycleInterface {

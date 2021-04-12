@@ -20,6 +20,6 @@ export class ObjectiveStatusObject implements StatusGraphQLInterface {
   // ABSTRACTED FIELDS
   // **********************************************************************************************
 
-  public progress: number
-  public confidence: number
+  public progress!: number
+  public confidence!: number
 }
