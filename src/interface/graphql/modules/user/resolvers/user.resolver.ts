@@ -13,7 +13,7 @@ import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-resu
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
-import { TeamInterface } from '@core/modules/team/team.interface'
+import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'

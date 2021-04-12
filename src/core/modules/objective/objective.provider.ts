@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { maxBy, minBy } from 'lodash'
-import { FindConditions } from 'typeorm'
+import { Any, FindConditions } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
@@ -13,6 +13,7 @@ import { CreationQuery } from '@core/types/creation-query.type'
 import { CycleProvider } from '../cycle/cycle.provider'
 import { KeyResult } from '../key-result/key-result.orm-entity'
 import { KeyResultProvider } from '../key-result/key-result.provider'
+import { TeamInterface } from '../team/interfaces/team.interface'
 
 import { ObjectiveStatus } from './interfaces/objective-status.interface'
 import { ObjectiveInterface } from './interfaces/objective.interface'
@@ -82,6 +83,18 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     const objectiveStatus = await this.buildStatusAtDate(date, keyResults)
 
     return objectiveStatus
+  }
+
+  public async getFromTeams(team: TeamInterface | TeamInterface[]): Promise<Objective[]> {
+    const keyResults = await this.keyResultProvider.getFromTeams(team)
+    if (!keyResults) return []
+
+    const objectiveIds = keyResults.map((keyResult) => keyResult.objectiveId)
+    if (objectiveIds.length === 0) return []
+
+    const objectives = await this.repository.find({ where: { id: Any(objectiveIds) } })
+
+    return objectives
   }
 
   protected async protectCreationQuery(

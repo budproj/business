@@ -8,7 +8,7 @@ import { Sorting } from '@core/enums/sorting'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
-import { TeamInterface } from '@core/modules/team/team.interface'
+import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { TeamProvider } from '@core/modules/team/team.provider'
 import { CreationQuery } from '@core/types/creation-query.type'
 

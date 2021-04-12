@@ -4,7 +4,7 @@ import { Brackets, Repository, SelectQueryBuilder, WhereExpression } from 'typeo
 import { ConditionalMethodNames } from './enums/conditional-method-names.enum'
 import { ConstraintType } from './enums/contrain-type.enum'
 import { GetOptions } from './interfaces/get-options'
-import { TeamInterface } from './modules/team/team.interface'
+import { TeamInterface } from './modules/team/interfaces/team.interface'
 import { UserInterface } from './modules/user/user.interface'
 import { SelectionQueryConstrain } from './types/selection-query-constrain.type'
 

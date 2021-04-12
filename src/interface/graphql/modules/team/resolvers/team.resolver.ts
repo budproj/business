@@ -4,7 +4,7 @@ import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
-import { TeamInterface } from '@core/modules/team/team.interface'
+import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
 import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
@@ -12,6 +12,7 @@ import { GuardedResolver } from '@interface/graphql/authorization/decorators/gua
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
 import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
+import { TeamStatusObject } from '@interface/graphql/objects/team/team-status.object'
 import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
 import { TeamsGraphQLConnection } from '@interface/graphql/objects/team/teams.connection'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
@@ -56,6 +57,18 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     const queryResult = await queryHandler()
 
     return this.relay.marshalResponse<Team>(queryResult, connection)
+  }
+
+  @ResolveField('status', () => TeamStatusObject)
+  protected async getTeamStatus(@Parent() team: TeamGraphQLNode) {
+    this.logger.log({
+      team,
+      message: 'Fetching current status for this team',
+    })
+
+    const status = await this.core.team.getCurrentStatus(team)
+
+    return status
   }
 
   @ResolveField('owner', () => UserGraphQLNode)

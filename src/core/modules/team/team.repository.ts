@@ -4,7 +4,7 @@ import { CoreEntityRepository } from '@core/core.repository'
 import { ConstraintType } from '@core/enums/contrain-type.enum'
 import { UserInterface } from '@core/modules/user/user.interface'
 
-import { TeamInterface } from './team.interface'
+import { TeamInterface } from './interfaces/team.interface'
 import { Team } from './team.orm-entity'
 
 @EntityRepository(Team)

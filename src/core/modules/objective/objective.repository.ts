@@ -2,7 +2,7 @@ import { EntityRepository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
 import { CoreEntityRepository } from '@core/core.repository'
 import { ConstraintType } from '@core/enums/contrain-type.enum'
-import { TeamInterface } from '@core/modules/team/team.interface'
+import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'

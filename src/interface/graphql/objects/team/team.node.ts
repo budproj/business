@@ -10,6 +10,8 @@ import { CycleGraphQLNode } from '../cycle/cycle.node'
 import { KeyResultGraphQLNode } from '../key-result/key-result.node'
 import { UserGraphQLNode } from '../user/user.node'
 
+import { TeamStatusObject } from './team-status.object'
+
 @ObjectType('Team', {
   implements: () => [NodeRelayInterface, GuardedNodeGraphQLInterface],
   description:
@@ -45,6 +47,12 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   // **********************************************************************************************
   // RESOLVED FIELDS
   // **********************************************************************************************
+
+  @Field(() => TeamStatusObject, {
+    description:
+      'The status of the given team. Here you can fetch the current progress, confidence, and others for that team',
+  })
+  public status: TeamStatusObject
 
   @Field(() => UserGraphQLNode, {
     complexity: 1,

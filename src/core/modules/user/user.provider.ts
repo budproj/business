@@ -5,7 +5,7 @@ import { FindConditions } from 'typeorm'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
-import { TeamInterface } from '@core/modules/team/team.interface'
+import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 
 import { UserInterface } from './user.interface'

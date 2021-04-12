@@ -15,7 +15,7 @@ import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-resu
 import { UserInterface } from '@core/modules/user/user.interface'
 
 import { TeamGender } from './enums/team-gender.enum'
-import { TeamInterface } from './team.interface'
+import { TeamInterface } from './interfaces/team.interface'
 
 @Entity()
 export class Team extends CoreEntity implements TeamInterface {

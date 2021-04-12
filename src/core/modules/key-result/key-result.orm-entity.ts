@@ -2,7 +2,7 @@ import { Column, Entity, ManyToOne, OneToMany, RelationId, UpdateDateColumn } fr
 
 import { CoreEntity } from '@core/core.orm-entity'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
-import { TeamInterface } from '@core/modules/team/team.interface'
+import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 
 import { KeyResultCheckInInterface } from './check-in/key-result-check-in.interface'

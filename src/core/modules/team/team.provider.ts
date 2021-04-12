@@ -1,18 +1,21 @@
-import { Injectable } from '@nestjs/common'
-import { filter, flatten, uniqBy } from 'lodash'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
+import { filter, flatten, maxBy, meanBy, minBy, uniqBy } from 'lodash'
 import { FindConditions } from 'typeorm'
 
 import { Scope } from '@adapters/authorization/enums/scope.enum'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
+import { Objective } from '@core/modules/objective/objective.orm-entity'
+import { ObjectiveProvider } from '@core/modules/objective/objective.provider'
 import { UserInterface } from '@core/modules/user/user.interface'
+import { UserProvider } from '@core/modules/user/user.provider'
 import { CreationQuery } from '@core/types/creation-query.type'
 
-import { UserProvider } from '../user/user.provider'
-
+import { TeamStatus } from './interfaces/team-status.interface'
+import { TeamInterface } from './interfaces/team.interface'
 import { TeamRankingProvider } from './ranking.provider'
-import { TeamInterface } from './team.interface'
+import { DEFAULT_CONFIDENCE, DEFAULT_PROGRESS } from './team.constants'
 import { Team } from './team.orm-entity'
 import { TeamRepository } from './team.repository'
 import { TeamSpecification } from './team.specification'
@@ -27,6 +30,8 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     protected readonly repository: TeamRepository,
     private readonly ranking: TeamRankingProvider,
     private readonly userProvider: UserProvider,
+    @Inject(forwardRef(() => ObjectiveProvider))
+    private readonly objectiveProvider: ObjectiveProvider,
   ) {
     super(TeamProvider.name, repository)
   }
@@ -191,6 +196,13 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return rankedChildTeams
   }
 
+  public async getCurrentStatus(team: TeamInterface): Promise<TeamStatus> {
+    const date = new Date()
+    const teamStatus = await this.getStatusAtDate(date, team)
+
+    return teamStatus
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<Team>,
     _data: Partial<TeamInterface>,
@@ -302,5 +314,52 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     const uniqNodes = uniqBy(clearedNodes, 'id')
 
     return uniqNodes
+  }
+
+  private async getStatusAtDate(date: Date, team: TeamInterface): Promise<TeamStatus> {
+    const childTeams = await this.getTeamNodesTreeAfterTeam(team)
+    const objectives = await this.objectiveProvider.getFromTeams(childTeams)
+    if (!objectives || objectives.length === 0) return this.buildDefaultStatus(date)
+
+    const teamStatus = await this.buildStatusAtDate(date, objectives)
+
+    return teamStatus
+  }
+
+  private async buildStatusAtDate(
+    date: Date,
+    objectives: Objective[],
+  ): Promise<TeamStatus | undefined> {
+    const objectiveStatusPromises = objectives.map(async (objective) =>
+      this.objectiveProvider.getStatusAtDate(date, objective),
+    )
+    const objectiveStatus = await Promise.all(objectiveStatusPromises)
+    const latestObjectiveStatus = maxBy(objectiveStatus, 'createdAt')
+    if (!latestObjectiveStatus) return
+
+    const teamStatus = {
+      latestObjectiveStatus,
+      progress: meanBy(objectiveStatus, 'progress'),
+      confidence: minBy(objectiveStatus, 'confidence').confidence,
+      createdAt: latestObjectiveStatus.createdAt,
+    }
+
+    return teamStatus
+  }
+
+  private buildDefaultStatus(
+    date?: Date,
+    progress: number = DEFAULT_PROGRESS,
+    confidence: number = DEFAULT_CONFIDENCE,
+  ) {
+    date ??= new Date()
+
+    const defaultStatus = {
+      progress,
+      confidence,
+      createdAt: date,
+    }
+
+    return defaultStatus
   }
 }

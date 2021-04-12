@@ -1,6 +1,6 @@
 import { CoreEntityInterface } from '@core/core-entity.interface'
 
-import { TeamGender } from './enums/team-gender.enum'
+import { TeamGender } from '../enums/team-gender.enum'
 
 export interface TeamInterface extends CoreEntityInterface {
   name: string

@@ -11,7 +11,7 @@ import { ObjectiveRepository } from './objective.repository'
 @Module({
   imports: [
     TypeOrmModule.forFeature([ObjectiveRepository]),
-    TeamModule,
+    forwardRef(() => TeamModule),
     forwardRef(() => CycleModule),
     forwardRef(() => KeyResultModule),
   ],

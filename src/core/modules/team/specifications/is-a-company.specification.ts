@@ -1,6 +1,6 @@
 import { CoreEntitySpecification } from '@core/core.specification'
 
-import { TeamInterface } from '../team.interface'
+import { TeamInterface } from '../interfaces/team.interface'
 
 export class IsACompanySpecification extends CoreEntitySpecification<TeamInterface> {
   currentRevision = this.rev20210102DoNotHaveParentTeam

@@ -1,4 +1,4 @@
-import { TeamInterface } from '../modules/team/team.interface'
+import { TeamInterface } from '../modules/team/interfaces/team.interface'
 
 export interface QueryContext {
   companies: TeamInterface[]

@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, OneToMany, RelationId, UpdateDateColumn } from 'typeorm'
 
 import { CoreEntity } from '@core/core.orm-entity'
-import { TeamInterface } from '@core/modules/team/team.interface'
+import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 
 import { Cadence } from './enums/cadence.enum'
 import { CycleInterface } from './interfaces/cycle.interface'

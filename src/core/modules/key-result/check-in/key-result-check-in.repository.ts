@@ -3,7 +3,7 @@ import { EntityRepository, LessThanOrEqual, SelectQueryBuilder, WhereExpression 
 import { CoreEntityRepository } from '@core/core.repository'
 import { ConstraintType } from '@core/enums/contrain-type.enum'
 import { Sorting } from '@core/enums/sorting'
-import { TeamInterface } from '@core/modules/team/team.interface'
+import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 
 import { KeyResultInterface } from '../interfaces/key-result.interface'
