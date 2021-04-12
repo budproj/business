@@ -19,6 +19,7 @@ import { GraphQLOptionsFactory } from './options.factory'
       useClass: GraphQLOptionsFactory,
     }),
     CoreModule,
+    GraphQLConfigModule,
     UserGraphQLModule,
     TeamGraphQLModule,
     CycleGraphQLModule,

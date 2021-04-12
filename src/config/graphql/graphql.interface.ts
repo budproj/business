@@ -1,7 +1,10 @@
+import { GodmodePropertiesInterface } from '@adapters/godmode/interfaces/godmode-properties.interface'
+
 export interface GraphQLConfigInterface {
   debug: GraphQLDebugConfigInterface
   playground: GraphQLPlaygroundConfigInterface
   introspection: GraphQLIntrospectionConfigInterface
+  godmode: GodmodePropertiesInterface
   schema: GraphQLSchemaConfigInterface
 }
 

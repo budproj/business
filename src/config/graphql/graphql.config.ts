@@ -17,6 +17,10 @@ export const graphqlConfig = registerAs(
       enabled: process.env.GRAPHQL_INSTROSPECTION_ENABLED === 'true',
     },
 
+    godmode: {
+      enabled: process.env.GRAPHQL_GODMODE_ENABLED === 'true',
+    },
+
     schema: {
       filePath: process.env.GRAPHQL_SCHEMA_FILE_PATH,
     },

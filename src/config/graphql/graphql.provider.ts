@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
+import { GodmodePropertiesInterface } from '@adapters/godmode/interfaces/godmode-properties.interface'
+
 import {
   GraphQLDebugConfigInterface,
   GraphQLIntrospectionConfigInterface,
@@ -22,6 +24,10 @@ export class GraphQLConfigProvider {
 
   get introspection(): GraphQLIntrospectionConfigInterface {
     return this.configService.get<GraphQLIntrospectionConfigInterface>('graphql.introspection')
+  }
+
+  get godmode(): GodmodePropertiesInterface {
+    return this.configService.get<GodmodePropertiesInterface>('graphql.godmode')
   }
 
   get schema(): GraphQLSchemaConfigInterface {

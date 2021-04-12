@@ -5,4 +5,5 @@ export const GraphQLEnvironmentSchema = Joi.object({
   GRAPHQL_PLAYGROUND_ENABLED: Joi.boolean().default(false),
   GRAPHQL_INSTROSPECTION_ENABLED: Joi.boolean().default(false),
   GRAPHQL_SCHEMA_FILE_PATH: Joi.string().default('./dist/src/interface/graphql/schema.gql'),
+  GRAPHQL_GODMOD_ENABLED: Joi.boolean().default(false),
 })
