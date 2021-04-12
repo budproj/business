@@ -42,13 +42,13 @@ export abstract class GuardedNodeGraphQLResolver<
   @ResolveField('policy', () => PolicyGraphQLObject)
   protected async getConnectionPolicies(
     @Parent() node: E,
-    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
     @Args('scope', { type: () => ScopeGraphQLEnum, nullable: true })
     scope?: Scope,
   ) {
-    scope ??= await this.getHighestScopeForNodeInUserContext(node, authorizedRequestUser)
+    scope ??= await this.getHighestScopeForNodeInUserContext(node, authorizationUser)
 
-    return this.getPolicyForUserInScope(authorizedRequestUser, scope, node)
+    return this.getPolicyForUserInScope(authorizationUser, scope, node)
   }
 
   private async getHighestScopeForNodeInUserContext(node: E, user: AuthorizationUser) {

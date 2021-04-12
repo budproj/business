@@ -30,11 +30,11 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   @GuardedQuery(TeamsGraphQLConnection, 'team:read', { name: 'teams' })
   protected async getTeams(
     @Args() request: TeamFiltersRequest,
-    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
     this.logger.log({
       request,
-      authorizedRequestUser,
+      authorizationUser,
       message: 'Fetching teams with filters',
     })
 
@@ -45,15 +45,11 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
 
     const queryLeveledHandlers = {
       default: async () =>
-        this.queryGuard.getManyWithActionScopeConstraint(
-          filters,
-          authorizedRequestUser,
-          queryOptions,
-        ),
+        this.queryGuard.getManyWithActionScopeConstraint(filters, authorizationUser, queryOptions),
       [TeamLevelGraphQLEnum.COMPANY]: async () =>
-        this.core.team.getUserCompanies(authorizedRequestUser, filters, queryOptions),
+        this.core.team.getUserCompanies(authorizationUser, filters, queryOptions),
       [TeamLevelGraphQLEnum.COMPANY_OR_DEPARTMENT]: async () =>
-        this.core.team.getUserCompaniesAndDepartments(authorizedRequestUser, filters, queryOptions),
+        this.core.team.getUserCompaniesAndDepartments(authorizationUser, filters, queryOptions),
     }
 
     const queryHandler = queryLeveledHandlers[level ?? 'default']

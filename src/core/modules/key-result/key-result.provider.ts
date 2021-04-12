@@ -171,7 +171,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   public async buildCheckInForUser(
     user: UserInterface,
     checkInData: Partial<KeyResultCheckInInterface>,
-  ) {
+  ): Promise<Partial<KeyResultCheckInInterface>> {
     const keyResult = await this.getOne({ id: checkInData.keyResultId })
     const previousCheckIn = await this.keyResultCheckInProvider.getLatestFromKeyResult(keyResult)
 
@@ -185,6 +185,13 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     }
 
     return checkIn
+  }
+
+  public async getFromKeyResultCheckInID(keyResultCheckInID: string): Promise<KeyResult> {
+    const keyResultCheckIn = await this.keyResultCheckInProvider.getOne({ id: keyResultCheckInID })
+    const keyResult = await this.getOne({ id: keyResultCheckIn.keyResultId })
+
+    return keyResult
   }
 
   protected async protectCreationQuery(

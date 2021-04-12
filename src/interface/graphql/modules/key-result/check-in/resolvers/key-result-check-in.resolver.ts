@@ -16,6 +16,7 @@ import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-resu
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { KeyResultCheckInCreateRequest } from '../requests/key-result-check-in-create.request'
+import { KeyResultCheckInDeleteRequest } from '../requests/key-result-comment-delete.request'
 
 @GuardedResolver(KeyResultCheckInGraphQLNode)
 export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
@@ -33,7 +34,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   })
   protected async getCheckIn(
     @Args() request: NodeIndexesRequest,
-    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
     this.logger.log({
       request,
@@ -42,7 +43,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
 
     const checkIn = await this.queryGuard.getOneWithActionScopeConstraint(
       request,
-      authorizedRequestUser,
+      authorizationUser,
     )
     if (!checkIn)
       throw new UserInputError(`We could not found a check-in with the provided arguments`)
@@ -68,7 +69,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
     })
     if (!isKeyResultActive)
       throw new UserInputError(
-        'You cannot create this check-in, because that cycle is not active anymore',
+        'You cannot create this check-in, because that key-result is not active anymore',
       )
 
     const checkIn = await this.core.keyResult.buildCheckInForUser(authorizationUser, request.data)
@@ -89,5 +90,42 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
     const createdCheckIn = createdCheckIns[0]
 
     return createdCheckIn
+  }
+
+  @GuardedMutation(KeyResultCheckInGraphQLNode, 'key-result-check-in:delete', {
+    name: 'deleteKeyResultCheckIn',
+  })
+  protected async deleteKeyResultCheckIn(
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @Args() request: KeyResultCheckInDeleteRequest,
+  ) {
+    this.logger.log({
+      authorizationUser,
+      request,
+      message: 'Removing key result check-in',
+    })
+
+    const keyResult = await this.core.keyResult.getFromKeyResultCheckInID(request.id)
+    if (!keyResult) throw new UserInputError('We were not able to find your key-result check-in')
+
+    const isObjectiveActive = await this.core.objective.isActiveFromIndexes({
+      id: keyResult.objectiveId,
+    })
+    if (!isObjectiveActive)
+      throw new UserInputError(
+        'You cannot delete this check-in, because that key-result is not active anymore',
+      )
+
+    const selector = { id: request.id }
+    const result = await this.queryGuard.deleteWithActionScopeConstraint(
+      selector,
+      authorizationUser,
+    )
+    if (!result)
+      throw new UserInputError(
+        `We could not find any key result check-in with ${request.id} to delete`,
+      )
+
+    return result
   }
 }

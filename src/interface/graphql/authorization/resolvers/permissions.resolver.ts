@@ -24,12 +24,12 @@ export class PermissionsGraphQLResolver {
   protected getUserPermissionsForScope(
     @Args('scope', { type: () => ScopeGraphQLEnum, defaultValue: Scope.COMPANY })
     scope: Scope,
-    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
-    this.logger.log(`Fetching user permissions for user with ID ${authorizedRequestUser.id}`)
+    this.logger.log(`Fetching user permissions for user with ID ${authorizationUser.id}`)
 
     const resourcePolicy = this.authz.getResourcePolicyFromPermissions(
-      authorizedRequestUser.token.permissions,
+      authorizationUser.token.permissions,
     )
     const resourcesCommandStatement = this.authz.getResourcesCommandStatementsForScopeFromPolicy(
       resourcePolicy,

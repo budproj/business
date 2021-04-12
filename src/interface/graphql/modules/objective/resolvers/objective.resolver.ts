@@ -32,11 +32,11 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedQuery(ObjectivesGraphQLConnection, 'objective:read', { name: 'objectives' })
   protected async getObjectives(
     @Args() request: ObjectiveFiltersRequest,
-    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
     this.logger.log({
       request,
-      authorizedRequestUser,
+      authorizationUser,
       message: 'Fetching objectives with filters',
     })
 
@@ -47,7 +47,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
 
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,
-      authorizedRequestUser,
+      authorizationUser,
       queryOptions,
     )
 

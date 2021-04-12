@@ -45,10 +45,10 @@ export abstract class GuardedConnectionGraphQLResolver<
   @ResolveField('policy', () => PolicyGraphQLObject)
   protected async getConnectionPolicies(
     @Parent() parent: C,
-    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
     @Args('scope', { type: () => ScopeGraphQLEnum })
     scope: Scope,
   ) {
-    return this.getPolicyForUserInScope(authorizedRequestUser, scope, parent)
+    return this.getPolicyForUserInScope(authorizationUser, scope, parent)
   }
 }

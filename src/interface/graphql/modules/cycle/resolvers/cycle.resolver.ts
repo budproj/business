@@ -31,11 +31,11 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   @GuardedQuery(CyclesGraphQLConnection, 'cycle:read', { name: 'cycles' })
   protected async getCycles(
     @Args() request: CycleFiltersRequest,
-    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
     this.logger.log({
       request,
-      authorizedRequestUser,
+      authorizationUser,
       message: 'Fetching teams with filters',
     })
 
@@ -44,9 +44,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       Cycle
     >(request)
 
-    const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(
-      authorizedRequestUser.teams,
-    )
+    const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(authorizationUser.teams)
     const queryResult = await this.core.cycle.getFromTeamsWithFilters(
       userTeamsTree,
       filters,
@@ -58,7 +56,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
 
   @GuardedQuery(CyclesGraphQLConnection, 'cycle:read', { name: 'cyclesInSamePeriod' })
   protected async getCyclesInSamePeriod(
-    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
     @Args() request: CyclesInSamePeriodRequest,
   ) {
     this.logger.log({
@@ -71,9 +69,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       Cycle
     >(request)
 
-    const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(
-      authorizedRequestUser.teams,
-    )
+    const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(authorizationUser.teams)
     const queryResult = await this.core.cycle.getCyclesInSamePeriodFromTeamsAndParentIDsWithFilters(
       userTeamsTree,
       fromCycles,

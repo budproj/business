@@ -45,28 +45,28 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   }
 
   @GuardedQuery(UserGraphQLNode, 'user:read', { name: 'me' })
-  protected async getMyUser(@AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser) {
+  protected async getMyUser(@AuthorizedRequestUser() authorizationUser: AuthorizationUser) {
     this.logger.log(
-      `Fetching data about the user that is executing the request. Provided user ID: ${authorizedRequestUser.id}`,
+      `Fetching data about the user that is executing the request. Provided user ID: ${authorizationUser.id}`,
     )
 
     const user = await this.queryGuard.getOneWithActionScopeConstraint(
-      { id: authorizedRequestUser.id },
-      authorizedRequestUser,
+      { id: authorizationUser.id },
+      authorizationUser,
     )
     if (!user)
-      throw new UserInputError(`We could not found an user with ID ${authorizedRequestUser.id}`)
+      throw new UserInputError(`We could not found an user with ID ${authorizationUser.id}`)
 
     return user
   }
 
   @GuardedMutation(UserGraphQLNode, 'user:update', { name: 'updateUser' })
   protected async updateUser(
-    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
     @Args() request: UserUpdateRequest,
   ) {
     this.logger.log({
-      authorizedRequestUser,
+      authorizationUser,
       request,
       message: 'Received update user request',
     })
@@ -74,7 +74,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     const user = await this.queryGuard.updateWithActionScopeConstraint(
       { id: request.id },
       request.data,
-      authorizedRequestUser,
+      authorizationUser,
     )
     if (!user) throw new UserInputError(`We could not found an user with ID ${request.id}`)
 

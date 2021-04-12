@@ -38,11 +38,11 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   })
   protected async getKeyResultComments(
     @Args() request: KeyResultCommentFiltersRequest,
-    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
     this.logger.log({
       request,
-      authorizedRequestUser,
+      authorizationUser,
       message: 'Fetching key-result comments with filters',
     })
 
@@ -53,7 +53,7 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
 
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,
-      authorizedRequestUser,
+      authorizationUser,
       queryOptions,
     )
 
@@ -64,11 +64,11 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     name: 'createKeyResultComment',
   })
   protected async createKeyResultComment(
-    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
     @Args() request: KeyResultCommentCreateRequest,
   ) {
     this.logger.log({
-      authorizedRequestUser,
+      authorizationUser,
       request,
       message: 'Received create comment request',
     })
@@ -81,10 +81,10 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
         'You cannot create this comment, because that key-result is not active anymore',
       )
 
-    const comment = this.core.keyResult.createUserCommentData(authorizedRequestUser, request.data)
+    const comment = this.core.keyResult.createUserCommentData(authorizationUser, request.data)
     const createdComments = await this.queryGuard.createWithActionScopeConstraint(
       comment,
-      authorizedRequestUser,
+      authorizationUser,
     )
     if (!createdComments || createdComments.length === 0)
       throw new UserInputError('We were not able to create your comment')
@@ -98,11 +98,11 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     name: 'deleteKeyResultComment',
   })
   protected async deleteKeyResultComment(
-    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
     @Args() request: KeyResultCommentDeleteRequest,
   ) {
     this.logger.log({
-      authorizedRequestUser,
+      authorizationUser,
       request,
       message: 'Removing key result comment',
     })
@@ -110,10 +110,10 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     const keyResult = await this.core.keyResult.getFromKeyResultCommentID(request.id)
     if (!keyResult) throw new UserInputError('We were not able to find your key-result comment')
 
-    const isKeyResultActive = await this.core.objective.isActiveFromIndexes({
+    const isObjectiveActive = await this.core.objective.isActiveFromIndexes({
       id: keyResult.objectiveId,
     })
-    if (!isKeyResultActive)
+    if (!isObjectiveActive)
       throw new UserInputError(
         'You cannot create this comment, because that key-result is not active anymore',
       )
@@ -121,7 +121,7 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     const selector = { id: request.id }
     const result = await this.queryGuard.deleteWithActionScopeConstraint(
       selector,
-      authorizedRequestUser,
+      authorizationUser,
     )
     if (!result) throw new UserInputError('We were not able to find that comment to exclude')
 

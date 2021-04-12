@@ -34,11 +34,11 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedQuery(KeyResultsGraphQLConnection, 'key-result:read', { name: 'keyResults' })
   protected async getKeyResults(
     @Args() request: KeyResultFiltersRequest,
-    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
     this.logger.log({
       request,
-      authorizedRequestUser,
+      authorizationUser,
       message: 'Fetching key-results with filters',
     })
 
@@ -49,7 +49,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
 
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,
-      authorizedRequestUser,
+      authorizationUser,
       queryOptions,
     )
 

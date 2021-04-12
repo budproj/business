@@ -30,11 +30,11 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
   @GuardedQuery(UsersGraphQLConnection, 'user:read', { name: 'users' })
   protected async getUsers(
     @Args() request: UserFiltersRequest,
-    @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
     this.logger.log({
       request,
-      authorizedRequestUser,
+      authorizationUser,
       message: 'Fetching users with filters',
     })
 
@@ -45,7 +45,7 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
 
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,
-      authorizedRequestUser,
+      authorizationUser,
       queryOptions,
     )
 
