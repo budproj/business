@@ -1,25 +1,21 @@
-import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Query, Resolver } from '@nestjs/graphql'
+import { Logger } from '@nestjs/common'
+import { Args } from '@nestjs/graphql'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
-import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/modules/check-in//key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/modules/check-in//key-result-check-in.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
-import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
-import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
-import { NourishUserDataInterceptor } from '@interface/graphql/authorization/interceptors/nourish-user-data.interceptor'
+import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
+import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
 import { KeyResultCheckInsGraphQLConnection } from '@interface/graphql/objects/key-result/check-in/key-result-check-ins.connection'
 
 import { KeyResultCheckInFiltersRequest } from '../requests/key-result-check-in-filters.request'
 
-@UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
-@UseInterceptors(NourishUserDataInterceptor)
-@Resolver(() => KeyResultCheckInsGraphQLConnection)
+@GuardedResolver(KeyResultCheckInsGraphQLConnection)
 export class KeyResultCheckInsConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
   KeyResultCheckIn,
   KeyResultCheckInInterface,
@@ -31,8 +27,9 @@ export class KeyResultCheckInsConnectionGraphQLResolver extends GuardedConnectio
     super(Resource.KEY_RESULT_CHECK_IN, core, core.keyResult.keyResultCheckInProvider)
   }
 
-  @RequiredActions('key-result-check-in:read')
-  @Query(() => KeyResultCheckInsGraphQLConnection, { name: 'keyResultCheckIns' })
+  @GuardedQuery(KeyResultCheckInsGraphQLConnection, 'key-result-check-in:read', {
+    name: 'keyResultCheckIns',
+  })
   protected async getKeyResultCheckIns(
     @Args() request: KeyResultCheckInFiltersRequest,
     @AuthorizedRequestUser()

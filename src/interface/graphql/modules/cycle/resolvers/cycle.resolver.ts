@@ -1,16 +1,14 @@
-import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Logger } from '@nestjs/common'
+import { Args, Parent, ResolveField } from '@nestjs/graphql'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
-import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CoreProvider } from '@core/core.provider'
 import { CycleInterface } from '@core/modules/cycle/cycle.interface'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
-import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
-import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
-import { NourishUserDataInterceptor } from '@interface/graphql/authorization/interceptors/nourish-user-data.interceptor'
+import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
+import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
 import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
 import { CyclesGraphQLConnection } from '@interface/graphql/objects/cycle/cycles.connection'
@@ -22,9 +20,7 @@ import { KeyResultFiltersRequest } from '../../key-result/requests/key-result-fi
 import { CycleFiltersRequest } from '../requests/cycle-filters.request'
 import { CyclesInSamePeriodRequest } from '../requests/cycles-in-same-period.request'
 
-@UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
-@UseInterceptors(NourishUserDataInterceptor)
-@Resolver(() => CycleGraphQLNode)
+@GuardedResolver(CycleGraphQLNode)
 export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, CycleInterface> {
   private readonly logger = new Logger(CycleGraphQLResolver.name)
 
@@ -32,8 +28,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     super(Resource.CYCLE, core, core.cycle)
   }
 
-  @RequiredActions('cycle:read')
-  @Query(() => CyclesGraphQLConnection, { name: 'cycles' })
+  @GuardedQuery(CyclesGraphQLConnection, 'cycle:read', { name: 'cycles' })
   protected async getCycles(
     @Args() request: CycleFiltersRequest,
     @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
@@ -61,8 +56,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     return this.relay.marshalResponse<Cycle>(queryResult, connection)
   }
 
-  @RequiredActions('cycle:read')
-  @Query(() => CyclesGraphQLConnection, { name: 'cyclesInSamePeriod', nullable: true })
+  @GuardedQuery(CyclesGraphQLConnection, 'cycle:read', { name: 'cyclesInSamePeriod' })
   protected async getCyclesInSamePeriod(
     @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
     @Args() request: CyclesInSamePeriodRequest,

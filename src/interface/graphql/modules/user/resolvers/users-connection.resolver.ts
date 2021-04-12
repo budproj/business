@@ -1,25 +1,21 @@
-import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Query, Resolver } from '@nestjs/graphql'
+import { Logger } from '@nestjs/common'
+import { Args } from '@nestjs/graphql'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
-import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CoreProvider } from '@core/core.provider'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
-import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
-import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
-import { NourishUserDataInterceptor } from '@interface/graphql/authorization/interceptors/nourish-user-data.interceptor'
+import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
+import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 import { UsersGraphQLConnection } from '@interface/graphql/objects/user/users.connection'
 
 import { UserFiltersRequest } from '../requests/user-filters.request'
 
-@UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
-@UseInterceptors(NourishUserDataInterceptor)
-@Resolver(() => UsersGraphQLConnection)
+@GuardedResolver(UsersGraphQLConnection)
 export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
   User,
   UserInterface,
@@ -31,8 +27,7 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
     super(Resource.USER, core, core.user)
   }
 
-  @RequiredActions('user:read')
-  @Query(() => UsersGraphQLConnection, { name: 'users' })
+  @GuardedQuery(UsersGraphQLConnection, 'user:read', { name: 'users' })
   protected async getUsers(
     @Args() request: UserFiltersRequest,
     @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,

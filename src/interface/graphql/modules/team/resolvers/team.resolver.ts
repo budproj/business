@@ -1,16 +1,14 @@
-import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Logger } from '@nestjs/common'
+import { Args, Parent, ResolveField } from '@nestjs/graphql'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
-import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CoreProvider } from '@core/core.provider'
 import { TeamInterface } from '@core/modules/team/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
-import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
-import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
-import { NourishUserDataInterceptor } from '@interface/graphql/authorization/interceptors/nourish-user-data.interceptor'
+import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
+import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
 import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
@@ -21,9 +19,7 @@ import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 import { TeamLevelGraphQLEnum } from '../enums/team-level.enum'
 import { TeamFiltersRequest } from '../requests/team-filters.request'
 
-@UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
-@UseInterceptors(NourishUserDataInterceptor)
-@Resolver(() => TeamGraphQLNode)
+@GuardedResolver(TeamGraphQLNode)
 export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamInterface> {
   private readonly logger = new Logger(TeamGraphQLResolver.name)
 
@@ -31,8 +27,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     super(Resource.TEAM, core, core.team)
   }
 
-  @RequiredActions('team:read')
-  @Query(() => TeamsGraphQLConnection, { name: 'teams' })
+  @GuardedQuery(TeamsGraphQLConnection, 'team:read', { name: 'teams' })
   protected async getTeams(
     @Args() request: TeamFiltersRequest,
     @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,

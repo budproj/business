@@ -1,16 +1,14 @@
-import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Logger } from '@nestjs/common'
+import { Args, Parent, ResolveField } from '@nestjs/graphql'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
-import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultInterface } from '@core/modules/key-result/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
-import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
-import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
-import { NourishUserDataInterceptor } from '@interface/graphql/authorization/interceptors/nourish-user-data.interceptor'
+import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
+import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
 import { KeyResultCommentGraphQLNode } from '@interface/graphql/objects/key-result/comment/key-result-comment.node'
@@ -22,9 +20,7 @@ import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 
 import { KeyResultFiltersRequest } from '../requests/key-result-filters.request'
 
-@UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
-@UseInterceptors(NourishUserDataInterceptor)
-@Resolver(() => KeyResultGraphQLNode)
+@GuardedResolver(KeyResultGraphQLNode)
 export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   KeyResult,
   KeyResultInterface
@@ -35,8 +31,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     super(Resource.KEY_RESULT, core, core.keyResult)
   }
 
-  @RequiredActions('key-result:read')
-  @Query(() => KeyResultsGraphQLConnection, { name: 'keyResults' })
+  @GuardedQuery(KeyResultsGraphQLConnection, 'key-result:read', { name: 'keyResults' })
   protected async getKeyResults(
     @Args() request: KeyResultFiltersRequest,
     @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,

@@ -1,31 +1,26 @@
-import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Resolver, Query, Args } from '@nestjs/graphql'
+import { Logger } from '@nestjs/common'
+import { Args } from '@nestjs/graphql'
 import { camelCase, mapKeys } from 'lodash'
 
 import { AuthzAdapter } from '@adapters/authorization/authz.adapter'
 import { Effect } from '@adapters/authorization/enums/effect.enum'
 import { Scope } from '@adapters/authorization/enums/scope.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
-import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CommandStatement } from '@adapters/authorization/types/command-statement.type'
 import { ResourceStatement } from '@adapters/authorization/types/resource-statement.type copy'
 
 import { ScopeGraphQLEnum } from '../../enums/scope.enum'
 import { AuthorizedRequestUser } from '../decorators/authorized-request-user.decorator'
-import { GraphQLRequiredPoliciesGuard } from '../guards/required-policies.guard'
-import { GraphQLTokenGuard } from '../guards/token.guard'
-import { NourishUserDataInterceptor } from '../interceptors/nourish-user-data.interceptor'
+import { GuardedQuery } from '../decorators/guarded-query.decorator'
+import { GuardedResolver } from '../decorators/guarded-resolver.decorator'
 import { PermissionsGraphQLObject } from '../objects/permissions.object'
 
-@UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
-@UseInterceptors(NourishUserDataInterceptor)
-@Resolver(() => PermissionsGraphQLObject)
+@GuardedResolver(PermissionsGraphQLObject)
 export class PermissionsGraphQLResolver {
   private readonly logger = new Logger(PermissionsGraphQLResolver.name)
   private readonly authz = new AuthzAdapter()
 
-  @RequiredActions('permission:read')
-  @Query(() => PermissionsGraphQLObject, { name: 'permissions' })
+  @GuardedQuery(PermissionsGraphQLObject, 'permission:read', { name: 'permissions' })
   protected getUserPermissionsForScope(
     @Args('scope', { type: () => ScopeGraphQLEnum, defaultValue: Scope.COMPANY })
     scope: Scope,

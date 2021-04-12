@@ -1,10 +1,9 @@
-import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Logger } from '@nestjs/common'
+import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
-import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultInterface } from '@core/modules/key-result/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
@@ -19,9 +18,9 @@ import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
-import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
-import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
-import { NourishUserDataInterceptor } from '@interface/graphql/authorization/interceptors/nourish-user-data.interceptor'
+import { GuardedMutation } from '@interface/graphql/authorization/decorators/guarded-mutation.decorator'
+import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
+import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
 import { UserKeyResultCheckInsGraphQLConnection } from '@interface/graphql/objects/user/user-key-result-check-ins.connection'
 import { UserKeyResultCommentsGraphQLConnection } from '@interface/graphql/objects/user/user-key-result-comments.connection'
@@ -37,9 +36,7 @@ import { ObjectiveFiltersRequest } from '../../objective/requests/objective-filt
 import { TeamFiltersRequest } from '../../team/requests/team-filters.request'
 import { UserUpdateRequest } from '../requests/user-update.request'
 
-@UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
-@UseInterceptors(NourishUserDataInterceptor)
-@Resolver(() => UserGraphQLNode)
+@GuardedResolver(UserGraphQLNode)
 export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserInterface> {
   private readonly logger = new Logger(UserGraphQLResolver.name)
 
@@ -47,8 +44,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     super(Resource.USER, core, core.user)
   }
 
-  @RequiredActions('user:read')
-  @Query(() => UserGraphQLNode, { name: 'me' })
+  @GuardedQuery(UserGraphQLNode, 'user:read', { name: 'me' })
   protected async getMyUser(@AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser) {
     this.logger.log(
       `Fetching data about the user that is executing the request. Provided user ID: ${authorizedRequestUser.id}`,
@@ -64,8 +60,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return user
   }
 
-  @RequiredActions('user:update')
-  @Mutation(() => UserGraphQLNode, { name: 'updateUser' })
+  @GuardedMutation(UserGraphQLNode, 'user:update', { name: 'updateUser' })
   protected async updateUser(
     @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
     @Args() request: UserUpdateRequest,

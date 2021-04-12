@@ -1,20 +1,13 @@
-import { UseGuards, UseInterceptors } from '@nestjs/common'
-import { Resolver } from '@nestjs/graphql'
-
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCommentInterface } from '@core/modules/key-result/modules/comment/key-result-comment.interface'
 import { KeyResultComment } from '@core/modules/key-result/modules/comment/key-result-comment.orm-entity'
-import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
-import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
-import { NourishUserDataInterceptor } from '@interface/graphql/authorization/interceptors/nourish-user-data.interceptor'
+import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
 import { KeyResultCommentGraphQLNode } from '@interface/graphql/objects/key-result/comment/key-result-comment.node'
 import { UserKeyResultCommentsGraphQLConnection } from '@interface/graphql/objects/user/user-key-result-comments.connection'
 
-@UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
-@UseInterceptors(NourishUserDataInterceptor)
-@Resolver(() => UserKeyResultCommentsGraphQLConnection)
+@GuardedResolver(UserKeyResultCommentsGraphQLConnection)
 export class UserKeyResultCommentsConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
   KeyResultComment,
   KeyResultCommentInterface,

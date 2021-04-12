@@ -1,20 +1,18 @@
-import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Logger } from '@nestjs/common'
+import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
-import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCommentInterface } from '@core/modules/key-result/modules/comment/key-result-comment.interface'
 import { KeyResultComment } from '@core/modules/key-result/modules/comment/key-result-comment.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
-import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
-import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
-import { NourishUserDataInterceptor } from '@interface/graphql/authorization/interceptors/nourish-user-data.interceptor'
+import { GuardedMutation } from '@interface/graphql/authorization/decorators/guarded-mutation.decorator'
+import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
+import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
-import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
 import { KeyResultCommentGraphQLNode } from '@interface/graphql/objects/key-result/comment/key-result-comment.node'
 import { KeyResultCommentsGraphQLConnection } from '@interface/graphql/objects/key-result/comment/key-result-comments.connection'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
@@ -24,9 +22,7 @@ import { KeyResultCommentCreateRequest } from '../requests/key-result-comment-cr
 import { KeyResultCommentDeleteRequest } from '../requests/key-result-comment-delete.request'
 import { KeyResultCommentFiltersRequest } from '../requests/key-result-comment-filters.request'
 
-@UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
-@UseInterceptors(NourishUserDataInterceptor)
-@Resolver(() => KeyResultCommentGraphQLNode)
+@GuardedResolver(KeyResultCommentGraphQLNode)
 export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   KeyResultComment,
   KeyResultCommentInterface
@@ -37,8 +33,9 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     super(Resource.KEY_RESULT_COMMENT, core, core.keyResult.keyResultCommentProvider)
   }
 
-  @RequiredActions('key-result-comment:read')
-  @Query(() => KeyResultCommentsGraphQLConnection, { name: 'keyResultComments' })
+  @GuardedQuery(KeyResultCommentsGraphQLConnection, 'key-result-comment:read', {
+    name: 'keyResultComments',
+  })
   protected async getKeyResultComments(
     @Args() request: KeyResultCommentFiltersRequest,
     @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
@@ -63,8 +60,9 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     return this.relay.marshalResponse<KeyResultComment>(queryResult, connection)
   }
 
-  @RequiredActions('key-result-comment:create')
-  @Mutation(() => KeyResultCommentGraphQLNode, { name: 'createKeyResultComment' })
+  @GuardedMutation(KeyResultCommentGraphQLNode, 'key-result-comment:create', {
+    name: 'createKeyResultComment',
+  })
   protected async createKeyResultComment(
     @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
     @Args() request: KeyResultCommentCreateRequest,
@@ -96,8 +94,9 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     return createdComment
   }
 
-  @RequiredActions('key-result-comment:delete')
-  @Mutation(() => DeleteResultGraphQLObject, { name: 'deleteKeyResultComment' })
+  @GuardedMutation(KeyResultCommentGraphQLNode, 'key-result-comment:delete', {
+    name: 'deleteKeyResultComment',
+  })
   protected async deleteKeyResultComment(
     @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
     @Args() request: KeyResultCommentDeleteRequest,

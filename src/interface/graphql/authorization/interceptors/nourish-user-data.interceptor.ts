@@ -1,5 +1,6 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Logger } from '@nestjs/common'
 import { GqlExecutionContext } from '@nestjs/graphql'
+import { Observable } from 'rxjs'
 
 import { AuthzAdapter } from '@adapters/authorization/authz.adapter'
 import { ServerRequest } from '@adapters/context/server-request.interface'
@@ -12,7 +13,10 @@ export class NourishUserDataInterceptor implements NestInterceptor {
 
   constructor(private readonly core: CoreProvider) {}
 
-  public async intercept(executionContext: ExecutionContext, next: CallHandler) {
+  public async intercept(
+    executionContext: ExecutionContext,
+    next: CallHandler,
+  ): Promise<Observable<any>> {
     const graphqlContext = GqlExecutionContext.create(executionContext)
     const request: ServerRequest = graphqlContext.getContext().req
 

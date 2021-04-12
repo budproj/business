@@ -1,16 +1,14 @@
-import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
-import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql'
+import { Logger } from '@nestjs/common'
+import { Args, Parent, ResolveField } from '@nestjs/graphql'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
-import { RequiredActions } from '@adapters/authorization/required-actions.decorator'
 import { CoreProvider } from '@core/core.provider'
 import { ObjectiveInterface } from '@core/modules/objective/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
-import { GraphQLRequiredPoliciesGuard } from '@interface/graphql/authorization/guards/required-policies.guard'
-import { GraphQLTokenGuard } from '@interface/graphql/authorization/guards/token.guard'
-import { NourishUserDataInterceptor } from '@interface/graphql/authorization/interceptors/nourish-user-data.interceptor'
+import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
+import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
 import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
@@ -20,9 +18,7 @@ import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 
 import { ObjectiveFiltersRequest } from '../requests/objective-filters.request'
 
-@UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard)
-@UseInterceptors(NourishUserDataInterceptor)
-@Resolver(() => ObjectiveGraphQLNode)
+@GuardedResolver(ObjectiveGraphQLNode)
 export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   Objective,
   ObjectiveInterface
@@ -33,8 +29,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     super(Resource.OBJECTIVE, core, core.objective)
   }
 
-  @RequiredActions('objective:read')
-  @Query(() => ObjectivesGraphQLConnection, { name: 'objectives' })
+  @GuardedQuery(ObjectivesGraphQLConnection, 'objective:read', { name: 'objectives' })
   protected async getObjectives(
     @Args() request: ObjectiveFiltersRequest,
     @AuthorizedRequestUser() authorizedRequestUser: AuthorizationUser,
