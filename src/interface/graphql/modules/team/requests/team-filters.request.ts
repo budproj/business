@@ -1,12 +1,12 @@
 import { ArgsType, Field, ID } from '@nestjs/graphql'
 
 import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
-import { NodeFiltersRequest } from '@interface/graphql/requests/node-filters.request'
+import { ConnectionFiltersRequest } from '@interface/graphql/requests/connection-filters.request'
 
 import { TeamLevelGraphQLEnum } from '../enums/team-level.enum'
 
 @ArgsType()
-export class TeamFiltersRequest extends NodeFiltersRequest {
+export class TeamFiltersRequest extends ConnectionFiltersRequest {
   @Field(() => ID, {
     description: 'The ID of the parent team that you want to user on this query',
     nullable: true,

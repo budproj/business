@@ -5,8 +5,8 @@ import { UserInputError } from 'apollo-server-fastify'
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
-import { KeyResultCommentInterface } from '@core/modules/key-result/modules/comment/key-result-comment.interface'
-import { KeyResultComment } from '@core/modules/key-result/modules/comment/key-result-comment.orm-entity'
+import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
+import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
 import { GuardedMutation } from '@interface/graphql/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
@@ -73,12 +73,12 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Received create comment request',
     })
 
-    const keyResult = await this.core.keyResult.getOne({ id: request.data.keyResultId })
-    const objective = await this.core.objective.getFromKeyResult(keyResult)
-    const cycle = await this.core.cycle.getFromObjective(objective)
-    if (!cycle.active)
+    const isKeyResultActive = await this.core.keyResult.isActiveFromIndexes({
+      id: request.data.keyResultId,
+    })
+    if (!isKeyResultActive)
       throw new UserInputError(
-        'You cannot create this comment, because that cycle is not active anymore',
+        'You cannot create this comment, because that key-result is not active anymore',
       )
 
     const comment = this.core.keyResult.createUserCommentData(authorizedRequestUser, request.data)
@@ -110,11 +110,12 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     const keyResult = await this.core.keyResult.getFromKeyResultCommentID(request.id)
     if (!keyResult) throw new UserInputError('We were not able to find your key-result comment')
 
-    const objective = await this.core.objective.getFromKeyResult(keyResult)
-    const cycle = await this.core.cycle.getFromObjective(objective)
-    if (!cycle.active)
+    const isKeyResultActive = await this.core.objective.isActiveFromIndexes({
+      id: keyResult.objectiveId,
+    })
+    if (!isKeyResultActive)
       throw new UserInputError(
-        'You cannot delete this comment, because that cycle is not active anymore',
+        'You cannot create this comment, because that key-result is not active anymore',
       )
 
     const selector = { id: request.id }

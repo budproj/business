@@ -5,7 +5,7 @@ import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 
-import { KeyResultProvider } from '../../key-result.provider'
+import { KeyResultProvider } from '../key-result.provider'
 
 import { KeyResultCommentInterface } from './key-result-comment.interface'
 import { KeyResultComment } from './key-result-comment.orm-entity'

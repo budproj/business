@@ -16,9 +16,12 @@ import { CADENCE_RANK } from './cycle.constants'
 import { CycleInterface } from './cycle.interface'
 import { Cycle } from './cycle.orm-entity'
 import { CycleRepository } from './cycle.repository'
+import { CycleSpecification } from './cycle.specification'
 
 @Injectable()
 export class CycleProvider extends CoreEntityProvider<Cycle, CycleInterface> {
+  private readonly specification = new CycleSpecification()
+
   constructor(
     protected readonly repository: CycleRepository,
     private readonly teamProvider: TeamProvider,
@@ -128,6 +131,12 @@ export class CycleProvider extends CoreEntityProvider<Cycle, CycleInterface> {
 
   public async getFromObjective(objective: ObjectiveInterface): Promise<Cycle> {
     return this.repository.findOne({ id: objective.cycleId })
+  }
+
+  public async isActiveFromIndexes(cycleIndexes: Partial<CycleInterface>): Promise<boolean> {
+    const cycle = await this.repository.findOne(cycleIndexes)
+
+    return this.specification.isActive.isSatisfiedBy(cycle)
   }
 
   protected async protectCreationQuery(

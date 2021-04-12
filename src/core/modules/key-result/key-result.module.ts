@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
+import { ObjectiveModule } from '../objective/objective.module'
+
+import { KeyResultCheckInProvider } from './check-in/key-result-check-in.provider'
+import { KeyResultCheckInRepository } from './check-in/key-result-check-in.repository'
+import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
+import { KeyResultCommentRepository } from './comment/key-result-comment.repository'
 import { KeyResultProvider } from './key-result.provider'
 import { KeyResultRepository } from './key-result.repository'
-import { KeyResultCheckInProvider } from './modules/check-in/key-result-check-in.provider'
-import { KeyResultCheckInRepository } from './modules/check-in/key-result-check-in.repository'
-import { KeyResultCommentProvider } from './modules/comment/key-result-comment.provider'
-import { KeyResultCommentRepository } from './modules/comment/key-result-comment.repository'
 
 @Module({
   imports: [
@@ -15,6 +17,7 @@ import { KeyResultCommentRepository } from './modules/comment/key-result-comment
       KeyResultCommentRepository,
       KeyResultCheckInRepository,
     ]),
+    ObjectiveModule,
   ],
   providers: [KeyResultProvider, KeyResultCommentProvider, KeyResultCheckInProvider],
   exports: [KeyResultProvider],

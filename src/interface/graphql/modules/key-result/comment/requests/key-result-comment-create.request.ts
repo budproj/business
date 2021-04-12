@@ -1,9 +1,9 @@
 import { ArgsType, Field } from '@nestjs/graphql'
 
-import { KeyResultCommentInputRequest } from './key-result-comment-input.request'
+import { KeyResultCommentInputObject } from '../objects/key-result-comment-input.object'
 
 @ArgsType()
 export class KeyResultCommentCreateRequest {
-  @Field(() => KeyResultCommentInputRequest)
-  public readonly data: KeyResultCommentInputRequest
+  @Field(() => KeyResultCommentInputObject)
+  public readonly data: KeyResultCommentInputObject
 }

@@ -1,7 +1,7 @@
 import { Field, ID, InputType } from '@nestjs/graphql'
 
 @InputType({ description: 'The required data to create a new comment' })
-export class KeyResultCommentInputRequest {
+export class KeyResultCommentInputObject {
   @Field(() => String, { description: 'The text of the comment' })
   public text: string
 

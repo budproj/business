@@ -5,7 +5,7 @@ import { ConstraintType } from '@core/enums/contrain-type.enum'
 import { TeamInterface } from '@core/modules/team/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 
-import { KeyResult } from '../../key-result.orm-entity'
+import { KeyResult } from '../key-result.orm-entity'
 
 import { KeyResultComment } from './key-result-comment.orm-entity'
 

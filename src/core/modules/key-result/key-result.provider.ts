@@ -10,14 +10,17 @@ import { TeamInterface } from '@core/modules/team/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 
+import { ObjectiveProvider } from '../objective/objective.provider'
+
+import { KeyResultCheckInInterface } from './check-in/key-result-check-in.interface'
+import { KeyResultCheckIn } from './check-in/key-result-check-in.orm-entity'
+import { KeyResultCheckInProvider } from './check-in/key-result-check-in.provider'
+import { KeyResultCommentInterface } from './comment/key-result-comment.interface'
+import { KeyResultComment } from './comment/key-result-comment.orm-entity'
+import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
 import { KeyResultInterface } from './key-result.interface'
 import { KeyResult } from './key-result.orm-entity'
 import { KeyResultRepository } from './key-result.repository'
-import { KeyResultCheckIn } from './modules/check-in/key-result-check-in.orm-entity'
-import { KeyResultCheckInProvider } from './modules/check-in/key-result-check-in.provider'
-import { KeyResultCommentInterface } from './modules/comment/key-result-comment.interface'
-import { KeyResultComment } from './modules/comment/key-result-comment.orm-entity'
-import { KeyResultCommentProvider } from './modules/comment/key-result-comment.provider'
 
 @Injectable()
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
@@ -25,6 +28,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     public readonly keyResultCommentProvider: KeyResultCommentProvider,
     public readonly keyResultCheckInProvider: KeyResultCheckInProvider,
     protected readonly repository: KeyResultRepository,
+    private readonly objectiveProvider: ObjectiveProvider,
   ) {
     super(KeyResultProvider.name, repository)
   }
@@ -154,6 +158,33 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const keyResult = await this.getOne({ id: keyResultComment.keyResultId })
 
     return keyResult
+  }
+
+  public async isActiveFromIndexes(
+    keyResultIndexes: Partial<KeyResultInterface>,
+  ): Promise<boolean> {
+    const keyResult = await this.repository.findOne(keyResultIndexes)
+
+    return this.objectiveProvider.isActiveFromIndexes({ id: keyResult.objectiveId })
+  }
+
+  public async buildCheckInForUser(
+    user: UserInterface,
+    checkInData: Partial<KeyResultCheckInInterface>,
+  ) {
+    const keyResult = await this.getOne({ id: checkInData.keyResultId })
+    const previousCheckIn = await this.keyResultCheckInProvider.getLatestFromKeyResult(keyResult)
+
+    const checkIn: Partial<KeyResultCheckInInterface> = {
+      userId: user.id,
+      keyResultId: checkInData.keyResultId,
+      value: checkInData.value,
+      confidence: checkInData.confidence,
+      comment: checkInData.comment,
+      parentId: previousCheckIn?.id,
+    }
+
+    return checkIn
   }
 
   protected async protectCreationQuery(

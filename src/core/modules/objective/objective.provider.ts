@@ -9,13 +9,18 @@ import { KeyResultInterface } from '@core/modules/key-result/key-result.interfac
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 
+import { CycleProvider } from '../cycle/cycle.provider'
+
 import { ObjectiveInterface } from './objective.interface'
 import { Objective } from './objective.orm-entity'
 import { ObjectiveRepository } from './objective.repository'
 
 @Injectable()
 export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveInterface> {
-  constructor(protected readonly repository: ObjectiveRepository) {
+  constructor(
+    protected readonly repository: ObjectiveRepository,
+    private readonly cycleProvider: CycleProvider,
+  ) {
     super(ObjectiveProvider.name, repository)
   }
 
@@ -42,6 +47,14 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
 
   public async getFromKeyResult(keyResult: KeyResultInterface): Promise<Objective> {
     return this.repository.findOne({ id: keyResult.objectiveId })
+  }
+
+  public async isActiveFromIndexes(
+    objectiveIndexes: Partial<ObjectiveInterface>,
+  ): Promise<boolean> {
+    const objective = await this.repository.findOne(objectiveIndexes)
+
+    return this.cycleProvider.isActiveFromIndexes({ id: objective.cycleId })
   }
 
   protected async protectCreationQuery(

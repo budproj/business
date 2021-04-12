@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql'
 
 @InputType({ description: 'Data that you can assign to a given user' })
-export class UserInputRequest {
+export class UserInputObject {
   @Field(() => String, { description: 'The first name of the user', nullable: true })
   public readonly firstName?: string
 
