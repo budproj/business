@@ -19,9 +19,7 @@ import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.req
 
 import { KeyResultCheckInGraphQLNode } from './check-in/key-result-check-in.node'
 import { KeyResultCommentGraphQLNode } from './comment/key-result-comment.node'
-import { KeyResultsGraphQLConnection } from './connections/key-results/key-results.connection'
 import { KeyResultGraphQLNode } from './key-result.node'
-import { KeyResultFiltersRequest } from './requests/key-result-filters.request'
 
 @GuardedResolver(KeyResultGraphQLNode)
 export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
@@ -52,31 +50,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       throw new UserInputError(`We could not found an key-result with the provided arguments`)
 
     return keyResult
-  }
-
-  @GuardedQuery(KeyResultsGraphQLConnection, 'key-result:read', { name: 'keyResults' })
-  protected async getKeyResultsForRequestAndAuthorizedRequestUser(
-    @Args() request: KeyResultFiltersRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
-  ) {
-    this.logger.log({
-      request,
-      authorizationUser,
-      message: 'Fetching key-results with filters',
-    })
-
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      KeyResultFiltersRequest,
-      KeyResult
-    >(request)
-
-    const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
-      filters,
-      authorizationUser,
-      queryOptions,
-    )
-
-    return this.relay.marshalResponse<KeyResult>(queryResult, connection)
   }
 
   @ResolveField('owner', () => UserGraphQLNode)

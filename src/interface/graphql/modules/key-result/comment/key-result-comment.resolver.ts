@@ -18,11 +18,9 @@ import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.req
 
 import { KeyResultGraphQLNode } from '../key-result.node'
 
-import { KeyResultCommentsGraphQLConnection } from './connections/key-result-comments/key-result-comments.connection'
 import { KeyResultCommentGraphQLNode } from './key-result-comment.node'
 import { KeyResultCommentCreateRequest } from './requests/key-result-comment-create.request'
 import { KeyResultCommentDeleteRequest } from './requests/key-result-comment-delete.request'
-import { KeyResultCommentFiltersRequest } from './requests/key-result-comment-filters.request'
 
 @GuardedResolver(KeyResultCommentGraphQLNode)
 export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
@@ -57,33 +55,6 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
       )
 
     return keyResultComment
-  }
-
-  @GuardedQuery(KeyResultCommentsGraphQLConnection, 'key-result-comment:read', {
-    name: 'keyResultComments',
-  })
-  protected async getKeyResultCommentsForRequestAndAuthorizedRequestUser(
-    @Args() request: KeyResultCommentFiltersRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
-  ) {
-    this.logger.log({
-      request,
-      authorizationUser,
-      message: 'Fetching key-result comments with filters',
-    })
-
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      KeyResultCommentFiltersRequest,
-      KeyResultComment
-    >(request)
-
-    const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
-      filters,
-      authorizationUser,
-      queryOptions,
-    )
-
-    return this.relay.marshalResponse<KeyResultComment>(queryResult, connection)
   }
 
   @GuardedMutation(KeyResultCommentGraphQLNode, 'key-result-comment:create', {

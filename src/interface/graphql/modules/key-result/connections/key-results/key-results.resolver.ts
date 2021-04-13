@@ -4,44 +4,44 @@ import { Args } from '@nestjs/graphql'
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
-import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
-import { Objective } from '@core/modules/objective/objective.orm-entity'
+import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
+import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
 import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
 
-import { ObjectiveGraphQLNode } from '../../objective.node'
-import { ObjectiveFiltersRequest } from '../../requests/objective-filters.request'
+import { KeyResultGraphQLNode } from '../../key-result.node'
+import { KeyResultFiltersRequest } from '../../requests/key-result-filters.request'
 
-import { ObjectivesGraphQLConnection } from './objectives.connection'
+import { KeyResultsGraphQLConnection } from './key-results.connection'
 
-@GuardedResolver(ObjectivesGraphQLConnection)
-export class ObjectivesConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
-  Objective,
-  ObjectiveInterface,
-  ObjectiveGraphQLNode
+@GuardedResolver(KeyResultsGraphQLConnection)
+export class KeyResultsConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
+  KeyResult,
+  KeyResultInterface,
+  KeyResultGraphQLNode
 > {
-  private readonly logger = new Logger(ObjectivesConnectionGraphQLResolver.name)
+  private readonly logger = new Logger(KeyResultsConnectionGraphQLResolver.name)
 
   constructor(protected readonly core: CoreProvider) {
-    super(Resource.OBJECTIVE, core, core.objective)
+    super(Resource.KEY_RESULT, core, core.keyResult)
   }
 
-  @GuardedQuery(ObjectivesGraphQLConnection, 'objective:read', { name: 'objectives' })
-  protected async getObjectivesForRequestAndAuthorizedRequestUser(
-    @Args() request: ObjectiveFiltersRequest,
+  @GuardedQuery(KeyResultsGraphQLConnection, 'key-result:read', { name: 'keyResults' })
+  protected async getKeyResultsForRequestAndAuthorizedRequestUser(
+    @Args() request: KeyResultFiltersRequest,
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
     this.logger.log({
       request,
       authorizationUser,
-      message: 'Fetching objectives with filters',
+      message: 'Fetching key-results with filters',
     })
 
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      ObjectiveFiltersRequest,
-      Objective
+      KeyResultFiltersRequest,
+      KeyResult
     >(request)
 
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
@@ -50,6 +50,6 @@ export class ObjectivesConnectionGraphQLResolver extends GuardedConnectionGraphQ
       queryOptions,
     )
 
-    return this.relay.marshalResponse<Objective>(queryResult, connection)
+    return this.relay.marshalResponse<KeyResult>(queryResult, connection)
   }
 }
