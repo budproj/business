@@ -9,6 +9,7 @@ import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
+import { UserInterface } from '@core/modules/user/user.interface'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
 import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
@@ -20,8 +21,13 @@ import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/re
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
+import { UserFiltersRequest } from '../user/requests/user-filters.request'
+
 import { TeamObjectivesGraphQLConnection } from './connections/team-objectives/team-objectives.connection'
+import { TeamTeamsGraphQLConnection } from './connections/team-teams/team-teams.connection'
+import { TeamUsersGraphQLConnection } from './connections/team-users/team-users.connection'
 import { TeamStatusObject } from './objects/team-status.object'
+import { TeamFiltersRequest } from './requests/team-filters.request'
 import { TeamGraphQLNode } from './team.node'
 
 @GuardedResolver(TeamGraphQLNode)
@@ -70,28 +76,46 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.core.user.getOne({ id: team.ownerId })
   }
 
-  @ResolveField('teams', () => [TeamGraphQLNode], { nullable: true })
-  protected async getChildTeamsForTeam(@Parent() team: TeamGraphQLNode) {
+  @ResolveField('teams', () => TeamTeamsGraphQLConnection, { nullable: true })
+  protected async getChildTeamsForTeam(
+    @Args() request: TeamFiltersRequest,
+    @Parent() team: TeamGraphQLNode,
+  ) {
     this.logger.log({
       team,
+      request,
       message: 'Fetching child teams for team',
     })
 
-    const childTeams = await this.core.team.getTeamChildTeams(team)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      ObjectiveFiltersRequest,
+      Objective
+    >(request)
 
-    return childTeams
+    const queryResult = await this.core.team.getTeamChildTeams(team, filters, queryOptions)
+
+    return this.relay.marshalResponse<TeamInterface>(queryResult, connection)
   }
 
-  @ResolveField('rankedTeams', () => [TeamGraphQLNode], { nullable: true })
-  protected async getRankedTeamsForTeam(@Parent() team: TeamGraphQLNode) {
+  @ResolveField('rankedTeams', () => TeamTeamsGraphQLConnection, { nullable: true })
+  protected async getRankedTeamsForTeam(
+    @Args() request: TeamFiltersRequest,
+    @Parent() team: TeamGraphQLNode,
+  ) {
     this.logger.log({
       team,
-      message: 'Fetching child teams for team ranked by progress',
+      request,
+      message: 'Fetching ranked teams for team',
     })
 
-    const rankedTeams = await this.core.team.getRankedTeamsBelowNode(team)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      ObjectiveFiltersRequest,
+      Objective
+    >(request)
 
-    return rankedTeams
+    const queryResult = await this.core.team.getRankedTeamsBelowNode(team, filters, queryOptions)
+
+    return this.relay.marshalResponse<TeamInterface>(queryResult, connection)
   }
 
   @ResolveField('parent', () => TeamGraphQLNode, { nullable: true })
@@ -106,14 +130,25 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return parent
   }
 
-  @ResolveField('users', () => [UserGraphQLNode], { nullable: true })
-  protected async getUsersForTeam(@Parent() team: TeamGraphQLNode) {
+  @ResolveField('users', () => TeamUsersGraphQLConnection, { nullable: true })
+  protected async getUsersForTeam(
+    @Args() request: UserFiltersRequest,
+    @Parent() team: TeamGraphQLNode,
+  ) {
     this.logger.log({
       team,
+      request,
       message: 'Fetching users for team',
     })
 
-    return this.core.team.getUsersInTeam(team)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      ObjectiveFiltersRequest,
+      Objective
+    >(request)
+
+    const queryResult = await this.core.team.getUsersInTeam(team, filters, queryOptions)
+
+    return this.relay.marshalResponse<UserInterface>(queryResult, connection)
   }
 
   @ResolveField('isCompany', () => Boolean)

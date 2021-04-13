@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { filter, flatten, maxBy, meanBy, minBy, uniqBy } from 'lodash'
-import { FindConditions } from 'typeorm'
+import { Any, FindConditions } from 'typeorm'
 
 import { Scope } from '@adapters/authorization/enums/scope.enum'
 import { CoreEntityProvider } from '@core/entity.provider'
@@ -87,13 +87,22 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     teams: TeamInterface | TeamInterface[],
     selectors?: TeamEntityKey[],
     relations?: TeamEntityRelation[],
+    filters?: FindConditions<TeamInterface>,
+    queryOptions?: GetOptions<TeamInterface>,
   ): Promise<Team[]> {
     const teamsAsArray = Array.isArray(teams) ? teams : [teams]
     const initialNodes: Team[] = await Promise.all(
       teamsAsArray.map(async (team) => this.getOne({ id: team.id })),
     )
 
-    const nodes = await this.getNodesFromTeams(initialNodes, 'below', selectors, relations)
+    const nodes = await this.getNodesFromTeams(
+      initialNodes,
+      'below',
+      selectors,
+      relations,
+      filters,
+      queryOptions,
+    )
 
     return nodes
   }
@@ -128,11 +137,14 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     team: TeamInterface,
     selectors?: TeamEntityKey[],
     relations?: TeamEntityRelation[],
+    filters?: FindConditions<Team>,
+    options?: GetOptions<Team>,
   ): Promise<Team> {
     if (!team.parentId) return
-    const whereSelector = { id: team.parentId }
+    const whereSelector = { ...filters, id: team.parentId }
 
     const parent = await this.repository.findOne({
+      ...options,
       relations,
       select: selectors,
       where: whereSelector,
@@ -141,14 +153,24 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return parent
   }
 
-  public async getUsersInTeam(team: TeamInterface): Promise<UserInterface[]> {
+  public async getUsersInTeam(
+    team: TeamInterface,
+    userFilters?: FindConditions<UserInterface>,
+    queryOptions?: GetOptions<UserInterface>,
+  ): Promise<UserInterface[]> {
     const teamsBelowCurrentNode = await this.getTeamNodesTreeAfterTeam(team)
 
-    const teamUsers = await Promise.all(teamsBelowCurrentNode.map(async (team) => team.users))
-    const flattenedTeamUsers = flatten(teamUsers)
-    const uniqTeamUsers = uniqBy(flattenedTeamUsers, 'id')
+    const teamsUsers = await Promise.all(teamsBelowCurrentNode.map(async (team) => team.users))
+    const userIDs = flatten(teamsUsers).map((user) => user.id)
 
-    return uniqTeamUsers
+    const selector = {
+      ...userFilters,
+      id: Any(userIDs),
+    }
+
+    const users = await this.userProvider.getMany(selector, undefined, queryOptions)
+
+    return users
   }
 
   public async buildTeamQueryContext(
@@ -175,8 +197,12 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return queryContext
   }
 
-  public async getTeamChildTeams(team: TeamInterface): Promise<Team[]> {
-    const childTeams = await this.getMany({ parentId: team.id })
+  public async getTeamChildTeams(
+    team: TeamInterface,
+    filters?: FindConditions<TeamInterface>,
+    queryOptions?: GetOptions<TeamInterface>,
+  ): Promise<Team[]> {
+    const childTeams = await this.getChildTeams(team, undefined, undefined, filters, queryOptions)
 
     return childTeams
   }
@@ -188,8 +214,18 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return rankedChildTeams
   }
 
-  public async getRankedTeamsBelowNode(team: TeamInterface): Promise<Team[]> {
-    const teamNodeTree = await this.getTeamNodesTreeAfterTeam(team)
+  public async getRankedTeamsBelowNode(
+    team: TeamInterface,
+    filters?: FindConditions<TeamInterface>,
+    queryOptions?: GetOptions<TeamInterface>,
+  ): Promise<Team[]> {
+    const teamNodeTree = await this.getTeamNodesTreeAfterTeam(
+      team,
+      undefined,
+      undefined,
+      filters,
+      queryOptions,
+    )
     const teamsBelowTeam = teamNodeTree.slice(1)
     const rankedChildTeams = await this.ranking.rankTeamsByProgress(teamsBelowTeam)
 
@@ -289,6 +325,8 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     direction: 'above' | 'below',
     selectors?: TeamEntityKey[],
     relations?: TeamEntityRelation[],
+    filters?: FindConditions<Team>,
+    options?: GetOptions<Team>,
   ) {
     let nextIterationNodes = nodes
 
@@ -297,12 +335,12 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
         team: TeamInterface,
         selectors?: TeamEntityKey[],
         relations?: TeamEntityRelation[],
-      ) => this.getChildTeams(team, selectors, relations),
+      ) => this.getChildTeams(team, selectors, relations, filters, options),
       above: async (
         team: TeamInterface,
         selectors?: TeamEntityKey[],
         relations?: TeamEntityRelation[],
-      ) => this.getParentTeam(team, selectors, relations),
+      ) => this.getParentTeam(team, selectors, relations, filters, options),
     }
     const directionHandler = directionHandlers[direction]
 

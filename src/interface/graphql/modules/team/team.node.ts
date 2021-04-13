@@ -10,6 +10,8 @@ import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.interface'
 
 import { TeamObjectivesGraphQLConnection } from './connections/team-objectives/team-objectives.connection'
+import { TeamTeamsGraphQLConnection } from './connections/team-teams/team-teams.connection'
+import { TeamUsersGraphQLConnection } from './connections/team-users/team-users.connection'
 import { TeamGenderGraphQLEnum } from './enums/team-gender.enum'
 import { TeamStatusObject } from './objects/team-status.object'
 
@@ -94,26 +96,26 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   // CONNECTION FIELDS
   // **********************************************************************************************
 
-  @Field(() => [UserGraphQLNode], {
+  @Field(() => TeamUsersGraphQLConnection, {
     complexity: 0,
     nullable: true,
     description: 'A creation date ordered list of users that are members of this team',
   })
-  public readonly users?: Promise<UserGraphQLNode[]>
+  public readonly users?: TeamUsersGraphQLConnection
 
-  @Field(() => [TeamGraphQLNode], {
+  @Field(() => TeamTeamsGraphQLConnection, {
     complexity: 0,
     nullable: true,
     description: 'A list of teams that belongs to this team',
   })
-  public readonly teams?: TeamGraphQLNode[]
+  public readonly teams?: TeamTeamsGraphQLConnection
 
-  @Field(() => [TeamGraphQLNode], {
+  @Field(() => TeamTeamsGraphQLConnection, {
     complexity: 0,
     nullable: true,
     description: "A list with all teams inside this team's tree ordered by their progress",
   })
-  public readonly rankedTeams?: TeamGraphQLNode[]
+  public readonly rankedTeams?: TeamTeamsGraphQLConnection
 
   @Field(() => [CycleGraphQLNode], {
     complexity: 0,
