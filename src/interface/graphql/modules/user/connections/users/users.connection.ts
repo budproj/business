@@ -1,12 +1,13 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
-import { GuardedConnectionGraphQLInterface } from '../../authorization/interfaces/guarded-connection.interface'
-import { PolicyGraphQLObject } from '../../authorization/objects/policy.object'
-import { ConnectionRelayInterface } from '../../relay/interfaces/connection.interface'
-import { PageInfoRelayObject } from '../../relay/objects/page-info.object'
+import { GuardedConnectionGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-connection.interface'
+import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
+import { ConnectionRelayInterface } from '@interface/graphql/relay/interfaces/connection.interface'
+import { PageInfoRelayObject } from '@interface/graphql/relay/objects/page-info.object'
+
+import { UserGraphQLNode } from '../../user.node'
 
 import { UserRootEdgeGraphQLObject } from './user-root.edge'
-import { UserGraphQLNode } from './user.node'
 
 @ObjectType('Users', {
   implements: () => [ConnectionRelayInterface, GuardedConnectionGraphQLInterface],

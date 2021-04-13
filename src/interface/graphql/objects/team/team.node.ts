@@ -11,6 +11,7 @@ import { KeyResultCheckInGraphQLNode } from '../key-result/check-in/key-result-c
 import { KeyResultGraphQLNode } from '../key-result/key-result.node'
 import { UserGraphQLNode } from '../user/user.node'
 
+import { TeamObjectivesGraphQLConnection } from './team-objectives.connection'
 import { TeamStatusObject } from './team-status.object'
 
 @ObjectType('Team', {
@@ -121,6 +122,13 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
     description: 'The cycles that belongs to this team',
   })
   public readonly cycles?: CycleGraphQLNode[]
+
+  @Field(() => TeamObjectivesGraphQLConnection, {
+    complexity: 0,
+    nullable: true,
+    description: 'The objectives that belongs to this team',
+  })
+  public readonly objectives?: TeamObjectivesGraphQLConnection
 
   @Field(() => [KeyResultGraphQLNode], {
     complexity: 0,

@@ -1,10 +1,10 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
-import { GuardedConnectionGraphQLInterface } from '../../authorization/interfaces/guarded-connection.interface'
-import { PolicyGraphQLObject } from '../../authorization/objects/policy.object'
-import { ConnectionRelayInterface } from '../../relay/interfaces/connection.interface'
-import { PageInfoRelayObject } from '../../relay/objects/page-info.object'
-import { TeamGraphQLNode } from '../team/team.node'
+import { GuardedConnectionGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-connection.interface'
+import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
+import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
+import { ConnectionRelayInterface } from '@interface/graphql/relay/interfaces/connection.interface'
+import { PageInfoRelayObject } from '@interface/graphql/relay/objects/page-info.object'
 
 import { UserTeamEdgeGraphQLObject } from './user-team.edge'
 

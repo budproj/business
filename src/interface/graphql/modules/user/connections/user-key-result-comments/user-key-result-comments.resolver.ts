@@ -5,7 +5,8 @@ import { KeyResultComment } from '@core/modules/key-result/comment/key-result-co
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
 import { KeyResultCommentGraphQLNode } from '@interface/graphql/objects/key-result/comment/key-result-comment.node'
-import { UserKeyResultCommentsGraphQLConnection } from '@interface/graphql/objects/user/user-key-result-comments.connection'
+
+import { UserKeyResultCommentsGraphQLConnection } from './user-key-result-comments.connection'
 
 @GuardedResolver(UserKeyResultCommentsGraphQLConnection)
 export class UserKeyResultCommentsConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<

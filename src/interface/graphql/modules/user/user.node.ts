@@ -4,14 +4,13 @@ import { UserGender } from '@core/modules/user/enums/user-gender.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-node.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
 import { UserGenderGraphQLEnum } from '@interface/graphql/enums/user-gender.enum'
+import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.interface'
 
-import { NodeRelayInterface } from '../../relay/interfaces/node.interface'
-
-import { UserKeyResultCheckInsGraphQLConnection } from './user-key-result-check-ins.connection'
-import { UserKeyResultCommentsGraphQLConnection } from './user-key-result-comments.connection'
-import { UserKeyResultsGraphQLConnection } from './user-key-results.connection'
-import { UserObjectivesGraphQLConnection } from './user-objectives.connection'
-import { UserTeamsGraphQLConnection } from './user-teams.connection'
+import { UserKeyResultCheckInsGraphQLConnection } from './connections/user-key-result-check-ins/user-key-result-check-ins.connection'
+import { UserKeyResultCommentsGraphQLConnection } from './connections/user-key-result-comments/user-key-result-comments.connection'
+import { UserKeyResultsGraphQLConnection } from './connections/user-key-results/user-key-results.connection'
+import { UserObjectivesGraphQLConnection } from './connections/user-objectives/user-objectives.connection'
+import { UserTeamsGraphQLConnection } from './connections/user-teams/user-teams.connection'
 
 @ObjectType('User', {
   implements: () => [NodeRelayInterface, GuardedNodeGraphQLInterface],

@@ -10,10 +10,11 @@ import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorato
 import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
-import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
-import { UsersGraphQLConnection } from '@interface/graphql/objects/user/users.connection'
 
-import { UserFiltersRequest } from '../requests/user-filters.request'
+import { UserFiltersRequest } from '../../requests/user-filters.request'
+import { UserGraphQLNode } from '../../user.node'
+
+import { UsersGraphQLConnection } from './users.connection'
 
 @GuardedResolver(UsersGraphQLConnection)
 export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<

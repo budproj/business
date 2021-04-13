@@ -2,16 +2,15 @@ import { Field, ObjectType } from '@nestjs/graphql'
 import { ConnectionCursor } from 'graphql-relay'
 
 import { EdgeRelayInterface } from '../../relay/interfaces/edge.interface'
+import { ObjectiveGraphQLNode } from '../objective/objective.node'
 
-import { UserGraphQLNode } from './user.node'
-
-@ObjectType('UserRootEdge', {
+@ObjectType('TeamObjectivesEdge', {
   implements: () => EdgeRelayInterface,
-  description: 'The edge for our user query interface',
+  description: 'This edge represents the relation between teams and their objectives',
 })
-export class UserRootEdgeGraphQLObject implements EdgeRelayInterface<UserGraphQLNode> {
-  @Field(() => UserGraphQLNode, { complexity: 1 })
-  public readonly node!: UserGraphQLNode
+export class TeamObjectivesEdgeGraphQLObject implements EdgeRelayInterface<ObjectiveGraphQLNode> {
+  @Field(() => ObjectiveGraphQLNode, { complexity: 1 })
+  public readonly node!: ObjectiveGraphQLNode
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS

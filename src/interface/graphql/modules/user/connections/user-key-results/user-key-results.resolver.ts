@@ -5,7 +5,8 @@ import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
-import { UserKeyResultsGraphQLConnection } from '@interface/graphql/objects/user/user-key-results.connection'
+
+import { UserKeyResultsGraphQLConnection } from './user-key-results.connection'
 
 @GuardedResolver(UserKeyResultsGraphQLConnection)
 export class UserKeyResultsConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<

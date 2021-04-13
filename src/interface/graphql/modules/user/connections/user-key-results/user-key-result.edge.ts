@@ -1,17 +1,16 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 import { ConnectionCursor } from 'graphql-relay'
 
-import { EdgeRelayInterface } from '../../relay/interfaces/edge.interface'
-import { KeyResultCheckInGraphQLNode } from '../key-result/check-in/key-result-check-in.node'
+import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
+import { EdgeRelayInterface } from '@interface/graphql/relay/interfaces/edge.interface'
 
-@ObjectType('UserKeyResultCheckInEdge', {
+@ObjectType('UserKeyResultEdge', {
   implements: () => EdgeRelayInterface,
   description: 'This edge represents the relation between users and their key-results',
 })
-export class UserKeyResultCheckInEdgeGraphQLObject
-  implements EdgeRelayInterface<KeyResultCheckInGraphQLNode> {
-  @Field(() => KeyResultCheckInGraphQLNode, { complexity: 1 })
-  public readonly node!: KeyResultCheckInGraphQLNode
+export class UserKeyResultEdgeGraphQLObject implements EdgeRelayInterface<KeyResultGraphQLNode> {
+  @Field(() => KeyResultGraphQLNode, { complexity: 1 })
+  public readonly node!: KeyResultGraphQLNode
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS

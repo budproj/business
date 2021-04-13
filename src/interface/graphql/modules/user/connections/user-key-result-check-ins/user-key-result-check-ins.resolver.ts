@@ -5,7 +5,8 @@ import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-c
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
-import { UserKeyResultCheckInsGraphQLConnection } from '@interface/graphql/objects/user/user-key-result-check-ins.connection'
+
+import { UserKeyResultCheckInsGraphQLConnection } from './user-key-result-check-ins.connection'
 
 @GuardedResolver(UserKeyResultCheckInsGraphQLConnection)
 export class UserKeyResultCheckInsConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<

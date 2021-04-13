@@ -3,12 +3,12 @@ import { Module } from '@nestjs/common'
 import { GraphQLConfigModule } from '@config/graphql/graphql.module'
 import { CoreModule } from '@core/core.module'
 
-import { UserKeyResultCommentsConnectionGraphQLResolver } from './resolvers/user-key-result-comments.resolver'
-import { UserKeyResultsConnectionGraphQLResolver } from './resolvers/user-key-results.resolver'
-import { UserObjectivesConnectionGraphQLResolver } from './resolvers/user-objectives.connection.resolver'
-import { UserTeamsConnectionGraphQLResolver } from './resolvers/user-teams-connection.resolver'
-import { UserGraphQLResolver } from './resolvers/user.resolver'
-import { UsersConnectionGraphQLResolver } from './resolvers/users-connection.resolver'
+import { UserKeyResultCommentsConnectionGraphQLResolver } from './connections/user-key-result-comments/user-key-result-comments.resolver'
+import { UserKeyResultsConnectionGraphQLResolver } from './connections/user-key-results/user-key-results.resolver'
+import { UserObjectivesConnectionGraphQLResolver } from './connections/user-objectives/user-objectives.resolver'
+import { UserTeamsConnectionGraphQLResolver } from './connections/user-teams/user-teams.resolver'
+import { UsersConnectionGraphQLResolver } from './connections/users/users-connection.resolver'
+import { UserGraphQLResolver } from './user.resolver'
 
 @Module({
   imports: [CoreModule, GraphQLConfigModule],

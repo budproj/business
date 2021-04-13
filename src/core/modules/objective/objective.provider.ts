@@ -85,14 +85,26 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     return objectiveStatus
   }
 
-  public async getFromTeams(team: TeamInterface | TeamInterface[]): Promise<Objective[]> {
+  public async getFromTeams(
+    team: TeamInterface | TeamInterface[],
+    filters?: FindConditions<Objective>,
+    options?: GetOptions<Objective>,
+  ): Promise<Objective[]> {
     const keyResults = await this.keyResultProvider.getFromTeams(team)
     if (!keyResults) return []
 
     const objectiveIds = keyResults.map((keyResult) => keyResult.objectiveId)
     if (objectiveIds.length === 0) return []
 
-    const objectives = await this.repository.find({ where: { id: Any(objectiveIds) } })
+    const whereSelector = {
+      ...filters,
+      id: Any(objectiveIds),
+    }
+
+    const objectives = await this.repository.find({
+      ...options,
+      where: whereSelector,
+    })
 
     return objectives
   }

@@ -5,6 +5,8 @@ import { UserInputError } from 'apollo-server-fastify'
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
+import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
@@ -14,12 +16,14 @@ import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/res
 import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
+import { TeamObjectivesGraphQLConnection } from '@interface/graphql/objects/team/team-objectives.connection'
 import { TeamStatusObject } from '@interface/graphql/objects/team/team-status.object'
 import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
 import { TeamsGraphQLConnection } from '@interface/graphql/objects/team/teams.connection'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
+import { ObjectiveFiltersRequest } from '../../objective/requests/objective-filters.request'
 import { TeamLevelGraphQLEnum } from '../enums/team-level.enum'
 import { TeamFiltersRequest } from '../requests/team-filters.request'
 
@@ -164,6 +168,27 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     })
 
     return this.core.cycle.getFromTeam(team)
+  }
+
+  @ResolveField('objectives', () => TeamObjectivesGraphQLConnection, { nullable: true })
+  protected async getObjectivesForRequestAndUser(
+    @Args() request: ObjectiveFiltersRequest,
+    @Parent() team: TeamGraphQLNode,
+  ) {
+    this.logger.log({
+      team,
+      request,
+      message: 'Fetching objectives for team',
+    })
+
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      ObjectiveFiltersRequest,
+      Objective
+    >(request)
+
+    const queryResult = await this.core.objective.getFromTeams(team, filters, queryOptions)
+
+    return this.relay.marshalResponse<ObjectiveInterface>(queryResult, connection)
   }
 
   @ResolveField('keyResults', () => [KeyResultGraphQLNode], { nullable: true })
