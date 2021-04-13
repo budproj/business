@@ -6,11 +6,11 @@ import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
+import { ObjectiveProvider } from '@core/modules/objective/objective.provider'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
+import { TeamProvider } from '@core/modules/team/team.provider'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
-
-import { ObjectiveProvider } from '../objective/objective.provider'
 
 import { KeyResultCheckInInterface } from './check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from './check-in/key-result-check-in.orm-entity'
@@ -28,6 +28,8 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     public readonly keyResultCommentProvider: KeyResultCommentProvider,
     public readonly keyResultCheckInProvider: KeyResultCheckInProvider,
     protected readonly repository: KeyResultRepository,
+    @Inject(forwardRef(() => TeamProvider))
+    private readonly teamProvider: TeamProvider,
     @Inject(forwardRef(() => ObjectiveProvider))
     private readonly objectiveProvider: ObjectiveProvider,
   ) {
@@ -283,6 +285,13 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     )
 
     return keyResultCheckInListAverageProgress
+  }
+
+  public async getLatestCheckInForTeam(team: TeamInterface) {
+    const users = await this.teamProvider.getUsersInTeam(team)
+    const latestCheckIn = await this.keyResultCheckInProvider.getLatestFromUsers(users)
+
+    return latestCheckIn
   }
 
   protected async protectCreationQuery(

@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql'
+import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
 
 import { TeamGender } from '@core/modules/team/enums/team-gender.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-node.interface'
@@ -7,6 +7,7 @@ import { TeamGenderGraphQLEnum } from '@interface/graphql/enums/team-gender.enum
 
 import { NodeRelayInterface } from '../../relay/interfaces/node.interface'
 import { CycleGraphQLNode } from '../cycle/cycle.node'
+import { KeyResultCheckInGraphQLNode } from '../key-result/check-in/key-result-check-in.node'
 import { KeyResultGraphQLNode } from '../key-result/key-result.node'
 import { UserGraphQLNode } from '../user/user.node'
 
@@ -54,6 +55,12 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   })
   public status: TeamStatusObject
 
+  @Field(() => Float, {
+    description:
+      'The percentage progress increase of the objective since the last week. We consider a week as a "business" week, considering it starting on saturday and ending on friday',
+  })
+  public progressIncreaseSinceLastWeek!: number
+
   @Field(() => UserGraphQLNode, {
     complexity: 1,
     description: 'The user that owns this team',
@@ -76,6 +83,12 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
     description: 'The team that owns this team',
   })
   public readonly parent?: TeamGraphQLNode
+
+  @Field(() => KeyResultCheckInGraphQLNode, {
+    description: 'The latest key result check-in for this team',
+    nullable: true,
+  })
+  public latestKeyResultCheckIn?: KeyResultCheckInGraphQLNode
 
   // **********************************************************************************************
   // CONNECTION FIELDS

@@ -1,7 +1,8 @@
 import { forwardRef, Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import { ObjectiveModule } from '../objective/objective.module'
+import { ObjectiveModule } from '@core/modules/objective/objective.module'
+import { TeamModule } from '@core/modules/team/team.module'
 
 import { KeyResultCheckInProvider } from './check-in/key-result-check-in.provider'
 import { KeyResultCheckInRepository } from './check-in/key-result-check-in.repository'
@@ -17,6 +18,7 @@ import { KeyResultRepository } from './key-result.repository'
       KeyResultCommentRepository,
       KeyResultCheckInRepository,
     ]),
+    TeamModule,
     forwardRef(() => ObjectiveModule),
   ],
   providers: [KeyResultProvider, KeyResultCommentProvider, KeyResultCheckInProvider],

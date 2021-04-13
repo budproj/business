@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common'
-import { Args, Parent, ResolveField } from '@nestjs/graphql'
+import { Args, Float, Parent, ResolveField } from '@nestjs/graphql'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
@@ -11,6 +11,7 @@ import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarde
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
 import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
+import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { TeamStatusObject } from '@interface/graphql/objects/team/team-status.object'
 import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
@@ -155,5 +156,25 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     })
 
     return this.core.keyResult.getFromTeams(team)
+  }
+
+  @ResolveField('progressIncreaseSinceLastWeek', () => Float)
+  protected async getTeamProgressIncreaseSinceLastWeek(@Parent() team: TeamGraphQLNode) {
+    this.logger.log({
+      team,
+      message: 'Fetching the progress increase for team since last week',
+    })
+
+    return this.core.team.getTeamProgressIncreaseSinceLastWeek(team)
+  }
+
+  @ResolveField('latestKeyResultCheckIn', () => KeyResultCheckInGraphQLNode, { nullable: true })
+  protected async getTeamLatestKeyResultCheckIn(@Parent() team: TeamGraphQLNode) {
+    this.logger.log({
+      team,
+      message: 'Fetching latest key result check-in for team',
+    })
+
+    return this.core.keyResult.getLatestCheckInForTeam(team)
   }
 }

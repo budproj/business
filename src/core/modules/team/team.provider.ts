@@ -203,6 +203,15 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return teamStatus
   }
 
+  public async getTeamProgressIncreaseSinceLastWeek(team: TeamInterface): Promise<number> {
+    const progress = await this.getCurrentProgressForTeam(team)
+    const lastWeekProgress = await this.getLastWeekProgressForTeam(team)
+
+    const deltaProgress = progress - lastWeekProgress
+
+    return deltaProgress
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<Team>,
     _data: Partial<TeamInterface>,
@@ -361,5 +370,20 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     }
 
     return defaultStatus
+  }
+
+  private async getCurrentProgressForTeam(team: TeamInterface): Promise<number> {
+    const date = new Date()
+    const currentStatus = await this.getStatusAtDate(date, team)
+
+    return currentStatus?.progress ?? DEFAULT_PROGRESS
+  }
+
+  private async getLastWeekProgressForTeam(team: TeamInterface): Promise<number> {
+    const firstDayAfterLastWeek = this.getFirstDayAfterLastWeek()
+
+    const lastWeekStatus = await this.getStatusAtDate(firstDayAfterLastWeek, team)
+
+    return lastWeekStatus?.progress ?? DEFAULT_PROGRESS
   }
 }
