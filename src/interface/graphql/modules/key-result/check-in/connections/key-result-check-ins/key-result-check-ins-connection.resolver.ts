@@ -10,10 +10,11 @@ import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorato
 import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
-import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
-import { KeyResultCheckInsGraphQLConnection } from '@interface/graphql/objects/key-result/check-in/key-result-check-ins.connection'
 
-import { KeyResultCheckInFiltersRequest } from '../requests/key-result-check-in-filters.request'
+import { KeyResultCheckInGraphQLNode } from '../../key-result-check-in.node'
+import { KeyResultCheckInFiltersRequest } from '../../requests/key-result-check-in-filters.request'
+
+import { KeyResultCheckInsGraphQLConnection } from './key-result-check-ins.connection'
 
 @GuardedResolver(KeyResultCheckInsGraphQLConnection)
 export class KeyResultCheckInsConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<

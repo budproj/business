@@ -7,9 +7,9 @@ import { KeyResultFormatGraphQLEnum } from '@interface/graphql/enums/key-result-
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
-import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
 import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.interface'
 
+import { KeyResultCheckInGraphQLNode } from './check-in/key-result-check-in.node'
 import { KeyResultCommentGraphQLNode } from './comment/key-result-comment.node'
 
 @ObjectType('KeyResult', {

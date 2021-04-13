@@ -14,10 +14,10 @@ import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarde
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
+import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-result/check-in/key-result-check-in.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/modules/key-result/key-result.node'
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
-import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { TeamObjectivesGraphQLConnection } from './connections/team-objectives/team-objectives.connection'

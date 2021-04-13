@@ -15,9 +15,9 @@ import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/res
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
-import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
+import { KeyResultCheckInGraphQLNode } from './check-in/key-result-check-in.node'
 import { KeyResultCommentGraphQLNode } from './comment/key-result-comment.node'
 import { KeyResultsGraphQLConnection } from './connections/key-results/key-results.connection'
 import { KeyResultGraphQLNode } from './key-result.node'

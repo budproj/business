@@ -1,6 +1,6 @@
 import { ArgsType, Field, ID } from '@nestjs/graphql'
 
-import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
+import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { ConnectionFiltersRequest } from '@interface/graphql/requests/connection-filters.request'
 
 @ArgsType()

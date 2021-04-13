@@ -1,7 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
 import { StatusGraphQLInterface } from '@interface/graphql/interfaces/status.interface'
-import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
+import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-result/check-in/key-result-check-in.node'
 
 @ObjectType('ObjectiveStatus', {
   implements: () => StatusGraphQLInterface,
