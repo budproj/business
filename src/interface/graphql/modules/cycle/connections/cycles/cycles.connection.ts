@@ -1,12 +1,13 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
-import { GuardedConnectionGraphQLInterface } from '../../authorization/interfaces/guarded-connection.interface'
-import { PolicyGraphQLObject } from '../../authorization/objects/policy.object'
-import { ConnectionRelayInterface } from '../../relay/interfaces/connection.interface'
-import { PageInfoRelayObject } from '../../relay/objects/page-info.object'
+import { GuardedConnectionGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-connection.interface'
+import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
+import { ConnectionRelayInterface } from '@interface/graphql/relay/interfaces/connection.interface'
+import { PageInfoRelayObject } from '@interface/graphql/relay/objects/page-info.object'
+
+import { CycleGraphQLNode } from '../../cycle.node'
 
 import { CycleRootEdgeGraphQLObject } from './cycle-root.edge'
-import { CycleGraphQLNode } from './cycle.node'
 
 @ObjectType('Cycles', {
   implements: () => [ConnectionRelayInterface, GuardedConnectionGraphQLInterface],

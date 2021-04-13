@@ -11,17 +11,17 @@ import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorato
 import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
+import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/requests/key-result-filters.request'
+import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
-import { CycleStatusObject } from '@interface/graphql/objects/cycle/cycle-status.object'
-import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
-import { CyclesGraphQLConnection } from '@interface/graphql/objects/cycle/cycles.connection'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
-import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
-import { KeyResultFiltersRequest } from '../../key-result/requests/key-result-filters.request'
-import { CycleFiltersRequest } from '../requests/cycle-filters.request'
-import { CyclesInSamePeriodRequest } from '../requests/cycles-in-same-period.request'
+import { CyclesGraphQLConnection } from './connections/cycles/cycles.connection'
+import { CycleGraphQLNode } from './cycle.node'
+import { CycleStatusObject } from './objects/cycle-status.object'
+import { CycleFiltersRequest } from './requests/cycle-filters.request'
+import { CyclesInSamePeriodRequest } from './requests/cycles-in-same-period.request'
 
 @GuardedResolver(CycleGraphQLNode)
 export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, CycleInterface> {

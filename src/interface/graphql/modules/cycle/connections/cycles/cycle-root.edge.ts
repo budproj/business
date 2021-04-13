@@ -1,9 +1,9 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 import { ConnectionCursor } from 'graphql-relay'
 
-import { EdgeRelayInterface } from '../../relay/interfaces/edge.interface'
+import { EdgeRelayInterface } from '@interface/graphql/relay/interfaces/edge.interface'
 
-import { CycleGraphQLNode } from './cycle.node'
+import { CycleGraphQLNode } from '../../cycle.node'
 
 @ObjectType('CycleRootEdge', {
   implements: () => EdgeRelayInterface,

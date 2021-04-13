@@ -11,15 +11,15 @@ import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorato
 import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
-import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
+import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
+import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
-import { ObjectiveStatusObject } from '@interface/graphql/objects/objective/objective-status.object'
-import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
-import { ObjectivesGraphQLConnection } from '@interface/graphql/objects/objective/objectives.connection'
-import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
-import { ObjectiveFiltersRequest } from '../requests/objective-filters.request'
+import { ObjectivesGraphQLConnection } from './connections/objectives/objectives.connection'
+import { ObjectiveGraphQLNode } from './objective.node'
+import { ObjectiveStatusObject } from './objects/objective-status.object'
+import { ObjectiveFiltersRequest } from './requests/objective-filters.request'
 
 @GuardedResolver(ObjectiveGraphQLNode)
 export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<

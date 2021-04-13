@@ -1,6 +1,6 @@
 import { ArgsType, Field, ID } from '@nestjs/graphql'
 
-import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
+import { CycleGraphQLNode } from '../cycle.node'
 
 import { CycleFiltersRequest } from './cycle-filters.request'
 

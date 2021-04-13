@@ -2,13 +2,12 @@ import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
 
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-node.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
+import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
+import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
+import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
+import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.interface'
 
-import { NodeRelayInterface } from '../../relay/interfaces/node.interface'
-import { CycleGraphQLNode } from '../cycle/cycle.node'
-import { KeyResultGraphQLNode } from '../key-result/key-result.node'
-import { UserGraphQLNode } from '../user/user.node'
-
-import { ObjectiveStatusObject } from './objective-status.object'
+import { ObjectiveStatusObject } from './objects/objective-status.object'
 
 @ObjectType('Objective', {
   implements: () => [NodeRelayInterface, GuardedNodeGraphQLInterface],
