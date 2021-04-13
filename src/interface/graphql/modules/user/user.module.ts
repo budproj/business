@@ -7,7 +7,7 @@ import { UserKeyResultCommentsConnectionGraphQLResolver } from './connections/us
 import { UserKeyResultsConnectionGraphQLResolver } from './connections/user-key-results/user-key-results.resolver'
 import { UserObjectivesConnectionGraphQLResolver } from './connections/user-objectives/user-objectives.resolver'
 import { UserTeamsConnectionGraphQLResolver } from './connections/user-teams/user-teams.resolver'
-import { UsersConnectionGraphQLResolver } from './connections/users/users-connection.resolver'
+import { UsersConnectionGraphQLResolver } from './connections/users/users.resolver'
 import { UserGraphQLResolver } from './user.resolver'
 
 @Module({

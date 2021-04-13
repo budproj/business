@@ -7,7 +7,7 @@ import { TeamCyclesConnectionGraphQLResolver } from './connections/team-cycles/t
 import { TeamKeyResultsConnectionGraphQLResolver } from './connections/team-key-results/team-key-results.resolver'
 import { TeamTeamsConnectionGraphQLResolver } from './connections/team-teams/team-teams.resolver'
 import { TeamUsersConnectionGraphQLResolver } from './connections/team-users/team-users.resolver'
-import { TeamsConnectionGraphQLResolver } from './connections/teams/teams-connection.resolver'
+import { TeamsConnectionGraphQLResolver } from './connections/teams/teams.resolver'
 import { TeamGraphQLResolver } from './team.resolver'
 
 @Module({

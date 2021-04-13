@@ -5,15 +5,15 @@ import { Any, FindConditions } from 'typeorm'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
+import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
+import { CycleProvider } from '@core/modules/cycle/cycle.provider'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
+import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { KeyResultProvider } from '@core/modules/key-result/key-result.provider'
+import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
-
-import { CycleProvider } from '../cycle/cycle.provider'
-import { KeyResult } from '../key-result/key-result.orm-entity'
-import { KeyResultProvider } from '../key-result/key-result.provider'
-import { TeamInterface } from '../team/interfaces/team.interface'
 
 import { ObjectiveStatus } from './interfaces/objective-status.interface'
 import { ObjectiveInterface } from './interfaces/objective.interface'
@@ -50,8 +50,20 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     })
   }
 
-  public async getFromCycle(cycle: CycleInterface): Promise<Objective[]> {
-    return this.repository.find({ cycleId: cycle.id })
+  public async getFromCycle(
+    cycle: CycleInterface,
+    filters?: FindConditions<Cycle>,
+    options?: GetOptions<Cycle>,
+  ): Promise<Objective[]> {
+    const whereSelector = {
+      ...filters,
+      cycleId: cycle.id,
+    }
+
+    return this.repository.find({
+      ...options,
+      where: whereSelector,
+    })
   }
 
   public async getFromKeyResult(keyResult: KeyResultInterface): Promise<Objective> {

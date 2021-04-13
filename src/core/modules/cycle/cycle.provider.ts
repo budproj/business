@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { orderBy, filter, omitBy, groupBy, mapValues, flatten, maxBy, meanBy, minBy } from 'lodash'
-import { Any } from 'typeorm'
+import { Any, FindConditions } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
 import { LodashSorting } from '@core/enums/lodash-sorting'
@@ -89,11 +89,17 @@ export class CycleProvider extends CoreEntityProvider<Cycle, CycleInterface> {
 
   public async getChildCycles(
     parentCycle: CycleInterface,
-    filters?: Partial<CycleInterface>,
+    filters?: FindConditions<Cycle>,
+    options?: GetOptions<Cycle>,
   ): Promise<Cycle[]> {
-    const cycles = await this.repository.find({
+    const whereSelector = {
       ...filters,
       parentId: parentCycle.id,
+    }
+
+    const cycles = await this.repository.find({
+      ...options,
+      where: whereSelector,
     })
 
     return cycles

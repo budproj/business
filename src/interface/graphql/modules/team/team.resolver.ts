@@ -5,13 +5,16 @@ import { UserInputError } from 'apollo-server-fastify'
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
+import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
+import { User } from '@core/modules/user/user.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
 import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
@@ -145,8 +148,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     })
 
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      ObjectiveFiltersRequest,
-      Objective
+      UserFiltersRequest,
+      User
     >(request)
 
     const queryResult = await this.core.team.getUsersInTeam(team, filters, queryOptions)
@@ -176,8 +179,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     })
 
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      ObjectiveFiltersRequest,
-      Objective
+      CycleFiltersRequest,
+      Cycle
     >(request)
 
     const queryResult = await this.core.cycle.getFromTeamsWithFilters([team], filters, queryOptions)
@@ -218,8 +221,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     })
 
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      ObjectiveFiltersRequest,
-      Objective
+      KeyResultFiltersRequest,
+      KeyResult
     >(request)
 
     const queryResult = await this.core.keyResult.getFromTeams(team, filters, queryOptions)

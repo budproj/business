@@ -4,10 +4,12 @@ import { Cadence } from '@core/modules/cycle/enums/cadence.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-node.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
 import { KeyResultGraphQLNode } from '@interface/graphql/modules/key-result/key-result.node'
-import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.interface'
 
+import { ObjectivesGraphQLConnection } from '../objective/connections/objectives/objectives.connection'
+
+import { CycleCyclesGraphQLConnection } from './connections/cycle-cycles/cycle-cycles.connection'
 import { CadenceGraphQLEnum } from './enums/cadence.enum'
 import { CycleStatusObject } from './objects/cycle-status.object'
 
@@ -81,20 +83,20 @@ export class CycleGraphQLNode implements GuardedNodeGraphQLInterface {
   // CONNECTION FIELDS
   // **********************************************************************************************
 
-  @Field(() => [CycleGraphQLNode], {
+  @Field(() => CycleCyclesGraphQLConnection, {
     complexity: 0,
     nullable: true,
     description:
       'Each cycle can have multiple cycles below it. If this cycle has any cycle inside of it, those will be listed here',
   })
-  public readonly cycles?: CycleGraphQLNode[]
+  public readonly cycles?: CycleCyclesGraphQLConnection
 
-  @Field(() => [ObjectiveGraphQLNode], {
+  @Field(() => ObjectivesGraphQLConnection, {
     complexity: 0,
     nullable: true,
     description: 'The objectives inside this cycle',
   })
-  public readonly objectives?: ObjectiveGraphQLNode[]
+  public readonly objectives?: ObjectivesGraphQLConnection
 
   @Field(() => [KeyResultGraphQLNode], {
     complexity: 0,

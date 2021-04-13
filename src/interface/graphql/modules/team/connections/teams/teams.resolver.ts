@@ -26,7 +26,7 @@ export class TeamsConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
   private readonly logger = new Logger(TeamsConnectionGraphQLResolver.name)
 
   constructor(protected readonly core: CoreProvider) {
-    super(Resource.USER, core, core.team)
+    super(Resource.TEAM, core, core.team)
   }
 
   @GuardedQuery(TeamsGraphQLConnection, 'team:read', { name: 'teams' })

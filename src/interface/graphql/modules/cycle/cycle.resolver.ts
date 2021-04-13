@@ -7,16 +7,20 @@ import { AuthorizationUser } from '@adapters/authorization/interfaces/user.inter
 import { CoreProvider } from '@core/core.provider'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
+import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
+import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
 import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
 import { KeyResultGraphQLNode } from '@interface/graphql/modules/key-result/key-result.node'
 import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/requests/key-result-filters.request'
-import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
+import { ObjectivesGraphQLConnection } from '@interface/graphql/modules/objective/connections/objectives/objectives.connection'
+import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
+import { CycleCyclesGraphQLConnection } from './connections/cycle-cycles/cycle-cycles.connection'
 import { CyclesGraphQLConnection } from './connections/cycles/cycles.connection'
 import { CycleGraphQLNode } from './cycle.node'
 import { CycleStatusObject } from './objects/cycle-status.object'
@@ -45,32 +49,6 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     if (!cycle) throw new UserInputError(`We could not found a cycle with the provided arguments`)
 
     return cycle
-  }
-
-  @GuardedQuery(CyclesGraphQLConnection, 'cycle:read', { name: 'cycles' })
-  protected async getCyclesForRequestAndAuthorizedRequestUser(
-    @Args() request: CycleFiltersRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
-  ) {
-    this.logger.log({
-      request,
-      authorizationUser,
-      message: 'Fetching teams with filters',
-    })
-
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      CycleFiltersRequest,
-      Cycle
-    >(request)
-
-    const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(authorizationUser.teams)
-    const queryResult = await this.core.cycle.getFromTeamsWithFilters(
-      userTeamsTree,
-      filters,
-      queryOptions,
-    )
-
-    return this.relay.marshalResponse<Cycle>(queryResult, connection)
   }
 
   @GuardedQuery(CyclesGraphQLConnection, 'cycle:read', { name: 'cyclesInSamePeriod' })
@@ -123,14 +101,25 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     return team
   }
 
-  @ResolveField('objectives', () => [ObjectiveGraphQLNode], { nullable: true })
-  protected async getObjectivesForCycle(@Parent() cycle: CycleGraphQLNode) {
+  @ResolveField('objectives', () => ObjectivesGraphQLConnection, { nullable: true })
+  protected async getObjectivesForCycle(
+    @Args() request: ObjectiveFiltersRequest,
+    @Parent() cycle: CycleGraphQLNode,
+  ) {
     this.logger.log({
       cycle,
+      request,
       message: 'Fetching objectives for cycle',
     })
 
-    return this.core.objective.getFromCycle(cycle)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      ObjectiveFiltersRequest,
+      Objective
+    >(request)
+
+    const queryResult = await this.core.objective.getFromCycle(cycle, filters, queryOptions)
+
+    return this.relay.marshalResponse<ObjectiveInterface>(queryResult, connection)
   }
 
   @ResolveField('parent', () => CycleGraphQLNode, { nullable: true })
@@ -145,7 +134,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     return parentCycle
   }
 
-  @ResolveField('cycles', () => [CycleGraphQLNode], { nullable: true })
+  @ResolveField('cycles', () => CycleCyclesGraphQLConnection, { nullable: true })
   protected async getChildCyclesForRequestAndCycle(
     @Args() request: CycleFiltersRequest,
     @Parent() cycle: CycleGraphQLNode,
@@ -156,10 +145,15 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       message: 'Fetching child cycles for cycle',
     })
 
-    const childCycles = await this.core.cycle.getChildCycles(cycle, request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      CycleFiltersRequest,
+      Cycle
+    >(request)
+
+    const childCycles = await this.core.cycle.getChildCycles(cycle, filters, queryOptions)
     const sortedByCadenceChildCycles = this.core.cycle.sortCyclesByCadence(childCycles)
 
-    return sortedByCadenceChildCycles
+    return this.relay.marshalResponse<CycleInterface>(sortedByCadenceChildCycles, connection)
   }
 
   @ResolveField('keyResults', () => [KeyResultGraphQLNode], { nullable: true })
