@@ -5,9 +5,9 @@ import { GuardedNodeGraphQLInterface } from '@interface/graphql/authorization/in
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
 import { TeamGenderGraphQLEnum } from '@interface/graphql/enums/team-gender.enum'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
+import { KeyResultGraphQLNode } from '@interface/graphql/modules/key-result/key-result.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
-import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.interface'
 
 import { TeamObjectivesGraphQLConnection } from './connections/team-objectives/team-objectives.connection'

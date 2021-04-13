@@ -12,8 +12,8 @@ import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarde
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
+import { KeyResultGraphQLNode } from '@interface/graphql/modules/key-result/key-result.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
-import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { ObjectivesGraphQLConnection } from './connections/objectives/objectives.connection'

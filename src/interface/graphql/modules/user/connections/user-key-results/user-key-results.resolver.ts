@@ -4,7 +4,7 @@ import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-resu
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
-import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
+import { KeyResultGraphQLNode } from '@interface/graphql/modules/key-result/key-result.node'
 
 import { UserKeyResultsGraphQLConnection } from './user-key-results.connection'
 

@@ -2,7 +2,7 @@ import { Field, ObjectType } from '@nestjs/graphql'
 
 import { GuardedConnectionGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-connection.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
-import { KeyResultCommentGraphQLNode } from '@interface/graphql/objects/key-result/comment/key-result-comment.node'
+import { KeyResultCommentGraphQLNode } from '@interface/graphql/modules/key-result/comment/key-result-comment.node'
 import { ConnectionRelayInterface } from '@interface/graphql/relay/interfaces/connection.interface'
 import { PageInfoRelayObject } from '@interface/graphql/relay/objects/page-info.object'
 

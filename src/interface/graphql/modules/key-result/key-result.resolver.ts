@@ -16,12 +16,12 @@ import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objec
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
-import { KeyResultCommentGraphQLNode } from '@interface/graphql/objects/key-result/comment/key-result-comment.node'
-import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
-import { KeyResultsGraphQLConnection } from '@interface/graphql/objects/key-result/key-results.connection'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
-import { KeyResultFiltersRequest } from '../requests/key-result-filters.request'
+import { KeyResultCommentGraphQLNode } from './comment/key-result-comment.node'
+import { KeyResultsGraphQLConnection } from './connections/key-results/key-results.connection'
+import { KeyResultGraphQLNode } from './key-result.node'
+import { KeyResultFiltersRequest } from './requests/key-result-filters.request'
 
 @GuardedResolver(KeyResultGraphQLNode)
 export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<

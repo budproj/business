@@ -1,10 +1,10 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql'
 
-import { GuardedNodeGraphQLInterface } from '../../../authorization/interfaces/guarded-node.interface'
-import { PolicyGraphQLObject } from '../../../authorization/objects/policy.object'
-import { NodeRelayInterface } from '../../../relay/interfaces/node.interface'
-import { UserGraphQLNode } from '../../user/user.node'
-import { KeyResultGraphQLNode } from '../key-result.node'
+import { GuardedNodeGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-node.interface'
+import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
+import { KeyResultGraphQLNode } from '@interface/graphql/modules/key-result/key-result.node'
+import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
+import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.interface'
 
 @ObjectType('KeyResultComment', {
   implements: () => [NodeRelayInterface, GuardedNodeGraphQLInterface],

@@ -13,15 +13,16 @@ import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarde
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
-import { KeyResultCommentGraphQLNode } from '@interface/graphql/objects/key-result/comment/key-result-comment.node'
-import { KeyResultCommentsGraphQLConnection } from '@interface/graphql/objects/key-result/comment/key-result-comments.connection'
-import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
-import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
+import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
-import { KeyResultCommentCreateRequest } from '../requests/key-result-comment-create.request'
-import { KeyResultCommentDeleteRequest } from '../requests/key-result-comment-delete.request'
-import { KeyResultCommentFiltersRequest } from '../requests/key-result-comment-filters.request'
+import { KeyResultGraphQLNode } from '../key-result.node'
+
+import { KeyResultCommentsGraphQLConnection } from './connections/key-result-comments/key-result-comments.connection'
+import { KeyResultCommentGraphQLNode } from './key-result-comment.node'
+import { KeyResultCommentCreateRequest } from './requests/key-result-comment-create.request'
+import { KeyResultCommentDeleteRequest } from './requests/key-result-comment-delete.request'
+import { KeyResultCommentFiltersRequest } from './requests/key-result-comment-filters.request'
 
 @GuardedResolver(KeyResultCommentGraphQLNode)
 export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
