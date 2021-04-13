@@ -30,7 +30,7 @@ export class KeyResultCheckInsConnectionGraphQLResolver extends GuardedConnectio
   @GuardedQuery(KeyResultCheckInsGraphQLConnection, 'key-result-check-in:read', {
     name: 'keyResultCheckIns',
   })
-  protected async getKeyResultCheckIns(
+  protected async getKeyResultCheckInsForRequestAndAuthorizedRequestUser(
     @Args() request: KeyResultCheckInFiltersRequest,
     @AuthorizedRequestUser()
     authorizedRequestKeyResultCheckIn: AuthorizationUser,

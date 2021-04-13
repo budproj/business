@@ -32,7 +32,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   }
 
   @GuardedQuery(TeamGraphQLNode, 'team:read', { name: 'team' })
-  protected async getTeam(
+  protected async getTeamForRequestAndAuthorizedRequestUser(
     @Args() request: NodeIndexesRequest,
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
@@ -48,7 +48,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   }
 
   @GuardedQuery(TeamsGraphQLConnection, 'team:read', { name: 'teams' })
-  protected async getTeams(
+  protected async getTeamsForRequestAndAuthorizedRequestUser(
     @Args() request: TeamFiltersRequest,
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
@@ -79,7 +79,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   }
 
   @ResolveField('status', () => TeamStatusObject)
-  protected async getTeamStatus(@Parent() team: TeamGraphQLNode) {
+  protected async getStatusForTeam(@Parent() team: TeamGraphQLNode) {
     this.logger.log({
       team,
       message: 'Fetching current status for this team',
@@ -91,7 +91,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   }
 
   @ResolveField('owner', () => UserGraphQLNode)
-  protected async getTeamOwner(@Parent() team: TeamGraphQLNode) {
+  protected async getOwnerForTeam(@Parent() team: TeamGraphQLNode) {
     this.logger.log({
       team,
       message: 'Fetching owner for team',
@@ -101,7 +101,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   }
 
   @ResolveField('teams', () => [TeamGraphQLNode], { nullable: true })
-  protected async getTeamChildTeams(@Parent() team: TeamGraphQLNode) {
+  protected async getChildTeamsForTeam(@Parent() team: TeamGraphQLNode) {
     this.logger.log({
       team,
       message: 'Fetching child teams for team',
@@ -113,7 +113,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   }
 
   @ResolveField('rankedTeams', () => [TeamGraphQLNode], { nullable: true })
-  protected async getTeamRankedChildTeams(@Parent() team: TeamGraphQLNode) {
+  protected async getRankedTeamsForTeam(@Parent() team: TeamGraphQLNode) {
     this.logger.log({
       team,
       message: 'Fetching child teams for team ranked by progress',
@@ -125,7 +125,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   }
 
   @ResolveField('parent', () => TeamGraphQLNode, { nullable: true })
-  protected async getTeamParentTeam(@Parent() team: TeamGraphQLNode) {
+  protected async getParentForTeam(@Parent() team: TeamGraphQLNode) {
     this.logger.log({
       team,
       message: 'Fetching parent team for team',
@@ -137,7 +137,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   }
 
   @ResolveField('users', () => [UserGraphQLNode], { nullable: true })
-  protected async getTeamUsers(@Parent() team: TeamGraphQLNode) {
+  protected async getUsersForTeam(@Parent() team: TeamGraphQLNode) {
     this.logger.log({
       team,
       message: 'Fetching users for team',
@@ -147,7 +147,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   }
 
   @ResolveField('isCompany', () => Boolean)
-  protected async getTeamIsCompanySpecification(@Parent() team: TeamGraphQLNode) {
+  protected async getIsCompanyForTeam(@Parent() team: TeamGraphQLNode) {
     this.logger.log({
       team,
       message: 'Deciding if the team is a company',
@@ -157,7 +157,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   }
 
   @ResolveField('cycles', () => [CycleGraphQLNode], { nullable: true })
-  protected async getTeamCycles(@Parent() team: TeamGraphQLNode) {
+  protected async getCyclesForTeam(@Parent() team: TeamGraphQLNode) {
     this.logger.log({
       team,
       message: 'Fetching cycles for team',
@@ -167,7 +167,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   }
 
   @ResolveField('keyResults', () => [KeyResultGraphQLNode], { nullable: true })
-  protected async getTeamKeyResults(@Parent() team: TeamGraphQLNode) {
+  protected async getKeyResultsForTeam(@Parent() team: TeamGraphQLNode) {
     this.logger.log({
       team,
       message: 'Fetching key results for team',
@@ -177,7 +177,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   }
 
   @ResolveField('progressIncreaseSinceLastWeek', () => Float)
-  protected async getTeamProgressIncreaseSinceLastWeek(@Parent() team: TeamGraphQLNode) {
+  protected async getProgressIncreaseSinceLastWeekForTeam(@Parent() team: TeamGraphQLNode) {
     this.logger.log({
       team,
       message: 'Fetching the progress increase for team since last week',
@@ -187,7 +187,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   }
 
   @ResolveField('latestKeyResultCheckIn', () => KeyResultCheckInGraphQLNode, { nullable: true })
-  protected async getTeamLatestKeyResultCheckIn(@Parent() team: TeamGraphQLNode) {
+  protected async getLatestKeyResultCheckInForTeam(@Parent() team: TeamGraphQLNode) {
     this.logger.log({
       team,
       message: 'Fetching latest key result check-in for team',

@@ -46,7 +46,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   }
 
   @GuardedQuery(UserGraphQLNode, 'user:read', { name: 'user' })
-  protected async getUser(
+  protected async getUserForRequestAndAuthorizedRequestUser(
     @Args() request: NodeIndexesRequest,
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
@@ -62,7 +62,9 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   }
 
   @GuardedQuery(UserGraphQLNode, 'user:read', { name: 'me' })
-  protected async getMyUser(@AuthorizedRequestUser() authorizationUser: AuthorizationUser) {
+  protected async getMyUserForAuthorizedRequestUser(
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+  ) {
     this.logger.log(
       `Fetching data about the user that is executing the request. Provided user ID: ${authorizationUser.id}`,
     )
@@ -78,9 +80,9 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   }
 
   @GuardedMutation(UserGraphQLNode, 'user:update', { name: 'updateUser' })
-  protected async updateUser(
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+  protected async updateUserForRequestAndAuthorizedRequestUser(
     @Args() request: UserUpdateRequest,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
     this.logger.log({
       authorizationUser,
@@ -99,7 +101,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   }
 
   @ResolveField('fullName', () => String)
-  protected async getUserFullName(@Parent() user: UserGraphQLNode) {
+  protected async getFullNameForUser(@Parent() user: UserGraphQLNode) {
     this.logger.log({
       user,
       message: 'Fetching user full name',
@@ -109,9 +111,9 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   }
 
   @ResolveField('companies', () => UserTeamsGraphQLConnection, { nullable: true })
-  protected async getUserCompanies(
+  protected async getCompaniesForRequestAndUser(
+    @Args() request: TeamFiltersRequest,
     @Parent() user: UserGraphQLNode,
-    @Args() request?: TeamFiltersRequest,
   ) {
     this.logger.log({
       user,
@@ -130,9 +132,9 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   }
 
   @ResolveField('teams', () => UserTeamsGraphQLConnection, { nullable: true })
-  protected async getUserTeams(
+  protected async getTeamsForRequestAndUser(
+    @Args() request: TeamFiltersRequest,
     @Parent() user: UserGraphQLNode,
-    @Args() request?: TeamFiltersRequest,
   ) {
     this.logger.log({
       user,
@@ -151,9 +153,9 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   }
 
   @ResolveField('ownedTeams', () => UserTeamsGraphQLConnection, { nullable: true })
-  protected async getUserOwnedTeams(
+  protected async getOwnedTeamsForRequestAndUser(
+    @Args() request: TeamFiltersRequest,
     @Parent() user: UserGraphQLNode,
-    @Args() request?: TeamFiltersRequest,
   ) {
     this.logger.log({
       user,
@@ -172,9 +174,9 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   }
 
   @ResolveField('objectives', () => UserObjectivesGraphQLConnection, { nullable: true })
-  protected async getUserObjectives(
+  protected async getObjectivesForRequestAndUser(
+    @Args() request: ObjectiveFiltersRequest,
     @Parent() user: UserGraphQLNode,
-    @Args() request?: ObjectiveFiltersRequest,
   ) {
     this.logger.log({
       user,
@@ -193,9 +195,9 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   }
 
   @ResolveField('keyResults', () => UserKeyResultsGraphQLConnection, { nullable: true })
-  protected async getUserKeyResults(
+  protected async getKeyResultsForRequestAndUser(
+    @Args() request: KeyResultFiltersRequest,
     @Parent() user: UserGraphQLNode,
-    @Args() request?: KeyResultFiltersRequest,
   ) {
     this.logger.log({
       user,
@@ -216,9 +218,9 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   @ResolveField('keyResultComments', () => UserKeyResultCommentsGraphQLConnection, {
     nullable: true,
   })
-  protected async getUserKeyResultComments(
+  protected async getKeyResultCommentsForRequestAndUser(
+    @Args() request: KeyResultCommentFiltersRequest,
     @Parent() user: UserGraphQLNode,
-    @Args() request?: KeyResultCommentFiltersRequest,
   ) {
     this.logger.log({
       user,
@@ -243,9 +245,9 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   @ResolveField('keyResultCheckIns', () => UserKeyResultCheckInsGraphQLConnection, {
     nullable: true,
   })
-  protected async getUserKeyResultCheckIns(
+  protected async getKeyResultCheckInsForRequestAndUser(
+    @Args() request: KeyResultCheckInFiltersRequest,
     @Parent() user: UserGraphQLNode,
-    @Args() request?: KeyResultCheckInFiltersRequest,
   ) {
     this.logger.log({
       user,

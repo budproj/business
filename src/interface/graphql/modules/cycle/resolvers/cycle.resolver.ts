@@ -32,7 +32,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   }
 
   @GuardedQuery(CycleGraphQLNode, 'cycle:read', { name: 'cycle' })
-  protected async getCycle(
+  protected async getCycleForRequestAndAuthorizedRequestUser(
     @Args() request: NodeIndexesRequest,
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
@@ -48,7 +48,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   }
 
   @GuardedQuery(CyclesGraphQLConnection, 'cycle:read', { name: 'cycles' })
-  protected async getCycles(
+  protected async getCyclesForRequestAndAuthorizedRequestUser(
     @Args() request: CycleFiltersRequest,
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
@@ -74,9 +74,9 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   }
 
   @GuardedQuery(CyclesGraphQLConnection, 'cycle:read', { name: 'cyclesInSamePeriod' })
-  protected async getCyclesInSamePeriod(
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+  protected async getCyclesInSamePeriodForRequestAndAuthorizedRequestUser(
     @Args() request: CyclesInSamePeriodRequest,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
     this.logger.log({
       request,
@@ -100,7 +100,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   }
 
   @ResolveField('status', () => CycleStatusObject)
-  protected async getCycleStatus(@Parent() cycle: CycleGraphQLNode) {
+  protected async getStatusForCycle(@Parent() cycle: CycleGraphQLNode) {
     this.logger.log({
       cycle,
       message: 'Fetching current status for this cycle',
@@ -112,7 +112,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   }
 
   @ResolveField('team', () => TeamGraphQLNode)
-  protected async getCycleTeam(@Parent() cycle: CycleGraphQLNode) {
+  protected async getTeamForCycle(@Parent() cycle: CycleGraphQLNode) {
     this.logger.log({
       cycle,
       message: 'Fetching team for cycle',
@@ -124,7 +124,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   }
 
   @ResolveField('objectives', () => [ObjectiveGraphQLNode], { nullable: true })
-  protected async getCycleObjectives(@Parent() cycle: CycleGraphQLNode) {
+  protected async getObjectivesForCycle(@Parent() cycle: CycleGraphQLNode) {
     this.logger.log({
       cycle,
       message: 'Fetching objectives for cycle',
@@ -134,7 +134,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   }
 
   @ResolveField('parent', () => CycleGraphQLNode, { nullable: true })
-  protected async getParentCycle(@Parent() cycle: CycleGraphQLNode) {
+  protected async getParentCycleForCycle(@Parent() cycle: CycleGraphQLNode) {
     this.logger.log({
       cycle,
       message: 'Fetching parent cycle for cycle',
@@ -146,24 +146,24 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   }
 
   @ResolveField('cycles', () => [CycleGraphQLNode], { nullable: true })
-  protected async getChildCycles(
+  protected async getChildCyclesForRequestAndCycle(
+    @Args() request: CycleFiltersRequest,
     @Parent() cycle: CycleGraphQLNode,
-    @Args() filters: CycleFiltersRequest,
   ) {
     this.logger.log({
       cycle,
-      filters,
+      request,
       message: 'Fetching child cycles for cycle',
     })
 
-    const childCycles = await this.core.cycle.getChildCycles(cycle, filters)
+    const childCycles = await this.core.cycle.getChildCycles(cycle, request)
     const sortedByCadenceChildCycles = this.core.cycle.sortCyclesByCadence(childCycles)
 
     return sortedByCadenceChildCycles
   }
 
   @ResolveField('keyResults', () => [KeyResultGraphQLNode], { nullable: true })
-  protected async getCycleKeyResults(
+  protected async getKeyResultsForRequestAndCycle(
     @Args() request: KeyResultFiltersRequest,
     @Parent() cycle: CycleGraphQLNode,
   ) {

@@ -28,7 +28,7 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
   }
 
   @GuardedQuery(UsersGraphQLConnection, 'user:read', { name: 'users' })
-  protected async getUsers(
+  protected async getUsersForRequestAndAuthorizedRequestUser(
     @Args() request: UserFiltersRequest,
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {

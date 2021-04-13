@@ -35,7 +35,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedQuery(KeyResultCheckInGraphQLNode, 'key-result-check-in:read', {
     name: 'keyResultCheckIn',
   })
-  protected async getCheckIn(
+  protected async getCheckInForResquestAndAuthorizedRequestUser(
     @Args() request: NodeIndexesRequest,
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
@@ -57,7 +57,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedMutation(KeyResultCheckInGraphQLNode, 'key-result-check-in:create', {
     name: 'createKeyResultCheckIn',
   })
-  protected async createKeyResultCheckIn(
+  protected async createKeyResultCheckInForRequestAndAuthorizedRequestUser(
     @Args() request: KeyResultCheckInCreateRequest,
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
@@ -101,9 +101,9 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedMutation(KeyResultCheckInGraphQLNode, 'key-result-check-in:delete', {
     name: 'deleteKeyResultCheckIn',
   })
-  protected async deleteKeyResultCheckIn(
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+  protected async deleteKeyResultCheckInForRequestAndAuthorizedRequestUser(
     @Args() request: KeyResultCheckInDeleteRequest,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
     this.logger.log({
       authorizationUser,
@@ -136,7 +136,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('progress', () => Float)
-  protected async getKeyResultCheckInProgress(
+  protected async getProgressForKeyResultCheckIn(
     @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
   ) {
     this.logger.log({
@@ -148,7 +148,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('progressIncrease', () => Float)
-  protected async getKeyResultCheckInPercentageProgressIncrease(
+  protected async getPercentageProgressIncreaseForKeyResultCheckIn(
     @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
   ) {
     this.logger.log({
@@ -160,7 +160,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('confidenceIncrease', () => Int)
-  protected async getKeyResultCheckInAbsoluteConfidenceIncrease(
+  protected async getAbsoluteConfidenceIncreaseForKeyResultCheckIn(
     @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
   ) {
     this.logger.log({
@@ -172,7 +172,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('valueIncrease', () => Float)
-  protected async getKeyResultCheckInValueIncrease(
+  protected async getValueIncreaseForKeyResultCheckIn(
     @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
   ) {
     this.logger.log({
@@ -184,7 +184,9 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('user', () => UserGraphQLNode)
-  protected async getKeyResultCheckInUser(@Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode) {
+  protected async getUserForKeyResultCheckIn(
+    @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
+  ) {
     this.logger.log({
       keyResultCheckIn,
       message: 'Fetching user for key result check-in',
@@ -194,7 +196,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('keyResult', () => KeyResultGraphQLNode)
-  protected async getKeyResultCheckInKeyResult(
+  protected async getKeyResultForKeyResultCheckIn(
     @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
   ) {
     this.logger.log({
@@ -206,7 +208,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('parent', () => KeyResultCheckInGraphQLNode, { nullable: true })
-  protected async getKeyResultCheckInParent(
+  protected async getParentForKeyResultCheckIn(
     @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
   ) {
     this.logger.log({

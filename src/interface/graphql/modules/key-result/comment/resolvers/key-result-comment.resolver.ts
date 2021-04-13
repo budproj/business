@@ -37,7 +37,7 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedQuery(KeyResultCommentGraphQLNode, 'key-result-comment:read', {
     name: 'keyResultComment',
   })
-  protected async getKeyResultComment(
+  protected async getKeyResultCommentForRequestAndAuthorizedRequestUser(
     @Args() request: NodeIndexesRequest,
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
@@ -61,7 +61,7 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedQuery(KeyResultCommentsGraphQLConnection, 'key-result-comment:read', {
     name: 'keyResultComments',
   })
-  protected async getKeyResultComments(
+  protected async getKeyResultCommentsForRequestAndAuthorizedRequestUser(
     @Args() request: KeyResultCommentFiltersRequest,
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
@@ -88,9 +88,9 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedMutation(KeyResultCommentGraphQLNode, 'key-result-comment:create', {
     name: 'createKeyResultComment',
   })
-  protected async createKeyResultComment(
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+  protected async createKeyResultCommentForRequestAndAuthorizedRequestUser(
     @Args() request: KeyResultCommentCreateRequest,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
     this.logger.log({
       authorizationUser,
@@ -103,12 +103,15 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     })
     if (!isKeyResultActive)
       throw new UserInputError(
-        'You cannot create this comment, because that key-result is not active anymore',
+        'You cannot create this keyResultComment, because that key-result is not active anymore',
       )
 
-    const comment = this.core.keyResult.createUserCommentData(authorizationUser, request.data)
+    const keyResultComment = this.core.keyResult.createUserCommentData(
+      authorizationUser,
+      request.data,
+    )
     const createdComments = await this.queryGuard.createWithActionScopeConstraint(
-      comment,
+      keyResultComment,
       authorizationUser,
     )
     if (!createdComments || createdComments.length === 0)
@@ -122,7 +125,7 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedMutation(KeyResultCommentGraphQLNode, 'key-result-comment:delete', {
     name: 'deleteKeyResultComment',
   })
-  protected async deleteKeyResultComment(
+  protected async deleteKeyResultCommentForRequestAndAuthorizedRequestUser(
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
     @Args() request: KeyResultCommentDeleteRequest,
   ) {
@@ -140,7 +143,7 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     })
     if (!isObjectiveActive)
       throw new UserInputError(
-        'You cannot create this comment, because that key-result is not active anymore',
+        'You cannot create this keyResultComment, because that key-result is not active anymore',
       )
 
     const selector = { id: request.id }
@@ -154,23 +157,27 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('user', () => UserGraphQLNode)
-  protected async getKeyResultCommentUser(@Parent() comment: KeyResultCommentGraphQLNode) {
+  protected async getUserForKeyResultComment(
+    @Parent() keyResultComment: KeyResultCommentGraphQLNode,
+  ) {
     this.logger.log({
-      comment,
+      keyResultComment,
       message: 'Fetching user for key result comment',
     })
 
-    return this.core.user.getOne({ id: comment.userId })
+    return this.core.user.getOne({ id: keyResultComment.userId })
   }
 
   @ResolveField('keyResult', () => KeyResultGraphQLNode)
-  protected async getKeyResultCommentKeyResult(@Parent() comment: KeyResultCommentGraphQLNode) {
+  protected async getKeyResultForKeyResultComment(
+    @Parent() keyResultComment: KeyResultCommentGraphQLNode,
+  ) {
     this.logger.log({
-      comment,
+      keyResultComment,
       message: 'Fetching key result for key result comment',
     })
 
-    return this.core.keyResult.getOne({ id: comment.keyResultId })
+    return this.core.keyResult.getOne({ id: keyResultComment.keyResultId })
   }
 
   protected async customizeEntityPolicy(

@@ -35,7 +35,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @GuardedQuery(KeyResultGraphQLNode, 'key-result:read', { name: 'keyResult' })
-  protected async getKeyResult(
+  protected async getKeyResultForRequestAndAuthorizedRequestUser(
     @Args() request: NodeIndexesRequest,
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
@@ -55,7 +55,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @GuardedQuery(KeyResultsGraphQLConnection, 'key-result:read', { name: 'keyResults' })
-  protected async getKeyResults(
+  protected async getKeyResultsForRequestAndAuthorizedRequestUser(
     @Args() request: KeyResultFiltersRequest,
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
@@ -80,7 +80,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('owner', () => UserGraphQLNode)
-  protected async getKeyResultOwner(@Parent() keyResult: KeyResultGraphQLNode) {
+  protected async getOwnerForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
     this.logger.log({
       keyResult,
       message: 'Fetching owner for key result',
@@ -90,7 +90,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('team', () => TeamGraphQLNode)
-  protected async getKeyResultTeam(@Parent() keyResult: KeyResultGraphQLNode) {
+  protected async getTeamForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
     this.logger.log({
       keyResult,
       message: 'Fetching team for key result',
@@ -102,7 +102,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('objective', () => ObjectiveGraphQLNode)
-  protected async getKeyResultGraphQLNodeive(@Parent() keyResult: KeyResultGraphQLNode) {
+  protected async getObjectiveForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
     this.logger.log({
       keyResult,
       message: 'Fetching objective for key result',
@@ -112,7 +112,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('keyResultComments', () => [KeyResultCommentGraphQLNode])
-  protected async getKeyResultComments(@Parent() keyResult: KeyResultGraphQLNode) {
+  protected async getKeyResultCommentsForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
     this.logger.log({
       keyResult,
       message: 'Fetching comments for key result',
@@ -122,7 +122,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('isOutdated', () => Boolean)
-  protected async getIsOutdatedFlag(@Parent() keyResult: KeyResultGraphQLNode) {
+  protected async getIsOutdatedForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
     this.logger.log({
       keyResult,
       message: 'Deciding if the given key result is outdated',
@@ -143,7 +143,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('latestKeyResultCheckIn', () => KeyResultCheckInGraphQLNode, { nullable: true })
-  protected async getLatestKeyResultCheckIn(@Parent() keyResult: KeyResultGraphQLNode) {
+  protected async getLatestKeyResultCheckInForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
     this.logger.log({
       keyResult,
       message: 'Fetching latest key result check-in for key result',

@@ -33,7 +33,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @GuardedQuery(ObjectiveGraphQLNode, 'objective:read', { name: 'objective' })
-  protected async getObjective(
+  protected async getObjectiveForRequestAndAuthorizedRequestUser(
     @Args() request: NodeIndexesRequest,
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
@@ -53,7 +53,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @GuardedQuery(ObjectivesGraphQLConnection, 'objective:read', { name: 'objectives' })
-  protected async getObjectives(
+  protected async getObjectivesForRequestAndAuthorizedRequestUser(
     @Args() request: ObjectiveFiltersRequest,
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
@@ -78,7 +78,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('owner', () => UserGraphQLNode)
-  protected async getObjectiveOwner(@Parent() objective: ObjectiveGraphQLNode) {
+  protected async getOwnerForObjective(@Parent() objective: ObjectiveGraphQLNode) {
     this.logger.log({
       objective,
       message: 'Fetching owner for objective',
@@ -88,7 +88,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('cycle', () => CycleGraphQLNode)
-  protected async getObjectiveCycle(@Parent() objective: ObjectiveGraphQLNode) {
+  protected async getCycleForObjective(@Parent() objective: ObjectiveGraphQLNode) {
     this.logger.log({
       objective,
       message: 'Fetching cycle for objective',
@@ -98,7 +98,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('keyResults', () => [KeyResultGraphQLNode], { nullable: true })
-  protected async getObjectiveKeyResults(@Parent() objective: ObjectiveGraphQLNode) {
+  protected async getKeyResultsForObjective(@Parent() objective: ObjectiveGraphQLNode) {
     this.logger.log({
       objective,
       message: 'Fetching key results for objective',
@@ -108,7 +108,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('status', () => ObjectiveStatusObject)
-  protected async getObjectiveStatus(@Parent() objective: ObjectiveGraphQLNode) {
+  protected async getStatusForObjective(@Parent() objective: ObjectiveGraphQLNode) {
     this.logger.log({
       objective,
       message: 'Fetching current status for objective',
@@ -118,7 +118,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('progressIncreaseSinceLastWeek', () => Float)
-  protected async getObjectiveProgressIncreaseSinceLastWeek(
+  protected async getProgressIncreaseSinceLastWeekForObjective(
     @Parent() objective: ObjectiveGraphQLNode,
   ) {
     this.logger.log({
