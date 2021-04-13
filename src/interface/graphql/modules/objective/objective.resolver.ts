@@ -5,6 +5,8 @@ import { UserInputError } from 'apollo-server-fastify'
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
+import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
@@ -12,14 +14,14 @@ import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarde
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
-import { KeyResultGraphQLNode } from '@interface/graphql/modules/key-result/key-result.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
-import { ObjectivesGraphQLConnection } from './connections/objectives/objectives.connection'
+import { KeyResultFiltersRequest } from '../key-result/requests/key-result-filters.request'
+
+import { ObjectiveKeyResultsGraphQLConnection } from './connections/objective-key-results/objective-key-results.connection'
 import { ObjectiveGraphQLNode } from './objective.node'
 import { ObjectiveStatusObject } from './objects/objective-status.object'
-import { ObjectiveFiltersRequest } from './requests/objective-filters.request'
 
 @GuardedResolver(ObjectiveGraphQLNode)
 export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
@@ -52,31 +54,6 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     return objective
   }
 
-  @GuardedQuery(ObjectivesGraphQLConnection, 'objective:read', { name: 'objectives' })
-  protected async getObjectivesForRequestAndAuthorizedRequestUser(
-    @Args() request: ObjectiveFiltersRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
-  ) {
-    this.logger.log({
-      request,
-      authorizationUser,
-      message: 'Fetching objectives with filters',
-    })
-
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      ObjectiveFiltersRequest,
-      Objective
-    >(request)
-
-    const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
-      filters,
-      authorizationUser,
-      queryOptions,
-    )
-
-    return this.relay.marshalResponse<Objective>(queryResult, connection)
-  }
-
   @ResolveField('owner', () => UserGraphQLNode)
   protected async getOwnerForObjective(@Parent() objective: ObjectiveGraphQLNode) {
     this.logger.log({
@@ -97,14 +74,25 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     return this.core.cycle.getFromObjective(objective)
   }
 
-  @ResolveField('keyResults', () => [KeyResultGraphQLNode], { nullable: true })
-  protected async getKeyResultsForObjective(@Parent() objective: ObjectiveGraphQLNode) {
+  @ResolveField('keyResults', () => ObjectiveKeyResultsGraphQLConnection, { nullable: true })
+  protected async getKeyResultsForObjective(
+    @Args() request: KeyResultFiltersRequest,
+    @Parent() objective: ObjectiveGraphQLNode,
+  ) {
     this.logger.log({
       objective,
-      message: 'Fetching key results for objective',
+      request,
+      message: 'Fetching key-results for objective',
     })
 
-    return this.core.keyResult.getFromObjective(objective)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      KeyResultFiltersRequest,
+      KeyResult
+    >(request)
+
+    const queryResult = await this.core.keyResult.getFromObjective(objective, filters, queryOptions)
+
+    return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection)
   }
 
   @ResolveField('status', () => ObjectiveStatusObject)

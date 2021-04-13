@@ -3,10 +3,10 @@ import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-node.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
-import { KeyResultGraphQLNode } from '@interface/graphql/modules/key-result/key-result.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.interface'
 
+import { ObjectiveKeyResultsGraphQLConnection } from './connections/objective-key-results/objective-key-results.connection'
 import { ObjectiveStatusObject } from './objects/objective-status.object'
 
 @ObjectType('Objective', {
@@ -59,12 +59,12 @@ export class ObjectiveGraphQLNode implements GuardedNodeGraphQLInterface {
   // CONNECTION FIELDS
   // **********************************************************************************************
 
-  @Field(() => [KeyResultGraphQLNode], {
+  @Field(() => ObjectiveKeyResultsGraphQLConnection, {
     complexity: 0,
     nullable: true,
     description: 'A creation date ordered list of key results that belongs to this objective',
   })
-  public readonly keyResults?: KeyResultGraphQLNode[]
+  public readonly keyResults?: ObjectiveKeyResultsGraphQLConnection
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS
