@@ -11,6 +11,7 @@ import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarde
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
+import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
 import { KeyResultCommentGraphQLNode } from '@interface/graphql/objects/key-result/comment/key-result-comment.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { KeyResultsGraphQLConnection } from '@interface/graphql/objects/key-result/key-results.connection'
@@ -96,6 +97,37 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     })
 
     return this.core.keyResult.getComments(keyResult)
+  }
+
+  @ResolveField('isOutdated', () => Boolean)
+  protected async getIsOutdatedFlag(@Parent() keyResult: KeyResultGraphQLNode) {
+    this.logger.log({
+      keyResult,
+      message: 'Deciding if the given key result is outdated',
+    })
+
+    const objective = await this.core.objective.getFromKeyResult(keyResult)
+    const latestKeyResultCheckIn = await this.core.keyResult.getLatestCheckInForKeyResultAtDate(
+      keyResult,
+    )
+
+    const enhancedKeyResult = {
+      ...keyResult,
+      objective,
+      checkIns: latestKeyResultCheckIn ? [latestKeyResultCheckIn] : undefined,
+    }
+
+    return this.core.keyResult.isOutdated(enhancedKeyResult)
+  }
+
+  @ResolveField('latestKeyResultCheckIn', () => KeyResultCheckInGraphQLNode, { nullable: true })
+  protected async getLatestKeyResultCheckIn(@Parent() keyResult: KeyResultGraphQLNode) {
+    this.logger.log({
+      keyResult,
+      message: 'Fetching latest key result check-in for key result',
+    })
+
+    return this.core.keyResult.getLatestCheckInForKeyResultAtDate(keyResult)
   }
 
   protected async customizeEntityPolicy(

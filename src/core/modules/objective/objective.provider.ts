@@ -97,6 +97,17 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     return objectives
   }
 
+  public async getObjectiveProgressIncreaseSinceLastWeek(
+    objective: ObjectiveInterface,
+  ): Promise<number> {
+    const progress = await this.getCurrentProgressForObjective(objective)
+    const lastWeekProgress = await this.getLastWeekProgressForObjective(objective)
+
+    const deltaProgress = progress - lastWeekProgress
+
+    return deltaProgress
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<Objective>,
     _data: Partial<ObjectiveInterface>,
@@ -141,5 +152,20 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     }
 
     return defaultStatus
+  }
+
+  private async getCurrentProgressForObjective(objective: ObjectiveInterface): Promise<number> {
+    const date = new Date()
+    const currentStatus = await this.getStatusAtDate(date, objective)
+
+    return currentStatus?.progress ?? DEFAULT_PROGRESS
+  }
+
+  private async getLastWeekProgressForObjective(objective: ObjectiveInterface): Promise<number> {
+    const firstDayAfterLastWeek = this.getFirstDayAfterLastWeek()
+
+    const lastWeekStatus = await this.getStatusAtDate(firstDayAfterLastWeek, objective)
+
+    return lastWeekStatus?.progress ?? DEFAULT_PROGRESS
   }
 }

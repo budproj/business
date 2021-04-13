@@ -10,6 +10,7 @@ import { ObjectiveGraphQLNode } from '../objective/objective.node'
 import { TeamGraphQLNode } from '../team/team.node'
 import { UserGraphQLNode } from '../user/user.node'
 
+import { KeyResultCheckInGraphQLNode } from './check-in/key-result-check-in.node'
 import { KeyResultCommentGraphQLNode } from './comment/key-result-comment.node'
 
 @ObjectType('KeyResult', {
@@ -77,6 +78,12 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
       'Saying a key result is "outdated" means that the owner needs to do a new check-in to report the current key result progress',
   })
   public readonly isOutdated?: boolean
+
+  @Field(() => KeyResultCheckInGraphQLNode, {
+    description: 'The latest key result check-in reported for that key result',
+    nullable: true,
+  })
+  public latestKeyResultCheckIn?: KeyResultCheckInGraphQLNode
 
   // **********************************************************************************************
   // CONNECTION FIELDS

@@ -21,9 +21,12 @@ import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
 import { KeyResultInterface } from './interfaces/key-result.interface'
 import { KeyResult } from './key-result.orm-entity'
 import { KeyResultRepository } from './key-result.repository'
+import { KeyResultSpecification } from './key-result.specification'
 
 @Injectable()
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
+  private readonly specifications: KeyResultSpecification = new KeyResultSpecification()
+
   constructor(
     public readonly keyResultCommentProvider: KeyResultCommentProvider,
     public readonly keyResultCheckInProvider: KeyResultCheckInProvider,
@@ -292,6 +295,15 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const latestCheckIn = await this.keyResultCheckInProvider.getLatestFromUsers(users)
 
     return latestCheckIn
+  }
+
+  public async isOutdated(keyResult: KeyResult): Promise<boolean> {
+    const keyResultIndexes = {
+      id: keyResult.id,
+    }
+    const isActive = await this.isActiveFromIndexes(keyResultIndexes)
+
+    return isActive && this.specifications.isOutdated.isSatisfiedBy(keyResult)
   }
 
   protected async protectCreationQuery(

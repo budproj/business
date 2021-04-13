@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common'
-import { Args, Parent, ResolveField } from '@nestjs/graphql'
+import { Args, Float, Parent, ResolveField } from '@nestjs/graphql'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
@@ -93,5 +93,17 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     })
 
     return this.core.objective.getCurrentStatus(objective)
+  }
+
+  @ResolveField('progressIncreaseSinceLastWeek', () => Float)
+  protected async getObjectiveProgressIncreaseSinceLastWeek(
+    @Parent() objective: ObjectiveGraphQLNode,
+  ) {
+    this.logger.log({
+      objective,
+      message: 'Fetching progress increase for objective since last week',
+    })
+
+    return this.core.objective.getObjectiveProgressIncreaseSinceLastWeek(objective)
   }
 }

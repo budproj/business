@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql'
+import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
 
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-node.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
@@ -36,7 +36,13 @@ export class ObjectiveGraphQLNode implements GuardedNodeGraphQLInterface {
     description:
       'The status of the given objective. Here you can fetch the current progress, confidence, and other for that objective',
   })
-  public status: ObjectiveStatusObject
+  public status!: ObjectiveStatusObject
+
+  @Field(() => Float, {
+    description:
+      'The percentage progress increase of the objective since the last week. We consider a week as a "business" week, considering it starting on saturday and ending on friday',
+  })
+  public progressIncreaseSinceLastWeek!: number
 
   @Field(() => CycleGraphQLNode, {
     complexity: 1,
