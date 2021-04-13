@@ -7,6 +7,7 @@ import { KeyResultCheckInsConnectionGraphQLResolver } from './check-in/connectio
 import { KeyResultCheckInGraphQLResolver } from './check-in/key-result-check-in.resolver'
 import { KeyResultCommentsConnectionGraphQLResolver } from './comment/connections/key-result-comments/key-result-comments.resolver'
 import { KeyResultCommentGraphQLResolver } from './comment/key-result-comment.resolver'
+import { KeyResultKeyResultCommentsConnectionGraphQLResolver } from './connections/key-result-key-result-comments/key-result-key-result-comments.resolver'
 import { KeyResultsConnectionGraphQLResolver } from './connections/key-results/key-results.resolver'
 import { KeyResultGraphQLResolver } from './key-result.resolver'
 
@@ -19,6 +20,7 @@ import { KeyResultGraphQLResolver } from './key-result.resolver'
     KeyResultCheckInsConnectionGraphQLResolver,
     KeyResultsConnectionGraphQLResolver,
     KeyResultCommentsConnectionGraphQLResolver,
+    KeyResultKeyResultCommentsConnectionGraphQLResolver,
   ],
 })
 export class KeyResultGraphQLModule {}

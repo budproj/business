@@ -9,7 +9,7 @@ import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.interface'
 
 import { KeyResultCheckInGraphQLNode } from './check-in/key-result-check-in.node'
-import { KeyResultCommentGraphQLNode } from './comment/key-result-comment.node'
+import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-result-key-result-comments/key-result-key-result-comments.connection'
 import { KeyResultFormatGraphQLEnum } from './enums/key-result-format.enum'
 
 @ObjectType('KeyResult', {
@@ -88,11 +88,11 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
   // CONNECTION FIELDS
   // **********************************************************************************************
 
-  @Field(() => [KeyResultCommentGraphQLNode], {
+  @Field(() => KeyResultKeyResultCommentsGraphQLConnection, {
     description: 'A created date ordered list of key result comments for this key result',
     nullable: true,
   })
-  public readonly keyResultComments?: KeyResultCommentGraphQLNode[]
+  public readonly keyResultComments?: KeyResultKeyResultCommentsGraphQLConnection
 
   public readonly id!: string
   public readonly createdAt!: Date

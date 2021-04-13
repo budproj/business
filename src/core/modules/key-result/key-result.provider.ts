@@ -119,9 +119,13 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
   public async getComments(
     keyResult: KeyResultInterface,
-    options?: GetOptions<KeyResultComment>,
+    filters?: FindConditions<KeyResultCommentInterface>,
+    options?: GetOptions<KeyResultCommentInterface>,
   ): Promise<KeyResultComment[]> {
-    const selector = { keyResultId: keyResult.id }
+    const selector = {
+      ...filters,
+      keyResultId: keyResult.id,
+    }
 
     return this.keyResultCommentProvider.getMany(selector, undefined, options)
   }

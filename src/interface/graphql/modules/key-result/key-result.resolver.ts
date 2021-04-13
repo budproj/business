@@ -5,6 +5,8 @@ import { UserInputError } from 'apollo-server-fastify'
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
+import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
@@ -18,7 +20,8 @@ import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { KeyResultCheckInGraphQLNode } from './check-in/key-result-check-in.node'
-import { KeyResultCommentGraphQLNode } from './comment/key-result-comment.node'
+import { KeyResultCommentFiltersRequest } from './comment/requests/key-result-comment-filters.request'
+import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-result-key-result-comments/key-result-key-result-comments.connection'
 import { KeyResultGraphQLNode } from './key-result.node'
 
 @GuardedResolver(KeyResultGraphQLNode)
@@ -84,14 +87,25 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     return this.core.objective.getFromKeyResult(keyResult)
   }
 
-  @ResolveField('keyResultComments', () => [KeyResultCommentGraphQLNode])
-  protected async getKeyResultCommentsForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
+  @ResolveField('keyResultComments', () => KeyResultKeyResultCommentsGraphQLConnection)
+  protected async getKeyResultCommentsForKeyResult(
+    @Args() request: KeyResultCommentFiltersRequest,
+    @Parent() keyResult: KeyResult,
+  ) {
     this.logger.log({
       keyResult,
-      message: 'Fetching comments for key result',
+      request,
+      message: 'Fetching key-results for team',
     })
 
-    return this.core.keyResult.getComments(keyResult)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      KeyResultCommentFiltersRequest,
+      KeyResultComment
+    >(request)
+
+    const queryResult = await this.core.keyResult.getComments(keyResult, filters, queryOptions)
+
+    return this.relay.marshalResponse<KeyResultCommentInterface>(queryResult, connection)
   }
 
   @ResolveField('isOutdated', () => Boolean)
