@@ -130,6 +130,19 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return this.keyResultCommentProvider.getMany(selector, undefined, options)
   }
 
+  public async getCheckIns(
+    keyResult: KeyResultInterface,
+    filters?: FindConditions<KeyResultCheckInInterface>,
+    options?: GetOptions<KeyResultCheckInInterface>,
+  ): Promise<KeyResultCheckIn[]> {
+    const selector = {
+      ...filters,
+      keyResultId: keyResult.id,
+    }
+
+    return this.keyResultCheckInProvider.getMany(selector, undefined, options)
+  }
+
   public async getCommentsCreatedByUser(
     user: UserInterface,
     filters?: FindConditions<KeyResultComment>,

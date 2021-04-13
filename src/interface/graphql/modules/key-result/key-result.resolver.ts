@@ -5,6 +5,7 @@ import { UserInputError } from 'apollo-server-fastify'
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
 import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
@@ -20,7 +21,9 @@ import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { KeyResultCheckInGraphQLNode } from './check-in/key-result-check-in.node'
+import { KeyResultCheckInFiltersRequest } from './check-in/requests/key-result-check-in-filters.request'
 import { KeyResultCommentFiltersRequest } from './comment/requests/key-result-comment-filters.request'
+import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.connection'
 import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-result-key-result-comments/key-result-key-result-comments.connection'
 import { KeyResultGraphQLNode } from './key-result.node'
 
@@ -95,7 +98,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     this.logger.log({
       keyResult,
       request,
-      message: 'Fetching key-results for team',
+      message: 'Fetching key-result comments',
     })
 
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
@@ -106,6 +109,27 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     const queryResult = await this.core.keyResult.getComments(keyResult, filters, queryOptions)
 
     return this.relay.marshalResponse<KeyResultCommentInterface>(queryResult, connection)
+  }
+
+  @ResolveField('keyResultCheckIns', () => KeyResultKeyResultCheckInsGraphQLConnection)
+  protected async getKeyResultCheckInsForKeyResult(
+    @Args() request: KeyResultCheckInFiltersRequest,
+    @Parent() keyResult: KeyResult,
+  ) {
+    this.logger.log({
+      keyResult,
+      request,
+      message: 'Fetching key-result check-ins',
+    })
+
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      KeyResultCommentFiltersRequest,
+      KeyResultComment
+    >(request)
+
+    const queryResult = await this.core.keyResult.getCheckIns(keyResult, filters, queryOptions)
+
+    return this.relay.marshalResponse<KeyResultCheckInInterface>(queryResult, connection)
   }
 
   @ResolveField('isOutdated', () => Boolean)

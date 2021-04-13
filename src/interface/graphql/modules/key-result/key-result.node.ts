@@ -9,6 +9,7 @@ import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.interface'
 
 import { KeyResultCheckInGraphQLNode } from './check-in/key-result-check-in.node'
+import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.connection'
 import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-result-key-result-comments/key-result-key-result-comments.connection'
 import { KeyResultFormatGraphQLEnum } from './enums/key-result-format.enum'
 
@@ -93,6 +94,12 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
     nullable: true,
   })
   public readonly keyResultComments?: KeyResultKeyResultCommentsGraphQLConnection
+
+  @Field(() => KeyResultKeyResultCheckInsGraphQLConnection, {
+    description: 'A created date ordered list of key result check-ins for this key result',
+    nullable: true,
+  })
+  public readonly keyResultCheckIns?: KeyResultKeyResultCheckInsGraphQLConnection
 
   public readonly id!: string
   public readonly createdAt!: Date
