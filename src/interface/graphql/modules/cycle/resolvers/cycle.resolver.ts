@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
+import { UserInputError } from 'apollo-server-fastify'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
@@ -16,6 +17,7 @@ import { CyclesGraphQLConnection } from '@interface/graphql/objects/cycle/cycles
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
+import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { KeyResultFiltersRequest } from '../../key-result/requests/key-result-filters.request'
 import { CycleFiltersRequest } from '../requests/cycle-filters.request'
@@ -27,6 +29,22 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
 
   constructor(protected readonly core: CoreProvider) {
     super(Resource.CYCLE, core, core.cycle)
+  }
+
+  @GuardedQuery(CycleGraphQLNode, 'cycle:read', { name: 'cycle' })
+  protected async getCycle(
+    @Args() request: NodeIndexesRequest,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+  ) {
+    this.logger.log({
+      request,
+      message: 'Fetching cycle with provided indexes',
+    })
+
+    const cycle = await this.queryGuard.getOneWithActionScopeConstraint(request, authorizationUser)
+    if (!cycle) throw new UserInputError(`We could not found a cycle with the provided arguments`)
+
+    return cycle
   }
 
   @GuardedQuery(CyclesGraphQLConnection, 'cycle:read', { name: 'cycles' })

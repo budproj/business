@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common'
 import { Args, Float, Parent, ResolveField } from '@nestjs/graphql'
+import { UserInputError } from 'apollo-server-fastify'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
@@ -16,6 +17,7 @@ import { ObjectiveStatusObject } from '@interface/graphql/objects/objective/obje
 import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
 import { ObjectivesGraphQLConnection } from '@interface/graphql/objects/objective/objectives.connection'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
+import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { ObjectiveFiltersRequest } from '../requests/objective-filters.request'
 
@@ -28,6 +30,26 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
 
   constructor(protected readonly core: CoreProvider) {
     super(Resource.OBJECTIVE, core, core.objective)
+  }
+
+  @GuardedQuery(ObjectiveGraphQLNode, 'objective:read', { name: 'objective' })
+  protected async getObjective(
+    @Args() request: NodeIndexesRequest,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+  ) {
+    this.logger.log({
+      request,
+      message: 'Fetching objective with provided indexes',
+    })
+
+    const objective = await this.queryGuard.getOneWithActionScopeConstraint(
+      request,
+      authorizationUser,
+    )
+    if (!objective)
+      throw new UserInputError(`We could not found an objective with the provided arguments`)
+
+    return objective
   }
 
   @GuardedQuery(ObjectivesGraphQLConnection, 'objective:read', { name: 'objectives' })

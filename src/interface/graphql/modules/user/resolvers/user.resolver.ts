@@ -28,6 +28,7 @@ import { UserKeyResultsGraphQLConnection } from '@interface/graphql/objects/user
 import { UserObjectivesGraphQLConnection } from '@interface/graphql/objects/user/user-objectives.connection'
 import { UserTeamsGraphQLConnection } from '@interface/graphql/objects/user/user-teams.connection'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
+import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { KeyResultCheckInFiltersRequest } from '../../key-result/check-in/requests/key-result-check-in-filters.request'
 import { KeyResultCommentFiltersRequest } from '../../key-result/comment/requests/key-result-comment-filters.request'
@@ -42,6 +43,22 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
   constructor(protected readonly core: CoreProvider) {
     super(Resource.USER, core, core.user)
+  }
+
+  @GuardedQuery(UserGraphQLNode, 'user:read', { name: 'user' })
+  protected async getUser(
+    @Args() request: NodeIndexesRequest,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+  ) {
+    this.logger.log({
+      request,
+      message: 'Fetching user with provided indexes',
+    })
+
+    const user = await this.queryGuard.getOneWithActionScopeConstraint(request, authorizationUser)
+    if (!user) throw new UserInputError(`We could not found an user with the provided arguments`)
+
+    return user
   }
 
   @GuardedQuery(UserGraphQLNode, 'user:read', { name: 'me' })

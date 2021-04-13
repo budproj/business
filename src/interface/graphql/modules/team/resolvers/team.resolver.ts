@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common'
 import { Args, Float, Parent, ResolveField } from '@nestjs/graphql'
+import { UserInputError } from 'apollo-server-fastify'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
@@ -17,6 +18,7 @@ import { TeamStatusObject } from '@interface/graphql/objects/team/team-status.ob
 import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
 import { TeamsGraphQLConnection } from '@interface/graphql/objects/team/teams.connection'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
+import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { TeamLevelGraphQLEnum } from '../enums/team-level.enum'
 import { TeamFiltersRequest } from '../requests/team-filters.request'
@@ -27,6 +29,22 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
 
   constructor(protected readonly core: CoreProvider) {
     super(Resource.TEAM, core, core.team)
+  }
+
+  @GuardedQuery(TeamGraphQLNode, 'team:read', { name: 'team' })
+  protected async getTeam(
+    @Args() request: NodeIndexesRequest,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+  ) {
+    this.logger.log({
+      request,
+      message: 'Fetching team with provided indexes',
+    })
+
+    const team = await this.queryGuard.getOneWithActionScopeConstraint(request, authorizationUser)
+    if (!team) throw new UserInputError(`We could not found a team with the provided arguments`)
+
+    return team
   }
 
   @GuardedQuery(TeamsGraphQLConnection, 'team:read', { name: 'teams' })
