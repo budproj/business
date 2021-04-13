@@ -56,14 +56,24 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     })
   }
 
-  public async getFromTeams(teams: TeamInterface | TeamInterface[]): Promise<KeyResult[]> {
+  public async getFromTeams(
+    teams: TeamInterface | TeamInterface[],
+    filters?: FindConditions<KeyResult>,
+    options?: GetOptions<KeyResult>,
+  ): Promise<KeyResult[]> {
     const isEmptyArray = Array.isArray(teams) ? teams.length === 0 : false
     if (!teams || isEmptyArray) return
 
     const teamsArray = Array.isArray(teams) ? teams : [teams]
+    const teamIDs = teamsArray.map((team) => team.id)
+    const whereSelector = {
+      ...filters,
+      teamId: Any(teamIDs),
+    }
 
     return this.repository.find({
-      teamId: Any(teamsArray.map((team) => team.id)),
+      ...options,
+      where: whereSelector,
     })
   }
 

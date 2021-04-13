@@ -3,12 +3,12 @@ import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
 import { TeamGender } from '@core/modules/team/enums/team-gender.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-node.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
-import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-result/check-in/key-result-check-in.node'
-import { KeyResultGraphQLNode } from '@interface/graphql/modules/key-result/key-result.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.interface'
 
+import { TeamCyclesGraphQLConnection } from './connections/team-cycles/team-cycles.connection'
+import { TeamKeyResultsGraphQLConnection } from './connections/team-key-results/team-key-results.connection'
 import { TeamObjectivesGraphQLConnection } from './connections/team-objectives/team-objectives.connection'
 import { TeamTeamsGraphQLConnection } from './connections/team-teams/team-teams.connection'
 import { TeamUsersGraphQLConnection } from './connections/team-users/team-users.connection'
@@ -117,12 +117,12 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   })
   public readonly rankedTeams?: TeamTeamsGraphQLConnection
 
-  @Field(() => [CycleGraphQLNode], {
+  @Field(() => TeamCyclesGraphQLConnection, {
     complexity: 0,
     nullable: true,
     description: 'The cycles that belongs to this team',
   })
-  public readonly cycles?: CycleGraphQLNode[]
+  public readonly cycles?: TeamCyclesGraphQLConnection
 
   @Field(() => TeamObjectivesGraphQLConnection, {
     complexity: 0,
@@ -131,12 +131,12 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   })
   public readonly objectives?: TeamObjectivesGraphQLConnection
 
-  @Field(() => [KeyResultGraphQLNode], {
+  @Field(() => TeamKeyResultsGraphQLConnection, {
     complexity: 0,
     nullable: true,
     description: 'The creation date ordered list of key results that belongs to that team',
   })
-  public readonly keyResults?: KeyResultGraphQLNode[]
+  public readonly keyResults?: TeamKeyResultsGraphQLConnection
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS

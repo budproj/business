@@ -5,6 +5,8 @@ import { UserInputError } from 'apollo-server-fastify'
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
+import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
@@ -14,15 +16,16 @@ import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorato
 import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
-import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
+import { CycleFiltersRequest } from '@interface/graphql/modules/cycle/requests/cycle-filters.request'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-result/check-in/key-result-check-in.node'
-import { KeyResultGraphQLNode } from '@interface/graphql/modules/key-result/key-result.node'
+import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/requests/key-result-filters.request'
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
+import { UserFiltersRequest } from '@interface/graphql/modules/user/requests/user-filters.request'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
-import { UserFiltersRequest } from '../user/requests/user-filters.request'
-
+import { TeamCyclesGraphQLConnection } from './connections/team-cycles/team-cycles.connection'
+import { TeamKeyResultsGraphQLConnection } from './connections/team-key-results/team-key-results.connection'
 import { TeamObjectivesGraphQLConnection } from './connections/team-objectives/team-objectives.connection'
 import { TeamTeamsGraphQLConnection } from './connections/team-teams/team-teams.connection'
 import { TeamUsersGraphQLConnection } from './connections/team-users/team-users.connection'
@@ -161,14 +164,25 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.core.team.specification.isACompany.isSatisfiedBy(team)
   }
 
-  @ResolveField('cycles', () => [CycleGraphQLNode], { nullable: true })
-  protected async getCyclesForTeam(@Parent() team: TeamGraphQLNode) {
+  @ResolveField('cycles', () => TeamCyclesGraphQLConnection, { nullable: true })
+  protected async getCyclesForTeam(
+    @Args() request: CycleFiltersRequest,
+    @Parent() team: TeamGraphQLNode,
+  ) {
     this.logger.log({
       team,
+      request,
       message: 'Fetching cycles for team',
     })
 
-    return this.core.cycle.getFromTeam(team)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      ObjectiveFiltersRequest,
+      Objective
+    >(request)
+
+    const queryResult = await this.core.cycle.getFromTeamsWithFilters([team], filters, queryOptions)
+
+    return this.relay.marshalResponse<CycleInterface>(queryResult, connection)
   }
 
   @ResolveField('objectives', () => TeamObjectivesGraphQLConnection, { nullable: true })
@@ -192,14 +206,25 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.relay.marshalResponse<ObjectiveInterface>(queryResult, connection)
   }
 
-  @ResolveField('keyResults', () => [KeyResultGraphQLNode], { nullable: true })
-  protected async getKeyResultsForTeam(@Parent() team: TeamGraphQLNode) {
+  @ResolveField('keyResults', () => TeamKeyResultsGraphQLConnection, { nullable: true })
+  protected async getKeyResultsForTeam(
+    @Args() request: KeyResultFiltersRequest,
+    @Parent() team: TeamGraphQLNode,
+  ) {
     this.logger.log({
       team,
-      message: 'Fetching key results for team',
+      request,
+      message: 'Fetching key-results for team',
     })
 
-    return this.core.keyResult.getFromTeams(team)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      ObjectiveFiltersRequest,
+      Objective
+    >(request)
+
+    const queryResult = await this.core.keyResult.getFromTeams(team, filters, queryOptions)
+
+    return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection)
   }
 
   @ResolveField('progressIncreaseSinceLastWeek', () => Float)
