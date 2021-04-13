@@ -17,6 +17,7 @@ import { KeyResultCommentGraphQLNode } from '@interface/graphql/objects/key-resu
 import { KeyResultCommentsGraphQLConnection } from '@interface/graphql/objects/key-result/comment/key-result-comments.connection'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
+import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { KeyResultCommentCreateRequest } from '../requests/key-result-comment-create.request'
 import { KeyResultCommentDeleteRequest } from '../requests/key-result-comment-delete.request'
@@ -31,6 +32,30 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
 
   constructor(protected readonly core: CoreProvider) {
     super(Resource.KEY_RESULT_COMMENT, core, core.keyResult.keyResultCommentProvider)
+  }
+
+  @GuardedQuery(KeyResultCommentGraphQLNode, 'key-result-comment:read', {
+    name: 'keyResultComment',
+  })
+  protected async getKeyResultComment(
+    @Args() request: NodeIndexesRequest,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+  ) {
+    this.logger.log({
+      request,
+      message: 'Fetching key-result comment with provided indexes',
+    })
+
+    const keyResultComment = await this.queryGuard.getOneWithActionScopeConstraint(
+      request,
+      authorizationUser,
+    )
+    if (!keyResultComment)
+      throw new UserInputError(
+        `We could not found an key-result comment with the provided arguments`,
+      )
+
+    return keyResultComment
   }
 
   @GuardedQuery(KeyResultCommentsGraphQLConnection, 'key-result-comment:read', {

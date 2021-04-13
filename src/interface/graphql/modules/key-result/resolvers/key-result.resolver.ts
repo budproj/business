@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
+import { UserInputError } from 'apollo-server-fastify'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
@@ -18,6 +19,7 @@ import { KeyResultsGraphQLConnection } from '@interface/graphql/objects/key-resu
 import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
+import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { KeyResultFiltersRequest } from '../requests/key-result-filters.request'
 
@@ -30,6 +32,26 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
 
   constructor(protected readonly core: CoreProvider) {
     super(Resource.KEY_RESULT, core, core.keyResult)
+  }
+
+  @GuardedQuery(KeyResultGraphQLNode, 'key-result:read', { name: 'keyResult' })
+  protected async getKeyResult(
+    @Args() request: NodeIndexesRequest,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+  ) {
+    this.logger.log({
+      request,
+      message: 'Fetching key-result with provided indexes',
+    })
+
+    const keyResult = await this.queryGuard.getOneWithActionScopeConstraint(
+      request,
+      authorizationUser,
+    )
+    if (!keyResult)
+      throw new UserInputError(`We could not found an key-result with the provided arguments`)
+
+    return keyResult
   }
 
   @GuardedQuery(KeyResultsGraphQLConnection, 'key-result:read', { name: 'keyResults' })
