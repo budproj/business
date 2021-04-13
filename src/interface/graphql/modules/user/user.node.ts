@@ -3,7 +3,6 @@ import { Field, ObjectType } from '@nestjs/graphql'
 import { UserGender } from '@core/modules/user/enums/user-gender.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-node.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
-import { UserGenderGraphQLEnum } from '@interface/graphql/enums/user-gender.enum'
 import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.interface'
 
 import { UserKeyResultCheckInsGraphQLConnection } from './connections/user-key-result-check-ins/user-key-result-check-ins.connection'
@@ -11,6 +10,7 @@ import { UserKeyResultCommentsGraphQLConnection } from './connections/user-key-r
 import { UserKeyResultsGraphQLConnection } from './connections/user-key-results/user-key-results.connection'
 import { UserObjectivesGraphQLConnection } from './connections/user-objectives/user-objectives.connection'
 import { UserTeamsGraphQLConnection } from './connections/user-teams/user-teams.connection'
+import { UserGenderGraphQLEnum } from './enums/user-gender.enum'
 
 @ObjectType('User', {
   implements: () => [NodeRelayInterface, GuardedNodeGraphQLInterface],

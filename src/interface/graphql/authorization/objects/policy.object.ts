@@ -2,7 +2,7 @@ import { Field, ObjectType } from '@nestjs/graphql'
 
 import { Effect } from '@adapters/authorization/enums/effect.enum'
 
-import { EffectGraphQLEnum } from '../../enums/effect.enum'
+import { EffectGraphQLEnum } from '../enums/effect.enum'
 
 @ObjectType('Policy', {
   description:

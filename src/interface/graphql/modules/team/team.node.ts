@@ -3,7 +3,6 @@ import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
 import { TeamGender } from '@core/modules/team/enums/team-gender.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-node.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
-import { TeamGenderGraphQLEnum } from '@interface/graphql/enums/team-gender.enum'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-result/check-in/key-result-check-in.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/modules/key-result/key-result.node'
@@ -11,6 +10,7 @@ import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.interface'
 
 import { TeamObjectivesGraphQLConnection } from './connections/team-objectives/team-objectives.connection'
+import { TeamGenderGraphQLEnum } from './enums/team-gender.enum'
 import { TeamStatusObject } from './objects/team-status.object'
 
 @ObjectType('Team', {

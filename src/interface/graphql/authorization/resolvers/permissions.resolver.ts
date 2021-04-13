@@ -9,10 +9,10 @@ import { AuthorizationUser } from '@adapters/authorization/interfaces/user.inter
 import { CommandStatement } from '@adapters/authorization/types/command-statement.type'
 import { ResourceStatement } from '@adapters/authorization/types/resource-statement.type copy'
 
-import { ScopeGraphQLEnum } from '../../enums/scope.enum'
 import { AuthorizedRequestUser } from '../decorators/authorized-request-user.decorator'
 import { GuardedQuery } from '../decorators/guarded-query.decorator'
 import { GuardedResolver } from '../decorators/guarded-resolver.decorator'
+import { ScopeGraphQLEnum } from '../enums/scope.enum'
 import { PermissionsGraphQLObject } from '../objects/permissions.object'
 
 @GuardedResolver(PermissionsGraphQLObject)

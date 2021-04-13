@@ -21,10 +21,7 @@ import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { TeamObjectivesGraphQLConnection } from './connections/team-objectives/team-objectives.connection'
-import { TeamsGraphQLConnection } from './connections/teams/teams.connection'
-import { TeamLevelGraphQLEnum } from './enums/team-level.enum'
 import { TeamStatusObject } from './objects/team-status.object'
-import { TeamFiltersRequest } from './requests/team-filters.request'
 import { TeamGraphQLNode } from './team.node'
 
 @GuardedResolver(TeamGraphQLNode)
@@ -49,37 +46,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     if (!team) throw new UserInputError(`We could not found a team with the provided arguments`)
 
     return team
-  }
-
-  @GuardedQuery(TeamsGraphQLConnection, 'team:read', { name: 'teams' })
-  protected async getTeamsForRequestAndAuthorizedRequestUser(
-    @Args() request: TeamFiltersRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
-  ) {
-    this.logger.log({
-      request,
-      authorizationUser,
-      message: 'Fetching teams with filters',
-    })
-
-    const [{ level, ...filters }, queryOptions, connection] = this.relay.unmarshalRequest<
-      TeamFiltersRequest,
-      Team
-    >(request)
-
-    const queryLeveledHandlers = {
-      default: async () =>
-        this.queryGuard.getManyWithActionScopeConstraint(filters, authorizationUser, queryOptions),
-      [TeamLevelGraphQLEnum.COMPANY]: async () =>
-        this.core.team.getUserCompanies(authorizationUser, filters, queryOptions),
-      [TeamLevelGraphQLEnum.COMPANY_OR_DEPARTMENT]: async () =>
-        this.core.team.getUserCompaniesAndDepartments(authorizationUser, filters, queryOptions),
-    }
-
-    const queryHandler = queryLeveledHandlers[level ?? 'default']
-    const queryResult = await queryHandler()
-
-    return this.relay.marshalResponse<Team>(queryResult, connection)
   }
 
   @ResolveField('status', () => TeamStatusObject)
