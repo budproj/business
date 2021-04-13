@@ -1,6 +1,6 @@
 import { ArgsType, Field, ID } from '@nestjs/graphql'
 
-import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
+import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { ConnectionFiltersRequest } from '@interface/graphql/requests/connection-filters.request'
 
 import { TeamLevelGraphQLEnum } from '../enums/team-level.enum'

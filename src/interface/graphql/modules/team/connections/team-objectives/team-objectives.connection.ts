@@ -1,12 +1,12 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
-import { GuardedConnectionGraphQLInterface } from '../../authorization/interfaces/guarded-connection.interface'
-import { PolicyGraphQLObject } from '../../authorization/objects/policy.object'
-import { ConnectionRelayInterface } from '../../relay/interfaces/connection.interface'
-import { PageInfoRelayObject } from '../../relay/objects/page-info.object'
-import { ObjectiveGraphQLNode } from '../objective/objective.node'
+import { GuardedConnectionGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-connection.interface'
+import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
+import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
+import { ConnectionRelayInterface } from '@interface/graphql/relay/interfaces/connection.interface'
+import { PageInfoRelayObject } from '@interface/graphql/relay/objects/page-info.object'
 
-import { TeamObjectivesEdgeGraphQLObject } from './team-objectives.edge'
+import { TeamObjectiveEdgeGraphQLObject } from './team-objective.edge'
 
 @ObjectType('TeamObjectives', {
   implements: () => [ConnectionRelayInterface, GuardedConnectionGraphQLInterface],
@@ -15,8 +15,8 @@ import { TeamObjectivesEdgeGraphQLObject } from './team-objectives.edge'
 })
 export class TeamObjectivesGraphQLConnection
   implements GuardedConnectionGraphQLInterface<ObjectiveGraphQLNode> {
-  @Field(() => [TeamObjectivesEdgeGraphQLObject], { complexity: 0 })
-  public readonly edges!: TeamObjectivesEdgeGraphQLObject[]
+  @Field(() => [TeamObjectiveEdgeGraphQLObject], { complexity: 0 })
+  public readonly edges!: TeamObjectiveEdgeGraphQLObject[]
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS

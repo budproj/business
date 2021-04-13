@@ -1,9 +1,9 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 import { ConnectionCursor } from 'graphql-relay'
 
-import { EdgeRelayInterface } from '../../relay/interfaces/edge.interface'
+import { EdgeRelayInterface } from '@interface/graphql/relay/interfaces/edge.interface'
 
-import { TeamGraphQLNode } from './team.node'
+import { TeamGraphQLNode } from '../../team.node'
 
 @ObjectType('TeamRootEdge', {
   implements: () => EdgeRelayInterface,

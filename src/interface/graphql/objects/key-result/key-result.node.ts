@@ -4,11 +4,10 @@ import { KeyResultFormat } from '@core/modules/key-result/enums/key-result-forma
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-node.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
 import { KeyResultFormatGraphQLEnum } from '@interface/graphql/enums/key-result-format.enum'
-
-import { NodeRelayInterface } from '../../relay/interfaces/node.interface'
-import { ObjectiveGraphQLNode } from '../objective/objective.node'
-import { TeamGraphQLNode } from '../team/team.node'
-import { UserGraphQLNode } from '../user/user.node'
+import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
+import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
+import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
+import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.interface'
 
 import { KeyResultCheckInGraphQLNode } from './check-in/key-result-check-in.node'
 import { KeyResultCommentGraphQLNode } from './comment/key-result-comment.node'

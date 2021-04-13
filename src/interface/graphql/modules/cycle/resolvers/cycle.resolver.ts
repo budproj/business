@@ -11,12 +11,12 @@ import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorato
 import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
+import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { CycleStatusObject } from '@interface/graphql/objects/cycle/cycle-status.object'
 import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
 import { CyclesGraphQLConnection } from '@interface/graphql/objects/cycle/cycles.connection'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
 import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
-import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { KeyResultFiltersRequest } from '../../key-result/requests/key-result-filters.request'

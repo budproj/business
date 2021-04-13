@@ -5,7 +5,8 @@ import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
 import { ObjectiveGraphQLNode } from '@interface/graphql/objects/objective/objective.node'
-import { TeamObjectivesGraphQLConnection } from '@interface/graphql/objects/team/team-objectives.connection'
+
+import { TeamObjectivesGraphQLConnection } from './team-objectives.connection'
 
 @GuardedResolver(TeamObjectivesGraphQLConnection)
 export class TeamObjectivesConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<

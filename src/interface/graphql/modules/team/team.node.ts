@@ -4,15 +4,14 @@ import { TeamGender } from '@core/modules/team/enums/team-gender.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-node.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
 import { TeamGenderGraphQLEnum } from '@interface/graphql/enums/team-gender.enum'
+import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
+import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
+import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
+import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
+import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.interface'
 
-import { NodeRelayInterface } from '../../relay/interfaces/node.interface'
-import { CycleGraphQLNode } from '../cycle/cycle.node'
-import { KeyResultCheckInGraphQLNode } from '../key-result/check-in/key-result-check-in.node'
-import { KeyResultGraphQLNode } from '../key-result/key-result.node'
-import { UserGraphQLNode } from '../user/user.node'
-
-import { TeamObjectivesGraphQLConnection } from './team-objectives.connection'
-import { TeamStatusObject } from './team-status.object'
+import { TeamObjectivesGraphQLConnection } from './connections/team-objectives/team-objectives.connection'
+import { TeamStatusObject } from './objects/team-status.object'
 
 @ObjectType('Team', {
   implements: () => [NodeRelayInterface, GuardedNodeGraphQLInterface],

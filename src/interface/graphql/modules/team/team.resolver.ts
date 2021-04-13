@@ -13,19 +13,20 @@ import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorato
 import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
+import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { CycleGraphQLNode } from '@interface/graphql/objects/cycle/cycle.node'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/objects/key-result/check-in/key-result-check-in.node'
 import { KeyResultGraphQLNode } from '@interface/graphql/objects/key-result/key-result.node'
-import { TeamObjectivesGraphQLConnection } from '@interface/graphql/objects/team/team-objectives.connection'
-import { TeamStatusObject } from '@interface/graphql/objects/team/team-status.object'
-import { TeamGraphQLNode } from '@interface/graphql/objects/team/team.node'
-import { TeamsGraphQLConnection } from '@interface/graphql/objects/team/teams.connection'
-import { UserGraphQLNode } from '@interface/graphql/objects/user/user.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
-import { ObjectiveFiltersRequest } from '../../objective/requests/objective-filters.request'
-import { TeamLevelGraphQLEnum } from '../enums/team-level.enum'
-import { TeamFiltersRequest } from '../requests/team-filters.request'
+import { ObjectiveFiltersRequest } from '../objective/requests/objective-filters.request'
+
+import { TeamObjectivesGraphQLConnection } from './connections/team-objectives/team-objectives.connection'
+import { TeamsGraphQLConnection } from './connections/teams/teams.connection'
+import { TeamLevelGraphQLEnum } from './enums/team-level.enum'
+import { TeamStatusObject } from './objects/team-status.object'
+import { TeamFiltersRequest } from './requests/team-filters.request'
+import { TeamGraphQLNode } from './team.node'
 
 @GuardedResolver(TeamGraphQLNode)
 export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamInterface> {
