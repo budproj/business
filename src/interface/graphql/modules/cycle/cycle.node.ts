@@ -3,13 +3,13 @@ import { Field, ID, ObjectType } from '@nestjs/graphql'
 import { Cadence } from '@core/modules/cycle/enums/cadence.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-node.interface'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
-import { KeyResultGraphQLNode } from '@interface/graphql/modules/key-result/key-result.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.interface'
 
 import { ObjectivesGraphQLConnection } from '../objective/connections/objectives/objectives.connection'
 
 import { CycleCyclesGraphQLConnection } from './connections/cycle-cycles/cycle-cycles.connection'
+import { CycleKeyResultsGraphQLConnection } from './connections/cycle-key-results/cycle-key-results.connection'
 import { CadenceGraphQLEnum } from './enums/cadence.enum'
 import { CycleStatusObject } from './objects/cycle-status.object'
 
@@ -98,12 +98,12 @@ export class CycleGraphQLNode implements GuardedNodeGraphQLInterface {
   })
   public readonly objectives?: ObjectivesGraphQLConnection
 
-  @Field(() => [KeyResultGraphQLNode], {
+  @Field(() => CycleKeyResultsGraphQLConnection, {
     complexity: 0,
     nullable: true,
     description: 'The key-results from this cycle',
   })
-  public readonly keyResults?: KeyResultGraphQLNode[]
+  public readonly keyResults?: CycleKeyResultsGraphQLConnection
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS
