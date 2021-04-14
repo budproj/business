@@ -21,7 +21,7 @@ export class KeyResultTimelineProvider {
 
   public async buildUnionQuery(
     keyResult: KeyResultInterface,
-    options: GetOptions<KeyResultCheckIn | KeyResultComment>,
+    options?: GetOptions<KeyResultCheckIn | KeyResultComment>,
   ): Promise<KeyResultTimelineQueryResult[]> {
     const columns = `id, created_at`
     const entityColumnName = 'entity'
@@ -44,9 +44,9 @@ export class KeyResultTimelineProvider {
         FROM ${keyResultCommentTableName}
         WHERE ${keyResultCommentTableName}.${keyResultIDColumnName}='${keyResult.id}'
 
-      ORDER BY created_at ${options.orderBy?.createdAt ?? 'DESC'}
-      OFFSET ${options.offset ?? 0}
-      ${options.limit ? `LIMIT ${options.limit}` : ''}
+      ORDER BY created_at ${options?.orderBy?.createdAt ?? 'DESC'}
+      OFFSET ${options?.offset ?? 0}
+      ${options?.limit ? `LIMIT ${options?.limit}` : ''}
     `
 
     const manager = getManager()

@@ -177,12 +177,12 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching timeline for key result',
     })
 
-    const [_, queryOptions, connection] = this.relay.unmarshalRequest<
+    const connection = this.relay.unmarshalRequest<
       ConnectionFiltersRequest,
       KeyResultCheckIn | KeyResultComment
-    >(request)
+    >(request)[2]
 
-    const queryResult = await this.core.keyResult.getTimeline(keyResult, queryOptions)
+    const queryResult = await this.core.keyResult.getTimeline(keyResult)
 
     return this.relay.marshalResponse(queryResult, connection)
   }

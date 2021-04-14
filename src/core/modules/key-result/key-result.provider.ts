@@ -338,7 +338,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
   public async getTimeline(
     keyResult: KeyResultInterface,
-    queryOptions: GetOptions<KeyResultComment | KeyResultCheckIn>,
+    queryOptions?: GetOptions<KeyResultComment | KeyResultCheckIn>,
   ): Promise<KeyResultTimelineEntry[]> {
     const timelineQueryResult = await this.timeline.buildUnionQuery(keyResult, queryOptions)
     const timelineEntries = await this.timeline.getEntriesForTimelineOrder(timelineQueryResult)

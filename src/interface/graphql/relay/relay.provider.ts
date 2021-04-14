@@ -1,4 +1,4 @@
-import { Connection, connectionFromArray } from 'graphql-relay'
+import { Connection, connectionFromArray, cursorToOffset } from 'graphql-relay'
 import { omit, pick } from 'lodash'
 
 import { CoreEntity } from '@core/core.orm-entity'
@@ -41,6 +41,13 @@ export class RelayProvider {
   ): GetOptions<E> {
     return {
       limit: connection.first,
+      offset: this.getConnectionOffset(connection),
     }
+  }
+
+  private getConnectionOffset(connection: ConnectionRelayRequest): number {
+    if (!connection.after) return 0
+
+    return cursorToOffset(connection.after) + 1
   }
 }
