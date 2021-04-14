@@ -9,6 +9,7 @@ import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 
+import { KeyResultTimelineQueryResult } from '../interfaces/key-result-timeline-query-result.interface'
 import { KeyResultInterface } from '../interfaces/key-result.interface'
 import { KeyResult } from '../key-result.orm-entity'
 import { KeyResultProvider } from '../key-result.provider'
@@ -143,6 +144,15 @@ export class KeyResultCheckInProvider extends CoreEntityProvider<
     const percentageCheckInWithLimit = this.limitPercentageCheckIn(percentageCheckIn)
 
     return percentageCheckInWithLimit
+  }
+
+  public async getForTimelineEntries(
+    entries: KeyResultTimelineQueryResult[],
+  ): Promise<KeyResultCheckIn[]> {
+    const checkInIDs = entries.map((entry) => entry.id)
+    const result = await this.repository.findByIds(checkInIDs)
+
+    return result
   }
 
   protected onModuleInit(): void {

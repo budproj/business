@@ -6,6 +6,7 @@ import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
+import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
 import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
@@ -18,6 +19,7 @@ import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/res
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
+import { ConnectionFiltersRequest } from '@interface/graphql/requests/connection-filters.request'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { KeyResultCheckInGraphQLNode } from './check-in/key-result-check-in.node'
@@ -25,6 +27,7 @@ import { KeyResultCheckInFiltersRequest } from './check-in/requests/key-result-c
 import { KeyResultCommentFiltersRequest } from './comment/requests/key-result-comment-filters.request'
 import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.connection'
 import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-result-key-result-comments/key-result-key-result-comments.connection'
+import { KeyResultTimelineGraphQLConnection } from './connections/key-result-timeline/key-result-key-result-timeline.connection'
 import { KeyResultGraphQLNode } from './key-result.node'
 
 @GuardedResolver(KeyResultGraphQLNode)
@@ -161,6 +164,27 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     })
 
     return this.core.keyResult.getLatestCheckInForKeyResultAtDate(keyResult)
+  }
+
+  @ResolveField('timeline', () => KeyResultTimelineGraphQLConnection)
+  protected async getKeyResultTimeline(
+    @Args() request: ConnectionFiltersRequest,
+    @Parent() keyResult: KeyResultGraphQLNode,
+  ) {
+    this.logger.log({
+      keyResult,
+      request,
+      message: 'Fetching timeline for key result',
+    })
+
+    const [_, queryOptions, connection] = this.relay.unmarshalRequest<
+      ConnectionFiltersRequest,
+      KeyResultCheckIn | KeyResultComment
+    >(request)
+
+    const queryResult = await this.core.keyResult.getTimeline(keyResult, queryOptions)
+
+    return this.relay.marshalResponse(queryResult, connection)
   }
 
   protected async customizeEntityPolicy(

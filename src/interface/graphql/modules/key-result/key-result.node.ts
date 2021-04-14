@@ -11,6 +11,7 @@ import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.int
 import { KeyResultCheckInGraphQLNode } from './check-in/key-result-check-in.node'
 import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.connection'
 import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-result-key-result-comments/key-result-key-result-comments.connection'
+import { KeyResultTimelineGraphQLConnection } from './connections/key-result-timeline/key-result-key-result-timeline.connection'
 import { KeyResultFormatGraphQLEnum } from './enums/key-result-format.enum'
 
 @ObjectType('KeyResult', {
@@ -100,6 +101,12 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
     nullable: true,
   })
   public readonly keyResultCheckIns?: KeyResultKeyResultCheckInsGraphQLConnection
+
+  @Field(() => KeyResultTimelineGraphQLConnection, {
+    description:
+      'The timeline for this key result. It is ordered by creation date and is composed by both check-ins and comments',
+  })
+  public timeline?: KeyResultTimelineGraphQLConnection
 
   public readonly id!: string
   public readonly createdAt!: Date

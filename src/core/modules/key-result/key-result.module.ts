@@ -10,6 +10,7 @@ import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
 import { KeyResultCommentRepository } from './comment/key-result-comment.repository'
 import { KeyResultProvider } from './key-result.provider'
 import { KeyResultRepository } from './key-result.repository'
+import { KeyResultTimelineProvider } from './timeline.provider'
 
 @Module({
   imports: [
@@ -21,7 +22,12 @@ import { KeyResultRepository } from './key-result.repository'
     TeamModule,
     forwardRef(() => ObjectiveModule),
   ],
-  providers: [KeyResultProvider, KeyResultCommentProvider, KeyResultCheckInProvider],
+  providers: [
+    KeyResultProvider,
+    KeyResultCommentProvider,
+    KeyResultCheckInProvider,
+    KeyResultTimelineProvider,
+  ],
   exports: [KeyResultProvider],
 })
 export class KeyResultModule {}

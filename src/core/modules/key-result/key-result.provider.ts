@@ -22,6 +22,8 @@ import { KeyResultInterface } from './interfaces/key-result.interface'
 import { KeyResult } from './key-result.orm-entity'
 import { KeyResultRepository } from './key-result.repository'
 import { KeyResultSpecification } from './key-result.specification'
+import { KeyResultTimelineProvider } from './timeline.provider'
+import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
 
 @Injectable()
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
@@ -30,6 +32,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   constructor(
     public readonly keyResultCommentProvider: KeyResultCommentProvider,
     public readonly keyResultCheckInProvider: KeyResultCheckInProvider,
+    public readonly timeline: KeyResultTimelineProvider,
     protected readonly repository: KeyResultRepository,
     @Inject(forwardRef(() => TeamProvider))
     private readonly teamProvider: TeamProvider,
@@ -331,6 +334,16 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const isActive = await this.isActiveFromIndexes(keyResultIndexes)
 
     return isActive && this.specifications.isOutdated.isSatisfiedBy(keyResult)
+  }
+
+  public async getTimeline(
+    keyResult: KeyResultInterface,
+    queryOptions: GetOptions<KeyResultComment | KeyResultCheckIn>,
+  ): Promise<KeyResultTimelineEntry[]> {
+    const timelineQueryResult = await this.timeline.buildUnionQuery(keyResult, queryOptions)
+    const timelineEntries = await this.timeline.getEntriesForTimelineOrder(timelineQueryResult)
+
+    return timelineEntries
   }
 
   protected async protectCreationQuery(

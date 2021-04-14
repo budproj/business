@@ -5,6 +5,7 @@ import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 
+import { KeyResultTimelineQueryResult } from '../interfaces/key-result-timeline-query-result.interface'
 import { KeyResultProvider } from '../key-result.provider'
 
 import { KeyResultCommentInterface } from './key-result-comment.interface'
@@ -23,6 +24,15 @@ export class KeyResultCommentProvider extends CoreEntityProvider<
     private readonly moduleReference: ModuleRef,
   ) {
     super(KeyResultCommentProvider.name, repository)
+  }
+
+  public async getForTimelineEntries(
+    entries: KeyResultTimelineQueryResult[],
+  ): Promise<KeyResultComment[]> {
+    const commentIDs = entries.map((entry) => entry.id)
+    const result = await this.repository.findByIds(commentIDs)
+
+    return result
   }
 
   protected onModuleInit(): void {
