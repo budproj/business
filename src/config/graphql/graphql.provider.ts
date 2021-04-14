@@ -8,6 +8,7 @@ import {
   GraphQLIntrospectionConfigInterface,
   GraphQLPlaygroundConfigInterface,
   GraphQLSchemaConfigInterface,
+  GraphQLUploadsConfigInterface,
 } from './graphql.interface'
 
 @Injectable()
@@ -32,5 +33,13 @@ export class GraphQLConfigProvider {
 
   get schema(): GraphQLSchemaConfigInterface {
     return this.configService.get<GraphQLSchemaConfigInterface>('graphql.schema')
+  }
+
+  get globalPrefixEnabled(): boolean {
+    return this.configService.get<boolean>('graphql.globalPrefixEnabled')
+  }
+
+  get uploads(): GraphQLUploadsConfigInterface {
+    return this.configService.get<GraphQLUploadsConfigInterface>('graphql.uploads')
   }
 }
