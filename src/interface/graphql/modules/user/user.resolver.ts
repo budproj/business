@@ -28,7 +28,6 @@ import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/r
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
 import { TeamFiltersRequest } from '@interface/graphql/modules/team/requests/team-filters.request'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
-import { ImageUploadValidationPipe } from '@interface/graphql/validators/image-upload.validator'
 
 import { UserKeyResultCheckInsGraphQLConnection } from './connections/user-key-result-check-ins/user-key-result-check-ins.connection'
 import { UserKeyResultCommentsGraphQLConnection } from './connections/user-key-result-comments/user-key-result-comments.connection'
@@ -37,6 +36,7 @@ import { UserObjectivesGraphQLConnection } from './connections/user-objectives/u
 import { UserTeamsGraphQLConnection } from './connections/user-teams/user-teams.connection'
 import { UserUpdateRequest } from './requests/user-update.request'
 import { UserGraphQLNode } from './user.node'
+import { UserUpdateRequestValidationPipe } from './validation-pipes/user-update-request.validation-pipe'
 
 @GuardedResolver(UserGraphQLNode)
 export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserInterface> {
@@ -82,7 +82,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
   @GuardedMutation(UserGraphQLNode, 'user:update', { name: 'updateUser' })
   protected async updateUserForRequestAndAuthorizedRequestUser(
-    @Args(new ImageUploadValidationPipe()) request: UserUpdateRequest,
+    @Args(new UserUpdateRequestValidationPipe()) request: UserUpdateRequest,
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
     this.logger.log({
@@ -90,6 +90,8 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       request,
       message: 'Received update user request',
     })
+
+    console.log(request.data.picture)
 
     const user = await this.queryGuard.updateWithActionScopeConstraint(
       { id: request.id },
