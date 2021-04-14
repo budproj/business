@@ -34,6 +34,7 @@ import { UserKeyResultCommentsGraphQLConnection } from './connections/user-key-r
 import { UserKeyResultsGraphQLConnection } from './connections/user-key-results/user-key-results.connection'
 import { UserObjectivesGraphQLConnection } from './connections/user-objectives/user-objectives.connection'
 import { UserTeamsGraphQLConnection } from './connections/user-teams/user-teams.connection'
+import { UserUpdatePictureRequest } from './requests/user-update-picture.request'
 import { UserUpdateRequest } from './requests/user-update.request'
 import { UserGraphQLNode } from './user.node'
 
@@ -98,6 +99,22 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     if (!user) throw new UserInputError(`We could not found an user with ID ${request.id}`)
 
     return user
+  }
+
+  @GuardedMutation(UserGraphQLNode, 'user:update', { name: 'updateUserPicture' })
+  protected async updateUserPictureForRequestAndAuthorizedRequestUser(
+    @Args() request: UserUpdatePictureRequest,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+  ) {
+    this.logger.log({
+      authorizationUser,
+      request,
+      message: 'Received user picture update request',
+    })
+
+    console.log(request.picture)
+
+    return {}
   }
 
   @ResolveField('fullName', () => String)
