@@ -1,0 +1,3 @@
+export const MIN_PERCENTAGE_PROGRESS = 0
+export const MAX_PERCENTAGE_PROGRESS = 100
+export const DEFAULT_CONFIDENCE = 100

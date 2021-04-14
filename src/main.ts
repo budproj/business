@@ -1,3 +1,5 @@
-import bootstrap from './bootstrap'
+import { ServerFactory } from '@infrastructure/server/server.factory'
 
-bootstrap() // eslint-disable-line @typescript-eslint/no-floating-promises
+const serverFactory = new ServerFactory()
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+serverFactory.bootstrap()

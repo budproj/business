@@ -11,8 +11,12 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
-      "lib/*": ["./lib/*"],
-      "src/*": ["./src/*"]
+      "@adapters/*": ["src/adapters/*"],
+      "@config/*": ["src/config/*"],
+      "@core/*": ["src/core/*"],
+      "@interface/*": ["src/interface/*"],
+      "@infrastructure/*": ["src/infrastructure/*"],
+      "@lib/*": ["lib/*"]
     },
     "incremental": true,
     "skipLibCheck": true
