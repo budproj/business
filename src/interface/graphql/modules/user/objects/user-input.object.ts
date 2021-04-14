@@ -1,5 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql'
 
+import { UploadGraphQLScalar } from '@interface/graphql/scalars/upload.scalar'
+
 @InputType({ description: 'Data that you can assign to a given user' })
 export class UserInputObject {
   @Field(() => String, { description: 'The first name of the user', nullable: true })
@@ -7,6 +9,11 @@ export class UserInputObject {
 
   @Field(() => String, { description: 'The last name of the user', nullable: true })
   public readonly lastName?: string
+
+  @Field(() => UploadGraphQLScalar, {
+    description: 'An image file that we will upload and user as the new user picture',
+  })
+  public readonly picture!: string
 
   @Field(() => String, { description: 'The role of the user in her/his company', nullable: true })
   public readonly role?: string

@@ -3,9 +3,14 @@ import { GraphQLUpload } from 'graphql-upload'
 
 @Scalar('Upload')
 export class UploadGraphQLScalar {
-  description = 'File upload scalar type'
+  public get description(): string {
+    return 'File upload scalar type'
+  }
 
-  protected parseValue(value) {
-    return GraphQLUpload.parseValue(value)
+  protected parseValue(value): string {
+    const file = GraphQLUpload.parseValue(value)
+    console.log(file)
+
+    return 'ok'
   }
 }
