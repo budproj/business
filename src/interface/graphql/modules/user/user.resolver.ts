@@ -28,6 +28,7 @@ import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/r
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
 import { TeamFiltersRequest } from '@interface/graphql/modules/team/requests/team-filters.request'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
+import { ImageUploadValidationPipe } from '@interface/graphql/validators/image-upload.validator'
 
 import { UserKeyResultCheckInsGraphQLConnection } from './connections/user-key-result-check-ins/user-key-result-check-ins.connection'
 import { UserKeyResultCommentsGraphQLConnection } from './connections/user-key-result-comments/user-key-result-comments.connection'
@@ -81,7 +82,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
   @GuardedMutation(UserGraphQLNode, 'user:update', { name: 'updateUser' })
   protected async updateUserForRequestAndAuthorizedRequestUser(
-    @Args() request: UserUpdateRequest,
+    @Args(new ImageUploadValidationPipe()) request: UserUpdateRequest,
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
     this.logger.log({
@@ -90,11 +91,9 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Received update user request',
     })
 
-    console.log(request.data)
-
     const user = await this.queryGuard.updateWithActionScopeConstraint(
       { id: request.id },
-      request.data,
+      {},
       authorizationUser,
     )
     if (!user) throw new UserInputError(`We could not found an user with ID ${request.id}`)

@@ -1,4 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql'
+import { FileUpload } from 'graphql-upload'
 
 import { UploadGraphQLScalar } from '@interface/graphql/scalars/upload.scalar'
 
@@ -11,9 +12,10 @@ export class UserInputObject {
   public readonly lastName?: string
 
   @Field(() => UploadGraphQLScalar, {
+    nullable: true,
     description: 'An image file that we will upload and user as the new user picture',
   })
-  public readonly picture!: string
+  public readonly picture?: Promise<FileUpload>
 
   @Field(() => String, { description: 'The role of the user in her/his company', nullable: true })
   public readonly role?: string

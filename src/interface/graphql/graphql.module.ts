@@ -3,6 +3,7 @@ import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql'
 
 import { GraphQLConfigModule } from '@config/graphql/graphql.module'
 import { CoreModule } from '@core/core.module'
+import { StorageModule } from '@infrastructure/storage/storage.module'
 
 import { PermissionsGraphQLResolver } from './authorization/resolvers/permissions.resolver'
 import { CycleGraphQLModule } from './modules/cycle/cycle.module'
@@ -20,6 +21,7 @@ import { UploadGraphQLScalar } from './scalars/upload.scalar'
       useClass: GraphQLOptionsFactory,
     }),
     CoreModule,
+    StorageModule,
     GraphQLConfigModule,
     UserGraphQLModule,
     TeamGraphQLModule,
