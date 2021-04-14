@@ -1,7 +1,7 @@
 import { LoggerService, ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
-import fastifyMultipart from 'fastify-multipart'
+import { processRequest } from 'graphql-upload'
 
 import { ServerConfigProvider } from '@config/server/server.provider'
 import { buildLogger } from '@lib/logger/logger.factory'
@@ -18,7 +18,7 @@ export class ServerFactory {
 
   private async createFastifyAdapter(): Promise<FastifyAdapter> {
     const adapter = new FastifyAdapter()
-    await adapter.register(fastifyMultipart)
+    this.applyMultipartFix(adapter)
 
     return adapter
   }
@@ -63,5 +63,22 @@ export class ServerFactory {
     const endpoint = `http://${config.host}:${config.port}`
 
     return endpoint
+  }
+
+  private applyMultipartFix(adapter: FastifyAdapter): void {
+    const fastify = adapter.getInstance()
+
+    fastify.addContentTypeParser('multipart', (request, done) => {
+      request.isMultipart = true
+      done()
+    })
+
+    fastify.addHook('preValidation', async function (request: any, reply) {
+      if (!request.raw.isMultipart) {
+        return
+      }
+
+      request.body = await processRequest(request.raw, reply.raw, {})
+    })
   }
 }

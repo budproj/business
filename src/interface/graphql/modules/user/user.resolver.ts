@@ -114,7 +114,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
     console.log(request.picture)
 
-    return {}
+    return { id: 'ok' }
   }
 
   @ResolveField('fullName', () => String)

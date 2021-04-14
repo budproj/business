@@ -1,11 +1,12 @@
 import { ArgsType, Field, ID } from '@nestjs/graphql'
-import { GraphQLUpload, FileUpload } from 'graphql-upload'
+
+import { UploadGraphQLScalar } from '@interface/graphql/scalars/upload.scalar'
 
 @ArgsType()
 export class UserUpdatePictureRequest {
   @Field(() => ID)
   public readonly id!: string
 
-  @Field(() => GraphQLUpload)
-  public readonly picture!: FileUpload
+  @Field(() => UploadGraphQLScalar)
+  public readonly picture!: UploadGraphQLScalar
 }
