@@ -1,4 +1,4 @@
-import { LoggerService, ValidationPipe } from '@nestjs/common'
+import { LoggerService } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import { processRequest } from 'graphql-upload'
@@ -10,17 +10,25 @@ import { ServerModule } from './server.module'
 
 export class ServerFactory {
   public async bootstrap(): Promise<void> {
-    const fastifyAdapter = await this.createFastifyAdapter()
-    const application = await this.createApplication(fastifyAdapter)
+    const adapter = new FastifyAdapter()
+    const fastify = adapter.getInstance()
+
+    fastify.addContentTypeParser('multipart', (request, done) => {
+      request.isMultipart = true
+      done()
+    })
+
+    fastify.addHook('preValidation', async function (request: any, reply) {
+      if (!request.raw.isMultipart) {
+        return
+      }
+
+      request.body = await processRequest(request.raw, reply.raw)
+    })
+
+    const application = await this.createApplication(adapter)
 
     await this.launch(application)
-  }
-
-  private async createFastifyAdapter(): Promise<FastifyAdapter> {
-    const adapter = new FastifyAdapter()
-    this.applyMultipartPlugin(adapter)
-
-    return adapter
   }
 
   private async createApplication(adapter: FastifyAdapter): Promise<NestFastifyApplication> {
@@ -35,11 +43,6 @@ export class ServerFactory {
 
     application.setGlobalPrefix(config.prefix ?? '')
     application.useLogger(logger)
-    application.useGlobalPipes(
-      new ValidationPipe({
-        transform: true,
-      }),
-    )
     application.enableCors({
       credentials: config.cors.credentialsEnabled,
       origin: config.cors.allowedOrigins,
@@ -63,22 +66,5 @@ export class ServerFactory {
     const endpoint = `http://${config.host}:${config.port}`
 
     return endpoint
-  }
-
-  private applyMultipartPlugin(adapter: FastifyAdapter): void {
-    const fastify = adapter.getInstance()
-
-    fastify.addContentTypeParser('multipart', (request, done) => {
-      request.isMultipart = true
-      done()
-    })
-
-    fastify.addHook('preValidation', async function (request: any, reply) {
-      if (!request.raw.isMultipart) {
-        return
-      }
-
-      request.body = await processRequest(request.raw, reply.raw)
-    })
   }
 }
