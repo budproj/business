@@ -1,10 +1,27 @@
 import { PipeTransform } from '@nestjs/common'
+import { UserInputError } from 'apollo-server-fastify'
 import { FileUpload } from 'graphql-upload'
 
 export class ImageUploadValidationPipe implements PipeTransform {
-  async transform(file: FileUpload): Promise<string> {
-    console.log(file)
+  private readonly validMimetypes: string[]
 
-    return 'ok'
+  constructor(validMimetypes: string[] = ['image/jpeg', 'image/png', 'image/webp']) {
+    this.validMimetypes = validMimetypes
+  }
+
+  public transform(file: FileUpload): FileUpload {
+    this.validate(file)
+
+    return file
+  }
+
+  private validate(file: FileUpload): void {
+    const isValid = this.validMimetypes.includes(file.mimetype)
+
+    if (!isValid) {
+      throw new UserInputError(
+        `Invalid image format. Valid mimetypes are: ${this.validMimetypes.join(', ')}`,
+      )
+    }
   }
 }
