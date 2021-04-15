@@ -7,7 +7,6 @@ export interface GraphQLConfigInterface {
   introspection: GraphQLIntrospectionConfigInterface
   godmode: GodmodePropertiesInterface
   schema: GraphQLSchemaConfigInterface
-  uploads: GraphQLUploadsConfigInterface
 }
 
 export interface GraphQLDebugConfigInterface {
@@ -24,9 +23,4 @@ export interface GraphQLIntrospectionConfigInterface {
 
 export interface GraphQLSchemaConfigInterface {
   filePath: string
-}
-
-export interface GraphQLUploadsConfigInterface {
-  maxFileSize: number
-  maxFiles: number
 }

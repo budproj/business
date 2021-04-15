@@ -18,7 +18,7 @@ export class ServerFactory {
 
   private async createFastifyAdapter(): Promise<FastifyAdapter> {
     const adapter = new FastifyAdapter()
-    this.applyMultipartFix(adapter)
+    this.applyMultipartPlugin(adapter)
 
     return adapter
   }
@@ -65,7 +65,7 @@ export class ServerFactory {
     return endpoint
   }
 
-  private applyMultipartFix(adapter: FastifyAdapter): void {
+  private applyMultipartPlugin(adapter: FastifyAdapter): void {
     const fastify = adapter.getInstance()
 
     fastify.addContentTypeParser('multipart', (request, done) => {
@@ -78,7 +78,7 @@ export class ServerFactory {
         return
       }
 
-      request.body = await processRequest(request.raw, reply.raw, {})
+      request.body = await processRequest(request.raw, reply.raw)
     })
   }
 }

@@ -26,10 +26,5 @@ export const graphqlConfig = registerAs(
     schema: {
       filePath: process.env.GRAPHQL_SCHEMA_FILE_PATH,
     },
-
-    uploads: {
-      maxFileSize: Number.parseInt(process.env.GRAPHQL_UPLOADS_MAX_BYTE_FILE_SIZE, 10),
-      maxFiles: Number.parseInt(process.env.GRAPHQL_UPLOADS_MAX_NUMBER_OF_FILES, 10),
-    },
   }),
 )

@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
+import { pickBy } from 'lodash'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
@@ -17,6 +18,7 @@ import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
+import { AWSS3Provider } from '@infrastructure/aws/s3/aws-s3.provider'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
 import { GuardedMutation } from '@interface/graphql/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
@@ -28,6 +30,7 @@ import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/r
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
 import { TeamFiltersRequest } from '@interface/graphql/modules/team/requests/team-filters.request'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
+import { UploadGraphQLProvider } from '@interface/graphql/upload/upload.provider'
 
 import { UserKeyResultCheckInsGraphQLConnection } from './connections/user-key-result-check-ins/user-key-result-check-ins.connection'
 import { UserKeyResultCommentsGraphQLConnection } from './connections/user-key-result-comments/user-key-result-comments.connection'
@@ -36,14 +39,16 @@ import { UserObjectivesGraphQLConnection } from './connections/user-objectives/u
 import { UserTeamsGraphQLConnection } from './connections/user-teams/user-teams.connection'
 import { UserUpdateRequest } from './requests/user-update.request'
 import { UserGraphQLNode } from './user.node'
-import { UserUpdateRequestValidationPipe } from './validation-pipes/user-update-request.validation-pipe'
 
 @GuardedResolver(UserGraphQLNode)
 export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserInterface> {
   private readonly logger = new Logger(UserGraphQLResolver.name)
+  private readonly uploadProvider: UploadGraphQLProvider
 
-  constructor(protected readonly core: CoreProvider) {
+  constructor(protected readonly core: CoreProvider, awsS3: AWSS3Provider) {
     super(Resource.USER, core, core.user)
+
+    this.uploadProvider = new UploadGraphQLProvider(awsS3)
   }
 
   @GuardedQuery(UserGraphQLNode, 'user:read', { name: 'user' })
@@ -82,7 +87,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
   @GuardedMutation(UserGraphQLNode, 'user:update', { name: 'updateUser' })
   protected async updateUserForRequestAndAuthorizedRequestUser(
-    @Args(new UserUpdateRequestValidationPipe()) request: UserUpdateRequest,
+    @Args() request: UserUpdateRequest,
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
   ) {
     this.logger.log({
@@ -91,11 +96,15 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Received update user request',
     })
 
-    console.log(request.data.picture)
+    const resolvedPicture = await request.data.picture
+    const picture = await this.uploadProvider.uploadFileToRepository(resolvedPicture)
 
     const user = await this.queryGuard.updateWithActionScopeConstraint(
       { id: request.id },
-      {},
+      pickBy({
+        ...request.data,
+        picture,
+      }),
       authorizationUser,
     )
     if (!user) throw new UserInputError(`We could not found an user with ID ${request.id}`)
