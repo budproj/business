@@ -1,7 +1,8 @@
-import { createWriteStream, unlink } from 'fs'
+import { createWriteStream, unlink, readFileSync } from 'fs'
 
 import { ReadStream } from 'fs-capacitor'
 import { FileUpload } from 'graphql-upload'
+import { v4 as uuidv4 } from 'uuid'
 
 import { FileStorageInterface } from '@adapters/storage/interfaces/file.interface'
 import { RepositoryStorageInterface } from '@adapters/storage/interfaces/repository.interface'
@@ -29,28 +30,29 @@ export class UploadGraphQLProvider {
     encoding,
     createReadStream,
   }: FileUpload): Promise<FileStorageInterface> {
-    console.log(createReadStream)
     const readStream = createReadStream()
-    const fileContent = await this.getReadStreamContent(readStream, filename)
+    const extension = this.getFileExtension(filename)
+
+    const temporaryName = this.createTemporaryFilename(extension)
+    const temporaryPath = await this.downloadReadStreamFile(readStream, temporaryName)
+    const temporaryFile = readFileSync(temporaryPath)
 
     return {
       encoding,
-      name: filename,
-      extension: this.getFileExtension(filename),
+      extension,
+      tmpPath: temporaryPath,
+      name: temporaryName,
       type: mimetype,
-      content: fileContent,
+      content: temporaryFile,
     }
   }
 
-  private async getReadStreamContent(
-    readStream: ReadStream,
-    filename?: string,
-  ): Promise<ArrayBuffer> {
+  private async downloadReadStreamFile(readStream: ReadStream, filename: string): Promise<string> {
     return new Promise((resolve, reject) => {
       const path = `${this.dir}/${filename}`
       const writeStream = createWriteStream(path)
 
-      writeStream.on('finish', resolve)
+      writeStream.on('finish', () => resolve(path))
       writeStream.on('error', (error) => {
         unlink(path, () => {
           reject(error)
@@ -66,5 +68,12 @@ export class UploadGraphQLProvider {
 
   private getFileExtension(filename: string): string {
     return filename.split('.').slice(-1)[0]
+  }
+
+  private createTemporaryFilename(extension: string): string {
+    const uuidName: string = uuidv4()
+    const filename = `${uuidName}.${extension}`
+
+    return filename
   }
 }

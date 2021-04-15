@@ -3,5 +3,6 @@ export interface FileGraphQLInterface {
   type: string
   encoding: string
   extension: string
+  tmpPath: string
   content: ArrayBuffer
 }
