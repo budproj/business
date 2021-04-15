@@ -45,7 +45,7 @@ export class ServerFactory {
     application.useLogger(logger)
     application.enableCors({
       credentials: config.cors.credentialsEnabled,
-      origin: config.cors.allowedOrigins,
+      origin: config.cors.allowedOrigins.join(','),
     })
 
     await this.launchServer(application, logger, config)
