@@ -34,6 +34,10 @@ export class AWSS3Provider implements RepositoryStorageInterface {
 
     console.log('ok')
     console.log(uploaded)
+    // TODO: Falta:
+    // - Arrumar o ACL pra ficar público
+    // - Arrumar tb o key pra usar o diretório correto
+    // - Pegar a URL e retornar ela pra salvar no banco
 
     return {} as any
   }
