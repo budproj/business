@@ -4,4 +4,5 @@ export const AWSEnvironmentSchema = Joi.object({
   AWS_REGION: Joi.string().default('sa-east-1'),
   AWS_CREDENTIALS_ACCESS_KEY_ID: Joi.string().required(),
   AWS_CREDENTIALS_SECRET_ACCESS_KEY: Joi.string().required(),
+  AWS_S3_BUCKET_NAME: Joi.string().default('business.s3.getbud.co'),
 })

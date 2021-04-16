@@ -21,7 +21,7 @@ export class UploadGraphQLProvider {
 
   public async uploadFileToRepository(file: FileUpload): Promise<void> {
     const parsedFile = await this.parseGraphQLUpload(file)
-    console.log(parsedFile)
+    await this.storage.uploadFile(parsedFile)
   }
 
   protected async parseGraphQLUpload({
@@ -33,7 +33,7 @@ export class UploadGraphQLProvider {
     const readStream = createReadStream()
     const extension = this.getFileExtension(filename)
 
-    const temporaryName = this.createTemporaryFilename(extension)
+    const temporaryName = this.createTemporaryFilename()
     const temporaryPath = await this.downloadReadStreamFile(readStream, temporaryName)
     const temporaryFile = readFileSync(temporaryPath)
 
@@ -70,10 +70,8 @@ export class UploadGraphQLProvider {
     return filename.split('.').slice(-1)[0]
   }
 
-  private createTemporaryFilename(extension: string): string {
+  private createTemporaryFilename(): string {
     const uuidName: string = uuidv4()
-    const filename = `${uuidName}.${extension}`
-
-    return filename
+    return uuidName
   }
 }

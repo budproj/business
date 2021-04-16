@@ -11,5 +11,9 @@ export const awsConfig = registerAs(
       accessKeyID: process.env.AWS_CREDENTIALS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_CREDENTIALS_SECRET_ACCESS_KEY,
     },
+
+    s3: {
+      bucketName: process.env.AWS_S3_BUCKET_NAME,
+    },
   }),
 )
