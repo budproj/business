@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { S3 } from 'aws-sdk'
+import { PutObjectRequest } from 'aws-sdk/clients/s3'
 import { InjectAwsService } from 'nest-aws-sdk'
 
+import { FilePolicyStorageInterface } from '@adapters/storage/interfaces/file-policy.interface'
 import { RepositoryStorageInterface } from '@adapters/storage/interfaces/repository.interface'
 import { AWSS3ConfigInterface } from '@config/aws/aws.interface'
 import { AWSConfigProvider } from '@config/aws/aws.provider'
@@ -23,12 +25,15 @@ export class AWSS3Provider implements RepositoryStorageInterface {
 
   public async upload(file: FileAWSS3Interface): Promise<RemoteFileAWSS3Interface> {
     const key = this.generateFileKey(file)
+    const acl = this.marshalACL(file.policy)
+
     const uploaded = await this.remote
       .putObject({
         Bucket: this.config.bucketName,
         Key: key,
         ContentType: file.type,
         Body: file.content,
+        ACL: acl,
       })
       .promise()
 
@@ -47,5 +52,9 @@ export class AWSS3Provider implements RepositoryStorageInterface {
     const key = `${file.name}-${timestamp}.${file.extension}`
 
     return key
+  }
+
+  private marshalACL(policy: FilePolicyStorageInterface): PutObjectRequest['ACL'] {
+    return 'public-read'
   }
 }
