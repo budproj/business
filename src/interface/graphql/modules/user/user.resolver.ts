@@ -5,6 +5,7 @@ import { pickBy } from 'lodash'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { VisibilityStorageEnum } from '@adapters/storage/enums/visilibity.enum'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
@@ -97,7 +98,11 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     })
 
     const resolvedPicture = await request.data.picture
-    const picture = await this.uploadProvider.uploadFileToRepository(resolvedPicture)
+    const policy = {
+      write: VisibilityStorageEnum.PRIVATE,
+      read: VisibilityStorageEnum.PUBLIC,
+    }
+    const picture = await this.uploadProvider.uploadFileToRepository(resolvedPicture, policy)
 
     const user = await this.queryGuard.updateWithActionScopeConstraint(
       { id: request.id },

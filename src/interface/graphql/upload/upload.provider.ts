@@ -8,10 +8,12 @@ import { FileStorageInterface } from '@adapters/storage/interfaces/file.interfac
 import { RepositoryStorageInterface } from '@adapters/storage/interfaces/repository.interface'
 import { StorageAdapterProvider } from '@adapters/storage/storage.provider'
 
+import { FilePolicyGraphQLInterface } from './interfaces/file-policy.interface'
+
 export class UploadGraphQLProvider {
   private readonly storage: StorageAdapterProvider
 
-  private get dir() {
+  private get temporaryDir() {
     return '/tmp'
   }
 
@@ -19,17 +21,18 @@ export class UploadGraphQLProvider {
     this.storage = new StorageAdapterProvider(repository)
   }
 
-  public async uploadFileToRepository(file: FileUpload): Promise<void> {
-    const parsedFile = await this.parseGraphQLUpload(file)
+  public async uploadFileToRepository(
+    file: FileUpload,
+    policy?: FilePolicyGraphQLInterface,
+  ): Promise<void> {
+    const parsedFile = await this.parseGraphQLUpload(file, policy)
     await this.storage.uploadFile(parsedFile)
   }
 
-  protected async parseGraphQLUpload({
-    filename,
-    mimetype,
-    encoding,
-    createReadStream,
-  }: FileUpload): Promise<FileStorageInterface> {
+  protected async parseGraphQLUpload(
+    { filename, mimetype, encoding, createReadStream }: FileUpload,
+    policy?: FilePolicyGraphQLInterface,
+  ): Promise<FileStorageInterface> {
     const readStream = createReadStream()
     const extension = this.getFileExtension(filename)
 
@@ -40,6 +43,7 @@ export class UploadGraphQLProvider {
     return {
       encoding,
       extension,
+      policy,
       tmpPath: temporaryPath,
       name: temporaryName,
       type: mimetype,
@@ -49,7 +53,7 @@ export class UploadGraphQLProvider {
 
   private async downloadReadStreamFile(readStream: ReadStream, filename: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      const path = `${this.dir}/${filename}`
+      const path = `${this.temporaryDir}/${filename}`
       const writeStream = createWriteStream(path)
 
       writeStream.on('finish', () => resolve(path))

@@ -1,3 +1,5 @@
+import { FilePolicyStorageInterface } from './file-policy.interface'
+
 export interface FileStorageInterface {
   name: string
   type: string
@@ -5,4 +7,5 @@ export interface FileStorageInterface {
   extension: string
   tmpPath: string
   content: ArrayBuffer
+  policy?: FilePolicyStorageInterface
 }
