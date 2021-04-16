@@ -1,8 +1,3 @@
-export interface FileGraphQLInterface {
-  name: string
-  type: string
-  encoding: string
-  extension: string
-  tmpPath: string
-  content: ArrayBuffer
-}
+import { FileStorageInterface } from '@adapters/storage/interfaces/file.interface'
+
+export interface FileGraphQLInterface extends FileStorageInterface {}

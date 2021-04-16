@@ -1,3 +1,8 @@
-import { FileGraphQLInterface } from '@interface/graphql/upload/interfaces/file.interface'
-
-export interface FileStorageInterface extends FileGraphQLInterface {}
+export interface FileStorageInterface {
+  name: string
+  type: string
+  encoding: string
+  extension: string
+  tmpPath: string
+  content: ArrayBuffer
+}
