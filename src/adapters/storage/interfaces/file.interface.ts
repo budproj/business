@@ -7,5 +7,6 @@ export interface FileStorageInterface {
   extension: string
   tmpPath: string
   content: ArrayBuffer
+  path?: string
   policy?: FilePolicyStorageInterface
 }

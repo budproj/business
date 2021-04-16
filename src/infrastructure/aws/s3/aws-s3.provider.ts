@@ -52,7 +52,8 @@ export class AWSS3Provider implements RepositoryStorageInterface {
 
   private generateFileKey(file: FileAWSS3Interface): string {
     const timestamp = Date.now()
-    const key = `${file.name}-${timestamp}.${file.extension}`
+    const prefix = file.path ? `${file.path}/` : ''
+    const key = `${prefix}${file.name}-${timestamp}.${file.extension}`
 
     return key
   }

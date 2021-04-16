@@ -102,8 +102,12 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       write: VisibilityStorageEnum.PRIVATE,
       read: VisibilityStorageEnum.PUBLIC,
     }
-    const picture = await this.uploadProvider.uploadFileToRepository(resolvedPicture, policy)
+    const specification = {
+      policy,
+      path: 'user/pictures',
+    }
 
+    const picture = await this.uploadProvider.uploadFileToRepository(resolvedPicture, specification)
     const user = await this.queryGuard.updateWithActionScopeConstraint(
       { id: request.id },
       pickBy({

@@ -8,7 +8,7 @@ import { FileStorageInterface } from '@adapters/storage/interfaces/file.interfac
 import { RepositoryStorageInterface } from '@adapters/storage/interfaces/repository.interface'
 import { StorageAdapterProvider } from '@adapters/storage/storage.provider'
 
-import { FilePolicyGraphQLInterface } from './interfaces/file-policy.interface'
+import { FileSpecificationGraphQLInterface } from './interfaces/file-specification.interface'
 
 export class UploadGraphQLProvider {
   private readonly storage: StorageAdapterProvider
@@ -23,15 +23,15 @@ export class UploadGraphQLProvider {
 
   public async uploadFileToRepository(
     file: FileUpload,
-    policy?: FilePolicyGraphQLInterface,
+    specification?: FileSpecificationGraphQLInterface,
   ): Promise<void> {
-    const parsedFile = await this.parseGraphQLUpload(file, policy)
+    const parsedFile = await this.parseGraphQLUpload(file, specification)
     await this.storage.uploadFile(parsedFile)
   }
 
   protected async parseGraphQLUpload(
     { filename, mimetype, encoding, createReadStream }: FileUpload,
-    policy?: FilePolicyGraphQLInterface,
+    specification?: FileSpecificationGraphQLInterface,
   ): Promise<FileStorageInterface> {
     const readStream = createReadStream()
     const extension = this.getFileExtension(filename)
@@ -43,7 +43,8 @@ export class UploadGraphQLProvider {
     return {
       encoding,
       extension,
-      policy,
+      policy: specification?.policy,
+      path: specification?.path,
       tmpPath: temporaryPath,
       name: temporaryName,
       type: mimetype,
