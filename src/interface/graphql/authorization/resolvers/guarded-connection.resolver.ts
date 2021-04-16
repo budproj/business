@@ -11,7 +11,7 @@ import { CoreEntity } from '@core/core.orm-entity'
 import { CoreProvider } from '@core/core.provider'
 import { CoreEntityProvider } from '@core/entity.provider'
 
-import { RelayProvider } from '../../relay/relay.provider'
+import { RelayGraphQLProvider } from '../../relay/relay.provider'
 import { AuthorizedRequestUser } from '../decorators/authorized-request-user.decorator'
 import { ScopeGraphQLEnum } from '../enums/scope.enum'
 import { GuardedConnectionGraphQLInterface } from '../interfaces/guarded-connection.interface'
@@ -30,7 +30,7 @@ export abstract class GuardedConnectionGraphQLResolver<
   protected readonly queryGuard: QueryGuardAdapter<E, I>
   protected readonly policy: PolicyAdapter
   protected readonly authz: AuthzAdapter
-  protected readonly relay: RelayProvider
+  protected readonly relay: RelayGraphQLProvider
 
   constructor(
     protected readonly resource: Resource,

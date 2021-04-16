@@ -1,9 +1,11 @@
 import { Logger } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
+import { pickBy } from 'lodash'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { VisibilityStorageEnum } from '@adapters/storage/enums/visilibity.enum'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
@@ -17,6 +19,7 @@ import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
+import { AWSS3Provider } from '@infrastructure/aws/s3/aws-s3.provider'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
 import { GuardedMutation } from '@interface/graphql/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
@@ -28,6 +31,7 @@ import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/r
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
 import { TeamFiltersRequest } from '@interface/graphql/modules/team/requests/team-filters.request'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
+import { UploadGraphQLProvider } from '@interface/graphql/upload/upload.provider'
 
 import { UserKeyResultCheckInsGraphQLConnection } from './connections/user-key-result-check-ins/user-key-result-check-ins.connection'
 import { UserKeyResultCommentsGraphQLConnection } from './connections/user-key-result-comments/user-key-result-comments.connection'
@@ -40,9 +44,12 @@ import { UserGraphQLNode } from './user.node'
 @GuardedResolver(UserGraphQLNode)
 export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserInterface> {
   private readonly logger = new Logger(UserGraphQLResolver.name)
+  private readonly uploadProvider: UploadGraphQLProvider
 
-  constructor(protected readonly core: CoreProvider) {
+  constructor(protected readonly core: CoreProvider, awsS3: AWSS3Provider) {
     super(Resource.USER, core, core.user)
+
+    this.uploadProvider = new UploadGraphQLProvider(awsS3)
   }
 
   @GuardedQuery(UserGraphQLNode, 'user:read', { name: 'user' })
@@ -90,9 +97,23 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Received update user request',
     })
 
+    const resolvedPicture = await request.data.picture
+    const policy = {
+      write: VisibilityStorageEnum.PRIVATE,
+      read: VisibilityStorageEnum.PUBLIC,
+    }
+    const specification = {
+      policy,
+      path: 'user/pictures',
+    }
+
+    const picture = await this.uploadProvider.uploadFileToRepository(resolvedPicture, specification)
     const user = await this.queryGuard.updateWithActionScopeConstraint(
       { id: request.id },
-      request.data,
+      pickBy({
+        ...request.data,
+        picture,
+      }),
       authorizationUser,
     )
     if (!user) throw new UserInputError(`We could not found an user with ID ${request.id}`)

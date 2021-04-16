@@ -17,5 +17,5 @@ export interface ServerLoggingConfigInterface {
 
 export interface ServerCORSConfigInterface {
   credentialsEnabled: boolean
-  allowedOrigins: string | string[]
+  allowedOrigins: string[]
 }

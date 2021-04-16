@@ -5,6 +5,8 @@ import { GraphQLConfigInterface } from './graphql.interface'
 export const graphqlConfig = registerAs(
   'graphql',
   (): GraphQLConfigInterface => ({
+    globalPrefixEnabled: process.env.GRAPHQL_GLOBAL_PREFIX_ENABLED === 'true',
+
     debug: {
       enabled: process.env.GRAPHQL_DEBUG_ENABLED === 'true',
     },

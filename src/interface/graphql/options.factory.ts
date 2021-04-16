@@ -13,7 +13,7 @@ export class GraphQLOptionsFactory implements GqlOptionsFactory {
       playground: this.config.playground.enabled,
       introspection: this.config.introspection.enabled,
       autoSchemaFile: this.config.schema.filePath,
-      useGlobalPrefix: true,
+      useGlobalPrefix: this.config.globalPrefixEnabled,
     }
   }
 }

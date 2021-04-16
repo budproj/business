@@ -11,6 +11,7 @@ import { ObjectiveGraphQLModule } from './modules/objective/objective.module'
 import { TeamGraphQLModule } from './modules/team/team.module'
 import { UserGraphQLModule } from './modules/user/user.module'
 import { GraphQLOptionsFactory } from './options.factory'
+import { UploadGraphQLScalar } from './upload/scalars/upload.scalar'
 
 @Module({
   imports: [
@@ -26,6 +27,6 @@ import { GraphQLOptionsFactory } from './options.factory'
     ObjectiveGraphQLModule,
     KeyResultGraphQLModule,
   ],
-  providers: [PermissionsGraphQLResolver],
+  providers: [UploadGraphQLScalar, PermissionsGraphQLResolver],
 })
 export class GraphQLModule {}

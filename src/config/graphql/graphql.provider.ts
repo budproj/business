@@ -33,4 +33,8 @@ export class GraphQLConfigProvider {
   get schema(): GraphQLSchemaConfigInterface {
     return this.configService.get<GraphQLSchemaConfigInterface>('graphql.schema')
   }
+
+  get globalPrefixEnabled(): boolean {
+    return this.configService.get<boolean>('graphql.globalPrefixEnabled')
+  }
 }

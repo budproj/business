@@ -1,6 +1,7 @@
 import { GodmodePropertiesInterface } from '@adapters/authorization/godmode/interfaces/godmode-properties.interface'
 
 export interface GraphQLConfigInterface {
+  globalPrefixEnabled: boolean
   debug: GraphQLDebugConfigInterface
   playground: GraphQLPlaygroundConfigInterface
   introspection: GraphQLIntrospectionConfigInterface
