@@ -12,5 +12,5 @@ export class OrderNodeGraphQLInput {
     nullable: true,
     description: 'Defines the expected order for the createdAt attribute',
   })
-  public createAt: Sorting
+  public createdAt: Sorting
 }
