@@ -18,14 +18,16 @@ export class PageInfoRelayObject {
   public readonly hasPreviousPage!: boolean
 
   @Field(() => String, {
+    nullable: true,
     complexity: 0,
     description: 'The cursor ID of the first element in our nodes list',
   })
-  public readonly startCursor!: ConnectionCursor
+  public readonly startCursor?: ConnectionCursor
 
   @Field(() => String, {
+    nullable: true,
     complexity: 0,
     description: 'The cursor ID of the last element in our nodes list',
   })
-  public readonly endCursor!: ConnectionCursor
+  public readonly endCursor?: ConnectionCursor
 }
