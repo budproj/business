@@ -153,12 +153,12 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     return this.core.keyResult.getOne({ id: keyResultComment.keyResultId })
   }
 
-  protected async customizeEntityPolicy(
-    originalPolicy: PolicyGraphQLObject,
+  protected async controlNodePolicy(
+    policy: PolicyGraphQLObject,
     keyResultComment: KeyResultCommentGraphQLNode,
   ) {
     const restrictedToActivePolicy = await this.restrictPolicyToActiveKeyResult(
-      originalPolicy,
+      policy,
       keyResultComment,
     )
 
@@ -166,15 +166,15 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   private async restrictPolicyToActiveKeyResult(
-    originalPolicy: PolicyGraphQLObject,
+    policy: PolicyGraphQLObject,
     keyResultComment: KeyResultCommentGraphQLNode,
   ) {
-    if (this.policy.commandStatementIsDenyingAll(originalPolicy)) return originalPolicy
+    if (this.policy.commandStatementIsDenyingAll(policy)) return policy
 
     const isKeyResultActive = await this.core.keyResult.isActiveFromIndexes({
       id: keyResultComment.keyResultId,
     })
 
-    return isKeyResultActive ? originalPolicy : this.policy.denyCommandStatement(originalPolicy)
+    return isKeyResultActive ? policy : this.policy.denyCommandStatement(policy)
   }
 }
