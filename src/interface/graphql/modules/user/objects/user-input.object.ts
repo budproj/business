@@ -3,7 +3,7 @@ import { FileUpload } from 'graphql-upload'
 
 import { UploadGraphQLScalar } from '@interface/graphql/upload/scalars/upload.scalar'
 
-@InputType({ description: 'Data that you can assign to a given user' })
+@InputType('UserInput', { description: 'Data that you can assign to a given user' })
 export class UserInputObject {
   @Field(() => String, { description: 'The first name of the user', nullable: true })
   public readonly firstName?: string
