@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
+import { FileUpload } from 'graphql-upload'
 import { pickBy } from 'lodash'
 
 import { Resource } from '@adapters/authorization/enums/resource.enum'
@@ -97,17 +98,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Received update user request',
     })
 
-    const resolvedPicture = await request.data.picture
-    const policy = {
-      write: VisibilityStorageEnum.PRIVATE,
-      read: VisibilityStorageEnum.PUBLIC,
-    }
-    const specification = {
-      policy,
-      path: 'user/pictures',
-    }
-
-    const picture = await this.uploadProvider.uploadFileToRepository(resolvedPicture, specification)
+    const picture = await this.parseUserPictureFileToRemoteURL(request.data.picture)
     const user = await this.queryGuard.updateWithActionScopeConstraint(
       { id: request.id },
       pickBy({
@@ -288,5 +279,28 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     )
 
     return this.relay.marshalResponse<KeyResultCheckInInterface>(queryResult, connection)
+  }
+
+  private async parseUserPictureFileToRemoteURL(
+    picturePromise?: Promise<FileUpload>,
+  ): Promise<string | undefined> {
+    if (typeof picturePromise === 'undefined') return
+
+    const pictureFile = await picturePromise
+    const pictureStoragePolicy = {
+      write: VisibilityStorageEnum.PRIVATE,
+      read: VisibilityStorageEnum.PUBLIC,
+    }
+    const pictureSpecification = {
+      policy: pictureStoragePolicy,
+      path: 'user/pictures',
+    }
+
+    const pictureRemoteURL = await this.uploadProvider.uploadFileToRepository(
+      pictureFile,
+      pictureSpecification,
+    )
+
+    return pictureRemoteURL
   }
 }
