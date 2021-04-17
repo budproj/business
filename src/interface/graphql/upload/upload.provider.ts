@@ -24,9 +24,11 @@ export class UploadGraphQLProvider {
   public async uploadFileToRepository(
     file: FileUpload,
     specification?: FileSpecificationGraphQLInterface,
-  ): Promise<void> {
+  ): Promise<string> {
     const parsedFile = await this.parseGraphQLUpload(file, specification)
-    await this.storage.uploadFile(parsedFile)
+    const uploadedFile = await this.storage.uploadFile(parsedFile)
+
+    return uploadedFile.path
   }
 
   protected async parseGraphQLUpload(

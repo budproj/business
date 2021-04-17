@@ -48,10 +48,23 @@ export abstract class GuardedNodeGraphQLResolver<
   ) {
     scope ??= await this.getHighestScopeForNodeInUserContext(node, authorizationUser)
 
-    return this.getPolicyForUserInScope(authorizationUser, scope, node)
+    const policy = await this.getPolicyForUserInScope(authorizationUser, scope, node)
+    const controlledPolicy = await this.controlNodePolicy(policy, node)
+
+    return controlledPolicy
   }
 
-  private async getHighestScopeForNodeInUserContext(node: E, user: AuthorizationUser) {
+  protected async controlNodePolicy(
+    policy: PolicyGraphQLObject,
+    _node: E,
+  ): Promise<PolicyGraphQLObject> {
+    return policy
+  }
+
+  private async getHighestScopeForNodeInUserContext(
+    node: E,
+    user: AuthorizationUser,
+  ): Promise<Scope> {
     const queryContext = await this.core.team.buildTeamQueryContext(user)
     const scope = await this.coreEntityProvider.defineResourceHighestScope(node, queryContext)
 

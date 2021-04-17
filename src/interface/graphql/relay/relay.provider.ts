@@ -10,7 +10,7 @@ import { NodeRequest } from './types/node-request.type'
 
 export class RelayGraphQLProvider {
   public getNodeRequest<R extends ConnectionRelayRequest>(request: R): NodeRequest<R> {
-    return omit(request, ['before', 'after', 'first', 'last'])
+    return omit(request, ['before', 'after', 'first', 'last', 'order']) as any
   }
 
   public getConnectionRelayRequest<R extends ConnectionRelayRequest>(
@@ -23,7 +23,7 @@ export class RelayGraphQLProvider {
     request: R,
   ): [NodeRequest<R>, GetOptions<E>, ConnectionRelayRequest] {
     const connection = this.getConnectionRelayRequest(request)
-    const getOptions = this.marshalGetOptionsForConnection<E>(connection)
+    const getOptions = this.marshalGetOptionsForConnection<E>(request)
     const nodeRequest = this.getNodeRequest(request)
 
     return [nodeRequest, getOptions, connection]
@@ -36,12 +36,11 @@ export class RelayGraphQLProvider {
     return connectionFromArray(nodes, connectionRequest)
   }
 
-  public marshalGetOptionsForConnection<E extends CoreEntity>(
-    connection: ConnectionRelayRequest,
-  ): GetOptions<E> {
+  public marshalGetOptionsForConnection<E extends CoreEntity>(request: any): GetOptions<E> {
     return {
-      limit: connection.first,
-      offset: this.getConnectionOffset(connection),
+      limit: request.first,
+      offset: this.getConnectionOffset(request),
+      orderBy: request.order,
     }
   }
 

@@ -187,28 +187,22 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     return this.relay.marshalResponse(queryResult, connection)
   }
 
-  protected async customizeEntityPolicy(
-    originalPolicy: PolicyGraphQLObject,
-    keyResult: KeyResultGraphQLNode,
-  ) {
-    const restrictedToActivePolicy = await this.restrictPolicyToActiveKeyResult(
-      originalPolicy,
-      keyResult,
-    )
+  protected async controlNodePolicy(policy: PolicyGraphQLObject, keyResult: KeyResultGraphQLNode) {
+    const restrictedToActivePolicy = await this.restrictPolicyToActiveKeyResult(policy, keyResult)
 
     return restrictedToActivePolicy
   }
 
   private async restrictPolicyToActiveKeyResult(
-    originalPolicy: PolicyGraphQLObject,
+    policy: PolicyGraphQLObject,
     keyResult: KeyResultGraphQLNode,
   ) {
-    if (this.policy.commandStatementIsDenyingAll(originalPolicy)) return originalPolicy
+    if (this.policy.commandStatementIsDenyingAll(policy)) return policy
 
     const isObjectiveActive = await this.core.objective.isActiveFromIndexes({
       id: keyResult.objectiveId,
     })
 
-    return isObjectiveActive ? originalPolicy : this.policy.denyCommandStatement(originalPolicy)
+    return isObjectiveActive ? policy : this.policy.denyCommandStatement(policy)
   }
 }

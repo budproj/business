@@ -1,6 +1,6 @@
 import { Field, Float, ID, InputType, Int } from '@nestjs/graphql'
 
-@InputType({ description: 'The required data to create a new check-in' })
+@InputType('KeyResultCheckInInput', { description: 'The required data to create a new check-in' })
 export class KeyResultCheckInInputObject {
   @Field(() => Float, { description: 'The check-in value you are reporting' })
   public value: number

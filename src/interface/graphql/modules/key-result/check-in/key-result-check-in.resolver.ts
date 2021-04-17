@@ -2,6 +2,8 @@ import { Logger } from '@nestjs/common'
 import { Args, Float, Int, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
+import { Command } from '@adapters/authorization/enums/command.enum'
+import { Effect } from '@adapters/authorization/enums/effect.enum'
 import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
@@ -14,6 +16,7 @@ import { GuardedResolver } from '@interface/graphql/authorization/decorators/gua
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
+import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { KeyResultGraphQLNode } from '../key-result.node'
@@ -99,7 +102,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
     return createdCheckIn
   }
 
-  @GuardedMutation(KeyResultCheckInGraphQLNode, 'key-result-check-in:delete', {
+  @GuardedMutation(DeleteResultGraphQLObject, 'key-result-check-in:delete', {
     name: 'deleteKeyResultCheckIn',
   })
   protected async deleteKeyResultCheckInForRequestAndAuthorizedRequestUser(
@@ -220,28 +223,48 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
     return this.core.keyResult.getParentCheckInFromCheckIn(keyResultCheckIn)
   }
 
-  protected async customizeEntityPolicy(
-    originalPolicy: PolicyGraphQLObject,
+  protected async controlNodePolicy(
+    policy: PolicyGraphQLObject,
     keyResultCheckIn: KeyResultCheckInGraphQLNode,
   ) {
     const restrictedToActivePolicy = await this.restrictPolicyToActiveKeyResult(
-      originalPolicy,
+      policy,
+      keyResultCheckIn,
+    )
+    const restrictedToLatestCheckInDelete = await this.restrictDeletePolicyToAllowOnlyLatestCheckIn(
+      restrictedToActivePolicy,
       keyResultCheckIn,
     )
 
-    return restrictedToActivePolicy
+    return restrictedToLatestCheckInDelete
   }
 
   private async restrictPolicyToActiveKeyResult(
-    originalPolicy: PolicyGraphQLObject,
+    policy: PolicyGraphQLObject,
     keyResultCheckIn: KeyResultCheckInGraphQLNode,
   ) {
-    if (this.policy.commandStatementIsDenyingAll(originalPolicy)) return originalPolicy
+    if (this.policy.commandStatementIsDenyingAll(policy)) return policy
 
     const isKeyResultActive = await this.core.keyResult.isActiveFromIndexes({
       id: keyResultCheckIn.keyResultId,
     })
 
-    return isKeyResultActive ? originalPolicy : this.policy.denyCommandStatement(originalPolicy)
+    return isKeyResultActive ? policy : this.policy.denyCommandStatement(policy)
+  }
+
+  private async restrictDeletePolicyToAllowOnlyLatestCheckIn(
+    policy: PolicyGraphQLObject,
+    keyResultCheckIn: KeyResultCheckInGraphQLNode,
+  ) {
+    const keyResult = await this.core.keyResult.getOne({ id: keyResultCheckIn.keyResultId })
+    const latestCheckIn = await this.core.keyResult.getLatestCheckInForKeyResultAtDate(keyResult)
+
+    const controlledDeletePolicy =
+      latestCheckIn.id === keyResultCheckIn.id ? Effect.ALLOW : Effect.DENY
+
+    return {
+      ...policy,
+      [Command.DELETE]: controlledDeletePolicy,
+    }
   }
 }
