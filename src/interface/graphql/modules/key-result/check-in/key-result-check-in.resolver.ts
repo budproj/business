@@ -14,6 +14,7 @@ import { GuardedResolver } from '@interface/graphql/authorization/decorators/gua
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
+import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { KeyResultGraphQLNode } from '../key-result.node'
@@ -99,7 +100,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
     return createdCheckIn
   }
 
-  @GuardedMutation(KeyResultCheckInGraphQLNode, 'key-result-check-in:delete', {
+  @GuardedMutation(DeleteResultGraphQLObject, 'key-result-check-in:delete', {
     name: 'deleteKeyResultCheckIn',
   })
   protected async deleteKeyResultCheckInForRequestAndAuthorizedRequestUser(
