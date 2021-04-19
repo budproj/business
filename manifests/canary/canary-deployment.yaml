@@ -46,7 +46,7 @@ spec:
                   name: business-canary
                   key: typeorm-password
             - name: AUTHZ_ISSUER
-              value: getbud.us.auth0.com
+              value: https://getbud.us.auth0.com/
             - name: AUTHZ_AUDIENCE
               value: https://api.getbud.co/business
             - name: GRAPHQL_SCHEMA_FILE_PATH
