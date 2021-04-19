@@ -72,10 +72,12 @@ spec:
             - name: AWS_S3_BUCKET_NAME
               value: business.s3.getbud.co
             - name: AWS_CREDENTIALS_ACCESS_KEY_ID
-              secretKeyRef:
-                name: business-canary
-                key: aws-credentials-access-key-id
+              valueFrom:
+                secretKeyRef:
+                  name: business-canary
+                  key: aws-credentials-access-key-id
             - name: AWS_CREDENTIALS_SECRET_ACCESS_KEY
-              secretKeyRef:
-                name: business-canary
-                key: aws-credentials-secret-access-key
+              valueFrom:
+                secretKeyRef:
+                  name: business-canary
+                  key: aws-credentials-secret-access-key
