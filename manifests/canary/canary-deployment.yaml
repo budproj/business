@@ -52,7 +52,7 @@ spec:
             - name: GRAPHQL_SCHEMA_FILE_PATH
               value: './dist/src/interface/graphql/schema.gql'
             - name: SERVER_LOGGING_LEVEL
-              value: debug
+              value: DEBUG
             - name: SERVER_LOGGING_SERVICE_NAME
               value: business@canary
             - name: SERVER_PREFIX
