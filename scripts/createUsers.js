@@ -4,13 +4,23 @@ const csv = require('fast-csv')
 const { createConnection } = require('typeorm')
 const Promise = require('bluebird')
 
-const dbConfig = require('../dist/src/config/database/config').default
 const Auth0 = require('../dist/lib/auth0').default
-const { User } = require('../dist/src/domain/user/entities')
+const { User } = require('../dist/src/core/modules/user/user.orm-entity')
+const { SnakeNamingStrategy } = require('typeorm-naming-strategies')
 
 const { AUTH0_MGMT_TOKEN } = process.env
 const auth0 = new Auth0(AUTH0_MGMT_TOKEN)
 const filePath = join(__dirname, '..', 'users_to_invite.csv')
+const dbConfig = {
+  type: 'postgres',
+  database: process.env.TYPEORM_DATABASE,
+  host: process.env.TYPEORM_HOST,
+  port: Number.parseInt(process.env.TYPEORM_PORT, 10),
+  username: process.env.TYPEORM_USERNAME,
+  password: process.env.TYPEORM_PASSWORD,
+  entities: ['dist/src/**/*.orm-entity.js'],
+  namingStrategy: new SnakeNamingStrategy(),
+}
 
 const main = () =>
   createConnection(dbConfig).then((dbConnection) => {
