@@ -27,9 +27,7 @@ spec:
           ports:
             - containerPort: 8080
           env:
-            - name: APP_ENV
-              value: production
-            - name: PORT
+            - name: SERVER_PORT
               value: '8080'
             - name: TYPEORM_HOST
               value: business.cka3r3gokfjc.sa-east-1.rds.amazonaws.com
@@ -37,36 +35,49 @@ spec:
               value: '5432'
             - name: TYPEORM_DATABASE
               value: business
-            - name: TYPEORM_USER
+            - name: TYPEORM_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: business
-                  key: typeorm-user
+                  key: typeorm-username
             - name: TYPEORM_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: business
                   key: typeorm-password
-            - name: AUTH0_NAMESPACE
-              value: https://api.getbud.co
-            - name: AUTH0_CLIENT_ID
-              value: sC2t6uIvHC2wCN8creSkJ7npjZdkv4W9
-            - name: AUTH0_CLIENT_SECRET
+            - name: AUTHZ_ISSUER
+              value: https://getbud.us.auth0.com/
+            - name: AUTHZ_AUDIENCE
+              value: https://api.getbud.co/business
+            - name: GRAPHQL_SCHEMA_FILE_PATH
+              value: './dist/src/interface/graphql/schema.gql'
+            - name: SERVER_LOGGING_LEVEL
+              value: DEBUG
+            - name: SERVER_LOGGING_SERVICE_NAME
+              value: business@canary
+            - name: SERVER_PREFIX
+              value: business
+            - name: SERVER_CORS_ALLOWED_ORIGINS
+              value: https://app.canary.getbud.co
+            - name: TYPEORM_LOGGING_ENABLED
+              value: 'true'
+            - name: GRAPHQL_DEBUG_ENABLED
+              value: 'true'
+            - name: GRAPHQL_PLAYGROUND_ENABLED
+              value: 'true'
+            - name: GRAPHQL_INSTROSPECTION_ENABLED
+              value: 'true'
+            - name: AWS_REGION
+              value: sa-east-1
+            - name: AWS_S3_BUCKET_NAME
+              value: business.s3.getbud.co
+            - name: AWS_CREDENTIALS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
                   name: business
-                  key: auth0-client-secret
-            - name: AUTH0_ISSUER
-              value: getbud.us.auth0.com
-            - name: AUTH0_AUDIENCE
-              value: https://api.getbud.co/business
-            - name: GRAPHQL_SCHEMA_FILE_PATH
-              value: './dist/src/app/graphql/schema.gql'
-            - name: LOGGING_LEVEL
-              value: error
-            - name: LOGGING_SERVICE_NAME
-              value: business@stable
-            - name: GLOBAL_PREFIX
-              value: business
-            - name: CORS_ALLOWED_ORIGINS
-              value: https://app.getbud.co
+                  key: aws-credentials-access-key-id
+            - name: AWS_CREDENTIALS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: business
+                  key: aws-credentials-secret-access-key
