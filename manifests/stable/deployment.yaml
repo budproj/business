@@ -52,13 +52,13 @@ spec:
             - name: GRAPHQL_SCHEMA_FILE_PATH
               value: './dist/src/interface/graphql/schema.gql'
             - name: SERVER_LOGGING_LEVEL
-              value: DEBUG
+              value: ERROR
             - name: SERVER_LOGGING_SERVICE_NAME
-              value: business@canary
+              value: business@stable
             - name: SERVER_PREFIX
               value: business
             - name: SERVER_CORS_ALLOWED_ORIGINS
-              value: https://app.canary.getbud.co
+              value: https://app.getbud.co
             - name: TYPEORM_LOGGING_ENABLED
               value: 'true'
             - name: GRAPHQL_DEBUG_ENABLED
