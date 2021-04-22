@@ -24,7 +24,7 @@ export class TeamRankingProvider {
   }
 
   private async enhanceTeamWithProgress(team: Team) {
-    const progress = 0 // Await this.teamProvider.getCurrentProgressForTeam(team)
+    const { progress } = await this.teamProvider.getCurrentStatus(team)
 
     return {
       ...team,
