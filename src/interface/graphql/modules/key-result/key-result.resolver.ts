@@ -12,6 +12,7 @@ import { KeyResultComment } from '@core/modules/key-result/comment/key-result-co
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
+import { GuardedMutation } from '@interface/graphql/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
 import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
@@ -29,6 +30,7 @@ import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-r
 import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-result-key-result-comments/key-result-key-result-comments.connection'
 import { KeyResultTimelineGraphQLConnection } from './connections/key-result-timeline/key-result-key-result-timeline.connection'
 import { KeyResultGraphQLNode } from './key-result.node'
+import { KeyResultUpdateRequest } from './requests/key-result-update.request'
 
 @GuardedResolver(KeyResultGraphQLNode)
 export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
@@ -57,6 +59,28 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     )
     if (!keyResult)
       throw new UserInputError(`We could not found an key-result with the provided arguments`)
+
+    return keyResult
+  }
+
+  @GuardedMutation(KeyResultGraphQLNode, 'key-result:update', { name: 'updateKeyResult' })
+  protected async updateKeyResultForRequestAndAuthorizedRequestUser(
+    @Args() request: KeyResultUpdateRequest,
+    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+  ) {
+    this.logger.log({
+      authorizationUser,
+      request,
+      message: 'Received update key-result request',
+    })
+
+    const keyResult = await this.queryGuard.updateWithActionScopeConstraint(
+      { id: request.id },
+      { ...request.data },
+      authorizationUser,
+    )
+    if (!keyResult)
+      throw new UserInputError(`We could not found an key-result with ID ${request.id}`)
 
     return keyResult
   }
