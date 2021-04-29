@@ -11,6 +11,8 @@ import { Objective } from './objective.orm-entity'
 
 @EntityRepository(Objective)
 export class ObjectiveRepository extends CoreEntityRepository<Objective> {
+  public entityName = Objective.name
+
   protected setupTeamQuery(query: SelectQueryBuilder<Objective>) {
     return query
       .leftJoinAndSelect(`${Objective.name}.owner`, User.name)

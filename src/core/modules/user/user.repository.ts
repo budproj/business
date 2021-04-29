@@ -10,6 +10,8 @@ import { User } from './user.orm-entity'
 
 @EntityRepository(User)
 export class UserRepository extends CoreEntityRepository<User> {
+  public entityName = User.name
+
   protected setupTeamQuery(query: SelectQueryBuilder<User>) {
     return query.leftJoinAndSelect(`${User.name}.teams`, 'Team')
   }

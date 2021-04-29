@@ -10,7 +10,7 @@ export class UserFiltersRequest extends ConnectionFiltersRequest<UserOrderInputO
   @Field(() => UserOrderInputObject, {
     nullable: true,
     defaultValue: {
-      firstName: SortingGraphQLEnum.DESC,
+      firstName: SortingGraphQLEnum.ASC,
     },
     description: 'Define the expected order for our users connection edges',
   })

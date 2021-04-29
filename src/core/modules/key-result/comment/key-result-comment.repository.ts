@@ -11,6 +11,8 @@ import { KeyResultComment } from './key-result-comment.orm-entity'
 
 @EntityRepository(KeyResultComment)
 export class KeyResultCommentRepository extends CoreEntityRepository<KeyResultComment> {
+  public entityName = KeyResultComment.name
+
   protected setupTeamQuery(query: SelectQueryBuilder<KeyResultComment>) {
     return query.leftJoinAndSelect(`${KeyResultComment.name}.keyResult`, KeyResult.name)
   }

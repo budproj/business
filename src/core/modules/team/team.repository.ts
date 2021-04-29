@@ -9,6 +9,8 @@ import { Team } from './team.orm-entity'
 
 @EntityRepository(Team)
 export class TeamRepository extends CoreEntityRepository<Team> {
+  public entityName = Team.name
+
   protected addTeamWhereExpression(
     query: WhereExpression,
     allowedTeams: Array<TeamInterface['id']>,

@@ -1,14 +1,16 @@
-import { flow } from 'lodash'
+import { flow, mapKeys } from 'lodash'
 import { Brackets, Repository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
 import { ConditionalMethodNames } from './enums/conditional-method-names.enum'
 import { ConstraintType } from './enums/contrain-type.enum'
+import { Sorting } from './enums/sorting'
 import { GetOptions } from './interfaces/get-options'
 import { TeamInterface } from './modules/team/interfaces/team.interface'
 import { UserInterface } from './modules/user/user.interface'
 import { SelectionQueryConstrain } from './types/selection-query-constrain.type'
 
 export abstract class CoreEntityRepository<E> extends Repository<E> {
+  public entityName: string
   protected composeTeamQuery = flow(this.setupOwnsQuery, this.setupTeamQuery)
 
   public constraintQueryToTeam(
@@ -55,6 +57,10 @@ export abstract class CoreEntityRepository<E> extends Repository<E> {
       skip: options?.offset,
       order: options?.orderBy,
     }
+  }
+
+  public marshalOrderBy(unmarshalled: Partial<Record<keyof E, Sorting>>): Record<string, Sorting> {
+    return mapKeys(unmarshalled, (_, key) => `${this.entityName}.${key}`) as Record<string, Sorting>
   }
 
   protected setupTeamQuery(query: SelectQueryBuilder<E>) {
