@@ -10,6 +10,8 @@ import { Cycle } from './cycle.orm-entity'
 
 @EntityRepository(Cycle)
 export class CycleRepository extends CoreEntityRepository<Cycle> {
+  public entityName = Cycle.name
+
   protected setupOwnsQuery(query: SelectQueryBuilder<Cycle>) {
     return query.leftJoinAndSelect(`${Cycle.name}.team`, Team.name)
   }

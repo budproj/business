@@ -11,6 +11,8 @@ import { KeyResult } from './key-result.orm-entity'
 
 @EntityRepository(KeyResult)
 export class KeyResultRepository extends CoreEntityRepository<KeyResult> {
+  public entityName = KeyResult.name
+
   public buildRankSortColumn(rank: Array<KeyResultInterface['id']>): string {
     if (rank.length === 0) return ''
 

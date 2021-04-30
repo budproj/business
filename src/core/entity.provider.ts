@@ -1,6 +1,5 @@
 import { Logger } from '@nestjs/common'
 import { startOfWeek } from 'date-fns'
-import { mapKeys, snakeCase } from 'lodash'
 import { DeleteResult, FindConditions, SelectQueryBuilder } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
@@ -173,7 +172,7 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
     constrainQuery?: SelectionQueryConstrain<E>,
     options?: GetOptions<E>,
   ): Promise<SelectQueryBuilder<E>> {
-    const orderBy = mapKeys(options?.orderBy, (_, key) => snakeCase(key))
+    const orderBy = this.repository.marshalOrderBy(options?.orderBy)
 
     const query = this.repository
       .createQueryBuilder()

@@ -13,6 +13,8 @@ import { KeyResultCheckIn } from './key-result-check-in.orm-entity'
 
 @EntityRepository(KeyResultCheckIn)
 export class KeyResultCheckInRepository extends CoreEntityRepository<KeyResultCheckIn> {
+  public entityName = KeyResultCheckIn.name
+
   public async getLatestFromDateForKeyResult(date: Date, keyResult: KeyResultInterface) {
     const isoDate = date.toISOString()
 
