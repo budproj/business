@@ -43,7 +43,10 @@ const main = () =>
 
             createDatabaseUser(userDraft, user).then(resolve).catch(reject)
           })
-          .catch(reject)
+          .catch((error) => {
+            console.log(error)
+            resolve()
+          })
       )
 
     const createDatabaseUser = (userDraft, authzUser) => {
