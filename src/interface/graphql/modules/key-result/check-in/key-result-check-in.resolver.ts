@@ -35,11 +35,11 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   KeyResultCheckInInterface
 > {
   private readonly logger = new Logger(KeyResultCheckInGraphQLResolver.name)
-  private readonly accessControl = new KeyResultCheckInAccessControl()
 
   constructor(
     protected readonly core: CoreProvider,
     private readonly corePorts: CorePortsProvider,
+    private readonly accessControl: KeyResultCheckInAccessControl,
   ) {
     super(Resource.KEY_RESULT_CHECK_IN, core, core.keyResult.keyResultCheckInProvider)
   }
