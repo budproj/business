@@ -4,14 +4,13 @@ import { GqlExecutionContext } from '@nestjs/graphql'
 import { AuthGuard } from '@nestjs/passport'
 import { Observable } from 'rxjs'
 
-import { GodBypass } from '@adapters/authorization/godmode/decorators/god-bypass.decorator'
 import { GodmodeProvider } from '@adapters/authorization/godmode/godmode.provider'
 import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 
 @Injectable()
-export class GraphQLTokenGuard extends AuthGuard('jwt') {
+export class TokenGraphQLGuard extends AuthGuard('jwt') {
   protected readonly godmode: GodmodeProvider
-  private readonly logger = new Logger(GraphQLTokenGuard.name)
+  private readonly logger = new Logger(TokenGraphQLGuard.name)
 
   constructor(private readonly config: GraphQLConfigProvider) {
     super()
@@ -19,7 +18,7 @@ export class GraphQLTokenGuard extends AuthGuard('jwt') {
     this.godmode = new GodmodeProvider(this.config.godmode)
   }
 
-  @GodBypass(true)
+  // @GodBypass(true)
   public canActivate(
     executionContext: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {

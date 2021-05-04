@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 
-import { Context } from '@adapters/context/context.interface'
+import { Context } from '@adapters/context/interfaces/context.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 
 import { Port } from './base.interface'

@@ -4,14 +4,14 @@ import { Class } from 'type-fest'
 
 import { BaseResolver } from '@interface/graphql/decorators/base-resolver.decorator'
 
-import { GraphQLRequiredPoliciesGuard } from '../guards/required-policies.guard'
-import { GraphQLTokenGuard } from '../guards/token.guard'
+import { GraphQLRequiredPoliciesGraphQLGuard } from '../guards/required-policies.guard'
+import { TokenGraphQLGuard } from '../guards/token.guard'
 import { NourishUserDataInterceptor } from '../interceptors/nourish-user-data.interceptor'
 
 export function GuardedResolver(GraphQLObject: Class) {
   return applyDecorators(
     BaseResolver(),
-    UseGuards(GraphQLTokenGuard, GraphQLRequiredPoliciesGuard),
+    UseGuards(TokenGraphQLGuard, GraphQLRequiredPoliciesGraphQLGuard),
     UseInterceptors(NourishUserDataInterceptor),
     Resolver(() => GraphQLObject),
   )
