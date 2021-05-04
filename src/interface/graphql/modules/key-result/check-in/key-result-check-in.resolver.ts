@@ -1,5 +1,5 @@
-import { Logger, UseInterceptors } from '@nestjs/common'
-import { Args, Float, Int, Mutation, Parent, ResolveField } from '@nestjs/graphql'
+import { Logger } from '@nestjs/common'
+import { Args, Float, Int, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { UserWithContext } from '@adapters/context/interfaces/user.interface'
@@ -10,7 +10,6 @@ import { CoreProvider } from '@core/core.provider'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
-import { GuardedGraphQLRequest } from '@interface/graphql/adapters/authorization/decorators/guarded-graphql-request.decorator'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
@@ -19,7 +18,6 @@ import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authoriz
 import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { GraphQLRequestState } from '@interface/graphql/adapters/context/interfaces/request-state.interface'
-import { TraceGraphQLRequestInterceptor } from '@interface/graphql/adapters/tracing/trace-request.interceptor'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
@@ -66,9 +64,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
     return keyResultCheckIn
   }
 
-  @UseInterceptors(TraceGraphQLRequestInterceptor)
-  @GuardedGraphQLRequest('key-result-check-in:create')
-  @Mutation(() => KeyResultCheckInGraphQLNode, {
+  @GuardedMutation(KeyResultCheckInGraphQLNode, 'key-result-check-in:create', {
     name: 'createKeyResultCheckIn',
   })
   protected async createKeyResultCheckInForRequestAndRequestUserWithContext(
