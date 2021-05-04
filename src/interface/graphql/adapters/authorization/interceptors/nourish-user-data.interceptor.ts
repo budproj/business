@@ -7,7 +7,8 @@ import { GodmodeProvider } from '@adapters/authorization/godmode/godmode.provide
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 import { CoreProvider } from '@core/core.provider'
-import { ContextGraphQLRequestInterface } from '@interface/graphql/interfaces/context-request.interface'
+
+import { GraphQLRequest } from '../../context/interfaces/request.interface'
 
 @Injectable()
 export class NourishUserDataInterceptor implements NestInterceptor {
@@ -24,32 +25,30 @@ export class NourishUserDataInterceptor implements NestInterceptor {
     next: CallHandler,
   ): Promise<Observable<any>> {
     const graphqlContext = GqlExecutionContext.create(executionContext)
-    const request: ContextGraphQLRequestInterface = graphqlContext.getContext().req
+    const request: GraphQLRequest = graphqlContext.getContext().req
 
-    request.user = this.godmode.enabled
+    request.state.user = this.godmode.enabled
       ? await this.godmode.getGodUser(this.core)
       : await this.getRequestUser(request)
 
     this.logger.debug({
-      requestUser: request.user,
-      message: `Selected user with ID ${request.user.id} for current request`,
+      requestUser: request.state.user,
+      message: `Selected user with ID ${request.state.user.id} for current request`,
     })
 
     return next.handle()
   }
 
-  private async getRequestUser(
-    request: ContextGraphQLRequestInterface,
-  ): Promise<AuthorizationUser> {
+  private async getRequestUser(request: GraphQLRequest): Promise<AuthorizationUser> {
     const { teams, ...user } = await this.core.user.getUserFromSubjectWithTeamRelation(
-      request.user.token.sub,
+      request.state.user.token.sub,
     )
     const resourcePolicy = this.authz.getResourcePolicyFromPermissions(
-      request.user.token.permissions,
+      request.state.user.token.permissions,
     )
 
     return {
-      ...request.user,
+      ...request.state.user,
       ...user,
       teams,
       resourcePolicy,

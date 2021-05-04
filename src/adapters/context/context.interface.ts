@@ -2,6 +2,6 @@ import { AuthorizationUser } from '@adapters/authorization/interfaces/user.inter
 import { TracingInterface } from '@adapters/tracing/tracing.interface'
 
 export interface ContextInterface {
-  user: AuthorizationUser
+  user?: AuthorizationUser
   tracing?: TracingInterface
 }

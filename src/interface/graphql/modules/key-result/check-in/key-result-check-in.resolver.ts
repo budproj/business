@@ -15,6 +15,8 @@ import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorato
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { PolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/policy.object'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
+import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
+import { GraphQLRequestState } from '@interface/graphql/adapters/context/interfaces/request-state.interface'
 import { TraceGraphQLRequestInterceptor } from '@interface/graphql/adapters/tracing/trace-request.interceptor'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
@@ -66,12 +68,16 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   protected async createKeyResultCheckInForRequestAndAuthorizedRequestUser(
     @Args() request: KeyResultCheckInCreateRequest,
     @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestState() state: GraphQLRequestState,
   ) {
     this.logger.log({
       authorizationUser,
       request,
+      state,
       message: 'Received create check-in request',
     })
+
+    console.log(state)
 
     const isKeyResultActive = await this.core.keyResult.isActiveFromIndexes({
       id: request.data.keyResultId,
