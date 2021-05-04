@@ -3,17 +3,17 @@ import { GqlExecutionContext } from '@nestjs/graphql'
 import { Observable } from 'rxjs'
 
 import { GodmodeProvider } from '@adapters/authorization/godmode/godmode.provider'
-import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { PolicyAdapter } from '@adapters/policy/policy.adapter'
 import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 import { CoreProvider } from '@core/core.provider'
 
-import { GraphQLRequest } from '../../context/interfaces/request.interface'
+import { GraphQLRequest } from '../interfaces/request.interface'
 
 @Injectable()
-export class NourishUserDataInterceptor implements NestInterceptor {
+export class AddContextToUserInterceptor implements NestInterceptor {
   protected readonly godmode: GodmodeProvider
-  private readonly logger = new Logger(NourishUserDataInterceptor.name)
+  private readonly logger = new Logger(AddContextToUserInterceptor.name)
   private readonly authz = new PolicyAdapter()
 
   constructor(private readonly core: CoreProvider, private readonly config: GraphQLConfigProvider) {
@@ -39,7 +39,7 @@ export class NourishUserDataInterceptor implements NestInterceptor {
     return next.handle()
   }
 
-  private async getRequestUser(request: GraphQLRequest): Promise<AuthorizationUser> {
+  private async getRequestUser(request: GraphQLRequest): Promise<UserWithContext> {
     const { teams, ...user } = await this.core.user.getUserFromSubjectWithTeamRelation(
       request.state.user.token.sub,
     )

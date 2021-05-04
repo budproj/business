@@ -2,17 +2,17 @@ import { Logger } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
-import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
 import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
-import { AuthorizedRequestUser } from '@interface/graphql/adapters/authorization/decorators/authorized-request-user.decorator'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { PolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/policy.object'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
+import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
@@ -37,9 +37,9 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedQuery(KeyResultCommentGraphQLNode, 'key-result-comment:read', {
     name: 'keyResultComment',
   })
-  protected async getKeyResultCommentForRequestAndAuthorizedRequestUser(
+  protected async getKeyResultCommentForRequestAndRequestUserWithContext(
     @Args() request: NodeIndexesRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
       request,
@@ -48,7 +48,7 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
 
     const keyResultComment = await this.queryGuard.getOneWithActionScopeConstraint(
       request,
-      authorizationUser,
+      userWithContext,
     )
     if (!keyResultComment)
       throw new UserInputError(
@@ -61,12 +61,12 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedMutation(KeyResultCommentGraphQLNode, 'key-result-comment:create', {
     name: 'createKeyResultComment',
   })
-  protected async createKeyResultCommentForRequestAndAuthorizedRequestUser(
+  protected async createKeyResultCommentForRequestAndRequestUserWithContext(
     @Args() request: KeyResultCommentCreateRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
-      authorizationUser,
+      userWithContext,
       request,
       message: 'Received create comment request',
     })
@@ -80,12 +80,12 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
       )
 
     const keyResultComment = this.core.keyResult.createUserCommentData(
-      authorizationUser,
+      userWithContext,
       request.data,
     )
     const createdComments = await this.queryGuard.createWithActionScopeConstraint(
       keyResultComment,
-      authorizationUser,
+      userWithContext,
     )
     if (!createdComments || createdComments.length === 0)
       throw new UserInputError('We were not able to create your comment')
@@ -98,12 +98,12 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedMutation(DeleteResultGraphQLObject, 'key-result-comment:delete', {
     name: 'deleteKeyResultComment',
   })
-  protected async deleteKeyResultCommentForRequestAndAuthorizedRequestUser(
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+  protected async deleteKeyResultCommentForRequestAndRequestUserWithContext(
+    @RequestUserWithContext() userWithContext: UserWithContext,
     @Args() request: KeyResultCommentDeleteRequest,
   ) {
     this.logger.log({
-      authorizationUser,
+      userWithContext,
       request,
       message: 'Removing key result comment',
     })
@@ -120,10 +120,7 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
       )
 
     const selector = { id: request.id }
-    const result = await this.queryGuard.deleteWithActionScopeConstraint(
-      selector,
-      authorizationUser,
-    )
+    const result = await this.queryGuard.deleteWithActionScopeConstraint(selector, userWithContext)
     if (!result) throw new UserInputError('We were not able to find that comment to exclude')
 
     return result

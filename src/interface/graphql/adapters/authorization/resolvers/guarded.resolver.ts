@@ -1,5 +1,5 @@
 import { AuthorizationAdapter } from '@adapters/authorization/authorization.adapter'
-import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { Scope } from '@adapters/policy/enums/scope.enum'
 import { PolicyAdapter } from '@adapters/policy/policy.adapter'
@@ -17,7 +17,7 @@ export abstract class GuardedGraphQLResolver<P> extends BaseGraphQLResolver {
     super()
   }
 
-  protected async getPolicyForUserInScope(user: AuthorizationUser, scope: Scope, parent?: P) {
+  protected async getPolicyForUserInScope(user: UserWithContext, scope: Scope, parent?: P) {
     const resourcePolicy = this.policy.getResourcePolicyFromPermissions(user.token.permissions)
 
     const resourcesCommandStatement = this.policy.getResourcesCommandStatementsForScopeFromPolicy(

@@ -1,7 +1,7 @@
 import { Args, Parent, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { QueryGuardAdapter } from '@adapters/authorization/query-guard.adapter'
+import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { Scope } from '@adapters/policy/enums/scope.enum'
 import { PolicyAdapter } from '@adapters/policy/policy.adapter'
@@ -10,8 +10,8 @@ import { CoreEntity } from '@core/core.orm-entity'
 import { CoreProvider } from '@core/core.provider'
 import { CoreEntityProvider } from '@core/entity.provider'
 
+import { RequestUserWithContext } from '../../context/decorators/request-user-with-context.decorator'
 import { RelayGraphQLAdapter } from '../../relay/relay.adapter'
-import { AuthorizedRequestUser } from '../decorators/authorized-request-user.decorator'
 import { ScopeGraphQLEnum } from '../enums/scope.enum'
 import { GuardedNodeGraphQLInterface } from '../interfaces/guarded-node.interface'
 import { PolicyGraphQLObject } from '../objects/policy.object'
@@ -41,13 +41,13 @@ export abstract class GuardedNodeGraphQLResolver<
   @ResolveField('policy', () => PolicyGraphQLObject)
   protected async getConnectionPolicies(
     @Parent() node: E,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() userWithContext: UserWithContext,
     @Args('scope', { type: () => ScopeGraphQLEnum, nullable: true })
     scope?: Scope,
   ) {
-    scope ??= await this.getHighestScopeForNodeInUserContext(node, authorizationUser)
+    scope ??= await this.getHighestScopeForNodeInUserContext(node, userWithContext)
 
-    const policy = await this.getPolicyForUserInScope(authorizationUser, scope, node)
+    const policy = await this.getPolicyForUserInScope(userWithContext, scope, node)
     const controlledPolicy = await this.controlNodePolicy(policy, node)
 
     return controlledPolicy
@@ -62,7 +62,7 @@ export abstract class GuardedNodeGraphQLResolver<
 
   private async getHighestScopeForNodeInUserContext(
     node: E,
-    user: AuthorizationUser,
+    user: UserWithContext,
   ): Promise<Scope> {
     const queryContext = await this.core.team.buildTeamQueryContext(user)
     const scope = await this.coreEntityProvider.defineResourceHighestScope(node, queryContext)

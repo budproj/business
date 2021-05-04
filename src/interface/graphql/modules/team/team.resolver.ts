@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common'
 import { Args, Float, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
-import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
@@ -15,10 +15,10 @@ import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
-import { AuthorizedRequestUser } from '@interface/graphql/adapters/authorization/decorators/authorized-request-user.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
+import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { CycleFiltersRequest } from '@interface/graphql/modules/cycle/requests/cycle-filters.request'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-result/check-in/key-result-check-in.node'
 import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/requests/key-result-filters.request'
@@ -45,16 +45,16 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   }
 
   @GuardedQuery(TeamGraphQLNode, 'team:read', { name: 'team' })
-  protected async getTeamForRequestAndAuthorizedRequestUser(
+  protected async getTeamForRequestAndRequestUserWithContext(
     @Args() request: NodeIndexesRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
       request,
       message: 'Fetching team with provided indexes',
     })
 
-    const team = await this.queryGuard.getOneWithActionScopeConstraint(request, authorizationUser)
+    const team = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
     if (!team) throw new UserInputError(`We could not found a team with the provided arguments`)
 
     return team

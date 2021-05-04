@@ -1,7 +1,7 @@
 import { Args, Parent, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
 import { QueryGuardAdapter } from '@adapters/authorization/query-guard.adapter'
+import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { Scope } from '@adapters/policy/enums/scope.enum'
 import { PolicyAdapter } from '@adapters/policy/policy.adapter'
@@ -10,8 +10,8 @@ import { CoreEntity } from '@core/core.orm-entity'
 import { CoreProvider } from '@core/core.provider'
 import { CoreEntityProvider } from '@core/entity.provider'
 
+import { RequestUserWithContext } from '../../context/decorators/request-user-with-context.decorator'
 import { RelayGraphQLAdapter } from '../../relay/relay.adapter'
-import { AuthorizedRequestUser } from '../decorators/authorized-request-user.decorator'
 import { ScopeGraphQLEnum } from '../enums/scope.enum'
 import { GuardedConnectionGraphQLInterface } from '../interfaces/guarded-connection.interface'
 import { GuardedNodeGraphQLInterface } from '../interfaces/guarded-node.interface'
@@ -44,10 +44,10 @@ export abstract class GuardedConnectionGraphQLResolver<
   @ResolveField('policy', () => PolicyGraphQLObject)
   protected async getConnectionPolicies(
     @Parent() parent: C,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() userWithContext: UserWithContext,
     @Args('scope', { type: () => ScopeGraphQLEnum })
     scope: Scope,
   ) {
-    return this.getPolicyForUserInScope(authorizationUser, scope, parent)
+    return this.getPolicyForUserInScope(userWithContext, scope, parent)
   }
 }

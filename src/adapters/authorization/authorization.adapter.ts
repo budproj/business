@@ -1,5 +1,6 @@
 import { PolicyAdapter } from '@adapters/policy/policy.adapter'
 import { Action } from '@adapters/policy/types/action.type'
+import { Permission } from '@adapters/policy/types/permission.type'
 
 import { AuthorizationUser } from './interfaces/user.interface'
 
@@ -17,5 +18,15 @@ export class AuthorizationAdapter {
     )
 
     return canExecuteAllRequiredActions
+  }
+
+  public canUserExecutePermissions(user: AuthorizationUser, permissions?: Permission[]): boolean {
+    if (!permissions || permissions.length === 0) return true
+
+    const userHasAllPermissions = permissions.every((permission) =>
+      user.token.permissions.includes(permission),
+    )
+
+    return userHasAllPermissions
   }
 }

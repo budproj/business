@@ -2,17 +2,17 @@ import { Logger } from '@nestjs/common'
 import { Args, Float, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
-import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
-import { AuthorizedRequestUser } from '@interface/graphql/adapters/authorization/decorators/authorized-request-user.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
+import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
@@ -35,9 +35,9 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @GuardedQuery(ObjectiveGraphQLNode, 'objective:read', { name: 'objective' })
-  protected async getObjectiveForRequestAndAuthorizedRequestUser(
+  protected async getObjectiveForRequestAndRequestUserWithContext(
     @Args() request: NodeIndexesRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() authorizationUser: UserWithContext,
   ) {
     this.logger.log({
       request,

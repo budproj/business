@@ -1,15 +1,15 @@
 import { Logger } from '@nestjs/common'
 import { Args } from '@nestjs/graphql'
 
-import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
-import { AuthorizedRequestUser } from '@interface/graphql/adapters/authorization/decorators/authorized-request-user.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
+import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 
 import { CycleGraphQLNode } from '../../cycle.node'
 import { CycleFiltersRequest } from '../../requests/cycle-filters.request'
@@ -29,13 +29,13 @@ export class CyclesConnectionGraphQLResolver extends GuardedConnectionGraphQLRes
   }
 
   @GuardedQuery(CyclesGraphQLConnection, 'cycle:read', { name: 'cycles' })
-  protected async getCyclesForRequestAndAuthorizedRequestUser(
+  protected async getCyclesForRequestAndRequestUserWithContext(
     @Args() request: CycleFiltersRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
       request,
-      authorizationUser,
+      userWithContext,
       message: 'Fetching teams with filters',
     })
 
@@ -44,7 +44,7 @@ export class CyclesConnectionGraphQLResolver extends GuardedConnectionGraphQLRes
       Cycle
     >(request)
 
-    const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(authorizationUser.teams)
+    const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(userWithContext.teams)
     const queryResult = await this.core.cycle.getFromTeamsWithFilters(
       userTeamsTree,
       filters,

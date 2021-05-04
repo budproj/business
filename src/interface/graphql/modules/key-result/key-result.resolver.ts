@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
-import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
@@ -11,12 +11,12 @@ import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-
 import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
-import { AuthorizedRequestUser } from '@interface/graphql/adapters/authorization/decorators/authorized-request-user.decorator'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { PolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/policy.object'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
+import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
@@ -44,9 +44,9 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @GuardedQuery(KeyResultGraphQLNode, 'key-result:read', { name: 'keyResult' })
-  protected async getKeyResultForRequestAndAuthorizedRequestUser(
+  protected async getKeyResultForRequestAndRequestUserWithContext(
     @Args() request: NodeIndexesRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
       request,
@@ -55,7 +55,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
 
     const keyResult = await this.queryGuard.getOneWithActionScopeConstraint(
       request,
-      authorizationUser,
+      userWithContext,
     )
     if (!keyResult)
       throw new UserInputError(`We could not found an key-result with the provided arguments`)
@@ -64,12 +64,12 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @GuardedMutation(KeyResultGraphQLNode, 'key-result:update', { name: 'updateKeyResult' })
-  protected async updateKeyResultForRequestAndAuthorizedRequestUser(
+  protected async updateKeyResultForRequestAndRequestUserWithContext(
     @Args() request: KeyResultUpdateRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
-      authorizationUser,
+      userWithContext,
       request,
       message: 'Received update key-result request',
     })
@@ -77,7 +77,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     const keyResult = await this.queryGuard.updateWithActionScopeConstraint(
       { id: request.id },
       { ...request.data },
-      authorizationUser,
+      userWithContext,
     )
     if (!keyResult)
       throw new UserInputError(`We could not found an key-result with ID ${request.id}`)

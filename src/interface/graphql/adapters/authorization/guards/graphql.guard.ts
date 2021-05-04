@@ -27,7 +27,7 @@ export abstract class GraphQLGuard implements CanActivate {
     return graphqlExecutionContext.getContext().req
   }
 
-  protected getResolverRequiredActions(graphqlExecutionContext: GqlExecutionContext) {
+  protected getResolverRequiredActions(graphqlExecutionContext: GqlExecutionContext): Action[] {
     const handler = graphqlExecutionContext.getHandler()
     const permissions = this.reflector.get<Action[]>('requiredActions', handler)
 

@@ -4,7 +4,7 @@ import { UserInputError } from 'apollo-server-fastify'
 import { FileUpload } from 'graphql-upload'
 import { pickBy } from 'lodash'
 
-import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { VisibilityStorageEnum } from '@adapters/storage/enums/visilibity.enum'
 import { CoreProvider } from '@core/core.provider'
@@ -21,11 +21,11 @@ import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 import { AWSS3Provider } from '@infrastructure/aws/s3/aws-s3.provider'
-import { AuthorizedRequestUser } from '@interface/graphql/adapters/authorization/decorators/authorized-request-user.decorator'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
+import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { UploadGraphQLProvider } from '@interface/graphql/adapters/upload/upload.provider'
 import { KeyResultCheckInFiltersRequest } from '@interface/graphql/modules/key-result/check-in/requests/key-result-check-in-filters.request'
 import { KeyResultCommentFiltersRequest } from '@interface/graphql/modules/key-result/comment/requests/key-result-comment-filters.request'
@@ -54,46 +54,45 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   }
 
   @GuardedQuery(UserGraphQLNode, 'user:read', { name: 'user' })
-  protected async getUserForRequestAndAuthorizedRequestUser(
+  protected async getUserForRequestAndRequestUserWithContext(
     @Args() request: NodeIndexesRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
       request,
       message: 'Fetching user with provided indexes',
     })
 
-    const user = await this.queryGuard.getOneWithActionScopeConstraint(request, authorizationUser)
+    const user = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
     if (!user) throw new UserInputError(`We could not found an user with the provided arguments`)
 
     return user
   }
 
   @GuardedQuery(UserGraphQLNode, 'user:read', { name: 'me' })
-  protected async getMyUserForAuthorizedRequestUser(
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+  protected async getMyUserForRequestUserWithContext(
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log(
-      `Fetching data about the user that is executing the request. Provided user ID: ${authorizationUser.id}`,
+      `Fetching data about the user that is executing the request. Provided user ID: ${userWithContext.id}`,
     )
 
     const user = await this.queryGuard.getOneWithActionScopeConstraint(
-      { id: authorizationUser.id },
-      authorizationUser,
+      { id: userWithContext.id },
+      userWithContext,
     )
-    if (!user)
-      throw new UserInputError(`We could not found an user with ID ${authorizationUser.id}`)
+    if (!user) throw new UserInputError(`We could not found an user with ID ${userWithContext.id}`)
 
     return user
   }
 
   @GuardedMutation(UserGraphQLNode, 'user:update', { name: 'updateUser' })
-  protected async updateUserForRequestAndAuthorizedRequestUser(
+  protected async updateUserForRequestAndRequestUserWithContext(
     @Args() request: UserUpdateRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
-      authorizationUser,
+      userWithContext,
       request,
       message: 'Received update user request',
     })
@@ -105,7 +104,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
         ...request.data,
         picture,
       }),
-      authorizationUser,
+      userWithContext,
     )
     if (!user) throw new UserInputError(`We could not found an user with ID ${request.id}`)
 

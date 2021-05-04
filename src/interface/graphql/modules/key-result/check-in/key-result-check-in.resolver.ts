@@ -2,7 +2,7 @@ import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
 import { Args, Float, Int, Mutation, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
-import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Command } from '@adapters/policy/enums/command.enum'
 import { Effect } from '@adapters/policy/enums/effect.enum'
 import { Resource } from '@adapters/policy/enums/resource.enum'
@@ -10,7 +10,6 @@ import { CoreProvider } from '@core/core.provider'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
-import { AuthorizedRequestUser } from '@interface/graphql/adapters/authorization/decorators/authorized-request-user.decorator'
 import { GuardedGraphQLRequest } from '@interface/graphql/adapters/authorization/decorators/guarded-graphql-request.decorator'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
@@ -18,6 +17,7 @@ import { GuardedResolver } from '@interface/graphql/adapters/authorization/decor
 import { PolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/policy.object'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
+import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { GraphQLRequestState } from '@interface/graphql/adapters/context/interfaces/request-state.interface'
 import { TraceGraphQLRequestInterceptor } from '@interface/graphql/adapters/tracing/trace-request.interceptor'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
@@ -48,9 +48,9 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedQuery(KeyResultCheckInGraphQLNode, 'key-result-check-in:read', {
     name: 'keyResultCheckIn',
   })
-  protected async getCheckInForResquestAndAuthorizedRequestUser(
+  protected async getCheckInForResquestAndRequestUserWithContext(
     @Args() request: NodeIndexesRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
       request,
@@ -59,7 +59,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
 
     const keyResultCheckIn = await this.queryGuard.getOneWithActionScopeConstraint(
       request,
-      authorizationUser,
+      userWithContext,
     )
     if (!keyResultCheckIn)
       throw new UserInputError(`We could not found a check-in with the provided arguments`)
@@ -73,7 +73,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   @Mutation(() => KeyResultCheckInGraphQLNode, {
     name: 'createKeyResultCheckIn',
   })
-  protected async createKeyResultCheckInForRequestAndAuthorizedRequestUser(
+  protected async createKeyResultCheckInForRequestAndRequestUserWithContext(
     @Args() request: KeyResultCheckInCreateRequest,
     @RequestState() state: GraphQLRequestState,
   ) {
@@ -108,12 +108,12 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedMutation(DeleteResultGraphQLObject, 'key-result-check-in:delete', {
     name: 'deleteKeyResultCheckIn',
   })
-  protected async deleteKeyResultCheckInForRequestAndAuthorizedRequestUser(
+  protected async deleteKeyResultCheckInForRequestAndRequestUserWithContext(
     @Args() request: KeyResultCheckInDeleteRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
-      authorizationUser,
+      userWithContext,
       request,
       message: 'Removing key result check-in',
     })
@@ -130,10 +130,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
       )
 
     const selector = { id: request.id }
-    const result = await this.queryGuard.deleteWithActionScopeConstraint(
-      selector,
-      authorizationUser,
-    )
+    const result = await this.queryGuard.deleteWithActionScopeConstraint(selector, userWithContext)
     if (!result)
       throw new UserInputError(
         `We could not find any key result check-in with ${request.id} to delete`,

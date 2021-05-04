@@ -1,27 +1,29 @@
-import { ExecutionContext, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 
+import { Action } from '@adapters/policy/types/action.type'
+import { Permission } from '@adapters/policy/types/permission.type'
 import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 import { CoreProvider } from '@core/core.provider'
-import { GraphQLGuard } from '@interface/graphql/adapters/authorization/guards/graphql.guard'
+import { User } from '@core/modules/user/user.orm-entity'
+import { EntityGraphQLGuard } from '@interface/graphql/adapters/authorization/guards/entity.guard'
 
 @Injectable()
-export class KeyResultCheckInGraphQLGuard extends GraphQLGuard {
+export class KeyResultCheckInGraphQLGuard extends EntityGraphQLGuard {
   constructor(
     protected readonly reflector: Reflector,
-    private readonly core: CoreProvider,
+    protected readonly core: CoreProvider,
     config: GraphQLConfigProvider,
   ) {
-    super(reflector, config)
+    super(reflector, core, config)
   }
 
-  public async canActivate(executionContext: ExecutionContext): Promise<boolean> {
-    const graphqlExecutionContext = this.getGraphQLExecutionContext(executionContext)
-    const request = this.getGraphQLRequestFromContext(graphqlExecutionContext)
-    const resolverRequiredActions = this.getResolverRequiredActions(graphqlExecutionContext)
+  protected async getRequiredPermissionsForUserAndActions(
+    user: User,
+    actions: Action[],
+  ): Promise<Permission[]> {
+    console.log(user, actions)
 
-    console.log(request.user, resolverRequiredActions)
-
-    return false
+    return []
   }
 }

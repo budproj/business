@@ -2,14 +2,14 @@ import { Logger } from '@nestjs/common'
 import { Args } from '@nestjs/graphql'
 import { camelCase, mapKeys } from 'lodash'
 
-import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Effect } from '@adapters/policy/enums/effect.enum'
 import { Scope } from '@adapters/policy/enums/scope.enum'
 import { PolicyAdapter } from '@adapters/policy/policy.adapter'
 import { CommandStatement } from '@adapters/policy/types/command-statement.type'
 import { ResourceStatement } from '@adapters/policy/types/resource-statement.type copy'
 
-import { AuthorizedRequestUser } from '../decorators/authorized-request-user.decorator'
+import { RequestUserWithContext } from '../../context/decorators/request-user-with-context.decorator'
 import { GuardedQuery } from '../decorators/guarded-query.decorator'
 import { GuardedResolver } from '../decorators/guarded-resolver.decorator'
 import { ScopeGraphQLEnum } from '../enums/scope.enum'
@@ -24,12 +24,12 @@ export class PermissionsGraphQLResolver {
   protected getUserPermissionsForScope(
     @Args('scope', { type: () => ScopeGraphQLEnum, defaultValue: Scope.COMPANY })
     scope: Scope,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log(`Fetching user permissions for user with ID ${authorizationUser.id}`)
+    this.logger.log(`Fetching user permissions for user with ID ${userWithContext.id}`)
 
     const resourcePolicy = this.authz.getResourcePolicyFromPermissions(
-      authorizationUser.token.permissions,
+      userWithContext.token.permissions,
     )
     const resourcesCommandStatement = this.authz.getResourcesCommandStatementsForScopeFromPolicy(
       resourcePolicy,

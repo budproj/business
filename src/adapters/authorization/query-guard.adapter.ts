@@ -1,6 +1,7 @@
 import { DeleteResult, FindConditions } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
+import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { CoreEntity } from '@core/core.orm-entity'
 import { CoreProvider } from '@core/core.provider'
 import { CoreEntityProvider } from '@core/entity.provider'
@@ -9,8 +10,6 @@ import { GetOptions } from '@core/interfaces/get-options'
 import { Command } from '../policy/enums/command.enum'
 import { Resource } from '../policy/enums/resource.enum'
 import { PolicyAdapter } from '../policy/policy.adapter'
-
-import { AuthorizationUser } from './interfaces/user.interface'
 
 export class QueryGuardAdapter<E extends CoreEntity, I> {
   protected readonly authz = new PolicyAdapter()
@@ -23,7 +22,7 @@ export class QueryGuardAdapter<E extends CoreEntity, I> {
 
   public async createWithActionScopeConstraint(
     data: Partial<I>,
-    user: AuthorizationUser,
+    user: UserWithContext,
     command: Command = Command.CREATE,
   ): Promise<E[]> {
     const queryScope = this.authz.getResourceCommandScopeForUser(this.resource, command, user)
@@ -34,7 +33,7 @@ export class QueryGuardAdapter<E extends CoreEntity, I> {
 
   public async getOneWithActionScopeConstraint(
     selector: FindConditions<E>,
-    user: AuthorizationUser,
+    user: UserWithContext,
     command: Command = Command.READ,
   ): Promise<E> {
     const queryScope = this.authz.getResourceCommandScopeForUser(this.resource, command, user)
@@ -45,7 +44,7 @@ export class QueryGuardAdapter<E extends CoreEntity, I> {
 
   public async getManyWithActionScopeConstraint(
     selector: FindConditions<E>,
-    user: AuthorizationUser,
+    user: UserWithContext,
     options?: GetOptions<E>,
     command: Command = Command.READ,
   ): Promise<E[]> {
@@ -58,7 +57,7 @@ export class QueryGuardAdapter<E extends CoreEntity, I> {
   public async updateWithActionScopeConstraint(
     selector: FindConditions<E>,
     newData: QueryDeepPartialEntity<E>,
-    user: AuthorizationUser,
+    user: UserWithContext,
     command: Command = Command.UPDATE,
   ): Promise<E> {
     const queryScope = this.authz.getResourceCommandScopeForUser(this.resource, command, user)
@@ -69,7 +68,7 @@ export class QueryGuardAdapter<E extends CoreEntity, I> {
 
   public async deleteWithActionScopeConstraint(
     selector: FindConditions<E>,
-    user: AuthorizationUser,
+    user: UserWithContext,
     command: Command = Command.DELETE,
   ): Promise<DeleteResult> {
     const queryScope = this.authz.getResourceCommandScopeForUser(this.resource, command, user)
