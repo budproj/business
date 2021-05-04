@@ -2,8 +2,8 @@ import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
 import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
-import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
-import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
+import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
+import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
 
 import { KeyResultCommentGraphQLNode } from '../../comment/key-result-comment.node'
 

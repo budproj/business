@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql'
 import { FileUpload } from 'graphql-upload'
 
-import { UploadGraphQLScalar } from '@interface/graphql/upload/scalars/upload.scalar'
+import { UploadGraphQLScalar } from '@interface/graphql/adapters/upload/scalars/upload.scalar'
 
 @InputType('UserInput', { description: 'Data that you can assign to a given user' })
 export class UserInputObject {

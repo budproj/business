@@ -1,8 +1,8 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 import { ConnectionCursor } from 'graphql-relay'
 
+import { EdgeRelayInterface } from '@interface/graphql/adapters/relay/interfaces/edge.interface'
 import { KeyResultCommentGraphQLNode } from '@interface/graphql/modules/key-result/comment/key-result-comment.node'
-import { EdgeRelayInterface } from '@interface/graphql/relay/interfaces/edge.interface'
 
 @ObjectType('UserKeyResultCommentEdge', {
   implements: () => EdgeRelayInterface,

@@ -8,7 +8,7 @@ import { NodeRelayInterface } from './interfaces/node.interface'
 import { ConnectionRelayRequest } from './requests/connection.request'
 import { NodeRequest } from './types/node-request.type'
 
-export class RelayGraphQLProvider {
+export class RelayGraphQLAdapter {
   public getNodeRequest<R extends ConnectionRelayRequest>(request: R): NodeRequest<R> {
     return omit(request, ['before', 'after', 'first', 'last', 'order']) as any
   }

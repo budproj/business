@@ -1,6 +1,6 @@
 import { PipeTransform } from '@nestjs/common'
 
-import { ImageUploadValidationPipe } from '@interface/graphql/upload/validation-pipes/image-upload.validation-pipe'
+import { ImageUploadValidationPipe } from '@interface/graphql/adapters/upload/validation-pipes/image-upload.validation-pipe'
 
 import { UserUpdateRequest } from '../requests/user-update.request'
 

@@ -1,10 +1,10 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql'
 
 import { Cadence } from '@core/modules/cycle/enums/cadence.enum'
-import { GuardedNodeGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-node.interface'
-import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
+import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
+import { PolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/policy.object'
+import { NodeRelayInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
-import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.interface'
 
 import { ObjectivesGraphQLConnection } from '../objective/connections/objectives/objectives.connection'
 

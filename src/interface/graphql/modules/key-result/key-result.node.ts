@@ -1,12 +1,12 @@
 import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
 
 import { KeyResultFormat } from '@core/modules/key-result/enums/key-result-format.enum'
-import { GuardedNodeGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-node.interface'
-import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
+import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
+import { PolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/policy.object'
+import { NodeRelayInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
-import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.interface'
 
 import { KeyResultCheckInGraphQLNode } from './check-in/key-result-check-in.node'
 import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.connection'

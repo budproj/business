@@ -1,9 +1,9 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
 import { UserGender } from '@core/modules/user/enums/user-gender.enum'
-import { GuardedNodeGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-node.interface'
-import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
-import { NodeRelayInterface } from '@interface/graphql/relay/interfaces/node.interface'
+import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
+import { PolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/policy.object'
+import { NodeRelayInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 
 import { UserKeyResultCheckInsGraphQLConnection } from './connections/user-key-result-check-ins/user-key-result-check-ins.connection'
 import { UserKeyResultCommentsGraphQLConnection } from './connections/user-key-result-comments/user-key-result-comments.connection'

@@ -6,7 +6,7 @@ import { GodmodeProvider } from '@adapters/authorization/godmode/godmode.provide
 import { TracingInterface } from '@adapters/tracing/tracing.interface'
 import { TracingProvider } from '@adapters/tracing/tracing.provider'
 
-import { ContextGraphQLRequestInterface } from '../interfaces/context-request.interface'
+import { ContextGraphQLRequestInterface } from '../../interfaces/context-request.interface'
 
 @Injectable()
 export class TraceGraphQLRequestInterceptor implements NestInterceptor {
