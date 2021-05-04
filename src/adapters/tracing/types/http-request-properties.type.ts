@@ -1,3 +1,3 @@
 export type HttpRequestProperties = {
-  'Session-Id': string
+  'session-id'?: string
 }

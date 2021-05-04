@@ -1,22 +1,28 @@
 import { TracingInterface } from './tracing.interface'
 import { HttpRequestProperties } from './types/http-request-properties.type'
+import { MarshalFunction } from './types/marshal-function.type'
 import { Origin } from './types/origin.type'
 import { Properties } from './types/properties.type'
 
 export class TracingProvider {
   public data: TracingInterface
-  private readonly dataMarshalers: Record<Origin, (data: Properties) => TracingInterface> = {
+  private readonly marshal: MarshalFunction
+  private readonly dataMarshalers: Record<Origin, MarshalFunction> = {
     'http-request': TracingProvider.marshalFromHTTPRequest,
   }
 
-  constructor(origin: Origin, properties: Properties) {
-    const marshal = this.dataMarshalers[origin]
-    this.data = marshal(properties)
+  constructor(origin: Origin, properties?: Properties) {
+    this.marshal = this.dataMarshalers[origin]
+    this.data = this.marshal(properties)
   }
 
-  static marshalFromHTTPRequest(data: HttpRequestProperties): TracingInterface {
+  static marshalFromHTTPRequest(properties?: HttpRequestProperties): TracingInterface {
     return {
-      sessionID: data['Session-Id'],
+      sessionID: properties?.['session-id'],
     }
+  }
+
+  public refreshData(properties?: Properties): void {
+    this.data = this.marshal(properties)
   }
 }
