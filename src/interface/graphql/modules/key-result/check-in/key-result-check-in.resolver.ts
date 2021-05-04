@@ -1,5 +1,5 @@
-import { Logger, UseInterceptors } from '@nestjs/common'
-import { Args, Float, Int, Parent, ResolveField } from '@nestjs/graphql'
+import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
+import { Args, Float, Int, Mutation, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
@@ -11,6 +11,7 @@ import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { AuthorizedRequestUser } from '@interface/graphql/adapters/authorization/decorators/authorized-request-user.decorator'
+import { GuardedGraphQLRequest } from '@interface/graphql/adapters/authorization/decorators/guarded-graphql-request.decorator'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
@@ -25,6 +26,7 @@ import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.req
 
 import { KeyResultGraphQLNode } from '../key-result.node'
 
+import { KeyResultCheckInGraphQLGuard } from './guards/key-result-check-in.guard'
 import { KeyResultCheckInGraphQLNode } from './key-result-check-in.node'
 import { KeyResultCheckInCreateRequest } from './requests/key-result-check-in-create.request'
 import { KeyResultCheckInDeleteRequest } from './requests/key-result-comment-delete.request'
@@ -66,7 +68,9 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @UseInterceptors(TraceGraphQLRequestInterceptor)
-  @GuardedMutation(KeyResultCheckInGraphQLNode, 'key-result-check-in:create', {
+  @GuardedGraphQLRequest('key-result-check-in:create')
+  @UseGuards(KeyResultCheckInGraphQLGuard)
+  @Mutation(() => KeyResultCheckInGraphQLNode, {
     name: 'createKeyResultCheckIn',
   })
   protected async createKeyResultCheckInForRequestAndAuthorizedRequestUser(

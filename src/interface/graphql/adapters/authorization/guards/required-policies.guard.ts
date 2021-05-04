@@ -2,9 +2,9 @@ import { CanActivate, ExecutionContext, Injectable, Logger } from '@nestjs/commo
 import { Reflector } from '@nestjs/core'
 import { GqlExecutionContext } from '@nestjs/graphql'
 
+import { AuthorizationAdapter } from '@adapters/authorization/authorization.adapter'
 import { GodBypass } from '@adapters/authorization/godmode/decorators/god-bypass.decorator'
 import { GodmodeProvider } from '@adapters/authorization/godmode/godmode.provider'
-import { PolicyAdapter } from '@adapters/policy/policy.adapter'
 import { Action } from '@adapters/policy/types/action.type'
 import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 
@@ -12,7 +12,7 @@ import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 export class GraphQLRequiredPoliciesGuard implements CanActivate {
   protected readonly godmode: GodmodeProvider
   private readonly logger = new Logger(GraphQLRequiredPoliciesGuard.name)
-  private readonly authz = new PolicyAdapter()
+  private readonly authorization = new AuthorizationAdapter()
 
   constructor(
     private readonly reflector: Reflector,
@@ -34,7 +34,7 @@ export class GraphQLRequiredPoliciesGuard implements CanActivate {
       message: 'Checking if user is allowed in given route',
     })
 
-    const hasRequiredPolicies = this.authz.canUserExecuteActions(
+    const hasRequiredPolicies = this.authorization.canUserExecuteActions(
       request.user,
       resolverRequiredActions,
     )

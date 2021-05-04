@@ -39,19 +39,6 @@ export class PolicyAdapter {
     return resourcePolicy
   }
 
-  public canUserExecuteActions(user: AuthorizationUser, actions?: Action[]): boolean {
-    if (!actions || actions.length === 0) return true
-
-    const userAllowedActions = this.getActionsFromPermissions(user.token.permissions)
-    if (userAllowedActions.length === 0) return false
-
-    const canExecuteAllRequiredActions = actions.every((action) =>
-      userAllowedActions.includes(action),
-    )
-
-    return canExecuteAllRequiredActions
-  }
-
   public getResourceCommandScopeForUser(
     resource: Resource,
     command: Command,
@@ -80,6 +67,13 @@ export class PolicyAdapter {
     const effects = uniq(Object.values(statement))
 
     return effects === [Effect.DENY]
+  }
+
+  public getActionsFromPermissions(permissions: Permission[]): Action[] {
+    const actions: Action[] = permissions.map((permission) => this.drillUp<Action>(permission))
+    const uniqActions = uniq(actions)
+
+    return uniqActions
   }
 
   private getCommandPoliciesForResourceFromPermissions(
@@ -126,13 +120,6 @@ export class PolicyAdapter {
 
   private filterActionPermissionsFromPermissions(action: Action, permissions: Permission[]) {
     return permissions.filter((permission) => permission.includes(action))
-  }
-
-  private getActionsFromPermissions(permissions: Permission[]): Action[] {
-    const actions: Action[] = permissions.map((permission) => this.drillUp<Action>(permission))
-    const uniqActions = uniq(actions)
-
-    return uniqActions
   }
 
   private drillUp<T extends string = string>(value: string): T {

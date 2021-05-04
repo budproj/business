@@ -1,0 +1,21 @@
+import { PolicyAdapter } from '@adapters/policy/policy.adapter'
+import { Action } from '@adapters/policy/types/action.type'
+
+import { AuthorizationUser } from './interfaces/user.interface'
+
+export class AuthorizationAdapter {
+  private readonly policyAdapter: PolicyAdapter = new PolicyAdapter()
+
+  public canUserExecuteActions(user: AuthorizationUser, actions?: Action[]): boolean {
+    if (!actions || actions.length === 0) return true
+
+    const userAllowedActions = this.policyAdapter.getActionsFromPermissions(user.token.permissions)
+    if (userAllowedActions.length === 0) return false
+
+    const canExecuteAllRequiredActions = actions.every((action) =>
+      userAllowedActions.includes(action),
+    )
+
+    return canExecuteAllRequiredActions
+  }
+}
