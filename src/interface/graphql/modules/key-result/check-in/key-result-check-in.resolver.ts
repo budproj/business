@@ -2,13 +2,14 @@ import { Logger, UseInterceptors } from '@nestjs/common'
 import { Args, Float, Int, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
-import { Command } from '@adapters/authorization/enums/command.enum'
-import { Effect } from '@adapters/authorization/enums/effect.enum'
-import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { Command } from '@adapters/policy/enums/command.enum'
+import { Effect } from '@adapters/policy/enums/effect.enum'
+import { Resource } from '@adapters/policy/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
+import { CorePortsProvider } from '@core/ports/ports.provider'
 import { AuthorizedRequestUser } from '@interface/graphql/adapters/authorization/decorators/authorized-request-user.decorator'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
@@ -35,7 +36,10 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
 > {
   private readonly logger = new Logger(KeyResultCheckInGraphQLResolver.name)
 
-  constructor(protected readonly core: CoreProvider) {
+  constructor(
+    protected readonly core: CoreProvider,
+    private readonly corePorts: CorePortsProvider,
+  ) {
     super(Resource.KEY_RESULT_CHECK_IN, core, core.keyResult.keyResultCheckInProvider)
   }
 
@@ -67,17 +71,13 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   })
   protected async createKeyResultCheckInForRequestAndAuthorizedRequestUser(
     @Args() request: KeyResultCheckInCreateRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
     @RequestState() state: GraphQLRequestState,
   ) {
     this.logger.log({
-      authorizationUser,
       request,
       state,
       message: 'Received create check-in request',
     })
-
-    console.log(state)
 
     const isKeyResultActive = await this.core.keyResult.isActiveFromIndexes({
       id: request.data.keyResultId,
@@ -87,25 +87,16 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
         'You cannot create this check-in, because that key-result is not active anymore',
       )
 
-    const keyResultCheckIn = await this.core.keyResult.buildCheckInForUser(
-      authorizationUser,
-      request.data,
-    )
-    const createdCheckIns = await this.queryGuard.createWithActionScopeConstraint(
-      keyResultCheckIn,
-      authorizationUser,
-    )
+    const keyResultCheckIn = await this.core.keyResult.buildCheckInForUser(state.user, request.data)
+    const createdCheckIn = await this.corePorts.createCheckIn.execute(keyResultCheckIn, state)
+
+    if (!createdCheckIn) throw new UserInputError('We were not able to create your check-in')
 
     this.logger.log({
-      authorizationUser,
+      state,
       keyResultCheckIn,
-      message: 'Creating a new check-in in our database',
+      message: 'Created a new check-in in our database',
     })
-
-    if (!createdCheckIns || createdCheckIns.length === 0)
-      throw new UserInputError('We were not able to create your check-in')
-
-    const createdCheckIn = createdCheckIns[0]
 
     return createdCheckIn
   }

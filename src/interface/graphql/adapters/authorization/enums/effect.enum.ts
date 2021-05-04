@@ -1,6 +1,6 @@
 import { registerEnumType } from '@nestjs/graphql/dist'
 
-import { Effect } from '@adapters/authorization/enums/effect.enum'
+import { Effect } from '@adapters/policy/enums/effect.enum'
 
 export const EffectGraphQLEnum = Effect
 

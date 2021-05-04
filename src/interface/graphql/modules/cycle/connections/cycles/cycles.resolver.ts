@@ -1,8 +1,8 @@
 import { Logger } from '@nestjs/common'
 import { Args } from '@nestjs/graphql'
 
-import { Resource } from '@adapters/authorization/enums/resource.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { Resource } from '@adapters/policy/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'

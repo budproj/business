@@ -1,6 +1,6 @@
 import { registerEnumType } from '@nestjs/graphql/dist'
 
-import { Scope } from '@adapters/authorization/enums/scope.enum'
+import { Scope } from '@adapters/policy/enums/scope.enum'
 
 export const ScopeGraphQLEnum = Scope
 

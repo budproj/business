@@ -2,7 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { filter, flatten, maxBy, meanBy, minBy, uniqBy } from 'lodash'
 import { Any, FindConditions } from 'typeorm'
 
-import { Scope } from '@adapters/authorization/enums/scope.enum'
+import { Scope } from '@adapters/policy/enums/scope.enum'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'

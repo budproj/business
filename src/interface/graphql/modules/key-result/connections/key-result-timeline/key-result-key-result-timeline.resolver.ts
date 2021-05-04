@@ -1,4 +1,4 @@
-import { Resource } from '@adapters/authorization/enums/resource.enum'
+import { Resource } from '@adapters/policy/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
 import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'

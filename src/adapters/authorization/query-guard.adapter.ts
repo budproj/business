@@ -6,13 +6,14 @@ import { CoreProvider } from '@core/core.provider'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { GetOptions } from '@core/interfaces/get-options'
 
-import { AuthzAdapter } from './authz.adapter'
-import { Command } from './enums/command.enum'
-import { Resource } from './enums/resource.enum'
+import { Command } from '../policy/enums/command.enum'
+import { Resource } from '../policy/enums/resource.enum'
+import { PolicyAdapter } from '../policy/policy.adapter'
+
 import { AuthorizationUser } from './interfaces/user.interface'
 
 export class QueryGuardAdapter<E extends CoreEntity, I> {
-  protected readonly authz = new AuthzAdapter()
+  protected readonly authz = new PolicyAdapter()
 
   constructor(
     protected readonly resource: Resource,

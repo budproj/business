@@ -1,11 +1,12 @@
 import { mapValues, uniq, zipObject } from 'lodash'
 
-import { SCOPE_PRIORITY } from './authorization.constants'
+import { AuthorizationUser } from '../authorization/interfaces/user.interface'
+
 import { Command } from './enums/command.enum'
 import { Effect } from './enums/effect.enum'
 import { Resource } from './enums/resource.enum'
 import { Scope } from './enums/scope.enum'
-import { AuthorizationUser } from './interfaces/user.interface'
+import { SCOPE_PRIORITY } from './policy.constants'
 import { Action } from './types/action.type'
 import { CommandPolicy } from './types/command-policy.type'
 import { CommandStatement } from './types/command-statement.type'
@@ -14,7 +15,7 @@ import { ResourcePolicy } from './types/resource-policy.type'
 import { ResourceStatement } from './types/resource-statement.type copy'
 import { ScopePolicy } from './types/scope-policy'
 
-export class AuthzAdapter {
+export class PolicyAdapter {
   private readonly resources = [
     Resource.PERMISSION,
     Resource.USER,
@@ -69,6 +70,16 @@ export class AuthzAdapter {
     return mapValues(policy, (commandPolicy) =>
       this.getCommandStatementsForScopeFromPolicy(commandPolicy, scope),
     )
+  }
+
+  public denyCommandStatement(statement: CommandStatement): CommandStatement {
+    return mapValues(statement, () => Effect.DENY)
+  }
+
+  public commandStatementIsDenyingAll(statement: CommandStatement): boolean {
+    const effects = uniq(Object.values(statement))
+
+    return effects === [Effect.DENY]
   }
 
   private getCommandPoliciesForResourceFromPermissions(

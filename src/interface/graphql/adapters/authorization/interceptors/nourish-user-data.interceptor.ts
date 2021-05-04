@@ -2,9 +2,9 @@ import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Logger } fr
 import { GqlExecutionContext } from '@nestjs/graphql'
 import { Observable } from 'rxjs'
 
-import { AuthzAdapter } from '@adapters/authorization/authz.adapter'
 import { GodmodeProvider } from '@adapters/authorization/godmode/godmode.provider'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { PolicyAdapter } from '@adapters/policy/policy.adapter'
 import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 import { CoreProvider } from '@core/core.provider'
 
@@ -14,7 +14,7 @@ import { GraphQLRequest } from '../../context/interfaces/request.interface'
 export class NourishUserDataInterceptor implements NestInterceptor {
   protected readonly godmode: GodmodeProvider
   private readonly logger = new Logger(NourishUserDataInterceptor.name)
-  private readonly authz = new AuthzAdapter()
+  private readonly authz = new PolicyAdapter()
 
   constructor(private readonly core: CoreProvider, private readonly config: GraphQLConfigProvider) {
     this.godmode = new GodmodeProvider(this.config.godmode)

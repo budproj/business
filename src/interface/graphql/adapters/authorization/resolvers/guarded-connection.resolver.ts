@@ -1,11 +1,10 @@
 import { Args, Parent, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { AuthzAdapter } from '@adapters/authorization/authz.adapter'
-import { Resource } from '@adapters/authorization/enums/resource.enum'
-import { Scope } from '@adapters/authorization/enums/scope.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
-import { PolicyAdapter } from '@adapters/authorization/policy.adapter'
 import { QueryGuardAdapter } from '@adapters/authorization/query-guard.adapter'
+import { Resource } from '@adapters/policy/enums/resource.enum'
+import { Scope } from '@adapters/policy/enums/scope.enum'
+import { PolicyAdapter } from '@adapters/policy/policy.adapter'
 import { CoreEntityInterface } from '@core/core-entity.interface'
 import { CoreEntity } from '@core/core.orm-entity'
 import { CoreProvider } from '@core/core.provider'
@@ -29,7 +28,7 @@ export abstract class GuardedConnectionGraphQLResolver<
 > extends GuardedGraphQLResolver<C> {
   protected readonly queryGuard: QueryGuardAdapter<E, I>
   protected readonly policy: PolicyAdapter
-  protected readonly authz: AuthzAdapter
+  protected readonly authz: PolicyAdapter
   protected readonly relay: RelayGraphQLAdapter
 
   constructor(

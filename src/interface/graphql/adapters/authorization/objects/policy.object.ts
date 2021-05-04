@@ -1,6 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
-import { Effect } from '@adapters/authorization/enums/effect.enum'
+import { Effect } from '@adapters/policy/enums/effect.enum'
 
 import { EffectGraphQLEnum } from '../enums/effect.enum'
 

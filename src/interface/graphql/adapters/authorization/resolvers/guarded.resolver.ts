@@ -1,8 +1,7 @@
-import { AuthzAdapter } from '@adapters/authorization/authz.adapter'
-import { Resource } from '@adapters/authorization/enums/resource.enum'
-import { Scope } from '@adapters/authorization/enums/scope.enum'
 import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
-import { PolicyAdapter } from '@adapters/authorization/policy.adapter'
+import { Resource } from '@adapters/policy/enums/resource.enum'
+import { Scope } from '@adapters/policy/enums/scope.enum'
+import { PolicyAdapter } from '@adapters/policy/policy.adapter'
 
 import { BaseGraphQLResolver } from '../../../resolvers/base.resolver'
 import { RelayGraphQLAdapter } from '../../relay/relay.adapter'
@@ -10,13 +9,13 @@ import { PolicyGraphQLObject } from '../objects/policy.object'
 
 export abstract class GuardedGraphQLResolver<P> extends BaseGraphQLResolver {
   protected readonly policy: PolicyAdapter
-  protected readonly authz: AuthzAdapter
+  protected readonly authz: PolicyAdapter
   protected readonly relay: RelayGraphQLAdapter
 
   constructor(protected readonly resource: Resource) {
     super()
 
-    this.authz = new AuthzAdapter()
+    this.authz = new PolicyAdapter()
     this.policy = new PolicyAdapter()
   }
 

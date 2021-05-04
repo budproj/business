@@ -1,4 +1,4 @@
-import { Resource } from '@adapters/authorization/enums/resource.enum'
+import { Resource } from '@adapters/policy/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'

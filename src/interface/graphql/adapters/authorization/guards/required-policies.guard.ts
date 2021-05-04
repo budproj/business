@@ -2,17 +2,17 @@ import { CanActivate, ExecutionContext, Injectable, Logger } from '@nestjs/commo
 import { Reflector } from '@nestjs/core'
 import { GqlExecutionContext } from '@nestjs/graphql'
 
-import { AuthzAdapter } from '@adapters/authorization/authz.adapter'
 import { GodBypass } from '@adapters/authorization/godmode/decorators/god-bypass.decorator'
 import { GodmodeProvider } from '@adapters/authorization/godmode/godmode.provider'
-import { Action } from '@adapters/authorization/types/action.type'
+import { PolicyAdapter } from '@adapters/policy/policy.adapter'
+import { Action } from '@adapters/policy/types/action.type'
 import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 
 @Injectable()
 export class GraphQLRequiredPoliciesGuard implements CanActivate {
   protected readonly godmode: GodmodeProvider
   private readonly logger = new Logger(GraphQLRequiredPoliciesGuard.name)
-  private readonly authz = new AuthzAdapter()
+  private readonly authz = new PolicyAdapter()
 
   constructor(
     private readonly reflector: Reflector,

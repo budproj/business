@@ -1,4 +1,4 @@
-import { Resource } from '@adapters/authorization/enums/resource.enum'
+import { Resource } from '@adapters/policy/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
