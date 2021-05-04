@@ -24,10 +24,10 @@ import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.req
 
 import { KeyResultGraphQLNode } from '../key-result.node'
 
+import { KeyResultCheckInAccessControl } from './key-result-check-in.access-control'
 import { KeyResultCheckInGraphQLNode } from './key-result-check-in.node'
 import { KeyResultCheckInCreateRequest } from './requests/key-result-check-in-create.request'
 import { KeyResultCheckInDeleteRequest } from './requests/key-result-comment-delete.request'
-import { KeyResultCheckInAccessControl } from './key-result-check-in.access-control'
 
 @GuardedResolver(KeyResultCheckInGraphQLNode)
 export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
@@ -73,7 +73,8 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: KeyResultCheckInCreateRequest,
     @RequestState() state: GraphQLRequestState,
   ) {
-    if (!this.accessControl.canCreate(state.user, request)) throw new UnauthorizedException()
+    const canCreate = await this.accessControl.canCreate(state.user, request.data)
+    if (!canCreate) throw new UnauthorizedException()
 
     this.logger.log({
       request,
