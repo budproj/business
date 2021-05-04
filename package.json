@@ -55,6 +55,7 @@
     "node": ">=15.5.1"
   },
   "dependencies": {
+    "@amplitude/node": "^1.5.4",
     "@hapi/joi": "^17.1.1",
     "@nestjs/cli": "^7.5.3",
     "@nestjs/common": "^7.5.2",
