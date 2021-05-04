@@ -1,21 +1,16 @@
-import { CanActivate, ExecutionContext } from '@nestjs/common'
+import { ExecutionContext } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { GqlExecutionContext } from '@nestjs/graphql'
 
 import { AuthorizationAdapter } from '@adapters/authorization/authorization.adapter'
-import { GodmodeProvider } from '@adapters/authorization/godmode/godmode.provider'
 import { Action } from '@adapters/policy/types/action.type'
-import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 
 import { RequestWithUserToken } from '../interfaces/request-with-user-token'
 
-export abstract class GraphQLGuard implements CanActivate {
-  protected readonly godmode: GodmodeProvider
+export abstract class BaseAuthorizationGraphQLReflector {
   protected readonly authorization = new AuthorizationAdapter()
 
-  constructor(protected readonly reflector: Reflector, config: GraphQLConfigProvider) {
-    this.godmode = new GodmodeProvider(config.godmode)
-  }
+  constructor(protected readonly reflector: Reflector) {}
 
   protected getGraphQLExecutionContext(executionContext: ExecutionContext): GqlExecutionContext {
     return GqlExecutionContext.create(executionContext)
@@ -33,6 +28,4 @@ export abstract class GraphQLGuard implements CanActivate {
 
     return permissions
   }
-
-  public abstract canActivate(executionContext: ExecutionContext): boolean | Promise<boolean>
 }

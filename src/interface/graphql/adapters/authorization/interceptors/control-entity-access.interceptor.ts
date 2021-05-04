@@ -1,4 +1,4 @@
-import { ExecutionContext } from '@nestjs/common'
+import { CallHandler, ExecutionContext, Logger, NestInterceptor, UnauthorizedException } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 
 import { Action } from '@adapters/policy/types/action.type'
@@ -6,19 +6,30 @@ import { Permission } from '@adapters/policy/types/permission.type'
 import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 import { CoreProvider } from '@core/core.provider'
 import { User } from '@core/modules/user/user.orm-entity'
-import { GraphQLGuard } from '@interface/graphql/adapters/authorization/guards/graphql.guard'
+import { BaseAuthorizationGraphQLReflector, GraphQLGuard } from '@interface/graphql/adapters/authorization/reflectors/base.reflector'
+import { GodmodeProvider } from '@adapters/authorization/godmode/godmode.provider'
+import { Observable } from 'rxjs'
 
-export abstract class EntityGraphQLGuard extends GraphQLGuard {
+export abstract class ControlGraphQLEntityAccessInterceptor extends BaseAuthorizationGraphQLReflector implements NestInterceptor {
+  protected readonly godmode: GodmodeProvider
+  private readonly logger = new Logger(ControlGraphQLEntityAccessInterceptor.name)
+
   constructor(
     protected readonly reflector: Reflector,
     protected readonly core: CoreProvider,
     config: GraphQLConfigProvider,
   ) {
-    super(reflector, config)
+    super(reflector)
+
+    this.godmode = new GodmodeProvider(config.godmode)
   }
 
-  // @GodBypass(true)
-  public async canActivate(executionContext: ExecutionContext): Promise<boolean> {
+  public async intercept(
+    executionContext: ExecutionContext,
+    next: CallHandler,
+  ): Promise<Observable<any>> {
+    if (this.godmode.enabled) next.handle()
+
     const graphqlExecutionContext = this.getGraphQLExecutionContext(executionContext)
     const request = this.getGraphQLRequestFromContext(graphqlExecutionContext)
     const resolverRequiredActions = this.getResolverRequiredActions(graphqlExecutionContext)
@@ -33,7 +44,10 @@ export abstract class EntityGraphQLGuard extends GraphQLGuard {
       requiredPermissions,
     )
 
-    return isAllowedToExecute
+    console.log(isAllowedToExecute)
+
+    return next.handle(
+    )
   }
 
   protected abstract getRequiredPermissionsForUserAndActions(

@@ -1,4 +1,4 @@
-import { Logger, UseGuards, UseInterceptors } from '@nestjs/common'
+import { Logger, UseInterceptors } from '@nestjs/common'
 import { Args, Float, Int, Mutation, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
@@ -26,7 +26,6 @@ import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.req
 
 import { KeyResultGraphQLNode } from '../key-result.node'
 
-import { KeyResultCheckInGraphQLGuard } from './guards/key-result-check-in.guard'
 import { KeyResultCheckInGraphQLNode } from './key-result-check-in.node'
 import { KeyResultCheckInCreateRequest } from './requests/key-result-check-in-create.request'
 import { KeyResultCheckInDeleteRequest } from './requests/key-result-comment-delete.request'
@@ -69,7 +68,6 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
 
   @UseInterceptors(TraceGraphQLRequestInterceptor)
   @GuardedGraphQLRequest('key-result-check-in:create')
-  @UseGuards(KeyResultCheckInGraphQLGuard)
   @Mutation(() => KeyResultCheckInGraphQLNode, {
     name: 'createKeyResultCheckIn',
   })
