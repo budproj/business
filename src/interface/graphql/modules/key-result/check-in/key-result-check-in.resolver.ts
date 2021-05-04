@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common'
+import { Logger, UnauthorizedException } from '@nestjs/common'
 import { Args, Float, Int, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
@@ -27,6 +27,7 @@ import { KeyResultGraphQLNode } from '../key-result.node'
 import { KeyResultCheckInGraphQLNode } from './key-result-check-in.node'
 import { KeyResultCheckInCreateRequest } from './requests/key-result-check-in-create.request'
 import { KeyResultCheckInDeleteRequest } from './requests/key-result-comment-delete.request'
+import { KeyResultCheckInAccessControl } from './key-result-check-in.access-control'
 
 @GuardedResolver(KeyResultCheckInGraphQLNode)
 export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
@@ -34,6 +35,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   KeyResultCheckInInterface
 > {
   private readonly logger = new Logger(KeyResultCheckInGraphQLResolver.name)
+  private readonly accessControl = new KeyResultCheckInAccessControl()
 
   constructor(
     protected readonly core: CoreProvider,
@@ -71,6 +73,8 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: KeyResultCheckInCreateRequest,
     @RequestState() state: GraphQLRequestState,
   ) {
+    if (!this.accessControl.canCreate(state.user, request)) throw new UnauthorizedException()
+
     this.logger.log({
       request,
       state,
