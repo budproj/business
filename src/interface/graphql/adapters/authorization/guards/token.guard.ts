@@ -4,6 +4,7 @@ import { GqlExecutionContext } from '@nestjs/graphql'
 import { AuthGuard } from '@nestjs/passport'
 import { Observable } from 'rxjs'
 
+import { GodBypass } from '@adapters/authorization/godmode/decorators/god-bypass.decorator'
 import { GodmodeProvider } from '@adapters/authorization/godmode/godmode.provider'
 import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 
@@ -18,7 +19,7 @@ export class TokenGraphQLGuard extends AuthGuard('jwt') {
     this.godmode = new GodmodeProvider(this.config.godmode)
   }
 
-  // @GodBypass(true)
+  @GodBypass(true)
   public canActivate(
     executionContext: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
