@@ -11,8 +11,8 @@ export class GetKeyResultPort implements Port<Promise<KeyResult>> {
   constructor(private readonly keyResult: KeyResultProvider) {}
 
   public async execute(indexes: Partial<KeyResultInterface>): Promise<KeyResult> {
-    const user = await this.keyResult.getFromIndexes(indexes)
+    const keyResult = await this.keyResult.getFromIndexes(indexes)
 
-    return user
+    return keyResult
   }
 }

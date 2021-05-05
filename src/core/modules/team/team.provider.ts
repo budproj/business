@@ -179,8 +179,8 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
   ): Promise<CoreQueryContext> {
     const context = this.buildContext(user, constraint)
 
-    const userCompanies = await this.parseUserCompanies(user)
-    const userCompaniesTeams = await this.parseUserCompaniesTeams(userCompanies)
+    const userCompanies = await this.getUserCompanies(user)
+    const userCompaniesTeams = await this.getUserCompaniesTeams(userCompanies)
     const userTeams = await this.userProvider.getUserTeams(user)
 
     const query = {
@@ -248,16 +248,12 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return deltaProgress
   }
 
-  protected async protectCreationQuery(
-    _query: CreationQuery<Team>,
-    _data: Partial<TeamInterface>,
-    _queryContext: CoreQueryContext,
-  ) {
-    return []
+  public async getFromIndexes(indexes: Partial<TeamInterface>): Promise<Team> {
+    return this.repository.findOne(indexes)
   }
 
-  private async getRootTeamForTeam(
-    team: TeamInterface,
+  public async getRootTeamForTeam(
+    team: Partial<TeamInterface>,
     filters?: FindConditions<Team>,
     options?: GetOptions<Team>,
   ): Promise<Team> {
@@ -271,6 +267,14 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     }
 
     return rootTeam
+  }
+
+  protected async protectCreationQuery(
+    _query: CreationQuery<Team>,
+    _data: Partial<TeamInterface>,
+    _queryContext: CoreQueryContext,
+  ) {
+    return []
   }
 
   private async getChildTeams(
@@ -308,13 +312,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return departments
   }
 
-  private async parseUserCompanies(user: UserInterface) {
-    const userCompanies = await this.getUserCompanies(user)
-
-    return userCompanies
-  }
-
-  private async parseUserCompaniesTeams(companies: TeamInterface[]) {
+  private async getUserCompaniesTeams(companies: TeamInterface[]) {
     const companiesTeams = await this.getTeamNodesTreeAfterTeam(companies)
 
     return companiesTeams
