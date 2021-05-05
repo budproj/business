@@ -11,6 +11,10 @@ export class AmplitudeProvider implements ActivityDispatcher {
 
   public async dispatch<D = any>(activity: Activity<D>): Promise<void> {
     const event = this.events.buildEventForActivity(activity)
-    console.log(event)
+    await event.loadProperties()
+
+    const marshalledEvent = event.marshalEvent()
+
+    console.log(marshalledEvent)
   }
 }

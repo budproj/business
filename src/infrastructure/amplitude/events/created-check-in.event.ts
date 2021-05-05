@@ -38,5 +38,9 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
     super(activity, CreatedCheckInAmplitudeEvent.amplitudeEventType)
   }
 
-  public async loadProperties(): Promise<void> {}
+  public async loadProperties(): Promise<void> {
+    this.properties = {
+      isOwner: true,
+    }
+  }
 }
