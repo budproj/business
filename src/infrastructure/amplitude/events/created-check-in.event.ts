@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common'
 
-import { CreatedCheckInActivity } from '@adapters/activity/activities/created-check-in.activity'
+import { Activity } from '@adapters/activity/activities/base.activity'
+import { CREATED_CHECK_IN_ACTIVITY_TYPE } from '@adapters/activity/activities/created-check-in-activity'
+import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
 import { BaseAmplitudeEvent } from './base.event'
 
-const EVENT_TYPE = 'CreatedCheckIn'
 type CreatedCheckInAmplitudeEventProperties = {
   isOwner?: boolean
   userRole?: 'SQUAD MEMBER' | 'LEADER' | 'TEAM MEMBER'
@@ -26,17 +27,15 @@ type CreatedCheckInAmplitudeEventProperties = {
 }
 
 @Injectable()
-export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<CreatedCheckInAmplitudeEventProperties> {
-  static activityName = EVENT_TYPE
+export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
+  CreatedCheckInAmplitudeEventProperties,
+  KeyResultCheckIn
+> {
+  static activityType = CREATED_CHECK_IN_ACTIVITY_TYPE
+  static amplitudeEventType = 'CreatedCheckIn'
 
-  constructor(
-    protected readonly activity: CreatedCheckInActivity,
-    protected readonly core: CorePortsProvider,
-  ) {
-    super({
-      activity: CreatedCheckInAmplitudeEvent.activityName,
-      ...activity.metadata,
-    })
+  constructor(activity: Activity<KeyResultCheckIn>, protected readonly core: CorePortsProvider) {
+    super(activity, CreatedCheckInAmplitudeEvent.amplitudeEventType)
   }
 
   public async loadProperties(): Promise<void> {}

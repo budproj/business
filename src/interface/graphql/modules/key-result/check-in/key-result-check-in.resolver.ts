@@ -2,7 +2,7 @@ import { Logger, UnauthorizedException } from '@nestjs/common'
 import { Args, Float, Int, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
-import { CreatedCheckInActivity } from '@adapters/activity/activities/created-check-in.activity'
+import { CreatedCheckInActivity } from '@adapters/activity/activities/created-check-in-activity'
 import { ActivityAdapter } from '@adapters/activity/activity.adapter'
 import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Command } from '@adapters/policy/enums/command.enum'

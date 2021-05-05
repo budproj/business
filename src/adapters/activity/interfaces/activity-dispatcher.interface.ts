@@ -1,5 +1,5 @@
-import { Activity } from './activity.interface'
+import { Activity } from '../activities/base.activity'
 
 export interface ActivityDispatcher {
-  dispatch(activity: Activity): void | Promise<void>
+  dispatch<D = any>(activity: Activity<D>): void | Promise<void>
 }

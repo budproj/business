@@ -1,25 +1,35 @@
-import { Activity } from '@adapters/activity/interfaces/activity.interface'
+import { Activity } from '@adapters/activity/activities/base.activity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
-import { EventData } from '../types/event-data.type'
 import { EventMetadata } from '../types/event-metadata.type'
+import { EventProperties } from '../types/event-properties.type'
 import { AmplitudeEvent } from '../types/event.type'
 
-export abstract class BaseAmplitudeEvent<P extends EventData = EventData> {
-  static activityName: string
+export abstract class BaseAmplitudeEvent<P extends EventProperties, D = any> {
+  static activityType: string
+  static amplitudeEventType: string
 
   protected core!: CorePortsProvider
-  protected readonly activity: Activity
+  protected readonly metadata!: EventMetadata
   protected properties?: P
 
-  constructor(protected readonly metadata: EventMetadata) {}
+  constructor(protected readonly activity: Activity<D>, amplitudeEventType: string) {
+    this.metadata = this.marshalMetadata(activity, amplitudeEventType)
+  }
 
-  public marshal(): AmplitudeEvent {
+  public marshalEvent(): AmplitudeEvent {
     return {
-      event_type: this.metadata.type,
+      event_type: this.metadata.amplitudeEventType,
       user_id: this.metadata.userID,
       session_id: this.metadata.sessionID,
       event_properties: this.properties,
+    }
+  }
+
+  private marshalMetadata(activity: Activity<D>, amplitudeEventType: string): EventMetadata {
+    return {
+      ...activity.metadata,
+      amplitudeEventType,
     }
   }
 

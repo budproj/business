@@ -1,13 +1,16 @@
+import { Activity } from './activities/base.activity'
 import { ActivityDispatcher } from './interfaces/activity-dispatcher.interface'
-import { Activity } from './interfaces/activity.interface'
 
-export class ActivityAdapter<D extends string = string> {
-  constructor(private readonly dispatchers: Record<D, ActivityDispatcher>) {}
+export class ActivityAdapter<S extends string = string> {
+  constructor(private readonly dispatchers: Record<S, ActivityDispatcher>) {}
 
-  public async dispatch(activity: Activity, ignoreDispatchers: D[] = []): Promise<void> {
+  public async dispatch<D = any>(
+    activity: Activity<D>,
+    ignoreDispatchers: S[] = [],
+  ): Promise<void> {
     const dispatchPromises = Object.entries<ActivityDispatcher>(this.dispatchers).map(
       ([name, dispatcher]) =>
-        !ignoreDispatchers.includes(name as D) && dispatcher.dispatch(activity),
+        !ignoreDispatchers.includes(name as S) && dispatcher.dispatch<D>(activity),
     )
 
     await Promise.all(dispatchPromises)
