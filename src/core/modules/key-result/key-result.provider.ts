@@ -346,6 +346,14 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return timelineEntries
   }
 
+  public async getFromID(id: string): Promise<KeyResult> {
+    return this.repository.findOne({ id })
+  }
+
+  public async getFromIndexes(indexes: Partial<KeyResultInterface>): Promise<KeyResult> {
+    return this.repository.findOne(indexes)
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<KeyResult>,
     _data: Partial<KeyResultInterface>,
