@@ -1,15 +1,21 @@
 import { Injectable } from '@nestjs/common'
 
-import { AccessControl } from '@adapters/authorization/interfaces/access-control.interface'
+import { AccessControl } from '@adapters/authorization/access-control.adapter'
 import { UserWithContext } from '@adapters/context/interfaces/user.interface'
+import { Command } from '@adapters/policy/enums/command.enum'
+import { Resource } from '@adapters/policy/enums/resource.enum'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
 @Injectable()
-export class KeyResultCheckInAccessControl implements AccessControl<KeyResultCheckInInterface> {
-  constructor(private readonly core: CorePortsProvider) {}
+export class KeyResultCheckInAccessControl extends AccessControl<KeyResultCheckInInterface> {
+  protected readonly resource = Resource.KEY_RESULT_CHECK_IN
+
+  constructor(private readonly core: CorePortsProvider) {
+    super()
+  }
 
   public async canCreate(
     user: UserWithContext,
@@ -24,9 +30,7 @@ export class KeyResultCheckInAccessControl implements AccessControl<KeyResultChe
     const isTeamLeader = await this.isTeamLeader(teams, user)
     const isCompanyMember = await this.isCompanyMember(keyResult, user)
 
-    console.log(isKeyResultOwner, isTeamLeader, isCompanyMember)
-
-    return false
+    return this.canActivate(user, Command.CREATE, isKeyResultOwner, isTeamLeader, isCompanyMember)
   }
 
   public async canRead(

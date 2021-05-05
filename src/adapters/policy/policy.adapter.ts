@@ -76,6 +76,10 @@ export class PolicyAdapter {
     return uniqActions
   }
 
+  public buildPermission(resource: Resource, command: Command, scope: Scope): Permission {
+    return `${resource}:${command}:${scope}` as const
+  }
+
   private getCommandPoliciesForResourceFromPermissions(
     resource: Resource,
     permissions: Permission[],
