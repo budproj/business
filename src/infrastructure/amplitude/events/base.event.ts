@@ -1,9 +1,10 @@
+import { Event } from '@amplitude/node'
+
 import { Activity } from '@adapters/activity/activities/base.activity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
 import { EventMetadata } from '../types/event-metadata.type'
 import { EventProperties } from '../types/event-properties.type'
-import { AmplitudeEvent } from '../types/event.type'
 
 export abstract class BaseAmplitudeEvent<P extends EventProperties, D = any> {
   static activityType: string
@@ -17,7 +18,7 @@ export abstract class BaseAmplitudeEvent<P extends EventProperties, D = any> {
     this.metadata = this.marshalMetadata(activity, amplitudeEventType)
   }
 
-  public marshalEvent(): AmplitudeEvent {
+  public marshalEvent(): Event {
     return {
       event_type: this.metadata.amplitudeEventType,
       user_id: this.metadata.userID,

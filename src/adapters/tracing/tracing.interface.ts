@@ -1,3 +1,3 @@
 export interface TracingInterface {
-  sessionID?: string
+  sessionID?: number
 }

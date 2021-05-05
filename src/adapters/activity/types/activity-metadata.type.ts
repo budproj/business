@@ -1,5 +1,5 @@
 export type ActivityMetadata = {
   userID: string
-  sessionID: string
+  sessionID: number
   timestamp: number
 }

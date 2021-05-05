@@ -1,8 +1,10 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Logger } from '@nestjs/common'
 import { GqlExecutionContext } from '@nestjs/graphql'
+import { UserInputError } from 'apollo-server-errors'
 import { Observable } from 'rxjs'
 
 import { GodmodeProvider } from '@adapters/authorization/godmode/godmode.provider'
+import { InvalidSessionIDException } from '@adapters/exceptions/invalid-session-id.exception'
 import { TracingInterface } from '@adapters/tracing/tracing.interface'
 import { TracingProvider } from '@adapters/tracing/tracing.provider'
 
@@ -30,7 +32,11 @@ export class TraceGraphQLRequestInterceptor implements NestInterceptor {
   }
 
   private getTracingData(request: GraphQLRequest): TracingInterface {
-    this.tracing.refreshData(request.headers)
+    try {
+      this.tracing.refreshData(request.headers)
+    } catch (error: unknown) {
+      if (error instanceof InvalidSessionIDException) throw new UserInputError(error.message)
+    }
 
     return this.tracing.data
   }
