@@ -354,6 +354,15 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return this.repository.findOne(indexes)
   }
 
+  public async createCheckIn(
+    checkIn: Partial<KeyResultCheckInInterface>,
+  ): Promise<KeyResultCheckIn> {
+    const queryResult = await this.keyResultCheckInProvider.createCheckIn(checkIn)
+    const createdCheckIn = queryResult[0]
+
+    return createdCheckIn
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<KeyResult>,
     _data: Partial<KeyResultInterface>,
