@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 
 import { GraphQLConfigModule } from '@config/graphql/graphql.module'
 import { CoreModule } from '@core/core.module'
+import { AmplitudeModule } from '@infrastructure/amplitude/amplitude.module'
 
 import { KeyResultCheckInsConnectionGraphQLResolver } from './check-in/connections/key-result-check-ins/key-result-check-ins.resolver'
 import { KeyResultCheckInAccessControl } from './check-in/key-result-check-in.access-control'
@@ -15,7 +16,7 @@ import { KeyResultsConnectionGraphQLResolver } from './connections/key-results/k
 import { KeyResultGraphQLResolver } from './key-result.resolver'
 
 @Module({
-  imports: [CoreModule, GraphQLConfigModule],
+  imports: [CoreModule, GraphQLConfigModule, AmplitudeModule],
   providers: [
     KeyResultGraphQLResolver,
     KeyResultCommentGraphQLResolver,
