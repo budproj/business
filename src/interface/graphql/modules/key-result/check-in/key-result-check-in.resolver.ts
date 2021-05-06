@@ -44,7 +44,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
     protected readonly core: CoreProvider,
     private readonly corePorts: CorePortsProvider,
     private readonly accessControl: KeyResultCheckInAccessControl,
-    private readonly amplitudeProvider: AmplitudeProvider,
+    amplitudeProvider: AmplitudeProvider,
   ) {
     super(Resource.KEY_RESULT_CHECK_IN, core, core.keyResult.keyResultCheckInProvider)
 

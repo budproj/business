@@ -2,11 +2,13 @@ import { Logger } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
+import { ActivityAdapter } from '@adapters/activity/activity.adapter'
 import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
 import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
+import { AmplitudeProvider } from '@infrastructure/amplitude/amplitude.provider'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
@@ -29,9 +31,14 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   KeyResultCommentInterface
 > {
   private readonly logger = new Logger(KeyResultCommentGraphQLResolver.name)
+  private readonly activityAdapter: ActivityAdapter
 
-  constructor(protected readonly core: CoreProvider) {
+  constructor(protected readonly core: CoreProvider, amplitudeProvider: AmplitudeProvider) {
     super(Resource.KEY_RESULT_COMMENT, core, core.keyResult.keyResultCommentProvider)
+
+    this.activityAdapter = new ActivityAdapter({
+      amplitude: amplitudeProvider,
+    })
   }
 
   @GuardedQuery(KeyResultCommentGraphQLNode, 'key-result-comment:read', {
