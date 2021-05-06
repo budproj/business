@@ -17,10 +17,13 @@ export class GetCheckInWindowForCheckInCommand extends Command<number> {
     timeUnit: WindowUnit = 'minutes',
   ): Promise<number> {
     const previousCheckIn = await this.core.keyResult.getFromKeyResultCheckInID(checkIn.parentId)
-    if (!previousCheckIn) return 0
+    const keyResult = await this.core.keyResult.getFromIndexes({ id: checkIn.keyResultId })
+
+    const nextDate = checkIn.createdAt
+    const previousDate = previousCheckIn?.createdAt ?? keyResult.createdAt
 
     const differenceHandler = this.differenceHandlers[timeUnit]
-    const difference = differenceHandler(checkIn.createdAt, previousCheckIn.createdAt)
+    const difference = differenceHandler(nextDate, previousDate)
 
     return difference
   }

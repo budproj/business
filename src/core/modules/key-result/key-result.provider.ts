@@ -223,7 +223,9 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return checkIn
   }
 
-  public async getFromKeyResultCheckInID(keyResultCheckInID: string): Promise<KeyResult> {
+  public async getFromKeyResultCheckInID(keyResultCheckInID?: string): Promise<KeyResult> {
+    if (!keyResultCheckInID) return
+
     const keyResultCheckIn = await this.keyResultCheckInProvider.getOne({ id: keyResultCheckInID })
     const keyResult = await this.getOne({ id: keyResultCheckIn.keyResultId })
 
@@ -232,7 +234,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
   public async getParentCheckInFromCheckIn(
     keyResultCheckIn: KeyResultCheckInInterface,
-  ): Promise<KeyResultCheckIn> {
+  ): Promise<KeyResultCheckIn | undefined> {
     return this.keyResultCheckInProvider.getOne({ id: keyResultCheckIn.parentId })
   }
 
