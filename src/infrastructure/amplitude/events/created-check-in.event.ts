@@ -14,7 +14,7 @@ type CreatedCheckInAmplitudeEventProperties = {
   keyResultFormat?: 'NUMBER' | 'PERCENTAGE' | 'COIN_BRL' | 'COIN_USD'
   isFirst?: boolean
   lastCheckIn?: string
-  timeSinceLast?: string
+  minutesSinceLastCheckIn?: string
   keyResultCyclePeriod?: string
   progressChanged?: boolean
   previousProgress?: number
@@ -43,11 +43,20 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
     const keyResult = await this.core.dispatchCommand<KeyResult>('get-key-result', {
       id: this.activity.data.keyResultId,
     })
+    const keyResultCheckIns = await this.core.dispatchCommand<KeyResultCheckIn[]>(
+      'get-key-result-check-in-list',
+      keyResult,
+    )
+    const minutesSinceLastCheckIn = await this.core.dispatchCommand<number>(
+      'get-check-in-window-for-check-in',
+      this.activity.data,
+    )
 
     this.properties = {
+      minutesSinceLastCheckIn,
       isOwner: this.isUserOwner(keyResult),
       keyResultFormat: keyResult.format,
-      isFirst: await this.isFirst(keyResult),
+      isFirst: await this.isFirst(keyResultCheckIns),
     }
   }
 
@@ -55,13 +64,8 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
     return keyResult.ownerId === this.activity.context.user.id
   }
 
-  private async isFirst(keyResult: KeyResult): Promise<boolean> {
-    const keyResultCheckIns = await this.core.dispatchCommand<KeyResultCheckIn[]>(
-      'get-key-result-check-in-list',
-      keyResult,
-    )
+  private async isFirst(keyResultCheckIns: KeyResultCheckIn[]): Promise<boolean> {
     if (!keyResultCheckIns || keyResultCheckIns.length === 0) return false
-
     const firstCheckIn = keyResultCheckIns[0]
 
     return firstCheckIn.id === this.activity.data.id
