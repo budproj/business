@@ -14,7 +14,7 @@ type CreatedCheckInAmplitudeEventProperties = {
   keyResultFormat?: 'NUMBER' | 'PERCENTAGE' | 'COIN_BRL' | 'COIN_USD'
   isFirst?: boolean
   lastCheckIn?: string
-  minutesSinceLastCheckIn?: string
+  minutesSinceLastCheckIn?: number
   keyResultCyclePeriod?: string
   progressChanged?: boolean
   previousProgress?: number
