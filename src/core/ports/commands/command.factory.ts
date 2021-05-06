@@ -6,6 +6,7 @@ import { Command } from './base.command'
 import { CreateCheckInCommand } from './create-check-in.command'
 import { GetCheckInDeltaConfidenceTagCommand } from './get-check-in-delta-confidence-tag.command'
 import { GetCheckInDeltaProgressCommand } from './get-check-in-delta-progress.command'
+import { GetCheckInTeamCommand } from './get-check-in-team.command'
 import { GetCheckInWindowForCheckInCommand } from './get-check-in-window-for-check-in.command'
 import { GetCycleCommand } from './get-cycle.command'
 import { GetKeyResultCheckInListCommand } from './get-key-result-check-in-list.command'
@@ -15,6 +16,7 @@ import { GetKeyResultFromCheckInCommand } from './get-key-result-from-check-in.c
 import { GetKeyResultOwnerCommand } from './get-key-result-owner.command'
 import { GetKeyResultTeamTreeCommand } from './get-key-result-team-tree.command'
 import { GetKeyResultCommand } from './get-key-result.command'
+import { GetTeamCompanyCommand } from './get-team-company.command'
 import { GetTeamOwnerCommand } from './get-team-owner.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
 
@@ -34,6 +36,8 @@ export type CommandType =
   | 'get-key-result-cycle'
   | 'get-check-in-delta-progress'
   | 'get-check-in-delta-confidence-tag'
+  | 'get-check-in-team'
+  | 'get-team-company'
 
 @Injectable()
 export class CommandFactory {
@@ -52,6 +56,8 @@ export class CommandFactory {
     'get-key-result-cycle': GetKeyResultCycleCommand,
     'get-check-in-delta-progress': GetCheckInDeltaProgressCommand,
     'get-check-in-delta-confidence-tag': GetCheckInDeltaConfidenceTagCommand,
+    'get-check-in-team': GetCheckInTeamCommand,
+    'get-team-company': GetTeamCompanyCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}

@@ -5,6 +5,7 @@ import { CREATED_CHECK_IN_ACTIVITY_TYPE } from '@adapters/activity/activities/cr
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { Team } from '@core/modules/team/team.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
 import { BaseAmplitudeEvent } from './base.event'
@@ -29,6 +30,8 @@ type RelatedData = {
   keyResult: KeyResult
   keyResultCheckInList: KeyResultCheckIn[]
   cycle: Cycle
+  team: Team
+  company: Team
 }
 
 @Injectable()
@@ -44,7 +47,7 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
   }
 
   public async loadProperties(): Promise<void> {
-    const { keyResult, keyResultCheckInList, cycle } = await this.getRelatedData()
+    const { keyResult, keyResultCheckInList, cycle, team, company } = await this.getRelatedData()
 
     const deltaProgress = await this.getDeltaProgress()
     const deltaConfidenceTag = await this.getDeltaConfidenceTag()
@@ -62,6 +65,8 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
       progressChanged: Boolean(deltaProgress),
       confidenceChanged: Boolean(deltaConfidenceTag),
       hasComment: Boolean(commentLength),
+      team: team.name,
+      company: company.name,
     }
   }
 
@@ -69,11 +74,15 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
     const keyResult = await this.getKeyResult()
     const keyResultCheckInList = await this.getKeyResultCheckInList(keyResult)
     const cycle = await this.getCycle(keyResult)
+    const team = await this.getTeam()
+    const company = await this.getCompany(team)
 
     return {
       keyResult,
       keyResultCheckInList,
       cycle,
+      team,
+      company,
     }
   }
 
@@ -119,5 +128,13 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
 
   private getCommentLength(): number {
     return this.activity.data.comment?.length
+  }
+
+  private async getTeam(): Promise<Team> {
+    return this.core.dispatchCommand<Team>('get-check-in-team', this.activity.data)
+  }
+
+  private async getCompany(team: Team): Promise<Team> {
+    return this.core.dispatchCommand<Team>('get-team-company', team)
   }
 }
