@@ -4,6 +4,7 @@ import { UserInputError } from 'apollo-server-errors'
 import { Observable } from 'rxjs'
 
 import { GodmodeProvider } from '@adapters/authorization/godmode/godmode.provider'
+import { InvalidDeviceIDException } from '@adapters/exceptions/invalid-device-id.exception'
 import { InvalidSessionIDException } from '@adapters/exceptions/invalid-session-id.exception'
 import { TracingInterface } from '@adapters/tracing/tracing.interface'
 import { TracingProvider } from '@adapters/tracing/tracing.provider'
@@ -36,6 +37,7 @@ export class TraceGraphQLRequestInterceptor implements NestInterceptor {
       this.tracing.refreshData(request.headers)
     } catch (error: unknown) {
       if (error instanceof InvalidSessionIDException) throw new UserInputError(error.message)
+      if (error instanceof InvalidDeviceIDException) throw new UserInputError(error.message)
     }
 
     return this.tracing.data

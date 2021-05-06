@@ -1,3 +1,6 @@
+import { validate as validateUUID } from 'uuid'
+
+import { InvalidDeviceIDException } from '@adapters/exceptions/invalid-device-id.exception'
 import { InvalidSessionIDException } from '@adapters/exceptions/invalid-session-id.exception'
 
 import { TracingInterface } from './tracing.interface'
@@ -46,6 +49,13 @@ export class TracingProvider {
   }
 
   private marshalDeviceID(properties?: HttpRequestProperties): string | undefined {
-    return properties?.['device-id']
+    const deviceID = properties?.['device-id']
+    if (!deviceID) return
+
+    if (!validateUUID(deviceID)) {
+      throw new InvalidDeviceIDException(deviceID)
+    }
+
+    return deviceID
   }
 }
