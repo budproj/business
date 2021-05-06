@@ -5,8 +5,10 @@ import { CoreProvider } from '@core/core.provider'
 import { Command } from './base.command'
 import { CreateCheckInCommand } from './create-check-in.command'
 import { GetCheckInWindowForCheckInCommand } from './get-check-in-window-for-check-in.command'
+import { GetCycleCommand } from './get-cycle.command'
 import { GetKeyResultCheckInListCommand } from './get-key-result-check-in-list.command'
 import { GetKeyResultCompanyCommand } from './get-key-result-company.command'
+import { GetKeyResultCycleCommand } from './get-key-result-cycle.command'
 import { GetKeyResultFromCheckInCommand } from './get-key-result-from-check-in.command'
 import { GetKeyResultOwnerCommand } from './get-key-result-owner.command'
 import { GetKeyResultTeamTreeCommand } from './get-key-result-team-tree.command'
@@ -26,6 +28,8 @@ export type CommandType =
   | 'get-team-owner'
   | 'get-user-companies'
   | 'get-check-in-window-for-check-in'
+  | 'get-cycle'
+  | 'get-key-result-cycle'
 
 @Injectable()
 export class CommandFactory {
@@ -40,6 +44,8 @@ export class CommandFactory {
     'get-team-owner': GetTeamOwnerCommand,
     'get-user-companies': GetUserCompaniesCommand,
     'get-check-in-window-for-check-in': GetCheckInWindowForCheckInCommand,
+    'get-cycle': GetCycleCommand,
+    'get-key-result-cycle': GetKeyResultCycleCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}
