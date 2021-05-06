@@ -10,12 +10,10 @@ import { BaseAmplitudeEvent } from './base.event'
 
 type CreatedCheckInAmplitudeEventProperties = {
   isOwner?: boolean
-  userRole?: 'SQUAD MEMBER' | 'LEADER' | 'TEAM MEMBER'
   keyResultFormat?: 'NUMBER' | 'PERCENTAGE' | 'COIN_BRL' | 'COIN_USD'
   isFirst?: boolean
-  lastCheckIn?: string
   minutesSinceLastCheckIn?: number
-  keyResultCyclePeriod?: string
+  keyResultCycleCadence?: 'QUARTERLY' | 'YEARLY'
   progressChanged?: boolean
   previousProgress?: number
   newProgress?: number
@@ -25,6 +23,11 @@ type CreatedCheckInAmplitudeEventProperties = {
   newConfidence?: 'HIGH' | 'MEDIUM' | 'LOW' | 'BARRIER'
   hasComment?: boolean
   commentLength?: number
+}
+
+type RelatedData = {
+  keyResult: KeyResult
+  keyResultCheckInList: KeyResultCheckIn[]
 }
 
 @Injectable()
@@ -40,34 +43,48 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
   }
 
   public async loadProperties(): Promise<void> {
-    const keyResult = await this.core.dispatchCommand<KeyResult>('get-key-result', {
-      id: this.activity.data.keyResultId,
-    })
-    const keyResultCheckIns = await this.core.dispatchCommand<KeyResultCheckIn[]>(
-      'get-key-result-check-in-list',
-      keyResult,
-    )
-    const minutesSinceLastCheckIn = await this.core.dispatchCommand<number>(
-      'get-check-in-window-for-check-in',
-      this.activity.data,
-    )
+    const { keyResult, keyResultCheckInList } = await this.getRelatedData()
 
     this.properties = {
-      minutesSinceLastCheckIn,
       isOwner: this.isUserOwner(keyResult),
       keyResultFormat: keyResult.format,
-      isFirst: await this.isFirst(keyResultCheckIns),
+      isFirst: this.isFirst(keyResultCheckInList),
+      minutesSinceLastCheckIn: await this.getMinutesSinceLastCheckIn(),
     }
+  }
+
+  private async getRelatedData(): Promise<RelatedData> {
+    const keyResult = await this.getKeyResult()
+    const keyResultCheckInList = await this.getKeyResultCheckInList(keyResult)
+
+    return {
+      keyResult,
+      keyResultCheckInList,
+    }
+  }
+
+  private async getKeyResult(): Promise<KeyResult> {
+    return this.core.dispatchCommand<KeyResult>('get-key-result', {
+      id: this.activity.data.keyResultId,
+    })
+  }
+
+  private async getKeyResultCheckInList(keyResult: KeyResult): Promise<KeyResultCheckIn[]> {
+    return this.core.dispatchCommand<KeyResultCheckIn[]>('get-key-result-check-in-list', keyResult)
   }
 
   private isUserOwner(keyResult: KeyResult): boolean {
     return keyResult.ownerId === this.activity.context.user.id
   }
 
-  private async isFirst(keyResultCheckIns: KeyResultCheckIn[]): Promise<boolean> {
+  private isFirst(keyResultCheckIns: KeyResultCheckIn[]): boolean {
     if (!keyResultCheckIns || keyResultCheckIns.length === 0) return false
     const firstCheckIn = keyResultCheckIns[0]
 
     return firstCheckIn.id === this.activity.data.id
+  }
+
+  private async getMinutesSinceLastCheckIn(): Promise<number> {
+    return this.core.dispatchCommand<number>('get-check-in-window-for-check-in', this.activity.data)
   }
 }
