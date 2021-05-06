@@ -17,7 +17,7 @@ type CreatedCheckInAmplitudeEventProperties = {
   cycleCadence?: 'QUARTERLY' | 'YEARLY'
   deltaProgress?: number
   progressChanged?: boolean
-  deltaConfidence?: number
+  deltaConfidenceTag?: number
   confidenceChanged?: boolean
   hasComment?: boolean
   commentLength?: number
@@ -47,15 +47,18 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
     const { keyResult, keyResultCheckInList, cycle } = await this.getRelatedData()
 
     const deltaProgress = await this.getDeltaProgress()
+    const deltaConfidenceTag = await this.getDeltaConfidenceTag()
 
     this.properties = {
       deltaProgress,
+      deltaConfidenceTag,
       isOwner: this.isUserOwner(keyResult),
       keyResultFormat: keyResult.format,
       isFirst: this.isFirst(keyResultCheckInList),
       minutesSinceLastCheckIn: await this.getMinutesSinceLastCheckIn(),
       cycleCadence: cycle.cadence,
       progressChanged: Boolean(deltaProgress),
+      confidenceChanged: Boolean(deltaConfidenceTag),
     }
   }
 
@@ -102,5 +105,12 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
 
   private async getDeltaProgress(): Promise<number> {
     return this.core.dispatchCommand<number>('get-check-in-delta-progress', this.activity.data)
+  }
+
+  private async getDeltaConfidenceTag(): Promise<number> {
+    return this.core.dispatchCommand<number>(
+      'get-check-in-delta-confidence-tag',
+      this.activity.data,
+    )
   }
 }

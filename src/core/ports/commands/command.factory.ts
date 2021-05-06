@@ -4,6 +4,7 @@ import { CoreProvider } from '@core/core.provider'
 
 import { Command } from './base.command'
 import { CreateCheckInCommand } from './create-check-in.command'
+import { GetCheckInDeltaConfidenceTagCommand } from './get-check-in-delta-confidence-tag.command'
 import { GetCheckInDeltaProgressCommand } from './get-check-in-delta-progress.command'
 import { GetCheckInWindowForCheckInCommand } from './get-check-in-window-for-check-in.command'
 import { GetCycleCommand } from './get-cycle.command'
@@ -32,6 +33,7 @@ export type CommandType =
   | 'get-cycle'
   | 'get-key-result-cycle'
   | 'get-check-in-delta-progress'
+  | 'get-check-in-delta-confidence-tag'
 
 @Injectable()
 export class CommandFactory {
@@ -49,6 +51,7 @@ export class CommandFactory {
     'get-cycle': GetCycleCommand,
     'get-key-result-cycle': GetKeyResultCycleCommand,
     'get-check-in-delta-progress': GetCheckInDeltaProgressCommand,
+    'get-check-in-delta-confidence-tag': GetCheckInDeltaConfidenceTagCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}
