@@ -365,6 +365,15 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return createdCheckIn
   }
 
+  public async createComment(
+    comment: Partial<KeyResultCommentInterface>,
+  ): Promise<KeyResultComment> {
+    const queryResult = await this.keyResultCommentProvider.createComment(comment)
+    const createdComment = queryResult[0]
+
+    return createdComment
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<KeyResult>,
     _data: Partial<KeyResultInterface>,

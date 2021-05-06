@@ -4,6 +4,7 @@ import { CoreProvider } from '@core/core.provider'
 
 import { Command } from './base.command'
 import { CreateCheckInCommand } from './create-check-in.command'
+import { CreateKeyResultCommentCommand } from './create-key-result-comment.command'
 import { GetCheckInDeltaConfidenceTagCommand } from './get-check-in-delta-confidence-tag.command'
 import { GetCheckInDeltaProgressCommand } from './get-check-in-delta-progress.command'
 import { GetCheckInTeamCommand } from './get-check-in-team.command'
@@ -23,6 +24,7 @@ import { GetUserCompaniesCommand } from './get-user-companies.command'
 type CommandConstructor = new (...commandArguments: any[]) => Command<unknown>
 export type CommandType =
   | 'create-check-in'
+  | 'create-key-result-comment'
   | 'get-key-result-check-in-list'
   | 'get-key-result-company'
   | 'get-key-result-from-check-in'
@@ -43,6 +45,7 @@ export type CommandType =
 export class CommandFactory {
   private readonly commands: Record<CommandType, CommandConstructor> = {
     'create-check-in': CreateCheckInCommand,
+    'create-key-result-comment': CreateKeyResultCommentCommand,
     'get-key-result-check-in-list': GetKeyResultCheckInListCommand,
     'get-key-result-company': GetKeyResultCompanyCommand,
     'get-key-result-from-check-in': GetKeyResultFromCheckInCommand,

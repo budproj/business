@@ -8,6 +8,7 @@ import { KeyResultCheckInsConnectionGraphQLResolver } from './check-in/connectio
 import { KeyResultCheckInAccessControl } from './check-in/key-result-check-in.access-control'
 import { KeyResultCheckInGraphQLResolver } from './check-in/key-result-check-in.resolver'
 import { KeyResultCommentsConnectionGraphQLResolver } from './comment/connections/key-result-comments/key-result-comments.resolver'
+import { KeyResultCommentAccessControl } from './comment/key-result-comment.access-control'
 import { KeyResultCommentGraphQLResolver } from './comment/key-result-comment.resolver'
 import { KeyResultKeyResultCheckInsConnectionGraphQLResolver } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.resolver'
 import { KeyResultKeyResultCommentsConnectionGraphQLResolver } from './connections/key-result-key-result-comments/key-result-key-result-comments.resolver'
@@ -23,6 +24,7 @@ import { KeyResultGraphQLResolver } from './key-result.resolver'
     KeyResultCheckInGraphQLResolver,
     KeyResultCheckInsConnectionGraphQLResolver,
     KeyResultCheckInAccessControl,
+    KeyResultCommentAccessControl,
     KeyResultsConnectionGraphQLResolver,
     KeyResultCommentsConnectionGraphQLResolver,
     KeyResultKeyResultCommentsConnectionGraphQLResolver,
