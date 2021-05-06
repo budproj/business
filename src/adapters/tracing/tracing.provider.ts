@@ -30,6 +30,7 @@ export class TracingProvider {
   private marshalFromHTTPRequest(properties?: HttpRequestProperties): TracingInterface {
     return {
       sessionID: this.marshalSessionID(properties),
+      deviceID: this.marshalDeviceID(properties),
     }
   }
 
@@ -42,5 +43,9 @@ export class TracingProvider {
     }
 
     return sessionID
+  }
+
+  private marshalDeviceID(properties?: HttpRequestProperties): string | undefined {
+    return properties?.['device-id']
   }
 }
