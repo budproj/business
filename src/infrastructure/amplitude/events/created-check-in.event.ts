@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common'
 import { Activity } from '@adapters/activity/activities/base.activity'
 import { CREATED_CHECK_IN_ACTIVITY_TYPE } from '@adapters/activity/activities/created-check-in-activity'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
+import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
 import { BaseAmplitudeEvent } from './base.event'
@@ -10,7 +11,7 @@ import { BaseAmplitudeEvent } from './base.event'
 type CreatedCheckInAmplitudeEventProperties = {
   isOwner?: boolean
   userRole?: 'SQUAD MEMBER' | 'LEADER' | 'TEAM MEMBER'
-  keyResultType?: 'NUMBER' | 'PERCENTAGE' | 'COIN_BRL' | 'COIN_USD'
+  keyResultFormat?: 'NUMBER' | 'PERCENTAGE' | 'COIN_BRL' | 'COIN_USD'
   isFirst?: boolean
   lastCheckIn?: string
   timeSinceLast?: string
@@ -39,8 +40,15 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
   }
 
   public async loadProperties(): Promise<void> {
+    const keyResult = await this.core.getKeyResult.execute({ id: this.activity.data.keyResultId })
+
     this.properties = {
-      isOwner: true,
+      isOwner: this.isUserOwner(keyResult),
+      keyResultFormat: keyResult.format,
     }
+  }
+
+  private isUserOwner(keyResult: KeyResult): boolean {
+    return keyResult.ownerId === this.activity.context.user.id
   }
 }
