@@ -20,7 +20,7 @@ export class GetCheckInWindowForCheckInCommand extends Command<number> {
     if (!previousCheckIn) return 0
 
     const differenceHandler = this.differenceHandlers[timeUnit]
-    const difference = differenceHandler(previousCheckIn.createdAt, checkIn.createdAt)
+    const difference = differenceHandler(checkIn.createdAt, previousCheckIn.createdAt)
 
     return difference
   }
