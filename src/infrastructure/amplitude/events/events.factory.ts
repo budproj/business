@@ -16,10 +16,10 @@ export class EventsFactory {
 
   public buildEventForActivity<P extends EventProperties, D = any>(
     activity: Activity<D>,
-  ): BaseAmplitudeEvent<P> {
+  ): BaseAmplitudeEvent<P> | undefined {
     const Event = this.eventConstructors.find((event) => event.activityType === activity.type)
-    const event: BaseAmplitudeEvent<P> = new Event(activity as any, this.core) as any
+    if (!Event) return
 
-    return event
+    return new Event(activity as any, this.core) as any
   }
 }
