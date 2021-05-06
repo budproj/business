@@ -62,7 +62,7 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
     )
     if (!keyResultCheckIns || keyResultCheckIns.length === 0) return false
 
-    const firstCheckIn = keyResultCheckIns.slice(-1)[0]
+    const firstCheckIn = keyResultCheckIns[0]
 
     return firstCheckIn.id === this.activity.data.id
   }
