@@ -48,10 +48,12 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
 
     const deltaProgress = await this.getDeltaProgress()
     const deltaConfidenceTag = await this.getDeltaConfidenceTag()
+    const commentLength = this.getCommentLength()
 
     this.properties = {
       deltaProgress,
       deltaConfidenceTag,
+      commentLength,
       isOwner: this.isUserOwner(keyResult),
       keyResultFormat: keyResult.format,
       isFirst: this.isFirst(keyResultCheckInList),
@@ -59,6 +61,7 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
       cycleCadence: cycle.cadence,
       progressChanged: Boolean(deltaProgress),
       confidenceChanged: Boolean(deltaConfidenceTag),
+      hasComment: Boolean(commentLength),
     }
   }
 
@@ -112,5 +115,9 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
       'get-check-in-delta-confidence-tag',
       this.activity.data,
     )
+  }
+
+  private getCommentLength(): number {
+    return this.activity.data.comment?.length
   }
 }
