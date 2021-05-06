@@ -100,7 +100,10 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
       )
 
     const keyResultCheckIn = await this.core.keyResult.buildCheckInForUser(state.user, request.data)
-    const createdCheckIn = await this.corePorts.createCheckIn.execute(keyResultCheckIn)
+    const createdCheckIn = await this.corePorts.dispatchCommand<KeyResultCheckIn>(
+      'create-check-in',
+      keyResultCheckIn,
+    )
 
     if (!createdCheckIn) throw new UserInputError('We were not able to create your check-in')
 
