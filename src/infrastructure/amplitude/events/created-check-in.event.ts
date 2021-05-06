@@ -46,12 +46,16 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
   public async loadProperties(): Promise<void> {
     const { keyResult, keyResultCheckInList, cycle } = await this.getRelatedData()
 
+    const deltaProgress = await this.getDeltaProgress()
+
     this.properties = {
+      deltaProgress,
       isOwner: this.isUserOwner(keyResult),
       keyResultFormat: keyResult.format,
       isFirst: this.isFirst(keyResultCheckInList),
       minutesSinceLastCheckIn: await this.getMinutesSinceLastCheckIn(),
       cycleCadence: cycle.cadence,
+      progressChanged: Boolean(deltaProgress),
     }
   }
 
@@ -94,5 +98,9 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
 
   private async getMinutesSinceLastCheckIn(): Promise<number> {
     return this.core.dispatchCommand<number>('get-check-in-window-for-check-in', this.activity.data)
+  }
+
+  private async getDeltaProgress(): Promise<number> {
+    return this.core.dispatchCommand<number>('get-check-in-delta-progress', this.activity.data)
   }
 }

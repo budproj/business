@@ -4,6 +4,7 @@ import { CoreProvider } from '@core/core.provider'
 
 import { Command } from './base.command'
 import { CreateCheckInCommand } from './create-check-in.command'
+import { GetCheckInDeltaProgressCommand } from './get-check-in-delta-progress.command'
 import { GetCheckInWindowForCheckInCommand } from './get-check-in-window-for-check-in.command'
 import { GetCycleCommand } from './get-cycle.command'
 import { GetKeyResultCheckInListCommand } from './get-key-result-check-in-list.command'
@@ -30,6 +31,7 @@ export type CommandType =
   | 'get-check-in-window-for-check-in'
   | 'get-cycle'
   | 'get-key-result-cycle'
+  | 'get-check-in-delta-progress'
 
 @Injectable()
 export class CommandFactory {
@@ -46,6 +48,7 @@ export class CommandFactory {
     'get-check-in-window-for-check-in': GetCheckInWindowForCheckInCommand,
     'get-cycle': GetCycleCommand,
     'get-key-result-cycle': GetKeyResultCycleCommand,
+    'get-check-in-delta-progress': GetCheckInDeltaProgressCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}
