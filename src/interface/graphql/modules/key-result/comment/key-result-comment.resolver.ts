@@ -1,4 +1,4 @@
-import { Logger, UnauthorizedException, UseInterceptors } from '@nestjs/common'
+import { Logger, UnauthorizedException } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
@@ -9,8 +9,7 @@ import { CoreProvider } from '@core/core.provider'
 import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
 import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
-import { AttachActivity } from '@interface/graphql/adapters/activity/attach-activity.metadata'
-import { DispatchResponseToActivityInterceptor } from '@interface/graphql/adapters/activity/dispatch-response-to-activity.interceptor'
+import { AttachActivity } from '@interface/graphql/adapters/activity/attach-activity.decorator'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
@@ -70,7 +69,6 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @AttachActivity(CreatedKeyResultCommentActivity)
-  @UseInterceptors(DispatchResponseToActivityInterceptor)
   @GuardedMutation(KeyResultCommentGraphQLNode, 'key-result-comment:create', {
     name: 'createKeyResultComment',
   })

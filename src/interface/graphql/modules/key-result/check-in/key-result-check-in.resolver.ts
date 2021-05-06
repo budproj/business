@@ -1,4 +1,4 @@
-import { Logger, UnauthorizedException, UseInterceptors } from '@nestjs/common'
+import { Logger, UnauthorizedException } from '@nestjs/common'
 import { Args, Float, Int, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
@@ -11,8 +11,7 @@ import { CoreProvider } from '@core/core.provider'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
-import { AttachActivity } from '@interface/graphql/adapters/activity/attach-activity.metadata'
-import { DispatchResponseToActivityInterceptor } from '@interface/graphql/adapters/activity/dispatch-response-to-activity.interceptor'
+import { AttachActivity } from '@interface/graphql/adapters/activity/attach-activity.decorator'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
@@ -70,7 +69,6 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @AttachActivity(CreatedCheckInActivity)
-  @UseInterceptors(DispatchResponseToActivityInterceptor)
   @GuardedMutation(KeyResultCheckInGraphQLNode, 'key-result-check-in:create', {
     name: 'createKeyResultCheckIn',
   })
