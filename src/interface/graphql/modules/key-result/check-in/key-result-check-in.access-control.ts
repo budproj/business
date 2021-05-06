@@ -7,6 +7,7 @@ import { Resource } from '@adapters/policy/enums/resource.enum'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { Team } from '@core/modules/team/team.orm-entity'
+import { User } from '@core/modules/user/user.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
 @Injectable()
@@ -21,10 +22,13 @@ export class KeyResultCheckInAccessControl extends AccessControl<KeyResultCheckI
     user: UserWithContext,
     data: Partial<KeyResultCheckInInterface>,
   ): Promise<boolean> {
-    const keyResult = await this.core.getKeyResultFromCheckIn.execute(data)
+    const keyResult = await this.core.dispatchCommand<KeyResult>(
+      'get-key-result-from-check-in',
+      data,
+    )
     if (!keyResult) return false
 
-    const teams = await this.core.getKeyResulTeamTree.execute(keyResult)
+    const teams = await this.core.dispatchCommand<Team[]>('get-key-result-team-tree', keyResult)
 
     const isKeyResultOwner = await this.isKeyResultOwner(keyResult, user)
     const isTeamLeader = await this.isTeamLeader(teams, user)
@@ -55,21 +59,26 @@ export class KeyResultCheckInAccessControl extends AccessControl<KeyResultCheckI
   }
 
   private async isKeyResultOwner(keyResult: KeyResult, user: UserWithContext): Promise<boolean> {
-    const owner = await this.core.getKeyResultOwner.execute(keyResult)
+    const owner = await this.core.dispatchCommand<User>('get-key-result-owner', keyResult)
 
     return owner.id === user.id
   }
 
   private async isTeamLeader(teams: Team[], user: UserWithContext): Promise<boolean> {
-    const leaderPromises = teams.map(async (team) => this.core.getTeamOwner.execute(team))
+    const leaderPromises = teams.map(async (team) =>
+      this.core.dispatchCommand<User>('get-team-owner', team),
+    )
     const leaders = await Promise.all(leaderPromises)
 
     return leaders.some((leader) => leader.id === user.id)
   }
 
   private async isCompanyMember(keyResult: KeyResult, user: UserWithContext): Promise<boolean> {
-    const keyResultCompany = await this.core.getKeyResultCompany.execute(keyResult)
-    const userCompanies = await this.core.getUserCompanies.execute(user)
+    const keyResultCompany = await this.core.dispatchCommand<Team>(
+      'get-key-result-company',
+      keyResult,
+    )
+    const userCompanies = await this.core.dispatchCommand<Team[]>('get-user-companies', user)
 
     return userCompanies.some((company) => company.id === keyResultCompany.id)
   }

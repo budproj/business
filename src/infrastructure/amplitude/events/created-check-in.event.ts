@@ -40,15 +40,30 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
   }
 
   public async loadProperties(): Promise<void> {
-    const keyResult = await this.core.getKeyResult.execute({ id: this.activity.data.keyResultId })
+    const keyResult = await this.core.dispatchCommand<KeyResult>('get-key-result', {
+      id: this.activity.data.keyResultId,
+    })
 
     this.properties = {
       isOwner: this.isUserOwner(keyResult),
       keyResultFormat: keyResult.format,
+      isFirst: await this.isFirst(keyResult),
     }
   }
 
   private isUserOwner(keyResult: KeyResult): boolean {
     return keyResult.ownerId === this.activity.context.user.id
+  }
+
+  private async isFirst(keyResult: KeyResult): Promise<boolean> {
+    const keyResultCheckIns = await this.core.dispatchCommand<KeyResultCheckIn[]>(
+      'get-key-result-check-in-list',
+      keyResult,
+    )
+    if (!keyResultCheckIns || keyResultCheckIns.length === 0) return false
+
+    const firstCheckIn = keyResultCheckIns.slice(-1)[0]
+
+    return firstCheckIn.id === this.activity.data.id
   }
 }

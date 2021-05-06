@@ -6,11 +6,12 @@ import { KeyResultModule } from './modules/key-result/key-result.module'
 import { ObjectiveModule } from './modules/objective/objective.module'
 import { TeamModule } from './modules/team/team.module'
 import { UserModule } from './modules/user/user.module'
-import { CorePortsModule } from './ports/ports.module'
+import { CommandFactory } from './ports/commands/command.factory'
+import { CorePortsProvider } from './ports/ports.provider'
 
 @Module({
-  imports: [UserModule, TeamModule, CycleModule, ObjectiveModule, KeyResultModule, CorePortsModule],
-  providers: [CoreProvider],
-  exports: [CoreProvider, CorePortsModule],
+  imports: [UserModule, TeamModule, CycleModule, ObjectiveModule, KeyResultModule],
+  providers: [CoreProvider, CorePortsProvider, CommandFactory],
+  exports: [CoreProvider, CorePortsProvider],
 })
 export class CoreModule {}

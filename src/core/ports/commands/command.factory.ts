@@ -7,6 +7,11 @@ import { CreateCheckInCommand } from './create-check-in.command'
 import { GetKeyResultCheckInListCommand } from './get-key-result-check-in-list.command'
 import { GetKeyResultCompanyCommand } from './get-key-result-company.command'
 import { GetKeyResultFromCheckInCommand } from './get-key-result-from-check-in.command'
+import { GetKeyResultOwnerCommand } from './get-key-result-owner.command'
+import { GetKeyResultTeamTreeCommand } from './get-key-result-team-tree.command'
+import { GetKeyResultCommand } from './get-key-result.command'
+import { GetTeamOwnerCommand } from './get-team-owner.command'
+import { GetUserCompaniesCommand } from './get-user-companies.command'
 
 type CommandConstructor = new (...commandArguments: any[]) => Command<unknown>
 export type CommandType =
@@ -14,6 +19,11 @@ export type CommandType =
   | 'get-key-result-check-in-list'
   | 'get-key-result-company'
   | 'get-key-result-from-check-in'
+  | 'get-key-result-owner'
+  | 'get-key-result-team-tree'
+  | 'get-key-result'
+  | 'get-team-owner'
+  | 'get-user-companies'
 
 @Injectable()
 export class CommandFactory {
@@ -22,6 +32,11 @@ export class CommandFactory {
     'get-key-result-check-in-list': GetKeyResultCheckInListCommand,
     'get-key-result-company': GetKeyResultCompanyCommand,
     'get-key-result-from-check-in': GetKeyResultFromCheckInCommand,
+    'get-key-result-owner': GetKeyResultOwnerCommand,
+    'get-key-result-team-tree': GetKeyResultTeamTreeCommand,
+    'get-key-result': GetKeyResultCommand,
+    'get-team-owner': GetTeamOwnerCommand,
+    'get-user-companies': GetUserCompaniesCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}
