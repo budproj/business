@@ -1,6 +1,6 @@
 import { Identify } from '@amplitude/identify'
 import { init, NodeClient as AmplitudeClient } from '@amplitude/node'
-import { Injectable, Scope } from '@nestjs/common'
+import { Injectable, Logger, Scope } from '@nestjs/common'
 
 import { Activity } from '@adapters/activity/activities/base.activity'
 import { ActivityDispatcher } from '@adapters/activity/interfaces/activity-dispatcher.interface'
@@ -13,6 +13,7 @@ import { UserProperties } from './types/user-properties.type'
 
 @Injectable({ scope: Scope.REQUEST })
 export class AmplitudeProvider implements ActivityDispatcher {
+  private readonly logger = new Logger(AmplitudeProvider.name)
   private readonly client: AmplitudeClient
 
   constructor(private readonly events: EventsFactory, config: AmplitudeConfigProvider) {
@@ -26,6 +27,11 @@ export class AmplitudeProvider implements ActivityDispatcher {
     await event.loadProperties()
     const marshalledEvent = event.marshalEvent()
 
+    this.logger.log({
+      event: marshalledEvent,
+      message: 'Logging event on Amplitude',
+    })
+
     await this.client.logEvent(marshalledEvent)
   }
 
@@ -36,6 +42,11 @@ export class AmplitudeProvider implements ActivityDispatcher {
 
     const userIdentification = new Identify()
     this.attachPropertiesToIdentification(userProperties, userIdentification)
+
+    this.logger.debug({
+      userProperties,
+      message: 'Identifying user',
+    })
 
     await this.client.identify(userID, deviceID, userIdentification)
   }
