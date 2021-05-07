@@ -41,6 +41,10 @@ export class UpdatedKeyResultAmplitudeEvent extends BaseAmplitudeEvent<
     this.properties = {
       isOwner: this.isOwner(),
       titleChanged: this.titleChanged(),
+      descriptionChanged: this.descriptionChanged(),
+      initialValueChanged: this.initialValueChanged(),
+      goalChanged: this.goalChanged(),
+      ownerChanged: this.ownerChanged(),
     }
   }
 
@@ -50,5 +54,21 @@ export class UpdatedKeyResultAmplitudeEvent extends BaseAmplitudeEvent<
 
   private titleChanged(): boolean {
     return this.activity.context.originalKeyResult.title !== this.activity.data.title
+  }
+
+  private descriptionChanged(): boolean {
+    return this.activity.context.originalKeyResult.description !== this.activity.data.description
+  }
+
+  private initialValueChanged(): boolean {
+    return this.activity.context.originalKeyResult.initialValue !== this.activity.data.initialValue
+  }
+
+  private goalChanged(): boolean {
+    return this.activity.context.originalKeyResult.goal !== this.activity.data.goal
+  }
+
+  private ownerChanged(): boolean {
+    return this.activity.context.originalKeyResult.ownerId !== this.activity.data.ownerId
   }
 }
