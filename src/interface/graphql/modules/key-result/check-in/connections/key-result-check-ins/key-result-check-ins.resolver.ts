@@ -1,15 +1,15 @@
 import { Logger } from '@nestjs/common'
 import { Args } from '@nestjs/graphql'
 
-import { Resource } from '@adapters/authorization/enums/resource.enum'
-import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { UserWithContext } from '@adapters/context/interfaces/user.interface'
+import { Resource } from '@adapters/policy/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
-import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
-import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
-import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
-import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
+import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
+import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
+import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
+import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 
 import { KeyResultCheckInGraphQLNode } from '../../key-result-check-in.node'
 import { KeyResultCheckInFiltersRequest } from '../../requests/key-result-check-in-filters.request'
@@ -31,10 +31,10 @@ export class KeyResultCheckInsConnectionGraphQLResolver extends GuardedConnectio
   @GuardedQuery(KeyResultCheckInsGraphQLConnection, 'key-result-check-in:read', {
     name: 'keyResultCheckIns',
   })
-  protected async getKeyResultCheckInsForRequestAndAuthorizedRequestUser(
+  protected async getKeyResultCheckInsForRequestAndRequestUserWithContext(
     @Args() request: KeyResultCheckInFiltersRequest,
-    @AuthorizedRequestUser()
-    authorizedRequestKeyResultCheckIn: AuthorizationUser,
+    @RequestUserWithContext()
+    authorizedRequestKeyResultCheckIn: UserWithContext,
   ) {
     this.logger.log({
       request,

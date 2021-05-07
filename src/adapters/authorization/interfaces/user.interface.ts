@@ -1,12 +1,5 @@
-import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
-import { UserInterface } from '@core/modules/user/user.interface'
+import { AuthzToken } from '@infrastructure/authz/interfaces/authz-token.interface'
 
-import { ResourcePolicy } from '../types/resource-policy.type'
-
-import { AuthzToken } from './authz-token.interface'
-
-export interface AuthorizationUser extends UserInterface {
+export interface AuthorizationUser {
   token: AuthzToken
-  resourcePolicy: ResourcePolicy
-  teams: TeamInterface[]
 }

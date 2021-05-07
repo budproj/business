@@ -1,4 +1,4 @@
-import { Scope } from '@adapters/authorization/enums/scope.enum'
+import { Scope } from '@adapters/policy/enums/scope.enum'
 
 import { UserInterface } from '../modules/user/user.interface'
 

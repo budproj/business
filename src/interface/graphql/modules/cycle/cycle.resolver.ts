@@ -2,8 +2,8 @@ import { Logger } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
-import { Resource } from '@adapters/authorization/enums/resource.enum'
-import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { UserWithContext } from '@adapters/context/interfaces/user.interface'
+import { Resource } from '@adapters/policy/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
@@ -11,10 +11,10 @@ import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-resu
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
-import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
-import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
-import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
-import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
+import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
+import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
+import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
+import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/requests/key-result-filters.request'
 import { ObjectivesGraphQLConnection } from '@interface/graphql/modules/objective/connections/objectives/objectives.connection'
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
@@ -38,25 +38,25 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   }
 
   @GuardedQuery(CycleGraphQLNode, 'cycle:read', { name: 'cycle' })
-  protected async getCycleForRequestAndAuthorizedRequestUser(
+  protected async getCycleForRequestAndRequestUserWithContext(
     @Args() request: NodeIndexesRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
       request,
       message: 'Fetching cycle with provided indexes',
     })
 
-    const cycle = await this.queryGuard.getOneWithActionScopeConstraint(request, authorizationUser)
+    const cycle = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
     if (!cycle) throw new UserInputError(`We could not found a cycle with the provided arguments`)
 
     return cycle
   }
 
   @GuardedQuery(CyclesGraphQLConnection, 'cycle:read', { name: 'cyclesInSamePeriod' })
-  protected async getCyclesInSamePeriodForRequestAndAuthorizedRequestUser(
+  protected async getCyclesInSamePeriodForRequestAndRequestUserWithContext(
     @Args() request: CyclesInSamePeriodRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
       request,
@@ -68,7 +68,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       Cycle
     >(request)
 
-    const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(authorizationUser.teams)
+    const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(userWithContext.teams)
     const queryResult = await this.core.cycle.getCyclesInSamePeriodFromTeamsAndParentIDsWithFilters(
       userTeamsTree,
       fromCycles,

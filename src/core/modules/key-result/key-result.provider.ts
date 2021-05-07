@@ -223,7 +223,9 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return checkIn
   }
 
-  public async getFromKeyResultCheckInID(keyResultCheckInID: string): Promise<KeyResult> {
+  public async getFromKeyResultCheckInID(keyResultCheckInID?: string): Promise<KeyResult> {
+    if (!keyResultCheckInID) return
+
     const keyResultCheckIn = await this.keyResultCheckInProvider.getOne({ id: keyResultCheckInID })
     const keyResult = await this.getOne({ id: keyResultCheckIn.keyResultId })
 
@@ -232,7 +234,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
   public async getParentCheckInFromCheckIn(
     keyResultCheckIn: KeyResultCheckInInterface,
-  ): Promise<KeyResultCheckIn> {
+  ): Promise<KeyResultCheckIn | undefined> {
     return this.keyResultCheckInProvider.getOne({ id: keyResultCheckIn.parentId })
   }
 
@@ -344,6 +346,32 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const timelineEntries = await this.timeline.getEntriesForTimelineOrder(timelineQueryResult)
 
     return timelineEntries
+  }
+
+  public async getFromID(id: string): Promise<KeyResult> {
+    return this.repository.findOne({ id })
+  }
+
+  public async getFromIndexes(indexes: Partial<KeyResultInterface>): Promise<KeyResult> {
+    return this.repository.findOne(indexes)
+  }
+
+  public async createCheckIn(
+    checkIn: Partial<KeyResultCheckInInterface>,
+  ): Promise<KeyResultCheckIn> {
+    const queryResult = await this.keyResultCheckInProvider.createCheckIn(checkIn)
+    const createdCheckIn = queryResult[0]
+
+    return createdCheckIn
+  }
+
+  public async createComment(
+    comment: Partial<KeyResultCommentInterface>,
+  ): Promise<KeyResultComment> {
+    const queryResult = await this.keyResultCommentProvider.createComment(comment)
+    const createdComment = queryResult[0]
+
+    return createdComment
   }
 
   protected async protectCreationQuery(

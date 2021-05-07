@@ -1,9 +1,9 @@
 import { ArgsType, Field, ID } from '@nestjs/graphql'
 
+import { ConnectionRelayRequest } from '../adapters/relay/requests/connection.request'
 import { SortingGraphQLEnum } from '../enums/sorting.enum'
 import { DefaultOrderGraphQLInput } from '../objects/default-order.object'
 import { OrderGraphQLObject } from '../objects/order.object'
-import { ConnectionRelayRequest } from '../relay/requests/connection.request'
 
 @ArgsType()
 export class ConnectionFiltersRequest<
