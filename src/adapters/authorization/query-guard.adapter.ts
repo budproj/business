@@ -1,7 +1,7 @@
 import { DeleteResult, FindConditions } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
-import { UserWithContext } from '@adapters/context/interfaces/user.interface'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreEntity } from '@core/core.orm-entity'
 import { CoreProvider } from '@core/core.provider'
 import { CoreEntityProvider } from '@core/entity.provider'

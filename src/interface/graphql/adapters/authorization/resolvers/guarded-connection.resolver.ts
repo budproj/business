@@ -1,10 +1,10 @@
 import { Args, Parent, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { QueryGuardAdapter } from '@adapters/authorization/query-guard.adapter'
-import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { Scope } from '@adapters/policy/enums/scope.enum'
 import { PolicyAdapter } from '@adapters/policy/policy.adapter'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreEntityInterface } from '@core/core-entity.interface'
 import { CoreEntity } from '@core/core.orm-entity'
 import { CoreProvider } from '@core/core.provider'

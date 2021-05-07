@@ -1,8 +1,8 @@
 import { Logger } from '@nestjs/common'
 import { Args } from '@nestjs/graphql'
 
-import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'

@@ -2,8 +2,8 @@ import { Logger } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
-import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
@@ -86,9 +86,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       message: 'Fetching current status for this cycle',
     })
 
-    const status = await this.core.cycle.getCurrentStatus(cycle)
-
-    return status
+    return this.core.cycle.getCurrentStatus(cycle)
   }
 
   @ResolveField('team', () => TeamGraphQLNode)
@@ -98,9 +96,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       message: 'Fetching team for cycle',
     })
 
-    const team = await this.core.team.getOne({ id: cycle.teamId })
-
-    return team
+    return this.core.team.getOne({ id: cycle.teamId })
   }
 
   @ResolveField('objectives', () => ObjectivesGraphQLConnection, { nullable: true })
@@ -131,9 +127,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       message: 'Fetching parent cycle for cycle',
     })
 
-    const parentCycle = await this.core.cycle.getOne({ id: cycle.parentId })
-
-    return parentCycle
+    return this.core.cycle.getOne({ id: cycle.parentId })
   }
 
   @ResolveField('cycles', () => CycleCyclesGraphQLConnection, { nullable: true })

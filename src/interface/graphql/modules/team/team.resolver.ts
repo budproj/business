@@ -2,8 +2,8 @@ import { Logger } from '@nestjs/common'
 import { Args, Float, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
-import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
@@ -67,9 +67,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching current status for this team',
     })
 
-    const status = await this.core.team.getCurrentStatus(team)
-
-    return status
+    return this.core.team.getCurrentStatus(team)
   }
 
   @ResolveField('owner', () => UserGraphQLNode)
@@ -131,9 +129,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching parent team for team',
     })
 
-    const parent = await this.core.team.getOne({ id: team.parentId })
-
-    return parent
+    return this.core.team.getOne({ id: team.parentId })
   }
 
   @ResolveField('users', () => TeamUsersGraphQLConnection, { nullable: true })

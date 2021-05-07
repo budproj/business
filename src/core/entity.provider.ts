@@ -128,6 +128,16 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
       : this.defineResourceHighestScope(entity, queryContext, nextScope)
   }
 
+  public async update(
+    selector: FindConditions<E>,
+    newData: QueryDeepPartialEntity<E>,
+    queryContext?: CoreQueryContext,
+  ): Promise<E> {
+    await this.repository.update(selector, newData)
+
+    return this.getOne(selector, queryContext)
+  }
+
   protected async create(
     data: Partial<I> | Array<Partial<I>>,
     _queryContext?: CoreQueryContext,
@@ -238,16 +248,6 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
     })
 
     return query.getMany()
-  }
-
-  protected async update(
-    selector: FindConditions<E>,
-    newData: QueryDeepPartialEntity<E>,
-    queryContext?: CoreQueryContext,
-  ): Promise<E> {
-    await this.repository.update(selector, newData)
-
-    return this.getOne(selector, queryContext)
   }
 
   protected async updateIfWithinConstraint(

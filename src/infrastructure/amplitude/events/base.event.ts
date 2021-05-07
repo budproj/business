@@ -6,7 +6,7 @@ import { CorePortsProvider } from '@core/ports/ports.provider'
 import { EventMetadata } from '../types/event-metadata.type'
 import { EventProperties } from '../types/event-properties.type'
 
-export abstract class BaseAmplitudeEvent<P extends EventProperties, D = any> {
+export abstract class BaseAmplitudeEvent<P extends EventProperties, A extends Activity = Activity> {
   static activityType: string
   static amplitudeEventType: string
 
@@ -14,7 +14,7 @@ export abstract class BaseAmplitudeEvent<P extends EventProperties, D = any> {
   protected readonly metadata!: EventMetadata
   protected properties?: P
 
-  constructor(protected readonly activity: Activity<D>, amplitudeEventType: string) {
+  protected constructor(protected readonly activity: A, amplitudeEventType: string) {
     this.metadata = this.marshalMetadata(activity, amplitudeEventType)
   }
 
@@ -27,7 +27,7 @@ export abstract class BaseAmplitudeEvent<P extends EventProperties, D = any> {
     }
   }
 
-  private marshalMetadata(activity: Activity<D>, amplitudeEventType: string): EventMetadata {
+  private marshalMetadata(activity: A, amplitudeEventType: string): EventMetadata {
     return {
       ...activity.metadata,
       amplitudeEventType,

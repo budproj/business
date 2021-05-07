@@ -1,9 +1,11 @@
-import { Logger } from '@nestjs/common'
+import { Logger, UnauthorizedException } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
-import { UserWithContext } from '@adapters/context/interfaces/user.interface'
+import { UpdatedKeyResultActivity } from '@adapters/activity/activities/updated-key-result-activity'
 import { Resource } from '@adapters/policy/enums/resource.enum'
+import { State } from '@adapters/state/interfaces/state.interface'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
@@ -11,12 +13,17 @@ import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-
 import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { CorePortsProvider } from '@core/ports/ports.provider'
+import { AttachActivity } from '@interface/graphql/adapters/activity/attach-activity.decorator'
+import { RequestActivity } from '@interface/graphql/adapters/activity/request-activity.decorator'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { PolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/policy.object'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
+import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
+import { KeyResultAccessControl } from '@interface/graphql/modules/key-result/key-result.access-control'
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
@@ -39,7 +46,11 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
 > {
   private readonly logger = new Logger(KeyResultGraphQLResolver.name)
 
-  constructor(protected readonly core: CoreProvider) {
+  constructor(
+    protected readonly core: CoreProvider,
+    protected readonly corePorts: CorePortsProvider,
+    private readonly accessControl: KeyResultAccessControl,
+  ) {
     super(Resource.KEY_RESULT, core, core.keyResult)
   }
 
@@ -63,21 +74,33 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     return keyResult
   }
 
+  @AttachActivity(UpdatedKeyResultActivity)
   @GuardedMutation(KeyResultGraphQLNode, 'key-result:update', { name: 'updateKeyResult' })
   protected async updateKeyResultForRequestAndRequestUserWithContext(
     @Args() request: KeyResultUpdateRequest,
-    @RequestUserWithContext() userWithContext: UserWithContext,
+    @RequestState() state: State,
+    @RequestActivity() activity: UpdatedKeyResultActivity,
   ) {
+    const canUpdate = await this.accessControl.canUpdate(state.user, request.data)
+    if (!canUpdate) throw new UnauthorizedException()
+
     this.logger.log({
-      userWithContext,
+      state,
       request,
       message: 'Received update key-result request',
     })
 
-    const keyResult = await this.queryGuard.updateWithActionScopeConstraint(
-      { id: request.id },
+    const originalKeyResult = await this.corePorts.dispatchCommand<KeyResult>('get-key-result', {
+      id: request.id,
+    })
+    activity.attachToContext({
+      originalKeyResult,
+    })
+
+    const keyResult = await this.corePorts.dispatchCommand<KeyResult>(
+      'update-key-result',
+      request.id,
       { ...request.data },
-      userWithContext,
     )
     if (!keyResult)
       throw new UserInputError(`We could not found an key-result with ID ${request.id}`)
@@ -102,9 +125,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching team for key result',
     })
 
-    const team = await this.core.team.getOne({ id: keyResult.teamId })
-
-    return team
+    return this.core.team.getOne({ id: keyResult.teamId })
   }
 
   @ResolveField('objective', () => ObjectiveGraphQLNode)
@@ -212,9 +233,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   protected async controlNodePolicy(policy: PolicyGraphQLObject, keyResult: KeyResultGraphQLNode) {
-    const restrictedToActivePolicy = await this.restrictPolicyToActiveKeyResult(policy, keyResult)
-
-    return restrictedToActivePolicy
+    return this.restrictPolicyToActiveKeyResult(policy, keyResult)
   }
 
   private async restrictPolicyToActiveKeyResult(

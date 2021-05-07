@@ -1,11 +1,11 @@
 import { intersection } from 'lodash'
 
-import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Command } from '@adapters/policy/enums/command.enum'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { Scope } from '@adapters/policy/enums/scope.enum'
 import { PolicyAdapter } from '@adapters/policy/policy.adapter'
 import { Permission } from '@adapters/policy/types/permission.type'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreEntity } from '@core/core.orm-entity'
 
 export abstract class AccessControl<E extends CoreEntity> {
@@ -20,9 +20,7 @@ export abstract class AccessControl<E extends CoreEntity> {
     company: boolean,
   ): boolean {
     const requiredPermissions = this.getPermissionsForScopes(command, owns, team, company)
-    const userHasPermission = intersection(requiredPermissions, user.token.permissions).length > 0
-
-    return userHasPermission
+    return intersection(requiredPermissions, user.token.permissions).length > 0
   }
 
   private getPermissionsForScopes(
