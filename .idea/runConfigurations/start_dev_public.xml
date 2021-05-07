@@ -1,0 +1,25 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="start:dev:public" type="js.build_tools.npm">
+    <package-json value="$PROJECT_DIR$/package.json" />
+    <command value="run" />
+    <scripts>
+      <script value="start:dev" />
+    </scripts>
+    <node-interpreter value="project" />
+    <envs>
+      <env name="NODE_ENV" value="development" />
+      <env name="SERVER_LOGGING_LEVEL" value="DEBUG" />
+      <env name="SERVER_LOGGING_SERVICE_NAME" value="business@development" />
+      <env name="AUTHZ_ISSUER" value="https://getbud-develop.us.auth0.com/" />
+      <env name="AUTHZ_AUDIENCE" value="https://api.develop.getbud.co/business" />
+      <env name="GRAPHQL_DEBUG_ENABLED" value="true" />
+      <env name="GRAPHQL_PLAYGROUND_ENABLED" value="true" />
+      <env name="GRAPHQL_INSTROSPECTION_ENABLED" value="true" />
+      <env name="GRAPHQL_GODMODE_ENABLED" value="true" />
+      <env name="AWS_S3_BUCKET_NAME" value="business.s3.develop.getbud.co" />
+      <env name="AMPLITUDE_API_KEY" value="ce5c7ca0f7ad9002798472d2d858a50e" />
+      <env name="TYPEORM_HOST" value="localhost" />
+    </envs>
+    <method v="2" />
+  </configuration>
+</component>

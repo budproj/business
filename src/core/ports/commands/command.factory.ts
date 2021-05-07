@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 import { CoreProvider } from '@core/core.provider'
+import { GetKeyResultCommentTeamCommand } from '@core/ports/commands/get-key-result-comment-team.command'
 
 import { Command } from './base.command'
 import { CreateCheckInCommand } from './create-check-in.command'
@@ -40,6 +41,7 @@ export type CommandType =
   | 'get-check-in-delta-confidence-tag'
   | 'get-check-in-team'
   | 'get-team-company'
+  | 'get-key-result-comment-team'
 
 @Injectable()
 export class CommandFactory {
@@ -61,14 +63,13 @@ export class CommandFactory {
     'get-check-in-delta-confidence-tag': GetCheckInDeltaConfidenceTagCommand,
     'get-check-in-team': GetCheckInTeamCommand,
     'get-team-company': GetTeamCompanyCommand,
+    'get-key-result-comment-team': GetKeyResultCommentTeamCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}
 
   public buildCommand<R>(type: CommandType): Command<R> {
     const Command = this.commands[type]
-    const command: Command<R> = new Command(this.core) as any
-
-    return command
+    return new Command(this.core) as any
   }
 }
