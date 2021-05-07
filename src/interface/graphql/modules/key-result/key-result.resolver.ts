@@ -81,7 +81,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     @RequestState() state: State,
     @RequestActivity() activity: UpdatedKeyResultActivity,
   ) {
-    const canUpdate = await this.accessControl.canUpdate(state.user, request.data)
+    const canUpdate = await this.accessControl.canUpdate(state.user, request.id)
     if (!canUpdate) throw new UnauthorizedException()
 
     this.logger.log({

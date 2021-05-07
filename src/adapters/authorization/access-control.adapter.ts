@@ -6,9 +6,8 @@ import { Scope } from '@adapters/policy/enums/scope.enum'
 import { PolicyAdapter } from '@adapters/policy/policy.adapter'
 import { Permission } from '@adapters/policy/types/permission.type'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
-import { CoreEntity } from '@core/core.orm-entity'
 
-export abstract class AccessControl<E extends CoreEntity> {
+export abstract class AccessControl {
   protected readonly resource!: Resource
   private readonly policy: PolicyAdapter = new PolicyAdapter()
 
@@ -39,8 +38,8 @@ export abstract class AccessControl<E extends CoreEntity> {
     return permissions as Permission[]
   }
 
-  public abstract canCreate(user: UserWithContext, data: Partial<E>): boolean | Promise<boolean>
-  public abstract canRead(user: UserWithContext, indexes: Partial<E>): boolean | Promise<boolean>
-  public abstract canUpdate(user: UserWithContext, indexes: Partial<E>): boolean | Promise<boolean>
-  public abstract canDelete(user: UserWithContext, indexes: Partial<E>): boolean | Promise<boolean>
+  public abstract canCreate(user: UserWithContext, id: string): boolean | Promise<boolean>
+  public abstract canRead(user: UserWithContext, id: string): boolean | Promise<boolean>
+  public abstract canUpdate(user: UserWithContext, id: string): boolean | Promise<boolean>
+  public abstract canDelete(user: UserWithContext, id: string): boolean | Promise<boolean>
 }
