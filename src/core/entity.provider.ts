@@ -3,8 +3,8 @@ import { startOfWeek } from 'date-fns'
 import { DeleteResult, FindConditions, SelectQueryBuilder } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
-import { SCOPE_PRIORITY } from '@adapters/authorization/authorization.constants'
-import { Scope } from '@adapters/authorization/enums/scope.enum'
+import { Scope } from '@adapters/policy/enums/scope.enum'
+import { SCOPE_PRIORITY } from '@adapters/policy/policy.constants'
 
 import { CoreEntity } from './core.orm-entity'
 import { CoreEntityRepository } from './core.repository'

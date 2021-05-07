@@ -1,10 +1,10 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
-import { GuardedConnectionGraphQLInterface } from '@interface/graphql/authorization/interfaces/guarded-connection.interface'
-import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
+import { GuardedConnectionGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-connection.interface'
+import { PolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/policy.object'
+import { ConnectionRelayInterface } from '@interface/graphql/adapters/relay/interfaces/connection.interface'
+import { PageInfoRelayObject } from '@interface/graphql/adapters/relay/objects/page-info.object'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-result/check-in/key-result-check-in.node'
-import { ConnectionRelayInterface } from '@interface/graphql/relay/interfaces/connection.interface'
-import { PageInfoRelayObject } from '@interface/graphql/relay/objects/page-info.object'
 
 import { UserKeyResultCheckInEdgeGraphQLObject } from './user-key-result-check-in.edge'
 

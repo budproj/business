@@ -1,21 +1,20 @@
+import { UserWithContext } from '@adapters/context/interfaces/user.interface'
+import { PolicyAdapter } from '@adapters/policy/policy.adapter'
+import { Permission } from '@adapters/policy/types/permission.type'
 import { CoreProvider } from '@core/core.provider'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
-
-import { AuthzAdapter } from '../authz.adapter'
-import { AuthzToken } from '../interfaces/authz-token.interface'
-import { AuthorizationUser } from '../interfaces/user.interface'
-import { Permission } from '../types/permission.type'
+import { AuthzToken } from '@infrastructure/authz/interfaces/authz-token.interface'
 
 import { GodmodePropertiesInterface } from './interfaces/godmode-properties.interface'
 
 export class GodmodeProvider implements GodmodePropertiesInterface {
   public readonly enabled: boolean
-  private readonly authz: AuthzAdapter
+  private readonly authz: PolicyAdapter
 
   constructor(properties: GodmodePropertiesInterface) {
     this.enabled = properties.enabled
-    this.authz = new AuthzAdapter()
+    this.authz = new PolicyAdapter()
   }
 
   private get placeholder(): string {
@@ -59,19 +58,19 @@ export class GodmodeProvider implements GodmodePropertiesInterface {
     ]
   }
 
-  public async getGodUser(coreProvider: CoreProvider): Promise<AuthorizationUser> {
+  public async getGodUser(coreProvider: CoreProvider): Promise<UserWithContext> {
     const user = await coreProvider.user.getOne({})
     const teams = await coreProvider.user.getUserTeams(user)
 
-    const godUser = this.getGodAuthorizationUserBasedOnUserAndTeams(user, teams)
+    const godUser = this.getGodUserWithContextBasedOnUserAndTeams(user, teams)
 
     return godUser
   }
 
-  private getGodAuthorizationUserBasedOnUserAndTeams(
+  private getGodUserWithContextBasedOnUserAndTeams(
     user: UserInterface,
     teams: TeamInterface[],
-  ): AuthorizationUser {
+  ): UserWithContext {
     const token = this.getGodToken()
     const resourcePolicy = this.authz.getResourcePolicyFromPermissions(token.permissions)
 

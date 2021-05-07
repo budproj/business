@@ -41,7 +41,6 @@ export class AWSS3Provider implements RepositoryStorageInterface {
       .promise()
 
     const response = this.buildRemoteFileResponse(key)
-    console.log(response)
 
     return response
   }

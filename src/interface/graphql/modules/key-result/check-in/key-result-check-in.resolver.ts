@@ -1,26 +1,32 @@
-import { Logger } from '@nestjs/common'
+import { Logger, UnauthorizedException } from '@nestjs/common'
 import { Args, Float, Int, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
-import { Command } from '@adapters/authorization/enums/command.enum'
-import { Effect } from '@adapters/authorization/enums/effect.enum'
-import { Resource } from '@adapters/authorization/enums/resource.enum'
-import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { CreatedCheckInActivity } from '@adapters/activity/activities/created-check-in-activity'
+import { UserWithContext } from '@adapters/context/interfaces/user.interface'
+import { Command } from '@adapters/policy/enums/command.enum'
+import { Effect } from '@adapters/policy/enums/effect.enum'
+import { Resource } from '@adapters/policy/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
-import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
-import { GuardedMutation } from '@interface/graphql/authorization/decorators/guarded-mutation.decorator'
-import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
-import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
-import { PolicyGraphQLObject } from '@interface/graphql/authorization/objects/policy.object'
-import { GuardedNodeGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-node.resolver'
+import { CorePortsProvider } from '@core/ports/ports.provider'
+import { AttachActivity } from '@interface/graphql/adapters/activity/attach-activity.decorator'
+import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
+import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
+import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
+import { PolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/policy.object'
+import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
+import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
+import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
+import { GraphQLRequestState } from '@interface/graphql/adapters/context/interfaces/request-state.interface'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { KeyResultGraphQLNode } from '../key-result.node'
 
+import { KeyResultCheckInAccessControl } from './key-result-check-in.access-control'
 import { KeyResultCheckInGraphQLNode } from './key-result-check-in.node'
 import { KeyResultCheckInCreateRequest } from './requests/key-result-check-in-create.request'
 import { KeyResultCheckInDeleteRequest } from './requests/key-result-comment-delete.request'
@@ -32,16 +38,20 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
 > {
   private readonly logger = new Logger(KeyResultCheckInGraphQLResolver.name)
 
-  constructor(protected readonly core: CoreProvider) {
+  constructor(
+    protected readonly core: CoreProvider,
+    private readonly corePorts: CorePortsProvider,
+    private readonly accessControl: KeyResultCheckInAccessControl,
+  ) {
     super(Resource.KEY_RESULT_CHECK_IN, core, core.keyResult.keyResultCheckInProvider)
   }
 
   @GuardedQuery(KeyResultCheckInGraphQLNode, 'key-result-check-in:read', {
     name: 'keyResultCheckIn',
   })
-  protected async getCheckInForResquestAndAuthorizedRequestUser(
+  protected async getCheckInForResquestAndRequestUserWithContext(
     @Args() request: NodeIndexesRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
       request,
@@ -50,7 +60,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
 
     const keyResultCheckIn = await this.queryGuard.getOneWithActionScopeConstraint(
       request,
-      authorizationUser,
+      userWithContext,
     )
     if (!keyResultCheckIn)
       throw new UserInputError(`We could not found a check-in with the provided arguments`)
@@ -58,16 +68,20 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
     return keyResultCheckIn
   }
 
+  @AttachActivity(CreatedCheckInActivity)
   @GuardedMutation(KeyResultCheckInGraphQLNode, 'key-result-check-in:create', {
     name: 'createKeyResultCheckIn',
   })
-  protected async createKeyResultCheckInForRequestAndAuthorizedRequestUser(
+  protected async createKeyResultCheckInForRequestAndRequestUserWithContext(
     @Args() request: KeyResultCheckInCreateRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestState() state: GraphQLRequestState,
   ) {
+    const canCreate = await this.accessControl.canCreate(state.user, request.data)
+    if (!canCreate) throw new UnauthorizedException()
+
     this.logger.log({
-      authorizationUser,
       request,
+      state,
       message: 'Received create check-in request',
     })
 
@@ -79,25 +93,19 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
         'You cannot create this check-in, because that key-result is not active anymore',
       )
 
-    const keyResultCheckIn = await this.core.keyResult.buildCheckInForUser(
-      authorizationUser,
-      request.data,
-    )
-    const createdCheckIns = await this.queryGuard.createWithActionScopeConstraint(
+    const keyResultCheckIn = await this.core.keyResult.buildCheckInForUser(state.user, request.data)
+    const createdCheckIn = await this.corePorts.dispatchCommand<KeyResultCheckIn>(
+      'create-check-in',
       keyResultCheckIn,
-      authorizationUser,
     )
+
+    if (!createdCheckIn) throw new UserInputError('We were not able to create your check-in')
 
     this.logger.log({
-      authorizationUser,
+      state,
       keyResultCheckIn,
-      message: 'Creating a new check-in in our database',
+      message: 'Created a new check-in in our database',
     })
-
-    if (!createdCheckIns || createdCheckIns.length === 0)
-      throw new UserInputError('We were not able to create your check-in')
-
-    const createdCheckIn = createdCheckIns[0]
 
     return createdCheckIn
   }
@@ -105,12 +113,12 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedMutation(DeleteResultGraphQLObject, 'key-result-check-in:delete', {
     name: 'deleteKeyResultCheckIn',
   })
-  protected async deleteKeyResultCheckInForRequestAndAuthorizedRequestUser(
+  protected async deleteKeyResultCheckInForRequestAndRequestUserWithContext(
     @Args() request: KeyResultCheckInDeleteRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
-      authorizationUser,
+      userWithContext,
       request,
       message: 'Removing key result check-in',
     })
@@ -127,10 +135,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
       )
 
     const selector = { id: request.id }
-    const result = await this.queryGuard.deleteWithActionScopeConstraint(
-      selector,
-      authorizationUser,
-    )
+    const result = await this.queryGuard.deleteWithActionScopeConstraint(selector, userWithContext)
     if (!result)
       throw new UserInputError(
         `We could not find any key result check-in with ${request.id} to delete`,

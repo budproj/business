@@ -1,15 +1,15 @@
 import { Logger } from '@nestjs/common'
 import { Args } from '@nestjs/graphql'
 
-import { Resource } from '@adapters/authorization/enums/resource.enum'
-import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { UserWithContext } from '@adapters/context/interfaces/user.interface'
+import { Resource } from '@adapters/policy/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
-import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
-import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
-import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
-import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
+import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
+import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
+import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
+import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 
 import { KeyResultGraphQLNode } from '../../key-result.node'
 import { KeyResultFiltersRequest } from '../../requests/key-result-filters.request'
@@ -29,13 +29,13 @@ export class KeyResultsConnectionGraphQLResolver extends GuardedConnectionGraphQ
   }
 
   @GuardedQuery(KeyResultsGraphQLConnection, 'key-result:read', { name: 'keyResults' })
-  protected async getKeyResultsForRequestAndAuthorizedRequestUser(
+  protected async getKeyResultsForRequestAndRequestUserWithContext(
     @Args() request: KeyResultFiltersRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
       request,
-      authorizationUser,
+      userWithContext,
       message: 'Fetching key-results with filters',
     })
 
@@ -46,7 +46,7 @@ export class KeyResultsConnectionGraphQLResolver extends GuardedConnectionGraphQ
 
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,
-      authorizationUser,
+      userWithContext,
       queryOptions,
     )
 

@@ -49,7 +49,7 @@ export class User extends CoreEntity implements UserInterface {
   public ownedTeams?: TeamInterface[]
 
   @OneToMany('Objective', 'owner', { nullable: true })
-  public objectives: ObjectiveInterface[]
+  public objectives?: ObjectiveInterface[]
 
   @OneToMany('KeyResult', 'owner', { nullable: true })
   public keyResults?: KeyResultInterface[]

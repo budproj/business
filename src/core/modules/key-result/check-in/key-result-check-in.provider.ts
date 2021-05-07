@@ -155,6 +155,12 @@ export class KeyResultCheckInProvider extends CoreEntityProvider<
     return result
   }
 
+  public async createCheckIn(
+    checkIn: Partial<KeyResultCheckInInterface>,
+  ): Promise<KeyResultCheckIn[]> {
+    return this.create(checkIn)
+  }
+
   protected onModuleInit(): void {
     this.keyResultProvider = this.moduleReference.get(KeyResultProvider)
   }

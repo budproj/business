@@ -35,6 +35,12 @@ export class KeyResultCommentProvider extends CoreEntityProvider<
     return result
   }
 
+  public async createComment(
+    comment: Partial<KeyResultCommentInterface>,
+  ): Promise<KeyResultComment[]> {
+    return this.create(comment)
+  }
+
   protected onModuleInit(): void {
     this.keyResultProvider = this.moduleReference.get(KeyResultProvider)
   }

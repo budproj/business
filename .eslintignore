@@ -4,6 +4,5 @@
 .waypoint
 dist
 manifests
-node_modules
 scripts
 src/infrastructure/orm/migrations

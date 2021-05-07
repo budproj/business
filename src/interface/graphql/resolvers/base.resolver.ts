@@ -1,9 +1,9 @@
-import { RelayGraphQLProvider } from '../relay/relay.provider'
+import { RelayGraphQLAdapter } from '../adapters/relay/relay.adapter'
 
 export abstract class BaseGraphQLResolver {
-  protected readonly relay: RelayGraphQLProvider
+  protected readonly relay: RelayGraphQLAdapter
 
   constructor() {
-    this.relay = new RelayGraphQLProvider()
+    this.relay = new RelayGraphQLAdapter()
   }
 }

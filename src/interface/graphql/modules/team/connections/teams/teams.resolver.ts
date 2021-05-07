@@ -1,15 +1,15 @@
 import { Logger } from '@nestjs/common'
 import { Args } from '@nestjs/graphql'
 
-import { Resource } from '@adapters/authorization/enums/resource.enum'
-import { AuthorizationUser } from '@adapters/authorization/interfaces/user.interface'
+import { UserWithContext } from '@adapters/context/interfaces/user.interface'
+import { Resource } from '@adapters/policy/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
-import { AuthorizedRequestUser } from '@interface/graphql/authorization/decorators/authorized-request-user.decorator'
-import { GuardedQuery } from '@interface/graphql/authorization/decorators/guarded-query.decorator'
-import { GuardedResolver } from '@interface/graphql/authorization/decorators/guarded-resolver.decorator'
-import { GuardedConnectionGraphQLResolver } from '@interface/graphql/authorization/resolvers/guarded-connection.resolver'
+import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
+import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
+import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
+import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 
 import { TeamLevelGraphQLEnum } from '../../enums/team-level.enum'
 import { TeamFiltersRequest } from '../../requests/team-filters.request'
@@ -32,11 +32,11 @@ export class TeamsConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
   @GuardedQuery(TeamsGraphQLConnection, 'team:read', { name: 'teams' })
   protected async getTeamsForRequestAndAuthorizedRequestTeam(
     @Args() request: TeamFiltersRequest,
-    @AuthorizedRequestUser() authorizationUser: AuthorizationUser,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
       request,
-      authorizationUser,
+      userWithContext,
       message: 'Fetching teams with filters',
     })
 
@@ -47,11 +47,11 @@ export class TeamsConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
 
     const queryLeveledHandlers = {
       default: async () =>
-        this.queryGuard.getManyWithActionScopeConstraint(filters, authorizationUser, queryOptions),
+        this.queryGuard.getManyWithActionScopeConstraint(filters, userWithContext, queryOptions),
       [TeamLevelGraphQLEnum.COMPANY]: async () =>
-        this.core.team.getUserCompanies(authorizationUser, filters, queryOptions),
+        this.core.team.getUserCompanies(userWithContext, filters, queryOptions),
       [TeamLevelGraphQLEnum.COMPANY_OR_DEPARTMENT]: async () =>
-        this.core.team.getUserCompaniesAndDepartments(authorizationUser, filters, queryOptions),
+        this.core.team.getUserCompaniesAndDepartments(userWithContext, filters, queryOptions),
     }
 
     const queryHandler = queryLeveledHandlers[level ?? 'default']
