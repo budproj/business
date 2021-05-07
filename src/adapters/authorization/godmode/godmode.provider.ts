@@ -1,6 +1,6 @@
-import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { PolicyAdapter } from '@adapters/policy/policy.adapter'
 import { Permission } from '@adapters/policy/types/permission.type'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
@@ -17,11 +17,11 @@ export class GodmodeProvider implements GodmodePropertiesInterface {
     this.authz = new PolicyAdapter()
   }
 
-  private get placeholder(): string {
+  static get placeholder(): string {
     return 'GOD'
   }
 
-  private get permissions(): Permission[] {
+  static get permissions(): Permission[] {
     return [
       'permission:create:any',
       'permission:read:any',
@@ -58,20 +58,31 @@ export class GodmodeProvider implements GodmodePropertiesInterface {
     ]
   }
 
+  static get token(): AuthzToken {
+    return {
+      iss: GodmodeProvider.placeholder,
+      sub: GodmodeProvider.placeholder,
+      azp: GodmodeProvider.placeholder,
+      scope: GodmodeProvider.placeholder,
+      aud: [GodmodeProvider.placeholder],
+      iat: 0,
+      exp: 0,
+      permissions: GodmodeProvider.permissions,
+    }
+  }
+
   public async getGodUser(coreProvider: CoreProvider): Promise<UserWithContext> {
     const user = await coreProvider.user.getOne({})
     const teams = await coreProvider.user.getUserTeams(user)
 
-    const godUser = this.getGodUserWithContextBasedOnUserAndTeams(user, teams)
-
-    return godUser
+    return this.getGodUserWithContextBasedOnUserAndTeams(user, teams)
   }
 
   private getGodUserWithContextBasedOnUserAndTeams(
     user: UserInterface,
     teams: TeamInterface[],
   ): UserWithContext {
-    const token = this.getGodToken()
+    const { token } = GodmodeProvider
     const resourcePolicy = this.authz.getResourcePolicyFromPermissions(token.permissions)
 
     return {
@@ -79,19 +90,6 @@ export class GodmodeProvider implements GodmodePropertiesInterface {
       teams,
       token,
       resourcePolicy,
-    }
-  }
-
-  private getGodToken(): AuthzToken {
-    return {
-      iss: this.placeholder,
-      sub: this.placeholder,
-      azp: this.placeholder,
-      scope: this.placeholder,
-      aud: [this.placeholder],
-      iat: 0,
-      exp: 0,
-      permissions: this.permissions,
     }
   }
 }

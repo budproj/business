@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
 
 import { AccessControl } from '@adapters/authorization/access-control.adapter'
-import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Command } from '@adapters/policy/enums/command.enum'
 import { Resource } from '@adapters/policy/enums/resource.enum'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { Team } from '@core/modules/team/team.orm-entity'

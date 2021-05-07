@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common'
 
-import { Activity } from '@adapters/activity/activities/base.activity'
-import { UPDATED_KEY_RESULT_ACTIVITY_TYPE } from '@adapters/activity/activities/updated-key-result-activity'
-import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import {
+  UPDATED_KEY_RESULT_ACTIVITY_TYPE,
+  UpdatedKeyResultActivity,
+} from '@adapters/activity/activities/updated-key-result-activity'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
@@ -27,22 +28,27 @@ type RelatedData = {
 @Injectable()
 export class UpdatedKeyResultAmplitudeEvent extends BaseAmplitudeEvent<
   UpdatedKeyResultAmplitudeEventProperties,
-  KeyResult
+  UpdatedKeyResultActivity
 > {
   static activityType = UPDATED_KEY_RESULT_ACTIVITY_TYPE
   static amplitudeEventType = 'UpdatedKeyResult'
 
-  constructor(activity: Activity<KeyResult>, protected readonly core: CorePortsProvider) {
+  constructor(activity: UpdatedKeyResultActivity, protected readonly core: CorePortsProvider) {
     super(activity, UpdatedKeyResultAmplitudeEvent.amplitudeEventType)
   }
 
   public async loadProperties(): Promise<void> {
     this.properties = {
       isOwner: this.isOwner(),
+      titleChanged: this.titleChanged(),
     }
   }
 
   private isOwner(): boolean {
     return this.activity.data.ownerId === this.activity.context.user.id
+  }
+
+  private titleChanged(): boolean {
+    return this.activity.context.originalKeyResult.title !== this.activity.data.title
   }
 }

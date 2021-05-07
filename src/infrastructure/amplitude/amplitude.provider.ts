@@ -4,8 +4,8 @@ import { Injectable, Logger, Scope } from '@nestjs/common'
 
 import { Activity } from '@adapters/activity/activities/base.activity'
 import { ActivityDispatcher } from '@adapters/activity/interfaces/activity-dispatcher.interface'
-import { Context } from '@adapters/context/interfaces/context.interface'
-import { UserWithContext } from '@adapters/context/interfaces/user.interface'
+import { State } from '@adapters/state/interfaces/state.interface'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { AmplitudeConfigProvider } from '@config/amplitude/amplitude.provider'
 
 import { EventsFactory } from './events/events.factory'
@@ -18,6 +18,17 @@ export class AmplitudeProvider implements ActivityDispatcher {
 
   constructor(private readonly events: EventsFactory, config: AmplitudeConfigProvider) {
     this.client = init(config.apiKey)
+  }
+
+  static marshalUserProperties(user: UserWithContext): UserProperties {
+    return {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      gender: user.gender,
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString(),
+    }
   }
 
   public async dispatch<D = any>(activity: Activity<D>): Promise<void> {
@@ -35,10 +46,10 @@ export class AmplitudeProvider implements ActivityDispatcher {
     await this.client.logEvent(marshalledEvent)
   }
 
-  public async identify(context: Context): Promise<void> {
+  public async identify(context: State): Promise<void> {
     const userID = context.user.id
     const { deviceID } = context.tracing
-    const userProperties = this.marshalUserProperties(context.user)
+    const userProperties = AmplitudeProvider.marshalUserProperties(context.user)
 
     const userIdentification = new Identify()
     this.attachPropertiesToIdentification(userProperties, userIdentification)
@@ -49,17 +60,6 @@ export class AmplitudeProvider implements ActivityDispatcher {
     })
 
     await this.client.identify(userID, deviceID, userIdentification)
-  }
-
-  private marshalUserProperties(user: UserWithContext): UserProperties {
-    return {
-      id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      gender: user.gender,
-      createdAt: user.createdAt.toISOString(),
-      updatedAt: user.updatedAt.toISOString(),
-    }
   }
 
   private attachPropertiesToIdentification(

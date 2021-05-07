@@ -2,12 +2,12 @@ import { Logger } from '@nestjs/common'
 import { Args } from '@nestjs/graphql'
 import { camelCase, mapKeys } from 'lodash'
 
-import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Effect } from '@adapters/policy/enums/effect.enum'
 import { Scope } from '@adapters/policy/enums/scope.enum'
 import { PolicyAdapter } from '@adapters/policy/policy.adapter'
 import { CommandStatement } from '@adapters/policy/types/command-statement.type'
 import { ResourceStatement } from '@adapters/policy/types/resource-statement.type copy'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 
 import { RequestUserWithContext } from '../../context/decorators/request-user-with-context.decorator'
 import { GuardedQuery } from '../decorators/guarded-query.decorator'
@@ -36,11 +36,7 @@ export class PermissionsGraphQLResolver {
       scope,
     )
 
-    const permissions = this.normalizeResourceStatementKeys<CommandStatement>(
-      resourcesCommandStatement,
-    )
-
-    return permissions
+    return this.normalizeResourceStatementKeys<CommandStatement>(resourcesCommandStatement)
   }
 
   private normalizeResourceStatementKeys<E = Effect>(

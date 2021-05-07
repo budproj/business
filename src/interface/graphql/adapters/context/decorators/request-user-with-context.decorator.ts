@@ -1,7 +1,7 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common'
 import { GqlExecutionContext } from '@nestjs/graphql'
 
-import { UserWithContext } from '@adapters/context/interfaces/user.interface'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 
 import { GraphQLRequest } from '../interfaces/request.interface'
 

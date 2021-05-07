@@ -3,8 +3,8 @@ import { GqlExecutionContext } from '@nestjs/graphql'
 import { Observable } from 'rxjs'
 
 import { GodmodeProvider } from '@adapters/authorization/godmode/godmode.provider'
-import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { PolicyAdapter } from '@adapters/policy/policy.adapter'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 import { CoreProvider } from '@core/core.provider'
 

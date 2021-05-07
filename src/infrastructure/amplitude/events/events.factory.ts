@@ -20,8 +20,8 @@ export class EventsFactory {
 
   constructor(private readonly core: CorePortsProvider) {}
 
-  public buildEventForActivity<P extends EventProperties, D = any>(
-    activity: Activity<D>,
+  public buildEventForActivity<P extends EventProperties, A extends Activity = Activity>(
+    activity: A,
   ): BaseAmplitudeEvent<P> | undefined {
     const Event = this.eventConstructors.find((event) => event.activityType === activity.type)
     if (!Event) return

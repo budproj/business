@@ -3,9 +3,9 @@ import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { UpdatedKeyResultActivity } from '@adapters/activity/activities/updated-key-result-activity'
-import { Context } from '@adapters/context/interfaces/context.interface'
-import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
+import { State } from '@adapters/state/interfaces/state.interface'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
@@ -15,6 +15,7 @@ import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-resu
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { AttachActivity } from '@interface/graphql/adapters/activity/attach-activity.decorator'
+import { RequestActivity } from '@interface/graphql/adapters/activity/request-activity.decorator'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
@@ -77,7 +78,8 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedMutation(KeyResultGraphQLNode, 'key-result:update', { name: 'updateKeyResult' })
   protected async updateKeyResultForRequestAndRequestUserWithContext(
     @Args() request: KeyResultUpdateRequest,
-    @RequestState() state: Context,
+    @RequestState() state: State,
+    @RequestActivity() activity: UpdatedKeyResultActivity,
   ) {
     const canUpdate = await this.accessControl.canUpdate(state.user, request.data)
     if (!canUpdate) throw new UnauthorizedException()
@@ -86,6 +88,13 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       state,
       request,
       message: 'Received update key-result request',
+    })
+
+    const originalKeyResult = await this.corePorts.dispatchCommand<KeyResult>('get-key-result', {
+      id: request.id,
+    })
+    activity.attachToContext({
+      originalKeyResult,
     })
 
     const keyResult = await this.corePorts.dispatchCommand<KeyResult>(

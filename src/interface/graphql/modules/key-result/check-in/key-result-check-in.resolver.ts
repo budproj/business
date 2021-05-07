@@ -3,10 +3,10 @@ import { Args, Float, Int, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { CreatedCheckInActivity } from '@adapters/activity/activities/created-check-in-activity'
-import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Command } from '@adapters/policy/enums/command.enum'
 import { Effect } from '@adapters/policy/enums/effect.enum'
 import { Resource } from '@adapters/policy/enums/resource.enum'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
@@ -236,12 +236,10 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
       policy,
       keyResultCheckIn,
     )
-    const restrictedToLatestCheckInDelete = await this.restrictDeletePolicyToAllowOnlyLatestCheckIn(
+    return this.restrictDeletePolicyToAllowOnlyLatestCheckIn(
       restrictedToActivePolicy,
       keyResultCheckIn,
     )
-
-    return restrictedToLatestCheckInDelete
   }
 
   private async restrictPolicyToActiveKeyResult(
