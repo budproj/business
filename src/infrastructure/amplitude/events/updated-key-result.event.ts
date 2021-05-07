@@ -38,6 +38,8 @@ export class UpdatedKeyResultAmplitudeEvent extends BaseAmplitudeEvent<
   }
 
   public async loadProperties(): Promise<void> {
+    const { team, company } = await this.getRelatedData()
+
     this.properties = {
       isOwner: this.isOwner(),
       titleChanged: this.titleChanged(),
@@ -45,6 +47,18 @@ export class UpdatedKeyResultAmplitudeEvent extends BaseAmplitudeEvent<
       initialValueChanged: this.initialValueChanged(),
       goalChanged: this.goalChanged(),
       ownerChanged: this.ownerChanged(),
+      team: team.name,
+      company: company.name,
+    }
+  }
+
+  private async getRelatedData(): Promise<RelatedData> {
+    const team = await this.getTeam()
+    const company = await this.getCompany(team)
+
+    return {
+      team,
+      company,
     }
   }
 
@@ -70,5 +84,13 @@ export class UpdatedKeyResultAmplitudeEvent extends BaseAmplitudeEvent<
 
   private ownerChanged(): boolean {
     return this.activity.context.originalKeyResult.ownerId !== this.activity.data.ownerId
+  }
+
+  private async getTeam(): Promise<Team> {
+    return this.core.dispatchCommand<Team>('get-key-result-team', this.activity.data)
+  }
+
+  private async getCompany(team: Team): Promise<Team> {
+    return this.core.dispatchCommand<Team>('get-team-company', team)
   }
 }

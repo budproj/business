@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 
 import { CoreProvider } from '@core/core.provider'
 import { GetKeyResultCommentTeamCommand } from '@core/ports/commands/get-key-result-comment-team.command'
+import { GetKeyResultTeamCommand } from '@core/ports/commands/get-key-result-team.command'
 import { UpdateKeyResultCommand } from '@core/ports/commands/update-key-result.command'
 
 import { Command } from './base.command'
@@ -44,6 +45,7 @@ export type CommandType =
   | 'get-team-company'
   | 'get-key-result-comment-team'
   | 'update-key-result'
+  | 'get-key-result-team'
 
 @Injectable()
 export class CommandFactory {
@@ -67,6 +69,7 @@ export class CommandFactory {
     'get-team-company': GetTeamCompanyCommand,
     'get-key-result-comment-team': GetKeyResultCommentTeamCommand,
     'update-key-result': UpdateKeyResultCommand,
+    'get-key-result-team': GetKeyResultTeamCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}
