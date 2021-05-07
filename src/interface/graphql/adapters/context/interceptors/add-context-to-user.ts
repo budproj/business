@@ -41,14 +41,14 @@ export class AddContextToUserInterceptor implements NestInterceptor {
 
   private async getRequestUser(request: GraphQLRequest): Promise<UserWithContext> {
     const { teams, ...user } = await this.core.user.getUserFromSubjectWithTeamRelation(
-      request.state.user.token.sub,
+      request.user.token.sub,
     )
     const resourcePolicy = this.authz.getResourcePolicyFromPermissions(
-      request.state.user.token.permissions,
+      request.user.token.permissions,
     )
 
     return {
-      ...request.state.user,
+      ...request.user,
       ...user,
       teams,
       resourcePolicy,
