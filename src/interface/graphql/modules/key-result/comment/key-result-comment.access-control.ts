@@ -4,28 +4,23 @@ import { AccessControl } from '@adapters/authorization/access-control.adapter'
 import { Command } from '@adapters/policy/enums/command.enum'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
-import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { User } from '@core/modules/user/user.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
 @Injectable()
-export class KeyResultCommentAccessControl extends AccessControl<KeyResultCommentInterface> {
+export class KeyResultCommentAccessControl extends AccessControl {
   protected readonly resource = Resource.KEY_RESULT_COMMENT
 
   constructor(private readonly core: CorePortsProvider) {
     super()
   }
 
-  public async canCreate(
-    user: UserWithContext,
-    data: Partial<KeyResultCommentInterface>,
-  ): Promise<boolean> {
-    const keyResult = await this.core.dispatchCommand<KeyResult>(
-      'get-key-result-from-check-in',
-      data,
-    )
+  public async canCreate(user: UserWithContext, keyResultID: string): Promise<boolean> {
+    const keyResult = await this.core.dispatchCommand<KeyResult>('get-key-result', {
+      id: keyResultID,
+    })
     if (!keyResult) return false
 
     const teams = await this.core.dispatchCommand<Team[]>('get-key-result-team-tree', keyResult)
@@ -37,24 +32,15 @@ export class KeyResultCommentAccessControl extends AccessControl<KeyResultCommen
     return this.canActivate(user, Command.CREATE, isKeyResultOwner, isTeamLeader, isCompanyMember)
   }
 
-  public async canRead(
-    _user: UserWithContext,
-    _indexes: Partial<KeyResultCommentInterface>,
-  ): Promise<boolean> {
+  public async canRead(_user: UserWithContext, _id: string): Promise<boolean> {
     return false
   }
 
-  public async canUpdate(
-    _user: UserWithContext,
-    _indexes: Partial<KeyResultCommentInterface>,
-  ): Promise<boolean> {
+  public async canUpdate(_user: UserWithContext, _id: string): Promise<boolean> {
     return false
   }
 
-  public async canDelete(
-    _user: UserWithContext,
-    _indexes: Partial<KeyResultCommentInterface>,
-  ): Promise<boolean> {
+  public async canDelete(_user: UserWithContext, _id: string): Promise<boolean> {
     return false
   }
 

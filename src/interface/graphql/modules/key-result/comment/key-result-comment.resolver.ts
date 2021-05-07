@@ -76,7 +76,7 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: KeyResultCommentCreateRequest,
     @RequestState() state: GraphQLRequestState,
   ) {
-    const canCreate = await this.accessControl.canCreate(state.user, request.data)
+    const canCreate = await this.accessControl.canCreate(state.user, request.data.keyResultId)
     if (!canCreate) throw new UnauthorizedException()
 
     this.logger.log({
