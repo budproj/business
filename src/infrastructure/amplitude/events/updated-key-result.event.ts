@@ -38,7 +38,11 @@ export class UpdatedKeyResultAmplitudeEvent extends BaseAmplitudeEvent<
 
   public async loadProperties(): Promise<void> {
     this.properties = {
-      isOwner: true,
+      isOwner: this.isOwner(),
     }
+  }
+
+  private isOwner(): boolean {
+    return this.activity.data.ownerId === this.activity.context.user.id
   }
 }
