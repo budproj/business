@@ -3,8 +3,8 @@ import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { CreatedKeyResultCommentActivity } from '@adapters/activity/activities/created-key-result-comment.activity'
-import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
 import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
@@ -163,12 +163,7 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     policy: PolicyGraphQLObject,
     keyResultComment: KeyResultCommentGraphQLNode,
   ) {
-    const restrictedToActivePolicy = await this.restrictPolicyToActiveKeyResult(
-      policy,
-      keyResultComment,
-    )
-
-    return restrictedToActivePolicy
+    return this.restrictPolicyToActiveKeyResult(policy, keyResultComment)
   }
 
   private async restrictPolicyToActiveKeyResult(

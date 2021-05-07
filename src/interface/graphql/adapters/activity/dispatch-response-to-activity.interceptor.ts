@@ -8,9 +8,9 @@ import { Activity } from '@adapters/activity/activities/base.activity'
 import { ActivityAdapter } from '@adapters/activity/activity.adapter'
 import { ActivityConstructor } from '@adapters/activity/types/activity-constructor.type'
 import { AmplitudeProvider } from '@infrastructure/amplitude/amplitude.provider'
+import { GraphQContext } from '@interface/graphql/adapters/context/interfaces/context.interface'
 
 import { GraphQLRequestState } from '../context/interfaces/request-state.interface'
-import { GraphQLRequest } from '../context/interfaces/request.interface'
 
 @Injectable()
 export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor<T> {
@@ -22,34 +22,40 @@ export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor
     })
   }
 
+  static getContext(executionContext: ExecutionContext): GraphQContext {
+    const graphqlContext = GqlExecutionContext.create(executionContext)
+    return graphqlContext.getContext()
+  }
+
+  static getRequestState(executionContext: ExecutionContext): GraphQLRequestState {
+    return DispatchResponseToActivityInterceptor.getContext(executionContext).req.state
+  }
+
+  static getContextActivity(executionContext: ExecutionContext): Activity {
+    return DispatchResponseToActivityInterceptor.getContext(executionContext).activity
+  }
+
   public intercept(executionContext: ExecutionContext, next: CallHandler): Observable<T> {
+    const context = DispatchResponseToActivityInterceptor.getContext(executionContext)
+
+    context.activity = this.buildActivity({} as any, executionContext)
+
     return next.handle().pipe(map((data) => this.handleResult(data, executionContext)))
   }
 
-  private getActivity(
-    data: T,
-    state: GraphQLRequestState,
-    executionContext: ExecutionContext,
-  ): Activity<T> {
+  private buildActivity(data: T, executionContext: ExecutionContext): Activity<T> {
+    const state = DispatchResponseToActivityInterceptor.getRequestState(executionContext)
     const Activity = this.reflector.get<ActivityConstructor<T>>(
       'activity',
       executionContext.getHandler(),
     )
-    const activity = new Activity(data, state)
 
-    return activity
-  }
-
-  private getRequestState(executionContext: ExecutionContext): GraphQLRequestState {
-    const graphqlContext = GqlExecutionContext.create(executionContext)
-    const request: GraphQLRequest = graphqlContext.getContext().req
-
-    return request.state
+    return new Activity(data, state)
   }
 
   private handleResult(data: T, executionContext: ExecutionContext): T {
-    const state = this.getRequestState(executionContext)
-    const activity = this.getActivity(data, state, executionContext)
+    const activity = DispatchResponseToActivityInterceptor.getContextActivity(executionContext)
+    activity.refreshData(data)
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.activityAdapter.dispatch(activity)

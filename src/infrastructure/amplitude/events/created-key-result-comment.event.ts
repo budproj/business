@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common'
 
-import { Activity } from '@adapters/activity/activities/base.activity'
-import { CREATED_KEY_RESULT_COMMENT_ACTIVITY_TYPE } from '@adapters/activity/activities/created-key-result-comment.activity'
+import {
+  CREATED_KEY_RESULT_COMMENT_ACTIVITY_TYPE,
+  CreatedKeyResultCommentActivity,
+} from '@adapters/activity/activities/created-key-result-comment.activity'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { Cadence } from '@core/modules/cycle/enums/cadence.enum'
-import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
@@ -29,12 +30,15 @@ type RelatedData = {
 @Injectable()
 export class CreatedKeyResultCommentAmplitudeEvent extends BaseAmplitudeEvent<
   CreatedKeyResultCommentAmplitudeEventProperties,
-  KeyResultComment
+  CreatedKeyResultCommentActivity
 > {
   static activityType = CREATED_KEY_RESULT_COMMENT_ACTIVITY_TYPE
   static amplitudeEventType = 'CreatedKeyResultComment'
 
-  constructor(activity: Activity<KeyResultComment>, protected readonly core: CorePortsProvider) {
+  constructor(
+    activity: CreatedKeyResultCommentActivity,
+    protected readonly core: CorePortsProvider,
+  ) {
     super(activity, CreatedKeyResultCommentAmplitudeEvent.amplitudeEventType)
   }
 

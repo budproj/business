@@ -4,8 +4,8 @@ import { UserInputError } from 'apollo-server-fastify'
 import { FileUpload } from 'graphql-upload'
 import { pickBy } from 'lodash'
 
-import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { VisibilityStorageEnum } from '@adapters/storage/enums/visilibity.enum'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
@@ -295,11 +295,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       path: 'user/pictures',
     }
 
-    const pictureRemoteURL = await this.uploadProvider.uploadFileToRepository(
-      pictureFile,
-      pictureSpecification,
-    )
-
-    return pictureRemoteURL
+    return this.uploadProvider.uploadFileToRepository(pictureFile, pictureSpecification)
   }
 }

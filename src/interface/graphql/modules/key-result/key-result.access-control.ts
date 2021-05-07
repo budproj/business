@@ -4,15 +4,15 @@ import { AccessControl } from '@adapters/authorization/access-control.adapter'
 import { Command } from '@adapters/policy/enums/command.enum'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
-import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
+import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { User } from '@core/modules/user/user.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
 @Injectable()
-export class KeyResultCommentAccessControl extends AccessControl<KeyResultCommentInterface> {
-  protected readonly resource = Resource.KEY_RESULT_COMMENT
+export class KeyResultAccessControl extends AccessControl<KeyResult> {
+  protected readonly resource = Resource.KEY_RESULT
 
   constructor(private readonly core: CorePortsProvider) {
     super()
@@ -20,14 +20,9 @@ export class KeyResultCommentAccessControl extends AccessControl<KeyResultCommen
 
   public async canCreate(
     user: UserWithContext,
-    data: Partial<KeyResultCommentInterface>,
+    data: Partial<KeyResultInterface>,
   ): Promise<boolean> {
-    const keyResult = await this.core.dispatchCommand<KeyResult>(
-      'get-key-result-from-check-in',
-      data,
-    )
-    if (!keyResult) return false
-
+    const keyResult = await this.core.dispatchCommand<KeyResult>('get-key-result', data)
     const teams = await this.core.dispatchCommand<Team[]>('get-key-result-team-tree', keyResult)
 
     const isKeyResultOwner = await this.isKeyResultOwner(keyResult, user)
@@ -39,21 +34,28 @@ export class KeyResultCommentAccessControl extends AccessControl<KeyResultCommen
 
   public async canRead(
     _user: UserWithContext,
-    _indexes: Partial<KeyResultCommentInterface>,
+    _indexes: Partial<KeyResultInterface>,
   ): Promise<boolean> {
     return false
   }
 
   public async canUpdate(
-    _user: UserWithContext,
-    _indexes: Partial<KeyResultCommentInterface>,
+    user: UserWithContext,
+    indexes: Partial<KeyResultInterface>,
   ): Promise<boolean> {
-    return false
+    const keyResult = await this.core.dispatchCommand<KeyResult>('get-key-result', indexes)
+    const teams = await this.core.dispatchCommand<Team[]>('get-key-result-team-tree', keyResult)
+
+    const isKeyResultOwner = await this.isKeyResultOwner(keyResult, user)
+    const isTeamLeader = await this.isTeamLeader(teams, user)
+    const isCompanyMember = await this.isCompanyMember(keyResult, user)
+
+    return this.canActivate(user, Command.UPDATE, isKeyResultOwner, isTeamLeader, isCompanyMember)
   }
 
   public async canDelete(
     _user: UserWithContext,
-    _indexes: Partial<KeyResultCommentInterface>,
+    _indexes: Partial<KeyResultInterface>,
   ): Promise<boolean> {
     return false
   }

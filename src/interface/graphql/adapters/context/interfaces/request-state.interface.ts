@@ -1,3 +1,3 @@
-import { Context } from '@adapters/context/interfaces/context.interface'
+import { State } from '@adapters/state/interfaces/state.interface'
 
-export interface GraphQLRequestState extends Context {}
+export interface GraphQLRequestState extends State {}

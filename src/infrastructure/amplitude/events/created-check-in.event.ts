@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common'
 
-import { Activity } from '@adapters/activity/activities/base.activity'
-import { CREATED_CHECK_IN_ACTIVITY_TYPE } from '@adapters/activity/activities/created-check-in-activity'
+import {
+  CREATED_CHECK_IN_ACTIVITY_TYPE,
+  CreatedCheckInActivity,
+} from '@adapters/activity/activities/created-check-in-activity'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
@@ -37,12 +39,12 @@ type RelatedData = {
 @Injectable()
 export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
   CreatedCheckInAmplitudeEventProperties,
-  KeyResultCheckIn
+  CreatedCheckInActivity
 > {
   static activityType = CREATED_CHECK_IN_ACTIVITY_TYPE
   static amplitudeEventType = 'CreatedCheckIn'
 
-  constructor(activity: Activity<KeyResultCheckIn>, protected readonly core: CorePortsProvider) {
+  constructor(activity: CreatedCheckInActivity, protected readonly core: CorePortsProvider) {
     super(activity, CreatedCheckInAmplitudeEvent.amplitudeEventType)
   }
 

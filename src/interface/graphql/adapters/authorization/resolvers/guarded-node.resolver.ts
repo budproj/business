@@ -1,10 +1,10 @@
 import { Args, Parent, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { QueryGuardAdapter } from '@adapters/authorization/query-guard.adapter'
-import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { Scope } from '@adapters/policy/enums/scope.enum'
 import { PolicyAdapter } from '@adapters/policy/policy.adapter'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreEntityInterface } from '@core/core-entity.interface'
 import { CoreEntity } from '@core/core.orm-entity'
 import { CoreProvider } from '@core/core.provider'
@@ -28,7 +28,7 @@ export abstract class GuardedNodeGraphQLResolver<
   protected readonly authz: PolicyAdapter
   protected readonly relay: RelayGraphQLAdapter
 
-  constructor(
+  protected constructor(
     protected readonly resource: Resource,
     protected readonly core: CoreProvider,
     private readonly coreEntityProvider: CoreEntityProvider<E, I>,
@@ -48,9 +48,7 @@ export abstract class GuardedNodeGraphQLResolver<
     scope ??= await this.getHighestScopeForNodeInUserContext(node, userWithContext)
 
     const policy = await this.getPolicyForUserInScope(userWithContext, scope, node)
-    const controlledPolicy = await this.controlNodePolicy(policy, node)
-
-    return controlledPolicy
+    return this.controlNodePolicy(policy, node)
   }
 
   protected async controlNodePolicy(
@@ -65,8 +63,6 @@ export abstract class GuardedNodeGraphQLResolver<
     user: UserWithContext,
   ): Promise<Scope> {
     const queryContext = await this.core.team.buildTeamQueryContext(user)
-    const scope = await this.coreEntityProvider.defineResourceHighestScope(node, queryContext)
-
-    return scope
+    return this.coreEntityProvider.defineResourceHighestScope(node, queryContext)
   }
 }

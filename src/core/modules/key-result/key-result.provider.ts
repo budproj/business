@@ -115,9 +115,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       where: whereSelector,
     })
 
-    const uniqueKeyResults = uniqBy(keyResults, 'id')
-
-    return uniqueKeyResults
+    return uniqBy(keyResults, 'id')
   }
 
   public async getComments(
@@ -176,13 +174,11 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     user: UserInterface,
     data: Partial<KeyResultCommentInterface>,
   ): Partial<KeyResultCommentInterface> {
-    const comment: Partial<KeyResultCommentInterface> = {
+    return {
       text: data.text,
       userId: user.id,
       keyResultId: data.keyResultId,
     }
-
-    return comment
   }
 
   public async getFromKeyResultCommentID(
@@ -191,9 +187,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const keyResultComment = await this.keyResultCommentProvider.getOne({ id: keyResultCommentID })
     if (!keyResultComment) return
 
-    const keyResult = await this.getOne({ id: keyResultComment.keyResultId })
-
-    return keyResult
+    return this.getOne({ id: keyResultComment.keyResultId })
   }
 
   public async isActiveFromIndexes(
@@ -211,7 +205,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const keyResult = await this.getOne({ id: checkInData.keyResultId })
     const previousCheckIn = await this.keyResultCheckInProvider.getLatestFromKeyResult(keyResult)
 
-    const checkIn: Partial<KeyResultCheckInInterface> = {
+    return {
       userId: user.id,
       keyResultId: checkInData.keyResultId,
       value: checkInData.value,
@@ -219,17 +213,13 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       comment: checkInData.comment,
       parentId: previousCheckIn?.id,
     }
-
-    return checkIn
   }
 
   public async getFromKeyResultCheckInID(keyResultCheckInID?: string): Promise<KeyResult> {
     if (!keyResultCheckInID) return
-
     const keyResultCheckIn = await this.keyResultCheckInProvider.getOne({ id: keyResultCheckInID })
-    const keyResult = await this.getOne({ id: keyResultCheckIn.keyResultId })
 
-    return keyResult
+    return this.getOne({ id: keyResultCheckIn.keyResultId })
   }
 
   public async getParentCheckInFromCheckIn(
@@ -263,23 +253,19 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       previousCheckIn,
     )
 
-    const deltaProgress = this.keyResultCheckInProvider.calculateValueDifference(
+    return this.keyResultCheckInProvider.calculateValueDifference(
       normalizedPreviousCheckIn,
       normalizedCurrentCheckIn,
     )
-
-    return deltaProgress
   }
 
   public async getCheckInConfidenceIncrease(keyResultCheckIn: KeyResultCheckIn): Promise<number> {
     const previousCheckIn = await this.getParentCheckInFromCheckIn(keyResultCheckIn)
 
-    const deltaConfidence = this.keyResultCheckInProvider.calculateConfidenceDifference(
+    return this.keyResultCheckInProvider.calculateConfidenceDifference(
       previousCheckIn,
       keyResultCheckIn,
     )
-
-    return deltaConfidence
   }
 
   public async getCheckInValueIncrease(keyResultCheckIn: KeyResultCheckIn): Promise<number> {
@@ -287,9 +273,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const previousCheckIn = await this.getParentCheckInFromCheckIn(keyResultCheckIn)
     if (!previousCheckIn) return keyResultCheckIn.value - keyResult.initialValue
 
-    const deltaValue = keyResultCheckIn.value - previousCheckIn.value
-
-    return deltaValue
+    return keyResultCheckIn.value - previousCheckIn.value
   }
 
   public async getLatestCheckInForKeyResultAtDate(
@@ -297,12 +281,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     date?: Date,
   ): Promise<KeyResultCheckIn> {
     date ??= new Date()
-    const latestCheckIn = await this.keyResultCheckInProvider.getLatestFromKeyResultAtDate(
-      keyResult,
-      date,
-    )
-
-    return latestCheckIn
+    return this.keyResultCheckInProvider.getLatestFromKeyResultAtDate(keyResult, date)
   }
 
   public calculateKeyResultCheckInListAverageProgress(
@@ -315,18 +294,15 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
         keyResultCheckIn,
       ),
     )
-    const keyResultCheckInListAverageProgress = this.keyResultCheckInProvider.calculateAverageValueFromCheckInList(
+
+    return this.keyResultCheckInProvider.calculateAverageValueFromCheckInList(
       normalizedKeyResultCheckInList,
     )
-
-    return keyResultCheckInListAverageProgress
   }
 
   public async getLatestCheckInForTeam(team: TeamInterface) {
     const users = await this.teamProvider.getUsersInTeam(team)
-    const latestCheckIn = await this.keyResultCheckInProvider.getLatestFromUsers(users)
-
-    return latestCheckIn
+    return this.keyResultCheckInProvider.getLatestFromUsers(users)
   }
 
   public async isOutdated(keyResult: KeyResult): Promise<boolean> {
@@ -343,9 +319,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     queryOptions?: GetOptions<KeyResultComment | KeyResultCheckIn>,
   ): Promise<KeyResultTimelineEntry[]> {
     const timelineQueryResult = await this.timeline.buildUnionQuery(keyResult, queryOptions)
-    const timelineEntries = await this.timeline.getEntriesForTimelineOrder(timelineQueryResult)
-
-    return timelineEntries
+    return this.timeline.getEntriesForTimelineOrder(timelineQueryResult)
   }
 
   public async getFromID(id: string): Promise<KeyResult> {
@@ -360,18 +334,14 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     checkIn: Partial<KeyResultCheckInInterface>,
   ): Promise<KeyResultCheckIn> {
     const queryResult = await this.keyResultCheckInProvider.createCheckIn(checkIn)
-    const createdCheckIn = queryResult[0]
-
-    return createdCheckIn
+    return queryResult[0]
   }
 
   public async createComment(
     comment: Partial<KeyResultCommentInterface>,
   ): Promise<KeyResultComment> {
     const queryResult = await this.keyResultCommentProvider.createComment(comment)
-    const createdComment = queryResult[0]
-
-    return createdComment
+    return queryResult[0]
   }
 
   protected async protectCreationQuery(
