@@ -6,7 +6,7 @@ export abstract class Activity<D = any> {
   public readonly type: string
   public readonly metadata: ActivityMetadata
 
-  constructor(public readonly data: D, public readonly context: Context) {
+  protected constructor(public readonly data: D, public readonly context: Context) {
     this.metadata = this.marshalMetadata(context)
   }
 

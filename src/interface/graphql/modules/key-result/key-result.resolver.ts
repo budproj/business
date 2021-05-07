@@ -2,6 +2,7 @@ import { Logger } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
+import { UpdatedKeyResultActivity } from '@adapters/activity/activities/updated-key-result-activity'
 import { UserWithContext } from '@adapters/context/interfaces/user.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
@@ -11,6 +12,7 @@ import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-
 import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { AttachActivity } from '@interface/graphql/adapters/activity/attach-activity.decorator'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
@@ -63,6 +65,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     return keyResult
   }
 
+  @AttachActivity(UpdatedKeyResultActivity)
   @GuardedMutation(KeyResultGraphQLNode, 'key-result:update', { name: 'updateKeyResult' })
   protected async updateKeyResultForRequestAndRequestUserWithContext(
     @Args() request: KeyResultUpdateRequest,
@@ -102,9 +105,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching team for key result',
     })
 
-    const team = await this.core.team.getOne({ id: keyResult.teamId })
-
-    return team
+    return this.core.team.getOne({ id: keyResult.teamId })
   }
 
   @ResolveField('objective', () => ObjectiveGraphQLNode)
@@ -212,9 +213,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   protected async controlNodePolicy(policy: PolicyGraphQLObject, keyResult: KeyResultGraphQLNode) {
-    const restrictedToActivePolicy = await this.restrictPolicyToActiveKeyResult(policy, keyResult)
-
-    return restrictedToActivePolicy
+    return this.restrictPolicyToActiveKeyResult(policy, keyResult)
   }
 
   private async restrictPolicyToActiveKeyResult(
