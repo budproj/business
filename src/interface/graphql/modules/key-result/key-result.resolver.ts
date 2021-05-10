@@ -19,7 +19,6 @@ import { RequestActivity } from '@interface/graphql/adapters/activity/request-ac
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
-import { PolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/policy.object'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
@@ -49,7 +48,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   constructor(
     protected readonly core: CoreProvider,
     protected readonly corePorts: CorePortsProvider,
-    private readonly accessControl: KeyResultAccessControl,
+    protected readonly accessControl: KeyResultAccessControl,
   ) {
     super(Resource.KEY_RESULT, core, core.keyResult)
   }
@@ -230,22 +229,5 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     const queryResult = await this.core.keyResult.getTimeline(keyResult)
 
     return this.relay.marshalResponse(queryResult, connection)
-  }
-
-  protected async controlNodePolicy(policy: PolicyGraphQLObject, keyResult: KeyResultGraphQLNode) {
-    return this.restrictPolicyToActiveKeyResult(policy, keyResult)
-  }
-
-  private async restrictPolicyToActiveKeyResult(
-    policy: PolicyGraphQLObject,
-    keyResult: KeyResultGraphQLNode,
-  ) {
-    if (this.policy.commandStatementIsDenyingAll(policy)) return policy
-
-    const isObjectiveActive = await this.core.objective.isActiveFromIndexes({
-      id: keyResult.objectiveId,
-    })
-
-    return isObjectiveActive ? policy : this.policy.denyCommandStatement(policy)
   }
 }

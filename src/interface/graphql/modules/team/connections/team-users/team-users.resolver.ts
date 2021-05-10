@@ -4,15 +4,13 @@ import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
-import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 
 import { TeamUsersGraphQLConnection } from './team-users.connection'
 
 @GuardedResolver(TeamUsersGraphQLConnection)
 export class TeamUsersConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
   User,
-  UserInterface,
-  UserGraphQLNode
+  UserInterface
 > {
   constructor(protected readonly core: CoreProvider) {
     super(Resource.USER, core, core.user)

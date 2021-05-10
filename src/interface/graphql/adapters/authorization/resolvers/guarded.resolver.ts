@@ -6,7 +6,7 @@ import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 
 import { BaseGraphQLResolver } from '../../../resolvers/base.resolver'
 import { RelayGraphQLAdapter } from '../../relay/relay.adapter'
-import { PolicyGraphQLObject } from '../objects/policy.object'
+import { NodePolicyGraphQLObject } from '../objects/node-policy.object'
 
 export abstract class GuardedGraphQLResolver<P> extends BaseGraphQLResolver {
   protected readonly authorization: AuthorizationAdapter = new AuthorizationAdapter()
@@ -29,7 +29,7 @@ export abstract class GuardedGraphQLResolver<P> extends BaseGraphQLResolver {
     return this.customizePolicy(commandStatement, parent)
   }
 
-  protected async customizePolicy(originalPolicy: PolicyGraphQLObject, _parent: P) {
+  protected async customizePolicy(originalPolicy: NodePolicyGraphQLObject, _parent: P) {
     return originalPolicy
   }
 }

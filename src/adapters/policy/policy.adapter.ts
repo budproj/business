@@ -27,6 +27,22 @@ export class PolicyAdapter {
     Resource.KEY_RESULT_COMMENT,
   ]
 
+  static drillUp<T extends string = string>(value: string): T {
+    return value.split(':').slice(0, -1).join(':') as T
+  }
+
+  static buildAction(resource: Resource, command: Command): Action {
+    return `${resource}:${command}` as const
+  }
+
+  static userHasPermission(user: AuthorizationUser, permission: Permission): boolean {
+    return user.token.permissions.includes(permission)
+  }
+
+  static buildPermissionFromAction(action: Action, scope: Scope): Permission {
+    return `${action}:${scope}` as const
+  }
+
   public getResourcePolicyFromPermissions(
     permissions: Permission[],
     resources: Resource[] = this.resources,
@@ -34,9 +50,8 @@ export class PolicyAdapter {
     const commandPolicies = resources.map((resource) =>
       this.getCommandPoliciesForResourceFromPermissions(resource, permissions),
     )
-    const resourcePolicy = zipObject<Resource, CommandPolicy>(resources, commandPolicies)
 
-    return resourcePolicy
+    return zipObject<Resource, CommandPolicy>(resources, commandPolicies)
   }
 
   public getResourceCommandScopeForUser(
@@ -44,10 +59,9 @@ export class PolicyAdapter {
     command: Command,
     user: AuthorizationUser,
   ): Scope {
-    const action = this.buildAction(resource, command)
-    const scope = this.getHighestScopeForActionFromUser(action, user)
+    const action = PolicyAdapter.buildAction(resource, command)
 
-    return scope
+    return this.getHighestScopeForActionFromUser(action, user)
   }
 
   public getResourcesCommandStatementsForScopeFromPolicy(
@@ -70,14 +84,19 @@ export class PolicyAdapter {
   }
 
   public getActionsFromPermissions(permissions: Permission[]): Action[] {
-    const actions: Action[] = permissions.map((permission) => this.drillUp<Action>(permission))
-    const uniqActions = uniq(actions)
+    const actions: Action[] = permissions.map((permission) =>
+      PolicyAdapter.drillUp<Action>(permission),
+    )
 
-    return uniqActions
+    return uniq(actions)
   }
 
   public buildPermission(resource: Resource, command: Command, scope: Scope): Permission {
     return `${resource}:${command}:${scope}` as const
+  }
+
+  public getEffectForBoolean(bool: boolean): Effect {
+    return bool ? Effect.ALLOW : Effect.DENY
   }
 
   private getCommandPoliciesForResourceFromPermissions(
@@ -89,9 +108,7 @@ export class PolicyAdapter {
       this.getScopePoliciesForResourceCommandFromPermissions(resource, command, permissions),
     )
 
-    const commandPolicy = zipObject<Command, ScopePolicy>(commands, scopePolicies)
-
-    return commandPolicy
+    return zipObject<Command, ScopePolicy>(commands, scopePolicies)
   }
 
   private getScopePoliciesForResourceCommandFromPermissions(
@@ -106,9 +123,7 @@ export class PolicyAdapter {
       this.getEffectPolicyForActionScopeFromPermissions(scope, action, actionPermissions),
     )
 
-    const scopePolicy = zipObject<Scope, Effect>(scopes, effectPolicies)
-
-    return scopePolicy
+    return zipObject<Scope, Effect>(scopes, effectPolicies)
   }
 
   private getEffectPolicyForActionScopeFromPermissions(
@@ -126,33 +141,15 @@ export class PolicyAdapter {
     return permissions.filter((permission) => permission.includes(action))
   }
 
-  private drillUp<T extends string = string>(value: string): T {
-    return value.split(':').slice(0, -1).join(':') as T
-  }
-
-  private buildAction(resource: Resource, command: Command): Action {
-    return `${resource}:${command}` as const
-  }
-
   private getHighestScopeForActionFromUser(
     action: Action,
     user: AuthorizationUser,
   ): Scope | undefined {
-    const highestScope = SCOPE_PRIORITY.find((scope) => {
-      const permission = this.buildPermissionFromAction(action, scope)
+    return SCOPE_PRIORITY.find((scope) => {
+      const permission = PolicyAdapter.buildPermissionFromAction(action, scope)
 
-      return this.userHasPermission(user, permission)
+      return PolicyAdapter.userHasPermission(user, permission)
     })
-
-    return highestScope
-  }
-
-  private userHasPermission(user: AuthorizationUser, permission: Permission): boolean {
-    return user.token.permissions.includes(permission)
-  }
-
-  private buildPermissionFromAction(action: Action, scope: Scope): Permission {
-    return `${action}:${scope}` as const
   }
 
   private getCommandStatementsForScopeFromPolicy(

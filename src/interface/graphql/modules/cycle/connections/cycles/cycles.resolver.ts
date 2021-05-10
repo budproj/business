@@ -11,7 +11,6 @@ import { GuardedResolver } from '@interface/graphql/adapters/authorization/decor
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 
-import { CycleGraphQLNode } from '../../cycle.node'
 import { CycleFiltersRequest } from '../../requests/cycle-filters.request'
 
 import { CyclesGraphQLConnection } from './cycles.connection'
@@ -19,8 +18,7 @@ import { CyclesGraphQLConnection } from './cycles.connection'
 @GuardedResolver(CyclesGraphQLConnection)
 export class CyclesConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
   Cycle,
-  CycleInterface,
-  CycleGraphQLNode
+  CycleInterface
 > {
   private readonly logger = new Logger(CyclesConnectionGraphQLResolver.name)
 

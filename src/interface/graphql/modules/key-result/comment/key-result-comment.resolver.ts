@@ -13,7 +13,6 @@ import { AttachActivity } from '@interface/graphql/adapters/activity/attach-acti
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
-import { PolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/policy.object'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
@@ -39,7 +38,7 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   constructor(
     protected readonly core: CoreProvider,
     private readonly corePorts: CorePortsProvider,
-    private readonly accessControl: KeyResultCommentAccessControl,
+    protected readonly accessControl: KeyResultCommentAccessControl,
   ) {
     super(Resource.KEY_RESULT_COMMENT, core, core.keyResult.keyResultCommentProvider)
   }
@@ -157,25 +156,5 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     })
 
     return this.core.keyResult.getOne({ id: keyResultComment.keyResultId })
-  }
-
-  protected async controlNodePolicy(
-    policy: PolicyGraphQLObject,
-    keyResultComment: KeyResultCommentGraphQLNode,
-  ) {
-    return this.restrictPolicyToActiveKeyResult(policy, keyResultComment)
-  }
-
-  private async restrictPolicyToActiveKeyResult(
-    policy: PolicyGraphQLObject,
-    keyResultComment: KeyResultCommentGraphQLNode,
-  ) {
-    if (this.policy.commandStatementIsDenyingAll(policy)) return policy
-
-    const isKeyResultActive = await this.core.keyResult.isActiveFromIndexes({
-      id: keyResultComment.keyResultId,
-    })
-
-    return isKeyResultActive ? policy : this.policy.denyCommandStatement(policy)
   }
 }

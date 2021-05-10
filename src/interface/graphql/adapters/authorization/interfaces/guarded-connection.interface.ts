@@ -1,9 +1,10 @@
 import { Field, InterfaceType } from '@nestjs/graphql'
 import { Edge } from 'graphql-relay'
 
+import { ConnectionPolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/connection-policy.object'
+
 import { ConnectionRelayInterface } from '../../relay/interfaces/connection.interface'
 import { PageInfoRelayObject } from '../../relay/objects/page-info.object'
-import { PolicyGraphQLObject } from '../objects/policy.object'
 
 import { GuardedNodeGraphQLInterface } from './guarded-node.interface'
 
@@ -14,12 +15,12 @@ import { GuardedNodeGraphQLInterface } from './guarded-node.interface'
 export abstract class GuardedConnectionGraphQLInterface<
   N extends GuardedNodeGraphQLInterface
 > extends ConnectionRelayInterface<N> {
-  @Field(() => PolicyGraphQLObject, {
+  @Field(() => ConnectionPolicyGraphQLObject, {
     complexity: 1,
     description:
-      'The policy regarding the current connection. Those policies decribe actions that your user can perform for this connection',
+      'The policy regarding the current connection. Those policies describe actions that your user can perform for this connection',
   })
-  public readonly policy?: PolicyGraphQLObject
+  public readonly policy?: ConnectionPolicyGraphQLObject
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS

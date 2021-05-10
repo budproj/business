@@ -11,7 +11,6 @@ import { GuardedResolver } from '@interface/graphql/adapters/authorization/decor
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 
-import { ObjectiveGraphQLNode } from '../../objective.node'
 import { ObjectiveFiltersRequest } from '../../requests/objective-filters.request'
 
 import { ObjectivesGraphQLConnection } from './objectives.connection'
@@ -19,8 +18,7 @@ import { ObjectivesGraphQLConnection } from './objectives.connection'
 @GuardedResolver(ObjectivesGraphQLConnection)
 export class ObjectivesConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
   Objective,
-  ObjectiveInterface,
-  ObjectiveGraphQLNode
+  ObjectiveInterface
 > {
   private readonly logger = new Logger(ObjectivesConnectionGraphQLResolver.name)
 

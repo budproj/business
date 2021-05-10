@@ -33,7 +33,7 @@ export class KeyResultCheckInAccessControl extends AccessControl {
   }
 
   public async canRead(_user: UserWithContext, _id: string): Promise<boolean> {
-    return false
+    return true
   }
 
   public async canUpdate(_user: UserWithContext, _id: string): Promise<boolean> {

@@ -2,7 +2,7 @@ import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
 
 import { KeyResultFormat } from '@core/modules/key-result/enums/key-result-format.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
-import { PolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/policy.object'
+import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { NodeRelayInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
@@ -110,5 +110,5 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
 
   public readonly id!: string
   public readonly createdAt!: Date
-  public readonly policy?: PolicyGraphQLObject
+  public readonly policy?: NodePolicyGraphQLObject
 }

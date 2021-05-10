@@ -9,7 +9,7 @@ import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 
 export abstract class AccessControl {
   protected readonly resource!: Resource
-  private readonly policy: PolicyAdapter = new PolicyAdapter()
+  private readonly policyAdapter: PolicyAdapter = new PolicyAdapter()
 
   protected canActivate(
     user: UserWithContext,
@@ -29,17 +29,32 @@ export abstract class AccessControl {
     company: boolean,
   ): Permission[] {
     const permissions = [
-      owns && this.policy.buildPermission(this.resource, command, Scope.OWNS),
-      team && this.policy.buildPermission(this.resource, command, Scope.TEAM),
-      company && this.policy.buildPermission(this.resource, command, Scope.COMPANY),
-      this.policy.buildPermission(this.resource, command, Scope.ANY),
+      owns && this.policyAdapter.buildPermission(this.resource, command, Scope.OWNS),
+      team && this.policyAdapter.buildPermission(this.resource, command, Scope.TEAM),
+      company && this.policyAdapter.buildPermission(this.resource, command, Scope.COMPANY),
+      this.policyAdapter.buildPermission(this.resource, command, Scope.ANY),
     ].filter((permission) => Boolean(permission))
 
     return permissions as Permission[]
   }
 
-  public abstract canCreate(user: UserWithContext, id: string): boolean | Promise<boolean>
-  public abstract canRead(user: UserWithContext, id: string): boolean | Promise<boolean>
-  public abstract canUpdate(user: UserWithContext, id: string): boolean | Promise<boolean>
-  public abstract canDelete(user: UserWithContext, id: string): boolean | Promise<boolean>
+  public abstract canCreate(
+    user: UserWithContext,
+    ...indexArguments: string[]
+  ): boolean | Promise<boolean>
+
+  public abstract canRead(
+    user: UserWithContext,
+    ...indexArguments: string[]
+  ): boolean | Promise<boolean>
+
+  public abstract canUpdate(
+    user: UserWithContext,
+    ...indexArguments: string[]
+  ): boolean | Promise<boolean>
+
+  public abstract canDelete(
+    user: UserWithContext,
+    ...indexArguments: string[]
+  ): boolean | Promise<boolean>
 }
