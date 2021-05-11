@@ -1,3 +1,4 @@
+import { NotImplementedException } from '@nestjs/common'
 import { ResolveField, Resolver } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-errors'
 
@@ -24,13 +25,13 @@ export abstract class GuardedConnectionGraphQLResolver<
   I extends CoreEntityInterface
 > extends BaseGraphQLResolver {
   protected readonly queryGuard: QueryGuardAdapter<E, I>
-  protected readonly accessControl?: AccessControl
   protected readonly policyAdapter = new PolicyAdapter()
 
   protected constructor(
     protected readonly resource: Resource,
     protected readonly core: CoreProvider,
     coreEntityProvider: CoreEntityProvider<E, I>,
+    protected readonly accessControl?: AccessControl,
   ) {
     super()
 
@@ -42,6 +43,12 @@ export abstract class GuardedConnectionGraphQLResolver<
     @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
+    if (!this.accessControl) {
+      throw new NotImplementedException(
+        'You are trying to fetch policy, but this entity policy resolver is not implemented yet',
+      )
+    }
+
     if (!relayConnection.parentNode) {
       throw new UserInputError('You cannot get the connection policy for root connections')
     }

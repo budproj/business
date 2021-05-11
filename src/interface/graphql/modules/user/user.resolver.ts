@@ -52,10 +52,10 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
   constructor(
     protected readonly core: CoreProvider,
-    protected readonly accessControl: UserAccessControl,
+    accessControl: UserAccessControl,
     awsS3: AWSS3Provider,
   ) {
-    super(Resource.USER, core, core.user)
+    super(Resource.USER, core, core.user, accessControl)
 
     this.uploadProvider = new UploadGraphQLProvider(awsS3)
   }

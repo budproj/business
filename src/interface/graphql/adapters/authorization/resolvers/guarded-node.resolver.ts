@@ -1,3 +1,4 @@
+import { NotImplementedException } from '@nestjs/common'
 import { Parent, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { AccessControl } from '@adapters/authorization/access-control.adapter'
@@ -21,13 +22,13 @@ export abstract class GuardedNodeGraphQLResolver<
   I extends CoreEntityInterface
 > extends BaseGraphQLResolver {
   protected readonly queryGuard: QueryGuardAdapter<E, I>
-  protected readonly accessControl?: AccessControl
   private readonly policyAdapter = new PolicyAdapter()
 
   protected constructor(
     protected readonly resource: Resource,
     protected readonly core: CoreProvider,
     coreEntityProvider: CoreEntityProvider<E, I>,
+    protected readonly accessControl?: AccessControl,
   ) {
     super()
 
@@ -39,6 +40,12 @@ export abstract class GuardedNodeGraphQLResolver<
     @Parent() node: GuardedNodeGraphQLInterface,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
+    if (!this.accessControl) {
+      throw new NotImplementedException(
+        'You are trying to fetch policy, but this entity policy resolver is not implemented yet',
+      )
+    }
+
     return this.getNodePolicyForUserWithArgs(userWithContext, node.id)
   }
 

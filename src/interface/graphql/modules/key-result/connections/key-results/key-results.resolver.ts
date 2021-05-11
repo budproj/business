@@ -10,6 +10,7 @@ import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorato
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
+import { KeyResultAccessControl } from '@interface/graphql/modules/key-result/access-control/key-result.access-control'
 
 import { KeyResultFiltersRequest } from '../../requests/key-result-filters.request'
 
@@ -22,8 +23,8 @@ export class KeyResultsConnectionGraphQLResolver extends GuardedConnectionGraphQ
 > {
   private readonly logger = new Logger(KeyResultsConnectionGraphQLResolver.name)
 
-  constructor(protected readonly core: CoreProvider) {
-    super(Resource.KEY_RESULT, core, core.keyResult)
+  constructor(protected readonly core: CoreProvider, accessControl: KeyResultAccessControl) {
+    super(Resource.KEY_RESULT, core, core.keyResult, accessControl)
   }
 
   @GuardedQuery(KeyResultsGraphQLConnection, 'key-result:read', { name: 'keyResults' })

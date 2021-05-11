@@ -38,9 +38,9 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   constructor(
     protected readonly core: CoreProvider,
     private readonly corePorts: CorePortsProvider,
-    protected readonly accessControl: KeyResultCommentAccessControl,
+    accessControl: KeyResultCommentAccessControl,
   ) {
-    super(Resource.KEY_RESULT_COMMENT, core, core.keyResult.keyResultCommentProvider)
+    super(Resource.KEY_RESULT_COMMENT, core, core.keyResult.keyResultCommentProvider, accessControl)
   }
 
   @GuardedQuery(KeyResultCommentGraphQLNode, 'key-result-comment:read', {
