@@ -11,7 +11,6 @@ import { GuardedResolver } from '@interface/graphql/adapters/authorization/decor
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 
-import { KeyResultGraphQLNode } from '../../key-result.node'
 import { KeyResultFiltersRequest } from '../../requests/key-result-filters.request'
 
 import { KeyResultsGraphQLConnection } from './key-results.connection'
@@ -19,8 +18,7 @@ import { KeyResultsGraphQLConnection } from './key-results.connection'
 @GuardedResolver(KeyResultsGraphQLConnection)
 export class KeyResultsConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
   KeyResult,
-  KeyResultInterface,
-  KeyResultGraphQLNode
+  KeyResultInterface
 > {
   private readonly logger = new Logger(KeyResultsConnectionGraphQLResolver.name)
 

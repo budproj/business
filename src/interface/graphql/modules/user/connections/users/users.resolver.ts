@@ -12,15 +12,13 @@ import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/au
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 
 import { UserFiltersRequest } from '../../requests/user-filters.request'
-import { UserGraphQLNode } from '../../user.node'
 
 import { UsersGraphQLConnection } from './users.connection'
 
 @GuardedResolver(UsersGraphQLConnection)
 export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
   User,
-  UserInterface,
-  UserGraphQLNode
+  UserInterface
 > {
   private readonly logger = new Logger(UsersConnectionGraphQLResolver.name)
 

@@ -1,7 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
 import { GuardedConnectionGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-connection.interface'
-import { PolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/policy.object'
+import { ConnectionPolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/connection-policy.object'
 import { ConnectionRelayInterface } from '@interface/graphql/adapters/relay/interfaces/connection.interface'
 import { PageInfoRelayObject } from '@interface/graphql/adapters/relay/objects/page-info.object'
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
@@ -23,5 +23,5 @@ export class UserObjectivesGraphQLConnection
   // **********************************************************************************************
 
   public readonly pageInfo!: PageInfoRelayObject
-  public readonly policy!: PolicyGraphQLObject
+  public readonly policy!: ConnectionPolicyGraphQLObject
 }

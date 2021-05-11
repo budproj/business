@@ -5,15 +5,12 @@ import { KeyResultComment } from '@core/modules/key-result/comment/key-result-co
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
 
-import { KeyResultCommentGraphQLNode } from '../../comment/key-result-comment.node'
-
 import { KeyResultTimelineGraphQLConnection } from './key-result-key-result-timeline.connection'
 
 @GuardedResolver(KeyResultTimelineGraphQLConnection)
 export class KeyResultTimelineConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
   KeyResultComment,
-  KeyResultCommentInterface,
-  KeyResultCommentGraphQLNode
+  KeyResultCommentInterface
 > {
   constructor(protected readonly core: CoreProvider) {
     super(Resource.KEY_RESULT_COMMENT, core, core.keyResult.keyResultCommentProvider)

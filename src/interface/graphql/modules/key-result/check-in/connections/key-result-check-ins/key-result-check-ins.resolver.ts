@@ -11,7 +11,6 @@ import { GuardedResolver } from '@interface/graphql/adapters/authorization/decor
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 
-import { KeyResultCheckInGraphQLNode } from '../../key-result-check-in.node'
 import { KeyResultCheckInFiltersRequest } from '../../requests/key-result-check-in-filters.request'
 
 import { KeyResultCheckInsGraphQLConnection } from './key-result-check-ins.connection'
@@ -19,8 +18,7 @@ import { KeyResultCheckInsGraphQLConnection } from './key-result-check-ins.conne
 @GuardedResolver(KeyResultCheckInsGraphQLConnection)
 export class KeyResultCheckInsConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
   KeyResultCheckIn,
-  KeyResultCheckInInterface,
-  KeyResultCheckInGraphQLNode
+  KeyResultCheckInInterface
 > {
   private readonly logger = new Logger(KeyResultCheckInsConnectionGraphQLResolver.name)
 

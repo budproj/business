@@ -4,18 +4,19 @@ import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
-
-import { KeyResultCheckInGraphQLNode } from '../../check-in/key-result-check-in.node'
+import { KeyResultCheckInAccessControl } from '@interface/graphql/modules/key-result/access-control/key-result-check-in.access-control'
 
 import { KeyResultKeyResultCheckInsGraphQLConnection } from './key-result-key-result-check-ins.connection'
 
 @GuardedResolver(KeyResultKeyResultCheckInsGraphQLConnection)
 export class KeyResultKeyResultCheckInsConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
   KeyResultCheckIn,
-  KeyResultCheckInInterface,
-  KeyResultCheckInGraphQLNode
+  KeyResultCheckInInterface
 > {
-  constructor(protected readonly core: CoreProvider) {
+  constructor(
+    protected readonly core: CoreProvider,
+    protected readonly accessControl: KeyResultCheckInAccessControl,
+  ) {
     super(Resource.KEY_RESULT_CHECK_IN, core, core.keyResult.keyResultCheckInProvider)
   }
 }

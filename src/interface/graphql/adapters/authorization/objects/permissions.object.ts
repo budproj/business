@@ -1,32 +1,32 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
-import { PolicyGraphQLObject } from './policy.object'
+import { NodePolicyGraphQLObject } from './node-policy.object'
 
 @ObjectType('Permissions', {
   description: 'Defines all user permissions for each entity in our domain',
 })
 export class PermissionsGraphQLObject {
-  @Field(() => PolicyGraphQLObject, { complexity: 0 })
-  public readonly user!: PolicyGraphQLObject
+  @Field(() => NodePolicyGraphQLObject, { complexity: 0 })
+  public readonly user!: NodePolicyGraphQLObject
 
-  @Field(() => PolicyGraphQLObject, { complexity: 0 })
-  public readonly team!: PolicyGraphQLObject
+  @Field(() => NodePolicyGraphQLObject, { complexity: 0 })
+  public readonly team!: NodePolicyGraphQLObject
 
-  @Field(() => PolicyGraphQLObject, { complexity: 0 })
-  public readonly cycle!: PolicyGraphQLObject
+  @Field(() => NodePolicyGraphQLObject, { complexity: 0 })
+  public readonly cycle!: NodePolicyGraphQLObject
 
-  @Field(() => PolicyGraphQLObject, { complexity: 0 })
-  public readonly objective!: PolicyGraphQLObject
+  @Field(() => NodePolicyGraphQLObject, { complexity: 0 })
+  public readonly objective!: NodePolicyGraphQLObject
 
-  @Field(() => PolicyGraphQLObject, { complexity: 0 })
-  public readonly keyResult!: PolicyGraphQLObject
+  @Field(() => NodePolicyGraphQLObject, { complexity: 0 })
+  public readonly keyResult!: NodePolicyGraphQLObject
 
-  @Field(() => PolicyGraphQLObject, { complexity: 0 })
-  public readonly keyResultCheckIn!: PolicyGraphQLObject
+  @Field(() => NodePolicyGraphQLObject, { complexity: 0 })
+  public readonly keyResultCheckIn!: NodePolicyGraphQLObject
 
-  @Field(() => PolicyGraphQLObject, { complexity: 0 })
-  public readonly keyResultComment!: PolicyGraphQLObject
+  @Field(() => NodePolicyGraphQLObject, { complexity: 0 })
+  public readonly keyResultComment!: NodePolicyGraphQLObject
 
-  @Field(() => PolicyGraphQLObject, { complexity: 0 })
-  public readonly keyResultCustomList!: PolicyGraphQLObject
+  @Field(() => NodePolicyGraphQLObject, { complexity: 0 })
+  public readonly keyResultCustomList!: NodePolicyGraphQLObject
 }

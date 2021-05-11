@@ -1,68 +1,59 @@
-import { Args, Parent, ResolveField, Resolver } from '@nestjs/graphql'
+import { Parent, ResolveField, Resolver } from '@nestjs/graphql'
 
+import { AccessControl } from '@adapters/authorization/access-control.adapter'
 import { QueryGuardAdapter } from '@adapters/authorization/query-guard.adapter'
 import { Resource } from '@adapters/policy/enums/resource.enum'
-import { Scope } from '@adapters/policy/enums/scope.enum'
 import { PolicyAdapter } from '@adapters/policy/policy.adapter'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreEntityInterface } from '@core/core-entity.interface'
 import { CoreEntity } from '@core/core.orm-entity'
 import { CoreProvider } from '@core/core.provider'
 import { CoreEntityProvider } from '@core/entity.provider'
+import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
+import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
+import { BaseGraphQLResolver } from '@interface/graphql/resolvers/base.resolver'
 
-import { RequestUserWithContext } from '../../context/decorators/request-user-with-context.decorator'
-import { RelayGraphQLAdapter } from '../../relay/relay.adapter'
-import { ScopeGraphQLEnum } from '../enums/scope.enum'
 import { GuardedNodeGraphQLInterface } from '../interfaces/guarded-node.interface'
-import { PolicyGraphQLObject } from '../objects/policy.object'
-
-import { GuardedGraphQLResolver } from './guarded.resolver'
 
 @Resolver(() => GuardedNodeGraphQLInterface)
 export abstract class GuardedNodeGraphQLResolver<
   E extends CoreEntity,
   I extends CoreEntityInterface
-> extends GuardedGraphQLResolver<E> {
+> extends BaseGraphQLResolver {
   protected readonly queryGuard: QueryGuardAdapter<E, I>
-  protected readonly policy: PolicyAdapter
-  protected readonly authz: PolicyAdapter
-  protected readonly relay: RelayGraphQLAdapter
+  protected readonly accessControl?: AccessControl
+  private readonly policyAdapter = new PolicyAdapter()
 
   protected constructor(
     protected readonly resource: Resource,
     protected readonly core: CoreProvider,
-    private readonly coreEntityProvider: CoreEntityProvider<E, I>,
+    coreEntityProvider: CoreEntityProvider<E, I>,
   ) {
-    super(resource)
+    super()
 
     this.queryGuard = new QueryGuardAdapter(resource, core, coreEntityProvider)
   }
 
-  @ResolveField('policy', () => PolicyGraphQLObject)
-  protected async getConnectionPolicies(
-    @Parent() node: E,
+  @ResolveField('policy', () => NodePolicyGraphQLObject)
+  protected async resolveNodePolicy(
+    @Parent() node: GuardedNodeGraphQLInterface,
     @RequestUserWithContext() userWithContext: UserWithContext,
-    @Args('scope', { type: () => ScopeGraphQLEnum, nullable: true })
-    scope?: Scope,
   ) {
-    scope ??= await this.getHighestScopeForNodeInUserContext(node, userWithContext)
-
-    const policy = await this.getPolicyForUserInScope(userWithContext, scope, node)
-    return this.controlNodePolicy(policy, node)
+    return this.getNodePolicyForUserWithArgs(userWithContext, node.id)
   }
 
-  protected async controlNodePolicy(
-    policy: PolicyGraphQLObject,
-    _node: E,
-  ): Promise<PolicyGraphQLObject> {
-    return policy
-  }
+  protected async getNodePolicyForUserWithArgs(
+    userWithContext: UserWithContext,
+    ...indexArguments: string[]
+  ) {
+    const canRead = await this.accessControl.canRead(userWithContext, ...indexArguments)
+    const canUpdate = await this.accessControl.canUpdate(userWithContext, ...indexArguments)
+    const canDelete = await this.accessControl.canDelete(userWithContext, ...indexArguments)
 
-  private async getHighestScopeForNodeInUserContext(
-    node: E,
-    user: UserWithContext,
-  ): Promise<Scope> {
-    const queryContext = await this.core.team.buildTeamQueryContext(user)
-    return this.coreEntityProvider.defineResourceHighestScope(node, queryContext)
+    return {
+      read: this.policyAdapter.getEffectForBoolean(canRead),
+      update: this.policyAdapter.getEffectForBoolean(canUpdate),
+      delete: this.policyAdapter.getEffectForBoolean(canDelete),
+    }
   }
 }

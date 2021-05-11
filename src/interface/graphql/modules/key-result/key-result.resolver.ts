@@ -19,11 +19,12 @@ import { RequestActivity } from '@interface/graphql/adapters/activity/request-ac
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
-import { PolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/policy.object'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
-import { KeyResultAccessControl } from '@interface/graphql/modules/key-result/key-result.access-control'
+import { RelayConnection } from '@interface/graphql/adapters/relay/decorators/connection.decorator'
+import { RelayGraphQLConnectionProvider } from '@interface/graphql/adapters/relay/providers/connection.provider'
+import { KeyResultAccessControl } from '@interface/graphql/modules/key-result/access-control/key-result.access-control'
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
@@ -49,7 +50,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   constructor(
     protected readonly core: CoreProvider,
     protected readonly corePorts: CorePortsProvider,
-    private readonly accessControl: KeyResultAccessControl,
+    protected readonly accessControl: KeyResultAccessControl,
   ) {
     super(Resource.KEY_RESULT, core, core.keyResult)
   }
@@ -142,6 +143,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   protected async getKeyResultCommentsForKeyResult(
     @Args() request: KeyResultCommentFiltersRequest,
     @Parent() keyResult: KeyResult,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       keyResult,
@@ -149,6 +151,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching key-result comments',
     })
 
+    relayConnection.refreshParentNode(keyResult)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultCommentFiltersRequest,
       KeyResultComment
@@ -163,6 +166,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   protected async getKeyResultCheckInsForKeyResult(
     @Args() request: KeyResultCheckInFiltersRequest,
     @Parent() keyResult: KeyResult,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       keyResult,
@@ -170,6 +174,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching key-result check-ins',
     })
 
+    relayConnection.refreshParentNode(keyResult)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultCommentFiltersRequest,
       KeyResultComment
@@ -215,6 +220,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   protected async getKeyResultTimeline(
     @Args() request: ConnectionFiltersRequest,
     @Parent() keyResult: KeyResultGraphQLNode,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       keyResult,
@@ -222,6 +228,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching timeline for key result',
     })
 
+    relayConnection.refreshParentNode(keyResult)
     const connection = this.relay.unmarshalRequest<
       ConnectionFiltersRequest,
       KeyResultCheckIn | KeyResultComment
@@ -230,22 +237,5 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     const queryResult = await this.core.keyResult.getTimeline(keyResult)
 
     return this.relay.marshalResponse(queryResult, connection)
-  }
-
-  protected async controlNodePolicy(policy: PolicyGraphQLObject, keyResult: KeyResultGraphQLNode) {
-    return this.restrictPolicyToActiveKeyResult(policy, keyResult)
-  }
-
-  private async restrictPolicyToActiveKeyResult(
-    policy: PolicyGraphQLObject,
-    keyResult: KeyResultGraphQLNode,
-  ) {
-    if (this.policy.commandStatementIsDenyingAll(policy)) return policy
-
-    const isObjectiveActive = await this.core.objective.isActiveFromIndexes({
-      id: keyResult.objectiveId,
-    })
-
-    return isObjectiveActive ? policy : this.policy.denyCommandStatement(policy)
   }
 }

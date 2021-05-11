@@ -34,9 +34,7 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
       where: whereSelector,
       ...queryOptions,
     })
-    const teams = uniqBy(flatten(queryResult.map((user) => user.teams)), 'id')
-
-    return teams
+    return uniqBy(flatten(queryResult.map((user) => user.teams)), 'id')
   }
 
   public buildUserFullName(user: UserInterface) {
@@ -49,6 +47,10 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
 
   public async getFromID(id: string): Promise<User> {
     return this.repository.findOne({ id })
+  }
+
+  public async getFromIndexes(indexes: Partial<UserInterface>): Promise<User> {
+    return this.repository.findOne(indexes)
   }
 
   protected async protectCreationQuery(

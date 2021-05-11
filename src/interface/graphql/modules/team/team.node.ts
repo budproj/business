@@ -2,7 +2,7 @@ import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
 
 import { TeamGender } from '@core/modules/team/enums/team-gender.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
-import { PolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/policy.object'
+import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { NodeRelayInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-result/check-in/key-result-check-in.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
@@ -144,5 +144,5 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
 
   public readonly id!: string
   public readonly createdAt!: Date
-  public readonly policy?: PolicyGraphQLObject
+  public readonly policy?: NodePolicyGraphQLObject
 }

@@ -13,15 +13,13 @@ import { RequestUserWithContext } from '@interface/graphql/adapters/context/deco
 
 import { TeamLevelGraphQLEnum } from '../../enums/team-level.enum'
 import { TeamFiltersRequest } from '../../requests/team-filters.request'
-import { TeamGraphQLNode } from '../../team.node'
 
 import { TeamsGraphQLConnection } from './teams.connection'
 
 @GuardedResolver(TeamsGraphQLConnection)
 export class TeamsConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
   Team,
-  TeamInterface,
-  TeamGraphQLNode
+  TeamInterface
 > {
   private readonly logger = new Logger(TeamsConnectionGraphQLResolver.name)
 

@@ -15,6 +15,8 @@ import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorato
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
+import { RelayConnection } from '@interface/graphql/adapters/relay/decorators/connection.decorator'
+import { RelayGraphQLConnectionProvider } from '@interface/graphql/adapters/relay/providers/connection.provider'
 import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/requests/key-result-filters.request'
 import { ObjectivesGraphQLConnection } from '@interface/graphql/modules/objective/connections/objectives/objectives.connection'
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
@@ -103,6 +105,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   protected async getObjectivesForCycle(
     @Args() request: ObjectiveFiltersRequest,
     @Parent() cycle: CycleGraphQLNode,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       cycle,
@@ -110,6 +113,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       message: 'Fetching objectives for cycle',
     })
 
+    relayConnection.refreshParentNode(cycle)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       ObjectiveFiltersRequest,
       Objective
@@ -134,6 +138,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   protected async getChildCyclesForRequestAndCycle(
     @Args() request: CycleFiltersRequest,
     @Parent() cycle: CycleGraphQLNode,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       cycle,
@@ -141,6 +146,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       message: 'Fetching child cycles for cycle',
     })
 
+    relayConnection.refreshParentNode(cycle)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       CycleFiltersRequest,
       Cycle
@@ -156,6 +162,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   protected async getKeyResultsForRequestAndCycle(
     @Args() request: KeyResultFiltersRequest,
     @Parent() cycle: CycleGraphQLNode,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       request,
@@ -163,6 +170,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       message: 'Fetching key results for cycle',
     })
 
+    relayConnection.refreshParentNode(cycle)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultFiltersRequest,
       KeyResult

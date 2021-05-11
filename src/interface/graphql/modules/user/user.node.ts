@@ -2,7 +2,7 @@ import { Field, ObjectType } from '@nestjs/graphql'
 
 import { UserGender } from '@core/modules/user/enums/user-gender.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
-import { PolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/policy.object'
+import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { NodeRelayInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 
 import { UserKeyResultCheckInsGraphQLConnection } from './connections/user-key-result-check-ins/user-key-result-check-ins.connection'
@@ -131,5 +131,5 @@ export class UserGraphQLNode implements GuardedNodeGraphQLInterface {
 
   public readonly id!: string
   public readonly createdAt!: Date
-  public readonly policy?: PolicyGraphQLObject
+  public readonly policy?: NodePolicyGraphQLObject
 }

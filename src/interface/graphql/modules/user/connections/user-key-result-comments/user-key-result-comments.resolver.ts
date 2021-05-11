@@ -4,15 +4,13 @@ import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-
 import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
-import { KeyResultCommentGraphQLNode } from '@interface/graphql/modules/key-result/comment/key-result-comment.node'
 
 import { UserKeyResultCommentsGraphQLConnection } from './user-key-result-comments.connection'
 
 @GuardedResolver(UserKeyResultCommentsGraphQLConnection)
 export class UserKeyResultCommentsConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
   KeyResultComment,
-  KeyResultCommentInterface,
-  KeyResultCommentGraphQLNode
+  KeyResultCommentInterface
 > {
   constructor(protected readonly core: CoreProvider) {
     super(Resource.KEY_RESULT_COMMENT, core, core.keyResult.keyResultCommentProvider)
