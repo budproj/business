@@ -344,6 +344,12 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return queryResult[0]
   }
 
+  public async getKeyResultCheckIn(
+    indexes: Partial<KeyResultCheckInInterface>,
+  ): Promise<KeyResultCheckIn> {
+    return this.keyResultCheckInProvider.getOne(indexes)
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<KeyResult>,
     _data: Partial<KeyResultInterface>,

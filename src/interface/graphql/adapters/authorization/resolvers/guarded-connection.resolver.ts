@@ -47,7 +47,7 @@ export abstract class GuardedConnectionGraphQLResolver<
     userWithContext: UserWithContext,
     ...indexArguments: string[]
   ) {
-    const canCreate = await this.accessControl.canRead(userWithContext, ...indexArguments)
+    const canCreate = await this.accessControl.canCreate(userWithContext, ...indexArguments)
 
     return {
       create: this.policyAdapter.getEffectForBoolean(canCreate),

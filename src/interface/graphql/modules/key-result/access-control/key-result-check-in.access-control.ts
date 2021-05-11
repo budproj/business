@@ -1,9 +1,19 @@
 import { Injectable } from '@nestjs/common'
 
+import { AccessControlScopes } from '@adapters/authorization/interfaces/access-control-scopes.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
+import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
+import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { Team } from '@core/modules/team/team.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { KeyResultBaseAccessControl } from '@interface/graphql/modules/key-result/access-control/base.access-control'
+
+type RelatedEntities = {
+  keyResultCheckIn: KeyResultCheckIn
+  keyResult: KeyResult
+  teams: Team[]
+}
 
 @Injectable()
 export class KeyResultCheckInAccessControl extends KeyResultBaseAccessControl {
@@ -13,19 +23,48 @@ export class KeyResultCheckInAccessControl extends KeyResultBaseAccessControl {
     super(core)
   }
 
-  public async canCreate(user: UserWithContext, keyResultID: string): Promise<boolean> {
-    return this.canCreateInKeyResult(user, keyResultID)
+  static isCheckInAuthor(keyResultCheckIn: KeyResultCheckIn, user: UserWithContext): boolean {
+    return keyResultCheckIn.userId === user.id
   }
 
-  public async canRead(_user: UserWithContext, _id: string): Promise<boolean> {
-    return true
+  protected async resolveContextScopes(
+    user: UserWithContext,
+    keyResultID: string,
+  ): Promise<AccessControlScopes> {
+    return this.resolveKeyResultContext(user, keyResultID)
   }
 
-  public async canUpdate(_user: UserWithContext, _id: string): Promise<boolean> {
-    return false
+  protected async resolveEntityScopes(
+    user: UserWithContext,
+    keyResultCheckInID: string,
+  ): Promise<AccessControlScopes> {
+    const { keyResultCheckIn, keyResult, teams } = await this.getRelatedEntities(keyResultCheckInID)
+
+    const isCheckInAuthor = KeyResultCheckInAccessControl.isCheckInAuthor(keyResultCheckIn, user)
+    const isTeamLeader = await this.isTeamLeader(teams, user)
+    const isCompanyMember = await this.isKeyResultCompanyMember(keyResult, user)
+
+    return {
+      isTeamLeader,
+      isCompanyMember,
+      isOwner: isCheckInAuthor,
+    }
   }
 
-  public async canDelete(_user: UserWithContext, _id: string): Promise<boolean> {
-    return false
+  private async getRelatedEntities(keyResultCheckInID: string): Promise<RelatedEntities> {
+    const keyResultCheckIn = await this.core.dispatchCommand<KeyResultCheckIn>(
+      'get-key-result-check-in',
+      { id: keyResultCheckInID },
+    )
+    const keyResult = await this.core.dispatchCommand<KeyResult>('get-key-result', {
+      id: keyResultCheckIn.keyResultId,
+    })
+    const teams = await this.getKeyResultTeamTree(keyResult)
+
+    return {
+      keyResultCheckIn,
+      keyResult,
+      teams,
+    }
   }
 }

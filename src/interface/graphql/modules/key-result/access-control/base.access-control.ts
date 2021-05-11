@@ -1,24 +1,41 @@
 import { AccessControl } from '@adapters/authorization/access-control.adapter'
-import { Command } from '@adapters/policy/enums/command.enum'
+import { AccessControlScopes } from '@adapters/authorization/interfaces/access-control-scopes.interface'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { User } from '@core/modules/user/user.orm-entity'
 
 export abstract class KeyResultBaseAccessControl extends AccessControl {
-  public async canCreateInKeyResult(user: UserWithContext, keyResultID: string): Promise<boolean> {
+  protected async resolveKeyResultContext(
+    user: UserWithContext,
+    keyResultID: string,
+  ): Promise<AccessControlScopes> {
     const keyResult = await this.core.dispatchCommand<KeyResult>('get-key-result', {
       id: keyResultID,
     })
-    if (!keyResult) return false
-
     const teams = await this.core.dispatchCommand<Team[]>('get-key-result-team-tree', keyResult)
 
     const isKeyResultOwner = await this.isKeyResultOwner(keyResult, user)
     const isTeamLeader = await this.isTeamLeader(teams, user)
     const isCompanyMember = await this.isKeyResultCompanyMember(keyResult, user)
 
-    return this.canActivate(user, Command.CREATE, isKeyResultOwner, isTeamLeader, isCompanyMember)
+    return {
+      isTeamLeader,
+      isCompanyMember,
+      isOwner: isKeyResultOwner,
+    }
+  }
+
+  protected async getKeyResultTeamTreeFromKeyResultID(keyResultID: string): Promise<Team[]> {
+    const keyResult = await this.core.dispatchCommand<KeyResult>('get-key-result', {
+      id: keyResultID,
+    })
+
+    return this.getKeyResultTeamTree(keyResult)
+  }
+
+  protected async getKeyResultTeamTree(keyResult: KeyResult): Promise<Team[]> {
+    return this.core.dispatchCommand<Team[]>('get-key-result-team-tree', keyResult)
   }
 
   protected async isKeyResultOwner(keyResult: KeyResult, user: UserWithContext): Promise<boolean> {

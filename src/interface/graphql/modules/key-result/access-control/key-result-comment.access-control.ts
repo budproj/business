@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 
+import { AccessControlScopes } from '@adapters/authorization/interfaces/access-control-scopes.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CorePortsProvider } from '@core/ports/ports.provider'
@@ -13,19 +14,21 @@ export class KeyResultCommentAccessControl extends KeyResultBaseAccessControl {
     super(core)
   }
 
-  public async canCreate(user: UserWithContext, keyResultID: string): Promise<boolean> {
-    return this.canCreateInKeyResult(user, keyResultID)
+  protected async resolveContextScopes(
+    user: UserWithContext,
+    keyResultID: string,
+  ): Promise<AccessControlScopes> {
+    return this.resolveKeyResultContext(user, keyResultID)
   }
 
-  public async canRead(_user: UserWithContext, _id: string): Promise<boolean> {
-    return false
-  }
-
-  public async canUpdate(_user: UserWithContext, _id: string): Promise<boolean> {
-    return false
-  }
-
-  public async canDelete(_user: UserWithContext, _id: string): Promise<boolean> {
-    return false
+  protected async resolveEntityScopes(
+    _user: UserWithContext,
+    _keyResultCommentID: string,
+  ): Promise<AccessControlScopes> {
+    return {
+      isOwner: false,
+      isTeamLeader: false,
+      isCompanyMember: false,
+    }
   }
 }

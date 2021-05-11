@@ -1,5 +1,6 @@
 import { intersection } from 'lodash'
 
+import { AccessControlScopes } from '@adapters/authorization/interfaces/access-control-scopes.interface'
 import { Command } from '@adapters/policy/enums/command.enum'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { Scope } from '@adapters/policy/enums/scope.enum'
@@ -17,15 +18,20 @@ export abstract class AccessControl {
 
   protected constructor(protected readonly core: CorePortsProvider) {}
 
-  protected canActivate(
-    user: UserWithContext,
-    command: Command,
-    owns: boolean,
-    team: boolean,
-    company: boolean,
-  ): boolean {
-    const requiredPermissions = this.getPermissionsForScopes(command, owns, team, company)
-    return intersection(requiredPermissions, user.token.permissions).length > 0
+  public async canCreate(user: UserWithContext, ...indexArguments: string[]): Promise<boolean> {
+    return this.resolveContextCommandPermission(Command.CREATE, user, ...indexArguments)
+  }
+
+  public async canRead(user: UserWithContext, ...indexArguments: string[]): Promise<boolean> {
+    return this.resolveEntityCommandPermission(Command.READ, user, ...indexArguments)
+  }
+
+  public async canUpdate(user: UserWithContext, ...indexArguments: string[]): Promise<boolean> {
+    return this.resolveEntityCommandPermission(Command.UPDATE, user, ...indexArguments)
+  }
+
+  public async canDelete(user: UserWithContext, ...indexArguments: string[]): Promise<boolean> {
+    return this.resolveEntityCommandPermission(Command.DELETE, user, ...indexArguments)
   }
 
   protected async isTeamLeader(teams: Team[], user: UserWithContext): Promise<boolean> {
@@ -41,6 +47,43 @@ export abstract class AccessControl {
     const userCompanies = await this.core.dispatchCommand<Team[]>('get-user-companies', user)
 
     return userCompanies.some((userCompany) => userCompany.id === company.id)
+  }
+
+  private async resolveContextCommandPermission(
+    command: Command,
+    user: UserWithContext,
+    ...indexArguments: string[]
+  ): Promise<boolean> {
+    const { isOwner, isTeamLeader, isCompanyMember } = await this.resolveContextScopes(
+      user,
+      ...indexArguments,
+    )
+
+    return this.canActivate(user, command, isOwner, isTeamLeader, isCompanyMember)
+  }
+
+  private async resolveEntityCommandPermission(
+    command: Command,
+    user: UserWithContext,
+    ...indexArguments: string[]
+  ): Promise<boolean> {
+    const { isOwner, isTeamLeader, isCompanyMember } = await this.resolveEntityScopes(
+      user,
+      ...indexArguments,
+    )
+
+    return this.canActivate(user, command, isOwner, isTeamLeader, isCompanyMember)
+  }
+
+  private canActivate(
+    user: UserWithContext,
+    command: Command,
+    owns: boolean,
+    team: boolean,
+    company: boolean,
+  ): boolean {
+    const requiredPermissions = this.getPermissionsForScopes(command, owns, team, company)
+    return intersection(requiredPermissions, user.token.permissions).length > 0
   }
 
   private getPermissionsForScopes(
@@ -59,23 +102,13 @@ export abstract class AccessControl {
     return permissions as Permission[]
   }
 
-  public abstract canCreate(
+  protected abstract resolveContextScopes(
     user: UserWithContext,
     ...indexArguments: string[]
-  ): boolean | Promise<boolean>
+  ): Promise<AccessControlScopes>
 
-  public abstract canRead(
+  protected abstract resolveEntityScopes(
     user: UserWithContext,
     ...indexArguments: string[]
-  ): boolean | Promise<boolean>
-
-  public abstract canUpdate(
-    user: UserWithContext,
-    ...indexArguments: string[]
-  ): boolean | Promise<boolean>
-
-  public abstract canDelete(
-    user: UserWithContext,
-    ...indexArguments: string[]
-  ): boolean | Promise<boolean>
+  ): Promise<AccessControlScopes>
 }
