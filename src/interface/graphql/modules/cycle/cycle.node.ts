@@ -3,7 +3,7 @@ import { Field, ID, ObjectType } from '@nestjs/graphql'
 import { Cadence } from '@core/modules/cycle/enums/cadence.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
-import { NodeRelayInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
+import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 
 import { ObjectivesGraphQLConnection } from '../objective/connections/objectives/objectives.connection'
@@ -14,7 +14,7 @@ import { CadenceGraphQLEnum } from './enums/cadence.enum'
 import { CycleStatusObject } from './objects/cycle-status.object'
 
 @ObjectType('Cycle', {
-  implements: () => [NodeRelayInterface, GuardedNodeGraphQLInterface],
+  implements: () => [NodeRelayGraphQLInterface, GuardedNodeGraphQLInterface],
   description:
     'A collection of users. It can be either inside another team, or a root team (a.k.a. company)',
 })

@@ -3,7 +3,7 @@ import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
 import { KeyResultFormat } from '@core/modules/key-result/enums/key-result-format.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
-import { NodeRelayInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
+import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
@@ -15,7 +15,7 @@ import { KeyResultTimelineGraphQLConnection } from './connections/key-result-tim
 import { KeyResultFormatGraphQLEnum } from './enums/key-result-format.enum'
 
 @ObjectType('KeyResult', {
-  implements: () => [NodeRelayInterface, GuardedNodeGraphQLInterface],
+  implements: () => [NodeRelayGraphQLInterface, GuardedNodeGraphQLInterface],
   description:
     'The current status of this key-result. By status we mean progress, confidence, and other reported values from it',
 })

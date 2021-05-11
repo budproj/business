@@ -37,10 +37,15 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
 
   constructor(
     protected readonly core: CoreProvider,
-    protected readonly accessControl: KeyResultCheckInAccessControl,
     private readonly corePorts: CorePortsProvider,
+    accessControl: KeyResultCheckInAccessControl,
   ) {
-    super(Resource.KEY_RESULT_CHECK_IN, core, core.keyResult.keyResultCheckInProvider)
+    super(
+      Resource.KEY_RESULT_CHECK_IN,
+      core,
+      core.keyResult.keyResultCheckInProvider,
+      accessControl,
+    )
   }
 
   @GuardedQuery(KeyResultCheckInGraphQLNode, 'key-result-check-in:read', {

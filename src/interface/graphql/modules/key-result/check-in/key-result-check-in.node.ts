@@ -2,12 +2,12 @@ import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql'
 
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
-import { NodeRelayInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
+import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 import { KeyResultGraphQLNode } from '@interface/graphql/modules/key-result/key-result.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 
 @ObjectType('KeyResultCheckIn', {
-  implements: () => [NodeRelayInterface, GuardedNodeGraphQLInterface],
+  implements: () => [NodeRelayGraphQLInterface, GuardedNodeGraphQLInterface],
   description: 'A report in a given key result',
 })
 export class KeyResultCheckInGraphQLNode implements GuardedNodeGraphQLInterface {

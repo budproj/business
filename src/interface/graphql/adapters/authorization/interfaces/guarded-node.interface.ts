@@ -1,13 +1,13 @@
 import { Field, InterfaceType } from '@nestjs/graphql'
 
-import { NodeRelayInterface } from '../../relay/interfaces/node.interface'
+import { NodeRelayGraphQLInterface } from '../../relay/interfaces/node.interface'
 import { NodePolicyGraphQLObject } from '../objects/node-policy.object'
 
 @InterfaceType('GuardedNodeInterface', {
-  implements: () => NodeRelayInterface,
+  implements: () => NodeRelayGraphQLInterface,
   description: 'A guarded node is like a common node, but with an extra policy field',
 })
-export abstract class GuardedNodeGraphQLInterface extends NodeRelayInterface {
+export abstract class GuardedNodeGraphQLInterface extends NodeRelayGraphQLInterface {
   @Field(() => NodePolicyGraphQLObject, {
     complexity: 1,
     description:

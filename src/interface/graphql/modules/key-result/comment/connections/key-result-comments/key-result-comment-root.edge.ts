@@ -1,16 +1,16 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 import { ConnectionCursor } from 'graphql-relay'
 
-import { EdgeRelayInterface } from '@interface/graphql/adapters/relay/interfaces/edge.interface'
+import { EdgeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/edge.interface'
 
 import { KeyResultCommentGraphQLNode } from '../../key-result-comment.node'
 
 @ObjectType('KeyResultCommentRootEdge', {
-  implements: () => EdgeRelayInterface,
+  implements: () => EdgeRelayGraphQLInterface,
   description: 'The edge for our key-result comment query interface',
 })
 export class KeyResultCommentRootEdgeGraphQLObject
-  implements EdgeRelayInterface<KeyResultCommentGraphQLNode> {
+  implements EdgeRelayGraphQLInterface<KeyResultCommentGraphQLNode> {
   @Field(() => KeyResultCommentGraphQLNode, { complexity: 1 })
   public readonly node!: KeyResultCommentGraphQLNode
 
