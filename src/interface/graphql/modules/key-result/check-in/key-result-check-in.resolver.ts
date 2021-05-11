@@ -13,7 +13,6 @@ import { AttachActivity } from '@interface/graphql/adapters/activity/attach-acti
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
-import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
@@ -22,9 +21,9 @@ import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
+import { KeyResultCheckInAccessControl } from '../access-control/key-result-check-in.access-control'
 import { KeyResultGraphQLNode } from '../key-result.node'
 
-import { KeyResultCheckInAccessControl } from './key-result-check-in.access-control'
 import { KeyResultCheckInGraphQLNode } from './key-result-check-in.node'
 import { KeyResultCheckInCreateRequest } from './requests/key-result-check-in-create.request'
 import { KeyResultCheckInDeleteRequest } from './requests/key-result-comment-delete.request'
@@ -224,13 +223,5 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
     })
 
     return this.core.keyResult.getParentCheckInFromCheckIn(keyResultCheckIn)
-  }
-
-  @ResolveField('policy', () => NodePolicyGraphQLObject)
-  protected async resolveNodePolicy(
-    @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
-    @RequestUserWithContext() userWithContext: UserWithContext,
-  ) {
-    return this.getNodePolicyForUserWithArgs(userWithContext, keyResultCheckIn.id)
   }
 }

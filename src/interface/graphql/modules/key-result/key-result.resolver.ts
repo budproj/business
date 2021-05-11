@@ -22,7 +22,7 @@ import { GuardedResolver } from '@interface/graphql/adapters/authorization/decor
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
-import { KeyResultAccessControl } from '@interface/graphql/modules/key-result/key-result.access-control'
+import { KeyResultAccessControl } from '@interface/graphql/modules/key-result/access-control/key-result.access-control'
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'

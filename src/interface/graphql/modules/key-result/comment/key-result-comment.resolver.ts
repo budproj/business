@@ -21,9 +21,9 @@ import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
+import { KeyResultCommentAccessControl } from '../access-control/key-result-comment.access-control'
 import { KeyResultGraphQLNode } from '../key-result.node'
 
-import { KeyResultCommentAccessControl } from './key-result-comment.access-control'
 import { KeyResultCommentGraphQLNode } from './key-result-comment.node'
 import { KeyResultCommentCreateRequest } from './requests/key-result-comment-create.request'
 import { KeyResultCommentDeleteRequest } from './requests/key-result-comment-delete.request'

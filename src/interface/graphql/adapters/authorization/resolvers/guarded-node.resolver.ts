@@ -1,4 +1,4 @@
-import { Resolver } from '@nestjs/graphql'
+import { Parent, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { AccessControl } from '@adapters/authorization/access-control.adapter'
 import { QueryGuardAdapter } from '@adapters/authorization/query-guard.adapter'
@@ -9,6 +9,8 @@ import { CoreEntityInterface } from '@core/core-entity.interface'
 import { CoreEntity } from '@core/core.orm-entity'
 import { CoreProvider } from '@core/core.provider'
 import { CoreEntityProvider } from '@core/entity.provider'
+import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
+import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { BaseGraphQLResolver } from '@interface/graphql/resolvers/base.resolver'
 
 import { GuardedNodeGraphQLInterface } from '../interfaces/guarded-node.interface'
@@ -30,6 +32,14 @@ export abstract class GuardedNodeGraphQLResolver<
     super()
 
     this.queryGuard = new QueryGuardAdapter(resource, core, coreEntityProvider)
+  }
+
+  @ResolveField('policy', () => NodePolicyGraphQLObject)
+  protected async resolveNodePolicy(
+    @Parent() node: GuardedNodeGraphQLInterface,
+    @RequestUserWithContext() userWithContext: UserWithContext,
+  ) {
+    return this.getNodePolicyForUserWithArgs(userWithContext, node.id)
   }
 
   protected async getNodePolicyForUserWithArgs(
