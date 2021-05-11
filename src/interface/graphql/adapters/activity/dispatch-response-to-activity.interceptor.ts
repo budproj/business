@@ -8,7 +8,7 @@ import { Activity } from '@adapters/activity/activities/base.activity'
 import { ActivityAdapter } from '@adapters/activity/activity.adapter'
 import { ActivityConstructor } from '@adapters/activity/types/activity-constructor.type'
 import { AmplitudeProvider } from '@infrastructure/amplitude/amplitude.provider'
-import { GraphQContext } from '@interface/graphql/adapters/context/interfaces/context.interface'
+import { GraphQLContext } from '@interface/graphql/adapters/context/interfaces/context.interface'
 
 import { GraphQLRequestState } from '../context/interfaces/request-state.interface'
 
@@ -22,7 +22,7 @@ export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor
     })
   }
 
-  static getContext(executionContext: ExecutionContext): GraphQContext {
+  static getContext(executionContext: ExecutionContext): GraphQLContext {
     const graphqlContext = GqlExecutionContext.create(executionContext)
     return graphqlContext.getContext()
   }

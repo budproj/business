@@ -3,7 +3,7 @@ import { Resolver } from '@nestjs/graphql'
 import { Class } from 'type-fest'
 
 import { IdentifyGraphQLRequestToAmplitudeInterceptor } from '@interface/graphql/adapters/amplitude/identify-request.interceptor'
-import { AddContextToUserInterceptor } from '@interface/graphql/adapters/context/interceptors/add-context-to-user'
+import { AddContextToUserInterceptor } from '@interface/graphql/adapters/context/interceptors/add-context-to-user.interceptor'
 import { TraceGraphQLRequestInterceptor } from '@interface/graphql/adapters/tracing/trace-request.interceptor'
 import { BaseResolver } from '@interface/graphql/decorators/base-resolver.decorator'
 

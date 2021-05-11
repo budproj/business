@@ -22,6 +22,8 @@ import { GuardedResolver } from '@interface/graphql/adapters/authorization/decor
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
+import { RelayConnection } from '@interface/graphql/adapters/relay/decorators/connection.decorator'
+import { RelayGraphQLConnectionProvider } from '@interface/graphql/adapters/relay/providers/connection.provider'
 import { KeyResultAccessControl } from '@interface/graphql/modules/key-result/access-control/key-result.access-control'
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
@@ -162,6 +164,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   protected async getKeyResultCheckInsForKeyResult(
     @Args() request: KeyResultCheckInFiltersRequest,
     @Parent() keyResult: KeyResult,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       keyResult,
@@ -169,6 +172,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching key-result check-ins',
     })
 
+    relayConnection.refreshParentNode(keyResult)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultCommentFiltersRequest,
       KeyResultComment
