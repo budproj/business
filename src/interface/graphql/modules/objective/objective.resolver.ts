@@ -13,8 +13,6 @@ import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorato
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
-import { RelayConnection } from '@interface/graphql/adapters/relay/decorators/connection.decorator'
-import { RelayGraphQLConnectionProvider } from '@interface/graphql/adapters/relay/providers/connection.provider'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
@@ -80,7 +78,6 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   protected async getKeyResultsForObjective(
     @Args() request: KeyResultFiltersRequest,
     @Parent() objective: ObjectiveGraphQLNode,
-    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       objective,
@@ -88,7 +85,6 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching key-results for objective',
     })
 
-    relayConnection.refreshParentNode(objective)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultFiltersRequest,
       KeyResult
@@ -96,7 +92,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
 
     const queryResult = await this.core.keyResult.getFromObjective(objective, filters, queryOptions)
 
-    return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection)
+    return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection, objective)
   }
 
   @ResolveField('status', () => ObjectiveStatusObject)

@@ -3,7 +3,7 @@ import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
 import { TeamGender } from '@core/modules/team/enums/team-gender.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
-import { NodeRelayInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
+import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-result/check-in/key-result-check-in.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 
@@ -16,7 +16,7 @@ import { TeamGenderGraphQLEnum } from './enums/team-gender.enum'
 import { TeamStatusObject } from './objects/team-status.object'
 
 @ObjectType('Team', {
-  implements: () => [NodeRelayInterface, GuardedNodeGraphQLInterface],
+  implements: () => [NodeRelayGraphQLInterface, GuardedNodeGraphQLInterface],
   description:
     'A collection of users. It can be either inside another team, or a root team (a.k.a. company)',
 })

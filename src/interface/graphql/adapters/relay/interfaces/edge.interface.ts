@@ -1,12 +1,13 @@
 import { Field, InterfaceType } from '@nestjs/graphql'
 import { ConnectionCursor, Edge } from 'graphql-relay'
 
-import { NodeRelayInterface } from './node.interface'
+import { NodeRelayGraphQLInterface } from './node.interface'
 
 @InterfaceType('EdgeInterface', {
   description: 'An edge is used for proper pagination in nodes',
 })
-export abstract class EdgeRelayInterface<N extends NodeRelayInterface> implements Edge<N> {
+export abstract class EdgeRelayGraphQLInterface<N extends NodeRelayGraphQLInterface>
+  implements Edge<N> {
   @Field(() => String, {
     complexity: 0,
     nullable: true,

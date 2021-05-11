@@ -3,7 +3,7 @@ import { Field, ObjectType } from '@nestjs/graphql'
 import { UserGender } from '@core/modules/user/enums/user-gender.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
-import { NodeRelayInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
+import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 
 import { UserKeyResultCheckInsGraphQLConnection } from './connections/user-key-result-check-ins/user-key-result-check-ins.connection'
 import { UserKeyResultCommentsGraphQLConnection } from './connections/user-key-result-comments/user-key-result-comments.connection'
@@ -13,7 +13,7 @@ import { UserTeamsGraphQLConnection } from './connections/user-teams/user-teams.
 import { UserGenderGraphQLEnum } from './enums/user-gender.enum'
 
 @ObjectType('User', {
-  implements: () => [NodeRelayInterface, GuardedNodeGraphQLInterface],
+  implements: () => [NodeRelayGraphQLInterface, GuardedNodeGraphQLInterface],
   description:
     'User is an entity inside a given root team (a.k.a. company). It is associated with many teams, progress reports, and others.',
 })

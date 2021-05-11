@@ -1,14 +1,21 @@
-import { Connection, connectionFromArray, cursorToOffset } from 'graphql-relay'
+import { connectionFromArray, cursorToOffset } from 'graphql-relay'
 import { omit, pick } from 'lodash'
 
 import { CoreEntity } from '@core/core.orm-entity'
 import { GetOptions } from '@core/interfaces/get-options'
+import { Connection } from '@interface/graphql/adapters/relay/interfaces/connection.interface'
 
-import { NodeRelayInterface } from './interfaces/node.interface'
+import { NodeRelayGraphQLInterface } from './interfaces/node.interface'
 import { ConnectionRelayRequest } from './requests/connection.request'
 import { NodeRequest } from './types/node-request.type'
 
 export class RelayGraphQLAdapter {
+  static getConnectionOffset(connection: ConnectionRelayRequest): number {
+    if (!connection.after) return 0
+
+    return cursorToOffset(connection.after) + 1
+  }
+
   public getNodeRequest<R extends ConnectionRelayRequest>(request: R): NodeRequest<R> {
     return omit(request, ['before', 'after', 'first', 'last', 'order']) as any
   }
@@ -29,24 +36,24 @@ export class RelayGraphQLAdapter {
     return [nodeRequest, getOptions, connection]
   }
 
-  public marshalResponse<N extends NodeRelayInterface>(
+  public marshalResponse<N extends NodeRelayGraphQLInterface>(
     nodes: N[],
     connectionRequest: ConnectionRelayRequest,
+    parentNode?: NodeRelayGraphQLInterface,
   ): Connection<N> {
-    return connectionFromArray(nodes, connectionRequest)
+    const connection = connectionFromArray(nodes, connectionRequest)
+
+    return {
+      ...connection,
+      parentNodeId: parentNode?.id,
+    }
   }
 
   public marshalGetOptionsForConnection<E extends CoreEntity>(request: any): GetOptions<E> {
     return {
       limit: request.first,
-      offset: this.getConnectionOffset(request),
+      offset: RelayGraphQLAdapter.getConnectionOffset(request),
       orderBy: request.order,
     }
-  }
-
-  private getConnectionOffset(connection: ConnectionRelayRequest): number {
-    if (!connection.after) return 0
-
-    return cursorToOffset(connection.after) + 1
   }
 }

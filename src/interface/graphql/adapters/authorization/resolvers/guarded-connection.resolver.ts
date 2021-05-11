@@ -1,5 +1,5 @@
 import { NotImplementedException } from '@nestjs/common'
-import { ResolveField, Resolver } from '@nestjs/graphql'
+import { Parent, ResolveField, Resolver } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-errors'
 
 import { AccessControl } from '@adapters/authorization/access-control.adapter'
@@ -13,8 +13,7 @@ import { CoreProvider } from '@core/core.provider'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { ConnectionPolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/connection-policy.object'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
-import { RelayConnection } from '@interface/graphql/adapters/relay/decorators/connection.decorator'
-import { RelayGraphQLConnectionProvider } from '@interface/graphql/adapters/relay/providers/connection.provider'
+import { ConnectionRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/connection.interface'
 import { BaseGraphQLResolver } from '@interface/graphql/resolvers/base.resolver'
 
 import { GuardedConnectionGraphQLInterface } from '../interfaces/guarded-connection.interface'
@@ -40,7 +39,7 @@ export abstract class GuardedConnectionGraphQLResolver<
 
   @ResolveField('policy', () => ConnectionPolicyGraphQLObject)
   protected async resolveNodePolicy(
-    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
+    @Parent() { parentNodeId }: ConnectionRelayGraphQLInterface<any>,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     if (!this.accessControl) {
@@ -49,14 +48,11 @@ export abstract class GuardedConnectionGraphQLResolver<
       )
     }
 
-    if (!relayConnection.parentNode) {
-      throw new UserInputError('You cannot get the connection policy for root connections')
+    if (!parentNodeId) {
+      throw new UserInputError('We could not find a parent to resolve your connection policy')
     }
 
-    return this.getConnectionPolicyForUserWithArguments(
-      userWithContext,
-      relayConnection.parentNode.id,
-    )
+    return this.getConnectionPolicyForUserWithArguments(userWithContext, parentNodeId)
   }
 
   protected async getConnectionPolicyForUserWithArguments(

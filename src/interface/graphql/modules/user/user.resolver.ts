@@ -26,8 +26,6 @@ import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorato
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
-import { RelayConnection } from '@interface/graphql/adapters/relay/decorators/connection.decorator'
-import { RelayGraphQLConnectionProvider } from '@interface/graphql/adapters/relay/providers/connection.provider'
 import { UploadGraphQLProvider } from '@interface/graphql/adapters/upload/upload.provider'
 import { KeyResultCheckInFiltersRequest } from '@interface/graphql/modules/key-result/check-in/requests/key-result-check-in-filters.request'
 import { KeyResultCommentFiltersRequest } from '@interface/graphql/modules/key-result/comment/requests/key-result-comment-filters.request'
@@ -132,7 +130,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   protected async getCompaniesForRequestAndUser(
     @Args() request: TeamFiltersRequest,
     @Parent() user: UserGraphQLNode,
-    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       user,
@@ -140,7 +137,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching companies for user',
     })
 
-    relayConnection.refreshParentNode(user)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       TeamFiltersRequest,
       Team
@@ -148,14 +144,13 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
     const queryResult = await this.core.team.getUserCompanies(user, filters, queryOptions)
 
-    return this.relay.marshalResponse<Team>(queryResult, connection)
+    return this.relay.marshalResponse<Team>(queryResult, connection, user)
   }
 
   @ResolveField('teams', () => UserTeamsGraphQLConnection, { nullable: true })
   protected async getTeamsForRequestAndUser(
     @Args() request: TeamFiltersRequest,
     @Parent() user: UserGraphQLNode,
-    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       user,
@@ -163,7 +158,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching teams for user',
     })
 
-    relayConnection.refreshParentNode(user)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       TeamFiltersRequest,
       Team
@@ -171,14 +165,13 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
     const queryResult = await this.core.user.getUserTeams(user, filters, queryOptions)
 
-    return this.relay.marshalResponse<TeamInterface>(queryResult, connection)
+    return this.relay.marshalResponse<TeamInterface>(queryResult, connection, user)
   }
 
   @ResolveField('ownedTeams', () => UserTeamsGraphQLConnection, { nullable: true })
   protected async getOwnedTeamsForRequestAndUser(
     @Args() request: TeamFiltersRequest,
     @Parent() user: UserGraphQLNode,
-    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       user,
@@ -186,7 +179,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching owned teams for user',
     })
 
-    relayConnection.refreshParentNode(user)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       TeamFiltersRequest,
       Team
@@ -194,14 +186,13 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
     const queryResult = await this.core.team.getFromOwner(user, filters, queryOptions)
 
-    return this.relay.marshalResponse<TeamInterface>(queryResult, connection)
+    return this.relay.marshalResponse<TeamInterface>(queryResult, connection, user)
   }
 
   @ResolveField('objectives', () => UserObjectivesGraphQLConnection, { nullable: true })
   protected async getObjectivesForRequestAndUser(
     @Args() request: ObjectiveFiltersRequest,
     @Parent() user: UserGraphQLNode,
-    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       user,
@@ -209,7 +200,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching objectives for user',
     })
 
-    relayConnection.refreshParentNode(user)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       ObjectiveFiltersRequest,
       Objective
@@ -217,14 +207,13 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
     const queryResult = await this.core.objective.getFromOwner(user, filters, queryOptions)
 
-    return this.relay.marshalResponse<ObjectiveInterface>(queryResult, connection)
+    return this.relay.marshalResponse<ObjectiveInterface>(queryResult, connection, user)
   }
 
   @ResolveField('keyResults', () => UserKeyResultsGraphQLConnection, { nullable: true })
   protected async getKeyResultsForRequestAndUser(
     @Args() request: KeyResultFiltersRequest,
     @Parent() user: UserGraphQLNode,
-    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       user,
@@ -232,7 +221,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching key results for user',
     })
 
-    relayConnection.refreshParentNode(user)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultFiltersRequest,
       KeyResult
@@ -240,7 +228,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
     const queryResult = await this.core.keyResult.getFromOwner(user, filters, queryOptions)
 
-    return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection)
+    return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection, user)
   }
 
   @ResolveField('keyResultComments', () => UserKeyResultCommentsGraphQLConnection, {
@@ -249,7 +237,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   protected async getKeyResultCommentsForRequestAndUser(
     @Args() request: KeyResultCommentFiltersRequest,
     @Parent() user: UserGraphQLNode,
-    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       user,
@@ -257,7 +244,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching comments by user',
     })
 
-    relayConnection.refreshParentNode(user)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultCommentFiltersRequest,
       KeyResultComment
@@ -269,7 +255,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       queryOptions,
     )
 
-    return this.relay.marshalResponse<KeyResultCommentInterface>(queryResult, connection)
+    return this.relay.marshalResponse<KeyResultCommentInterface>(queryResult, connection, user)
   }
 
   @ResolveField('keyResultCheckIns', () => UserKeyResultCheckInsGraphQLConnection, {
@@ -278,7 +264,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   protected async getKeyResultCheckInsForRequestAndUser(
     @Args() request: KeyResultCheckInFiltersRequest,
     @Parent() user: UserGraphQLNode,
-    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       user,
@@ -286,7 +271,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching check-ins by user',
     })
 
-    relayConnection.refreshParentNode(user)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultCheckInFiltersRequest,
       KeyResultCheckIn
@@ -298,7 +282,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       queryOptions,
     )
 
-    return this.relay.marshalResponse<KeyResultCheckInInterface>(queryResult, connection)
+    return this.relay.marshalResponse<KeyResultCheckInInterface>(queryResult, connection, user)
   }
 
   private async parseUserPictureFileToRemoteURL(
