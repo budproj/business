@@ -53,6 +53,6 @@ export abstract class KeyResultBaseAccessControl extends AccessControl {
       keyResult,
     )
 
-    return this.isCompanyMember(keyResultCompany, user)
+    return this.isCompanyMember([keyResultCompany], user)
   }
 }

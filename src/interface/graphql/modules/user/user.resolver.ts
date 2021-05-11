@@ -34,6 +34,7 @@ import { KeyResultCommentFiltersRequest } from '@interface/graphql/modules/key-r
 import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/requests/key-result-filters.request'
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
 import { TeamFiltersRequest } from '@interface/graphql/modules/team/requests/team-filters.request'
+import { UserAccessControl } from '@interface/graphql/modules/user/user.access-control'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { UserKeyResultCheckInsGraphQLConnection } from './connections/user-key-result-check-ins/user-key-result-check-ins.connection'
@@ -49,7 +50,11 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   private readonly logger = new Logger(UserGraphQLResolver.name)
   private readonly uploadProvider: UploadGraphQLProvider
 
-  constructor(protected readonly core: CoreProvider, awsS3: AWSS3Provider) {
+  constructor(
+    protected readonly core: CoreProvider,
+    protected readonly accessControl: UserAccessControl,
+    awsS3: AWSS3Provider,
+  ) {
     super(Resource.USER, core, core.user)
 
     this.uploadProvider = new UploadGraphQLProvider(awsS3)

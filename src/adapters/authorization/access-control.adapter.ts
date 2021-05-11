@@ -43,10 +43,15 @@ export abstract class AccessControl {
     return leaders.some((leader) => leader.id === user.id)
   }
 
-  protected async isCompanyMember(company: TeamInterface, user: UserWithContext): Promise<boolean> {
+  protected async isCompanyMember(
+    companies: TeamInterface[],
+    user: UserWithContext,
+  ): Promise<boolean> {
     const userCompanies = await this.core.dispatchCommand<Team[]>('get-user-companies', user)
 
-    return userCompanies.some((userCompany) => userCompany.id === company.id)
+    return userCompanies.some((userCompany) =>
+      companies.some((company) => userCompany.id === company.id),
+    )
   }
 
   private async resolveContextCommandPermission(
