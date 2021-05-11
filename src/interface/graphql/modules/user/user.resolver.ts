@@ -26,6 +26,8 @@ import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorato
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
+import { RelayConnection } from '@interface/graphql/adapters/relay/decorators/connection.decorator'
+import { RelayGraphQLConnectionProvider } from '@interface/graphql/adapters/relay/providers/connection.provider'
 import { UploadGraphQLProvider } from '@interface/graphql/adapters/upload/upload.provider'
 import { KeyResultCheckInFiltersRequest } from '@interface/graphql/modules/key-result/check-in/requests/key-result-check-in-filters.request'
 import { KeyResultCommentFiltersRequest } from '@interface/graphql/modules/key-result/comment/requests/key-result-comment-filters.request'
@@ -125,6 +127,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   protected async getCompaniesForRequestAndUser(
     @Args() request: TeamFiltersRequest,
     @Parent() user: UserGraphQLNode,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       user,
@@ -132,6 +135,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching companies for user',
     })
 
+    relayConnection.refreshParentNode(user)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       TeamFiltersRequest,
       Team
@@ -146,6 +150,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   protected async getTeamsForRequestAndUser(
     @Args() request: TeamFiltersRequest,
     @Parent() user: UserGraphQLNode,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       user,
@@ -153,6 +158,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching teams for user',
     })
 
+    relayConnection.refreshParentNode(user)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       TeamFiltersRequest,
       Team
@@ -167,6 +173,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   protected async getOwnedTeamsForRequestAndUser(
     @Args() request: TeamFiltersRequest,
     @Parent() user: UserGraphQLNode,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       user,
@@ -174,6 +181,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching owned teams for user',
     })
 
+    relayConnection.refreshParentNode(user)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       TeamFiltersRequest,
       Team
@@ -188,6 +196,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   protected async getObjectivesForRequestAndUser(
     @Args() request: ObjectiveFiltersRequest,
     @Parent() user: UserGraphQLNode,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       user,
@@ -195,6 +204,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching objectives for user',
     })
 
+    relayConnection.refreshParentNode(user)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       ObjectiveFiltersRequest,
       Objective
@@ -209,6 +219,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   protected async getKeyResultsForRequestAndUser(
     @Args() request: KeyResultFiltersRequest,
     @Parent() user: UserGraphQLNode,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       user,
@@ -216,6 +227,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching key results for user',
     })
 
+    relayConnection.refreshParentNode(user)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultFiltersRequest,
       KeyResult
@@ -232,6 +244,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   protected async getKeyResultCommentsForRequestAndUser(
     @Args() request: KeyResultCommentFiltersRequest,
     @Parent() user: UserGraphQLNode,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       user,
@@ -239,6 +252,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching comments by user',
     })
 
+    relayConnection.refreshParentNode(user)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultCommentFiltersRequest,
       KeyResultComment
@@ -259,6 +273,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   protected async getKeyResultCheckInsForRequestAndUser(
     @Args() request: KeyResultCheckInFiltersRequest,
     @Parent() user: UserGraphQLNode,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       user,
@@ -266,6 +281,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching check-ins by user',
     })
 
+    relayConnection.refreshParentNode(user)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultCheckInFiltersRequest,
       KeyResultCheckIn

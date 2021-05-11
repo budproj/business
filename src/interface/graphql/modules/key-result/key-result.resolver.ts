@@ -143,6 +143,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   protected async getKeyResultCommentsForKeyResult(
     @Args() request: KeyResultCommentFiltersRequest,
     @Parent() keyResult: KeyResult,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       keyResult,
@@ -150,6 +151,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching key-result comments',
     })
 
+    relayConnection.refreshParentNode(keyResult)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultCommentFiltersRequest,
       KeyResultComment
@@ -218,6 +220,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   protected async getKeyResultTimeline(
     @Args() request: ConnectionFiltersRequest,
     @Parent() keyResult: KeyResultGraphQLNode,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       keyResult,
@@ -225,6 +228,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching timeline for key result',
     })
 
+    relayConnection.refreshParentNode(keyResult)
     const connection = this.relay.unmarshalRequest<
       ConnectionFiltersRequest,
       KeyResultCheckIn | KeyResultComment

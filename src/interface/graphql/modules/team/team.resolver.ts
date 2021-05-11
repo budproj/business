@@ -19,6 +19,8 @@ import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorato
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
+import { RelayConnection } from '@interface/graphql/adapters/relay/decorators/connection.decorator'
+import { RelayGraphQLConnectionProvider } from '@interface/graphql/adapters/relay/providers/connection.provider'
 import { CycleFiltersRequest } from '@interface/graphql/modules/cycle/requests/cycle-filters.request'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-result/check-in/key-result-check-in.node'
 import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/requests/key-result-filters.request'
@@ -84,6 +86,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   protected async getChildTeamsForTeam(
     @Args() request: TeamFiltersRequest,
     @Parent() team: TeamGraphQLNode,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       team,
@@ -91,6 +94,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching child teams for team',
     })
 
+    relayConnection.refreshParentNode(team)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       ObjectiveFiltersRequest,
       Objective
@@ -105,6 +109,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   protected async getRankedTeamsForTeam(
     @Args() request: TeamFiltersRequest,
     @Parent() team: TeamGraphQLNode,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       team,
@@ -112,6 +117,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching ranked teams for team',
     })
 
+    relayConnection.refreshParentNode(team)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       ObjectiveFiltersRequest,
       Objective
@@ -136,6 +142,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   protected async getUsersForTeam(
     @Args() request: UserFiltersRequest,
     @Parent() team: TeamGraphQLNode,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       team,
@@ -143,6 +150,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching users for team',
     })
 
+    relayConnection.refreshParentNode(team)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       UserFiltersRequest,
       User
@@ -167,6 +175,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   protected async getCyclesForTeam(
     @Args() request: CycleFiltersRequest,
     @Parent() team: TeamGraphQLNode,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       team,
@@ -174,6 +183,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching cycles for team',
     })
 
+    relayConnection.refreshParentNode(team)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       CycleFiltersRequest,
       Cycle
@@ -188,6 +198,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   protected async getObjectivesForRequestAndUser(
     @Args() request: ObjectiveFiltersRequest,
     @Parent() team: TeamGraphQLNode,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       team,
@@ -195,6 +206,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching objectives for team',
     })
 
+    relayConnection.refreshParentNode(team)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       ObjectiveFiltersRequest,
       Objective
@@ -209,6 +221,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   protected async getKeyResultsForTeam(
     @Args() request: KeyResultFiltersRequest,
     @Parent() team: TeamGraphQLNode,
+    @RelayConnection() relayConnection: RelayGraphQLConnectionProvider,
   ) {
     this.logger.log({
       team,
@@ -216,6 +229,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching key-results for team',
     })
 
+    relayConnection.refreshParentNode(team)
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultFiltersRequest,
       KeyResult
