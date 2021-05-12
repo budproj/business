@@ -350,6 +350,12 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return this.keyResultCheckInProvider.getOne(indexes)
   }
 
+  public async getKeyResultComment(
+    indexes: Partial<KeyResultCommentInterface>,
+  ): Promise<KeyResultComment> {
+    return this.keyResultCommentProvider.getOne(indexes)
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<KeyResult>,
     _data: Partial<KeyResultInterface>,
