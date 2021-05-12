@@ -3,16 +3,14 @@ import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-c
 
 import { Command } from './base.command'
 
-export class GetCheckInDeltaConfidenceTagCommand extends Command<number> {
+export class GetKeyResultCheckInDeltaConfidenceTagCommand extends Command<number> {
   private readonly confidenceTagAdapter = new ConfidenceTagAdapter()
 
   public async execute(checkIn: KeyResultCheckIn): Promise<number> {
     const parentCheckIn = await this.core.keyResult.getParentCheckInFromCheckIn(checkIn)
-    const deltaConfidenceTag = this.confidenceTagAdapter.differenceInConfidenceTagIndexes(
+    return this.confidenceTagAdapter.differenceInConfidenceTagIndexes(
       parentCheckIn?.confidence,
       checkIn.confidence,
     )
-
-    return deltaConfidenceTag
   }
 }

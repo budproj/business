@@ -10,14 +10,14 @@ import { GetUserTeamTreeCommand } from '@core/ports/commands/get-user-team-tree.
 import { UpdateKeyResultCommand } from '@core/ports/commands/update-key-result.command'
 
 import { Command } from './base.command'
-import { CreateCheckInCommand } from './create-check-in.command'
+import { CreateKeyResultCheckInCommand } from './create-key-result-check-in.command'
 import { CreateKeyResultCommentCommand } from './create-key-result-comment.command'
-import { GetCheckInDeltaConfidenceTagCommand } from './get-check-in-delta-confidence-tag.command'
-import { GetCheckInDeltaProgressCommand } from './get-check-in-delta-progress.command'
-import { GetCheckInTeamCommand } from './get-check-in-team.command'
-import { GetCheckInWindowForCheckInCommand } from './get-check-in-window-for-check-in.command'
 import { GetCycleCommand } from './get-cycle.command'
+import { GetKeyResultCheckInDeltaConfidenceTagCommand } from './get-key-result-check-in-delta-confidence-tag.command'
+import { GetKeyResultCheckInDeltaProgressCommand } from './get-key-result-check-in-delta-progress.command'
 import { GetKeyResultCheckInListCommand } from './get-key-result-check-in-list.command'
+import { GetKeyResultCheckInTeamCommand } from './get-key-result-check-in-team.command'
+import { GetKeyResultCheckInWindowForCheckInCommand } from './get-key-result-check-in-window-for-check-in.command'
 import { GetKeyResultCompanyCommand } from './get-key-result-company.command'
 import { GetKeyResultCycleCommand } from './get-key-result-cycle.command'
 import { GetKeyResultFromCheckInCommand } from './get-key-result-from-check-in.command'
@@ -58,7 +58,7 @@ export type CommandType =
 @Injectable()
 export class CommandFactory {
   private readonly commands: Record<CommandType, CommandConstructor> = {
-    'create-check-in': CreateCheckInCommand,
+    'create-check-in': CreateKeyResultCheckInCommand,
     'create-key-result-comment': CreateKeyResultCommentCommand,
     'get-key-result-check-in-list': GetKeyResultCheckInListCommand,
     'get-key-result-company': GetKeyResultCompanyCommand,
@@ -68,12 +68,12 @@ export class CommandFactory {
     'get-key-result': GetKeyResultCommand,
     'get-team-owner': GetTeamOwnerCommand,
     'get-user-companies': GetUserCompaniesCommand,
-    'get-check-in-window-for-check-in': GetCheckInWindowForCheckInCommand,
+    'get-check-in-window-for-check-in': GetKeyResultCheckInWindowForCheckInCommand,
     'get-cycle': GetCycleCommand,
     'get-key-result-cycle': GetKeyResultCycleCommand,
-    'get-check-in-delta-progress': GetCheckInDeltaProgressCommand,
-    'get-check-in-delta-confidence-tag': GetCheckInDeltaConfidenceTagCommand,
-    'get-check-in-team': GetCheckInTeamCommand,
+    'get-check-in-delta-progress': GetKeyResultCheckInDeltaProgressCommand,
+    'get-check-in-delta-confidence-tag': GetKeyResultCheckInDeltaConfidenceTagCommand,
+    'get-check-in-team': GetKeyResultCheckInTeamCommand,
     'get-team-company': GetTeamCompanyCommand,
     'get-key-result-comment-team': GetKeyResultCommentTeamCommand,
     'update-key-result': UpdateKeyResultCommand,
