@@ -23,7 +23,7 @@ export class EventsFactory {
   public buildEventForActivity<P extends EventProperties, A extends Activity = Activity>(
     activity: A,
   ): BaseAmplitudeEvent<P> | undefined {
-    const Event = this.eventConstructors.find((event) => event.activityType === activity.type)
+    const Event = this.eventConstructors.find((Event) => Event.activityType === activity.type)
     if (!Event) return
 
     return new Event(activity as any, this.core) as any
