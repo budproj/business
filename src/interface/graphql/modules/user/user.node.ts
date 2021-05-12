@@ -21,6 +21,9 @@ export class UserGraphQLNode implements GuardedNodeGraphQLInterface {
   @Field({ complexity: 0, description: 'The name of the user' })
   public readonly firstName!: string
 
+  @Field({ complexity: 0, description: 'The user e-mail' })
+  public readonly email: string
+
   @Field({ complexity: 0, description: 'The sub field in Auth0 (their ID)' })
   public readonly authzSub!: string
 

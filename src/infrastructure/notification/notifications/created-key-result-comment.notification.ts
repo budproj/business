@@ -8,7 +8,9 @@ import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-resu
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { NotificationChannel } from '@infrastructure/notification/channels/channel.interface'
+import { EmailNotificationChannel } from '@infrastructure/notification/channels/email/email.channel'
 import { BaseNotification } from '@infrastructure/notification/notifications/base.notification'
+import { NotificationMetadata } from '@infrastructure/notification/types/notification-metadata.type'
 
 type CreatedKeyResultCommentNotificationData = {
   owner: OwnerNotificationData
@@ -38,9 +40,14 @@ type RelatedData = {
   owner: UserInterface
 }
 
+type CreatedKeyResultCommentMetadata = {
+  keyResultOwner: UserInterface
+} & NotificationMetadata
+
 @Injectable()
 export class CreatedKeyResultCommentNotification extends BaseNotification<
   CreatedKeyResultCommentNotificationData,
+  CreatedKeyResultCommentMetadata,
   CreatedKeyResultCommentActivity
 > {
   static activityType = CREATED_KEY_RESULT_COMMENT_ACTIVITY_TYPE
@@ -66,21 +73,39 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     }
   }
 
-  public async loadData(): Promise<void> {
+  public async prepare(): Promise<void> {
     const { owner, keyResult } = await this.getRelatedData(this.activity.data.keyResultId)
 
-    this.data = {
+    const data = {
       owner: CreatedKeyResultCommentNotification.getOwnerData(owner),
       keyResult: CreatedKeyResultCommentNotification.getKeyResultData(keyResult),
       author: await this.getAuthorData(),
       comment: this.getCommentData(),
     }
+
+    const metadata = {
+      keyResultOwner: owner,
+    }
+
+    this.data = data
+    this.attachToMetadata(metadata)
   }
 
   public async dispatch(): Promise<void> {
-    const marshaledData = this.marshal()
+    await this.dispatchEmail()
+  }
 
-    await this.channels.email.dispatch(marshaledData.data, [], {})
+  private async dispatchEmail(): Promise<void> {
+    const { data, metadata } = this.marshal()
+
+    const recipients = EmailNotificationChannel.buildRecipientsFromUsers([metadata.keyResultOwner])
+
+    const emailMetadata = {
+      ...metadata,
+      recipients,
+    }
+
+    await this.channels.email.dispatch(data, emailMetadata)
   }
 
   private async getRelatedData(keyResultID: string): Promise<RelatedData> {

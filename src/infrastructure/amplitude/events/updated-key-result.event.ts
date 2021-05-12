@@ -37,7 +37,7 @@ export class UpdatedKeyResultAmplitudeEvent extends BaseAmplitudeEvent<
     super(activity, UpdatedKeyResultAmplitudeEvent.amplitudeEventType)
   }
 
-  public async loadProperties(): Promise<void> {
+  public async prepare(): Promise<void> {
     const { team, company } = await this.getRelatedData()
 
     this.properties = {

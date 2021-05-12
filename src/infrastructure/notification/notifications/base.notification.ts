@@ -1,15 +1,19 @@
 import { Activity } from '@adapters/activity/activities/base.activity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { NotificationChannel } from '@infrastructure/notification/channels/channel.interface'
+import { Notification } from '@infrastructure/notification/interfaces/notification.interface'
 import { NotificationData } from '@infrastructure/notification/types/notification-data.type'
 import { NotificationMetadata } from '@infrastructure/notification/types/notification-metadata.type'
-import { Notification } from '@infrastructure/notification/types/notification.type'
 
-export abstract class BaseNotification<D extends NotificationData, A extends Activity = Activity> {
+export abstract class BaseNotification<
+  D extends NotificationData,
+  M extends NotificationMetadata = NotificationMetadata,
+  A extends Activity = Activity
+> {
   static activityType: string
   static notificationType: string
 
-  protected readonly metadata!: NotificationMetadata
+  protected metadata!: M
   protected data?: D
 
   protected constructor(
@@ -21,21 +25,29 @@ export abstract class BaseNotification<D extends NotificationData, A extends Act
     this.metadata = this.marshalMetadata(activity, notificationType)
   }
 
-  public marshal(): Notification {
+  public marshal(): Notification<D, M> {
     return {
       metadata: this.metadata,
       data: this.data,
     }
   }
 
-  private marshalMetadata(activity: A, notificationType: string): NotificationMetadata {
-    return {
-      ...activity.metadata,
-      notificationType,
+  protected attachToMetadata(newMetadata: Partial<M>): void {
+    this.metadata = {
+      ...this.metadata,
+      ...newMetadata,
     }
   }
 
-  public abstract loadData(): Promise<void>
+  private marshalMetadata(activity: A, notificationType: string): M {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return {
+      ...activity.metadata,
+      notificationType,
+    } as M
+  }
+
+  public abstract prepare(): Promise<void>
 
   public abstract dispatch(): Promise<void>
 }

@@ -5,6 +5,7 @@ import { UserGender } from './enums/user-gender.enum'
 export interface UserInterface extends CoreEntityInterface {
   firstName: string
   authzSub: string
+  email: string
   updatedAt: Date
   lastName?: string
   gender?: UserGender

@@ -48,7 +48,7 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
     super(activity, CreatedCheckInAmplitudeEvent.amplitudeEventType)
   }
 
-  public async loadProperties(): Promise<void> {
+  public async prepare(): Promise<void> {
     const { keyResult, keyResultCheckInList, cycle, team, company } = await this.getRelatedData()
 
     const deltaProgress = await this.getDeltaProgress()

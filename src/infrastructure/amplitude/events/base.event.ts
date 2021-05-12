@@ -34,5 +34,5 @@ export abstract class BaseAmplitudeEvent<P extends EventProperties, A extends Ac
     }
   }
 
-  public abstract loadProperties(): Promise<void>
+  public abstract prepare(): Promise<void>
 }
