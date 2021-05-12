@@ -7,6 +7,7 @@ import {
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CorePortsProvider } from '@core/ports/ports.provider'
+import { NotificationChannel } from '@infrastructure/notification/channels/channel.interface'
 import { BaseNotification } from '@infrastructure/notification/notifications/base.notification'
 
 type CreatedKeyResultCommentNotificationData = {
@@ -47,9 +48,10 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
 
   constructor(
     activity: CreatedKeyResultCommentActivity,
-    protected readonly core: CorePortsProvider,
+    channels: Record<string, NotificationChannel>,
+    core: CorePortsProvider,
   ) {
-    super(activity, CreatedKeyResultCommentNotification.notificationType)
+    super(activity, channels, core, CreatedKeyResultCommentNotification.notificationType)
   }
 
   static getOwnerData(owner: UserInterface): OwnerNotificationData {
@@ -73,6 +75,12 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       author: await this.getAuthorData(),
       comment: this.getCommentData(),
     }
+  }
+
+  public async dispatch(): Promise<void> {
+    const marshaledData = this.marshal()
+
+    await this.channels.email.dispatch(marshaledData.data, [], {})
   }
 
   private async getRelatedData(keyResultID: string): Promise<RelatedData> {

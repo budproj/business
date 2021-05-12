@@ -15,13 +15,8 @@ export class NotificationProvider implements ActivityDispatcher {
     if (!notification) return
 
     await notification.loadData()
-    const marshalledNotification = notification.marshal()
+    this.logger.log('Dispatching notification')
 
-    this.logger.log({
-      notification: marshalledNotification,
-      message: 'Dispatching notification',
-    })
-
-    // Await this.client.logEvent(marshalledEvent)
+    await notification.dispatch()
   }
 }
