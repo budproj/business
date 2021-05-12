@@ -70,7 +70,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     this.data = {
       owner: CreatedKeyResultCommentNotification.getOwnerData(owner),
       keyResult: CreatedKeyResultCommentNotification.getKeyResultData(keyResult),
-      author: this.getAuthorData(),
+      author: await this.getAuthorData(),
       comment: this.getCommentData(),
     }
   }
@@ -87,9 +87,14 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     }
   }
 
-  private getAuthorData(): AuthorNotificationData {
+  private async getAuthorData(): Promise<AuthorNotificationData> {
+    const fullName = await this.core.dispatchCommand<string>(
+      'get-user-full-name',
+      this.activity.context.user,
+    )
+
     return {
-      fullName: 'test',
+      fullName,
     }
   }
 

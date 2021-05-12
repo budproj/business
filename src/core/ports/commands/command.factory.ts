@@ -6,6 +6,7 @@ import { GetKeyResultCommentTeamCommand } from '@core/ports/commands/get-key-res
 import { GetKeyResultCommentCommand } from '@core/ports/commands/get-key-result-comment.command'
 import { GetKeyResultTeamCommand } from '@core/ports/commands/get-key-result-team.command'
 import { GetUserCommand } from '@core/ports/commands/get-user'
+import { GetUserFullNameCommand } from '@core/ports/commands/get-user-full-name'
 import { GetUserTeamTreeCommand } from '@core/ports/commands/get-user-team-tree.command'
 import { UpdateKeyResultCommand } from '@core/ports/commands/update-key-result.command'
 
@@ -54,6 +55,7 @@ export type CommandType =
   | 'get-user'
   | 'get-user-team-tree'
   | 'get-key-result-comment'
+  | 'get-user-full-name'
 
 @Injectable()
 export class CommandFactory {
@@ -82,6 +84,7 @@ export class CommandFactory {
     'get-user': GetUserCommand,
     'get-user-team-tree': GetUserTeamTreeCommand,
     'get-key-result-comment': GetKeyResultCommentCommand,
+    'get-user-full-name': GetUserFullNameCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}
