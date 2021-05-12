@@ -3,42 +3,58 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies'
 
 import { TypeORMConfigInterface } from './typeorm.interface'
 
+const config = {
+  type: process.env.TYPEORM_CONNECTION,
+  database: process.env.TYPEORM_DATABASE,
+  host: process.env.TYPEORM_HOST,
+  port: Number.parseInt(process.env.TYPEORM_PORT, 10),
+  username: process.env.TYPEORM_USERNAME,
+  password: process.env.TYPEORM_PASSWORD,
+  migrations: process.env.TYPEORM_MIGRATIONS.split(','),
+  entities: process.env.TYPEORM_ENTITIES.split(','),
+  logging: process.env.TYPEORM_LOGGING_ENABLED === 'true',
+  namingStrategy:
+    process.env.TYPEORM_CONVENTION_NAMING_ENABLED === 'true'
+      ? new SnakeNamingStrategy()
+      : undefined,
+  cli: {
+    migrationsDir: process.env.TYPEORM_MIGRATIONS_DIR,
+  },
+}
+
 export const typeormConfig = registerAs(
   'typeorm',
   (): TypeORMConfigInterface => ({
-    type: process.env.TYPEORM_CONNECTION,
+    type: config.type,
 
     endpoint: {
-      host: process.env.TYPEORM_HOST,
-      port: Number.parseInt(process.env.TYPEORM_PORT, 10),
-      database: process.env.TYPEORM_DATABASE,
+      host: config.host,
+      port: config.port,
+      database: config.database,
     },
 
     authentication: {
-      user: process.env.TYPEORM_USERNAME,
-      password: process.env.TYPEORM_PASSWORD,
+      user: config.username,
+      password: config.password,
     },
 
     pattern: {
       file: {
-        entities: process.env.TYPEORM_ENTITIES.split(','),
-        migrations: process.env.TYPEORM_MIGRATIONS.split(','),
+        entities: config.entities,
+        migrations: config.migrations,
       },
 
       directory: {
-        migrations: process.env.TYPEORM_MIGRATIONS_DIR,
+        migrations: config.cli.migrationsDir,
       },
     },
 
     logging: {
-      enabled: process.env.TYPEORM_LOGGING_ENABLED === 'true',
+      enabled: config.logging,
     },
 
     conventions: {
-      naming:
-        process.env.TYPEORM_CONVENTION_NAMING_ENABLED === 'true'
-          ? new SnakeNamingStrategy()
-          : undefined,
+      naming: config.namingStrategy,
     },
   }),
 )
