@@ -72,7 +72,7 @@ spec:
             - name: AWS_S3_BUCKET_NAME
               value: business.s3.getbud.co
             - name: AMPLITUDE_API_KEY
-              value: ce5c7ca0f7ad9002798472d2d858a50e 
+              value: 9314f6f12a26e6a5989287b16d030c30
             - name: AWS_CREDENTIALS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
