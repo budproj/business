@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
 
+import { EmailAdapterProvider } from '@adapters/email/email.provider'
 import { UserInterface } from '@core/modules/user/user.interface'
+import { AWSSESProvider } from '@infrastructure/aws/ses/ses.provider'
 import { ChannelMetadata } from '@infrastructure/notification/types/channel-metadata.type'
 import { NotificationData } from '@infrastructure/notification/types/notification-data.type'
 import { NotificationRecipient } from '@infrastructure/notification/types/recipient.type'
@@ -13,6 +15,12 @@ type EmailMetadata = {
 
 @Injectable()
 export class EmailNotificationChannel implements NotificationChannel {
+  private readonly emailAdapter: EmailAdapterProvider
+
+  constructor(awsSESProvider: AWSSESProvider) {
+    this.emailAdapter = new EmailAdapterProvider(awsSESProvider)
+  }
+
   static buildRecipientsFromUsers(users: UserInterface[]): NotificationRecipient[] {
     return users.map((user) => EmailNotificationChannel.buildSingleRecipientFromUser(user))
   }
@@ -25,6 +33,6 @@ export class EmailNotificationChannel implements NotificationChannel {
   }
 
   public async dispatch(data: NotificationData, metadata: EmailMetadata): Promise<void> {
-    console.log('ok')
+    await this.emailAdapter.send()
   }
 }

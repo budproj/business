@@ -6,7 +6,7 @@ import { AWSConfigModule } from '@config/aws/aws.module'
 import { AWSConfigProvider } from '@config/aws/aws.provider'
 
 import { awsFactory } from './aws.factory'
-import { AWSS3Provider } from './s3/aws-s3.provider'
+import { AWSS3Provider } from './s3/s3.provider'
 
 @Module({
   imports: [
