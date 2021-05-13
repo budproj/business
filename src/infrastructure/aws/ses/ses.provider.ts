@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { SES } from 'aws-sdk'
+import { SendEmailRequest } from 'aws-sdk/clients/ses'
 import { InjectAwsService } from 'nest-aws-sdk'
 
 import { EmailProviderInterface } from '@adapters/email/interface/email-provider.interface'
@@ -20,6 +21,29 @@ export class AWSSESProvider implements EmailProviderInterface {
   }
 
   public async send(): Promise<void> {
-    console.log('ok')
+    const parameters = this.buildEmailParams()
+
+    await this.remote.sendEmail(parameters).promise()
+  }
+
+  private buildEmailParams(): SendEmailRequest {
+    return {
+      Source: this.config.sourceEmail,
+      Destination: {
+        ToAddresses: ['delucca@pm.me'],
+      },
+      Message: {
+        Body: {
+          Text: {
+            Charset: 'UTF-8',
+            Data: 'teste',
+          },
+        },
+        Subject: {
+          Charset: 'UTF-8',
+          Data: 'Test email',
+        },
+      },
+    }
   }
 }
