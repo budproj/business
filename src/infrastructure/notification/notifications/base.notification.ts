@@ -1,7 +1,7 @@
 import { Activity } from '@adapters/activity/activities/base.activity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
-import { NotificationChannel } from '@infrastructure/notification/channels/channel.interface'
 import { Notification } from '@infrastructure/notification/interfaces/notification.interface'
+import { ChannelHashmap } from '@infrastructure/notification/types/channel-hashmap.type'
 import { NotificationData } from '@infrastructure/notification/types/notification-data.type'
 import { NotificationMetadata } from '@infrastructure/notification/types/notification-metadata.type'
 
@@ -18,7 +18,7 @@ export abstract class BaseNotification<
 
   protected constructor(
     protected readonly activity: A,
-    protected readonly channels: Record<string, NotificationChannel>,
+    protected readonly channels: ChannelHashmap,
     protected readonly core: CorePortsProvider,
     notificationType: string,
   ) {

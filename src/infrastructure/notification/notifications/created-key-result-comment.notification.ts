@@ -7,9 +7,10 @@ import {
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CorePortsProvider } from '@core/ports/ports.provider'
-import { NotificationChannel } from '@infrastructure/notification/channels/channel.interface'
 import { EmailNotificationChannel } from '@infrastructure/notification/channels/email/email.channel'
+import { EmailNotificationChannelMetadata } from '@infrastructure/notification/channels/email/metadata.type'
 import { BaseNotification } from '@infrastructure/notification/notifications/base.notification'
+import { ChannelHashmap } from '@infrastructure/notification/types/channel-hashmap.type'
 import { NotificationMetadata } from '@infrastructure/notification/types/notification-metadata.type'
 
 type CreatedKeyResultCommentNotificationData = {
@@ -25,10 +26,12 @@ type OwnerNotificationData = {
 
 type AuthorNotificationData = {
   fullName: string
+  picture: string
 }
 
 type KeyResultNotificationData = {
   title: string
+  confidenceColor: string
 }
 
 type CommentNotificationData = {
@@ -55,7 +58,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
 
   constructor(
     activity: CreatedKeyResultCommentActivity,
-    channels: Record<string, NotificationChannel>,
+    channels: ChannelHashmap,
     core: CorePortsProvider,
   ) {
     super(activity, channels, core, CreatedKeyResultCommentNotification.notificationType)
@@ -67,18 +70,12 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     }
   }
 
-  static getKeyResultData(keyResult: KeyResultInterface): KeyResultNotificationData {
-    return {
-      title: keyResult.title,
-    }
-  }
-
   public async prepare(): Promise<void> {
     const { owner, keyResult } = await this.getRelatedData(this.activity.data.keyResultId)
 
     const data = {
       owner: CreatedKeyResultCommentNotification.getOwnerData(owner),
-      keyResult: CreatedKeyResultCommentNotification.getKeyResultData(keyResult),
+      keyResult: await this.getKeyResultData(keyResult),
       author: await this.getAuthorData(),
       comment: this.getCommentData(),
     }
@@ -100,12 +97,21 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
 
     const recipients = EmailNotificationChannel.buildRecipientsFromUsers([metadata.keyResultOwner])
 
-    const emailMetadata = {
+    const emailMetadata: EmailNotificationChannelMetadata = {
       ...metadata,
       recipients,
+      template: 'NewKeyResultComment',
+    }
+    const emailData = {
+      ownerFirstName: data.owner.firstName,
+      authorFullName: data.author.fullName,
+      authorPictureURL: data.author.picture,
+      keyResultTitle: data.keyResult.title,
+      keyResultConfidenceTagColor: data.keyResult.confidenceColor,
+      keyResultComment: data.comment.content,
     }
 
-    await this.channels.email.dispatch(data, emailMetadata)
+    await this.channels.email.dispatch(emailData, emailMetadata)
   }
 
   private async getRelatedData(keyResultID: string): Promise<RelatedData> {
@@ -128,12 +134,27 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
 
     return {
       fullName,
+      picture: this.activity.context.user.picture,
     }
   }
 
   private getCommentData(): CommentNotificationData {
     return {
       content: this.activity.data.text,
+    }
+  }
+
+  private async getKeyResultData(
+    keyResult: KeyResultInterface,
+  ): Promise<KeyResultNotificationData> {
+    const confidenceColor = await this.core.dispatchCommand<string>(
+      'get-key-result-confidence-color',
+      keyResult,
+    )
+
+    return {
+      confidenceColor,
+      title: keyResult.title,
     }
   }
 }

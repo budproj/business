@@ -4,6 +4,7 @@ import { CoreProvider } from '@core/core.provider'
 import { GetKeyResultCheckInCommand } from '@core/ports/commands/get-key-result-check-in.command'
 import { GetKeyResultCommentTeamCommand } from '@core/ports/commands/get-key-result-comment-team.command'
 import { GetKeyResultCommentCommand } from '@core/ports/commands/get-key-result-comment.command'
+import { GetKeyResultConfidenceColorCommand } from '@core/ports/commands/get-key-result-confidence-color.command'
 import { GetKeyResultTeamCommand } from '@core/ports/commands/get-key-result-team.command'
 import { GetUserCommand } from '@core/ports/commands/get-user'
 import { GetUserFullNameCommand } from '@core/ports/commands/get-user-full-name'
@@ -56,6 +57,7 @@ export type CommandType =
   | 'get-user-team-tree'
   | 'get-key-result-comment'
   | 'get-user-full-name'
+  | 'get-key-result-confidence-color'
 
 @Injectable()
 export class CommandFactory {
@@ -85,6 +87,7 @@ export class CommandFactory {
     'get-user-team-tree': GetUserTeamTreeCommand,
     'get-key-result-comment': GetKeyResultCommentCommand,
     'get-user-full-name': GetUserFullNameCommand,
+    'get-key-result-confidence-color': GetKeyResultConfidenceColorCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}

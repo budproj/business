@@ -1,16 +1,18 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { SES } from 'aws-sdk'
-import { SendEmailRequest } from 'aws-sdk/clients/ses'
+import { SendTemplatedEmailRequest } from 'aws-sdk/clients/ses'
 import { InjectAwsService } from 'nest-aws-sdk'
 
-import { EmailProviderInterface } from '@adapters/email/interface/email-provider.interface'
+import { EmailProviderInterface } from '@adapters/email/interface/provider.interface'
+import { EmailData } from '@adapters/email/types/data.type'
+import { EmailMetadata } from '@adapters/email/types/metadata.type'
 import { AWSSESConfigInterface } from '@config/aws/aws.interface'
 import { AWSConfigProvider } from '@config/aws/aws.provider'
 
 @Injectable()
 export class AWSSESProvider implements EmailProviderInterface {
+  private readonly logger = new Logger(AWSSESProvider.name)
   private readonly config: AWSSESConfigInterface
-  private readonly urlPrefix: string
 
   constructor(
     @InjectAwsService(SES)
@@ -20,30 +22,28 @@ export class AWSSESProvider implements EmailProviderInterface {
     this.config = awsConfig.ses
   }
 
-  public async send(): Promise<void> {
-    const parameters = this.buildEmailParams()
+  public async send(data: EmailData, metadata: EmailMetadata): Promise<void> {
+    const parameters = this.buildTemplateEmailParams(data, metadata)
 
-    await this.remote.sendEmail(parameters).promise()
+    this.logger.debug({
+      parameters,
+      message: 'Sending e-mail with AWS SES',
+    })
+
+    await this.remote.sendTemplatedEmail(parameters).promise()
   }
 
-  private buildEmailParams(): SendEmailRequest {
+  private buildTemplateEmailParams(
+    data: EmailData,
+    metadata: EmailMetadata,
+  ): SendTemplatedEmailRequest {
     return {
       Source: this.config.sourceEmail,
       Destination: {
-        ToAddresses: ['delucca@pm.me'],
+        ToAddresses: metadata.recipients,
       },
-      Message: {
-        Body: {
-          Text: {
-            Charset: 'UTF-8',
-            Data: 'teste',
-          },
-        },
-        Subject: {
-          Charset: 'UTF-8',
-          Data: 'Test email',
-        },
-      },
+      Template: metadata.template,
+      TemplateData: JSON.stringify(data),
     }
   }
 }
