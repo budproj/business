@@ -3,7 +3,7 @@ import { RelayGraphQLAdapter } from '../adapters/relay/relay.adapter'
 export abstract class BaseGraphQLResolver {
   protected readonly relay: RelayGraphQLAdapter
 
-  constructor() {
+  protected constructor() {
     this.relay = new RelayGraphQLAdapter()
   }
 }

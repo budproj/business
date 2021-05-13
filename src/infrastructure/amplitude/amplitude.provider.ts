@@ -35,7 +35,7 @@ export class AmplitudeProvider implements ActivityDispatcher {
     const event = this.events.buildEventForActivity(activity)
     if (!event) return
 
-    await event.loadProperties()
+    await event.prepare()
     const marshalledEvent = event.marshalEvent()
 
     this.logger.log({

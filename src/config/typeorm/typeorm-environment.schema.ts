@@ -4,7 +4,7 @@ export const TypeORMEnvironmentSchema = Joi.object({
   TYPEORM_HOST: Joi.string().required(),
   TYPEORM_USERNAME: Joi.string().required(),
   TYPEORM_PASSWORD: Joi.string().required(),
-  TYPEORM_CONNECTION: Joi.string().valid('postgres').default('postgres'),
+  TYPEORM_CONNECTION_TYPE: Joi.string().valid('postgres').default('postgres'),
   TYPEORM_PORT: Joi.number().default(5432),
   TYPEORM_DATABASE: Joi.string().default('business'),
   TYPEORM_ENTITIES: Joi.string().default('dist/src/**/*.orm-entity.js'),

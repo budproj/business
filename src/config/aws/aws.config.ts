@@ -15,5 +15,9 @@ export const awsConfig = registerAs(
     s3: {
       bucketName: process.env.AWS_S3_BUCKET_NAME,
     },
+
+    ses: {
+      sourceEmail: process.env.AWS_SES_SOURCE_EMAIL,
+    },
   }),
 )

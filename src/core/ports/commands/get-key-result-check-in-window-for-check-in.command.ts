@@ -7,7 +7,7 @@ import { Command } from './base.command'
 type WindowUnit = 'minutes'
 type WindowHandler = (dateLeft: Date, dateRight: Date) => number
 
-export class GetCheckInWindowForCheckInCommand extends Command<number> {
+export class GetKeyResultCheckInWindowForCheckInCommand extends Command<number> {
   private readonly differenceHandlers: Record<WindowUnit, WindowHandler> = {
     minutes: differenceInMinutes,
   }
@@ -23,8 +23,7 @@ export class GetCheckInWindowForCheckInCommand extends Command<number> {
     const previousDate = previousCheckIn?.createdAt ?? keyResult.createdAt
 
     const differenceHandler = this.differenceHandlers[timeUnit]
-    const difference = differenceHandler(nextDate, previousDate)
 
-    return difference
+    return differenceHandler(nextDate, previousDate)
   }
 }

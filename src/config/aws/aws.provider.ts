@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
-import { AWSCredentialsConfigInterface, AWSS3ConfigInterface } from './aws.interface'
+import {
+  AWSCredentialsConfigInterface,
+  AWSS3ConfigInterface,
+  AWSSESConfigInterface,
+} from './aws.interface'
 
 @Injectable()
 export class AWSConfigProvider {
@@ -17,5 +21,9 @@ export class AWSConfigProvider {
 
   get s3(): AWSS3ConfigInterface {
     return this.configService.get<AWSS3ConfigInterface>('aws.s3')
+  }
+
+  get ses(): AWSSESConfigInterface {
+    return this.configService.get<AWSSESConfigInterface>('aws.ses')
   }
 }

@@ -21,7 +21,7 @@
     "lint:staged": "lint-staged",
     "lint:fix": "npm run lint -- --fix",
     "typeorm": "run-s clean compile && npm run typeorm:run --",
-    "typeorm:run": "ts-node -r tsconfig-paths/register ./node_modules/.bin/typeorm --config src/config/database/config",
+    "typeorm:run": "ts-node -r tsconfig-paths/register ./node_modules/.bin/typeorm --config src/config/typeorm/typeorm-cli.config",
     "migration:generate": "npm run typeorm migration:generate -- -n",
     "migration:run": "npm run typeorm migration:run",
     "migration:revert": "npm run typeorm migration:revert",

@@ -1,44 +1,45 @@
 import { registerAs } from '@nestjs/config'
-import { SnakeNamingStrategy } from 'typeorm-naming-strategies'
 
 import { TypeORMConfigInterface } from './typeorm.interface'
 
 export const typeormConfig = registerAs(
   'typeorm',
-  (): TypeORMConfigInterface => ({
-    type: process.env.TYPEORM_CONNECTION,
+  (): TypeORMConfigInterface => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const cliConfig = require('./typeorm-cli.config')
 
-    endpoint: {
-      host: process.env.TYPEORM_HOST,
-      port: Number.parseInt(process.env.TYPEORM_PORT, 10),
-      database: process.env.TYPEORM_DATABASE,
-    },
+    return {
+      type: cliConfig.type,
 
-    authentication: {
-      user: process.env.TYPEORM_USERNAME,
-      password: process.env.TYPEORM_PASSWORD,
-    },
-
-    pattern: {
-      file: {
-        entities: process.env.TYPEORM_ENTITIES.split(','),
-        migrations: process.env.TYPEORM_MIGRATIONS.split(','),
+      endpoint: {
+        host: cliConfig.host,
+        port: cliConfig.port,
+        database: cliConfig.database,
       },
 
-      directory: {
-        migrations: process.env.TYPEORM_MIGRATIONS_DIR,
+      authentication: {
+        user: cliConfig.username,
+        password: cliConfig.password,
       },
-    },
 
-    logging: {
-      enabled: process.env.TYPEORM_LOGGING_ENABLED === 'true',
-    },
+      pattern: {
+        file: {
+          entities: cliConfig.entities,
+          migrations: cliConfig.migrations,
+        },
 
-    conventions: {
-      naming:
-        process.env.TYPEORM_CONVENTION_NAMING_ENABLED === 'true'
-          ? new SnakeNamingStrategy()
-          : undefined,
-    },
-  }),
+        directory: {
+          migrations: cliConfig.cli.migrationsDir,
+        },
+      },
+
+      logging: {
+        enabled: cliConfig.logging,
+      },
+
+      conventions: {
+        naming: cliConfig.namingStrategy,
+      },
+    }
+  },
 )

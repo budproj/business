@@ -2,10 +2,8 @@ import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-c
 
 import { Command } from './base.command'
 
-export class GetCheckInDeltaProgressCommand extends Command<number> {
+export class GetKeyResultCheckInDeltaProgressCommand extends Command<number> {
   public async execute(checkIn: KeyResultCheckIn): Promise<number> {
-    const progressIncrease = await this.core.keyResult.getCheckInProgressIncrease(checkIn)
-
-    return progressIncrease
+    return this.core.keyResult.getCheckInProgressIncrease(checkIn)
   }
 }

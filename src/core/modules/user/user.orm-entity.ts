@@ -18,6 +18,9 @@ export class User extends CoreEntity implements UserInterface {
   @Column()
   public authzSub: string
 
+  @Column({ type: 'citext', unique: true })
+  public email: string
+
   @UpdateDateColumn()
   public updatedAt: Date
 

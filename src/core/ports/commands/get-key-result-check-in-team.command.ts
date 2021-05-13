@@ -3,11 +3,9 @@ import { Team } from '@core/modules/team/team.orm-entity'
 
 import { Command } from './base.command'
 
-export class GetCheckInTeamCommand extends Command<Team> {
+export class GetKeyResultCheckInTeamCommand extends Command<Team> {
   public async execute(checkIn: KeyResultCheckIn): Promise<Team> {
     const keyResult = await this.core.keyResult.getFromKeyResultCheckInID(checkIn.id)
-    const keyResultTeam = await this.core.team.getFromIndexes({ id: keyResult.teamId })
-
-    return keyResultTeam
+    return this.core.team.getFromIndexes({ id: keyResult.teamId })
   }
 }

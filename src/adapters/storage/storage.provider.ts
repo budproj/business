@@ -6,8 +6,6 @@ export class StorageAdapterProvider {
   constructor(private readonly repository: RepositoryStorageInterface) {}
 
   public async uploadFile(file: FileStorageInterface): Promise<RemoteFileStorageInterface> {
-    const uploadedFile = this.repository.upload(file)
-
-    return uploadedFile
+    return this.repository.upload(file)
   }
 }

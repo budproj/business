@@ -42,7 +42,7 @@ export class CreatedKeyResultCommentAmplitudeEvent extends BaseAmplitudeEvent<
     super(activity, CreatedKeyResultCommentAmplitudeEvent.amplitudeEventType)
   }
 
-  public async loadProperties(): Promise<void> {
+  public async prepare(): Promise<void> {
     const { team, cycle, company } = await this.getRelatedData()
 
     this.properties = {
