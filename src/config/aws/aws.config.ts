@@ -17,7 +17,10 @@ export const awsConfig = registerAs(
     },
 
     ses: {
-      sourceEmail: process.env.AWS_SES_SOURCE_EMAIL,
+      source: {
+        name: process.env.AWS_SES_SOURCE_NAME,
+        email: process.env.AWS_SES_SOURCE_EMAIL,
+      },
     },
   }),
 )
