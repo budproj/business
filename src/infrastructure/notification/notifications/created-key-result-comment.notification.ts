@@ -21,10 +21,12 @@ type CreatedKeyResultCommentNotificationData = {
 }
 
 type OwnerNotificationData = {
+  id: string
   firstName: string
 }
 
 type AuthorNotificationData = {
+  id: string
   fullName: string
   picture: string
 }
@@ -66,6 +68,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
 
   static getOwnerData(owner: UserInterface): OwnerNotificationData {
     return {
+      id: owner.id,
       firstName: owner.firstName,
     }
   }
@@ -89,6 +92,9 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
   }
 
   public async dispatch(): Promise<void> {
+    const isOwnerAuthor = this.isOwnerAuthor()
+    if (isOwnerAuthor) return
+
     await this.dispatchEmail()
   }
 
@@ -134,6 +140,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
 
     return {
       fullName,
+      id: this.activity.context.user.id,
       picture: this.activity.context.user.picture,
     }
   }
@@ -156,5 +163,9 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       confidenceColor,
       title: keyResult.title,
     }
+  }
+
+  private isOwnerAuthor(): boolean {
+    return this.data.owner.id === this.data.author.id
   }
 }
