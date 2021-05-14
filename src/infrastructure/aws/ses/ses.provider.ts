@@ -38,12 +38,16 @@ export class AWSSESProvider implements EmailProviderInterface {
     metadata: EmailMetadata,
   ): SendTemplatedEmailRequest {
     return {
-      Source: this.config.sourceEmail,
+      Source: this.getNamedSource(),
       Destination: {
         ToAddresses: metadata.recipients,
       },
       Template: metadata.template,
       TemplateData: JSON.stringify(data),
     }
+  }
+
+  private getNamedSource() {
+    return `"${this.config.source.name}" <${this.config.source.email}>`
   }
 }

@@ -15,5 +15,10 @@ export interface AWSS3ConfigInterface {
 }
 
 export interface AWSSESConfigInterface {
-  sourceEmail: string
+  source: AWSSESSourceConfigInterface
+}
+
+export interface AWSSESSourceConfigInterface {
+  name: string
+  email: string
 }
