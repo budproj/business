@@ -1,10 +1,13 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { uniqBy } from 'lodash'
+import { uniqBy, sum } from 'lodash'
 import { Any, FindConditions } from 'typeorm'
 
+import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
+import { DEFAULT_CONFIDENCE } from '@core/modules/key-result/check-in/key-result-check-in.constants'
+import { KeyResultType } from '@core/modules/key-result/enums/key-result-type.enum'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { ObjectiveProvider } from '@core/modules/objective/objective.provider'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
@@ -28,6 +31,7 @@ import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
 @Injectable()
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
   private readonly specifications: KeyResultSpecification = new KeyResultSpecification()
+  private readonly confidenceTagAdapter = new ConfidenceTagAdapter()
 
   constructor(
     public readonly keyResultCommentProvider: KeyResultCommentProvider,
@@ -230,50 +234,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
   public async getCheckInProgress(keyResultCheckIn: KeyResultCheckIn): Promise<number> {
     const keyResult = await this.getOne({ id: keyResultCheckIn.keyResultId })
-    const normalizedCheckIn = this.keyResultCheckInProvider.transformCheckInToRelativePercentage(
-      keyResult,
-      keyResultCheckIn,
-    )
-
-    return normalizedCheckIn.value
-  }
-
-  public async getCheckInProgressIncrease(keyResultCheckIn: KeyResultCheckIn): Promise<number> {
-    const keyResult = await this.getOne({ id: keyResultCheckIn.keyResultId })
-    const previousCheckIn = await this.getParentCheckInFromCheckIn(keyResultCheckIn)
-
-    const normalizedCurrentCheckIn = this.keyResultCheckInProvider.transformCheckInToRelativePercentage(
-      keyResult,
-      keyResultCheckIn,
-    )
-    if (!previousCheckIn) return normalizedCurrentCheckIn.value
-
-    const normalizedPreviousCheckIn = this.keyResultCheckInProvider.transformCheckInToRelativePercentage(
-      keyResult,
-      previousCheckIn,
-    )
-
-    return this.keyResultCheckInProvider.calculateValueDifference(
-      normalizedPreviousCheckIn,
-      normalizedCurrentCheckIn,
-    )
-  }
-
-  public async getCheckInConfidenceIncrease(keyResultCheckIn: KeyResultCheckIn): Promise<number> {
-    const previousCheckIn = await this.getParentCheckInFromCheckIn(keyResultCheckIn)
-
-    return this.keyResultCheckInProvider.calculateConfidenceDifference(
-      previousCheckIn,
-      keyResultCheckIn,
-    )
-  }
-
-  public async getCheckInValueIncrease(keyResultCheckIn: KeyResultCheckIn): Promise<number> {
-    const keyResult = await this.getOne({ id: keyResultCheckIn.keyResultId })
-    const previousCheckIn = await this.getParentCheckInFromCheckIn(keyResultCheckIn)
-    if (!previousCheckIn) return keyResultCheckIn.value - keyResult.initialValue
-
-    return keyResultCheckIn.value - previousCheckIn.value
+    return this.keyResultCheckInProvider.getProgressFromValue(keyResult, keyResultCheckIn?.value)
   }
 
   public async getLatestCheckInForKeyResultAtDate(
@@ -285,19 +246,16 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   }
 
   public calculateKeyResultCheckInListAverageProgress(
-    keyResultCheckInList: KeyResultCheckIn[],
+    keyResultCheckInList: Array<KeyResultCheckIn | undefined>,
     keyResults: KeyResult[],
   ) {
-    const normalizedKeyResultCheckInList = keyResultCheckInList.map((keyResultCheckIn, index) =>
-      this.keyResultCheckInProvider.normalizeCheckInToPercentage(
-        keyResults[index],
-        keyResultCheckIn,
-      ),
+    if (keyResultCheckInList.length === 0) return 0
+
+    const progressList = keyResultCheckInList.map((checkIn, index) =>
+      this.keyResultCheckInProvider.getProgressFromValue(keyResults[index], checkIn?.value),
     )
 
-    return this.keyResultCheckInProvider.calculateAverageValueFromCheckInList(
-      normalizedKeyResultCheckInList,
-    )
+    return sum(progressList) / keyResultCheckInList.length
   }
 
   public async getLatestCheckInForTeam(team: TeamInterface) {
@@ -354,6 +312,55 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     indexes: Partial<KeyResultCommentInterface>,
   ): Promise<KeyResultComment> {
     return this.keyResultCommentProvider.getOne(indexes)
+  }
+
+  public getCheckInDeltaValue(
+    checkIn: KeyResultCheckIn,
+    keyResult: KeyResult,
+    parent?: KeyResultCheckIn,
+  ): number {
+    const previousValue = parent?.value ?? keyResult.initialValue
+    const delta = checkIn.value - previousValue
+
+    return keyResult.type === KeyResultType.DESCENDING ? delta * -1 : delta
+  }
+
+  public getCheckInDeltaProgress(
+    checkIn: KeyResultCheckIn,
+    keyResult: KeyResult,
+    parent?: KeyResultCheckIn,
+  ): number {
+    const currentProgress = this.keyResultCheckInProvider.getProgressFromValue(
+      keyResult,
+      checkIn.value,
+    )
+    const previousProgress = this.keyResultCheckInProvider.getProgressFromValue(
+      keyResult,
+      parent?.value,
+    )
+    const delta = currentProgress - previousProgress
+
+    return keyResult.type === KeyResultType.DESCENDING ? delta * -1 : delta
+  }
+
+  public getCheckInDeltaConfidence(
+    checkIn: KeyResultCheckIn,
+    keyResult: KeyResult,
+    parent?: KeyResultCheckIn,
+  ): number {
+    const previousConfidence = parent?.confidence ?? DEFAULT_CONFIDENCE
+    return checkIn.confidence - previousConfidence
+  }
+
+  public getCheckInDeltaConfidenceTag(
+    checkIn: KeyResultCheckIn,
+    _keyResult: KeyResult,
+    parent?: KeyResultCheckIn,
+  ): number {
+    return this.confidenceTagAdapter.differenceInConfidenceTagIndexes(
+      parent?.confidence,
+      checkIn.confidence,
+    )
   }
 
   protected async protectCreationQuery(

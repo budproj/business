@@ -114,17 +114,25 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
   }
 
   private async getMinutesSinceLastCheckIn(): Promise<number> {
-    return this.core.dispatchCommand<number>('get-check-in-window-for-check-in', this.activity.data)
+    return this.core.dispatchCommand<number>(
+      'get-key-result-check-in-window-for-check-in',
+      this.activity.data,
+    )
   }
 
   private async getDeltaProgress(): Promise<number> {
-    return this.core.dispatchCommand<number>('get-check-in-delta-progress', this.activity.data)
+    return this.core.dispatchCommand<number>(
+      'get-key-result-check-in-delta',
+      this.activity.data,
+      'progress',
+    )
   }
 
   private async getDeltaConfidenceTag(): Promise<number> {
     return this.core.dispatchCommand<number>(
-      'get-check-in-delta-confidence-tag',
+      'get-key-result-check-in-delta',
       this.activity.data,
+      'confidenceTag',
     )
   }
 
@@ -133,7 +141,7 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
   }
 
   private async getTeam(): Promise<Team> {
-    return this.core.dispatchCommand<Team>('get-check-in-team', this.activity.data)
+    return this.core.dispatchCommand<Team>('get-key-result-check-in-team', this.activity.data)
   }
 
   private async getCompany(team: Team): Promise<Team> {

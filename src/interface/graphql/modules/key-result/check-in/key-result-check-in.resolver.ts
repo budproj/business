@@ -167,7 +167,11 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching percentage progress increase for key result check-in',
     })
 
-    return this.core.keyResult.getCheckInProgressIncrease(keyResultCheckIn)
+    return this.corePorts.dispatchCommand<number>(
+      'get-key-result-check-in-delta',
+      keyResultCheckIn,
+      'progress',
+    )
   }
 
   @ResolveField('confidenceIncrease', () => Int)
@@ -179,7 +183,11 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching absolute confidence increase for key result check-in',
     })
 
-    return this.core.keyResult.getCheckInConfidenceIncrease(keyResultCheckIn)
+    return this.corePorts.dispatchCommand<number>(
+      'get-key-result-check-in-delta',
+      keyResultCheckIn,
+      'confidence',
+    )
   }
 
   @ResolveField('valueIncrease', () => Float)
@@ -191,7 +199,11 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching value increase for key result check-in',
     })
 
-    return this.core.keyResult.getCheckInValueIncrease(keyResultCheckIn)
+    return this.corePorts.dispatchCommand<number>(
+      'get-key-result-check-in-delta',
+      keyResultCheckIn,
+      'value',
+    )
   }
 
   @ResolveField('user', () => UserGraphQLNode)
