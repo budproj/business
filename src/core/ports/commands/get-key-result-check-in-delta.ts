@@ -12,10 +12,13 @@ type TypeHandler = (
 
 export class GetKeyResultCheckInDeltaCommand extends Command<number> {
   private readonly typeHandlers: Record<DeltaType, TypeHandler> = {
-    value: this.core.keyResult.getCheckInDeltaValue,
-    progress: this.core.keyResult.getCheckInDeltaProgress,
-    confidence: this.core.keyResult.getCheckInDeltaConfidence,
-    confidenceTag: this.core.keyResult.getCheckInDeltaConfidenceTag,
+    value: (...handlerArguments) => this.core.keyResult.getCheckInDeltaValue(...handlerArguments),
+    progress: (...handlerArguments) =>
+      this.core.keyResult.getCheckInDeltaProgress(...handlerArguments),
+    confidence: (...handlerArguments) =>
+      this.core.keyResult.getCheckInDeltaConfidence(...handlerArguments),
+    confidenceTag: (...handlerArguments) =>
+      this.core.keyResult.getCheckInDeltaConfidenceTag(...handlerArguments),
   }
 
   public async execute(checkIn: KeyResultCheckIn, type: DeltaType): Promise<number> {
