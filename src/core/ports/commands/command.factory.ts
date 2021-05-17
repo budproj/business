@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 import { CoreProvider } from '@core/core.provider'
+import { GetKeyResultCheckInDeltaCommand } from '@core/ports/commands/get-key-result-check-in-delta'
 import { GetKeyResultCheckInCommand } from '@core/ports/commands/get-key-result-check-in.command'
 import { GetKeyResultCommentTeamCommand } from '@core/ports/commands/get-key-result-comment-team.command'
 import { GetKeyResultCommentCommand } from '@core/ports/commands/get-key-result-comment.command'
@@ -15,8 +16,6 @@ import { Command } from './base.command'
 import { CreateKeyResultCheckInCommand } from './create-key-result-check-in.command'
 import { CreateKeyResultCommentCommand } from './create-key-result-comment.command'
 import { GetCycleCommand } from './get-cycle.command'
-import { GetKeyResultCheckInDeltaConfidenceTagCommand } from './get-key-result-check-in-delta-confidence-tag.command'
-import { GetKeyResultCheckInDeltaProgressCommand } from './get-key-result-check-in-delta-progress.command'
 import { GetKeyResultCheckInListCommand } from './get-key-result-check-in-list.command'
 import { GetKeyResultCheckInTeamCommand } from './get-key-result-check-in-team.command'
 import { GetKeyResultCheckInWindowForCheckInCommand } from './get-key-result-check-in-window-for-check-in.command'
@@ -42,12 +41,10 @@ export type CommandType =
   | 'get-key-result'
   | 'get-team-owner'
   | 'get-user-companies'
-  | 'get-check-in-window-for-check-in'
+  | 'get-key-result-check-in-window-for-check-in'
   | 'get-cycle'
   | 'get-key-result-cycle'
-  | 'get-check-in-delta-progress'
-  | 'get-check-in-delta-confidence-tag'
-  | 'get-check-in-team'
+  | 'get-key-result-check-in-team'
   | 'get-team-company'
   | 'get-key-result-comment-team'
   | 'update-key-result'
@@ -58,6 +55,7 @@ export type CommandType =
   | 'get-key-result-comment'
   | 'get-user-full-name'
   | 'get-key-result-confidence-color'
+  | 'get-key-result-check-in-delta'
 
 @Injectable()
 export class CommandFactory {
@@ -72,12 +70,10 @@ export class CommandFactory {
     'get-key-result': GetKeyResultCommand,
     'get-team-owner': GetTeamOwnerCommand,
     'get-user-companies': GetUserCompaniesCommand,
-    'get-check-in-window-for-check-in': GetKeyResultCheckInWindowForCheckInCommand,
+    'get-key-result-check-in-window-for-check-in': GetKeyResultCheckInWindowForCheckInCommand,
     'get-cycle': GetCycleCommand,
     'get-key-result-cycle': GetKeyResultCycleCommand,
-    'get-check-in-delta-progress': GetKeyResultCheckInDeltaProgressCommand,
-    'get-check-in-delta-confidence-tag': GetKeyResultCheckInDeltaConfidenceTagCommand,
-    'get-check-in-team': GetKeyResultCheckInTeamCommand,
+    'get-key-result-check-in-team': GetKeyResultCheckInTeamCommand,
     'get-team-company': GetTeamCompanyCommand,
     'get-key-result-comment-team': GetKeyResultCommentTeamCommand,
     'update-key-result': UpdateKeyResultCommand,
@@ -88,6 +84,7 @@ export class CommandFactory {
     'get-key-result-comment': GetKeyResultCommentCommand,
     'get-user-full-name': GetUserFullNameCommand,
     'get-key-result-confidence-color': GetKeyResultConfidenceColorCommand,
+    'get-key-result-check-in-delta': GetKeyResultCheckInDeltaCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}

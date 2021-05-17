@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToOne, OneToMany, RelationId, UpdateDateColumn } from 'typeorm'
 
 import { CoreEntity } from '@core/core.orm-entity'
+import { KeyResultType } from '@core/modules/key-result/enums/key-result-type.enum'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
@@ -23,6 +24,9 @@ export class KeyResult extends CoreEntity implements KeyResultInterface {
 
   @Column({ type: 'simple-enum', enum: KeyResultFormat, default: KeyResultFormat.NUMBER })
   public format: KeyResultFormat
+
+  @Column({ type: 'simple-enum', enum: KeyResultType, default: KeyResultType.ASCENDING })
+  public type: KeyResultType
 
   @UpdateDateColumn()
   public updatedAt: Date

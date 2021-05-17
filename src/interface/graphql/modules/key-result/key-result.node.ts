@@ -1,9 +1,11 @@
 import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
 
 import { KeyResultFormat } from '@core/modules/key-result/enums/key-result-format.enum'
+import { KeyResultType } from '@core/modules/key-result/enums/key-result-type.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
+import { KeyResultTypeGraphQLEnum } from '@interface/graphql/modules/key-result/enums/key-result-type.enum'
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
@@ -34,6 +36,12 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
     description: 'The format of the key result',
   })
   public readonly format!: KeyResultFormat
+
+  @Field(() => KeyResultTypeGraphQLEnum, {
+    complexity: 0,
+    description: 'The type of the key result',
+  })
+  public readonly type: KeyResultType
 
   @Field({ complexity: 0, description: 'The last update date of the key result' })
   public readonly updatedAt!: Date
