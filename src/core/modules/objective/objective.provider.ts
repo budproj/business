@@ -33,6 +33,20 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     super(ObjectiveProvider.name, repository)
   }
 
+  static buildDefaultStatus(
+    date?: Date,
+    progress: number = DEFAULT_PROGRESS,
+    confidence: number = DEFAULT_CONFIDENCE,
+  ) {
+    date ??= new Date()
+
+    return {
+      progress,
+      confidence,
+      createdAt: date,
+    }
+  }
+
   public async getFromOwner(
     user: UserInterface,
     filters?: FindConditions<Objective>,
@@ -80,9 +94,8 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
 
   public async getCurrentStatus(objective: ObjectiveInterface): Promise<ObjectiveStatus> {
     const date = new Date()
-    const objectiveStatus = await this.getStatusAtDate(date, objective)
 
-    return objectiveStatus
+    return this.getStatusAtDate(date, objective)
   }
 
   public async getStatusAtDate(
@@ -92,9 +105,48 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     const keyResults = await this.keyResultProvider.getFromObjective(objective)
     if (!keyResults || keyResults.length === 0) return
 
-    const objectiveStatus = await this.buildStatusAtDate(date, keyResults)
+    return this.buildStatusAtDate(date, keyResults)
+  }
 
-    return objectiveStatus
+  public async getObjectiveProgressIncreaseSinceLastWeek(
+    objective: ObjectiveInterface,
+  ): Promise<number> {
+    const progress = await this.getCurrentProgressForObjective(objective)
+    const lastWeekProgress = await this.getLastWeekProgressForObjective(objective)
+
+    return progress - lastWeekProgress
+  }
+
+  public async getFromIDList(
+    ids: string[],
+    indexes?: Partial<ObjectiveInterface>,
+    options?: GetOptions<Objective>,
+  ): Promise<Objective[]> {
+    const selector = {
+      ...indexes,
+      id: Any(ids),
+    }
+
+    return this.repository.find({
+      ...options,
+      where: selector,
+    })
+  }
+
+  public async getActiveFromIDList(
+    ids: string[],
+    _indexes?: Partial<ObjectiveInterface>,
+    options?: GetOptions<Objective>,
+  ): Promise<Objective[]> {
+    return this.getFromIDListAndCycleActiveStatus(ids, true, options)
+  }
+
+  public async getNotActiveFromIDList(
+    ids: string[],
+    _indexes?: Partial<ObjectiveInterface>,
+    options?: GetOptions<Objective>,
+  ): Promise<Objective[]> {
+    return this.getFromIDListAndCycleActiveStatus(ids, false, options)
   }
 
   public async getFromTeams(
@@ -113,23 +165,10 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
       id: Any(objectiveIds),
     }
 
-    const objectives = await this.repository.find({
+    return this.repository.find({
       ...options,
       where: whereSelector,
     })
-
-    return objectives
-  }
-
-  public async getObjectiveProgressIncreaseSinceLastWeek(
-    objective: ObjectiveInterface,
-  ): Promise<number> {
-    const progress = await this.getCurrentProgressForObjective(objective)
-    const lastWeekProgress = await this.getLastWeekProgressForObjective(objective)
-
-    const deltaProgress = progress - lastWeekProgress
-
-    return deltaProgress
   }
 
   protected async protectCreationQuery(
@@ -144,38 +183,21 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     const keyResultStatusPromises = keyResults.map(async (keyResult) =>
       this.keyResultProvider.getLatestCheckInForKeyResultAtDate(keyResult, date),
     )
-    const keyResultStatuss = await Promise.all(keyResultStatusPromises)
-    const latestKeyResultCheckIn = maxBy(keyResultStatuss, 'createdAt')
-    if (!latestKeyResultCheckIn) return this.buildDefaultStatus(date)
+    const keyResultStatus = await Promise.all(keyResultStatusPromises)
+    const latestKeyResultCheckIn = maxBy(keyResultStatus, 'createdAt')
+    if (!latestKeyResultCheckIn) return ObjectiveProvider.buildDefaultStatus(date)
 
     const progress = this.keyResultProvider.calculateKeyResultCheckInListAverageProgress(
-      keyResultStatuss,
+      keyResultStatus,
       keyResults,
     )
-    const objectiveStatus = {
+
+    return {
       latestKeyResultCheckIn,
       progress,
-      confidence: minBy(keyResultStatuss, 'confidence').confidence,
+      confidence: minBy(keyResultStatus, 'confidence').confidence,
       createdAt: latestKeyResultCheckIn.createdAt,
     }
-
-    return objectiveStatus
-  }
-
-  private buildDefaultStatus(
-    date?: Date,
-    progress: number = DEFAULT_PROGRESS,
-    confidence: number = DEFAULT_CONFIDENCE,
-  ) {
-    date ??= new Date()
-
-    const defaultStatus = {
-      progress,
-      confidence,
-      createdAt: date,
-    }
-
-    return defaultStatus
   }
 
   private async getCurrentProgressForObjective(objective: ObjectiveInterface): Promise<number> {
@@ -191,5 +213,13 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     const lastWeekStatus = await this.getStatusAtDate(firstDayAfterLastWeek, objective)
 
     return lastWeekStatus?.progress ?? DEFAULT_PROGRESS
+  }
+
+  private async getFromIDListAndCycleActiveStatus(
+    ids: string[],
+    cycleIsActive: boolean,
+    options?: GetOptions<Objective>,
+  ): Promise<Objective[]> {
+    return this.repository.getFromCycleStatus(cycleIsActive, ids, options)
   }
 }

@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common'
 
 import { CoreProvider } from '@core/core.provider'
-import { GetKeyResultCheckInDeltaCommand } from '@core/ports/commands/get-key-result-check-in-delta'
+import { GetKeyResultCheckInDeltaCommand } from '@core/ports/commands/get-key-result-check-in-delta.command'
 import { GetKeyResultCheckInCommand } from '@core/ports/commands/get-key-result-check-in.command'
 import { GetKeyResultCommentTeamCommand } from '@core/ports/commands/get-key-result-comment-team.command'
 import { GetKeyResultCommentCommand } from '@core/ports/commands/get-key-result-comment.command'
 import { GetKeyResultConfidenceColorCommand } from '@core/ports/commands/get-key-result-confidence-color.command'
 import { GetKeyResultTeamCommand } from '@core/ports/commands/get-key-result-team.command'
-import { GetUserCommand } from '@core/ports/commands/get-user'
-import { GetUserFullNameCommand } from '@core/ports/commands/get-user-full-name'
+import { GetTeamObjectivesCommand } from '@core/ports/commands/get-team-objectives.command'
+import { GetUserFullNameCommand } from '@core/ports/commands/get-user-full-name.command'
 import { GetUserTeamTreeCommand } from '@core/ports/commands/get-user-team-tree.command'
+import { GetUserCommand } from '@core/ports/commands/get-user.command'
 import { UpdateKeyResultCommand } from '@core/ports/commands/update-key-result.command'
 
 import { Command } from './base.command'
@@ -56,6 +57,7 @@ export type CommandType =
   | 'get-user-full-name'
   | 'get-key-result-confidence-color'
   | 'get-key-result-check-in-delta'
+  | 'get-team-objectives'
 
 @Injectable()
 export class CommandFactory {
@@ -85,6 +87,7 @@ export class CommandFactory {
     'get-user-full-name': GetUserFullNameCommand,
     'get-key-result-confidence-color': GetKeyResultConfidenceColorCommand,
     'get-key-result-check-in-delta': GetKeyResultCheckInDeltaCommand,
+    'get-team-objectives': GetTeamObjectivesCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}

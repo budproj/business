@@ -2,6 +2,8 @@ import { EntityRepository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
 import { CoreEntityRepository } from '@core/core.repository'
 import { ConstraintType } from '@core/enums/contrain-type.enum'
+import { GetOptions } from '@core/interfaces/get-options'
+import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
@@ -12,6 +14,20 @@ import { Objective } from './objective.orm-entity'
 @EntityRepository(Objective)
 export class ObjectiveRepository extends CoreEntityRepository<Objective> {
   public entityName = Objective.name
+
+  public async getFromCycleStatus(
+    cycleIsActive: boolean,
+    ids: string[],
+    options?: GetOptions<Objective>,
+  ): Promise<Objective[]> {
+    return this.createQueryBuilder()
+      .leftJoin(`${Objective.name}.cycle`, Cycle.name)
+      .where(`${Objective.name}.id IN (:...ids)`, { ids })
+      .andWhere(`${Cycle.name}.active = :cycleIsActive`, { cycleIsActive })
+      .take(options.limit)
+      .offset(options.offset)
+      .getMany()
+  }
 
   protected setupTeamQuery(query: SelectQueryBuilder<Objective>) {
     return query
