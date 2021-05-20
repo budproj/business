@@ -7,7 +7,6 @@ import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
 import { DEFAULT_CONFIDENCE } from '@core/modules/key-result/check-in/key-result-check-in.constants'
-import { KeyResultType } from '@core/modules/key-result/enums/key-result-type.enum'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { ObjectiveProvider } from '@core/modules/objective/objective.provider'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
@@ -320,9 +319,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     parent?: KeyResultCheckIn,
   ): number {
     const previousValue = parent?.value ?? keyResult.initialValue
-    const delta = checkIn.value - previousValue
-
-    return keyResult.type === KeyResultType.DESCENDING ? delta * -1 : delta
+    return checkIn.value - previousValue
   }
 
   public getCheckInDeltaProgress(
@@ -338,9 +335,8 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       keyResult,
       parent?.value,
     )
-    const delta = currentProgress - previousProgress
 
-    return keyResult.type === KeyResultType.DESCENDING ? delta * -1 : delta
+    return currentProgress - previousProgress
   }
 
   public getCheckInDeltaConfidence(
