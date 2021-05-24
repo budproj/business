@@ -41,7 +41,7 @@ export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor
     return DispatchResponseToActivityInterceptor.getContext(executionContext).activity
   }
 
-  public intercept(executionContext: ExecutionContext, next: CallHandler): Observable<T> {
+  public intercept(executionContext: ExecutionContext, next: CallHandler): Observable<Promise<T>> {
     const context = DispatchResponseToActivityInterceptor.getContext(executionContext)
 
     context.activity = this.buildActivity({} as any, executionContext)
