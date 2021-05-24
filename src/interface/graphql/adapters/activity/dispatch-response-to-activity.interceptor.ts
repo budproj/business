@@ -41,12 +41,12 @@ export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor
     return DispatchResponseToActivityInterceptor.getContext(executionContext).activity
   }
 
-  public intercept(executionContext: ExecutionContext, next: CallHandler): Observable<T> {
+  public intercept(executionContext: ExecutionContext, next: CallHandler): Observable<Promise<T>> {
     const context = DispatchResponseToActivityInterceptor.getContext(executionContext)
 
     context.activity = this.buildActivity({} as any, executionContext)
 
-    return next.handle().pipe(map((data) => this.handleResult(data, executionContext)))
+    return next.handle().pipe(map(async (data) => this.handleResult(data, executionContext)))
   }
 
   private buildActivity(data: T, executionContext: ExecutionContext): Activity<T> {
@@ -59,12 +59,11 @@ export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor
     return new Activity(data, state)
   }
 
-  private handleResult(data: T, executionContext: ExecutionContext): T {
+  private async handleResult(data: T, executionContext: ExecutionContext): Promise<T> {
     const activity = DispatchResponseToActivityInterceptor.getContextActivity(executionContext)
     activity.refreshData(data)
 
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.activityAdapter.dispatch(activity)
+    await this.activityAdapter.dispatch(activity).catch()
 
     return data
   }
