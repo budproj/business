@@ -15,6 +15,7 @@ import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
+import { CorePortsProvider } from '@core/ports/ports.provider'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
@@ -40,7 +41,10 @@ import { TeamGraphQLNode } from './team.node'
 export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamInterface> {
   private readonly logger = new Logger(TeamGraphQLResolver.name)
 
-  constructor(protected readonly core: CoreProvider) {
+  constructor(
+    protected readonly core: CoreProvider,
+    protected readonly corePorts: CorePortsProvider,
+  ) {
     super(Resource.TEAM, core, core.team)
   }
 
@@ -92,8 +96,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     })
 
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      ObjectiveFiltersRequest,
-      Objective
+      TeamFiltersRequest,
+      Team
     >(request)
 
     const queryResult = await this.core.team.getTeamChildTeams(team, filters, queryOptions)
@@ -113,8 +117,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     })
 
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      ObjectiveFiltersRequest,
-      Objective
+      TeamFiltersRequest,
+      Team
     >(request)
 
     const queryResult = await this.core.team.getRankedTeamsBelowNode(team, filters, queryOptions)
@@ -200,9 +204,14 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       Objective
     >(request)
 
-    const queryResult = await this.core.objective.getFromTeams(team, filters, queryOptions)
+    const objectives = await this.corePorts.dispatchCommand<Objective[]>(
+      'get-team-objectives',
+      team,
+      filters,
+      queryOptions,
+    )
 
-    return this.relay.marshalResponse<ObjectiveInterface>(queryResult, connection, team)
+    return this.relay.marshalResponse<ObjectiveInterface>(objectives, connection, team)
   }
 
   @ResolveField('keyResults', () => TeamKeyResultsGraphQLConnection, { nullable: true })
