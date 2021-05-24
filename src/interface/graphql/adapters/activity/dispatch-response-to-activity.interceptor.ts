@@ -46,7 +46,7 @@ export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor
 
     context.activity = this.buildActivity({} as any, executionContext)
 
-    return next.handle().pipe(map((data) => this.handleResult(data, executionContext)))
+    return next.handle().pipe(map(async (data) => this.handleResult(data, executionContext)))
   }
 
   private buildActivity(data: T, executionContext: ExecutionContext): Activity<T> {
@@ -59,7 +59,7 @@ export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor
     return new Activity(data, state)
   }
 
-  private async handleResult(data: T, executionContext: ExecutionContext): T {
+  private async handleResult(data: T, executionContext: ExecutionContext): Promise<T> {
     const activity = DispatchResponseToActivityInterceptor.getContextActivity(executionContext)
     activity.refreshData(data)
 
