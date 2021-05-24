@@ -63,8 +63,7 @@ export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor
     const activity = DispatchResponseToActivityInterceptor.getContextActivity(executionContext)
     activity.refreshData(data)
 
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.activityAdapter.dispatch(activity)
+    await this.activityAdapter.dispatch(activity).catch()
 
     return data
   }
