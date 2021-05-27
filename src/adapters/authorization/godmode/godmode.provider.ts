@@ -43,7 +43,7 @@ export class GodmodeProvider implements GodmodePropertiesInterface {
       'objective:read:any',
       'objective:update:any',
       'objective:delete:any',
-      'key-result:create:any',
+      'key-result:create:owns',
       'key-result:read:any',
       'key-result:update:any',
       'key-result:delete:any',
