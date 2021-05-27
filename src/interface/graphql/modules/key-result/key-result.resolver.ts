@@ -122,7 +122,12 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Received create key-result request',
     })
 
-    return {} as any
+    const keyResult = await this.corePorts.dispatchCommand<KeyResult>('create-key-result', {
+      ...request.data,
+    })
+    if (!keyResult) throw new UserInputError(`We could not create your Key Result`)
+
+    return keyResult
   }
 
   @ResolveField('owner', () => UserGraphQLNode)

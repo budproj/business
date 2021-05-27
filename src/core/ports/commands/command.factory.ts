@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 import { CoreProvider } from '@core/core.provider'
+import { CreateKeyResultCommand } from '@core/ports/commands/create-key-result.command'
 import { GetKeyResultCheckInDeltaCommand } from '@core/ports/commands/get-key-result-check-in-delta.command'
 import { GetKeyResultCheckInCommand } from '@core/ports/commands/get-key-result-check-in.command'
 import { GetKeyResultCommentTeamCommand } from '@core/ports/commands/get-key-result-comment-team.command'
@@ -62,6 +63,7 @@ export type CommandType =
   | 'get-team-objectives'
   | 'get-team'
   | 'get-team-tree'
+  | 'create-key-result'
 
 @Injectable()
 export class CommandFactory {
@@ -94,6 +96,7 @@ export class CommandFactory {
     'get-team-objectives': GetTeamObjectivesCommand,
     'get-team': GetTeamCommand,
     'get-team-tree': GetTeamTreeCommand,
+    'create-key-result': CreateKeyResultCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}
