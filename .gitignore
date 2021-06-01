@@ -25,3 +25,4 @@ log/*
 users_to_invite.csv
 src/database/environments/production/clients
 src/database/environments/production/dumps
+out
