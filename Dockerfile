@@ -8,8 +8,6 @@ WORKDIR /usr/app
 
 COPY package.json ./
 COPY package-lock.json ./
-COPY scripts scripts
-RUN chmod +x scripts/postinstall.sh
 RUN npm install
 
 COPY dist dist
