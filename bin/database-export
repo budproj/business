@@ -1,0 +1,17 @@
+#!/bin/bash
+
+BIN_DIR_PATH=$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)
+ROOT_DIR_PATH=$(dirname "${BIN_DIR_PATH}")
+TARGET_DIR_PATH="${1:-$ROOT_DIR_PATH/out}"
+DELIMITER="~"
+
+PGPASSWORD=${POSTGRES_PASSWORD} psql -h ${POSTGRES_HOST} -U ${POSTGRES_USER} -d ${POSTGRES_DB} <<SQL
+  \\copy (SELECT * FROM "user") TO '${TARGET_DIR_PATH}/users.csv' DELIMITER '${DELIMITER}' CSV HEADER;
+  \\copy (SELECT * FROM team) TO '${TARGET_DIR_PATH}/teams.csv' DELIMITER '${DELIMITER}' CSV HEADER;
+  \\copy (SELECT * FROM team_users_user) TO '${TARGET_DIR_PATH}/teams_team_user.csv' DELIMITER '${DELIMITER}' CSV HEADER;
+  \\copy (SELECT * FROM cycle) TO '${TARGET_DIR_PATH}/cycle.csv' DELIMITER '${DELIMITER}' CSV HEADER;
+  \\copy (SELECT * FROM objective) TO '${TARGET_DIR_PATH}/objectives.csv' DELIMITER '${DELIMITER}' CSV HEADER;
+  \\copy (SELECT * FROM key_result) TO '${TARGET_DIR_PATH}/key-results.csv' DELIMITER '${DELIMITER}' CSV HEADER;
+  \\copy (SELECT * FROM key_result_check_in) TO '${TARGET_DIR_PATH}/key-result-check-ins.csv' DELIMITER '${DELIMITER}' CSV HEADER;
+  \\copy (SELECT * FROM key_result_comment) TO '${TARGET_DIR_PATH}/key-result-comments.csv' DELIMITER '${DELIMITER}' CSV HEADER;
+SQL

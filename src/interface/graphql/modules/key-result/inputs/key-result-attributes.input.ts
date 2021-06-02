@@ -1,7 +1,9 @@
 import { Field, Float, ID, InputType } from '@nestjs/graphql'
 
-@InputType('KeyResultInput', { description: 'Data that you can assign to a given key-result' })
-export class KeyResultInputObject {
+@InputType('KeyResultAttributesInput', {
+  description: 'Data that you can assign to a given key-result',
+})
+export class KeyResultAttributesInput {
   @Field({ description: 'The title of the key result', nullable: true })
   public readonly title?: string
 

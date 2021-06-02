@@ -26,12 +26,20 @@ export abstract class KeyResultBaseAccessControl extends AccessControl {
     }
   }
 
-  protected async getKeyResultTeamTreeFromKeyResultID(keyResultID: string): Promise<Team[]> {
-    const keyResult = await this.core.dispatchCommand<KeyResult>('get-key-result', {
-      id: keyResultID,
-    })
+  protected async resolveTeamContext(
+    user: UserWithContext,
+    teamID: string,
+  ): Promise<AccessControlScopes> {
+    const teams = await this.core.dispatchCommand<Team[]>('get-team-tree', { id: teamID })
 
-    return this.getKeyResultTeamTree(keyResult)
+    const isTeamLeader = await this.isTeamLeader(teams, user)
+    const isCompanyMember = await this.isCompanyMember(teams, user)
+
+    return {
+      isTeamLeader,
+      isCompanyMember,
+      isOwner: isTeamLeader,
+    }
   }
 
   protected async getKeyResultTeamTree(keyResult: KeyResult): Promise<Team[]> {

@@ -34,5 +34,6 @@ import { KeyResultGraphQLResolver } from './key-result.resolver'
     KeyResultCheckInAccessControl,
     KeyResultCommentAccessControl,
   ],
+  exports: [KeyResultAccessControl],
 })
 export class KeyResultGraphQLModule {}

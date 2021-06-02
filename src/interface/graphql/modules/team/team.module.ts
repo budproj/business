@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common'
 import { GraphQLConfigModule } from '@config/graphql/graphql.module'
 import { CoreModule } from '@core/core.module'
 import { AmplitudeModule } from '@infrastructure/amplitude/amplitude.module'
+import { KeyResultGraphQLModule } from '@interface/graphql/modules/key-result/key-result.module'
 
 import { TeamCyclesConnectionGraphQLResolver } from './connections/team-cycles/team-cycles.resolver'
 import { TeamKeyResultsConnectionGraphQLResolver } from './connections/team-key-results/team-key-results.resolver'
@@ -12,7 +13,7 @@ import { TeamsConnectionGraphQLResolver } from './connections/teams/teams.resolv
 import { TeamGraphQLResolver } from './team.resolver'
 
 @Module({
-  imports: [CoreModule, GraphQLConfigModule, AmplitudeModule],
+  imports: [CoreModule, GraphQLConfigModule, AmplitudeModule, KeyResultGraphQLModule],
   providers: [
     TeamGraphQLResolver,
     TeamsConnectionGraphQLResolver,

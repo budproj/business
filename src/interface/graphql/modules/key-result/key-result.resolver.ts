@@ -23,6 +23,7 @@ import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authoriz
 import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { KeyResultAccessControl } from '@interface/graphql/modules/key-result/access-control/key-result.access-control'
+import { KeyResultCreateRequest } from '@interface/graphql/modules/key-result/requests/key-result-create.request'
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
@@ -103,6 +104,28 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     )
     if (!keyResult)
       throw new UserInputError(`We could not found an key-result with ID ${request.id}`)
+
+    return keyResult
+  }
+
+  @GuardedMutation(KeyResultGraphQLNode, 'key-result:create', { name: 'createKeyResult' })
+  protected async createKeyResultForRequestUsingState(
+    @Args() request: KeyResultCreateRequest,
+    @RequestState() state: State,
+  ) {
+    const canCreate = await this.accessControl.canCreate(state.user, request.data.teamId)
+    if (!canCreate) throw new UnauthorizedException()
+
+    this.logger.log({
+      state,
+      request,
+      message: 'Received create key-result request',
+    })
+
+    const keyResult = await this.corePorts.dispatchCommand<KeyResult>('create-key-result', {
+      ...request.data,
+    })
+    if (!keyResult) throw new UserInputError(`We could not create your Key Result`)
 
     return keyResult
   }

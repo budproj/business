@@ -359,6 +359,11 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     )
   }
 
+  public async createKeyResult(data: KeyResultInterface): Promise<KeyResult> {
+    const queryResult = await this.create(data)
+    return queryResult[0]
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<KeyResult>,
     _data: Partial<KeyResultInterface>,
