@@ -84,7 +84,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   }
 
   public async getFromObjective(
-    objective: ObjectiveInterface,
+    objective: Partial<ObjectiveInterface>,
     filters?: Partial<KeyResultInterface>,
     options?: GetOptions<KeyResult>,
   ) {
