@@ -171,6 +171,10 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     })
   }
 
+  public async getFromIndexes(indexes: Partial<ObjectiveInterface>): Promise<Objective> {
+    return this.repository.findOne(indexes)
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<Objective>,
     _data: Partial<ObjectiveInterface>,

@@ -1,9 +1,10 @@
-import { Injectable, NotImplementedException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 
 import { AccessControl } from '@adapters/authorization/access-control.adapter'
 import { AccessControlScopes } from '@adapters/authorization/interfaces/access-control-scopes.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
+import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
@@ -13,6 +14,10 @@ export class ObjectiveAccessControl extends AccessControl {
 
   constructor(protected core: CorePortsProvider) {
     super(core)
+  }
+
+  static isObjectiveOwner(objective: Objective, user: UserWithContext): boolean {
+    return objective.ownerId === user.id
   }
 
   protected async resolveContextScopes(
@@ -32,11 +37,22 @@ export class ObjectiveAccessControl extends AccessControl {
   }
 
   protected async resolveEntityScopes(
-    _user: UserWithContext,
-    _objectiveID: string,
+    user: UserWithContext,
+    objectiveID: string,
   ): Promise<AccessControlScopes> {
-    throw new NotImplementedException(
-      'The objective entity permission scope is not implemented yet',
-    )
+    const objective = await this.core.dispatchCommand<Objective>('get-objective', {
+      id: objectiveID,
+    })
+    const teams = await this.core.dispatchCommand<Team[]>('get-objective-team-tree', objective)
+
+    const isObjectiveOwner = ObjectiveAccessControl.isObjectiveOwner(objective, user)
+    const isTeamLeader = await this.isTeamLeader(teams, user)
+    const isCompanyMember = await this.isCompanyMember(teams, user)
+
+    return {
+      isTeamLeader,
+      isCompanyMember,
+      isOwner: isObjectiveOwner,
+    }
   }
 }

@@ -1,19 +1,25 @@
-import { Logger } from '@nestjs/common'
+import { Logger, UnauthorizedException } from '@nestjs/common'
 import { Args, Float, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
+import { State } from '@adapters/state/interfaces/state.interface'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
+import { CorePortsProvider } from '@core/ports/ports.provider'
+import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
+import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
+import { ObjectiveAccessControl } from '@interface/graphql/modules/objective/objective.access-control'
+import { ObjectiveUpdateRequest } from '@interface/graphql/modules/objective/requests/objective-update.request'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
@@ -30,8 +36,12 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
 > {
   private readonly logger = new Logger(ObjectiveGraphQLResolver.name)
 
-  constructor(protected readonly core: CoreProvider) {
-    super(Resource.OBJECTIVE, core, core.objective)
+  constructor(
+    protected readonly core: CoreProvider,
+    protected readonly corePorts: CorePortsProvider,
+    accessControl: ObjectiveAccessControl,
+  ) {
+    super(Resource.OBJECTIVE, core, core.objective, accessControl)
   }
 
   @GuardedQuery(ObjectiveGraphQLNode, 'objective:read', { name: 'objective' })
@@ -50,6 +60,31 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     )
     if (!objective)
       throw new UserInputError(`We could not found an objective with the provided arguments`)
+
+    return objective
+  }
+
+  @GuardedMutation(ObjectiveGraphQLNode, 'objective:update', { name: 'updateObjective' })
+  protected async updateObjectiveForRequestAndRequestUserWithContext(
+    @Args() request: ObjectiveUpdateRequest,
+    @RequestState() state: State,
+  ) {
+    const canUpdate = await this.accessControl.canUpdate(state.user, request.id)
+    if (!canUpdate) throw new UnauthorizedException()
+
+    this.logger.log({
+      state,
+      request,
+      message: 'Received update objective request',
+    })
+
+    const objective = await this.corePorts.dispatchCommand<KeyResult>(
+      'update-objective',
+      request.id,
+      { ...request.data },
+    )
+    if (!objective)
+      throw new UserInputError(`We could not found an objective with ID ${request.id}`)
 
     return objective
   }
