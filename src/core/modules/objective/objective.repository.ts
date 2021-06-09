@@ -20,6 +20,8 @@ export class ObjectiveRepository extends CoreEntityRepository<Objective> {
     ids: string[],
     options?: GetOptions<Objective>,
   ): Promise<Objective[]> {
+    if (ids.length === 0) return []
+
     return this.createQueryBuilder()
       .leftJoin(`${Objective.name}.cycle`, Cycle.name)
       .where(`${Objective.name}.id IN (:...ids)`, { ids })
