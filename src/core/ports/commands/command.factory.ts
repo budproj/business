@@ -8,6 +8,8 @@ import { GetKeyResultCommentTeamCommand } from '@core/ports/commands/get-key-res
 import { GetKeyResultCommentCommand } from '@core/ports/commands/get-key-result-comment.command'
 import { GetKeyResultConfidenceColorCommand } from '@core/ports/commands/get-key-result-confidence-color.command'
 import { GetKeyResultTeamCommand } from '@core/ports/commands/get-key-result-team.command'
+import { GetObjectiveTeamTreeCommand } from '@core/ports/commands/get-objective-team-tree.command'
+import { GetObjectiveCommand } from '@core/ports/commands/get-objective.command'
 import { GetTeamObjectivesCommand } from '@core/ports/commands/get-team-objectives.command'
 import { GetTeamTreeCommand } from '@core/ports/commands/get-team-tree.command'
 import { GetTeamCommand } from '@core/ports/commands/get-team.command'
@@ -15,6 +17,7 @@ import { GetUserFullNameCommand } from '@core/ports/commands/get-user-full-name.
 import { GetUserTeamTreeCommand } from '@core/ports/commands/get-user-team-tree.command'
 import { GetUserCommand } from '@core/ports/commands/get-user.command'
 import { UpdateKeyResultCommand } from '@core/ports/commands/update-key-result.command'
+import { UpdateObjectiveCommand } from '@core/ports/commands/update-objective.command'
 
 import { Command } from './base.command'
 import { CreateKeyResultCheckInCommand } from './create-key-result-check-in.command'
@@ -64,6 +67,9 @@ export type CommandType =
   | 'get-team'
   | 'get-team-tree'
   | 'create-key-result'
+  | 'get-objective'
+  | 'get-objective-team-tree'
+  | 'update-objective'
 
 @Injectable()
 export class CommandFactory {
@@ -97,6 +103,9 @@ export class CommandFactory {
     'get-team': GetTeamCommand,
     'get-team-tree': GetTeamTreeCommand,
     'create-key-result': CreateKeyResultCommand,
+    'get-objective': GetObjectiveCommand,
+    'get-objective-team-tree': GetObjectiveTeamTreeCommand,
+    'update-objective': UpdateObjectiveCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}

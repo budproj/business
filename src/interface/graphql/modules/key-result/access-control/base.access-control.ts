@@ -3,7 +3,6 @@ import { AccessControlScopes } from '@adapters/authorization/interfaces/access-c
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { Team } from '@core/modules/team/team.orm-entity'
-import { User } from '@core/modules/user/user.orm-entity'
 
 export abstract class KeyResultBaseAccessControl extends AccessControl {
   protected async resolveKeyResultContext(
@@ -15,7 +14,7 @@ export abstract class KeyResultBaseAccessControl extends AccessControl {
     })
     const teams = await this.core.dispatchCommand<Team[]>('get-key-result-team-tree', keyResult)
 
-    const isKeyResultOwner = await this.isKeyResultOwner(keyResult, user)
+    const isKeyResultOwner = this.isKeyResultOwner(keyResult, user)
     const isTeamLeader = await this.isTeamLeader(teams, user)
     const isCompanyMember = await this.isKeyResultCompanyMember(keyResult, user)
 
@@ -46,10 +45,8 @@ export abstract class KeyResultBaseAccessControl extends AccessControl {
     return this.core.dispatchCommand<Team[]>('get-key-result-team-tree', keyResult)
   }
 
-  protected async isKeyResultOwner(keyResult: KeyResult, user: UserWithContext): Promise<boolean> {
-    const owner = await this.core.dispatchCommand<User>('get-key-result-owner', keyResult)
-
-    return owner.id === user.id
+  protected isKeyResultOwner(keyResult: KeyResult, user: UserWithContext): boolean {
+    return keyResult.ownerId === user.id
   }
 
   protected async isKeyResultCompanyMember(

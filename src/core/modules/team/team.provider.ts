@@ -108,7 +108,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
   }
 
   public async getTeamNodesTreeBeforeTeam(
-    teams: TeamInterface | TeamInterface[],
+    teams: Partial<TeamInterface> | Array<Partial<TeamInterface>>,
     selectors?: TeamEntityKey[],
     relations?: TeamEntityRelation[],
   ): Promise<Team[]> {
