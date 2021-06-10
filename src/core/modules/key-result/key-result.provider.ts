@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { uniqBy, sum } from 'lodash'
-import { Any, FindConditions } from 'typeorm'
+import { Any, DeleteResult, FindConditions } from 'typeorm'
 
 import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
 import { CoreEntityProvider } from '@core/entity.provider'
@@ -122,7 +122,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   }
 
   public async getComments(
-    keyResult: KeyResultInterface,
+    keyResult: Partial<KeyResultInterface>,
     filters?: FindConditions<KeyResultCommentInterface>,
     options?: GetOptions<KeyResultCommentInterface>,
   ): Promise<KeyResultComment[]> {
@@ -135,7 +135,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   }
 
   public async getCheckIns(
-    keyResult: KeyResultInterface,
+    keyResult: Partial<KeyResultInterface>,
     filters?: FindConditions<KeyResultCheckInInterface>,
     options?: GetOptions<KeyResultCheckInInterface>,
   ): Promise<KeyResultCheckIn[]> {
@@ -362,6 +362,21 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   public async createKeyResult(data: KeyResultInterface): Promise<KeyResult> {
     const queryResult = await this.create(data)
     return queryResult[0]
+  }
+
+  public async deleteFromID(id: string): Promise<DeleteResult> {
+    const comments = await this.keyResultCommentProvider.delete({
+      keyResultId: id,
+    })
+    const checkIns = await this.keyResultCheckInProvider.delete({
+      keyResultId: id,
+    })
+    const keyResult = await this.delete({ id })
+
+    return {
+      raw: [...comments.raw, ...checkIns.raw, ...keyResult.raw],
+      affected: comments.affected + checkIns.affected + keyResult.affected,
+    }
   }
 
   protected async protectCreationQuery(

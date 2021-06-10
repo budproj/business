@@ -124,7 +124,7 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     })
     if (!isObjectiveActive)
       throw new UserInputError(
-        'You cannot create this keyResultComment, because that key-result is not active anymore',
+        'You cannot delete this keyResultComment, because that key-result is not active anymore',
       )
 
     const selector = { id: request.id }

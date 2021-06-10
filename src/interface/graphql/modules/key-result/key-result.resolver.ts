@@ -27,7 +27,9 @@ import { KeyResultCreateRequest } from '@interface/graphql/modules/key-result/re
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
+import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
 import { ConnectionFiltersRequest } from '@interface/graphql/requests/connection-filters.request'
+import { NodeDeleteRequest } from '@interface/graphql/requests/node-delete.request'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { KeyResultCheckInGraphQLNode } from './check-in/key-result-check-in.node'
@@ -128,6 +130,26 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     if (!keyResult) throw new UserInputError(`We could not create your Key Result`)
 
     return keyResult
+  }
+
+  @GuardedMutation(DeleteResultGraphQLObject, 'key-result:delete', { name: 'deleteKeyResult' })
+  protected async deleteKeyResultForRequestUsingState(
+    @Args() request: NodeDeleteRequest,
+    @RequestState() state: State,
+  ) {
+    const canDelete = await this.accessControl.canDelete(state.user, request.id)
+    if (!canDelete) throw new UnauthorizedException()
+
+    this.logger.log({
+      state,
+      request,
+      message: 'Received delete key-result request',
+    })
+
+    const deleteResult = await this.corePorts.dispatchCommand('delete-key-result', request.id)
+    if (!deleteResult) throw new UserInputError('We could not delete your key-result')
+
+    return deleteResult
   }
 
   @ResolveField('owner', () => UserGraphQLNode)

@@ -138,6 +138,13 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
     return this.getOne(selector, queryContext)
   }
 
+  public async delete(
+    selector: FindConditions<E>,
+    _queryContext?: CoreQueryContext,
+  ): Promise<DeleteResult> {
+    return this.repository.delete(selector)
+  }
+
   protected async create(
     data: Partial<I> | Array<Partial<I>>,
     _queryContext?: CoreQueryContext,
@@ -263,13 +270,6 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
       queryContext,
       MutationQueryType.UPDATE,
     )
-  }
-
-  protected async delete(
-    selector: FindConditions<E>,
-    _queryContext: CoreQueryContext,
-  ): Promise<DeleteResult> {
-    return this.repository.delete(selector)
   }
 
   protected async deleteIfWithinConstraint(

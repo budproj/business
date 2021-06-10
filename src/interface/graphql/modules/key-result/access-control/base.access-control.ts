@@ -1,3 +1,5 @@
+import { UserInputError } from 'apollo-server-errors'
+
 import { AccessControl } from '@adapters/authorization/access-control.adapter'
 import { AccessControlScopes } from '@adapters/authorization/interfaces/access-control-scopes.interface'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
@@ -12,6 +14,8 @@ export abstract class KeyResultBaseAccessControl extends AccessControl {
     const keyResult = await this.core.dispatchCommand<KeyResult>('get-key-result', {
       id: keyResultID,
     })
+    if (!keyResult) throw new UserInputError('We could not find a key-result for your request')
+
     const teams = await this.core.dispatchCommand<Team[]>('get-key-result-team-tree', keyResult)
 
     const isKeyResultOwner = this.isKeyResultOwner(keyResult, user)
