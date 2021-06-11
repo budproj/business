@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
-import { Any, SelectQueryBuilder } from 'typeorm'
+import { Any, DeleteResult, SelectQueryBuilder } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
 import { Sorting } from '@core/enums/sorting'
@@ -98,6 +98,15 @@ export class KeyResultCheckInProvider extends CoreEntityProvider<
     checkIn: Partial<KeyResultCheckInInterface>,
   ): Promise<KeyResultCheckIn[]> {
     return this.create(checkIn)
+  }
+
+  public async deleteFromObjective(objectiveID: string): Promise<DeleteResult> {
+    const objectiveCheckIns = await this.repository.getFromObjective(objectiveID)
+    const objectiveCheckInIDs = objectiveCheckIns.map((comment) => comment.id)
+
+    return this.delete({
+      id: Any(objectiveCheckInIDs),
+    })
   }
 
   protected onModuleInit(): void {

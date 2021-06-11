@@ -13,6 +13,13 @@ import { KeyResultComment } from './key-result-comment.orm-entity'
 export class KeyResultCommentRepository extends CoreEntityRepository<KeyResultComment> {
   public entityName = KeyResultComment.name
 
+  public async getFromObjective(objectiveID: string): Promise<KeyResultComment[]> {
+    return this.createQueryBuilder()
+      .leftJoinAndSelect(`${KeyResultComment.name}.keyResult`, `${KeyResult.name}`)
+      .where(`${KeyResult.name}.objectiveId = :objectiveID`, { objectiveID })
+      .getMany()
+  }
+
   protected setupTeamQuery(query: SelectQueryBuilder<KeyResultComment>) {
     return query.leftJoinAndSelect(`${KeyResultComment.name}.keyResult`, KeyResult.name)
   }

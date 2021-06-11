@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common'
 import { CoreProvider } from '@core/core.provider'
 import { CreateKeyResultCommand } from '@core/ports/commands/create-key-result.command'
 import { DeleteKeyResultCommand } from '@core/ports/commands/delete-key-result.command'
+import { DeleteObjectiveCommand } from '@core/ports/commands/delete-objective.command'
 import { GetKeyResultCheckInDeltaCommand } from '@core/ports/commands/get-key-result-check-in-delta.command'
 import { GetKeyResultCheckInCommand } from '@core/ports/commands/get-key-result-check-in.command'
 import { GetKeyResultCommentTeamCommand } from '@core/ports/commands/get-key-result-comment-team.command'
@@ -72,6 +73,7 @@ export type CommandType =
   | 'get-objective-team-tree'
   | 'update-objective'
   | 'delete-key-result'
+  | 'delete-objective'
 
 @Injectable()
 export class CommandFactory {
@@ -109,6 +111,7 @@ export class CommandFactory {
     'get-objective-team-tree': GetObjectiveTeamTreeCommand,
     'update-objective': UpdateObjectiveCommand,
     'delete-key-result': DeleteKeyResultCommand,
+    'delete-objective': DeleteObjectiveCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}
