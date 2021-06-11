@@ -26,12 +26,17 @@ export class KeyResultCheckInRepository extends CoreEntityRepository<KeyResultCh
       createdAt: Sorting.DESC,
     }
 
-    const checkIn = await this.findOne({
+    return this.findOne({
       where,
       order,
     })
+  }
 
-    return checkIn
+  public async getFromObjective(objectiveID: string): Promise<KeyResultCheckIn[]> {
+    return this.createQueryBuilder()
+      .leftJoinAndSelect(`${KeyResultCheckIn.name}.keyResult`, `${KeyResult.name}`)
+      .where(`${KeyResult.name}.objectiveId = :objectiveID`, { objectiveID })
+      .getMany()
   }
 
   protected setupTeamQuery(query: SelectQueryBuilder<KeyResultCheckIn>) {

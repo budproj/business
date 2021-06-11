@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
+import { Any, DeleteResult } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
@@ -39,6 +40,15 @@ export class KeyResultCommentProvider extends CoreEntityProvider<
     comment: Partial<KeyResultCommentInterface>,
   ): Promise<KeyResultComment[]> {
     return this.create(comment)
+  }
+
+  public async deleteFromObjective(objectiveID: string): Promise<DeleteResult> {
+    const objectiveComments = await this.repository.getFromObjective(objectiveID)
+    const objectiveCommentIDs = objectiveComments.map((comment) => comment.id)
+
+    return this.delete({
+      id: Any(objectiveCommentIDs),
+    })
   }
 
   protected onModuleInit(): void {

@@ -21,6 +21,8 @@ import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
 import { ObjectiveAccessControl } from '@interface/graphql/modules/objective/objective.access-control'
 import { ObjectiveUpdateRequest } from '@interface/graphql/modules/objective/requests/objective-update.request'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
+import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
+import { NodeDeleteRequest } from '@interface/graphql/requests/node-delete.request'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { KeyResultFiltersRequest } from '../key-result/requests/key-result-filters.request'
@@ -87,6 +89,26 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
       throw new UserInputError(`We could not found an objective with ID ${request.id}`)
 
     return objective
+  }
+
+  @GuardedMutation(DeleteResultGraphQLObject, 'objective:delete', { name: 'deleteObjective' })
+  protected async deleteObjectiveForRequestUsingState(
+    @Args() request: NodeDeleteRequest,
+    @RequestState() state: State,
+  ) {
+    const canDelete = await this.accessControl.canDelete(state.user, request.id)
+    if (!canDelete) throw new UnauthorizedException()
+
+    this.logger.log({
+      state,
+      request,
+      message: 'Received delete objective request',
+    })
+
+    const deleteResult = await this.corePorts.dispatchCommand('delete-objective', request.id)
+    if (!deleteResult) throw new UserInputError('We could not delete your objective')
+
+    return deleteResult
   }
 
   @ResolveField('owner', () => UserGraphQLNode)

@@ -379,6 +379,19 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     }
   }
 
+  public async deleteFromObjectiveID(objectiveId: string): Promise<DeleteResult> {
+    const comments = await this.keyResultCommentProvider.deleteFromObjective(objectiveId)
+    const checkIns = await this.keyResultCheckInProvider.deleteFromObjective(objectiveId)
+    const keyResults = await this.delete({
+      objectiveId,
+    })
+
+    return {
+      raw: [...comments.raw, ...checkIns.raw, ...keyResults.raw],
+      affected: comments.affected + checkIns.affected + keyResults.affected,
+    }
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<KeyResult>,
     _data: Partial<KeyResultInterface>,
