@@ -5,12 +5,15 @@ token_jerry="Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Im91OW9Rd0FneFdy
 
 function do_request {
   token=$1
-  query="{\n me {\n id\n fullName\n }\n}\n"
 
-  curl -i -H 'Content-Type: application/json' -H "authorization: ${token}" -X POST -d "{\"query\": \"query ${query}\"}" http://localhost:3000/graphql &
+  query="query {\n me {\n id\n fullName\n }\n}\n"
+  mutation="mutation {\n createKeyResultCheckIn(\n data: {keyResultId: \\\"6e5612e0-86e1-4cfe-9e91-00762d67f892\\\", confidence: 100, value: 100}\n ) {\n id\n user {\n firstName\n }\n }\n}"
+
+  curl -i -H 'Content-Type: application/json' -H "authorization: ${token}" -X POST -d "{\"query\": \"${mutation}\"}" http://localhost:3000/graphql &
 }
 
 do_request "$token_morty"
+sleep 0.1
 do_request "$token_jerry"
 
 wait
