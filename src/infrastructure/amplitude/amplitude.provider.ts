@@ -38,6 +38,8 @@ export class AmplitudeProvider implements ActivityDispatcher {
     await event.prepare()
     const marshalledEvent = event.marshalEvent()
 
+    await this.identify(activity.context)
+
     this.logger.log({
       event: marshalledEvent,
       message: 'Logging event on Amplitude',
@@ -46,7 +48,7 @@ export class AmplitudeProvider implements ActivityDispatcher {
     await this.client.logEvent(marshalledEvent)
   }
 
-  public async identify(context: State): Promise<void> {
+  private async identify(context: State): Promise<void> {
     const userID = context.user.id
     const { deviceID } = context.tracing
     const userProperties = AmplitudeProvider.marshalUserProperties(context.user)
@@ -56,7 +58,7 @@ export class AmplitudeProvider implements ActivityDispatcher {
 
     this.logger.debug({
       userProperties,
-      message: 'Identifying user',
+      message: 'Identifying user on Amplitude',
     })
 
     await this.client.identify(userID, deviceID, userIdentification)

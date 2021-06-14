@@ -1,4 +1,4 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common'
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor, Scope } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { GqlExecutionContext } from '@nestjs/graphql'
 import { Observable } from 'rxjs'
@@ -13,7 +13,7 @@ import { GraphQLContext } from '@interface/graphql/adapters/context/interfaces/c
 
 import { GraphQLRequestState } from '../context/interfaces/request-state.interface'
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor<T> {
   private readonly activityAdapter: ActivityAdapter
 
@@ -63,7 +63,7 @@ export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor
     const activity = DispatchResponseToActivityInterceptor.getContextActivity(executionContext)
     activity.refreshData(data)
 
-    await this.activityAdapter.dispatch(activity).catch()
+    void this.activityAdapter.dispatch(activity).catch()
 
     return data
   }
