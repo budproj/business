@@ -4,6 +4,7 @@ import { CoreProvider } from '@core/core.provider'
 import { CreateKeyResultCommand } from '@core/ports/commands/create-key-result.command'
 import { DeleteKeyResultCommand } from '@core/ports/commands/delete-key-result.command'
 import { DeleteObjectiveCommand } from '@core/ports/commands/delete-objective.command'
+import { GetCycleDeltaCommand } from '@core/ports/commands/get-cycle-delta.command'
 import { GetCycleStatusCommand } from '@core/ports/commands/get-cycle-status.command'
 import { GetKeyResultCheckInDeltaCommand } from '@core/ports/commands/get-key-result-check-in-delta.command'
 import { GetKeyResultCheckInCommand } from '@core/ports/commands/get-key-result-check-in.command'
@@ -16,6 +17,7 @@ import { GetObjectiveDeltaCommand } from '@core/ports/commands/get-objective-del
 import { GetObjectiveStatusCommand } from '@core/ports/commands/get-objective-status.command'
 import { GetObjectiveTeamTreeCommand } from '@core/ports/commands/get-objective-team-tree.command'
 import { GetObjectiveCommand } from '@core/ports/commands/get-objective.command'
+import { GetTeamDeltaCommand } from '@core/ports/commands/get-team-delta.command'
 import { GetTeamObjectivesCommand } from '@core/ports/commands/get-team-objectives.command'
 import { GetTeamStatusCommand } from '@core/ports/commands/get-team-status.command'
 import { GetTeamTreeCommand } from '@core/ports/commands/get-team-tree.command'
@@ -51,6 +53,7 @@ export type CommandType =
   | 'delete-key-result'
   | 'delete-objective'
   | 'get-cycle'
+  | 'get-cycle-delta'
   | 'get-cycle-status'
   | 'get-key-result'
   | 'get-key-result-check-in'
@@ -74,6 +77,7 @@ export type CommandType =
   | 'get-objective-team-tree'
   | 'get-team'
   | 'get-team-company'
+  | 'get-team-delta'
   | 'get-team-objectives'
   | 'get-team-owner'
   | 'get-team-status'
@@ -94,6 +98,7 @@ export class CommandFactory {
     'delete-key-result': DeleteKeyResultCommand,
     'delete-objective': DeleteObjectiveCommand,
     'get-cycle': GetCycleCommand,
+    'get-cycle-delta': GetCycleDeltaCommand,
     'get-cycle-status': GetCycleStatusCommand,
     'get-key-result': GetKeyResultCommand,
     'get-key-result-check-in': GetKeyResultCheckInCommand,
@@ -117,6 +122,7 @@ export class CommandFactory {
     'get-objective-team-tree': GetObjectiveTeamTreeCommand,
     'get-team': GetTeamCommand,
     'get-team-company': GetTeamCompanyCommand,
+    'get-team-delta': GetTeamDeltaCommand,
     'get-team-objectives': GetTeamObjectivesCommand,
     'get-team-owner': GetTeamOwnerCommand,
     'get-team-status': GetTeamStatusCommand,

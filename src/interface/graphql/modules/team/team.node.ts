@@ -1,11 +1,11 @@
-import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
+import { Field, ID, ObjectType } from '@nestjs/graphql'
 
 import { TeamGender } from '@core/modules/team/enums/team-gender.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
-import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-result/check-in/key-result-check-in.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
+import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
 import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 
 import { TeamCyclesGraphQLConnection } from './connections/team-cycles/team-cycles.connection'
@@ -57,11 +57,11 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   })
   public status: StatusGraphQLObject
 
-  @Field(() => Float, {
-    description:
-      'The percentage progress increase of the objective since the last week. We consider a week as a "business" week, considering it starting on saturday and ending on friday',
+  @Field(() => DeltaGraphQLObject, {
+    complexity: 2,
+    description: 'The delta of this team comparing with it last week',
   })
-  public progressIncreaseSinceLastWeek!: number
+  public delta!: DeltaGraphQLObject
 
   @Field(() => UserGraphQLNode, {
     complexity: 1,
@@ -85,12 +85,6 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
     description: 'The team that owns this team',
   })
   public readonly parent?: TeamGraphQLNode
-
-  @Field(() => KeyResultCheckInGraphQLNode, {
-    description: 'The latest key result check-in for this team',
-    nullable: true,
-  })
-  public latestKeyResultCheckIn?: KeyResultCheckInGraphQLNode
 
   // **********************************************************************************************
   // CONNECTION FIELDS

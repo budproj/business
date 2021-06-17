@@ -5,6 +5,7 @@ import { UserInputError } from 'apollo-server-fastify'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { Delta } from '@core/interfaces/delta.interface'
 import { Status } from '@core/interfaces/status.interface'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
@@ -21,6 +22,7 @@ import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/r
 import { ObjectivesGraphQLConnection } from '@interface/graphql/modules/objective/connections/objectives/objectives.connection'
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
+import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
 import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 import { StatusRequest } from '@interface/graphql/requests/status.request'
@@ -194,5 +196,19 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     )
 
     return this.relay.marshalResponse<KeyResultInterface>(keyResults, connection, cycle)
+  }
+
+  @ResolveField('delta', () => DeltaGraphQLObject)
+  protected async getDeltaForObjective(@Parent() cycle: CycleGraphQLNode) {
+    this.logger.log({
+      cycle,
+      message: 'Fetching delta for this cycle',
+    })
+
+    const result = await this.corePorts.dispatchCommand<Delta>('get-cycle-delta', cycle.id)
+    if (!result)
+      throw new UserInputError(`We could not find a delta for the cyle with ID ${cycle.id}`)
+
+    return result
   }
 }

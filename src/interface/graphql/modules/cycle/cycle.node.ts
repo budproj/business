@@ -5,6 +5,7 @@ import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authori
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
+import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
 import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 
 import { ObjectivesGraphQLConnection } from '../objective/connections/objectives/objectives.connection'
@@ -64,6 +65,12 @@ export class CycleGraphQLNode implements GuardedNodeGraphQLInterface {
       'The status of the given cycle. Here you can fetch the current progress, confidence, and others for that cycle',
   })
   public status!: StatusGraphQLObject
+
+  @Field(() => DeltaGraphQLObject, {
+    complexity: 2,
+    description: 'The delta of this cycle comparing with it last week',
+  })
+  public delta!: DeltaGraphQLObject
 
   @Field(() => TeamGraphQLNode, {
     complexity: 1,
