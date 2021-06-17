@@ -7,13 +7,13 @@ import { Resource } from '@adapters/policy/enums/resource.enum'
 import { State } from '@adapters/state/interfaces/state.interface'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { Status } from '@core/interfaces/status.interface'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
 import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
-import { KeyResultStatus } from '@core/ports/commands/get-key-result-status'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { AttachActivity } from '@interface/graphql/adapters/activity/attach-activity.decorator'
 import { RequestActivity } from '@interface/graphql/adapters/activity/request-activity.decorator'
@@ -33,6 +33,7 @@ import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-res
 import { ConnectionFiltersRequest } from '@interface/graphql/requests/connection-filters.request'
 import { NodeDeleteRequest } from '@interface/graphql/requests/node-delete.request'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
+import { StatusRequest } from '@interface/graphql/requests/status.request'
 
 import { KeyResultCheckInGraphQLNode } from './check-in/key-result-check-in.node'
 import { KeyResultCheckInFiltersRequest } from './check-in/requests/key-result-check-in-filters.request'
@@ -279,15 +280,20 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('status', () => KeyResultStatusObject)
-  protected async getStatusForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
+  protected async getStatusForKeyResult(
+    @Parent() keyResult: KeyResultGraphQLNode,
+    @Args() request: StatusRequest,
+  ) {
     this.logger.log({
       keyResult,
+      request,
       message: 'Fetching current status for this key-result',
     })
 
-    const result = await this.corePorts.dispatchCommand<KeyResultStatus>(
+    const result = await this.corePorts.dispatchCommand<Status>(
       'get-key-result-status',
       keyResult.id,
+      request,
     )
     if (!result)
       throw new UserInputError(

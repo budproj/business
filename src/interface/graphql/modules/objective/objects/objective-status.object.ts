@@ -1,5 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
+import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { StatusGraphQLInterface } from '@interface/graphql/interfaces/status.interface'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-result/check-in/key-result-check-in.node'
 
@@ -21,5 +22,6 @@ export class ObjectiveStatusObject implements StatusGraphQLInterface {
 
   public progress!: number
   public confidence!: number
-  public reportDate!: Date
+  public reportDate?: Date
+  public latestCheckIn?: KeyResultCheckIn
 }

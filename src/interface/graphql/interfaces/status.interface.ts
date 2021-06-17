@@ -1,5 +1,8 @@
 import { Field, Float, Int, InterfaceType } from '@nestjs/graphql'
 
+import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
+import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-result/check-in/key-result-check-in.node'
+
 @InterfaceType('Status', {
   description:
     "The current status of an entity. By status we mean progress, confidence, and other reported values from it's children",
@@ -22,6 +25,14 @@ export abstract class StatusGraphQLInterface {
   @Field(() => Date, {
     complexity: 0,
     description: 'The latest check-in date in this status',
+    nullable: true,
   })
-  public readonly reportDate!: Date
+  public readonly reportDate?: Date
+
+  @Field(() => KeyResultCheckInGraphQLNode, {
+    complexity: 0,
+    description: 'The latest check-in date in this status',
+    nullable: true,
+  })
+  public readonly latestCheckIn?: KeyResultCheckIn
 }

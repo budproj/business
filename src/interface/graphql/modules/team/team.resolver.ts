@@ -28,7 +28,7 @@ import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/re
 import { UserFiltersRequest } from '@interface/graphql/modules/user/requests/user-filters.request'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
-import { StatusRequest } from '@interface/graphql/requests/status.request'
+import { StatusGroupRequest } from '@interface/graphql/requests/status.request'
 
 import { TeamCyclesGraphQLConnection } from './connections/team-cycles/team-cycles.connection'
 import { TeamKeyResultsGraphQLConnection } from './connections/team-key-results/team-key-results.connection'
@@ -69,7 +69,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   @ResolveField('status', () => TeamStatusObject)
   protected async getStatusForTeam(
     @Parent() team: TeamGraphQLNode,
-    @Args() request: StatusRequest,
+    @Args() request: StatusGroupRequest,
   ) {
     this.logger.log({
       team,
