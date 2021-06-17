@@ -1,24 +1,10 @@
 import { GetStatusOptions, Status } from '@core/interfaces/status.interface'
-import {
-  DEFAULT_CONFIDENCE,
-  DEFAULT_PROGRESS,
-} from '@core/modules/key-result/check-in/key-result-check-in.constants'
+import { BaseStatusCommand } from '@core/ports/commands/base-status.command'
 
-import { Command } from './base.command'
-
-const defaultOptions: GetStatusOptions = {}
-
-export class GetKeyResultStatusCommand extends Command<Status> {
-  static buildDefaultStatus(): Status {
-    return {
-      progress: DEFAULT_PROGRESS,
-      confidence: DEFAULT_CONFIDENCE,
-    }
-  }
-
+export class GetKeyResultStatusCommand extends BaseStatusCommand {
   public async execute(
     keyResultID: string,
-    options: GetStatusOptions = defaultOptions,
+    options: GetStatusOptions = this.defaultOptions,
   ): Promise<Status> {
     const latestCheckIn = await this.core.keyResult.getLatestCheckInForKeyResultAtDate(
       keyResultID,

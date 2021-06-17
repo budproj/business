@@ -11,6 +11,7 @@ import { GetKeyResultCommentCommand } from '@core/ports/commands/get-key-result-
 import { GetKeyResultConfidenceColorCommand } from '@core/ports/commands/get-key-result-confidence-color.command'
 import { GetKeyResultStatusCommand } from '@core/ports/commands/get-key-result-status'
 import { GetKeyResultTeamCommand } from '@core/ports/commands/get-key-result-team.command'
+import { GetObjectiveStatusCommand } from '@core/ports/commands/get-objective-status'
 import { GetObjectiveTeamTreeCommand } from '@core/ports/commands/get-objective-team-tree.command'
 import { GetObjectiveCommand } from '@core/ports/commands/get-objective.command'
 import { GetTeamObjectivesCommand } from '@core/ports/commands/get-team-objectives.command'
@@ -65,6 +66,7 @@ export type CommandType =
   | 'get-key-result-team'
   | 'get-key-result-team-tree'
   | 'get-objective'
+  | 'get-objective-status'
   | 'get-objective-team-tree'
   | 'get-team'
   | 'get-team-company'
@@ -105,6 +107,7 @@ export class CommandFactory {
     'get-key-result-team': GetKeyResultTeamCommand,
     'get-key-result-team-tree': GetKeyResultTeamTreeCommand,
     'get-objective': GetObjectiveCommand,
+    'get-objective-status': GetObjectiveStatusCommand,
     'get-objective-team-tree': GetObjectiveTeamTreeCommand,
     'get-team': GetTeamCommand,
     'get-team-company': GetTeamCompanyCommand,
@@ -124,6 +127,6 @@ export class CommandFactory {
 
   public buildCommand<R>(type: CommandType): Command<R> {
     const Command = this.commands[type]
-    return new Command(this.core) as any
+    return new Command(this.core, this) as any
   }
 }

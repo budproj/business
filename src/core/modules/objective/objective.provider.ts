@@ -92,12 +92,6 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     return this.cycleProvider.isActiveFromIndexes({ id: objective.cycleId })
   }
 
-  public async getCurrentStatus(objective: ObjectiveInterface): Promise<ObjectiveStatus> {
-    const date = new Date()
-
-    return this.getStatusAtDate(date, objective)
-  }
-
   public async getStatusAtDate(
     date: Date,
     objective: ObjectiveInterface,

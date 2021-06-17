@@ -6,6 +6,7 @@ import { Resource } from '@adapters/policy/enums/resource.enum'
 import { State } from '@adapters/state/interfaces/state.interface'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { Status } from '@core/interfaces/status.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
@@ -24,6 +25,7 @@ import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
 import { NodeDeleteRequest } from '@interface/graphql/requests/node-delete.request'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
+import { StatusGroupRequest } from '@interface/graphql/requests/status.request'
 
 import { KeyResultFiltersRequest } from '../key-result/requests/key-result-filters.request'
 
@@ -153,13 +155,25 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('status', () => ObjectiveStatusObject)
-  protected async getStatusForObjective(@Parent() objective: ObjectiveGraphQLNode) {
+  protected async getStatusForObjective(
+    @Parent() objective: ObjectiveGraphQLNode,
+    @Args() request: StatusGroupRequest,
+  ) {
     this.logger.log({
       objective,
-      message: 'Fetching current status for objective',
+      request,
+      message: 'Fetching current status for this objective',
     })
 
-    return this.core.objective.getCurrentStatus(objective)
+    const result = await this.corePorts.dispatchCommand<Status>(
+      'get-objective-status',
+      objective.id,
+      request,
+    )
+    if (!result)
+      throw new UserInputError(`We could not find status for the objective with ID ${objective.id}`)
+
+    return result
   }
 
   @ResolveField('progressIncreaseSinceLastWeek', () => Float)

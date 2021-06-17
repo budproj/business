@@ -9,4 +9,5 @@ export interface Status {
 
 export interface GetStatusOptions {
   date?: Date
+  active?: boolean
 }
