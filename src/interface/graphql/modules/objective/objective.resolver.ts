@@ -23,6 +23,7 @@ import { ObjectiveAccessControl } from '@interface/graphql/modules/objective/obj
 import { ObjectiveUpdateRequest } from '@interface/graphql/modules/objective/requests/objective-update.request'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
+import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 import { NodeDeleteRequest } from '@interface/graphql/requests/node-delete.request'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 import { StatusGroupRequest } from '@interface/graphql/requests/status.request'
@@ -31,7 +32,6 @@ import { KeyResultFiltersRequest } from '../key-result/requests/key-result-filte
 
 import { ObjectiveKeyResultsGraphQLConnection } from './connections/objective-key-results/objective-key-results.connection'
 import { ObjectiveGraphQLNode } from './objective.node'
-import { ObjectiveStatusObject } from './objects/objective-status.object'
 
 @GuardedResolver(ObjectiveGraphQLNode)
 export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
@@ -154,7 +154,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection, objective)
   }
 
-  @ResolveField('status', () => ObjectiveStatusObject)
+  @ResolveField('status', () => StatusGraphQLObject)
   protected async getStatusForObjective(
     @Parent() objective: ObjectiveGraphQLNode,
     @Args() request: StatusGroupRequest,

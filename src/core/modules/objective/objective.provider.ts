@@ -65,7 +65,7 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
   }
 
   public async getFromCycle(
-    cycle: CycleInterface,
+    cycle: Partial<CycleInterface>,
     filters?: FindConditions<Cycle>,
     options?: GetOptions<Cycle>,
   ): Promise<Objective[]> {

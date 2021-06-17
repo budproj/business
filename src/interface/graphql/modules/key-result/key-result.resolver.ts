@@ -24,12 +24,12 @@ import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authoriz
 import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { KeyResultAccessControl } from '@interface/graphql/modules/key-result/access-control/key-result.access-control'
-import { KeyResultStatusObject } from '@interface/graphql/modules/key-result/objects/key-result-status.object'
 import { KeyResultCreateRequest } from '@interface/graphql/modules/key-result/requests/key-result-create.request'
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
+import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 import { ConnectionFiltersRequest } from '@interface/graphql/requests/connection-filters.request'
 import { NodeDeleteRequest } from '@interface/graphql/requests/node-delete.request'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
@@ -279,7 +279,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     return this.relay.marshalResponse(queryResult, connection, keyResult)
   }
 
-  @ResolveField('status', () => KeyResultStatusObject)
+  @ResolveField('status', () => StatusGraphQLObject)
   protected async getStatusForKeyResult(
     @Parent() keyResult: KeyResultGraphQLNode,
     @Args() request: StatusRequest,

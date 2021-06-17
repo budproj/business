@@ -6,10 +6,10 @@ import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authori
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 import { KeyResultTypeGraphQLEnum } from '@interface/graphql/modules/key-result/enums/key-result-type.enum'
-import { KeyResultStatusObject } from '@interface/graphql/modules/key-result/objects/key-result-status.object'
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
+import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 
 import { KeyResultCheckInGraphQLNode } from './check-in/key-result-check-in.node'
 import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.connection'
@@ -81,11 +81,11 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
   })
   public readonly team!: TeamGraphQLNode
 
-  @Field(() => KeyResultStatusObject, {
+  @Field(() => StatusGraphQLObject, {
     description:
       'The status of the given key-result. Here you can fetch the current progress, confidence, and others for that key-result',
   })
-  public status: KeyResultStatusObject
+  public status: StatusGraphQLObject
 
   @Field({
     complexity: 1,

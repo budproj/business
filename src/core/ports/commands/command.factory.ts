@@ -4,6 +4,7 @@ import { CoreProvider } from '@core/core.provider'
 import { CreateKeyResultCommand } from '@core/ports/commands/create-key-result.command'
 import { DeleteKeyResultCommand } from '@core/ports/commands/delete-key-result.command'
 import { DeleteObjectiveCommand } from '@core/ports/commands/delete-objective.command'
+import { GetCycleStatusCommand } from '@core/ports/commands/get-cycle-status'
 import { GetKeyResultCheckInDeltaCommand } from '@core/ports/commands/get-key-result-check-in-delta.command'
 import { GetKeyResultCheckInCommand } from '@core/ports/commands/get-key-result-check-in.command'
 import { GetKeyResultCommentTeamCommand } from '@core/ports/commands/get-key-result-comment-team.command'
@@ -49,6 +50,7 @@ export type CommandType =
   | 'delete-key-result'
   | 'delete-objective'
   | 'get-cycle'
+  | 'get-cycle-status'
   | 'get-key-result'
   | 'get-key-result-check-in'
   | 'get-key-result-check-in-delta'
@@ -90,6 +92,7 @@ export class CommandFactory {
     'delete-key-result': DeleteKeyResultCommand,
     'delete-objective': DeleteObjectiveCommand,
     'get-cycle': GetCycleCommand,
+    'get-cycle-status': GetCycleStatusCommand,
     'get-key-result': GetKeyResultCommand,
     'get-key-result-check-in': GetKeyResultCheckInCommand,
     'get-key-result-check-in-delta': GetKeyResultCheckInDeltaCommand,

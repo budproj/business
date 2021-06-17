@@ -5,13 +5,13 @@ import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authori
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
+import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 
 import { ObjectivesGraphQLConnection } from '../objective/connections/objectives/objectives.connection'
 
 import { CycleCyclesGraphQLConnection } from './connections/cycle-cycles/cycle-cycles.connection'
 import { CycleKeyResultsGraphQLConnection } from './connections/cycle-key-results/cycle-key-results.connection'
 import { CadenceGraphQLEnum } from './enums/cadence.enum'
-import { CycleStatusObject } from './objects/cycle-status.object'
 
 @ObjectType('Cycle', {
   implements: () => [NodeRelayGraphQLInterface, GuardedNodeGraphQLInterface],
@@ -59,11 +59,11 @@ export class CycleGraphQLNode implements GuardedNodeGraphQLInterface {
   // RESOLVED FIELDS
   // **********************************************************************************************
 
-  @Field(() => CycleStatusObject, {
+  @Field(() => StatusGraphQLObject, {
     description:
       'The status of the given cycle. Here you can fetch the current progress, confidence, and others for that cycle',
   })
-  public status!: CycleStatusObject
+  public status!: StatusGraphQLObject
 
   @Field(() => TeamGraphQLNode, {
     complexity: 1,

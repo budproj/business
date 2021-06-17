@@ -1,13 +1,13 @@
-import { Field, Float, Int, InterfaceType } from '@nestjs/graphql'
+import { Field, Float, Int, ObjectType } from '@nestjs/graphql'
 
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-result/check-in/key-result-check-in.node'
 
-@InterfaceType('StatusInterface', {
+@ObjectType('Status', {
   description:
     "The current status of an entity. By status we mean progress, confidence, and other reported values from it's children",
 })
-export abstract class StatusGraphQLInterface {
+export class StatusGraphQLObject {
   @Field(() => Float, {
     complexity: 0,
     description:
