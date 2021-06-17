@@ -3,14 +3,14 @@ import { Field, ObjectType } from '@nestjs/graphql'
 import { StatusGraphQLInterface } from '@interface/graphql/interfaces/status.interface'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-result/check-in/key-result-check-in.node'
 
-@ObjectType('ObjectiveStatus', {
+@ObjectType('KeyResultStatus', {
   implements: () => StatusGraphQLInterface,
   description:
-    "The current status of this objective. By status we mean progress, confidence, and other reported values from it's key results",
+    'The current status of this key-result. By status we mean progress, confidence, and other reported values',
 })
-export class ObjectiveStatusObject implements StatusGraphQLInterface {
+export class KeyResultStatusObject implements StatusGraphQLInterface {
   @Field(() => KeyResultCheckInGraphQLNode, {
-    description: 'The latest reported check-in among all key results of that objective',
+    description: 'The most recent check-in inside all this key-result check-ins',
     nullable: true,
   })
   public latestKeyResultCheckIn?: KeyResultCheckInGraphQLNode

@@ -18,4 +18,10 @@ export abstract class StatusGraphQLInterface {
       "The computed current confidence of this entity. The confidence is always the lowest among the entity's children",
   })
   public readonly confidence!: number
+
+  @Field(() => Date, {
+    complexity: 0,
+    description: 'The latest check-in date in this status',
+  })
+  public readonly reportDate!: Date
 }

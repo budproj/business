@@ -22,4 +22,5 @@ export class CycleStatusObject implements StatusGraphQLInterface {
 
   public progress!: number
   public confidence!: number
+  public reportDate!: Date
 }

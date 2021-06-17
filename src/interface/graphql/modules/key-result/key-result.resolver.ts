@@ -13,6 +13,7 @@ import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-
 import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { KeyResultStatus } from '@core/ports/commands/get-key-result-status'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { AttachActivity } from '@interface/graphql/adapters/activity/attach-activity.decorator'
 import { RequestActivity } from '@interface/graphql/adapters/activity/request-activity.decorator'
@@ -23,6 +24,7 @@ import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authoriz
 import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { KeyResultAccessControl } from '@interface/graphql/modules/key-result/access-control/key-result.access-control'
+import { KeyResultStatusObject } from '@interface/graphql/modules/key-result/objects/key-result-status.object'
 import { KeyResultCreateRequest } from '@interface/graphql/modules/key-result/requests/key-result-create.request'
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
@@ -233,7 +235,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
 
     const objective = await this.core.objective.getFromKeyResult(keyResult)
     const latestKeyResultCheckIn = await this.core.keyResult.getLatestCheckInForKeyResultAtDate(
-      keyResult,
+      keyResult.id,
     )
 
     const enhancedKeyResult = {
@@ -252,7 +254,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching latest key result check-in for key result',
     })
 
-    return this.core.keyResult.getLatestCheckInForKeyResultAtDate(keyResult)
+    return this.core.keyResult.getLatestCheckInForKeyResultAtDate(keyResult.id)
   }
 
   @ResolveField('timeline', () => KeyResultTimelineGraphQLConnection)
@@ -274,5 +276,24 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     const queryResult = await this.core.keyResult.getTimeline(keyResult)
 
     return this.relay.marshalResponse(queryResult, connection, keyResult)
+  }
+
+  @ResolveField('status', () => KeyResultStatusObject)
+  protected async getStatusForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
+    this.logger.log({
+      keyResult,
+      message: 'Fetching current status for this key-result',
+    })
+
+    const result = await this.corePorts.dispatchCommand<KeyResultStatus>(
+      'get-key-result-status',
+      keyResult.id,
+    )
+    if (!result)
+      throw new UserInputError(
+        `We could not find status for the key-result with ID ${keyResult.id}`,
+      )
+
+    return result
   }
 }

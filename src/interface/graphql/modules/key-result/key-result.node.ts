@@ -6,6 +6,7 @@ import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authori
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 import { KeyResultTypeGraphQLEnum } from '@interface/graphql/modules/key-result/enums/key-result-type.enum'
+import { KeyResultStatusObject } from '@interface/graphql/modules/key-result/objects/key-result-status.object'
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
@@ -18,8 +19,7 @@ import { KeyResultFormatGraphQLEnum } from './enums/key-result-format.enum'
 
 @ObjectType('KeyResult', {
   implements: () => [NodeRelayGraphQLInterface, GuardedNodeGraphQLInterface],
-  description:
-    'The current status of this key-result. By status we mean progress, confidence, and other reported values from it',
+  description: 'A key-result is a given goal inside an objective',
 })
 export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
   @Field({ complexity: 0, description: 'The title of the key result' })
@@ -80,6 +80,12 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
     description: 'The team that this key result belongs to',
   })
   public readonly team!: TeamGraphQLNode
+
+  @Field(() => KeyResultStatusObject, {
+    description:
+      'The status of the given key-result. Here you can fetch the current progress, confidence, and others for that key-result',
+  })
+  public status: KeyResultStatusObject
 
   @Field({
     complexity: 1,

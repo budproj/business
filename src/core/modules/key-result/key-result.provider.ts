@@ -237,11 +237,11 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   }
 
   public async getLatestCheckInForKeyResultAtDate(
-    keyResult: KeyResultInterface,
+    keyResultID: string,
     date?: Date,
   ): Promise<KeyResultCheckIn> {
     date ??= new Date()
-    return this.keyResultCheckInProvider.getLatestFromKeyResultAtDate(keyResult, date)
+    return this.keyResultCheckInProvider.getLatestFromKeyResultAtDate(keyResultID, date)
   }
 
   public calculateKeyResultCheckInListAverageProgress(

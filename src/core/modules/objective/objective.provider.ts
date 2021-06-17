@@ -185,7 +185,7 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
 
   private async buildStatusAtDate(date: Date, keyResults: KeyResult[]): Promise<ObjectiveStatus> {
     const keyResultStatusPromises = keyResults.map(async (keyResult) =>
-      this.keyResultProvider.getLatestCheckInForKeyResultAtDate(keyResult, date),
+      this.keyResultProvider.getLatestCheckInForKeyResultAtDate(keyResult.id, date),
     )
     const keyResultStatus = await Promise.all(keyResultStatusPromises)
     const latestKeyResultCheckIn = maxBy(keyResultStatus, 'createdAt')

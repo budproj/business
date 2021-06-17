@@ -9,10 +9,12 @@ import { GetKeyResultCheckInCommand } from '@core/ports/commands/get-key-result-
 import { GetKeyResultCommentTeamCommand } from '@core/ports/commands/get-key-result-comment-team.command'
 import { GetKeyResultCommentCommand } from '@core/ports/commands/get-key-result-comment.command'
 import { GetKeyResultConfidenceColorCommand } from '@core/ports/commands/get-key-result-confidence-color.command'
+import { GetKeyResultStatusCommand } from '@core/ports/commands/get-key-result-status'
 import { GetKeyResultTeamCommand } from '@core/ports/commands/get-key-result-team.command'
 import { GetObjectiveTeamTreeCommand } from '@core/ports/commands/get-objective-team-tree.command'
 import { GetObjectiveCommand } from '@core/ports/commands/get-objective.command'
 import { GetTeamObjectivesCommand } from '@core/ports/commands/get-team-objectives.command'
+import { GetTeamStatusCommand } from '@core/ports/commands/get-team-status'
 import { GetTeamTreeCommand } from '@core/ports/commands/get-team-tree.command'
 import { GetTeamCommand } from '@core/ports/commands/get-team.command'
 import { GetUserFullNameCommand } from '@core/ports/commands/get-user-full-name.command'
@@ -41,77 +43,81 @@ import { GetUserCompaniesCommand } from './get-user-companies.command'
 type CommandConstructor = new (...commandArguments: any[]) => Command<unknown>
 export type CommandType =
   | 'create-check-in'
-  | 'create-key-result-comment'
-  | 'get-key-result-check-in-list'
-  | 'get-key-result-company'
-  | 'get-key-result-from-check-in'
-  | 'get-key-result-owner'
-  | 'get-key-result-team-tree'
-  | 'get-key-result'
-  | 'get-team-owner'
-  | 'get-user-companies'
-  | 'get-key-result-check-in-window-for-check-in'
-  | 'get-cycle'
-  | 'get-key-result-cycle'
-  | 'get-key-result-check-in-team'
-  | 'get-team-company'
-  | 'get-key-result-comment-team'
-  | 'update-key-result'
-  | 'get-key-result-team'
-  | 'get-key-result-check-in'
-  | 'get-user'
-  | 'get-user-team-tree'
-  | 'get-key-result-comment'
-  | 'get-user-full-name'
-  | 'get-key-result-confidence-color'
-  | 'get-key-result-check-in-delta'
-  | 'get-team-objectives'
-  | 'get-team'
-  | 'get-team-tree'
   | 'create-key-result'
-  | 'get-objective'
-  | 'get-objective-team-tree'
-  | 'update-objective'
+  | 'create-key-result-comment'
   | 'delete-key-result'
   | 'delete-objective'
+  | 'get-cycle'
+  | 'get-key-result'
+  | 'get-key-result-check-in'
+  | 'get-key-result-check-in-delta'
+  | 'get-key-result-check-in-list'
+  | 'get-key-result-check-in-team'
+  | 'get-key-result-check-in-window-for-check-in'
+  | 'get-key-result-comment'
+  | 'get-key-result-comment-team'
+  | 'get-key-result-company'
+  | 'get-key-result-confidence-color'
+  | 'get-key-result-cycle'
+  | 'get-key-result-from-check-in'
+  | 'get-key-result-owner'
+  | 'get-key-result-status'
+  | 'get-key-result-team'
+  | 'get-key-result-team-tree'
+  | 'get-objective'
+  | 'get-objective-team-tree'
+  | 'get-team'
+  | 'get-team-company'
+  | 'get-team-objectives'
+  | 'get-team-owner'
+  | 'get-team-status'
+  | 'get-team-tree'
+  | 'get-user'
+  | 'get-user-companies'
+  | 'get-user-full-name'
+  | 'get-user-team-tree'
+  | 'update-key-result'
+  | 'update-objective'
 
 @Injectable()
 export class CommandFactory {
   private readonly commands: Record<CommandType, CommandConstructor> = {
     'create-check-in': CreateKeyResultCheckInCommand,
-    'create-key-result-comment': CreateKeyResultCommentCommand,
-    'get-key-result-check-in-list': GetKeyResultCheckInListCommand,
-    'get-key-result-company': GetKeyResultCompanyCommand,
-    'get-key-result-from-check-in': GetKeyResultFromCheckInCommand,
-    'get-key-result-owner': GetKeyResultOwnerCommand,
-    'get-key-result-team-tree': GetKeyResultTeamTreeCommand,
-    'get-key-result': GetKeyResultCommand,
-    'get-team-owner': GetTeamOwnerCommand,
-    'get-user-companies': GetUserCompaniesCommand,
-    'get-key-result-check-in-window-for-check-in': GetKeyResultCheckInWindowForCheckInCommand,
-    'get-cycle': GetCycleCommand,
-    'get-key-result-cycle': GetKeyResultCycleCommand,
-    'get-key-result-check-in-team': GetKeyResultCheckInTeamCommand,
-    'get-team-company': GetTeamCompanyCommand,
-    'get-key-result-comment-team': GetKeyResultCommentTeamCommand,
-    'update-key-result': UpdateKeyResultCommand,
-    'get-key-result-team': GetKeyResultTeamCommand,
-    'get-key-result-check-in': GetKeyResultCheckInCommand,
-    'get-user': GetUserCommand,
-    'get-user-team-tree': GetUserTeamTreeCommand,
-    'get-key-result-comment': GetKeyResultCommentCommand,
-    'get-user-full-name': GetUserFullNameCommand,
-    'get-key-result-confidence-color': GetKeyResultConfidenceColorCommand,
-    'get-key-result-check-in-delta': GetKeyResultCheckInDeltaCommand,
-    'get-team-objectives': GetTeamObjectivesCommand,
-    'get-team': GetTeamCommand,
-    'get-team-tree': GetTeamTreeCommand,
     'create-key-result': CreateKeyResultCommand,
-    'get-objective': GetObjectiveCommand,
-    'get-objective-team-tree': GetObjectiveTeamTreeCommand,
-    'update-objective': UpdateObjectiveCommand,
+    'create-key-result-comment': CreateKeyResultCommentCommand,
     'delete-key-result': DeleteKeyResultCommand,
     'delete-objective': DeleteObjectiveCommand,
+    'get-cycle': GetCycleCommand,
+    'get-key-result': GetKeyResultCommand,
+    'get-key-result-check-in': GetKeyResultCheckInCommand,
+    'get-key-result-check-in-delta': GetKeyResultCheckInDeltaCommand,
+    'get-key-result-check-in-list': GetKeyResultCheckInListCommand,
+    'get-key-result-check-in-team': GetKeyResultCheckInTeamCommand,
+    'get-key-result-check-in-window-for-check-in': GetKeyResultCheckInWindowForCheckInCommand,
+    'get-key-result-comment': GetKeyResultCommentCommand,
+    'get-key-result-comment-team': GetKeyResultCommentTeamCommand,
+    'get-key-result-company': GetKeyResultCompanyCommand,
+    'get-key-result-confidence-color': GetKeyResultConfidenceColorCommand,
+    'get-key-result-cycle': GetKeyResultCycleCommand,
+    'get-key-result-from-check-in': GetKeyResultFromCheckInCommand,
+    'get-key-result-owner': GetKeyResultOwnerCommand,
+    'get-key-result-status': GetKeyResultStatusCommand,
+    'get-key-result-team': GetKeyResultTeamCommand,
+    'get-key-result-team-tree': GetKeyResultTeamTreeCommand,
+    'get-objective': GetObjectiveCommand,
+    'get-objective-team-tree': GetObjectiveTeamTreeCommand,
+    'get-team': GetTeamCommand,
+    'get-team-company': GetTeamCompanyCommand,
+    'get-team-objectives': GetTeamObjectivesCommand,
+    'get-team-owner': GetTeamOwnerCommand,
+    'get-team-status': GetTeamStatusCommand,
+    'get-team-tree': GetTeamTreeCommand,
+    'get-user': GetUserCommand,
+    'get-user-companies': GetUserCompaniesCommand,
+    'get-user-full-name': GetUserFullNameCommand,
+    'get-user-team-tree': GetUserTeamTreeCommand,
+    'update-key-result': UpdateKeyResultCommand,
+    'update-objective': UpdateObjectiveCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}

@@ -11,6 +11,7 @@ import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-resu
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
+import { TeamStatus } from '@core/modules/team/interfaces/team-status.interface'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
@@ -27,6 +28,7 @@ import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/re
 import { UserFiltersRequest } from '@interface/graphql/modules/user/requests/user-filters.request'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
+import { StatusRequest } from '@interface/graphql/requests/status.request'
 
 import { TeamCyclesGraphQLConnection } from './connections/team-cycles/team-cycles.connection'
 import { TeamKeyResultsGraphQLConnection } from './connections/team-key-results/team-key-results.connection'
@@ -65,13 +67,25 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   }
 
   @ResolveField('status', () => TeamStatusObject)
-  protected async getStatusForTeam(@Parent() team: TeamGraphQLNode) {
+  protected async getStatusForTeam(
+    @Parent() team: TeamGraphQLNode,
+    @Args() request: StatusRequest,
+  ) {
     this.logger.log({
       team,
+      request,
       message: 'Fetching current status for this team',
     })
 
-    return this.core.team.getCurrentStatus(team)
+    const result = await this.corePorts.dispatchCommand<TeamStatus>(
+      'get-team-status',
+      team.id,
+      request,
+    )
+    if (!result)
+      throw new UserInputError(`We could not find status for the team with ID ${team.id}`)
+
+    return result
   }
 
   @ResolveField('owner', () => UserGraphQLNode)
