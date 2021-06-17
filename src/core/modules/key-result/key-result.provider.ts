@@ -23,13 +23,11 @@ import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
 import { KeyResultInterface } from './interfaces/key-result.interface'
 import { KeyResult } from './key-result.orm-entity'
 import { KeyResultRepository } from './key-result.repository'
-import { KeyResultSpecification } from './key-result.specification'
 import { KeyResultTimelineProvider } from './timeline.provider'
 import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
 
 @Injectable()
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
-  private readonly specifications: KeyResultSpecification = new KeyResultSpecification()
   private readonly confidenceTagAdapter = new ConfidenceTagAdapter()
 
   constructor(
@@ -260,15 +258,6 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   public async getLatestCheckInForTeam(team: TeamInterface) {
     const users = await this.teamProvider.getUsersInTeam(team)
     return this.keyResultCheckInProvider.getLatestFromUsers(users)
-  }
-
-  public async isOutdated(keyResult: KeyResult): Promise<boolean> {
-    const keyResultIndexes = {
-      id: keyResult.id,
-    }
-    const isActive = await this.isActiveFromIndexes(keyResultIndexes)
-
-    return isActive && this.specifications.isOutdated.isSatisfiedBy(keyResult)
   }
 
   public async getTimeline(

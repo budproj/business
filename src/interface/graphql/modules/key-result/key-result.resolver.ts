@@ -35,7 +35,6 @@ import { NodeDeleteRequest } from '@interface/graphql/requests/node-delete.reque
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 import { StatusRequest } from '@interface/graphql/requests/status.request'
 
-import { KeyResultCheckInGraphQLNode } from './check-in/key-result-check-in.node'
 import { KeyResultCheckInFiltersRequest } from './check-in/requests/key-result-check-in-filters.request'
 import { KeyResultCommentFiltersRequest } from './comment/requests/key-result-comment-filters.request'
 import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.connection'
@@ -225,37 +224,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     const queryResult = await this.core.keyResult.getCheckIns(keyResult, filters, queryOptions)
 
     return this.relay.marshalResponse<KeyResultCheckInInterface>(queryResult, connection, keyResult)
-  }
-
-  @ResolveField('isOutdated', () => Boolean)
-  protected async getIsOutdatedForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
-    this.logger.log({
-      keyResult,
-      message: 'Deciding if the given key result is outdated',
-    })
-
-    const objective = await this.core.objective.getFromKeyResult(keyResult)
-    const latestKeyResultCheckIn = await this.core.keyResult.getLatestCheckInForKeyResultAtDate(
-      keyResult.id,
-    )
-
-    const enhancedKeyResult = {
-      ...keyResult,
-      objective,
-      checkIns: latestKeyResultCheckIn ? [latestKeyResultCheckIn] : undefined,
-    }
-
-    return this.core.keyResult.isOutdated(enhancedKeyResult)
-  }
-
-  @ResolveField('latestKeyResultCheckIn', () => KeyResultCheckInGraphQLNode, { nullable: true })
-  protected async getLatestKeyResultCheckInForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
-    this.logger.log({
-      keyResult,
-      message: 'Fetching latest key result check-in for key result',
-    })
-
-    return this.core.keyResult.getLatestCheckInForKeyResultAtDate(keyResult.id)
   }
 
   @ResolveField('timeline', () => KeyResultTimelineGraphQLConnection)

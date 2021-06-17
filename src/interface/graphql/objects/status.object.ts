@@ -22,6 +22,13 @@ export class StatusGraphQLObject {
   })
   public readonly confidence!: number
 
+  @Field({
+    complexity: 0,
+    description:
+      'This key defines if the given entity is outdated. By outdated we mean that it needs to receive a new report',
+  })
+  public readonly isOutdated!: boolean
+
   @Field(() => Date, {
     complexity: 0,
     description: 'The latest check-in date in this status',

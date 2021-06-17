@@ -27,8 +27,10 @@ export class GetTeamStatusCommand extends BaseStatusCommand {
 
     const allStatus = [...objectivesStatus, ...childTeamsStatus]
     const latestStatusReport = this.getLatestFromList(allStatus)
+    const isOutdated = this.isOutdated(latestStatusReport.latestCheckIn)
 
     return {
+      isOutdated,
       latestCheckIn: latestStatusReport.latestCheckIn,
       reportDate: latestStatusReport.reportDate,
       progress: this.getAverageProgressFromList(allStatus),

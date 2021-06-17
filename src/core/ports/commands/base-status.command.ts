@@ -1,6 +1,8 @@
+import { differenceInCalendarWeeks } from 'date-fns'
 import { sum, minBy, maxBy } from 'lodash'
 
 import { GetStatusOptions, Status } from '@core/interfaces/status.interface'
+import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 
 import { Command } from './base.command'
 
@@ -11,6 +13,7 @@ export abstract class BaseStatusCommand extends Command<Status> {
     return {
       progress: 0,
       confidence: 0,
+      isOutdated: true,
     }
   }
 
@@ -32,5 +35,15 @@ export abstract class BaseStatusCommand extends Command<Status> {
     if (statusList.length === 0) return BaseStatusCommand.buildDefaultStatus()
 
     return maxBy(statusList, 'reportDate') ?? statusList[0]
+  }
+
+  protected isOutdated(
+    latestKeyResultCheckIn?: KeyResultCheckInInterface,
+    baseDate?: Date,
+  ): boolean {
+    baseDate ??= new Date()
+    const checkInDate = latestKeyResultCheckIn?.createdAt ?? baseDate
+
+    return differenceInCalendarWeeks(baseDate, checkInDate) > 0
   }
 }

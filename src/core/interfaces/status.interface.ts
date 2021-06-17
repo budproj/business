@@ -3,6 +3,7 @@ import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-c
 export interface Status {
   progress: number
   confidence: number
+  isOutdated: boolean
   reportDate?: Date
   latestCheckIn?: KeyResultCheckIn
 }

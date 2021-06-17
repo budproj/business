@@ -11,7 +11,6 @@ import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 
-import { KeyResultCheckInGraphQLNode } from './check-in/key-result-check-in.node'
 import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.connection'
 import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-result-key-result-comments/key-result-key-result-comments.connection'
 import { KeyResultTimelineGraphQLConnection } from './connections/key-result-timeline/key-result-key-result-timeline.connection'
@@ -82,23 +81,11 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
   public readonly team!: TeamGraphQLNode
 
   @Field(() => StatusGraphQLObject, {
+    complexity: 1,
     description:
       'The status of the given key-result. Here you can fetch the current progress, confidence, and others for that key-result',
   })
   public status: StatusGraphQLObject
-
-  @Field({
-    complexity: 1,
-    description:
-      'Saying a key result is "outdated" means that the owner needs to do a new check-in to report the current key result progress',
-  })
-  public readonly isOutdated?: boolean
-
-  @Field(() => KeyResultCheckInGraphQLNode, {
-    description: 'The latest key result check-in reported for that key result',
-    nullable: true,
-  })
-  public latestKeyResultCheckIn?: KeyResultCheckInGraphQLNode
 
   // **********************************************************************************************
   // CONNECTION FIELDS

@@ -24,8 +24,10 @@ export class GetObjectiveStatusCommand extends BaseStatusCommand {
 
     const keyResultsStatus = await Promise.all(keyResultStatusPromises)
     const latestStatusReport = this.getLatestFromList(keyResultsStatus)
+    const isOutdated = this.isOutdated(latestStatusReport.latestCheckIn)
 
     return {
+      isOutdated,
       latestCheckIn: latestStatusReport.latestCheckIn,
       reportDate: latestStatusReport.reportDate,
       progress: this.getAverageProgressFromList(keyResultsStatus),
