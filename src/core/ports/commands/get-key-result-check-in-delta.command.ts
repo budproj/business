@@ -1,31 +1,47 @@
-import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
-import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
+import { CoreProvider } from '@core/core.provider'
+import { Delta } from '@core/interfaces/delta.interface'
+import { Status } from '@core/interfaces/status.interface'
+import { BaseDeltaCommand } from '@core/ports/commands/base-delta.command'
+import { Command } from '@core/ports/commands/base.command'
+import { CommandFactory } from '@core/ports/commands/command.factory'
 
-import { Command } from './base.command'
+export interface KeyResultCheckInDelta extends Delta {
+  value: number
+  confidenceTag: number
+}
 
-type DeltaType = 'value' | 'progress' | 'confidence' | 'confidenceTag'
-type TypeHandler = (
-  checkIn: KeyResultCheckIn,
-  keyResult: KeyResult,
-  parent?: KeyResultCheckIn,
-) => number
+export class GetKeyResultCheckInDeltaCommand extends BaseDeltaCommand<KeyResultCheckInDelta> {
+  private readonly getKeyResultCheckInStatus: Command<Status>
+  private readonly confidenceTagAdapter = new ConfidenceTagAdapter()
 
-export class GetKeyResultCheckInDeltaCommand extends Command<number> {
-  private readonly typeHandlers: Record<DeltaType, TypeHandler> = {
-    value: (...handlerArguments) => this.core.keyResult.getCheckInDeltaValue(...handlerArguments),
-    progress: (...handlerArguments) =>
-      this.core.keyResult.getCheckInDeltaProgress(...handlerArguments),
-    confidence: (...handlerArguments) =>
-      this.core.keyResult.getCheckInDeltaConfidence(...handlerArguments),
-    confidenceTag: (...handlerArguments) =>
-      this.core.keyResult.getCheckInDeltaConfidenceTag(...handlerArguments),
+  constructor(protected core: CoreProvider, protected factory: CommandFactory) {
+    super(core, factory)
+
+    this.getKeyResultCheckInStatus = this.factory.buildCommand<Status>(
+      'get-key-result-check-in-status',
+    )
   }
 
-  public async execute(checkIn: KeyResultCheckIn, type: DeltaType): Promise<number> {
-    const parent = await this.core.keyResult.getParentCheckInFromCheckIn(checkIn)
-    const keyResult = await this.core.keyResult.getFromIndexes({ id: checkIn.keyResultId })
-    const handler = this.typeHandlers[type]
+  public async execute(keyResultCheckInID: string): Promise<KeyResultCheckInDelta> {
+    const currentStatus = await this.getKeyResultCheckInStatus.execute(keyResultCheckInID)
+    const previousStatus = await this.getKeyResultCheckInStatus.execute(
+      currentStatus.latestCheckIn.parentId,
+    )
 
-    return handler(checkIn, keyResult, parent)
+    return this.marshal(currentStatus, previousStatus)
+  }
+
+  protected marshal(currentStatus: Status, previousStatus: Status): KeyResultCheckInDelta {
+    const originalDeltaValues = super.marshal(currentStatus, previousStatus)
+
+    return {
+      ...originalDeltaValues,
+      value: currentStatus.latestCheckIn.value - previousStatus.latestCheckIn.value,
+      confidenceTag: this.confidenceTagAdapter.differenceInConfidenceTagIndexes(
+        currentStatus.confidence,
+        previousStatus.confidence,
+      ),
+    }
   }
 }

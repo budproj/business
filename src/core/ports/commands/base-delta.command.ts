@@ -5,7 +5,7 @@ import { Status } from '@core/interfaces/status.interface'
 
 import { Command } from './base.command'
 
-export abstract class BaseDeltaCommand extends Command<Delta> {
+export abstract class BaseDeltaCommand<D extends Delta = Delta> extends Command<D> {
   static buildDefaultDelta(): Delta {
     return {
       progress: 0,

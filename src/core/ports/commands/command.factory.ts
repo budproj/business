@@ -7,6 +7,7 @@ import { DeleteObjectiveCommand } from '@core/ports/commands/delete-objective.co
 import { GetCycleDeltaCommand } from '@core/ports/commands/get-cycle-delta.command'
 import { GetCycleStatusCommand } from '@core/ports/commands/get-cycle-status.command'
 import { GetKeyResultCheckInDeltaCommand } from '@core/ports/commands/get-key-result-check-in-delta.command'
+import { GetKeyResultCheckInStatusCommand } from '@core/ports/commands/get-key-result-check-in-status.command'
 import { GetKeyResultCheckInCommand } from '@core/ports/commands/get-key-result-check-in.command'
 import { GetKeyResultCommentTeamCommand } from '@core/ports/commands/get-key-result-comment-team.command'
 import { GetKeyResultCommentCommand } from '@core/ports/commands/get-key-result-comment.command'
@@ -60,6 +61,7 @@ export type CommandType =
   | 'get-key-result-check-in'
   | 'get-key-result-check-in-delta'
   | 'get-key-result-check-in-list'
+  | 'get-key-result-check-in-status'
   | 'get-key-result-check-in-team'
   | 'get-key-result-check-in-window-for-check-in'
   | 'get-key-result-comment'
@@ -106,6 +108,7 @@ export class CommandFactory {
     'get-key-result-check-in': GetKeyResultCheckInCommand,
     'get-key-result-check-in-delta': GetKeyResultCheckInDeltaCommand,
     'get-key-result-check-in-list': GetKeyResultCheckInListCommand,
+    'get-key-result-check-in-status': GetKeyResultCheckInStatusCommand,
     'get-key-result-check-in-team': GetKeyResultCheckInTeamCommand,
     'get-key-result-check-in-window-for-check-in': GetKeyResultCheckInWindowForCheckInCommand,
     'get-key-result-comment': GetKeyResultCommentCommand,

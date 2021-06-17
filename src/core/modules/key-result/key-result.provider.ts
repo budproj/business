@@ -2,11 +2,9 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { uniqBy } from 'lodash'
 import { Any, DeleteResult, FindConditions } from 'typeorm'
 
-import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
-import { DEFAULT_CONFIDENCE } from '@core/modules/key-result/check-in/key-result-check-in.constants'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { ObjectiveProvider } from '@core/modules/objective/objective.provider'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
@@ -27,8 +25,6 @@ import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
 
 @Injectable()
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
-  private readonly confidenceTagAdapter = new ConfidenceTagAdapter()
-
   constructor(
     public readonly keyResultCommentProvider: KeyResultCommentProvider,
     public readonly keyResultCheckInProvider: KeyResultCheckInProvider,
@@ -279,52 +275,6 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     indexes: Partial<KeyResultCommentInterface>,
   ): Promise<KeyResultComment> {
     return this.keyResultCommentProvider.getOne(indexes)
-  }
-
-  public getCheckInDeltaValue(
-    checkIn: KeyResultCheckIn,
-    keyResult: KeyResult,
-    parent?: KeyResultCheckIn,
-  ): number {
-    const previousValue = parent?.value ?? keyResult.initialValue
-    return checkIn.value - previousValue
-  }
-
-  public getCheckInDeltaProgress(
-    checkIn: KeyResultCheckIn,
-    keyResult: KeyResult,
-    parent?: KeyResultCheckIn,
-  ): number {
-    const currentProgress = this.keyResultCheckInProvider.getProgressFromValue(
-      keyResult,
-      checkIn.value,
-    )
-    const previousProgress = this.keyResultCheckInProvider.getProgressFromValue(
-      keyResult,
-      parent?.value,
-    )
-
-    return currentProgress - previousProgress
-  }
-
-  public getCheckInDeltaConfidence(
-    checkIn: KeyResultCheckIn,
-    keyResult: KeyResult,
-    parent?: KeyResultCheckIn,
-  ): number {
-    const previousConfidence = parent?.confidence ?? DEFAULT_CONFIDENCE
-    return checkIn.confidence - previousConfidence
-  }
-
-  public getCheckInDeltaConfidenceTag(
-    checkIn: KeyResultCheckIn,
-    _keyResult: KeyResult,
-    parent?: KeyResultCheckIn,
-  ): number {
-    return this.confidenceTagAdapter.differenceInConfidenceTagIndexes(
-      parent?.confidence,
-      checkIn.confidence,
-    )
   }
 
   public async createKeyResult(data: KeyResultInterface): Promise<KeyResult> {
