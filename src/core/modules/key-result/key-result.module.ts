@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { ObjectiveModule } from '@core/modules/objective/objective.module'
@@ -20,7 +20,7 @@ import { KeyResultTimelineProvider } from './timeline.provider'
       KeyResultCheckInRepository,
     ]),
     TeamModule,
-    forwardRef(() => ObjectiveModule),
+    ObjectiveModule,
   ],
   providers: [
     KeyResultProvider,

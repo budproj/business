@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { uniqBy, sum } from 'lodash'
+import { uniqBy } from 'lodash'
 import { Any, DeleteResult, FindConditions } from 'typeorm'
 
 import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
@@ -10,7 +10,6 @@ import { DEFAULT_CONFIDENCE } from '@core/modules/key-result/check-in/key-result
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { ObjectiveProvider } from '@core/modules/objective/objective.provider'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
-import { TeamProvider } from '@core/modules/team/team.provider'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 
@@ -35,8 +34,6 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     public readonly keyResultCheckInProvider: KeyResultCheckInProvider,
     public readonly timeline: KeyResultTimelineProvider,
     protected readonly repository: KeyResultRepository,
-    @Inject(forwardRef(() => TeamProvider))
-    private readonly teamProvider: TeamProvider,
     @Inject(forwardRef(() => ObjectiveProvider))
     private readonly objectiveProvider: ObjectiveProvider,
   ) {
@@ -240,24 +237,6 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   ): Promise<KeyResultCheckIn> {
     date ??= new Date()
     return this.keyResultCheckInProvider.getLatestFromKeyResultAtDate(keyResultID, date)
-  }
-
-  public calculateKeyResultCheckInListAverageProgress(
-    keyResultCheckInList: Array<KeyResultCheckIn | undefined>,
-    keyResults: KeyResult[],
-  ) {
-    if (keyResultCheckInList.length === 0) return 0
-
-    const progressList = keyResultCheckInList.map((checkIn, index) =>
-      this.keyResultCheckInProvider.getProgressFromValue(keyResults[index], checkIn?.value),
-    )
-
-    return sum(progressList) / keyResultCheckInList.length
-  }
-
-  public async getLatestCheckInForTeam(team: TeamInterface) {
-    const users = await this.teamProvider.getUsersInTeam(team)
-    return this.keyResultCheckInProvider.getLatestFromUsers(users)
   }
 
   public async getTimeline(
