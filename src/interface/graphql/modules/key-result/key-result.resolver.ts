@@ -7,6 +7,7 @@ import { Resource } from '@adapters/policy/enums/resource.enum'
 import { State } from '@adapters/state/interfaces/state.interface'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { Delta } from '@core/interfaces/delta.interface'
 import { Status } from '@core/interfaces/status.interface'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
@@ -29,6 +30,7 @@ import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objec
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
+import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
 import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 import { ConnectionFiltersRequest } from '@interface/graphql/requests/connection-filters.request'
 import { NodeDeleteRequest } from '@interface/graphql/requests/node-delete.request'
@@ -266,6 +268,22 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     if (!result)
       throw new UserInputError(
         `We could not find status for the key-result with ID ${keyResult.id}`,
+      )
+
+    return result
+  }
+
+  @ResolveField('delta', () => DeltaGraphQLObject)
+  protected async getDeltaForObjective(@Parent() keyResult: KeyResultGraphQLNode) {
+    this.logger.log({
+      keyResult,
+      message: 'Fetching delta for this key-result',
+    })
+
+    const result = await this.corePorts.dispatchCommand<Delta>('get-key-result-delta', keyResult.id)
+    if (!result)
+      throw new UserInputError(
+        `We could not find a delta for the key-result with ID ${keyResult.id}`,
       )
 
     return result

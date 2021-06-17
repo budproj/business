@@ -1,4 +1,4 @@
-import { Field, Float, ObjectType } from '@nestjs/graphql'
+import { Field, Float, Int, ObjectType } from '@nestjs/graphql'
 
 @ObjectType('Delta', {
   description:
@@ -10,4 +10,10 @@ export class DeltaGraphQLObject {
     description: 'The progress difference of this entity comparing with it last week',
   })
   public readonly progress!: number
+
+  @Field(() => Int, {
+    complexity: 0,
+    description: 'The confidence difference of this entity comparing with it last week',
+  })
+  public readonly confidence!: number
 }

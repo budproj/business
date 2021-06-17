@@ -41,7 +41,7 @@ export class ObjectiveGraphQLNode implements GuardedNodeGraphQLInterface {
 
   @Field(() => DeltaGraphQLObject, {
     complexity: 1,
-    description: 'The delta of this objective comparing with it last week',
+    description: 'The delta of this objective comparing with last week',
   })
   public delta!: DeltaGraphQLObject
 

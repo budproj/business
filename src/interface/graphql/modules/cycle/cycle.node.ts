@@ -68,7 +68,7 @@ export class CycleGraphQLNode implements GuardedNodeGraphQLInterface {
 
   @Field(() => DeltaGraphQLObject, {
     complexity: 2,
-    description: 'The delta of this cycle comparing with it last week',
+    description: 'The delta of this cycle comparing with last week',
   })
   public delta!: DeltaGraphQLObject
 

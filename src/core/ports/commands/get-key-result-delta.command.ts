@@ -5,20 +5,20 @@ import { BaseDeltaCommand } from '@core/ports/commands/base-delta.command'
 import { Command } from '@core/ports/commands/base.command'
 import { CommandFactory } from '@core/ports/commands/command.factory'
 
-export class GetObjectiveDeltaCommand extends BaseDeltaCommand {
-  private readonly getObjectiveStatus: Command<Status>
+export class GetKeyResultDeltaCommand extends BaseDeltaCommand {
+  private readonly getKeyResultStatus: Command<Status>
 
   constructor(protected core: CoreProvider, protected factory: CommandFactory) {
     super(core, factory)
 
-    this.getObjectiveStatus = this.factory.buildCommand<Status>('get-objective-status')
+    this.getKeyResultStatus = this.factory.buildCommand<Status>('get-key-result-status')
   }
 
-  public async execute(objectiveID: string): Promise<Delta> {
+  public async execute(keyResultID: string): Promise<Delta> {
     const comparisonDate = this.getComparisonDate()
 
-    const currentStatus = await this.getObjectiveStatus.execute(objectiveID)
-    const previousStatus = await this.getObjectiveStatus.execute(objectiveID, {
+    const currentStatus = await this.getKeyResultStatus.execute(keyResultID)
+    const previousStatus = await this.getKeyResultStatus.execute(keyResultID, {
       date: comparisonDate,
     })
 

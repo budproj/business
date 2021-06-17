@@ -22,8 +22,6 @@ export class GetCycleDeltaCommand extends BaseDeltaCommand {
       date: comparisonDate,
     })
 
-    return {
-      progress: this.getProgressDifference(currentStatus, previousStatus),
-    }
+    return this.marshal(currentStatus, previousStatus)
   }
 }

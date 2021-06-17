@@ -9,6 +9,7 @@ import { KeyResultTypeGraphQLEnum } from '@interface/graphql/modules/key-result/
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
+import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
 import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 
 import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.connection'
@@ -86,6 +87,12 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
       'The status of the given key-result. Here you can fetch the current progress, confidence, and others for that key-result',
   })
   public status: StatusGraphQLObject
+
+  @Field(() => DeltaGraphQLObject, {
+    complexity: 1,
+    description: 'The delta of this key-result comparing with last week',
+  })
+  public delta!: DeltaGraphQLObject
 
   // **********************************************************************************************
   // CONNECTION FIELDS

@@ -59,7 +59,7 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
 
   @Field(() => DeltaGraphQLObject, {
     complexity: 2,
-    description: 'The delta of this team comparing with it last week',
+    description: 'The delta of this team comparing with last week',
   })
   public delta!: DeltaGraphQLObject
 

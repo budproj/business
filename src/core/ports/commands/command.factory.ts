@@ -11,6 +11,7 @@ import { GetKeyResultCheckInCommand } from '@core/ports/commands/get-key-result-
 import { GetKeyResultCommentTeamCommand } from '@core/ports/commands/get-key-result-comment-team.command'
 import { GetKeyResultCommentCommand } from '@core/ports/commands/get-key-result-comment.command'
 import { GetKeyResultConfidenceColorCommand } from '@core/ports/commands/get-key-result-confidence-color.command'
+import { GetKeyResultDeltaCommand } from '@core/ports/commands/get-key-result-delta.command'
 import { GetKeyResultStatusCommand } from '@core/ports/commands/get-key-result-status.command'
 import { GetKeyResultTeamCommand } from '@core/ports/commands/get-key-result-team.command'
 import { GetObjectiveDeltaCommand } from '@core/ports/commands/get-objective-delta.command'
@@ -66,6 +67,7 @@ export type CommandType =
   | 'get-key-result-company'
   | 'get-key-result-confidence-color'
   | 'get-key-result-cycle'
+  | 'get-key-result-delta'
   | 'get-key-result-from-check-in'
   | 'get-key-result-owner'
   | 'get-key-result-status'
@@ -111,6 +113,7 @@ export class CommandFactory {
     'get-key-result-company': GetKeyResultCompanyCommand,
     'get-key-result-confidence-color': GetKeyResultConfidenceColorCommand,
     'get-key-result-cycle': GetKeyResultCycleCommand,
+    'get-key-result-delta': GetKeyResultDeltaCommand,
     'get-key-result-from-check-in': GetKeyResultFromCheckInCommand,
     'get-key-result-owner': GetKeyResultOwnerCommand,
     'get-key-result-status': GetKeyResultStatusCommand,

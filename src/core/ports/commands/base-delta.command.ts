@@ -9,6 +9,7 @@ export abstract class BaseDeltaCommand extends Command<Delta> {
   static buildDefaultDelta(): Delta {
     return {
       progress: 0,
+      confidence: 0,
     }
   }
 
@@ -18,7 +19,10 @@ export abstract class BaseDeltaCommand extends Command<Delta> {
     return startOfWeek(baseDate)
   }
 
-  protected getProgressDifference(currentStatus: Status, previousStatus: Status): number {
-    return currentStatus.progress - previousStatus.progress
+  protected marshal(currentStatus: Status, previousStatus: Status): Delta {
+    return {
+      progress: currentStatus.progress - previousStatus.progress,
+      confidence: currentStatus.confidence - previousStatus.confidence,
+    }
   }
 }

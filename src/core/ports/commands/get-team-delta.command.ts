@@ -22,8 +22,6 @@ export class GetTeamDeltaCommand extends BaseDeltaCommand {
       date: comparisonDate,
     })
 
-    return {
-      progress: this.getProgressDifference(currentStatus, previousStatus),
-    }
+    return this.marshal(currentStatus, previousStatus)
   }
 }
