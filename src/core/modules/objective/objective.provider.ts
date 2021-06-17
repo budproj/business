@@ -102,15 +102,6 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     return this.buildStatusAtDate(date, keyResults)
   }
 
-  public async getObjectiveProgressIncreaseSinceLastWeek(
-    objective: ObjectiveInterface,
-  ): Promise<number> {
-    const progress = await this.getCurrentProgressForObjective(objective)
-    const lastWeekProgress = await this.getLastWeekProgressForObjective(objective)
-
-    return progress - lastWeekProgress
-  }
-
   public async getFromIDList(
     ids: string[],
     indexes?: Partial<ObjectiveInterface>,
@@ -205,21 +196,6 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
       confidence: minBy(keyResultStatus, 'confidence').confidence,
       createdAt: latestKeyResultCheckIn.createdAt,
     }
-  }
-
-  private async getCurrentProgressForObjective(objective: ObjectiveInterface): Promise<number> {
-    const date = new Date()
-    const currentStatus = await this.getStatusAtDate(date, objective)
-
-    return currentStatus?.progress ?? DEFAULT_PROGRESS
-  }
-
-  private async getLastWeekProgressForObjective(objective: ObjectiveInterface): Promise<number> {
-    const firstDayAfterLastWeek = this.getFirstDayAfterLastWeek()
-
-    const lastWeekStatus = await this.getStatusAtDate(firstDayAfterLastWeek, objective)
-
-    return lastWeekStatus?.progress ?? DEFAULT_PROGRESS
   }
 
   private async getFromIDListAndCycleActiveStatus(

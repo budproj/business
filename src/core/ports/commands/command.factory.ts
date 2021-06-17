@@ -4,19 +4,20 @@ import { CoreProvider } from '@core/core.provider'
 import { CreateKeyResultCommand } from '@core/ports/commands/create-key-result.command'
 import { DeleteKeyResultCommand } from '@core/ports/commands/delete-key-result.command'
 import { DeleteObjectiveCommand } from '@core/ports/commands/delete-objective.command'
-import { GetCycleStatusCommand } from '@core/ports/commands/get-cycle-status'
+import { GetCycleStatusCommand } from '@core/ports/commands/get-cycle-status.command'
 import { GetKeyResultCheckInDeltaCommand } from '@core/ports/commands/get-key-result-check-in-delta.command'
 import { GetKeyResultCheckInCommand } from '@core/ports/commands/get-key-result-check-in.command'
 import { GetKeyResultCommentTeamCommand } from '@core/ports/commands/get-key-result-comment-team.command'
 import { GetKeyResultCommentCommand } from '@core/ports/commands/get-key-result-comment.command'
 import { GetKeyResultConfidenceColorCommand } from '@core/ports/commands/get-key-result-confidence-color.command'
-import { GetKeyResultStatusCommand } from '@core/ports/commands/get-key-result-status'
+import { GetKeyResultStatusCommand } from '@core/ports/commands/get-key-result-status.command'
 import { GetKeyResultTeamCommand } from '@core/ports/commands/get-key-result-team.command'
-import { GetObjectiveStatusCommand } from '@core/ports/commands/get-objective-status'
+import { GetObjectiveDeltaCommand } from '@core/ports/commands/get-objective-delta.command'
+import { GetObjectiveStatusCommand } from '@core/ports/commands/get-objective-status.command'
 import { GetObjectiveTeamTreeCommand } from '@core/ports/commands/get-objective-team-tree.command'
 import { GetObjectiveCommand } from '@core/ports/commands/get-objective.command'
 import { GetTeamObjectivesCommand } from '@core/ports/commands/get-team-objectives.command'
-import { GetTeamStatusCommand } from '@core/ports/commands/get-team-status'
+import { GetTeamStatusCommand } from '@core/ports/commands/get-team-status.command'
 import { GetTeamTreeCommand } from '@core/ports/commands/get-team-tree.command'
 import { GetTeamCommand } from '@core/ports/commands/get-team.command'
 import { GetUserFullNameCommand } from '@core/ports/commands/get-user-full-name.command'
@@ -68,6 +69,7 @@ export type CommandType =
   | 'get-key-result-team'
   | 'get-key-result-team-tree'
   | 'get-objective'
+  | 'get-objective-delta'
   | 'get-objective-status'
   | 'get-objective-team-tree'
   | 'get-team'
@@ -110,6 +112,7 @@ export class CommandFactory {
     'get-key-result-team': GetKeyResultTeamCommand,
     'get-key-result-team-tree': GetKeyResultTeamTreeCommand,
     'get-objective': GetObjectiveCommand,
+    'get-objective-delta': GetObjectiveDeltaCommand,
     'get-objective-status': GetObjectiveStatusCommand,
     'get-objective-team-tree': GetObjectiveTeamTreeCommand,
     'get-team': GetTeamCommand,

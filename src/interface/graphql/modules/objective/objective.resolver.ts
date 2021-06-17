@@ -1,11 +1,12 @@
 import { Logger, UnauthorizedException } from '@nestjs/common'
-import { Args, Float, Parent, ResolveField } from '@nestjs/graphql'
+import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { State } from '@adapters/state/interfaces/state.interface'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { Delta } from '@core/interfaces/delta.interface'
 import { Status } from '@core/interfaces/status.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
@@ -23,6 +24,7 @@ import { ObjectiveAccessControl } from '@interface/graphql/modules/objective/obj
 import { ObjectiveUpdateRequest } from '@interface/graphql/modules/objective/requests/objective-update.request'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
+import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
 import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 import { NodeDeleteRequest } from '@interface/graphql/requests/node-delete.request'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
@@ -176,15 +178,19 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     return result
   }
 
-  @ResolveField('progressIncreaseSinceLastWeek', () => Float)
-  protected async getProgressIncreaseSinceLastWeekForObjective(
-    @Parent() objective: ObjectiveGraphQLNode,
-  ) {
+  @ResolveField('delta', () => DeltaGraphQLObject)
+  protected async getDeltaForObjective(@Parent() objective: ObjectiveGraphQLNode) {
     this.logger.log({
       objective,
-      message: 'Fetching progress increase for objective since last week',
+      message: 'Fetching delta for this objective',
     })
 
-    return this.core.objective.getObjectiveProgressIncreaseSinceLastWeek(objective)
+    const result = await this.corePorts.dispatchCommand<Delta>('get-objective-delta', objective.id)
+    if (!result)
+      throw new UserInputError(
+        `We could not find a delta for the objective with ID ${objective.id}`,
+      )
+
+    return result
   }
 }
