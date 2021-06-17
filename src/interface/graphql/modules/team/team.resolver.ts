@@ -5,13 +5,13 @@ import { UserInputError } from 'apollo-server-fastify'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { Status } from '@core/interfaces/status.interface'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
-import { TeamStatus } from '@core/modules/team/interfaces/team-status.interface'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
@@ -27,15 +27,15 @@ import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/r
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
 import { UserFiltersRequest } from '@interface/graphql/modules/user/requests/user-filters.request'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
+import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
-import { StatusGroupRequest } from '@interface/graphql/requests/status.request'
+import { StatusRequest } from '@interface/graphql/requests/status.request'
 
 import { TeamCyclesGraphQLConnection } from './connections/team-cycles/team-cycles.connection'
 import { TeamKeyResultsGraphQLConnection } from './connections/team-key-results/team-key-results.connection'
 import { TeamObjectivesGraphQLConnection } from './connections/team-objectives/team-objectives.connection'
 import { TeamTeamsGraphQLConnection } from './connections/team-teams/team-teams.connection'
 import { TeamUsersGraphQLConnection } from './connections/team-users/team-users.connection'
-import { TeamStatusObject } from './objects/team-status.object'
 import { TeamFiltersRequest } from './requests/team-filters.request'
 import { TeamGraphQLNode } from './team.node'
 
@@ -66,10 +66,10 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return team
   }
 
-  @ResolveField('status', () => TeamStatusObject)
-  protected async getStatusForTeam(
+  @ResolveField('status', () => StatusGraphQLObject)
+  protected async getStatusForCycle(
     @Parent() team: TeamGraphQLNode,
-    @Args() request: StatusGroupRequest,
+    @Args() request: StatusRequest,
   ) {
     this.logger.log({
       team,
@@ -77,11 +77,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching current status for this team',
     })
 
-    const result = await this.corePorts.dispatchCommand<TeamStatus>(
-      'get-team-status',
-      team.id,
-      request,
-    )
+    const result = await this.corePorts.dispatchCommand<Status>('get-team-status', team.id, request)
     if (!result)
       throw new UserInputError(`We could not find status for the team with ID ${team.id}`)
 

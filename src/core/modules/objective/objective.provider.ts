@@ -144,7 +144,7 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
   }
 
   public async getFromTeams(
-    team: TeamInterface | TeamInterface[],
+    team: Partial<TeamInterface> | Array<Partial<TeamInterface>>,
     filters?: FindConditions<Objective>,
     options?: GetOptions<Objective>,
   ): Promise<Objective[]> {
@@ -167,6 +167,13 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
 
   public async getFromIndexes(indexes: Partial<ObjectiveInterface>): Promise<Objective> {
     return this.repository.findOne(indexes)
+  }
+
+  public async getActivesFromTeam(teamID: string): Promise<Objective[]> {
+    const allObjectives = await this.getFromTeams({ id: teamID })
+    const allObjectiveIDs = allObjectives.map((objective) => objective.id)
+
+    return this.repository.getFromCycleStatus(true, allObjectiveIDs)
   }
 
   protected async protectCreationQuery(

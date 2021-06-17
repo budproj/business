@@ -6,6 +6,7 @@ import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorizati
 import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-result/check-in/key-result-check-in.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
+import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 
 import { TeamCyclesGraphQLConnection } from './connections/team-cycles/team-cycles.connection'
 import { TeamKeyResultsGraphQLConnection } from './connections/team-key-results/team-key-results.connection'
@@ -13,7 +14,6 @@ import { TeamObjectivesGraphQLConnection } from './connections/team-objectives/t
 import { TeamTeamsGraphQLConnection } from './connections/team-teams/team-teams.connection'
 import { TeamUsersGraphQLConnection } from './connections/team-users/team-users.connection'
 import { TeamGenderGraphQLEnum } from './enums/team-gender.enum'
-import { TeamStatusObject } from './objects/team-status.object'
 
 @ObjectType('Team', {
   implements: () => [NodeRelayGraphQLInterface, GuardedNodeGraphQLInterface],
@@ -51,11 +51,11 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   // RESOLVED FIELDS
   // **********************************************************************************************
 
-  @Field(() => TeamStatusObject, {
+  @Field(() => StatusGraphQLObject, {
     description:
       'The status of the given team. Here you can fetch the current progress, confidence, and others for that team',
   })
-  public status: TeamStatusObject
+  public status: StatusGraphQLObject
 
   @Field(() => Float, {
     description:

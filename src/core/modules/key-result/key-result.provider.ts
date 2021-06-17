@@ -63,7 +63,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   }
 
   public async getFromTeams(
-    teams: TeamInterface | TeamInterface[],
+    teams: Partial<TeamInterface> | Array<Partial<TeamInterface>>,
     filters?: FindConditions<KeyResult>,
     options?: GetOptions<KeyResult>,
   ): Promise<KeyResult[]> {

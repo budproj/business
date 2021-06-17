@@ -63,9 +63,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
       this.getRootTeamForTeam(team, filters, options),
     )
 
-    const companies = Promise.all(companyPromises)
-
-    return companies
+    return Promise.all(companyPromises)
   }
 
   public async getFullTeamNodesTree(
@@ -78,13 +76,12 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
 
     const rawNodes = [...parents, ...childTeams]
     const nodes = uniqBy(rawNodes, 'id')
-    const clearedNodes = filter(nodes)
 
-    return clearedNodes
+    return filter(nodes)
   }
 
   public async getTeamNodesTreeAfterTeam(
-    teams: TeamInterface | TeamInterface[],
+    teams: Partial<TeamInterface> | Array<Partial<TeamInterface>>,
     selectors?: TeamEntityKey[],
     relations?: TeamEntityRelation[],
     filters?: FindConditions<TeamInterface>,
@@ -95,7 +92,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
       teamsAsArray.map(async (team) => this.getOne({ id: team.id })),
     )
 
-    const nodes = await this.getNodesFromTeams(
+    return this.getNodesFromTeams(
       initialNodes,
       'below',
       selectors,
@@ -103,8 +100,6 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
       filters,
       queryOptions,
     )
-
-    return nodes
   }
 
   public async getTeamNodesTreeBeforeTeam(
@@ -117,9 +112,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
       teamsAsArray.map(async (team) => this.getOne({ id: team.id })),
     )
 
-    const nodes = await this.getNodesFromTeams(initialNodes, 'above', selectors, relations)
-
-    return nodes
+    return this.getNodesFromTeams(initialNodes, 'above', selectors, relations)
   }
 
   public async getUserCompaniesAndDepartments(
@@ -143,14 +136,12 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     if (!team.parentId) return
     const whereSelector = { ...filters, id: team.parentId }
 
-    const parent = await this.repository.findOne({
+    return this.repository.findOne({
       ...options,
       relations,
       select: selectors,
       where: whereSelector,
     })
-
-    return parent
   }
 
   public async getUsersInTeam(
@@ -168,9 +159,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
       id: Any(userIDs),
     }
 
-    const users = await this.userProvider.getMany(selector, undefined, queryOptions)
-
-    return users
+    return this.userProvider.getMany(selector, undefined, queryOptions)
   }
 
   public async buildTeamQueryContext(
@@ -189,12 +178,10 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
       userTeams,
     }
 
-    const queryContext = {
+    return {
       ...context,
       query,
     }
-
-    return queryContext
   }
 
   public async getTeamChildTeams(
@@ -202,16 +189,13 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     filters?: FindConditions<TeamInterface>,
     queryOptions?: GetOptions<TeamInterface>,
   ): Promise<Team[]> {
-    const childTeams = await this.getChildTeams(team, undefined, undefined, filters, queryOptions)
-
-    return childTeams
+    return this.getChildTeams(team, undefined, undefined, filters, queryOptions)
   }
 
   public async getTeamRankedChildTeams(team: TeamInterface): Promise<Team[]> {
     const childTeams = await this.getTeamChildTeams(team)
-    const rankedChildTeams = await this.ranking.rankTeamsByProgress(childTeams)
 
-    return rankedChildTeams
+    return this.ranking.rankTeamsByProgress(childTeams)
   }
 
   public async getRankedTeamsBelowNode(
@@ -227,25 +211,15 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
       queryOptions,
     )
     const teamsBelowTeam = teamNodeTree.slice(1)
-    const rankedChildTeams = await this.ranking.rankTeamsByProgress(teamsBelowTeam)
 
-    return rankedChildTeams
-  }
-
-  public async getCurrentStatus(team: TeamInterface): Promise<TeamStatus> {
-    const date = new Date()
-    const teamStatus = await this.getStatusAtDate(date, team)
-
-    return teamStatus
+    return this.ranking.rankTeamsByProgress(teamsBelowTeam)
   }
 
   public async getTeamProgressIncreaseSinceLastWeek(team: TeamInterface): Promise<number> {
     const progress = await this.getCurrentProgressForTeam(team)
     const lastWeekProgress = await this.getLastWeekProgressForTeam(team)
 
-    const deltaProgress = progress - lastWeekProgress
-
-    return deltaProgress
+    return progress - lastWeekProgress
   }
 
   public async getFromIndexes(indexes: Partial<TeamInterface>): Promise<Team> {
@@ -291,14 +265,12 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
       parentId: team.id,
     }))
 
-    const childTeams = await this.repository.find({
+    return this.repository.find({
       ...getOptions,
       relations,
       select: selector,
       where: whereSelector,
     })
-
-    return childTeams
   }
 
   private async getUserCompaniesDepartments(
@@ -307,15 +279,12 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     options?: GetOptions<Team>,
   ) {
     const companies = await this.getUserCompanies(user)
-    const departments = this.getChildTeams(companies, undefined, undefined, filters, options)
 
-    return departments
+    return this.getChildTeams(companies, undefined, undefined, filters, options)
   }
 
   private async getUserCompaniesTeams(companies: TeamInterface[]) {
-    const companiesTeams = await this.getTeamNodesTreeAfterTeam(companies)
-
-    return companiesTeams
+    return this.getTeamNodesTreeAfterTeam(companies)
   }
 
   private async getNodesFromTeams(
@@ -356,9 +325,8 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     }
 
     const clearedNodes = filter(nodes)
-    const uniqNodes = uniqBy(clearedNodes, 'id')
 
-    return uniqNodes
+    return uniqBy(clearedNodes, 'id')
   }
 
   private async getStatusAtDate(date: Date, team: TeamInterface): Promise<TeamStatus> {
@@ -366,9 +334,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     const objectives = await this.objectiveProvider.getFromTeams(childTeams)
     if (!objectives || objectives.length === 0) return this.buildDefaultStatus(date)
 
-    const teamStatus = await this.buildStatusAtDate(date, objectives)
-
-    return teamStatus
+    return this.buildStatusAtDate(date, objectives)
   }
 
   private async buildStatusAtDate(
@@ -382,14 +348,12 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     const latestObjectiveStatus = maxBy(objectiveStatus, 'createdAt')
     if (!latestObjectiveStatus) return
 
-    const teamStatus = {
+    return {
       latestObjectiveStatus,
       progress: meanBy(objectiveStatus, 'progress'),
       confidence: minBy(objectiveStatus, 'confidence').confidence,
       createdAt: latestObjectiveStatus.createdAt,
     }
-
-    return teamStatus
   }
 
   private buildDefaultStatus(
@@ -399,13 +363,11 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
   ) {
     date ??= new Date()
 
-    const defaultStatus = {
+    return {
       progress,
       confidence,
       createdAt: date,
     }
-
-    return defaultStatus
   }
 
   private async getCurrentProgressForTeam(team: TeamInterface): Promise<number> {

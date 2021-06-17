@@ -26,7 +26,7 @@ import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-res
 import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 import { NodeDeleteRequest } from '@interface/graphql/requests/node-delete.request'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
-import { StatusGroupRequest } from '@interface/graphql/requests/status.request'
+import { StatusRequest } from '@interface/graphql/requests/status.request'
 
 import { KeyResultFiltersRequest } from '../key-result/requests/key-result-filters.request'
 
@@ -157,7 +157,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   @ResolveField('status', () => StatusGraphQLObject)
   protected async getStatusForObjective(
     @Parent() objective: ObjectiveGraphQLNode,
-    @Args() request: StatusGroupRequest,
+    @Args() request: StatusRequest,
   ) {
     this.logger.log({
       objective,

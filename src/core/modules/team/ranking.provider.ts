@@ -14,9 +14,7 @@ export class TeamRankingProvider {
     const enhanceTeamPromises = teams.map(async (team) => this.enhanceTeamWithProgress(team))
     const enhancedTeams = await Promise.all(enhanceTeamPromises)
 
-    const rankedTeams = orderBy(enhancedTeams, ['progress'], ['desc'])
-
-    return rankedTeams
+    return orderBy(enhancedTeams, ['progress'], ['desc'])
   }
 
   protected onModuleInit() {
@@ -24,7 +22,8 @@ export class TeamRankingProvider {
   }
 
   private async enhanceTeamWithProgress(team: Team) {
-    const { progress } = await this.teamProvider.getCurrentStatus(team)
+    // Const { progress } = await this.teamProvider.getCurrentStatus(team)
+    const progress = 0
 
     return {
       ...team,

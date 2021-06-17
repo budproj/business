@@ -7,10 +7,7 @@ export class StatusRequest {
     nullable: true,
   })
   public readonly date?: Date
-}
 
-@ArgsType()
-export class StatusGroupRequest extends StatusRequest {
   @Field({
     description: 'Defines if it should use only active key-results while defining the team status',
     defaultValue: true,

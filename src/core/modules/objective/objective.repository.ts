@@ -26,8 +26,8 @@ export class ObjectiveRepository extends CoreEntityRepository<Objective> {
       .leftJoin(`${Objective.name}.cycle`, Cycle.name)
       .where(`${Objective.name}.id IN (:...ids)`, { ids })
       .andWhere(`${Cycle.name}.active = :cycleIsActive`, { cycleIsActive })
-      .take(options.limit)
-      .offset(options.offset)
+      .take(options?.limit)
+      .offset(options?.offset)
       .getMany()
   }
 
