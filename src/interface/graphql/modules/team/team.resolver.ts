@@ -25,11 +25,11 @@ import { CycleFiltersRequest } from '@interface/graphql/modules/cycle/requests/c
 import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-result/check-in/key-result-check-in.node'
 import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/requests/key-result-filters.request'
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
+import { TeamStatusRequest } from '@interface/graphql/modules/team/requests/team-status.request'
 import { UserFiltersRequest } from '@interface/graphql/modules/user/requests/user-filters.request'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
-import { StatusRequest } from '@interface/graphql/requests/status.request'
 
 import { TeamCyclesGraphQLConnection } from './connections/team-cycles/team-cycles.connection'
 import { TeamKeyResultsGraphQLConnection } from './connections/team-key-results/team-key-results.connection'
@@ -69,7 +69,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   @ResolveField('status', () => StatusGraphQLObject)
   protected async getStatusForCycle(
     @Parent() team: TeamGraphQLNode,
-    @Args() request: StatusRequest,
+    @Args() request: TeamStatusRequest,
   ) {
     this.logger.log({
       team,

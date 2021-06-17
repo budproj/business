@@ -169,11 +169,13 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     return this.repository.findOne(indexes)
   }
 
-  public async getActivesFromTeam(teamID: string): Promise<Objective[]> {
-    const allObjectives = await this.getFromTeams({ id: teamID })
-    const allObjectiveIDs = allObjectives.map((objective) => objective.id)
-
-    return this.repository.getFromCycleStatus(true, allObjectiveIDs)
+  public async getFromTeamWithCycleFilters(
+    teamID: string,
+    cycleFilters?: Partial<CycleInterface>,
+  ): Promise<Objective[]> {
+    return this.repository.getFromTeamWithRelationFilters(teamID, {
+      cycle: cycleFilters,
+    })
   }
 
   protected async protectCreationQuery(

@@ -26,11 +26,13 @@ export class CycleProvider extends CoreEntityProvider<Cycle, CycleInterface> {
   }
 
   public async getFromTeamsWithFilters(
-    teams: TeamInterface[],
+    teams: Partial<TeamInterface> | Array<Partial<TeamInterface>>,
     filters?: Partial<CycleInterface>,
     options?: GetOptions<Cycle>,
   ): Promise<Cycle[]> {
-    const teamIDsFilter = Any(teams.map((team) => team.id))
+    const teamList = Array.isArray(teams) ? teams : [teams]
+
+    const teamIDsFilter = Any(teamList.map((team) => team.id))
     const getOptions = this.repository.marshalGetOptions(options)
     const whereSelector = {
       ...filters,

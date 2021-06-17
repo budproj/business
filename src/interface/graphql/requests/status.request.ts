@@ -7,10 +7,4 @@ export class StatusRequest {
     nullable: true,
   })
   public readonly date?: Date
-
-  @Field({
-    description: 'Defines if it should use only active key-results while defining the team status',
-    defaultValue: true,
-  })
-  public readonly active!: boolean
 }
