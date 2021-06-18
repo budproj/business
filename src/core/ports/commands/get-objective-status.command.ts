@@ -25,13 +25,22 @@ export class GetObjectiveStatusCommand extends BaseStatusCommand {
     const keyResultsStatus = await Promise.all(keyResultStatusPromises)
     const latestStatusReport = this.getLatestFromList(keyResultsStatus)
     const isOutdated = this.isOutdated(latestStatusReport.latestCheckIn)
+    const isActive = await this.isActive(objectiveID)
 
     return {
       isOutdated,
+      isActive,
       latestCheckIn: latestStatusReport.latestCheckIn,
       reportDate: latestStatusReport.reportDate,
       progress: this.getAverageProgressFromList(keyResultsStatus),
       confidence: this.getMinConfidenceFromList(keyResultsStatus),
     }
+  }
+
+  private async isActive(objectiveID: string): Promise<boolean> {
+    const objective = await this.core.objective.getFromID(objectiveID)
+    const cycle = await this.core.cycle.getFromObjective(objective)
+
+    return cycle.active
   }
 }

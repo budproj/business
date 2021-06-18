@@ -25,13 +25,21 @@ export class GetCycleStatusCommand extends BaseStatusCommand {
     const objectivesStatus = await Promise.all(objectiveStatusPromises)
     const latestStatusReport = this.getLatestFromList(objectivesStatus)
     const isOutdated = this.isOutdated(latestStatusReport.latestCheckIn)
+    const isActive = await this.isActive(cycleID)
 
     return {
       isOutdated,
+      isActive,
       latestCheckIn: latestStatusReport.latestCheckIn,
       reportDate: latestStatusReport.reportDate,
       progress: this.getAverageProgressFromList(objectivesStatus),
       confidence: this.getMinConfidenceFromList(objectivesStatus),
     }
+  }
+
+  private async isActive(cycleID: string): Promise<boolean> {
+    const cycle = await this.core.cycle.getFromID(cycleID)
+
+    return cycle.active
   }
 }

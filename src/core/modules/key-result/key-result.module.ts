@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import { ObjectiveModule } from '@core/modules/objective/objective.module'
 import { TeamModule } from '@core/modules/team/team.module'
 
 import { KeyResultCheckInProvider } from './check-in/key-result-check-in.provider'
@@ -20,7 +19,6 @@ import { KeyResultTimelineProvider } from './timeline.provider'
       KeyResultCheckInRepository,
     ]),
     TeamModule,
-    ObjectiveModule,
   ],
   providers: [
     KeyResultProvider,

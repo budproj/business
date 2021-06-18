@@ -6,6 +6,7 @@ import { CreatedCheckInActivity } from '@adapters/activity/activities/created-ch
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { Status } from '@core/interfaces/status.interface'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { KeyResultCheckInDelta } from '@core/ports/commands/get-key-result-check-in-delta.command'
@@ -89,10 +90,11 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Received create check-in request',
     })
 
-    const isKeyResultActive = await this.core.keyResult.isActiveFromIndexes({
-      id: request.data.keyResultId,
-    })
-    if (!isKeyResultActive)
+    const keyResultStatus = await this.corePorts.dispatchCommand<Status>(
+      'get-key-result-status',
+      request.data.keyResultId,
+    )
+    if (!keyResultStatus.isActive)
       throw new UserInputError(
         'You cannot create this check-in, because that key-result is not active anymore',
       )
@@ -130,10 +132,11 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
     const keyResult = await this.core.keyResult.getFromKeyResultCheckInID(request.id)
     if (!keyResult) throw new UserInputError('We were not able to find your key-result check-in')
 
-    const isObjectiveActive = await this.core.objective.isActiveFromIndexes({
-      id: keyResult.objectiveId,
-    })
-    if (!isObjectiveActive)
+    const keyResultStatus = await this.corePorts.dispatchCommand<Status>(
+      'get-key-result-status',
+      keyResult.id,
+    )
+    if (!keyResultStatus.isActive)
       throw new UserInputError(
         'You cannot delete this check-in, because that key-result is not active anymore',
       )

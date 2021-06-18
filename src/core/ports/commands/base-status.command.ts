@@ -14,6 +14,7 @@ export abstract class BaseStatusCommand extends Command<Status> {
       progress: 0,
       confidence: 0,
       isOutdated: true,
+      isActive: true,
     }
   }
 

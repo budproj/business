@@ -6,6 +6,7 @@ import { CreatedKeyResultCommentActivity } from '@adapters/activity/activities/c
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { Status } from '@core/interfaces/status.interface'
 import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
 import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
@@ -84,10 +85,11 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Received create comment request',
     })
 
-    const isKeyResultActive = await this.core.keyResult.isActiveFromIndexes({
-      id: request.data.keyResultId,
-    })
-    if (!isKeyResultActive)
+    const keyResultStatus = await this.corePorts.dispatchCommand<Status>(
+      'get-key-result-status',
+      request.data.keyResultId,
+    )
+    if (!keyResultStatus.isActive)
       throw new UserInputError(
         'You cannot create this keyResultComment, because that key-result is not active anymore',
       )
@@ -119,10 +121,11 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     const keyResult = await this.core.keyResult.getFromKeyResultCommentID(request.id)
     if (!keyResult) throw new UserInputError('We were not able to find your key-result comment')
 
-    const isObjectiveActive = await this.core.objective.isActiveFromIndexes({
-      id: keyResult.objectiveId,
-    })
-    if (!isObjectiveActive)
+    const keyResultStatus = await this.corePorts.dispatchCommand<Status>(
+      'get-key-result-status',
+      keyResult.id,
+    )
+    if (!keyResultStatus.isActive)
       throw new UserInputError(
         'You cannot delete this keyResultComment, because that key-result is not active anymore',
       )

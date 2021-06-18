@@ -5,7 +5,6 @@ import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
-import { CycleProvider } from '@core/modules/cycle/cycle.provider'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
@@ -18,10 +17,7 @@ import { ObjectiveRepository } from './objective.repository'
 
 @Injectable()
 export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveInterface> {
-  constructor(
-    protected readonly repository: ObjectiveRepository,
-    private readonly cycleProvider: CycleProvider,
-  ) {
+  constructor(protected readonly repository: ObjectiveRepository) {
     super(ObjectiveProvider.name, repository)
   }
 
@@ -76,12 +72,8 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     return this.repository.findOne({ id: keyResult.objectiveId })
   }
 
-  public async isActiveFromIndexes(
-    objectiveIndexes: Partial<ObjectiveInterface>,
-  ): Promise<boolean> {
-    const objective = await this.repository.findOne(objectiveIndexes)
-
-    return this.cycleProvider.isActiveFromIndexes({ id: objective.cycleId })
+  public async getFromID(id: string): Promise<Objective> {
+    return this.repository.findOne({ id })
   }
 
   public async getFromIDList(

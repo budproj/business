@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { uniqBy } from 'lodash'
 import { Any, DeleteResult, FindConditions } from 'typeorm'
 
@@ -6,7 +6,6 @@ import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
-import { ObjectiveProvider } from '@core/modules/objective/objective.provider'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
@@ -30,8 +29,6 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     public readonly keyResultCheckInProvider: KeyResultCheckInProvider,
     public readonly timeline: KeyResultTimelineProvider,
     protected readonly repository: KeyResultRepository,
-    @Inject(forwardRef(() => ObjectiveProvider))
-    private readonly objectiveProvider: ObjectiveProvider,
   ) {
     super(KeyResultProvider.name, repository)
   }
@@ -182,14 +179,6 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     if (!keyResultComment) return
 
     return this.getOne({ id: keyResultComment.keyResultId })
-  }
-
-  public async isActiveFromIndexes(
-    keyResultIndexes: Partial<KeyResultInterface>,
-  ): Promise<boolean> {
-    const keyResult = await this.repository.findOne(keyResultIndexes)
-
-    return this.objectiveProvider.isActiveFromIndexes({ id: keyResult.objectiveId })
   }
 
   public async buildCheckInForUser(

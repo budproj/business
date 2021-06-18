@@ -18,6 +18,12 @@ export class GetTeamStatusCommand extends BaseStatusCommand {
     this.getObjectiveStatus = this.factory.buildCommand<Status>('get-objective-status')
   }
 
+  static isActive(objectivesStatus: Status[], childTeamsStatus: Status[]): boolean {
+    const allStatus = [...objectivesStatus, ...childTeamsStatus]
+
+    return allStatus.some((status) => status.isActive)
+  }
+
   public async execute(
     teamID: string,
     options: GetTeamStatusOptions = this.defaultOptions,
@@ -28,9 +34,11 @@ export class GetTeamStatusCommand extends BaseStatusCommand {
     const allStatus = [...objectivesStatus, ...childTeamsStatus]
     const latestStatusReport = this.getLatestFromList(allStatus)
     const isOutdated = this.isOutdated(latestStatusReport.latestCheckIn)
+    const isActive = GetTeamStatusCommand.isActive(objectivesStatus, childTeamsStatus)
 
     return {
       isOutdated,
+      isActive,
       latestCheckIn: latestStatusReport.latestCheckIn,
       reportDate: latestStatusReport.reportDate,
       progress: this.getAverageProgressFromList(allStatus),

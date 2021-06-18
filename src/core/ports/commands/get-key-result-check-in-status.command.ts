@@ -11,13 +11,23 @@ export class GetKeyResultCheckInStatusCommand extends BaseStatusCommand {
 
     const currentProgress = await this.core.keyResult.getCheckInProgress(latestCheckIn)
     const isOutdated = this.isOutdated(latestCheckIn)
+    const isActive = await this.isActive(keyResultCheckInID)
 
     return {
       latestCheckIn,
       isOutdated,
+      isActive,
       progress: currentProgress,
       confidence: latestCheckIn.confidence,
       reportDate: latestCheckIn.createdAt,
     }
+  }
+
+  private async isActive(keyResultCheckInID: string): Promise<boolean> {
+    const keyResult = await this.core.keyResult.getFromKeyResultCheckInID(keyResultCheckInID)
+    const objective = await this.core.objective.getFromKeyResult(keyResult)
+    const cycle = await this.core.cycle.getFromObjective(objective)
+
+    return cycle.active
   }
 }
