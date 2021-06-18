@@ -7,6 +7,8 @@ import { Resource } from '@adapters/policy/enums/resource.enum'
 import { State } from '@adapters/state/interfaces/state.interface'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { Delta } from '@core/interfaces/delta.interface'
+import { Status } from '@core/interfaces/status.interface'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
@@ -28,11 +30,13 @@ import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objec
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
+import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
+import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 import { ConnectionFiltersRequest } from '@interface/graphql/requests/connection-filters.request'
 import { NodeDeleteRequest } from '@interface/graphql/requests/node-delete.request'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
+import { StatusRequest } from '@interface/graphql/requests/status.request'
 
-import { KeyResultCheckInGraphQLNode } from './check-in/key-result-check-in.node'
 import { KeyResultCheckInFiltersRequest } from './check-in/requests/key-result-check-in-filters.request'
 import { KeyResultCommentFiltersRequest } from './comment/requests/key-result-comment-filters.request'
 import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.connection'
@@ -224,37 +228,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     return this.relay.marshalResponse<KeyResultCheckInInterface>(queryResult, connection, keyResult)
   }
 
-  @ResolveField('isOutdated', () => Boolean)
-  protected async getIsOutdatedForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
-    this.logger.log({
-      keyResult,
-      message: 'Deciding if the given key result is outdated',
-    })
-
-    const objective = await this.core.objective.getFromKeyResult(keyResult)
-    const latestKeyResultCheckIn = await this.core.keyResult.getLatestCheckInForKeyResultAtDate(
-      keyResult,
-    )
-
-    const enhancedKeyResult = {
-      ...keyResult,
-      objective,
-      checkIns: latestKeyResultCheckIn ? [latestKeyResultCheckIn] : undefined,
-    }
-
-    return this.core.keyResult.isOutdated(enhancedKeyResult)
-  }
-
-  @ResolveField('latestKeyResultCheckIn', () => KeyResultCheckInGraphQLNode, { nullable: true })
-  protected async getLatestKeyResultCheckInForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
-    this.logger.log({
-      keyResult,
-      message: 'Fetching latest key result check-in for key result',
-    })
-
-    return this.core.keyResult.getLatestCheckInForKeyResultAtDate(keyResult)
-  }
-
   @ResolveField('timeline', () => KeyResultTimelineGraphQLConnection)
   protected async getKeyResultTimeline(
     @Args() request: ConnectionFiltersRequest,
@@ -274,5 +247,45 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     const queryResult = await this.core.keyResult.getTimeline(keyResult)
 
     return this.relay.marshalResponse(queryResult, connection, keyResult)
+  }
+
+  @ResolveField('status', () => StatusGraphQLObject)
+  protected async getStatusForKeyResult(
+    @Parent() keyResult: KeyResultGraphQLNode,
+    @Args() request: StatusRequest,
+  ) {
+    this.logger.log({
+      keyResult,
+      request,
+      message: 'Fetching current status for this key-result',
+    })
+
+    const result = await this.corePorts.dispatchCommand<Status>(
+      'get-key-result-status',
+      keyResult.id,
+      request,
+    )
+    if (!result)
+      throw new UserInputError(
+        `We could not find status for the key-result with ID ${keyResult.id}`,
+      )
+
+    return result
+  }
+
+  @ResolveField('delta', () => DeltaGraphQLObject)
+  protected async getDeltaForObjective(@Parent() keyResult: KeyResultGraphQLNode) {
+    this.logger.log({
+      keyResult,
+      message: 'Fetching delta for this key-result',
+    })
+
+    const result = await this.corePorts.dispatchCommand<Delta>('get-key-result-delta', keyResult.id)
+    if (!result)
+      throw new UserInputError(
+        `We could not find a delta for the key-result with ID ${keyResult.id}`,
+      )
+
+    return result
   }
 }

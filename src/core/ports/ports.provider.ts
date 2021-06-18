@@ -8,8 +8,7 @@ export class CorePortsProvider {
 
   public async dispatchCommand<R>(type: CommandType, ...commandArguments: any[]): Promise<R> {
     const command = this.commandFactory.buildCommand<R>(type)
-    const result = await command.execute(...commandArguments)
 
-    return result
+    return command.execute(...commandArguments)
   }
 }

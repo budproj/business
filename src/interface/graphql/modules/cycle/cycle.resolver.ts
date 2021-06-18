@@ -5,12 +5,15 @@ import { UserInputError } from 'apollo-server-fastify'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { Delta } from '@core/interfaces/delta.interface'
+import { Status } from '@core/interfaces/status.interface'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
+import { CorePortsProvider } from '@core/ports/ports.provider'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
@@ -19,13 +22,15 @@ import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/r
 import { ObjectivesGraphQLConnection } from '@interface/graphql/modules/objective/connections/objectives/objectives.connection'
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
+import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
+import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
+import { StatusRequest } from '@interface/graphql/requests/status.request'
 
 import { CycleCyclesGraphQLConnection } from './connections/cycle-cycles/cycle-cycles.connection'
 import { CycleKeyResultsGraphQLConnection } from './connections/cycle-key-results/cycle-key-results.connection'
 import { CyclesGraphQLConnection } from './connections/cycles/cycles.connection'
 import { CycleGraphQLNode } from './cycle.node'
-import { CycleStatusObject } from './objects/cycle-status.object'
 import { CycleFiltersRequest } from './requests/cycle-filters.request'
 import { CyclesInSamePeriodRequest } from './requests/cycles-in-same-period.request'
 
@@ -33,7 +38,10 @@ import { CyclesInSamePeriodRequest } from './requests/cycles-in-same-period.requ
 export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, CycleInterface> {
   private readonly logger = new Logger(CycleGraphQLResolver.name)
 
-  constructor(protected readonly core: CoreProvider) {
+  constructor(
+    protected readonly core: CoreProvider,
+    protected readonly corePorts: CorePortsProvider,
+  ) {
     super(Resource.CYCLE, core, core.cycle)
   }
 
@@ -79,14 +87,26 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     return this.relay.marshalResponse<Cycle>(queryResult, connection)
   }
 
-  @ResolveField('status', () => CycleStatusObject)
-  protected async getStatusForCycle(@Parent() cycle: CycleGraphQLNode) {
+  @ResolveField('status', () => StatusGraphQLObject)
+  protected async getStatusForCycle(
+    @Parent() cycle: CycleGraphQLNode,
+    @Args() request: StatusRequest,
+  ) {
     this.logger.log({
       cycle,
+      request,
       message: 'Fetching current status for this cycle',
     })
 
-    return this.core.cycle.getCurrentStatus(cycle)
+    const result = await this.corePorts.dispatchCommand<Status>(
+      'get-cycle-status',
+      cycle.id,
+      request,
+    )
+    if (!result)
+      throw new UserInputError(`We could not find status for the cycle with ID ${cycle.id}`)
+
+    return result
   }
 
   @ResolveField('team', () => TeamGraphQLNode)
@@ -176,5 +196,19 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     )
 
     return this.relay.marshalResponse<KeyResultInterface>(keyResults, connection, cycle)
+  }
+
+  @ResolveField('delta', () => DeltaGraphQLObject)
+  protected async getDeltaForObjective(@Parent() cycle: CycleGraphQLNode) {
+    this.logger.log({
+      cycle,
+      message: 'Fetching delta for this cycle',
+    })
+
+    const result = await this.corePorts.dispatchCommand<Delta>('get-cycle-delta', cycle.id)
+    if (!result)
+      throw new UserInputError(`We could not find a delta for the cyle with ID ${cycle.id}`)
+
+    return result
   }
 }

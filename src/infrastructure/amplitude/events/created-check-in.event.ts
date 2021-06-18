@@ -8,6 +8,7 @@ import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { Team } from '@core/modules/team/team.orm-entity'
+import { KeyResultCheckInDelta } from '@core/ports/commands/get-key-result-check-in-delta.command'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
 import { BaseAmplitudeEvent } from './base.event'
@@ -51,21 +52,20 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
   public async prepare(): Promise<void> {
     const { keyResult, keyResultCheckInList, cycle, team, company } = await this.getRelatedData()
 
-    const deltaProgress = await this.getDeltaProgress()
-    const deltaConfidenceTag = await this.getDeltaConfidenceTag()
+    const delta = await this.getDelta()
     const commentLength = this.getCommentLength()
 
     this.properties = {
-      deltaProgress,
-      deltaConfidenceTag,
       commentLength,
+      deltaProgress: delta.progress,
+      deltaConfidenceTag: delta.confidenceTag,
       isOwner: this.isUserOwner(keyResult),
       keyResultFormat: keyResult.format,
       isFirst: this.isFirst(keyResultCheckInList),
       minutesSinceLastCheckIn: await this.getMinutesSinceLastCheckIn(),
       cycleCadence: cycle.cadence,
-      progressChanged: Boolean(deltaProgress),
-      confidenceChanged: Boolean(deltaConfidenceTag),
+      progressChanged: Boolean(delta.progress),
+      confidenceChanged: Boolean(delta.confidenceTag),
       hasComment: Boolean(commentLength),
       team: team.name,
       company: company.name,
@@ -120,19 +120,10 @@ export class CreatedCheckInAmplitudeEvent extends BaseAmplitudeEvent<
     )
   }
 
-  private async getDeltaProgress(): Promise<number> {
-    return this.core.dispatchCommand<number>(
+  private async getDelta(): Promise<KeyResultCheckInDelta> {
+    return this.core.dispatchCommand<KeyResultCheckInDelta>(
       'get-key-result-check-in-delta',
-      this.activity.data,
-      'progress',
-    )
-  }
-
-  private async getDeltaConfidenceTag(): Promise<number> {
-    return this.core.dispatchCommand<number>(
-      'get-key-result-check-in-delta',
-      this.activity.data,
-      'confidenceTag',
+      this.activity.data.id,
     )
   }
 

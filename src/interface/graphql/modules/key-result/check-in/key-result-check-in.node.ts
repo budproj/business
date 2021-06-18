@@ -3,6 +3,7 @@ import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
+import { KeyResultCheckInDeltaGraphQLObject } from '@interface/graphql/modules/key-result/check-in/objects/key-result-check-in-delta.object'
 import { KeyResultGraphQLNode } from '@interface/graphql/modules/key-result/key-result.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 
@@ -35,28 +36,10 @@ export class KeyResultCheckInGraphQLNode implements GuardedNodeGraphQLInterface 
 
   @Field(() => Float, {
     complexity: 1,
-    description: 'The value increase comparing to previous check-in',
-  })
-  public readonly valueIncrease?: number
-
-  @Field(() => Float, {
-    complexity: 1,
     description:
       'The relative percentage progress of this check-in. It calculates the percentage of the completion for this key result, where 0% is equal to the initial value of the key result, and 100% is the goal of that given key result. Also, this metric cannot go above 100% or below 0%',
   })
   public readonly progress?: number
-
-  @Field(() => Float, {
-    complexity: 1,
-    description: 'The percentage progress increase comparing to previous check-in',
-  })
-  public readonly progressIncrease?: number
-
-  @Field(() => Int, {
-    complexity: 1,
-    description: 'The confidence increase comparing to previous check-in',
-  })
-  public readonly confidenceIncrease?: number
 
   @Field(() => KeyResultGraphQLNode, {
     complexity: 1,
@@ -69,6 +52,12 @@ export class KeyResultCheckInGraphQLNode implements GuardedNodeGraphQLInterface 
     description: 'The user that owns this report',
   })
   public readonly user!: UserGraphQLNode
+
+  @Field(() => KeyResultCheckInDeltaGraphQLObject, {
+    complexity: 1,
+    description: 'The delta of this key-result check-in comparing the previous one',
+  })
+  public delta!: KeyResultCheckInDeltaGraphQLObject
 
   @Field(() => KeyResultCheckInGraphQLNode, {
     complexity: 1,

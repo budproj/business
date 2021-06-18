@@ -9,8 +9,9 @@ import { KeyResultTypeGraphQLEnum } from '@interface/graphql/modules/key-result/
 import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objective.node'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
+import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
+import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 
-import { KeyResultCheckInGraphQLNode } from './check-in/key-result-check-in.node'
 import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.connection'
 import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-result-key-result-comments/key-result-key-result-comments.connection'
 import { KeyResultTimelineGraphQLConnection } from './connections/key-result-timeline/key-result-key-result-timeline.connection'
@@ -18,8 +19,7 @@ import { KeyResultFormatGraphQLEnum } from './enums/key-result-format.enum'
 
 @ObjectType('KeyResult', {
   implements: () => [NodeRelayGraphQLInterface, GuardedNodeGraphQLInterface],
-  description:
-    'The current status of this key-result. By status we mean progress, confidence, and other reported values from it',
+  description: 'A key-result is a given goal inside an objective',
 })
 export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
   @Field({ complexity: 0, description: 'The title of the key result' })
@@ -81,18 +81,18 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
   })
   public readonly team!: TeamGraphQLNode
 
-  @Field({
+  @Field(() => StatusGraphQLObject, {
     complexity: 1,
     description:
-      'Saying a key result is "outdated" means that the owner needs to do a new check-in to report the current key result progress',
+      'The status of the given key-result. Here you can fetch the current progress, confidence, and others for that key-result',
   })
-  public readonly isOutdated?: boolean
+  public status: StatusGraphQLObject
 
-  @Field(() => KeyResultCheckInGraphQLNode, {
-    description: 'The latest key result check-in reported for that key result',
-    nullable: true,
+  @Field(() => DeltaGraphQLObject, {
+    complexity: 1,
+    description: 'The delta of this key-result comparing with last week',
   })
-  public latestKeyResultCheckIn?: KeyResultCheckInGraphQLNode
+  public delta!: DeltaGraphQLObject
 
   // **********************************************************************************************
   // CONNECTION FIELDS

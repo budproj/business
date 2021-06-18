@@ -1,11 +1,12 @@
-import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
+import { Field, ID, ObjectType } from '@nestjs/graphql'
 
 import { TeamGender } from '@core/modules/team/enums/team-gender.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
-import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-result/check-in/key-result-check-in.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
+import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
+import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 
 import { TeamCyclesGraphQLConnection } from './connections/team-cycles/team-cycles.connection'
 import { TeamKeyResultsGraphQLConnection } from './connections/team-key-results/team-key-results.connection'
@@ -13,7 +14,6 @@ import { TeamObjectivesGraphQLConnection } from './connections/team-objectives/t
 import { TeamTeamsGraphQLConnection } from './connections/team-teams/team-teams.connection'
 import { TeamUsersGraphQLConnection } from './connections/team-users/team-users.connection'
 import { TeamGenderGraphQLEnum } from './enums/team-gender.enum'
-import { TeamStatusObject } from './objects/team-status.object'
 
 @ObjectType('Team', {
   implements: () => [NodeRelayGraphQLInterface, GuardedNodeGraphQLInterface],
@@ -51,17 +51,17 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   // RESOLVED FIELDS
   // **********************************************************************************************
 
-  @Field(() => TeamStatusObject, {
+  @Field(() => StatusGraphQLObject, {
     description:
       'The status of the given team. Here you can fetch the current progress, confidence, and others for that team',
   })
-  public status: TeamStatusObject
+  public status: StatusGraphQLObject
 
-  @Field(() => Float, {
-    description:
-      'The percentage progress increase of the objective since the last week. We consider a week as a "business" week, considering it starting on saturday and ending on friday',
+  @Field(() => DeltaGraphQLObject, {
+    complexity: 2,
+    description: 'The delta of this team comparing with last week',
   })
-  public progressIncreaseSinceLastWeek!: number
+  public delta!: DeltaGraphQLObject
 
   @Field(() => UserGraphQLNode, {
     complexity: 1,
@@ -86,12 +86,6 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   })
   public readonly parent?: TeamGraphQLNode
 
-  @Field(() => KeyResultCheckInGraphQLNode, {
-    description: 'The latest key result check-in for this team',
-    nullable: true,
-  })
-  public latestKeyResultCheckIn?: KeyResultCheckInGraphQLNode
-
   // **********************************************************************************************
   // CONNECTION FIELDS
   // **********************************************************************************************
@@ -113,9 +107,10 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   @Field(() => TeamTeamsGraphQLConnection, {
     complexity: 0,
     nullable: true,
-    description: "A list with all teams inside this team's tree ordered by their progress",
+    description:
+      "A list with all teams inside this team's descendant tree ordered by their progress",
   })
-  public readonly rankedTeams?: TeamTeamsGraphQLConnection
+  public readonly rankedDescendants?: TeamTeamsGraphQLConnection
 
   @Field(() => TeamCyclesGraphQLConnection, {
     complexity: 0,

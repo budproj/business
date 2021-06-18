@@ -1,10 +1,12 @@
 import { Logger } from '@nestjs/common'
-import { Args, Float, Parent, ResolveField } from '@nestjs/graphql'
+import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { Delta } from '@core/interfaces/delta.interface'
+import { Status } from '@core/interfaces/status.interface'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
@@ -21,11 +23,13 @@ import { GuardedResolver } from '@interface/graphql/adapters/authorization/decor
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { CycleFiltersRequest } from '@interface/graphql/modules/cycle/requests/cycle-filters.request'
-import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-result/check-in/key-result-check-in.node'
 import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/requests/key-result-filters.request'
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
+import { TeamStatusRequest } from '@interface/graphql/modules/team/requests/team-status.request'
 import { UserFiltersRequest } from '@interface/graphql/modules/user/requests/user-filters.request'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
+import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
+import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 import { TeamCyclesGraphQLConnection } from './connections/team-cycles/team-cycles.connection'
@@ -33,7 +37,6 @@ import { TeamKeyResultsGraphQLConnection } from './connections/team-key-results/
 import { TeamObjectivesGraphQLConnection } from './connections/team-objectives/team-objectives.connection'
 import { TeamTeamsGraphQLConnection } from './connections/team-teams/team-teams.connection'
 import { TeamUsersGraphQLConnection } from './connections/team-users/team-users.connection'
-import { TeamStatusObject } from './objects/team-status.object'
 import { TeamFiltersRequest } from './requests/team-filters.request'
 import { TeamGraphQLNode } from './team.node'
 
@@ -64,14 +67,22 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return team
   }
 
-  @ResolveField('status', () => TeamStatusObject)
-  protected async getStatusForTeam(@Parent() team: TeamGraphQLNode) {
+  @ResolveField('status', () => StatusGraphQLObject)
+  protected async getStatusForCycle(
+    @Parent() team: TeamGraphQLNode,
+    @Args() request: TeamStatusRequest,
+  ) {
     this.logger.log({
       team,
+      request,
       message: 'Fetching current status for this team',
     })
 
-    return this.core.team.getCurrentStatus(team)
+    const result = await this.corePorts.dispatchCommand<Status>('get-team-status', team.id, request)
+    if (!result)
+      throw new UserInputError(`We could not find status for the team with ID ${team.id}`)
+
+    return result
   }
 
   @ResolveField('owner', () => UserGraphQLNode)
@@ -100,20 +111,20 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       Team
     >(request)
 
-    const queryResult = await this.core.team.getTeamChildTeams(team, filters, queryOptions)
+    const queryResult = await this.core.team.getChildren(team.id, filters, queryOptions)
 
     return this.relay.marshalResponse<TeamInterface>(queryResult, connection, team)
   }
 
-  @ResolveField('rankedTeams', () => TeamTeamsGraphQLConnection, { nullable: true })
-  protected async getRankedTeamsForTeam(
+  @ResolveField('rankedDescendants', () => TeamTeamsGraphQLConnection, { nullable: true })
+  protected async getRankedDescendantsForTeam(
     @Args() request: TeamFiltersRequest,
     @Parent() team: TeamGraphQLNode,
   ) {
     this.logger.log({
       team,
       request,
-      message: 'Fetching ranked teams for team',
+      message: 'Fetching ranked descendants for team',
     })
 
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
@@ -121,9 +132,14 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       Team
     >(request)
 
-    const queryResult = await this.core.team.getRankedTeamsBelowNode(team, filters, queryOptions)
+    const result = await this.corePorts.dispatchCommand<Team[]>(
+      'get-team-ranked-descendants',
+      team.id,
+      filters,
+      queryOptions,
+    )
 
-    return this.relay.marshalResponse<TeamInterface>(queryResult, connection, team)
+    return this.relay.marshalResponse<TeamInterface>(result, connection, team)
   }
 
   @ResolveField('parent', () => TeamGraphQLNode, { nullable: true })
@@ -152,7 +168,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       User
     >(request)
 
-    const queryResult = await this.core.team.getUsersInTeam(team, filters, queryOptions)
+    const queryResult = await this.core.team.getUsersInTeam(team.id, filters, queryOptions)
 
     return this.relay.marshalResponse<UserInterface>(queryResult, connection, team)
   }
@@ -235,23 +251,17 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection, team)
   }
 
-  @ResolveField('progressIncreaseSinceLastWeek', () => Float)
-  protected async getProgressIncreaseSinceLastWeekForTeam(@Parent() team: TeamGraphQLNode) {
+  @ResolveField('delta', () => DeltaGraphQLObject)
+  protected async getDeltaForObjective(@Parent() team: TeamGraphQLNode) {
     this.logger.log({
       team,
-      message: 'Fetching the progress increase for team since last week',
+      message: 'Fetching delta for this team',
     })
 
-    return this.core.team.getTeamProgressIncreaseSinceLastWeek(team)
-  }
+    const result = await this.corePorts.dispatchCommand<Delta>('get-team-delta', team.id)
+    if (!result)
+      throw new UserInputError(`We could not find a delta for the team with ID ${team.id}`)
 
-  @ResolveField('latestKeyResultCheckIn', () => KeyResultCheckInGraphQLNode, { nullable: true })
-  protected async getLatestKeyResultCheckInForTeam(@Parent() team: TeamGraphQLNode) {
-    this.logger.log({
-      team,
-      message: 'Fetching latest key result check-in for team',
-    })
-
-    return this.core.keyResult.getLatestCheckInForTeam(team)
+    return result
   }
 }

@@ -1,13 +1,14 @@
-import { Field, Float, ID, ObjectType } from '@nestjs/graphql'
+import { Field, ID, ObjectType } from '@nestjs/graphql'
 
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
+import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
+import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 
 import { ObjectiveKeyResultsGraphQLConnection } from './connections/objective-key-results/objective-key-results.connection'
-import { ObjectiveStatusObject } from './objects/objective-status.object'
 
 @ObjectType('Objective', {
   implements: () => [NodeRelayGraphQLInterface, GuardedNodeGraphQLInterface],
@@ -31,17 +32,18 @@ export class ObjectiveGraphQLNode implements GuardedNodeGraphQLInterface {
   // RESOLVED FIELDS
   // **********************************************************************************************
 
-  @Field(() => ObjectiveStatusObject, {
+  @Field(() => StatusGraphQLObject, {
+    complexity: 1,
     description:
       'The status of the given objective. Here you can fetch the current progress, confidence, and other for that objective',
   })
-  public status!: ObjectiveStatusObject
+  public status!: StatusGraphQLObject
 
-  @Field(() => Float, {
-    description:
-      'The percentage progress increase of the objective since the last week. We consider a week as a "business" week, considering it starting on saturday and ending on friday',
+  @Field(() => DeltaGraphQLObject, {
+    complexity: 1,
+    description: 'The delta of this objective comparing with last week',
   })
-  public progressIncreaseSinceLastWeek!: number
+  public delta!: DeltaGraphQLObject
 
   @Field(() => CycleGraphQLNode, {
     complexity: 1,

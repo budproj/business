@@ -7,7 +7,7 @@ export class GetKeyResultConfidenceColorCommand extends Command<string> {
   private readonly confidenceTagAdapter = new ConfidenceTagAdapter()
 
   public async execute(keyResult: KeyResultInterface): Promise<string> {
-    const latestCheckIn = await this.core.keyResult.getLatestCheckInForKeyResultAtDate(keyResult)
+    const latestCheckIn = await this.core.keyResult.getLatestCheckInForKeyResultAtDate(keyResult.id)
 
     return this.confidenceTagAdapter.getColorFromConfidence(latestCheckIn?.confidence)
   }

@@ -1,16 +1,13 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { uniqBy, sum } from 'lodash'
+import { uniqBy } from 'lodash'
 import { Any, DeleteResult, FindConditions } from 'typeorm'
 
-import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
-import { DEFAULT_CONFIDENCE } from '@core/modules/key-result/check-in/key-result-check-in.constants'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { ObjectiveProvider } from '@core/modules/objective/objective.provider'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
-import { TeamProvider } from '@core/modules/team/team.provider'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 
@@ -23,22 +20,16 @@ import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
 import { KeyResultInterface } from './interfaces/key-result.interface'
 import { KeyResult } from './key-result.orm-entity'
 import { KeyResultRepository } from './key-result.repository'
-import { KeyResultSpecification } from './key-result.specification'
 import { KeyResultTimelineProvider } from './timeline.provider'
 import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
 
 @Injectable()
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
-  private readonly specifications: KeyResultSpecification = new KeyResultSpecification()
-  private readonly confidenceTagAdapter = new ConfidenceTagAdapter()
-
   constructor(
     public readonly keyResultCommentProvider: KeyResultCommentProvider,
     public readonly keyResultCheckInProvider: KeyResultCheckInProvider,
     public readonly timeline: KeyResultTimelineProvider,
     protected readonly repository: KeyResultRepository,
-    @Inject(forwardRef(() => TeamProvider))
-    private readonly teamProvider: TeamProvider,
     @Inject(forwardRef(() => ObjectiveProvider))
     private readonly objectiveProvider: ObjectiveProvider,
   ) {
@@ -63,7 +54,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   }
 
   public async getFromTeams(
-    teams: TeamInterface | TeamInterface[],
+    teams: Partial<TeamInterface> | Array<Partial<TeamInterface>>,
     filters?: FindConditions<KeyResult>,
     options?: GetOptions<KeyResult>,
   ): Promise<KeyResult[]> {
@@ -237,38 +228,11 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   }
 
   public async getLatestCheckInForKeyResultAtDate(
-    keyResult: KeyResultInterface,
+    keyResultID: string,
     date?: Date,
   ): Promise<KeyResultCheckIn> {
     date ??= new Date()
-    return this.keyResultCheckInProvider.getLatestFromKeyResultAtDate(keyResult, date)
-  }
-
-  public calculateKeyResultCheckInListAverageProgress(
-    keyResultCheckInList: Array<KeyResultCheckIn | undefined>,
-    keyResults: KeyResult[],
-  ) {
-    if (keyResultCheckInList.length === 0) return 0
-
-    const progressList = keyResultCheckInList.map((checkIn, index) =>
-      this.keyResultCheckInProvider.getProgressFromValue(keyResults[index], checkIn?.value),
-    )
-
-    return sum(progressList) / keyResultCheckInList.length
-  }
-
-  public async getLatestCheckInForTeam(team: TeamInterface) {
-    const users = await this.teamProvider.getUsersInTeam(team)
-    return this.keyResultCheckInProvider.getLatestFromUsers(users)
-  }
-
-  public async isOutdated(keyResult: KeyResult): Promise<boolean> {
-    const keyResultIndexes = {
-      id: keyResult.id,
-    }
-    const isActive = await this.isActiveFromIndexes(keyResultIndexes)
-
-    return isActive && this.specifications.isOutdated.isSatisfiedBy(keyResult)
+    return this.keyResultCheckInProvider.getLatestFromKeyResultAtDate(keyResultID, date)
   }
 
   public async getTimeline(
@@ -311,52 +275,6 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     indexes: Partial<KeyResultCommentInterface>,
   ): Promise<KeyResultComment> {
     return this.keyResultCommentProvider.getOne(indexes)
-  }
-
-  public getCheckInDeltaValue(
-    checkIn: KeyResultCheckIn,
-    keyResult: KeyResult,
-    parent?: KeyResultCheckIn,
-  ): number {
-    const previousValue = parent?.value ?? keyResult.initialValue
-    return checkIn.value - previousValue
-  }
-
-  public getCheckInDeltaProgress(
-    checkIn: KeyResultCheckIn,
-    keyResult: KeyResult,
-    parent?: KeyResultCheckIn,
-  ): number {
-    const currentProgress = this.keyResultCheckInProvider.getProgressFromValue(
-      keyResult,
-      checkIn.value,
-    )
-    const previousProgress = this.keyResultCheckInProvider.getProgressFromValue(
-      keyResult,
-      parent?.value,
-    )
-
-    return currentProgress - previousProgress
-  }
-
-  public getCheckInDeltaConfidence(
-    checkIn: KeyResultCheckIn,
-    keyResult: KeyResult,
-    parent?: KeyResultCheckIn,
-  ): number {
-    const previousConfidence = parent?.confidence ?? DEFAULT_CONFIDENCE
-    return checkIn.confidence - previousConfidence
-  }
-
-  public getCheckInDeltaConfidenceTag(
-    checkIn: KeyResultCheckIn,
-    _keyResult: KeyResult,
-    parent?: KeyResultCheckIn,
-  ): number {
-    return this.confidenceTagAdapter.differenceInConfidenceTagIndexes(
-      parent?.confidence,
-      checkIn.confidence,
-    )
   }
 
   public async createKeyResult(data: KeyResultInterface): Promise<KeyResult> {

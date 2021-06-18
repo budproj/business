@@ -1,11 +1,13 @@
 import { Logger, UnauthorizedException } from '@nestjs/common'
-import { Args, Float, Parent, ResolveField } from '@nestjs/graphql'
+import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { State } from '@adapters/state/interfaces/state.interface'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { Delta } from '@core/interfaces/delta.interface'
+import { Status } from '@core/interfaces/status.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
@@ -22,14 +24,16 @@ import { ObjectiveAccessControl } from '@interface/graphql/modules/objective/obj
 import { ObjectiveUpdateRequest } from '@interface/graphql/modules/objective/requests/objective-update.request'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
+import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
+import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 import { NodeDeleteRequest } from '@interface/graphql/requests/node-delete.request'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
+import { StatusRequest } from '@interface/graphql/requests/status.request'
 
 import { KeyResultFiltersRequest } from '../key-result/requests/key-result-filters.request'
 
 import { ObjectiveKeyResultsGraphQLConnection } from './connections/objective-key-results/objective-key-results.connection'
 import { ObjectiveGraphQLNode } from './objective.node'
-import { ObjectiveStatusObject } from './objects/objective-status.object'
 
 @GuardedResolver(ObjectiveGraphQLNode)
 export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
@@ -152,25 +156,41 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection, objective)
   }
 
-  @ResolveField('status', () => ObjectiveStatusObject)
-  protected async getStatusForObjective(@Parent() objective: ObjectiveGraphQLNode) {
-    this.logger.log({
-      objective,
-      message: 'Fetching current status for objective',
-    })
-
-    return this.core.objective.getCurrentStatus(objective)
-  }
-
-  @ResolveField('progressIncreaseSinceLastWeek', () => Float)
-  protected async getProgressIncreaseSinceLastWeekForObjective(
+  @ResolveField('status', () => StatusGraphQLObject)
+  protected async getStatusForObjective(
     @Parent() objective: ObjectiveGraphQLNode,
+    @Args() request: StatusRequest,
   ) {
     this.logger.log({
       objective,
-      message: 'Fetching progress increase for objective since last week',
+      request,
+      message: 'Fetching current status for this objective',
     })
 
-    return this.core.objective.getObjectiveProgressIncreaseSinceLastWeek(objective)
+    const result = await this.corePorts.dispatchCommand<Status>(
+      'get-objective-status',
+      objective.id,
+      request,
+    )
+    if (!result)
+      throw new UserInputError(`We could not find status for the objective with ID ${objective.id}`)
+
+    return result
+  }
+
+  @ResolveField('delta', () => DeltaGraphQLObject)
+  protected async getDeltaForObjective(@Parent() objective: ObjectiveGraphQLNode) {
+    this.logger.log({
+      objective,
+      message: 'Fetching delta for this objective',
+    })
+
+    const result = await this.corePorts.dispatchCommand<Delta>('get-objective-delta', objective.id)
+    if (!result)
+      throw new UserInputError(
+        `We could not find a delta for the objective with ID ${objective.id}`,
+      )
+
+    return result
   }
 }

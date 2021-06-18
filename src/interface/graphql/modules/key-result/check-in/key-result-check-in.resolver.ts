@@ -1,5 +1,5 @@
 import { Logger, UnauthorizedException } from '@nestjs/common'
-import { Args, Float, Int, Parent, ResolveField } from '@nestjs/graphql'
+import { Args, Float, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { CreatedCheckInActivity } from '@adapters/activity/activities/created-check-in-activity'
@@ -8,6 +8,7 @@ import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
+import { KeyResultCheckInDelta } from '@core/ports/commands/get-key-result-check-in-delta.command'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { AttachActivity } from '@interface/graphql/adapters/activity/attach-activity.decorator'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
@@ -17,6 +18,7 @@ import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authoriz
 import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { GraphQLRequestState } from '@interface/graphql/adapters/context/interfaces/request-state.interface'
+import { KeyResultCheckInDeltaGraphQLObject } from '@interface/graphql/modules/key-result/check-in/objects/key-result-check-in-delta.object'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
@@ -158,54 +160,6 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
     return this.core.keyResult.getCheckInProgress(keyResultCheckIn)
   }
 
-  @ResolveField('progressIncrease', () => Float)
-  protected async resolvePercentageProgressIncreaseForKeyResultCheckIn(
-    @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
-  ) {
-    this.logger.log({
-      keyResultCheckIn,
-      message: 'Fetching percentage progress increase for key result check-in',
-    })
-
-    return this.corePorts.dispatchCommand<number>(
-      'get-key-result-check-in-delta',
-      keyResultCheckIn,
-      'progress',
-    )
-  }
-
-  @ResolveField('confidenceIncrease', () => Int)
-  protected async resolveAbsoluteConfidenceIncreaseForKeyResultCheckIn(
-    @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
-  ) {
-    this.logger.log({
-      keyResultCheckIn,
-      message: 'Fetching absolute confidence increase for key result check-in',
-    })
-
-    return this.corePorts.dispatchCommand<number>(
-      'get-key-result-check-in-delta',
-      keyResultCheckIn,
-      'confidence',
-    )
-  }
-
-  @ResolveField('valueIncrease', () => Float)
-  protected async resolveValueIncreaseForKeyResultCheckIn(
-    @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
-  ) {
-    this.logger.log({
-      keyResultCheckIn,
-      message: 'Fetching value increase for key result check-in',
-    })
-
-    return this.corePorts.dispatchCommand<number>(
-      'get-key-result-check-in-delta',
-      keyResultCheckIn,
-      'value',
-    )
-  }
-
   @ResolveField('user', () => UserGraphQLNode)
   protected async resolveUserForKeyResultCheckIn(
     @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
@@ -240,5 +194,24 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
     })
 
     return this.core.keyResult.getParentCheckInFromCheckIn(keyResultCheckIn)
+  }
+
+  @ResolveField('delta', () => KeyResultCheckInDeltaGraphQLObject)
+  protected async getDeltaForObjective(@Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode) {
+    this.logger.log({
+      keyResultCheckIn,
+      message: 'Fetching delta for this key-result check-in',
+    })
+
+    const result = await this.corePorts.dispatchCommand<KeyResultCheckInDelta>(
+      'get-key-result-check-in-delta',
+      keyResultCheckIn.id,
+    )
+    if (!result)
+      throw new UserInputError(
+        `We could not find a delta for the key-result check-in with ID ${keyResultCheckIn.id}`,
+      )
+
+    return result
   }
 }

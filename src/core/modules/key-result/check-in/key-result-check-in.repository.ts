@@ -6,7 +6,6 @@ import { Sorting } from '@core/enums/sorting'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 
-import { KeyResultInterface } from '../interfaces/key-result.interface'
 import { KeyResult } from '../key-result.orm-entity'
 
 import { KeyResultCheckIn } from './key-result-check-in.orm-entity'
@@ -15,11 +14,11 @@ import { KeyResultCheckIn } from './key-result-check-in.orm-entity'
 export class KeyResultCheckInRepository extends CoreEntityRepository<KeyResultCheckIn> {
   public entityName = KeyResultCheckIn.name
 
-  public async getLatestFromDateForKeyResult(date: Date, keyResult: KeyResultInterface) {
+  public async getLatestFromDateForKeyResult(date: Date, keyResultId: string) {
     const isoDate = date.toISOString()
 
     const where = {
-      keyResultId: keyResult.id,
+      keyResultId,
       createdAt: LessThanOrEqual(isoDate),
     }
     const order = {

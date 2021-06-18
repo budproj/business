@@ -61,14 +61,15 @@ export class KeyResultCheckInProvider extends CoreEntityProvider<
 
   public async getLatestFromKeyResult(keyResult: KeyResultInterface): Promise<KeyResultCheckIn> {
     const date = new Date()
-    return this.repository.getLatestFromDateForKeyResult(date, keyResult)
+
+    return this.getLatestFromKeyResultAtDate(keyResult.id, date)
   }
 
   public async getLatestFromKeyResultAtDate(
-    keyResult: KeyResultInterface,
+    keyResultID: string,
     snapshot: Date,
   ): Promise<KeyResultCheckIn> {
-    return this.repository.getLatestFromDateForKeyResult(snapshot, keyResult)
+    return this.repository.getLatestFromDateForKeyResult(snapshot, keyResultID)
   }
 
   public getProgressFromValue(keyResult: KeyResultInterface, value?: number): number {
