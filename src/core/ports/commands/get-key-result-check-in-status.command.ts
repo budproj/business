@@ -2,7 +2,9 @@ import { Status } from '@core/interfaces/status.interface'
 import { BaseStatusCommand } from '@core/ports/commands/base-status.command'
 
 export class GetKeyResultCheckInStatusCommand extends BaseStatusCommand {
-  public async execute(keyResultCheckInID: string): Promise<Status> {
+  public async execute(keyResultCheckInID?: string): Promise<Status> {
+    if (!keyResultCheckInID) return BaseStatusCommand.buildDefaultStatus()
+
     const latestCheckIn = await this.core.keyResult.keyResultCheckInProvider.getOne({
       id: keyResultCheckInID,
     })

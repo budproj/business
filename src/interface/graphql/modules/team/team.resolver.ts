@@ -111,20 +111,20 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       Team
     >(request)
 
-    const queryResult = await this.core.team.getTeamChildTeams(team, filters, queryOptions)
+    const queryResult = await this.core.team.getChildren(team.id, filters, queryOptions)
 
     return this.relay.marshalResponse<TeamInterface>(queryResult, connection, team)
   }
 
-  @ResolveField('rankedTeams', () => TeamTeamsGraphQLConnection, { nullable: true })
-  protected async getRankedTeamsForTeam(
+  @ResolveField('rankedDescendants', () => TeamTeamsGraphQLConnection, { nullable: true })
+  protected async getRankedDescendantsForTeam(
     @Args() request: TeamFiltersRequest,
     @Parent() team: TeamGraphQLNode,
   ) {
     this.logger.log({
       team,
       request,
-      message: 'Fetching ranked teams for team',
+      message: 'Fetching ranked descendants for team',
     })
 
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
@@ -132,9 +132,14 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       Team
     >(request)
 
-    const queryResult = await this.core.team.getRankedTeamsBelowNode(team, filters, queryOptions)
+    const result = await this.corePorts.dispatchCommand<Team[]>(
+      'get-team-ranked-descendants',
+      team.id,
+      filters,
+      queryOptions,
+    )
 
-    return this.relay.marshalResponse<TeamInterface>(queryResult, connection, team)
+    return this.relay.marshalResponse<TeamInterface>(result, connection, team)
   }
 
   @ResolveField('parent', () => TeamGraphQLNode, { nullable: true })
@@ -163,7 +168,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       User
     >(request)
 
-    const queryResult = await this.core.team.getUsersInTeam(team, filters, queryOptions)
+    const queryResult = await this.core.team.getUsersInTeam(team.id, filters, queryOptions)
 
     return this.relay.marshalResponse<UserInterface>(queryResult, connection, team)
   }

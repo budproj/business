@@ -5,7 +5,7 @@ import { BaseStatusCommand } from '@core/ports/commands/base-status.command'
 import { Command } from '@core/ports/commands/base.command'
 import { CommandFactory } from '@core/ports/commands/command.factory'
 
-interface GetTeamStatusOptions extends GetStatusOptions {
+export interface GetTeamStatusOptions extends GetStatusOptions {
   cycleFilters?: Partial<CycleInterface>
 }
 
@@ -57,7 +57,7 @@ export class GetTeamStatusCommand extends BaseStatusCommand {
     teamID: string,
     options: GetTeamStatusOptions,
   ): Promise<Status[]> {
-    const teamNodesFromTeam = await this.core.team.getTeamNodesTreeAfterTeam({ id: teamID })
+    const teamNodesFromTeam = await this.core.team.getTeamNodesTreeAfterTeam(teamID)
     const childTeams = teamNodesFromTeam.filter((team) => team.id !== teamID)
     const childTeamStatusPromises = childTeams.map(async (team) => this.execute(team.id, options))
 

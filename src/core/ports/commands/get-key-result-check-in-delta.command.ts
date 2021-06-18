@@ -26,7 +26,7 @@ export class GetKeyResultCheckInDeltaCommand extends BaseDeltaCommand<KeyResultC
   public async execute(keyResultCheckInID: string): Promise<KeyResultCheckInDelta> {
     const currentStatus = await this.getKeyResultCheckInStatus.execute(keyResultCheckInID)
     const previousStatus = await this.getKeyResultCheckInStatus.execute(
-      currentStatus.latestCheckIn.parentId,
+      currentStatus.latestCheckIn?.parentId,
     )
 
     return this.marshal(currentStatus, previousStatus)
@@ -34,10 +34,11 @@ export class GetKeyResultCheckInDeltaCommand extends BaseDeltaCommand<KeyResultC
 
   protected marshal(currentStatus: Status, previousStatus: Status): KeyResultCheckInDelta {
     const originalDeltaValues = super.marshal(currentStatus, previousStatus)
+    const previousValue = previousStatus.latestCheckIn?.value ?? 0
 
     return {
       ...originalDeltaValues,
-      value: currentStatus.latestCheckIn.value - previousStatus.latestCheckIn.value,
+      value: currentStatus.latestCheckIn.value - previousValue,
       confidenceTag: this.confidenceTagAdapter.differenceInConfidenceTagIndexes(
         currentStatus.confidence,
         previousStatus.confidence,

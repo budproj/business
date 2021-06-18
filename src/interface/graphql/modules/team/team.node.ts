@@ -107,9 +107,10 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   @Field(() => TeamTeamsGraphQLConnection, {
     complexity: 0,
     nullable: true,
-    description: "A list with all teams inside this team's tree ordered by their progress",
+    description:
+      "A list with all teams inside this team's descendant tree ordered by their progress",
   })
-  public readonly rankedTeams?: TeamTeamsGraphQLConnection
+  public readonly rankedDescendants?: TeamTeamsGraphQLConnection
 
   @Field(() => TeamCyclesGraphQLConnection, {
     complexity: 0,
