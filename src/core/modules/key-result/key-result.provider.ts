@@ -5,6 +5,7 @@ import { Any, DeleteResult, FindConditions } from 'typeorm'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
+import { DEFAULT_PROGRESS } from '@core/modules/key-result/check-in/key-result-check-in.constants'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
@@ -211,7 +212,9 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return this.keyResultCheckInProvider.getOne({ id: keyResultCheckIn.parentId })
   }
 
-  public async getCheckInProgress(keyResultCheckIn: KeyResultCheckIn): Promise<number> {
+  public async getCheckInProgress(keyResultCheckIn?: KeyResultCheckIn): Promise<number> {
+    if (!keyResultCheckIn) return DEFAULT_PROGRESS
+
     const keyResult = await this.getOne({ id: keyResultCheckIn.keyResultId })
     return this.keyResultCheckInProvider.getProgressFromValue(keyResult, keyResultCheckIn?.value)
   }

@@ -3,22 +3,21 @@ import { BaseStatusCommand } from '@core/ports/commands/base-status.command'
 
 export class GetKeyResultCheckInStatusCommand extends BaseStatusCommand {
   public async execute(keyResultCheckInID?: string): Promise<Status> {
-    if (!keyResultCheckInID) return BaseStatusCommand.buildDefaultStatus()
-
     const latestCheckIn = await this.core.keyResult.keyResultCheckInProvider.getOne({
       id: keyResultCheckInID,
     })
 
-    const currentProgress = await this.core.keyResult.getCheckInProgress(latestCheckIn)
+    const progress = await this.core.keyResult.getCheckInProgress(latestCheckIn)
     const isOutdated = this.isOutdated(latestCheckIn)
     const isActive = await this.isActive(keyResultCheckInID)
+    const confidence = latestCheckIn?.confidence ?? this.defaultStatus.confidence
 
     return {
       latestCheckIn,
       isOutdated,
       isActive,
-      progress: currentProgress,
-      confidence: latestCheckIn.confidence,
+      progress,
+      confidence,
       reportDate: latestCheckIn.createdAt,
     }
   }

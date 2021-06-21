@@ -10,19 +10,19 @@ export class GetKeyResultStatusCommand extends BaseStatusCommand {
       keyResultID,
       options.date,
     )
-    if (!latestCheckIn) return GetKeyResultStatusCommand.buildDefaultStatus()
 
-    const currentProgress = await this.core.keyResult.getCheckInProgress(latestCheckIn)
+    const progress = await this.core.keyResult.getCheckInProgress(latestCheckIn)
     const isOutdated = this.isOutdated(latestCheckIn)
     const isActive = await this.isActive(keyResultID)
+    const confidence = latestCheckIn?.confidence ?? this.defaultStatus.confidence
 
     return {
       latestCheckIn,
       isOutdated,
       isActive,
-      progress: currentProgress,
-      confidence: latestCheckIn.confidence,
-      reportDate: latestCheckIn.createdAt,
+      progress,
+      confidence,
+      reportDate: latestCheckIn?.createdAt,
     }
   }
 
