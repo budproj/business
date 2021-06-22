@@ -41,6 +41,8 @@ export abstract class BaseStatusCommand extends Command<Status> {
   }
 
   protected getAverage(numbers: number[]): number {
+    if (numbers.length === 0) return 0
+
     return sum(numbers) / numbers.length
   }
 
