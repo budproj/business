@@ -25,6 +25,13 @@ export class StatusGraphQLObject {
   @Field({
     complexity: 0,
     description:
+      'This key defines if the given entity is active. An active entity definition varies according to the entity',
+  })
+  public readonly isActive!: boolean
+
+  @Field({
+    complexity: 0,
+    description:
       'This key defines if the given entity is outdated. By outdated we mean that it needs to receive a new report',
   })
   public readonly isOutdated!: boolean
