@@ -112,15 +112,6 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     return this.repository.findOne(indexes)
   }
 
-  public async getFromTeamWithCycleFilters(
-    teamID: string,
-    cycleFilters?: Partial<CycleInterface>,
-  ): Promise<Objective[]> {
-    return this.repository.getFromTeamWithRelationFilters(teamID, {
-      cycle: cycleFilters,
-    })
-  }
-
   protected async protectCreationQuery(
     _query: CreationQuery<Objective>,
     _data: Partial<ObjectiveInterface>,

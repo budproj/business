@@ -37,7 +37,11 @@ export abstract class BaseStatusCommand extends Command<Status> {
     if (statusList.length === 0) return 0
     const progressList = statusList.map((status) => status.progress)
 
-    return sum(progressList) / statusList.length
+    return this.getAverage(progressList)
+  }
+
+  protected getAverage(numbers: number[]): number {
+    return sum(numbers) / numbers.length
   }
 
   protected getMinConfidenceFromList(statusList: Status[]): number {
