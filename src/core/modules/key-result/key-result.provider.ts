@@ -5,7 +5,6 @@ import { Any, DeleteResult, FindConditions } from 'typeorm'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
-import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { DEFAULT_PROGRESS } from '@core/modules/key-result/check-in/key-result-check-in.constants'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
@@ -305,16 +304,6 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       raw: [...comments.raw, ...checkIns.raw, ...keyResults.raw],
       affected: comments.affected + checkIns.affected + keyResults.affected,
     }
-  }
-
-  public async getFromTeamWithCycleFilters(
-    teamID: string,
-    cycleFilters?: Partial<CycleInterface>,
-  ): Promise<KeyResult[]> {
-    throw new Error('FIXME')
-    // Return this.repository.getFromTeamWithRelationFilters(teamID, {
-    //   cycle: cycleFilters,
-    // })
   }
 
   public async getEntireOKRTreeWithFilters(filters: OKRTreeFilters): Promise<KeyResult[]> {
