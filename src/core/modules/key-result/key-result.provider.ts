@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { uniqBy, pick } from 'lodash'
+import { uniqBy, pickBy, omitBy, identity, isEmpty } from 'lodash'
 import { Any, DeleteResult, FindConditions } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
@@ -11,6 +11,7 @@ import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
+import { OKRTreeFilters } from '@core/types/okr-tree-filters.type'
 
 import { KeyResultCheckInInterface } from './check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from './check-in/key-result-check-in.orm-entity'
@@ -20,7 +21,7 @@ import { KeyResultComment } from './comment/key-result-comment.orm-entity'
 import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
 import { KeyResultInterface } from './interfaces/key-result.interface'
 import { KeyResult } from './key-result.orm-entity'
-import { KeyResultRelationFilters, KeyResultRepository } from './key-result.repository'
+import { KeyResultRepository } from './key-result.repository'
 import { KeyResultTimelineProvider } from './timeline.provider'
 import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
 
@@ -310,18 +311,24 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     teamID: string,
     cycleFilters?: Partial<CycleInterface>,
   ): Promise<KeyResult[]> {
-    return this.repository.getFromTeamWithRelationFilters(teamID, {
-      cycle: cycleFilters,
-    })
+    throw new Error('FIXME')
+    // Return this.repository.getFromTeamWithRelationFilters(teamID, {
+    //   cycle: cycleFilters,
+    // })
   }
 
-  public async getAllFromObjectiveWithCheckIns(
-    objectiveId: string,
-    relationFilters?: KeyResultRelationFilters,
-  ): Promise<KeyResult[]> {
-    const cleanedRelationFilters = pick(relationFilters)
+  public async getEntireOKRTreeWithFilters(filters: OKRTreeFilters): Promise<KeyResult[]> {
+    const cleanedRelationFilters = omitBy(
+      {
+        keyResultCheckIn: pickBy(filters.keyResultCheckIn, identity),
+        keyResult: pickBy(filters.keyResult, identity),
+        objective: pickBy(filters.objective, identity),
+        cycle: pickBy(filters.cycle, identity),
+      },
+      isEmpty,
+    )
 
-    return this.repository.findWithCheckIns({ objectiveId }, cleanedRelationFilters)
+    return this.repository.findOKRTreeWithFilters(cleanedRelationFilters)
   }
 
   protected async protectCreationQuery(

@@ -28,19 +28,15 @@ export class GetObjectiveStatusCommand extends BaseStatusCommand {
     objectiveID: string,
     options: GetStatusOptions,
   ): Promise<KeyResult[]> {
-    const keyResultFilters = {
-      checkIns: {
+    const filters = {
+      keyResultCheckIn: {
         createdAt: options.date,
+      },
+      objective: {
+        id: objectiveID,
       },
     }
 
-    return this.core.keyResult.getAllFromObjectiveWithCheckIns(objectiveID, keyResultFilters)
-  }
-
-  private async isActive(objectiveID: string): Promise<boolean> {
-    const objective = await this.core.objective.getFromID(objectiveID)
-    const cycle = await this.core.cycle.getFromObjective(objective)
-
-    return cycle.active
+    return this.core.keyResult.getEntireOKRTreeWithFilters(filters)
   }
 }
