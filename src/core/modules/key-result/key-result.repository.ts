@@ -5,6 +5,7 @@ import { CoreEntityRepository } from '@core/core.repository'
 import { ConstraintType } from '@core/enums/contrain-type.enum'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
+import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
@@ -13,11 +14,12 @@ import { UserInterface } from '@core/modules/user/user.interface'
 import { KeyResultInterface } from './interfaces/key-result.interface'
 import { KeyResult } from './key-result.orm-entity'
 
-type KeyResultRelationFilters = {
+export type KeyResultRelationFilters = {
   cycle?: Partial<CycleInterface>
+  checkIns?: Partial<KeyResultCheckIn>
 }
 
-type RelationFilterQuery = {
+type FilterQuery = {
   query: string
   variables: Record<string, any>
 }
@@ -48,6 +50,24 @@ export class KeyResultRepository extends CoreEntityRepository<KeyResult> {
     return orderedQuery.getMany()
   }
 
+  public async findWithCheckIns(
+    indexes: Partial<KeyResultInterface>,
+    relationFilters: KeyResultRelationFilters = {},
+  ): Promise<KeyResult[]> {
+    const filter = this.buildFilterQuery(indexes)
+    const checkInsRelationFilter = this.buildRelationFilterQuery(
+      KeyResultCheckIn.name,
+      relationFilters.checkIns,
+    )
+
+    return this.createQueryBuilder()
+      .where(filter.query, filter.variables)
+      .leftJoinAndSelect(`${KeyResult.name}.checkIns`, KeyResultCheckIn.name)
+      .andWhere(checkInsRelationFilter.query, checkInsRelationFilter.variables)
+      .orderBy(`${KeyResultCheckIn.name}.createdAt`, 'DESC')
+      .getMany()
+  }
+
   protected setupTeamQuery(query: SelectQueryBuilder<KeyResult>) {
     return query.leftJoinAndSelect(`${KeyResult.name}.team`, Team.name)
   }
@@ -76,10 +96,26 @@ export class KeyResultRepository extends CoreEntityRepository<KeyResult> {
     })
   }
 
+  private buildFilterQuery(indexes?: Partial<KeyResultInterface>): FilterQuery {
+    if (!indexes)
+      return {
+        query: '1 = 1',
+        variables: {},
+      }
+
+    const queryParts = Object.keys(indexes).map((key) => `${KeyResult.name}.${key} = :${key}`)
+    const query = queryParts.join(' AND ')
+
+    return {
+      query,
+      variables: indexes,
+    }
+  }
+
   private buildRelationFilterQuery(
     relationName: string,
     filter?: Partial<CoreEntityInterface>,
-  ): RelationFilterQuery {
+  ): FilterQuery {
     if (!filter)
       return {
         query: '1 = 1',

@@ -112,6 +112,15 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     return this.repository.findOne(indexes)
   }
 
+  public async isActive(id: string): Promise<boolean> {
+    const objectiveWithCycle = await this.repository.findOne({
+      where: { id },
+      relations: ['cycle'],
+    })
+
+    return objectiveWithCycle.cycle.active
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<Objective>,
     _data: Partial<ObjectiveInterface>,

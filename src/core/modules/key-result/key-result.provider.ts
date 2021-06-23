@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { uniqBy } from 'lodash'
+import { uniqBy, pick } from 'lodash'
 import { Any, DeleteResult, FindConditions } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
@@ -20,7 +20,7 @@ import { KeyResultComment } from './comment/key-result-comment.orm-entity'
 import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
 import { KeyResultInterface } from './interfaces/key-result.interface'
 import { KeyResult } from './key-result.orm-entity'
-import { KeyResultRepository } from './key-result.repository'
+import { KeyResultRelationFilters, KeyResultRepository } from './key-result.repository'
 import { KeyResultTimelineProvider } from './timeline.provider'
 import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
 
@@ -213,10 +213,13 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return this.keyResultCheckInProvider.getOne({ id: keyResultCheckIn.parentId })
   }
 
-  public async getCheckInProgress(keyResultCheckIn?: KeyResultCheckIn): Promise<number> {
+  public async getCheckInProgress(
+    keyResultCheckIn?: KeyResultCheckInInterface,
+    keyResult?: KeyResult,
+  ): Promise<number> {
     if (!keyResultCheckIn) return DEFAULT_PROGRESS
 
-    const keyResult = await this.getOne({ id: keyResultCheckIn.keyResultId })
+    keyResult ??= await this.getOne({ id: keyResultCheckIn.keyResultId })
     return this.keyResultCheckInProvider.getProgressFromValue(keyResult, keyResultCheckIn?.value)
   }
 
@@ -310,6 +313,15 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return this.repository.getFromTeamWithRelationFilters(teamID, {
       cycle: cycleFilters,
     })
+  }
+
+  public async getAllFromObjectiveWithCheckIns(
+    objectiveId: string,
+    relationFilters?: KeyResultRelationFilters,
+  ): Promise<KeyResult[]> {
+    const cleanedRelationFilters = pick(relationFilters)
+
+    return this.repository.findWithCheckIns({ objectiveId }, cleanedRelationFilters)
   }
 
   protected async protectCreationQuery(
