@@ -50,14 +50,17 @@ export abstract class BaseStatusCommand extends Command<Status> {
     return this.getAverage(progressList)
   }
 
-  protected getAverage(numbers: number[]): number {
-    if (numbers.length === 0) return 0
+  protected getAverage(
+    numberList: number[],
+    defaultValue: number = this.defaultStatus.progress,
+  ): number {
+    if (numberList.length === 0) return defaultValue
 
-    return sum(numbers) / numbers.length
+    return sum(numberList) / numberList.length
   }
 
   protected getMinConfidenceFromList(statusList: Status[]): number {
-    if (statusList.length === 0) return 100
+    if (statusList.length === 0) return this.defaultStatus.confidence
     const smallestConfidenceStatus = minBy(statusList, 'confidence')
 
     return smallestConfidenceStatus.confidence
@@ -105,9 +108,12 @@ export abstract class BaseStatusCommand extends Command<Status> {
     return [latestCheckIns, progresses, confidences]
   }
 
-  protected getMin(confidenceList: number[]): number {
-    if (confidenceList.length === 0) return 100
+  protected getMin(
+    numberList: number[],
+    defaultValue: number = this.defaultStatus.confidence,
+  ): number {
+    if (numberList.length === 0) return defaultValue
 
-    return min(confidenceList)
+    return min(numberList)
   }
 }

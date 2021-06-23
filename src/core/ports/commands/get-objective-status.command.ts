@@ -12,7 +12,7 @@ export class GetObjectiveStatusCommand extends BaseStatusCommand {
 
     const latestCheckIn = this.getLatestCheckInFromList(objectiveCheckIns)
     const isOutdated = this.isOutdated(latestCheckIn)
-    const isActive = await this.isActive(objectiveID)
+    const isActive = await this.core.objective.isActive(objectiveID)
 
     return {
       isOutdated,
