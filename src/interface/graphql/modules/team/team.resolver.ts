@@ -22,6 +22,7 @@ import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorato
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
+import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
 import { CycleFiltersRequest } from '@interface/graphql/modules/cycle/requests/cycle-filters.request'
 import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/requests/key-result-filters.request'
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
@@ -252,7 +253,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   }
 
   @ResolveField('delta', () => DeltaGraphQLObject)
-  protected async getDeltaForObjective(@Parent() team: TeamGraphQLNode) {
+  protected async getDeltaForTeam(@Parent() team: TeamGraphQLNode) {
     this.logger.log({
       team,
       message: 'Fetching delta for this team',
@@ -263,5 +264,15 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       throw new UserInputError(`We could not find a delta for the team with ID ${team.id}`)
 
     return result
+  }
+
+  @ResolveField('tacticalCycle', () => CycleGraphQLNode, { nullable: true })
+  protected async getTacticalCycleForTeam(@Parent() team: TeamGraphQLNode) {
+    this.logger.log({
+      team,
+      message: 'Fetching tactical cycle for this team',
+    })
+
+    return this.corePorts.dispatchCommand<Cycle | undefined>('get-team-tactical-cycle', team.id)
   }
 }

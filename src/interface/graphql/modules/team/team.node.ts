@@ -4,6 +4,7 @@ import { TeamGender } from '@core/modules/team/enums/team-gender.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
+import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
 import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
@@ -85,6 +86,14 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
     description: 'The team that owns this team',
   })
   public readonly parent?: TeamGraphQLNode
+
+  @Field(() => CycleGraphQLNode, {
+    complexity: 1,
+    nullable: true,
+    description:
+      'Based on the current date, this key defines what is the current active tactical cycle for this team',
+  })
+  public readonly tacticalCycle?: CycleGraphQLNode
 
   // **********************************************************************************************
   // CONNECTION FIELDS

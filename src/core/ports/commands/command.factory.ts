@@ -23,6 +23,7 @@ import { GetTeamDeltaCommand } from '@core/ports/commands/get-team-delta.command
 import { GetTeamObjectivesCommand } from '@core/ports/commands/get-team-objectives.command'
 import { GetTeamRankedDescendantsCommand } from '@core/ports/commands/get-team-ranked-descendants'
 import { GetTeamStatusCommand } from '@core/ports/commands/get-team-status.command'
+import { GetTeamTacticalCycleCommand } from '@core/ports/commands/get-team-tactical-cycle.command'
 import { GetTeamTreeCommand } from '@core/ports/commands/get-team-tree.command'
 import { GetTeamCommand } from '@core/ports/commands/get-team.command'
 import { GetUserFullNameCommand } from '@core/ports/commands/get-user-full-name.command'
@@ -87,6 +88,7 @@ export type CommandType =
   | 'get-team-owner'
   | 'get-team-ranked-descendants'
   | 'get-team-status'
+  | 'get-team-tactical-cycle'
   | 'get-team-tree'
   | 'get-user'
   | 'get-user-companies'
@@ -135,6 +137,7 @@ export class CommandFactory {
     'get-team-owner': GetTeamOwnerCommand,
     'get-team-ranked-descendants': GetTeamRankedDescendantsCommand,
     'get-team-status': GetTeamStatusCommand,
+    'get-team-tactical-cycle': GetTeamTacticalCycleCommand,
     'get-team-tree': GetTeamTreeCommand,
     'get-user': GetUserCommand,
     'get-user-companies': GetUserCompaniesCommand,
