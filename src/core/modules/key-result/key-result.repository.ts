@@ -30,6 +30,11 @@ export class KeyResultRepository extends CoreEntityRepository<KeyResult> {
     team: Team.name,
   }
 
+  private readonly filterOperatorHashmap = {
+    createdAt: '<',
+    default: '=',
+  }
+
   public async findOKRTreeWithFilters(treeFilters: OKRTreeFilters): Promise<KeyResult[]> {
     const filters = this.buildFilters(treeFilters)
 
@@ -101,12 +106,21 @@ export class KeyResultRepository extends CoreEntityRepository<KeyResult> {
       const entityKey = this.entityKeyHashmap[entity] as string
       const entityFilterKeys = Object.keys(entityFilters)
 
-      return entityFilterKeys.map((key) => `${entityKey}.${key} = :${entity}_${key}`)
+      return entityFilterKeys.map((key) => this.buildFilterQuery(entityKey, entity, key))
     })
 
     const flattenedQueries = flatten(queries)
 
     return flattenedQueries.join(' AND ')
+  }
+
+  private buildFilterQuery(entityName: string, entity: string, key: string): string {
+    const operator: string =
+      key in this.filterOperatorHashmap
+        ? this.filterOperatorHashmap[key]
+        : this.filterOperatorHashmap.default
+
+    return `${entityName}.${key} ${operator} :${entity}_${key}`
   }
 
   private buildVariablesFromFilters(filters: OKRTreeFilters): Record<string, any> {
