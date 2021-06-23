@@ -273,8 +273,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching tactical cycle for this team',
     })
 
-    const result = await this.corePorts.dispatchCommand<Delta>('get-team-tactical-cycle', team.id)
-
-    return result
+    return this.corePorts.dispatchCommand<Cycle | undefined>('get-team-tactical-cycle', team.id)
   }
 }

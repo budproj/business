@@ -206,6 +206,10 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return rootTeam
   }
 
+  public async getFromID(id: string): Promise<Team | undefined> {
+    return this.repository.findOne({ id })
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<Team>,
     _data: Partial<TeamInterface>,
