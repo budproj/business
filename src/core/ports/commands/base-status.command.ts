@@ -1,5 +1,5 @@
 import { differenceInCalendarWeeks } from 'date-fns'
-import { sum, minBy, maxBy, min } from 'lodash'
+import { sum, minBy, maxBy, min, groupBy } from 'lodash'
 
 import { GetStatusOptions, Status } from '@core/interfaces/status.interface'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
@@ -101,8 +101,19 @@ export abstract class BaseStatusCommand extends Command<Status> {
   protected async unzipKeyResultGroup(
     keyResults: KeyResult[],
   ): Promise<[KeyResultCheckInInterface[], number[], number[]]> {
+    const objectiveKeyResults = groupBy(keyResults, 'objectiveId')
+    const keyResultsByObjective = Object.values(objectiveKeyResults)
+
     const latestCheckIns = keyResults.map((keyResult) => keyResult.checkIns[0])
-    const progresses = await this.getKeyResultProgressesFromKeyResultList(keyResults)
+
+    const groupedKeyResultsProgressPromise = keyResultsByObjective.map(async (keyResultList) =>
+      this.getKeyResultProgressesFromKeyResultList(keyResultList),
+    )
+    const groupedKeyResultsProgress = await Promise.all(groupedKeyResultsProgressPromise)
+
+    const progresses = groupedKeyResultsProgress.map((progressList) =>
+      this.getAverage(progressList),
+    )
     const confidences = latestCheckIns.map((checkIn) => checkIn?.confidence)
 
     return [latestCheckIns, progresses, confidences]

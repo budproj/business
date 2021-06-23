@@ -4,7 +4,6 @@ import { EntityRepository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 import { CoreEntityRepository } from '@core/core.repository'
 import { ConstraintType } from '@core/enums/contrain-type.enum'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
-import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
@@ -14,11 +13,6 @@ import { OKRTreeFilters } from '@core/types/okr-tree-filters.type'
 
 import { KeyResultInterface } from './interfaces/key-result.interface'
 import { KeyResult } from './key-result.orm-entity'
-
-export type KeyResultRelationFilters = {
-  cycle?: Partial<CycleInterface>
-  checkIns?: Partial<KeyResultCheckIn>
-}
 
 type FilterQuery = {
   query: string
