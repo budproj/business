@@ -313,6 +313,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
         keyResult: pickBy(filters.keyResult, identity),
         objective: pickBy(filters.objective, identity),
         cycle: pickBy(filters.cycle, identity),
+        team: pickBy(filters.team, identity),
       },
       isEmpty,
     )

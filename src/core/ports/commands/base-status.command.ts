@@ -27,7 +27,7 @@ export abstract class BaseStatusCommand extends Command<Status> {
 
   protected getLatestCheckInFromList(
     checkInList: KeyResultCheckInInterface[],
-  ): KeyResultCheckInInterface {
+  ): KeyResultCheckInInterface | undefined {
     return maxBy(checkInList, 'createdAt')
   }
 
