@@ -27,6 +27,7 @@ export class KeyResultRepository extends CoreEntityRepository<KeyResult> {
     keyResult: KeyResult.name,
     objective: Objective.name,
     cycle: Cycle.name,
+    team: Team.name,
   }
 
   public async findOKRTreeWithFilters(treeFilters: OKRTreeFilters): Promise<KeyResult[]> {
@@ -36,6 +37,7 @@ export class KeyResultRepository extends CoreEntityRepository<KeyResult> {
       .where(filters.query, filters.variables)
       .leftJoinAndSelect(`${KeyResult.name}.checkIns`, KeyResultCheckIn.name)
       .leftJoinAndSelect(`${KeyResult.name}.objective`, Objective.name)
+      .leftJoinAndSelect(`${KeyResult.name}.team`, Team.name)
       .leftJoinAndSelect(`${Objective.name}.cycle`, Cycle.name)
       .orderBy(`${KeyResultCheckIn.name}.createdAt`, 'DESC')
       .getMany()

@@ -1,19 +1,8 @@
-import { CoreProvider } from '@core/core.provider'
 import { GetStatusOptions, Status } from '@core/interfaces/status.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { BaseStatusCommand } from '@core/ports/commands/base-status.command'
-import { Command } from '@core/ports/commands/base.command'
-import { CommandFactory } from '@core/ports/commands/command.factory'
 
 export class GetCycleStatusCommand extends BaseStatusCommand {
-  private readonly getObjectiveStatus: Command<Status>
-
-  constructor(protected core: CoreProvider, protected factory: CommandFactory) {
-    super(core, factory)
-
-    this.getObjectiveStatus = this.factory.buildCommand<Status>('get-objective-status')
-  }
-
   public async execute(
     cycleID: string,
     options: GetStatusOptions = this.defaultOptions,
