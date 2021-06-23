@@ -18,7 +18,7 @@ export class GetKeyResultCheckInStatusCommand extends BaseStatusCommand {
       isActive,
       progress,
       confidence,
-      reportDate: latestCheckIn.createdAt,
+      reportDate: latestCheckIn?.createdAt,
     }
   }
 

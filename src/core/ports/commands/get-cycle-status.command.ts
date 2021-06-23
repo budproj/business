@@ -18,7 +18,7 @@ export class GetCycleStatusCommand extends BaseStatusCommand {
       isOutdated,
       isActive,
       latestCheckIn,
-      reportDate: latestCheckIn.createdAt,
+      reportDate: latestCheckIn?.createdAt,
       progress: this.getAverage(progresses),
       confidence: this.getMin(confidences),
     }
