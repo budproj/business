@@ -6,14 +6,15 @@ export class GetKeyResultStatusCommand extends BaseStatusCommand {
     keyResultID: string,
     options: GetStatusOptions = this.defaultOptions,
   ): Promise<Status> {
+    const keyResult = await this.core.keyResult.getFromID(keyResultID)
     const latestCheckIn = await this.core.keyResult.getLatestCheckInForKeyResultAtDate(
       keyResultID,
       options.date,
     )
 
-    const progress = await this.core.keyResult.getCheckInProgress(latestCheckIn)
+    const progress = await this.core.keyResult.getCheckInProgress(latestCheckIn, keyResult)
     const isOutdated = this.isOutdated(latestCheckIn)
-    const isActive = await this.isActive(keyResultID)
+    const isActive = await this.core.objective.isActive(keyResult.objectiveId)
     const confidence = latestCheckIn?.confidence ?? this.defaultStatus.confidence
 
     return {
@@ -24,13 +25,5 @@ export class GetKeyResultStatusCommand extends BaseStatusCommand {
       confidence,
       reportDate: latestCheckIn?.createdAt,
     }
-  }
-
-  private async isActive(keyResultID: string): Promise<boolean> {
-    const keyResult = await this.core.keyResult.getFromID(keyResultID)
-    const objective = await this.core.objective.getFromKeyResult(keyResult)
-    const cycle = await this.core.cycle.getFromObjective(objective)
-
-    return cycle.active
   }
 }

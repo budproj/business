@@ -1,103 +1,52 @@
-import { groupBy, flatten } from 'lodash'
-
-import { CoreProvider } from '@core/core.provider'
 import { GetStatusOptions, Status } from '@core/interfaces/status.interface'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { BaseStatusCommand } from '@core/ports/commands/base-status.command'
-import { Command } from '@core/ports/commands/base.command'
-import { CommandFactory } from '@core/ports/commands/command.factory'
 
 export interface GetTeamStatusOptions extends GetStatusOptions {
   cycleFilters?: Partial<CycleInterface>
 }
 
-type KeyResultPair = [string, KeyResult[]]
-type StatusPair = [string, Status[]]
-type StatusGroup = Status[]
-
 export class GetTeamStatusCommand extends BaseStatusCommand {
-  private readonly getKeyResultStatus: Command<Status>
-
-  constructor(protected core: CoreProvider, protected factory: CommandFactory) {
-    super(core, factory)
-
-    this.getKeyResultStatus = this.factory.buildCommand<Status>('get-key-result-status')
+  static isActive(keyResults: any[]): boolean {
+    return keyResults.some((keyResult) => keyResult?.objective?.cycle?.active)
   }
 
   public async execute(
     teamID: string,
     options: GetTeamStatusOptions = this.defaultOptions,
   ): Promise<Status> {
-    const keyResultsStatus = await this.getTeamKeyResultsStatusGroupedByObjective(teamID, options)
-    const allTeamStatusReports = flatten(keyResultsStatus)
+    const keyResults = await this.getKeyResultsFromTeam(teamID, options)
+    const [cycleCheckIns, progresses, confidences] = await this.unzipKeyResultGroup(keyResults)
 
-    const latestStatusReport = this.getLatestFromList(allTeamStatusReports)
-    const isOutdated = this.isOutdated(latestStatusReport.latestCheckIn)
-    const isActive = allTeamStatusReports.some((status) => status.isActive)
+    const latestCheckIn = this.getLatestCheckInFromList(cycleCheckIns)
+    const isOutdated = this.isOutdated(latestCheckIn)
+    const isActive = GetTeamStatusCommand.isActive(keyResults)
 
     return {
       isOutdated,
       isActive,
-      latestCheckIn: latestStatusReport.latestCheckIn,
-      reportDate: latestStatusReport.reportDate,
-      progress: this.getAverageFromObjectiveGroups(keyResultsStatus),
-      confidence: this.getMinConfidenceFromList(allTeamStatusReports),
+      latestCheckIn,
+      reportDate: latestCheckIn.createdAt,
+      progress: this.getAverage(progresses),
+      confidence: this.getMin(confidences),
     }
   }
 
-  private async getTeamKeyResultsStatusGroupedByObjective(
+  private async getKeyResultsFromTeam(
     teamID: string,
     options: GetTeamStatusOptions,
-  ): Promise<StatusGroup[]> {
-    const keyResultObjectivePairs = await this.getKeyResultObjectivePairs(teamID, options)
-    const keyResultStatusObjectivePairs = await this.getKeyResultStatusFromPairs(
-      keyResultObjectivePairs,
-      options,
-    )
+  ): Promise<KeyResult[]> {
+    const filters = {
+      keyResultCheckIn: {
+        createdAt: options.date,
+      },
+      team: {
+        id: teamID,
+      },
+      cycle: options.cycleFilters,
+    }
 
-    return keyResultStatusObjectivePairs.map(([_, status]) => status)
-  }
-
-  private async getKeyResultObjectivePairs(
-    teamID: string,
-    options: GetTeamStatusOptions,
-  ): Promise<KeyResultPair[]> {
-    const keyResults = await this.core.keyResult.getFromTeamWithCycleFilters(
-      teamID,
-      options.cycleFilters,
-    )
-    const keyResultsGroupedByObjective = groupBy(keyResults, 'objectiveId')
-
-    return Object.entries(keyResultsGroupedByObjective)
-  }
-
-  private async getKeyResultStatusFromPairs(
-    pairs: KeyResultPair[],
-    options: GetTeamStatusOptions,
-  ): Promise<StatusPair[]> {
-    const pairsStatusPromises = pairs.map(async ([objectiveID, keyResults]) => [
-      objectiveID,
-      await this.getKeyResultListStatus(keyResults, options),
-    ]) as any
-
-    return Promise.all(pairsStatusPromises)
-  }
-
-  private async getKeyResultListStatus(
-    keyResults: KeyResult[],
-    options: GetTeamStatusOptions,
-  ): Promise<Status[]> {
-    const statusPromises = keyResults.map(async (keyResult) =>
-      this.getKeyResultStatus.execute(keyResult.id, options),
-    )
-
-    return Promise.all(statusPromises)
-  }
-
-  private getAverageFromObjectiveGroups(statusGroups: StatusGroup[]): number {
-    const groupedAverages = statusGroups.map((group) => this.getAverageProgressFromList(group))
-
-    return this.getAverage(groupedAverages)
+    return this.core.keyResult.getEntireOKRTreeWithFilters(filters)
   }
 }

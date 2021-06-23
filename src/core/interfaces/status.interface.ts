@@ -1,4 +1,4 @@
-import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
+import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 
 export interface Status {
   progress: number
@@ -6,7 +6,7 @@ export interface Status {
   isOutdated: boolean
   isActive: boolean
   reportDate?: Date
-  latestCheckIn?: KeyResultCheckIn
+  latestCheckIn?: KeyResultCheckInInterface
 }
 
 export interface GetStatusOptions {

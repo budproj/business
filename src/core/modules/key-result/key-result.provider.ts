@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common'
-import { uniqBy } from 'lodash'
+import { uniqBy, pickBy, omitBy, identity, isEmpty } from 'lodash'
 import { Any, DeleteResult, FindConditions } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
-import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { DEFAULT_PROGRESS } from '@core/modules/key-result/check-in/key-result-check-in.constants'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
+import { OKRTreeFilters } from '@core/types/okr-tree-filters.type'
 
 import { KeyResultCheckInInterface } from './check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from './check-in/key-result-check-in.orm-entity'
@@ -213,10 +213,13 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return this.keyResultCheckInProvider.getOne({ id: keyResultCheckIn.parentId })
   }
 
-  public async getCheckInProgress(keyResultCheckIn?: KeyResultCheckIn): Promise<number> {
+  public async getCheckInProgress(
+    keyResultCheckIn?: KeyResultCheckInInterface,
+    keyResult?: KeyResult,
+  ): Promise<number> {
     if (!keyResultCheckIn) return DEFAULT_PROGRESS
 
-    const keyResult = await this.getOne({ id: keyResultCheckIn.keyResultId })
+    keyResult ??= await this.getOne({ id: keyResultCheckIn.keyResultId })
     return this.keyResultCheckInProvider.getProgressFromValue(keyResult, keyResultCheckIn?.value)
   }
 
@@ -303,13 +306,18 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     }
   }
 
-  public async getFromTeamWithCycleFilters(
-    teamID: string,
-    cycleFilters?: Partial<CycleInterface>,
-  ): Promise<KeyResult[]> {
-    return this.repository.getFromTeamWithRelationFilters(teamID, {
-      cycle: cycleFilters,
-    })
+  public async getEntireOKRTreeWithFilters(filters: OKRTreeFilters): Promise<KeyResult[]> {
+    const cleanedRelationFilters = omitBy(
+      {
+        keyResultCheckIn: pickBy(filters.keyResultCheckIn, identity),
+        keyResult: pickBy(filters.keyResult, identity),
+        objective: pickBy(filters.objective, identity),
+        cycle: pickBy(filters.cycle, identity),
+      },
+      isEmpty,
+    )
+
+    return this.repository.findOKRTreeWithFilters(cleanedRelationFilters)
   }
 
   protected async protectCreationQuery(

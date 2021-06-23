@@ -1,42 +1,45 @@
+import { isEmpty, flatten, fromPairs } from 'lodash'
 import { EntityRepository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
-import { CoreEntityInterface } from '@core/core-entity.interface'
 import { CoreEntityRepository } from '@core/core.repository'
 import { ConstraintType } from '@core/enums/contrain-type.enum'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
-import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
+import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
+import { OKRTreeFilters } from '@core/types/okr-tree-filters.type'
 
 import { KeyResultInterface } from './interfaces/key-result.interface'
 import { KeyResult } from './key-result.orm-entity'
 
-type KeyResultRelationFilters = {
-  cycle?: Partial<CycleInterface>
-}
-
-type RelationFilterQuery = {
+type FilterQuery = {
   query: string
   variables: Record<string, any>
 }
 
 @EntityRepository(KeyResult)
 export class KeyResultRepository extends CoreEntityRepository<KeyResult> {
-  public entityName = KeyResult.name
+  public readonly entityName = KeyResult.name
+  private readonly entityKeyHashmap = {
+    keyResultCheckIn: KeyResultCheckIn.name,
+    keyResult: KeyResult.name,
+    objective: Objective.name,
+    cycle: Cycle.name,
+    team: Team.name,
+  }
 
-  public async getFromTeamWithRelationFilters(
-    teamID: string,
-    relationFilters: KeyResultRelationFilters,
-  ): Promise<KeyResult[]> {
-    const cycleRelationFilter = this.buildRelationFilterQuery(Cycle.name, relationFilters.cycle)
+  public async findOKRTreeWithFilters(treeFilters: OKRTreeFilters): Promise<KeyResult[]> {
+    const filters = this.buildFilters(treeFilters)
 
     return this.createQueryBuilder()
-      .where(`${KeyResult.name}.teamId = :teamID`, { teamID })
-      .leftJoin(`${KeyResult.name}.objective`, Objective.name)
-      .leftJoin(`${Objective.name}.cycle`, Cycle.name)
-      .andWhere(cycleRelationFilter.query, cycleRelationFilter.variables)
+      .where(filters.query, filters.variables)
+      .leftJoinAndSelect(`${KeyResult.name}.checkIns`, KeyResultCheckIn.name)
+      .leftJoinAndSelect(`${KeyResult.name}.objective`, Objective.name)
+      .leftJoinAndSelect(`${KeyResult.name}.team`, Team.name)
+      .leftJoinAndSelect(`${Objective.name}.cycle`, Cycle.name)
+      .orderBy(`${KeyResultCheckIn.name}.createdAt`, 'DESC')
       .getMany()
   }
 
@@ -76,22 +79,43 @@ export class KeyResultRepository extends CoreEntityRepository<KeyResult> {
     })
   }
 
-  private buildRelationFilterQuery(
-    relationName: string,
-    filter?: Partial<CoreEntityInterface>,
-  ): RelationFilterQuery {
-    if (!filter)
+  private buildFilters(filters: OKRTreeFilters = {}): FilterQuery {
+    if (isEmpty(filters))
       return {
-        query: '1 = 1',
+        query: '1=1',
         variables: {},
       }
 
-    const queryParts = Object.keys(filter).map((key) => `${relationName}.${key} = :${key}`)
-    const query = queryParts.join(' AND ')
+    const query = this.buildQueryFromFilters(filters)
+    const variables = this.buildVariablesFromFilters(filters)
 
     return {
       query,
-      variables: filter,
+      variables,
     }
+  }
+
+  private buildQueryFromFilters(filters: OKRTreeFilters): string {
+    const filterEntries = Object.entries(filters)
+    const queries = filterEntries.map(([entity, entityFilters]) => {
+      const entityKey = this.entityKeyHashmap[entity] as string
+      const entityFilterKeys = Object.keys(entityFilters)
+
+      return entityFilterKeys.map((key) => `${entityKey}.${key} = :${entity}_${key}`)
+    })
+
+    const flattenedQueries = flatten(queries)
+
+    return flattenedQueries.join(' AND ')
+  }
+
+  private buildVariablesFromFilters(filters: OKRTreeFilters): Record<string, any> {
+    const filterEntries = Object.entries(filters)
+    const variablePairs = filterEntries.map(([entity, entityFilters]) => {
+      const entityFilterEntries = Object.entries(entityFilters)
+      return entityFilterEntries.map(([key, value]) => [`${entity}_${key}`, value])
+    })
+
+    return fromPairs(variablePairs.flat(1))
   }
 }
