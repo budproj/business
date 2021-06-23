@@ -18,7 +18,7 @@ export class GetObjectiveStatusCommand extends BaseStatusCommand {
       isOutdated,
       isActive,
       latestCheckIn,
-      reportDate: latestCheckIn.createdAt,
+      reportDate: latestCheckIn?.createdAt,
       progress: this.getAverage(progresses),
       confidence: this.getMin(confidences),
     }
