@@ -1,10 +1,8 @@
-import { Identify } from '@amplitude/identify'
 import { init, NodeClient as AmplitudeClient } from '@amplitude/node'
 import { Injectable, Logger, Scope } from '@nestjs/common'
 
 import { Activity } from '@adapters/activity/activities/base.activity'
 import { ActivityDispatcher } from '@adapters/activity/interfaces/activity-dispatcher.interface'
-import { State } from '@adapters/state/interfaces/state.interface'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { AmplitudeConfigProvider } from '@config/amplitude/amplitude.provider'
 
@@ -38,36 +36,11 @@ export class AmplitudeProvider implements ActivityDispatcher {
     await event.prepare()
     const marshalledEvent = event.marshalEvent()
 
-    await this.identify(activity.context)
-
     this.logger.log({
       event: marshalledEvent,
       message: 'Logging event on Amplitude',
     })
 
     await this.client.logEvent(marshalledEvent)
-  }
-
-  private async identify(context: State): Promise<void> {
-    const userID = context.user.id
-    const { deviceID } = context.tracing
-    const userProperties = AmplitudeProvider.marshalUserProperties(context.user)
-
-    const userIdentification = new Identify()
-    this.attachPropertiesToIdentification(userProperties, userIdentification)
-
-    this.logger.debug({
-      userProperties,
-      message: 'Identifying user on Amplitude',
-    })
-
-    await this.client.identify(userID, deviceID, userIdentification)
-  }
-
-  private attachPropertiesToIdentification(
-    properties: UserProperties,
-    identification: Identify,
-  ): void {
-    Object.entries(properties).map(([key, value]) => identification.set(key, value))
   }
 }
