@@ -24,6 +24,8 @@ export class GetKeyResultCheckInStatusCommand extends BaseStatusCommand {
 
   private async isActive(keyResultCheckInID: string): Promise<boolean> {
     const keyResult = await this.core.keyResult.getFromKeyResultCheckInID(keyResultCheckInID)
+    if (!keyResult) return this.defaultStatus.isActive
+
     const objective = await this.core.objective.getFromKeyResult(keyResult)
     const cycle = await this.core.cycle.getFromObjective(objective)
 
