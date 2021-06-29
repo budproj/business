@@ -10,7 +10,6 @@ import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
-import { OKRTreeFilters } from '@core/types/okr-tree-filters.type'
 
 import { KeyResultCheckInInterface } from './check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from './check-in/key-result-check-in.orm-entity'
@@ -20,7 +19,7 @@ import { KeyResultComment } from './comment/key-result-comment.orm-entity'
 import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
 import { KeyResultInterface } from './interfaces/key-result.interface'
 import { KeyResult } from './key-result.orm-entity'
-import { KeyResultRepository } from './key-result.repository'
+import { KeyResultRelationFilterProperties, KeyResultRepository } from './key-result.repository'
 import { KeyResultTimelineProvider } from './timeline.provider'
 import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
 
@@ -306,7 +305,9 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     }
   }
 
-  public async getEntireOKRTreeWithFilters(filters: OKRTreeFilters): Promise<KeyResult[]> {
+  public async getEntireOKRTreeWithFilters(
+    filters: KeyResultRelationFilterProperties,
+  ): Promise<KeyResult[]> {
     const cleanedRelationFilters = omitBy(
       {
         keyResultCheckIn: pickBy(filters.keyResultCheckIn, identity),
@@ -318,7 +319,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       isEmpty,
     )
 
-    return this.repository.findOKRTreeWithFilters(cleanedRelationFilters)
+    return this.repository.findWithRelationFilters(cleanedRelationFilters)
   }
 
   protected async protectCreationQuery(

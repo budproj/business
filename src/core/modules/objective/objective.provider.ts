@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { omitBy, pickBy, isEmpty, identity } from 'lodash'
 import { Any, FindConditions } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
@@ -13,7 +14,7 @@ import { CreationQuery } from '@core/types/creation-query.type'
 import { ObjectiveInterface } from './interfaces/objective.interface'
 import { DEFAULT_CONFIDENCE, DEFAULT_PROGRESS } from './objective.constants'
 import { Objective } from './objective.orm-entity'
-import { ObjectiveRepository } from './objective.repository'
+import { ObjectiveRelationFilterProperties, ObjectiveRepository } from './objective.repository'
 
 @Injectable()
 export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveInterface> {
@@ -119,6 +120,20 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     })
 
     return objectiveWithCycle.cycle.active
+  }
+
+  public async getWithRelationFilters(
+    filters: ObjectiveRelationFilterProperties,
+  ): Promise<Objective[]> {
+    const cleanedRelationFilters = omitBy(
+      {
+        objective: pickBy(filters.objective, identity),
+        cycle: pickBy(filters.cycle, identity),
+      },
+      isEmpty,
+    )
+
+    return this.repository.findWithRelationFilters(cleanedRelationFilters)
   }
 
   protected async protectCreationQuery(

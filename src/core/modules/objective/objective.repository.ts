@@ -4,12 +4,19 @@ import { CoreEntityRepository } from '@core/core.repository'
 import { ConstraintType } from '@core/enums/contrain-type.enum'
 import { GetOptions } from '@core/interfaces/get-options'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
+import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
+import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 
 import { Objective } from './objective.orm-entity'
+
+export type ObjectiveRelationFilterProperties = {
+  objective?: Partial<ObjectiveInterface>
+  cycle?: Partial<CycleInterface>
+}
 
 @EntityRepository(Objective)
 export class ObjectiveRepository extends CoreEntityRepository<Objective> {
@@ -28,6 +35,17 @@ export class ObjectiveRepository extends CoreEntityRepository<Objective> {
       .andWhere(`${Cycle.name}.active = :cycleIsActive`, { cycleIsActive })
       .take(options?.limit)
       .offset(options?.offset)
+      .getMany()
+  }
+
+  public async findWithRelationFilters(
+    filterProperties: ObjectiveRelationFilterProperties,
+  ): Promise<Objective[]> {
+    const filters = this.buildFilters(filterProperties)
+
+    return this.createQueryBuilder()
+      .where(filters.query, filters.variables)
+      .leftJoinAndSelect(`${Objective.name}.cycle`, Cycle.name)
       .getMany()
   }
 
