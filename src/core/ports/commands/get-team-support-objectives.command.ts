@@ -15,7 +15,7 @@ type GetObjectivesHandler = (
   options?: GetOptions<Objective>,
 ) => Promise<Objective[]>
 
-export class GetTeamObjectivesCommand extends Command<Objective[]> {
+export class GetTeamSupportObjectivesCommand extends Command<Objective[]> {
   public async execute(
     team: TeamInterface,
     properties: Partial<GetTeamObjectivesProperties>,

@@ -205,8 +205,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.relay.marshalResponse<CycleInterface>(queryResult, connection, team)
   }
 
-  @ResolveField('objectives', () => TeamObjectivesGraphQLConnection, { nullable: true })
-  protected async getObjectivesForRequestAndUser(
+  @ResolveField('supportObjectives', () => TeamObjectivesGraphQLConnection, { nullable: true })
+  protected async getSupportObjectivesForRequestAndUser(
     @Args() request: ObjectiveFiltersRequest,
     @Parent() team: TeamGraphQLNode,
   ) {
@@ -222,7 +222,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     >(request)
 
     const objectives = await this.corePorts.dispatchCommand<Objective[]>(
-      'get-team-objectives',
+      'get-team-support-objectives',
       team,
       filters,
       queryOptions,

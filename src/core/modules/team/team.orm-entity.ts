@@ -12,6 +12,7 @@ import {
 import { CoreEntity } from '@core/core.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
+import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 
 import { TeamGender } from './enums/team-gender.enum'
@@ -57,4 +58,7 @@ export class Team extends CoreEntity implements TeamInterface {
 
   @OneToMany('KeyResult', 'team', { nullable: true })
   public keyResults?: KeyResultInterface[]
+
+  @OneToMany('Objective', 'team', { nullable: true })
+  public objectives?: ObjectiveInterface[]
 }

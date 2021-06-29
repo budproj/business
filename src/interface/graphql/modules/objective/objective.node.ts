@@ -4,6 +4,7 @@ import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authori
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
+import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
 import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
@@ -24,6 +25,9 @@ export class ObjectiveGraphQLNode implements GuardedNodeGraphQLInterface {
 
   @Field(() => ID, { complexity: 0, description: 'The cycle ID that owns this objective' })
   public readonly cycleId!: string
+
+  @Field(() => ID, { complexity: 0, description: 'The team ID that owns this objective' })
+  public readonly teamId!: string
 
   @Field(() => ID, { complexity: 0, description: 'The user ID that owns this objective' })
   public readonly ownerId!: string
@@ -50,6 +54,12 @@ export class ObjectiveGraphQLNode implements GuardedNodeGraphQLInterface {
     description: 'The cycle that owns this objective',
   })
   public readonly cycle!: CycleGraphQLNode
+
+  @Field(() => TeamGraphQLNode, {
+    complexity: 1,
+    description: 'The team that owns this objective',
+  })
+  public readonly team!: TeamGraphQLNode
 
   @Field(() => UserGraphQLNode, {
     complexity: 1,

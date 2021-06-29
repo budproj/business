@@ -20,9 +20,9 @@ import { GetObjectiveStatusCommand } from '@core/ports/commands/get-objective-st
 import { GetObjectiveTeamTreeCommand } from '@core/ports/commands/get-objective-team-tree.command'
 import { GetObjectiveCommand } from '@core/ports/commands/get-objective.command'
 import { GetTeamDeltaCommand } from '@core/ports/commands/get-team-delta.command'
-import { GetTeamObjectivesCommand } from '@core/ports/commands/get-team-objectives.command'
 import { GetTeamRankedDescendantsCommand } from '@core/ports/commands/get-team-ranked-descendants'
 import { GetTeamStatusCommand } from '@core/ports/commands/get-team-status.command'
+import { GetTeamSupportObjectivesCommand } from '@core/ports/commands/get-team-support-objectives.command'
 import { GetTeamTacticalCycleCommand } from '@core/ports/commands/get-team-tactical-cycle.command'
 import { GetTeamTreeCommand } from '@core/ports/commands/get-team-tree.command'
 import { GetTeamCommand } from '@core/ports/commands/get-team.command'
@@ -84,10 +84,10 @@ export type CommandType =
   | 'get-team'
   | 'get-team-company'
   | 'get-team-delta'
-  | 'get-team-objectives'
   | 'get-team-owner'
   | 'get-team-ranked-descendants'
   | 'get-team-status'
+  | 'get-team-support-objectives'
   | 'get-team-tactical-cycle'
   | 'get-team-tree'
   | 'get-user'
@@ -133,10 +133,10 @@ export class CommandFactory {
     'get-team': GetTeamCommand,
     'get-team-company': GetTeamCompanyCommand,
     'get-team-delta': GetTeamDeltaCommand,
-    'get-team-objectives': GetTeamObjectivesCommand,
     'get-team-owner': GetTeamOwnerCommand,
     'get-team-ranked-descendants': GetTeamRankedDescendantsCommand,
     'get-team-status': GetTeamStatusCommand,
+    'get-team-support-objectives': GetTeamSupportObjectivesCommand,
     'get-team-tactical-cycle': GetTeamTacticalCycleCommand,
     'get-team-tree': GetTeamTreeCommand,
     'get-user': GetUserCommand,
