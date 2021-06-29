@@ -11,7 +11,6 @@ export class AddTeamToObjective1624996496494 implements MigrationInterface {
     await queryRunner.query(
       `UPDATE "objective" SET "team_id"="objectives_main_team"."team_id" FROM (SELECT * FROM (SELECT DISTINCT ON("objective_id") "team_id", "objective_id", COUNT(*) as "count" FROM "key_result" GROUP BY "team_id", "objective_id") as "objective_teams" ORDER BY "count" DESC) as "objectives_main_team" WHERE "objective"."id"="objectives_main_team"."objective_id"`,
     )
-    await queryRunner.query(`ALTER TABLE "objective" ALTER COLUMN "team_id" SET NOT NULL`)
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

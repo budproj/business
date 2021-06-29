@@ -17,6 +17,7 @@ import { GetKeyResultStatusCommand } from '@core/ports/commands/get-key-result-s
 import { GetKeyResultTeamCommand } from '@core/ports/commands/get-key-result-team.command'
 import { GetObjectiveDeltaCommand } from '@core/ports/commands/get-objective-delta.command'
 import { GetObjectiveStatusCommand } from '@core/ports/commands/get-objective-status.command'
+import { GetObjectiveSupportTeamsCommand } from '@core/ports/commands/get-objective-support-teams.command'
 import { GetObjectiveTeamTreeCommand } from '@core/ports/commands/get-objective-team-tree.command'
 import { GetObjectiveCommand } from '@core/ports/commands/get-objective.command'
 import { GetTeamDeltaCommand } from '@core/ports/commands/get-team-delta.command'
@@ -80,6 +81,7 @@ export type CommandType =
   | 'get-objective'
   | 'get-objective-delta'
   | 'get-objective-status'
+  | 'get-objective-support-teams'
   | 'get-objective-team-tree'
   | 'get-team'
   | 'get-team-company'
@@ -129,6 +131,7 @@ export class CommandFactory {
     'get-objective': GetObjectiveCommand,
     'get-objective-delta': GetObjectiveDeltaCommand,
     'get-objective-status': GetObjectiveStatusCommand,
+    'get-objective-support-teams': GetObjectiveSupportTeamsCommand,
     'get-objective-team-tree': GetObjectiveTeamTreeCommand,
     'get-team': GetTeamCommand,
     'get-team-company': GetTeamCompanyCommand,

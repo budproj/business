@@ -4,6 +4,7 @@ import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authori
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
+import { ObjectiveTeamsGraphQLConnection } from '@interface/graphql/modules/objective/connections/objective-teams/objective-teams.connection'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
@@ -55,17 +56,18 @@ export class ObjectiveGraphQLNode implements GuardedNodeGraphQLInterface {
   })
   public readonly cycle!: CycleGraphQLNode
 
-  @Field(() => TeamGraphQLNode, {
-    complexity: 1,
-    description: 'The team that owns this objective',
-  })
-  public readonly team!: TeamGraphQLNode
-
   @Field(() => UserGraphQLNode, {
     complexity: 1,
     description: 'The user that owns this objective',
   })
   public readonly owner!: UserGraphQLNode
+
+  @Field(() => TeamGraphQLNode, {
+    complexity: 1,
+    description: 'The team that owns this objective',
+    nullable: true,
+  })
+  public readonly team?: TeamGraphQLNode
 
   // **********************************************************************************************
   // CONNECTION FIELDS
@@ -77,6 +79,13 @@ export class ObjectiveGraphQLNode implements GuardedNodeGraphQLInterface {
     description: 'A creation date ordered list of key results that belongs to this objective',
   })
   public readonly keyResults?: ObjectiveKeyResultsGraphQLConnection
+
+  @Field(() => ObjectiveTeamsGraphQLConnection, {
+    complexity: 0,
+    nullable: true,
+    description: 'A creation date ordered list of support teams of this objective',
+  })
+  public readonly supportTeams?: ObjectiveTeamsGraphQLConnection
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS

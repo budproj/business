@@ -30,12 +30,12 @@ export class Objective extends CoreEntity implements ObjectiveInterface {
   @ManyToOne('User', 'objectives')
   public owner: UserInterface
 
-  @Column()
+  @Column({ nullable: true })
   @RelationId((objective: Objective) => objective.team)
-  public teamId: TeamInterface['id']
+  public teamId?: TeamInterface['id']
 
-  @ManyToOne('Team', 'objectives')
-  public team: TeamInterface
+  @ManyToOne('Team', 'objectives', { nullable: true })
+  public team?: TeamInterface
 
   @OneToMany('KeyResult', 'objective', { nullable: true })
   public keyResults?: KeyResultInterface[]

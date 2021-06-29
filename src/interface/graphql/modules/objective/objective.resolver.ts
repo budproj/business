@@ -12,6 +12,7 @@ import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-resu
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
+import { Team } from '@core/modules/team/team.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
@@ -20,8 +21,11 @@ import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authoriz
 import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
+import { ObjectiveTeamsGraphQLConnection } from '@interface/graphql/modules/objective/connections/objective-teams/objective-teams.connection'
 import { ObjectiveAccessControl } from '@interface/graphql/modules/objective/objective.access-control'
 import { ObjectiveUpdateRequest } from '@interface/graphql/modules/objective/requests/objective-update.request'
+import { TeamFiltersRequest } from '@interface/graphql/modules/team/requests/team-filters.request'
+import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
 import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
@@ -133,6 +137,37 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     })
 
     return this.core.cycle.getFromObjective(objective)
+  }
+
+  @ResolveField('team', () => TeamGraphQLNode, { nullable: true })
+  protected async getTeamForObjective(@Parent() objective: ObjectiveGraphQLNode) {
+    this.logger.log({
+      objective,
+      message: 'Fetching team for objective',
+    })
+
+    return this.corePorts.dispatchCommand<Team>('get-team', objective.teamId)
+  }
+
+  @ResolveField('supportTeams', () => ObjectiveTeamsGraphQLConnection, { nullable: true })
+  protected async getSupportTeamsForObjective(
+    @Args() request: TeamFiltersRequest,
+    @Parent() objective: ObjectiveGraphQLNode,
+  ) {
+    this.logger.log({
+      objective,
+      request,
+      message: 'Fetching support teams for objective',
+    })
+
+    const [_, __, connection] = this.relay.unmarshalRequest<TeamFiltersRequest, Team>(request)
+
+    const queryResult = await this.corePorts.dispatchCommand<Team[]>(
+      'get-objective-support-teams',
+      objective.id,
+    )
+
+    return this.relay.marshalResponse<Team>(queryResult, connection, objective)
   }
 
   @ResolveField('keyResults', () => ObjectiveKeyResultsGraphQLConnection, { nullable: true })
