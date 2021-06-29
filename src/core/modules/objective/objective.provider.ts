@@ -93,22 +93,6 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     })
   }
 
-  public async getActiveFromIDList(
-    ids: string[],
-    _indexes?: Partial<ObjectiveInterface>,
-    options?: GetOptions<Objective>,
-  ): Promise<Objective[]> {
-    return this.getFromIDListAndCycleActiveStatus(ids, true, options)
-  }
-
-  public async getNotActiveFromIDList(
-    ids: string[],
-    _indexes?: Partial<ObjectiveInterface>,
-    options?: GetOptions<Objective>,
-  ): Promise<Objective[]> {
-    return this.getFromIDListAndCycleActiveStatus(ids, false, options)
-  }
-
   public async getFromIndexes(indexes: Partial<ObjectiveInterface>): Promise<Objective> {
     return this.repository.findOne(indexes)
   }
@@ -129,6 +113,7 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
       {
         objective: pickBy(filters.objective, identity),
         cycle: pickBy(filters.cycle, identity),
+        keyResult: pickBy(filters.keyResult, identity),
       },
       isEmpty,
     )
@@ -142,13 +127,5 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     _queryContext: CoreQueryContext,
   ) {
     return []
-  }
-
-  private async getFromIDListAndCycleActiveStatus(
-    ids: string[],
-    cycleIsActive: boolean,
-    options?: GetOptions<Objective>,
-  ): Promise<Objective[]> {
-    return this.repository.getFromCycleStatus(cycleIsActive, ids, options)
   }
 }

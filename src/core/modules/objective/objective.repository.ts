@@ -2,9 +2,10 @@ import { EntityRepository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
 import { CoreEntityRepository } from '@core/core.repository'
 import { ConstraintType } from '@core/enums/contrain-type.enum'
-import { GetOptions } from '@core/interfaces/get-options'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
+import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
+import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
@@ -16,27 +17,12 @@ import { Objective } from './objective.orm-entity'
 export type ObjectiveRelationFilterProperties = {
   objective?: Partial<ObjectiveInterface>
   cycle?: Partial<CycleInterface>
+  keyResult?: Partial<KeyResultInterface>
 }
 
 @EntityRepository(Objective)
 export class ObjectiveRepository extends CoreEntityRepository<Objective> {
   public entityName = Objective.name
-
-  public async getFromCycleStatus(
-    cycleIsActive: boolean,
-    ids: string[],
-    options?: GetOptions<Objective>,
-  ): Promise<Objective[]> {
-    if (ids.length === 0) return []
-
-    return this.createQueryBuilder()
-      .leftJoin(`${Objective.name}.cycle`, Cycle.name)
-      .where(`${Objective.name}.id IN (:...ids)`, { ids })
-      .andWhere(`${Cycle.name}.active = :cycleIsActive`, { cycleIsActive })
-      .take(options?.limit)
-      .offset(options?.offset)
-      .getMany()
-  }
 
   public async findWithRelationFilters(
     filterProperties: ObjectiveRelationFilterProperties,
@@ -46,6 +32,7 @@ export class ObjectiveRepository extends CoreEntityRepository<Objective> {
     return this.createQueryBuilder()
       .where(filters.query, filters.variables)
       .leftJoinAndSelect(`${Objective.name}.cycle`, Cycle.name)
+      .leftJoinAndSelect(`${Objective.name}.keyResults`, KeyResult.name)
       .getMany()
   }
 

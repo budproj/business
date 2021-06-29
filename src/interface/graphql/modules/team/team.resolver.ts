@@ -248,7 +248,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
 
     const objectives = await this.corePorts.dispatchCommand<Objective[]>(
       'get-team-support-objectives',
-      team,
+      team.id,
       filters,
       queryOptions,
     )
