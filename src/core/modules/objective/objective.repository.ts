@@ -33,6 +33,7 @@ export class ObjectiveRepository extends CoreEntityRepository<Objective> {
       .where(filters.query, filters.variables)
       .leftJoinAndSelect(`${Objective.name}.cycle`, Cycle.name)
       .leftJoinAndSelect(`${Objective.name}.keyResults`, KeyResult.name)
+      .orderBy(`${Objective.name}.createdAt`, 'DESC')
       .getMany()
   }
 
