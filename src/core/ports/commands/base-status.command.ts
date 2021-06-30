@@ -78,6 +78,6 @@ export abstract class BaseStatusCommand extends Command<Status> {
   ): number {
     if (numberList.length === 0) return defaultValue
 
-    return min(numberList)
+    return min(numberList) ?? defaultValue
   }
 }
