@@ -121,6 +121,11 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     return this.repository.findWithRelationFilters(cleanedRelationFilters)
   }
 
+  public async createObjective(objectiveData: ObjectiveInterface): Promise<Objective> {
+    const queryResult = await this.create(objectiveData)
+    return queryResult[0]
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<Objective>,
     _data: Partial<ObjectiveInterface>,

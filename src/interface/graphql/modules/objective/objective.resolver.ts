@@ -23,6 +23,7 @@ import { RequestUserWithContext } from '@interface/graphql/adapters/context/deco
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
 import { ObjectiveTeamsGraphQLConnection } from '@interface/graphql/modules/objective/connections/objective-teams/objective-teams.connection'
 import { ObjectiveAccessControl } from '@interface/graphql/modules/objective/objective.access-control'
+import { ObjectiveCreateRequest } from '@interface/graphql/modules/objective/requests/objective-create.request'
 import { ObjectiveUpdateRequest } from '@interface/graphql/modules/objective/requests/objective-update.request'
 import { TeamFiltersRequest } from '@interface/graphql/modules/team/requests/team-filters.request'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
@@ -117,6 +118,28 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     if (!deleteResult) throw new UserInputError('We could not delete your objective')
 
     return deleteResult
+  }
+
+  @GuardedMutation(ObjectiveGraphQLNode, 'objective:create', { name: 'createObjective' })
+  protected async createObjectiveForRequestUsingState(
+    @Args() request: ObjectiveCreateRequest,
+    @RequestState() state: State,
+  ) {
+    const canCreate = await this.accessControl.canCreate(state.user, request.data.teamId)
+    if (!canCreate) throw new UnauthorizedException()
+
+    this.logger.log({
+      state,
+      request,
+      message: 'Received create objective request',
+    })
+
+    const objective = await this.corePorts.dispatchCommand<Objective>('create-objective', {
+      ...request.data,
+    })
+    if (!objective) throw new UserInputError(`We could not create your objective`)
+
+    return objective
   }
 
   @ResolveField('owner', () => UserGraphQLNode)

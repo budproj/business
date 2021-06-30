@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 
 import { CoreProvider } from '@core/core.provider'
 import { CreateKeyResultCommand } from '@core/ports/commands/create-key-result.command'
+import { CreateObjectiveCommand } from '@core/ports/commands/create-objective.command'
 import { DeleteKeyResultCommand } from '@core/ports/commands/delete-key-result.command'
 import { DeleteObjectiveCommand } from '@core/ports/commands/delete-objective.command'
 import { GetCycleDeltaCommand } from '@core/ports/commands/get-cycle-delta.command'
@@ -56,6 +57,7 @@ export type CommandType =
   | 'create-check-in'
   | 'create-key-result'
   | 'create-key-result-comment'
+  | 'create-objective'
   | 'delete-key-result'
   | 'delete-objective'
   | 'get-cycle'
@@ -107,6 +109,7 @@ export class CommandFactory {
     'create-check-in': CreateKeyResultCheckInCommand,
     'create-key-result': CreateKeyResultCommand,
     'create-key-result-comment': CreateKeyResultCommentCommand,
+    'create-objective': CreateObjectiveCommand,
     'delete-key-result': DeleteKeyResultCommand,
     'delete-objective': DeleteObjectiveCommand,
     'get-cycle': GetCycleCommand,

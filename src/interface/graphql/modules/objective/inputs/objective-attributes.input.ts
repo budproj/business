@@ -12,4 +12,7 @@ export class ObjectiveAttributesInput {
 
   @Field(() => ID, { description: 'The ID of the owner for the cycle', nullable: true })
   public readonly ownerId?: string
+
+  @Field(() => ID, { description: 'The main team of that objective', nullable: true })
+  public readonly teamId?: string
 }
