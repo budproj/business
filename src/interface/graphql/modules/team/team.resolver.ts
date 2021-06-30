@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
+import { uniqBy } from 'lodash'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
@@ -238,7 +239,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     this.logger.log({
       team,
       request,
-      message: 'Fetching objectives for team',
+      message: 'Fetching support objectives for team',
     })
 
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
@@ -254,6 +255,39 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     )
 
     return this.relay.marshalResponse<ObjectiveInterface>(objectives, connection, team)
+  }
+
+  @ResolveField('allObjectives', () => TeamObjectivesGraphQLConnection, { nullable: true })
+  protected async getAllObjectivesForRequestAndUser(
+    @Args() request: ObjectiveFiltersRequest,
+    @Parent() team: TeamGraphQLNode,
+  ) {
+    this.logger.log({
+      team,
+      request,
+      message: 'Fetching all objectives for team',
+    })
+
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      ObjectiveFiltersRequest,
+      Objective
+    >(request)
+
+    const objectives = await this.corePorts.dispatchCommand<Objective[]>(
+      'get-team-objectives',
+      team.id,
+      filters,
+    )
+    const supportObjectives = await this.corePorts.dispatchCommand<Objective[]>(
+      'get-team-support-objectives',
+      team.id,
+      filters,
+      queryOptions,
+    )
+
+    const allObjectives = uniqBy([...objectives, ...supportObjectives], 'id')
+
+    return this.relay.marshalResponse<ObjectiveInterface>(allObjectives, connection, team)
   }
 
   @ResolveField('keyResults', () => TeamKeyResultsGraphQLConnection, { nullable: true })

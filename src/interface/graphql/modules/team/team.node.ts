@@ -142,6 +142,14 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   })
   public readonly supportObjectives?: TeamObjectivesGraphQLConnection
 
+  @Field(() => TeamObjectivesGraphQLConnection, {
+    complexity: 0,
+    nullable: true,
+    description:
+      'Any objective related to this team, no matter if the relation is because that team owns the objective, or if that team just supports it',
+  })
+  public readonly allObjectives?: TeamObjectivesGraphQLConnection
+
   @Field(() => TeamKeyResultsGraphQLConnection, {
     complexity: 0,
     nullable: true,
