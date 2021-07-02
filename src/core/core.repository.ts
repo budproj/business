@@ -21,6 +21,8 @@ type FilterQuery = {
   variables: Record<string, any>
 }
 
+export type NullableFilters = Partial<Record<string, string[]>>
+
 export abstract class CoreEntityRepository<E> extends Repository<E> {
   public entityName: string
   protected composeTeamQuery = flow(this.setupOwnsQuery, this.setupTeamQuery)
@@ -93,14 +95,17 @@ export abstract class CoreEntityRepository<E> extends Repository<E> {
     return methodNames[constraintType]
   }
 
-  protected buildFilters(filters: Record<string, Partial<CoreEntityInterface>> = {}): FilterQuery {
+  protected buildFilters(
+    filters: Record<string, Partial<CoreEntityInterface>> = {},
+    nullableFilters: NullableFilters = {},
+  ): FilterQuery {
     if (isEmpty(filters))
       return {
         query: '1=1',
         variables: {},
       }
 
-    const query = this.buildQueryFromFilters(filters)
+    const query = this.buildQueryFromFilters(filters, nullableFilters)
     const variables = this.buildVariablesFromFilters(filters)
 
     return {
@@ -109,13 +114,19 @@ export abstract class CoreEntityRepository<E> extends Repository<E> {
     }
   }
 
-  private buildQueryFromFilters(filters: Record<string, Partial<CoreEntityInterface>>): string {
+  private buildQueryFromFilters(
+    filters: Record<string, Partial<CoreEntityInterface>>,
+    nullableFilters: NullableFilters,
+  ): string {
     const filterEntries = Object.entries(filters)
     const queries = filterEntries.map(([entity, entityFilters]) => {
       const entityKey = this.entityKeyHashmap[entity] as string
       const entityFilterKeys = Object.keys(entityFilters)
+      const entityNullableFilters = nullableFilters[entity]
 
-      return entityFilterKeys.map((key) => this.buildFilterQuery(entityKey, entity, key))
+      return entityFilterKeys.map((key) =>
+        this.buildFilterQuery(entityKey, entity, key, entityNullableFilters),
+      )
     })
 
     const flattenedQueries = flatten(queries)
@@ -123,13 +134,20 @@ export abstract class CoreEntityRepository<E> extends Repository<E> {
     return flattenedQueries.join(' AND ')
   }
 
-  private buildFilterQuery(entityName: string, entity: string, key: string): string {
+  private buildFilterQuery(
+    entityName: string,
+    entity: string,
+    key: string,
+    nullableFilters?: string[],
+  ): string {
+    const isNullable = nullableFilters?.includes(key)
+    const nullableQuery = isNullable ? `OR ${entityName}.${key} IS NULL` : ''
     const operator: string =
       key in this.filterOperatorHashmap
         ? this.filterOperatorHashmap[key]
         : this.filterOperatorHashmap.default
 
-    return `${entityName}.${key} ${operator} :${entity}_${key}`
+    return `(${entityName}.${key} ${operator} :${entity}_${key} ${nullableQuery})`
   }
 
   private buildVariablesFromFilters(

@@ -318,8 +318,11 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       },
       isEmpty,
     )
+    const nullableFilters = {
+      keyResultCheckIn: ['createdAt'],
+    }
 
-    return this.repository.findWithRelationFilters(cleanedRelationFilters)
+    return this.repository.findWithRelationFilters(cleanedRelationFilters, nullableFilters)
   }
 
   protected async protectCreationQuery(

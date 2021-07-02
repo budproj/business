@@ -1,5 +1,5 @@
 import { differenceInCalendarWeeks } from 'date-fns'
-import { sum, maxBy, min, groupBy } from 'lodash'
+import { sum, maxBy, min, groupBy, filter } from 'lodash'
 
 import { GetStatusOptions, Status } from '@core/interfaces/status.interface'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
@@ -20,7 +20,8 @@ export abstract class BaseStatusCommand extends Command<Status> {
     numberList: number[],
     defaultValue: number = this.defaultStatus.progress,
   ): number {
-    if (numberList.length === 0) return defaultValue
+    const onlyDefinedNumbers = filter(numberList)
+    if (onlyDefinedNumbers.length === 0) return defaultValue
 
     return sum(numberList) / numberList.length
   }
@@ -76,8 +77,9 @@ export abstract class BaseStatusCommand extends Command<Status> {
     numberList: number[],
     defaultValue: number = this.defaultStatus.confidence,
   ): number {
-    if (numberList.length === 0) return defaultValue
+    const onlyDefinedNumbers = filter(numberList)
+    if (onlyDefinedNumbers.length === 0) return defaultValue
 
-    return min(numberList) ?? defaultValue
+    return min(onlyDefinedNumbers)
   }
 }

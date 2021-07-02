@@ -38,6 +38,9 @@ export class GetTeamStatusCommand extends BaseStatusCommand {
     options: GetTeamStatusOptions,
   ): Promise<KeyResult[]> {
     const filters = {
+      keyResult: {
+        createdAt: options.date,
+      },
       keyResultCheckIn: {
         createdAt: options.date,
       },

@@ -29,6 +29,9 @@ export class GetObjectiveStatusCommand extends BaseStatusCommand {
     options: GetStatusOptions,
   ): Promise<KeyResult[]> {
     const filters = {
+      keyResult: {
+        createdAt: options.date,
+      },
       keyResultCheckIn: {
         createdAt: options.date,
       },

@@ -1,6 +1,6 @@
 import { EntityRepository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
-import { CoreEntityRepository } from '@core/core.repository'
+import { CoreEntityRepository, NullableFilters } from '@core/core.repository'
 import { ConstraintType } from '@core/enums/contrain-type.enum'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
@@ -29,8 +29,9 @@ export class KeyResultRepository extends CoreEntityRepository<KeyResult> {
 
   public async findWithRelationFilters(
     filterProperties: KeyResultRelationFilterProperties,
+    nullableFilters?: NullableFilters,
   ): Promise<KeyResult[]> {
-    const filters = this.buildFilters(filterProperties)
+    const filters = this.buildFilters(filterProperties, nullableFilters)
 
     return this.createQueryBuilder()
       .where(filters.query, filters.variables)
