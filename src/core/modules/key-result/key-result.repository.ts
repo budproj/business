@@ -35,8 +35,11 @@ export class KeyResultRepository extends CoreEntityRepository<KeyResult> {
     default: '=',
   }
 
-  public async findOKRTreeWithFilters(treeFilters: OKRTreeFilters): Promise<KeyResult[]> {
-    const filters = this.buildFilters(treeFilters)
+  public async findOKRTreeWithFilters(
+    treeFilters: OKRTreeFilters,
+    nullableFilters?: Partial<Record<keyof OKRTreeFilters, string[]>>,
+  ): Promise<KeyResult[]> {
+    const filters = this.buildFilters(treeFilters, nullableFilters)
 
     return this.createQueryBuilder()
       .where(filters.query, filters.variables)
@@ -84,14 +87,17 @@ export class KeyResultRepository extends CoreEntityRepository<KeyResult> {
     })
   }
 
-  private buildFilters(filters: OKRTreeFilters = {}): FilterQuery {
+  private buildFilters(
+    filters: OKRTreeFilters = {},
+    nullableFilters: Partial<Record<keyof OKRTreeFilters, string[]>> = {},
+  ): FilterQuery {
     if (isEmpty(filters))
       return {
         query: '1=1',
         variables: {},
       }
 
-    const query = this.buildQueryFromFilters(filters)
+    const query = this.buildQueryFromFilters(filters, nullableFilters)
     const variables = this.buildVariablesFromFilters(filters)
 
     return {
@@ -100,13 +106,19 @@ export class KeyResultRepository extends CoreEntityRepository<KeyResult> {
     }
   }
 
-  private buildQueryFromFilters(filters: OKRTreeFilters): string {
+  private buildQueryFromFilters(
+    filters: OKRTreeFilters,
+    nullableFilters: Partial<Record<keyof OKRTreeFilters, string[]>>,
+  ): string {
     const filterEntries = Object.entries(filters)
     const queries = filterEntries.map(([entity, entityFilters]) => {
       const entityKey = this.entityKeyHashmap[entity] as string
       const entityFilterKeys = Object.keys(entityFilters)
+      const entityNullableFilters = nullableFilters[entity]
 
-      return entityFilterKeys.map((key) => this.buildFilterQuery(entityKey, entity, key))
+      return entityFilterKeys.map((key) =>
+        this.buildFilterQuery(entityKey, entity, key, entityNullableFilters),
+      )
     })
 
     const flattenedQueries = flatten(queries)
@@ -114,13 +126,20 @@ export class KeyResultRepository extends CoreEntityRepository<KeyResult> {
     return flattenedQueries.join(' AND ')
   }
 
-  private buildFilterQuery(entityName: string, entity: string, key: string): string {
+  private buildFilterQuery(
+    entityName: string,
+    entity: string,
+    key: string,
+    nullableFilters?: string[],
+  ): string {
+    const isNullable = nullableFilters?.includes(key)
+    const nullableQuery = isNullable ? `OR ${entityName}.${key} IS NULL` : ''
     const operator: string =
       key in this.filterOperatorHashmap
         ? this.filterOperatorHashmap[key]
         : this.filterOperatorHashmap.default
 
-    return `${entityName}.${key} ${operator} :${entity}_${key}`
+    return `(${entityName}.${key} ${operator} :${entity}_${key} ${nullableQuery})`
   }
 
   private buildVariablesFromFilters(filters: OKRTreeFilters): Record<string, any> {
