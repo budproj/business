@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Business",
+      "type": "node",
+      "request": "launch",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/.env.local",
+      "port": 9229,
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run-script",
+        "start:debug"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "serverReadyAction": {
+        "pattern": "listening on http://localhost:([0-9]+)",
+        "uriFormat": "http://localhost:%s/graphql",
+        "action": "openExternally"
+      }
+    }
+  ]
+}
