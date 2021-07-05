@@ -312,13 +312,17 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   }
 
   @ResolveField('delta', () => DeltaGraphQLObject)
-  protected async getDeltaForTeam(@Parent() team: TeamGraphQLNode) {
+  protected async getDeltaForTeam(
+    @Parent() team: TeamGraphQLNode,
+    @Args() request: TeamStatusRequest,
+  ) {
     this.logger.log({
       team,
+      request,
       message: 'Fetching delta for this team',
     })
 
-    const result = await this.corePorts.dispatchCommand<Delta>('get-team-delta', team.id)
+    const result = await this.corePorts.dispatchCommand<Delta>('get-team-delta', team.id, request)
     if (!result)
       throw new UserInputError(`We could not find a delta for the team with ID ${team.id}`)
 
