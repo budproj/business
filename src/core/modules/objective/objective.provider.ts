@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { omitBy, pickBy, isEmpty, identity } from 'lodash'
 import { Any, FindConditions } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
@@ -13,7 +14,7 @@ import { CreationQuery } from '@core/types/creation-query.type'
 import { ObjectiveInterface } from './interfaces/objective.interface'
 import { DEFAULT_CONFIDENCE, DEFAULT_PROGRESS } from './objective.constants'
 import { Objective } from './objective.orm-entity'
-import { ObjectiveRepository } from './objective.repository'
+import { ObjectiveRelationFilterProperties, ObjectiveRepository } from './objective.repository'
 
 @Injectable()
 export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveInterface> {
@@ -92,22 +93,6 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     })
   }
 
-  public async getActiveFromIDList(
-    ids: string[],
-    _indexes?: Partial<ObjectiveInterface>,
-    options?: GetOptions<Objective>,
-  ): Promise<Objective[]> {
-    return this.getFromIDListAndCycleActiveStatus(ids, true, options)
-  }
-
-  public async getNotActiveFromIDList(
-    ids: string[],
-    _indexes?: Partial<ObjectiveInterface>,
-    options?: GetOptions<Objective>,
-  ): Promise<Objective[]> {
-    return this.getFromIDListAndCycleActiveStatus(ids, false, options)
-  }
-
   public async getFromIndexes(indexes: Partial<ObjectiveInterface>): Promise<Objective> {
     return this.repository.findOne(indexes)
   }
@@ -121,19 +106,31 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     return objectiveWithCycle.cycle.active
   }
 
+  public async getWithRelationFilters(
+    filters: ObjectiveRelationFilterProperties,
+  ): Promise<Objective[]> {
+    const cleanedRelationFilters = omitBy(
+      {
+        objective: pickBy(filters.objective, identity),
+        cycle: pickBy(filters.cycle, identity),
+        keyResult: pickBy(filters.keyResult, identity),
+      },
+      isEmpty,
+    )
+
+    return this.repository.findWithRelationFilters(cleanedRelationFilters)
+  }
+
+  public async createObjective(objectiveData: ObjectiveInterface): Promise<Objective> {
+    const [queryResult] = await this.create(objectiveData)
+    return queryResult
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<Objective>,
     _data: Partial<ObjectiveInterface>,
     _queryContext: CoreQueryContext,
   ) {
     return []
-  }
-
-  private async getFromIDListAndCycleActiveStatus(
-    ids: string[],
-    cycleIsActive: boolean,
-    options?: GetOptions<Objective>,
-  ): Promise<Objective[]> {
-    return this.repository.getFromCycleStatus(cycleIsActive, ids, options)
   }
 }

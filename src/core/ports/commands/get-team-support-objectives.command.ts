@@ -3,17 +3,17 @@ import { ObjectiveRelationFilterProperties } from '@core/modules/objective/objec
 
 import { Command } from './base.command'
 
-interface GetTeamObjectivesProperties {
+interface GetTeamSupportObjectivesProperties {
   active: boolean
 }
 
-export class GetTeamObjectivesCommand extends Command<Objective[]> {
+export class GetTeamSupportObjectivesCommand extends Command<Objective[]> {
   static marshalFilters(
     teamId: string,
-    properties: Partial<GetTeamObjectivesProperties>,
+    properties: Partial<GetTeamSupportObjectivesProperties>,
   ): ObjectiveRelationFilterProperties {
     return {
-      objective: {
+      keyResult: {
         teamId,
       },
       cycle: {
@@ -24,9 +24,9 @@ export class GetTeamObjectivesCommand extends Command<Objective[]> {
 
   public async execute(
     teamID: string,
-    properties: Partial<GetTeamObjectivesProperties>,
+    properties: Partial<GetTeamSupportObjectivesProperties>,
   ): Promise<Objective[]> {
-    const filters = GetTeamObjectivesCommand.marshalFilters(teamID, properties)
+    const filters = GetTeamSupportObjectivesCommand.marshalFilters(teamID, properties)
 
     return this.core.objective.getWithRelationFilters(filters)
   }

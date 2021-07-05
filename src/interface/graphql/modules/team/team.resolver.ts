@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
+import { uniqBy } from 'lodash'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
@@ -216,6 +217,57 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching objectives for team',
     })
 
+    const [filters, _, connection] = this.relay.unmarshalRequest<
+      ObjectiveFiltersRequest,
+      Objective
+    >(request)
+
+    const objectives = await this.corePorts.dispatchCommand<Objective[]>(
+      'get-team-objectives',
+      team.id,
+      filters,
+    )
+
+    return this.relay.marshalResponse<ObjectiveInterface>(objectives, connection, team)
+  }
+
+  @ResolveField('supportObjectives', () => TeamObjectivesGraphQLConnection, { nullable: true })
+  protected async getSupportObjectivesForRequestAndUser(
+    @Args() request: ObjectiveFiltersRequest,
+    @Parent() team: TeamGraphQLNode,
+  ) {
+    this.logger.log({
+      team,
+      request,
+      message: 'Fetching support objectives for team',
+    })
+
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      ObjectiveFiltersRequest,
+      Objective
+    >(request)
+
+    const objectives = await this.corePorts.dispatchCommand<Objective[]>(
+      'get-team-support-objectives',
+      team.id,
+      filters,
+      queryOptions,
+    )
+
+    return this.relay.marshalResponse<ObjectiveInterface>(objectives, connection, team)
+  }
+
+  @ResolveField('allObjectives', () => TeamObjectivesGraphQLConnection, { nullable: true })
+  protected async getAllObjectivesForRequestAndUser(
+    @Args() request: ObjectiveFiltersRequest,
+    @Parent() team: TeamGraphQLNode,
+  ) {
+    this.logger.log({
+      team,
+      request,
+      message: 'Fetching all objectives for team',
+    })
+
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       ObjectiveFiltersRequest,
       Objective
@@ -223,12 +275,19 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
 
     const objectives = await this.corePorts.dispatchCommand<Objective[]>(
       'get-team-objectives',
-      team,
+      team.id,
+      filters,
+    )
+    const supportObjectives = await this.corePorts.dispatchCommand<Objective[]>(
+      'get-team-support-objectives',
+      team.id,
       filters,
       queryOptions,
     )
 
-    return this.relay.marshalResponse<ObjectiveInterface>(objectives, connection, team)
+    const allObjectives = uniqBy([...objectives, ...supportObjectives], 'id')
+
+    return this.relay.marshalResponse<ObjectiveInterface>(allObjectives, connection, team)
   }
 
   @ResolveField('keyResults', () => TeamKeyResultsGraphQLConnection, { nullable: true })

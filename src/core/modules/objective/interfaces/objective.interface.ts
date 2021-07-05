@@ -5,4 +5,5 @@ export interface ObjectiveInterface extends CoreEntityInterface {
   updatedAt: Date
   cycleId: string
   ownerId: string
+  teamId?: string
 }

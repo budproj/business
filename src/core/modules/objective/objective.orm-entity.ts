@@ -3,6 +3,7 @@ import { Column, Entity, ManyToOne, OneToMany, RelationId, UpdateDateColumn } fr
 import { CoreEntity } from '@core/core.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
+import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 
 import { ObjectiveInterface } from './interfaces/objective.interface'
@@ -28,6 +29,13 @@ export class Objective extends CoreEntity implements ObjectiveInterface {
 
   @ManyToOne('User', 'objectives')
   public owner: UserInterface
+
+  @Column({ nullable: true })
+  @RelationId((objective: Objective) => objective.team)
+  public teamId?: TeamInterface['id']
+
+  @ManyToOne('Team', 'objectives', { nullable: true })
+  public team?: TeamInterface
 
   @OneToMany('KeyResult', 'objective', { nullable: true })
   public keyResults?: KeyResultInterface[]
