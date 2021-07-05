@@ -9,7 +9,7 @@
       "envFile": "${workspaceFolder}/.env.local",
       "runtimeExecutable": "npm",
       "port": 9229,
-      "timeout": 5,
+      "timeout": 15000,
       "runtimeArgs": [
         "run-script",
         "start:debug"
