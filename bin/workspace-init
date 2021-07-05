@@ -59,8 +59,8 @@ function install_dependencies {
   install_pg_client
   set_node_version
   install_node_dependencies
-  install_global_dependencies
   seed_database
+  migrate_database
 }
 
 function install_pg_client {
@@ -83,18 +83,14 @@ function install_node_dependencies {
   npm install
 }
 
-function install_global_dependencies {
-  log "Installing global dependencies" "Install dependencies"
-
-  install_localtunnel
-}
-
-function install_localtunnel {
-  npm install -g localtunnel
-}
-
 function seed_database {
   source "${ROOT_DIR}/bin/database-seed"
+}
+
+function migrate_database {
+  log "Running migrations" "Database"
+
+  npm run migration:run
 }
 
 # Helpers

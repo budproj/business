@@ -2,6 +2,16 @@
   "dockerComposeFile": "docker-compose.yaml",
   "service": "dev-app",
   "workspaceFolder": "/workspace",
-  "postCreateCommand": "bin/codespace-init",
-  "forwardPorts": [3000, 5432]
+  "postCreateCommand": "bin/workspace-init",
+  "settings": {
+    "debug.javascript.usePreview": false,
+    "remote.autoForwardPorts": false,
+    "remote.restoreForwardedPorts": false
+  },
+  "extensions": [
+    "dbaeumer.vscode-eslint",
+    "eamodio.gitlens",
+    "graphql.vscode-graphql",
+    "github.copilot"
+  ]
 }
