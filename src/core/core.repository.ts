@@ -1,4 +1,4 @@
-import { flow, mapKeys, flatten, fromPairs, isEmpty } from 'lodash'
+import { flow, mapKeys, fromPairs, isEmpty } from 'lodash'
 import { Brackets, Repository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
 import { CoreEntityInterface } from '@core/core-entity.interface'
@@ -124,14 +124,12 @@ export abstract class CoreEntityRepository<E> extends Repository<E> {
       const entityFilterKeys = Object.keys(entityFilters)
       const entityNullableFilters = nullableFilters[entity]
 
-      return entityFilterKeys.map((key) =>
+      return entityFilterKeys.flatMap((key) =>
         this.buildFilterQuery(entityKey, entity, key, entityNullableFilters),
       )
     })
 
-    const flattenedQueries = flatten(queries)
-
-    return flattenedQueries.join(' AND ')
+    return queries.join(' AND ')
   }
 
   private buildFilterQuery(

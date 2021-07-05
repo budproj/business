@@ -7,8 +7,9 @@
       "request": "launch",
       "console": "integratedTerminal",
       "envFile": "${workspaceFolder}/.env.local",
-      "port": 9229,
       "runtimeExecutable": "npm",
+      "port": 9229,
+      "timeout": 5,
       "runtimeArgs": [
         "run-script",
         "start:debug"
