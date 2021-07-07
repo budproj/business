@@ -44,6 +44,7 @@ export class AWSSESProvider implements EmailProviderInterface {
       },
       Template: metadata.template,
       TemplateData: JSON.stringify(data),
+      ConfigurationSetName: this.config.debug ? 'Debug' : undefined,
     }
   }
 
