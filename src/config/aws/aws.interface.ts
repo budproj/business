@@ -15,6 +15,7 @@ export interface AWSS3ConfigInterface {
 }
 
 export interface AWSSESConfigInterface {
+  debug: boolean
   source: AWSSESSourceConfigInterface
 }
 
