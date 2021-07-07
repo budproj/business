@@ -7,9 +7,10 @@
     "debug.javascript.usePreview": false
   },
   "extensions": [
-    "dbaeumer.vscode-eslint",
-    "eamodio.gitlens",
-    "graphql.vscode-graphql",
-    "github.copilot"
-  ]
+	"dbaeumer.vscode-eslint",
+	"eamodio.gitlens",
+	"graphql.vscode-graphql",
+	"github.copilot",
+	"esbenp.prettier-vscode"
+]
 }
