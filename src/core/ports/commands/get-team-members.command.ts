@@ -8,15 +8,15 @@ import { User } from '@core/modules/user/user.orm-entity'
 
 import { Command } from './base.command'
 
-interface Filters extends UserInterface {
-  resolveTree: boolean
+interface Filters extends Partial<UserInterface> {
+  resolveTree?: boolean
 }
 
 export class GetTeamMembersCommand extends Command<User[]> {
   public async execute(
     teamID: string,
-    { resolveTree, ...entityFilters }: Filters,
-    options: GetOptions<User>,
+    { resolveTree, ...entityFilters }: Filters = {},
+    options?: GetOptions<User>,
   ): Promise<User[]> {
     const teams = resolveTree
       ? await this.core.team.getTeamNodesTreeAfterTeam(teamID)
@@ -27,8 +27,8 @@ export class GetTeamMembersCommand extends Command<User[]> {
 
   private async getUsers(
     teams: Team[],
-    filters: UserInterface,
-    options: GetOptions<User>,
+    filters?: Partial<UserInterface>,
+    options?: GetOptions<User>,
   ): Promise<User[]> {
     const teamUsersPromises = teams.map(async (team) => team.users)
     const teamUsers = await Promise.all(teamUsersPromises)

@@ -19,19 +19,25 @@ export class EmailNotificationChannel
     this.emailAdapter = new EmailAdapterProvider(awsSESProvider)
   }
 
-  static buildRecipientsFromUsers(users: UserInterface[]): NotificationRecipient[] {
-    return users.map((user) => EmailNotificationChannel.buildSingleRecipientFromUser(user))
+  static buildRecipientsFromUsers(
+    users: UserInterface[],
+    usersCustomTemplateData?: Array<Record<string, any>>,
+  ): NotificationRecipient[] {
+    return users.map((user, index) =>
+      EmailNotificationChannel.buildSingleRecipientFromUser(user, usersCustomTemplateData[index]),
+    )
   }
 
   static marshalMetadata(metadata: EmailNotificationChannelMetadata): EmailMetadata {
-    return {
-      ...metadata,
-      recipients: metadata.recipients.map((recipient) => recipient.address),
-    }
+    return metadata
   }
 
-  static buildSingleRecipientFromUser(user: UserInterface): NotificationRecipient {
+  static buildSingleRecipientFromUser(
+    user: UserInterface,
+    customTemplateData?: Record<string, any>,
+  ): NotificationRecipient {
     return {
+      customTemplateData,
       name: user.firstName,
       address: user.email,
     }
