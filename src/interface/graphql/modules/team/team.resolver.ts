@@ -40,6 +40,7 @@ import { TeamObjectivesGraphQLConnection } from './connections/team-objectives/t
 import { TeamTeamsGraphQLConnection } from './connections/team-teams/team-teams.connection'
 import { TeamUsersGraphQLConnection } from './connections/team-users/team-users.connection'
 import { TeamFiltersRequest } from './requests/team-filters.request'
+import { TeamMembersFiltersRequest } from './requests/team-members-filters.request'
 import { TeamGraphQLNode } from './team.node'
 
 @GuardedResolver(TeamGraphQLNode)
@@ -156,7 +157,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
 
   @ResolveField('users', () => TeamUsersGraphQLConnection, { nullable: true })
   protected async getUsersForTeam(
-    @Args() request: UserFiltersRequest,
+    @Args() request: TeamMembersFiltersRequest,
     @Parent() team: TeamGraphQLNode,
   ) {
     this.logger.log({
@@ -165,12 +166,16 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching users for team',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      UserFiltersRequest,
-      User
-    >(request)
+    const [filters, getOptions, connection] = this.relay.unmarshalRequest<UserFiltersRequest, User>(
+      request,
+    )
 
-    const queryResult = await this.core.team.getUsersInTeam(team.id, filters, queryOptions)
+    const queryResult = await this.corePorts.dispatchCommand<User[]>(
+      'get-team-members',
+      team.id,
+      filters,
+      getOptions,
+    )
 
     return this.relay.marshalResponse<UserInterface>(queryResult, connection, team)
   }
