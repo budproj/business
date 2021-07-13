@@ -110,10 +110,11 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
     const team = await this.core.dispatchCommand<TeamInterface>('get-team', {
       id: keyResult.teamId,
     })
-    const teamMembers = await this.core.dispatchCommand<UserInterface[]>(
+    const keyResultTeamMembers = await this.core.dispatchCommand<UserInterface[]>(
       'get-team-members',
       keyResult.teamId,
     )
+    const teamMembers = keyResultTeamMembers.filter((member) => member.id !== author.id)
 
     return {
       keyResult,
@@ -181,7 +182,8 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
       wasHighConfidence: data.parentCheckIn?.confidence === CONFIDENCE_TAG_THRESHOLDS.high,
       wasMediumConfidence: data.parentCheckIn?.confidence === CONFIDENCE_TAG_THRESHOLDS.medium,
       wasLowConfidence: data.parentCheckIn?.confidence === CONFIDENCE_TAG_THRESHOLDS.low,
-      recipientFirstName: 'teste',
+      hasComment: data.checkIn.comment?.length > 0,
+      teamID: data.team.id,
     }
 
     await this.channels.email.dispatch(emailData, emailMetadata)

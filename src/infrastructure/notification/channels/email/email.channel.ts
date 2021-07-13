@@ -24,7 +24,7 @@ export class EmailNotificationChannel
     usersCustomTemplateData?: Array<Record<string, any>>,
   ): NotificationRecipient[] {
     return users.map((user, index) =>
-      EmailNotificationChannel.buildSingleRecipientFromUser(user, usersCustomTemplateData[index]),
+      EmailNotificationChannel.buildSingleRecipientFromUser(user, usersCustomTemplateData?.[index]),
     )
   }
 

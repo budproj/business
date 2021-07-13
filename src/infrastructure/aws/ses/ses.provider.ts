@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { SES } from 'aws-sdk'
-import { SendTemplatedEmailRequest } from 'aws-sdk/clients/ses'
+import { BulkEmailDestinationList, SendBulkTemplatedEmailRequest } from 'aws-sdk/clients/ses'
 import { InjectAwsService } from 'nest-aws-sdk'
 
 import { EmailProviderInterface } from '@adapters/email/interface/provider.interface'
@@ -22,6 +22,15 @@ export class AWSSESProvider implements EmailProviderInterface {
     this.config = awsConfig.ses
   }
 
+  static buildBulkEmailDestinationList(metadata: EmailMetadata): BulkEmailDestinationList {
+    return metadata.recipients.map((recipient) => ({
+      Destination: {
+        ToAddresses: [recipient.address],
+      },
+      ReplacementTemplateData: JSON.stringify(recipient.customTemplateData),
+    }))
+  }
+
   public async send(data: EmailData, metadata: EmailMetadata): Promise<void> {
     const parameters = this.buildTemplateEmailParams(data, metadata)
 
@@ -30,20 +39,18 @@ export class AWSSESProvider implements EmailProviderInterface {
       message: 'Sending e-mail with AWS SES',
     })
 
-    await this.remote.sendTemplatedEmail(parameters).promise()
+    await this.remote.sendBulkTemplatedEmail(parameters).promise()
   }
 
   private buildTemplateEmailParams(
     data: EmailData,
     metadata: EmailMetadata,
-  ): SendTemplatedEmailRequest {
+  ): SendBulkTemplatedEmailRequest {
     return {
       Source: this.getNamedSource(),
-      Destination: {
-        ToAddresses: metadata.recipients.map((recipient) => recipient.address),
-      },
+      Destinations: AWSSESProvider.buildBulkEmailDestinationList(metadata),
       Template: metadata.template,
-      TemplateData: JSON.stringify(data),
+      DefaultTemplateData: JSON.stringify(data),
       ConfigurationSetName: this.config.debug ? 'Debug' : undefined,
     }
   }
