@@ -1,6 +1,7 @@
 import {
   CONFIDENCE_TAG_ASC_ORDER,
-  CONFIDENCE_TAG_COLORS,
+  CONFIDENCE_TAG_BACKGROUND_COLORS,
+  CONFIDENCE_TAG_PRIMARY_COLORS,
   CONFIDENCE_TAG_THRESHOLDS,
   DEFAULT_CONFIDENCE,
 } from './confidence-tag.constants'
@@ -17,10 +18,16 @@ export class ConfidenceTagAdapter {
     return nextConfidenceIndex - previousConfidenceIndex
   }
 
-  public getColorFromConfidence(confidence: number = DEFAULT_CONFIDENCE): string {
+  public getPrimaryColorFromConfidence(confidence: number = DEFAULT_CONFIDENCE): string {
     const confidenceTag = this.getTagForConfidence(confidence)
 
-    return CONFIDENCE_TAG_COLORS[confidenceTag]
+    return CONFIDENCE_TAG_PRIMARY_COLORS[confidenceTag]
+  }
+
+  public getBackgroundColorFromConfidence(confidence: number = DEFAULT_CONFIDENCE): string {
+    const confidenceTag = this.getTagForConfidence(confidence)
+
+    return CONFIDENCE_TAG_BACKGROUND_COLORS[confidenceTag]
   }
 
   private getConfidenceTagIndexFromConfidence(confidence: number): number {

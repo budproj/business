@@ -40,7 +40,7 @@ export class AWSSESProvider implements EmailProviderInterface {
     return {
       Source: this.getNamedSource(),
       Destination: {
-        ToAddresses: metadata.recipients,
+        ToAddresses: metadata.recipients.map((recipient) => recipient.address),
       },
       Template: metadata.template,
       TemplateData: JSON.stringify(data),

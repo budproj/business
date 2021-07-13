@@ -16,9 +16,16 @@ export const CONFIDENCE_TAG_ASC_ORDER = [
 
 export const DEFAULT_CONFIDENCE = 100
 
-export const CONFIDENCE_TAG_COLORS = {
+export const CONFIDENCE_TAG_PRIMARY_COLORS = {
   [ConfidenceTag.HIGH]: '#24CB8D',
   [ConfidenceTag.MEDIUM]: '#FFD964',
   [ConfidenceTag.LOW]: '#FF616A',
   [ConfidenceTag.BARRIER]: '#C26EFF',
+}
+
+export const CONFIDENCE_TAG_BACKGROUND_COLORS = {
+  [ConfidenceTag.HIGH]: '#D3F5E8',
+  [ConfidenceTag.MEDIUM]: '#FFF0C1',
+  [ConfidenceTag.LOW]: '#FFDFE1',
+  [ConfidenceTag.BARRIER]: '#F3E2FF',
 }
