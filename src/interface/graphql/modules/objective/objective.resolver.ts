@@ -208,10 +208,16 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
       KeyResultFiltersRequest,
       KeyResult
     >(request)
+    const orderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
 
-    const queryResult = await this.core.keyResult.getFromObjective(objective, filters, queryOptions)
+    const keyResults = await this.corePorts.dispatchCommand<KeyResult[]>(
+      'get-objective-key-results',
+      objective.id,
+      filters,
+      orderAttributes,
+    )
 
-    return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection, objective)
+    return this.relay.marshalResponse<KeyResultInterface>(keyResults, connection, objective)
   }
 
   @ResolveField('status', () => StatusGraphQLObject)

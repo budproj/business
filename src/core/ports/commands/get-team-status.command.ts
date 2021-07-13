@@ -50,6 +50,6 @@ export class GetTeamStatusCommand extends BaseStatusCommand {
       cycle: options.cycleFilters,
     }
 
-    return this.core.keyResult.getEntireOKRTreeWithFilters(filters)
+    return this.core.keyResult.getWithRelationFilters(filters)
   }
 }
