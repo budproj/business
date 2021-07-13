@@ -25,7 +25,7 @@ export class GetTeamObjectivesCommand extends Command<Objective[]> {
     }
   }
 
-  static marshalOrderAttributes(orderAttributes: OrderAttribute[]): OrderAttribute[] {
+  static marshalOrderAttributes(orderAttributes: OrderAttribute[] = []): OrderAttribute[] {
     return orderAttributes.map(([attribute, direction]) => [
       `${Objective.name}.${snakeCase(attribute)}`,
       direction,
