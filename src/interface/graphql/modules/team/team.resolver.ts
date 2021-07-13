@@ -253,12 +253,13 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       ObjectiveFiltersRequest,
       Objective
     >(request)
+    const orderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
 
     const objectives = await this.corePorts.dispatchCommand<Objective[]>(
       'get-team-support-objectives',
       team.id,
       filters,
-      queryOptions,
+      orderAttributes,
     )
 
     return this.relay.marshalResponse<ObjectiveInterface>(objectives, connection, team)
@@ -279,17 +280,19 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       ObjectiveFiltersRequest,
       Objective
     >(request)
+    const orderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
 
     const objectives = await this.corePorts.dispatchCommand<Objective[]>(
       'get-team-objectives',
       team.id,
       filters,
+      orderAttributes,
     )
     const supportObjectives = await this.corePorts.dispatchCommand<Objective[]>(
       'get-team-support-objectives',
       team.id,
       filters,
-      queryOptions,
+      orderAttributes,
     )
 
     const allObjectives = uniqBy([...objectives, ...supportObjectives], 'id')
