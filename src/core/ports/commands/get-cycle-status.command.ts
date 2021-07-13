@@ -40,6 +40,6 @@ export class GetCycleStatusCommand extends BaseStatusCommand {
       },
     }
 
-    return this.core.keyResult.getEntireOKRTreeWithFilters(filters)
+    return this.core.keyResult.getWithRelationFilters(filters)
   }
 }

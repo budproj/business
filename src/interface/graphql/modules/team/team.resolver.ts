@@ -222,15 +222,17 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching objectives for team',
     })
 
-    const [filters, _, connection] = this.relay.unmarshalRequest<
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       ObjectiveFiltersRequest,
       Objective
     >(request)
+    const orderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
 
     const objectives = await this.corePorts.dispatchCommand<Objective[]>(
       'get-team-objectives',
       team.id,
       filters,
+      orderAttributes,
     )
 
     return this.relay.marshalResponse<ObjectiveInterface>(objectives, connection, team)

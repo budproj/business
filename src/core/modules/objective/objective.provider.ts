@@ -10,6 +10,7 @@ import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
+import { OrderAttribute } from '@core/types/order-attribute.type'
 
 import { ObjectiveInterface } from './interfaces/objective.interface'
 import { DEFAULT_CONFIDENCE, DEFAULT_PROGRESS } from './objective.constants'
@@ -108,6 +109,7 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
 
   public async getWithRelationFilters(
     filters: ObjectiveRelationFilterProperties,
+    orderAttributes?: OrderAttribute[],
   ): Promise<Objective[]> {
     const cleanedRelationFilters = omitBy(
       {
@@ -118,7 +120,7 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
       isEmpty,
     )
 
-    return this.repository.findWithRelationFilters(cleanedRelationFilters)
+    return this.repository.findWithRelationFilters(cleanedRelationFilters, orderAttributes)
   }
 
   public async createObjective(objectiveData: ObjectiveInterface): Promise<Objective> {

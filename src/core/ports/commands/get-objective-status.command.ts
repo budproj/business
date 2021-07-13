@@ -40,6 +40,6 @@ export class GetObjectiveStatusCommand extends BaseStatusCommand {
       },
     }
 
-    return this.core.keyResult.getEntireOKRTreeWithFilters(filters)
+    return this.core.keyResult.getWithRelationFilters(filters)
   }
 }
