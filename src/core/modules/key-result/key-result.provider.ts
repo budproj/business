@@ -10,7 +10,7 @@ import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
-import { OrderAttribute } from '@core/types/order-attribute.type'
+import { EntityOrderAttributes } from '@core/types/order-attribute.type'
 
 import { KeyResultCheckInInterface } from './check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from './check-in/key-result-check-in.orm-entity'
@@ -308,8 +308,9 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
   public async getWithRelationFilters(
     filters: KeyResultRelationFilterProperties,
-    orderAttributes?: OrderAttribute[],
+    entityOrderAttributes?: EntityOrderAttributes[],
   ): Promise<KeyResult[]> {
+    const orderAttributes = this.marshalEntityOrderAttributes(entityOrderAttributes)
     const cleanedRelationFilters = omitBy(
       {
         keyResultCheckIn: pickBy(filters.keyResultCheckIn, identity),

@@ -208,7 +208,9 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
       KeyResultFiltersRequest,
       KeyResult
     >(request)
-    const orderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
+
+    const keyResultOrderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
+    const orderAttributes = [['keyResult', keyResultOrderAttributes]]
 
     const keyResults = await this.corePorts.dispatchCommand<KeyResult[]>(
       'get-objective-key-results',
