@@ -116,7 +116,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     const emailMetadata: EmailNotificationChannelMetadata = {
       ...metadata,
       recipients,
-      template: 'NewKeyResultCommentV2',
+      template: 'NewKeyResultComment',
     }
     const emailData = {
       ownerFirstName: data.owner.firstName,
