@@ -1,7 +1,6 @@
 import { GetStatusOptions, Status } from '@core/interfaces/status.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { BaseStatusCommand } from '@core/ports/commands/base-status.command'
-import { EntityOrderAttributes } from '@core/types/order-attribute.type'
 
 export class GetObjectiveStatusCommand extends BaseStatusCommand {
   public async execute(
@@ -40,7 +39,11 @@ export class GetObjectiveStatusCommand extends BaseStatusCommand {
         id: objectiveID,
       },
     }
-    const orderAttributes: EntityOrderAttributes[] = [['keyResult', [['createdAt', 'DESC']]]]
+    const orderAttributes = this.zipEntityOrderAttributes(
+      ['keyResultCheckIn'],
+      [['createdAt']],
+      [['DESC']],
+    )
 
     return this.core.keyResult.getWithRelationFilters(filters, orderAttributes)
   }
