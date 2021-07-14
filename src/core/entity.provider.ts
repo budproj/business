@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common'
 import { startOfWeek } from 'date-fns'
+import { flatten } from 'lodash'
 import { DeleteResult, FindConditions, SelectQueryBuilder } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 
@@ -14,6 +15,7 @@ import { CoreQueryContext } from './interfaces/core-query-context.interface'
 import { GetOptions } from './interfaces/get-options'
 import { UserInterface } from './modules/user/user.interface'
 import { CreationQuery } from './types/creation-query.type'
+import { EntityOrderAttributes, OrderAttribute } from './types/order-attribute.type'
 import { SelectionQueryConstrain } from './types/selection-query-constrain.type'
 
 export abstract class CoreEntityProvider<E extends CoreEntity, I> {
@@ -343,6 +345,18 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
     })
 
     return firstDayAfterLastWeek
+  }
+
+  protected marshalEntityOrderAttributes(
+    entityOrderAttributes?: EntityOrderAttributes[],
+  ): OrderAttribute[] {
+    if (!entityOrderAttributes) return []
+
+    const marshalledOrderAttributes = entityOrderAttributes.map(([entity, orderAttributes]) =>
+      this.repository.marshalEntityOrderAttributes(entity, orderAttributes),
+    )
+
+    return flatten(marshalledOrderAttributes)
   }
 
   protected abstract protectCreationQuery(

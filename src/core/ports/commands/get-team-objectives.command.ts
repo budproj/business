@@ -2,7 +2,7 @@ import { snakeCase } from 'lodash'
 
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { ObjectiveRelationFilterProperties } from '@core/modules/objective/objective.repository'
-import { OrderAttribute } from '@core/types/order-attribute.type'
+import { EntityOrderAttributes, OrderAttribute } from '@core/types/order-attribute.type'
 
 import { Command } from './base.command'
 
@@ -35,13 +35,10 @@ export class GetTeamObjectivesCommand extends Command<Objective[]> {
   public async execute(
     teamID: string,
     properties: Partial<GetTeamObjectivesProperties>,
-    orderAttributes?: OrderAttribute[],
+    orderAttributes?: EntityOrderAttributes[],
   ): Promise<Objective[]> {
     const filters = GetTeamObjectivesCommand.marshalFilters(teamID, properties)
-    const marshaledOrderAttributes = GetTeamObjectivesCommand.marshalOrderAttributes(
-      orderAttributes,
-    )
 
-    return this.core.objective.getWithRelationFilters(filters, marshaledOrderAttributes)
+    return this.core.objective.getWithRelationFilters(filters, orderAttributes)
   }
 }

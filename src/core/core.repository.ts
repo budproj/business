@@ -1,4 +1,4 @@
-import { flow, mapKeys, fromPairs, isEmpty } from 'lodash'
+import { flow, mapKeys, fromPairs, isEmpty, snakeCase } from 'lodash'
 import { Brackets, Repository, SelectQueryBuilder, WhereExpression } from 'typeorm'
 
 import { CoreEntityInterface } from '@core/core-entity.interface'
@@ -14,6 +14,7 @@ import { Sorting } from './enums/sorting'
 import { GetOptions } from './interfaces/get-options'
 import { TeamInterface } from './modules/team/interfaces/team.interface'
 import { UserInterface } from './modules/user/user.interface'
+import { OrderAttribute } from './types/order-attribute.type'
 import { SelectionQueryConstrain } from './types/selection-query-constrain.type'
 
 type FilterQuery = {
@@ -76,6 +77,18 @@ export abstract class CoreEntityRepository<E> extends Repository<E> {
 
   public marshalOrderBy(unmarshalled: Partial<Record<keyof E, Sorting>>): Record<string, Sorting> {
     return mapKeys(unmarshalled, (_, key) => `${this.entityName}.${key}`) as Record<string, Sorting>
+  }
+
+  public marshalEntityOrderAttributes(
+    entity: string,
+    orderAttributes: OrderAttribute[],
+  ): OrderAttribute[] {
+    const entityKey = this.entityKeyHashmap[entity] as string
+
+    return orderAttributes.map(([attribute, direction]) => [
+      `${entityKey}.${snakeCase(attribute)}`,
+      direction,
+    ])
   }
 
   protected setupTeamQuery(query: SelectQueryBuilder<E>) {

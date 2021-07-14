@@ -226,7 +226,9 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       ObjectiveFiltersRequest,
       Objective
     >(request)
-    const orderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
+
+    const objectiveOrderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
+    const orderAttributes = [['objective', objectiveOrderAttributes]]
 
     const objectives = await this.corePorts.dispatchCommand<Objective[]>(
       'get-team-objectives',
@@ -253,7 +255,9 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       ObjectiveFiltersRequest,
       Objective
     >(request)
-    const orderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
+
+    const objectiveOrderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
+    const orderAttributes = [['objective', objectiveOrderAttributes]]
 
     const objectives = await this.corePorts.dispatchCommand<Objective[]>(
       'get-team-support-objectives',
@@ -280,7 +284,9 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       ObjectiveFiltersRequest,
       Objective
     >(request)
-    const orderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
+
+    const objectiveOrderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
+    const orderAttributes = [['objective', objectiveOrderAttributes]]
 
     const objectives = await this.corePorts.dispatchCommand<Objective[]>(
       'get-team-objectives',
