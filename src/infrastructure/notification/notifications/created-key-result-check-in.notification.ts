@@ -89,6 +89,12 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
       data.parentCheckIn?.confidence !== CONFIDENCE_TAG_THRESHOLDS.barrier
     )
       void this.dispatchBarrierEmail()
+
+    if (
+      data.checkIn.confidence === CONFIDENCE_TAG_THRESHOLDS.low &&
+      data.parentCheckIn?.confidence !== CONFIDENCE_TAG_THRESHOLDS.low
+    )
+      void this.dispatchLowConfidenceEmail()
   }
 
   private async getRelatedData(checkIn: KeyResultCheckInInterface): Promise<RelatedData> {
@@ -182,6 +188,46 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
       wasHighConfidence: data.parentCheckIn?.confidence === CONFIDENCE_TAG_THRESHOLDS.high,
       wasMediumConfidence: data.parentCheckIn?.confidence === CONFIDENCE_TAG_THRESHOLDS.medium,
       wasLowConfidence: data.parentCheckIn?.confidence === CONFIDENCE_TAG_THRESHOLDS.low,
+      hasComment: data.checkIn.comment?.length > 0,
+      teamID: data.team.id,
+    }
+
+    await this.channels.email.dispatch(emailData, emailMetadata)
+  }
+
+  private async dispatchLowConfidenceEmail(): Promise<void> {
+    const { data, metadata } = this.marshal()
+
+    const customData = metadata.teamMembers.map((member) => ({
+      recipientFirstName: member.firstName,
+    }))
+    const recipients = EmailNotificationChannel.buildRecipientsFromUsers(
+      metadata.teamMembers,
+      customData,
+    )
+
+    const emailMetadata: EmailNotificationChannelMetadata = {
+      ...metadata,
+      recipients,
+      template: 'KeyResultWithLowConfidence',
+    }
+    const emailData = {
+      isMaleTeam: data.team.gender === TeamGender.MALE,
+      isFemaleTeam: data.team.gender === TeamGender.FEMALE,
+      teamName: data.team.name,
+      authorFirstName: data.author.firstName,
+      isQuarterlyCadence: data.cycle.cadence === Cadence.QUARTERLY,
+      cyclePeriod: data.cycle.period,
+      authorPictureURL: data.author.picture,
+      authorFullName: data.authorFullName,
+      keyResultTitle: data.keyResult.title,
+      keyResultPreviousConfidenceTagColorPrimary: data.previousCheckInConfidenceColor,
+      keyResultPreviousConfidenceTagColorBackground: data.previousCheckInConfidenceBackgroundColor,
+      keyResultComment: data.checkIn.comment,
+      hasPreviousCheckIn: data.hasPreviousCheckIn,
+      wasHighConfidence: data.parentCheckIn?.confidence === CONFIDENCE_TAG_THRESHOLDS.high,
+      wasMediumConfidence: data.parentCheckIn?.confidence === CONFIDENCE_TAG_THRESHOLDS.medium,
+      wasWithBarrier: data.parentCheckIn?.confidence === CONFIDENCE_TAG_THRESHOLDS.barrier,
       hasComment: data.checkIn.comment?.length > 0,
       teamID: data.team.id,
     }

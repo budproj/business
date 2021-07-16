@@ -18,7 +18,7 @@ export const DEFAULT_CONFIDENCE = 100
 
 export const CONFIDENCE_TAG_PRIMARY_COLORS = {
   [ConfidenceTag.HIGH]: '#24CB8D',
-  [ConfidenceTag.MEDIUM]: '#FFD964',
+  [ConfidenceTag.MEDIUM]: '#F1BF25',
   [ConfidenceTag.LOW]: '#FF616A',
   [ConfidenceTag.BARRIER]: '#C26EFF',
 }
