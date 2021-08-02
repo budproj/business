@@ -1,58 +1,24 @@
 // Inspired by this example: https://gist.github.com/Ciantic/be6a8b8ca27ee15e2223f642b5e01549
 
-import {
-  createConnection,
-  getConnection,
-  getRepository,
-  ConnectionOptions,
-  Entity,
-  Column,
-} from 'typeorm'
-
-import { CoreEntity } from '@core/core.orm-entity'
-
 import { CheckMarkStates } from './check-mark.interface'
 import { CheckMark } from './check-mark.orm-entity'
-
-@Entity()
-class User extends CoreEntity {
-  @Column()
-  firstName: string
-
-  keyResultComments: string[]
-}
-
-@Entity()
-class KeyResult extends CoreEntity {
-  @Column()
-  title: string
-}
-
-// Using a sqlite database for testing, so take care with advanced sql features
-const connectionOptions: ConnectionOptions = {
-  type: 'sqlite',
-  database: ':memory:',
-  dropSchema: true,
-  entities: [User, KeyResult, CheckMark],
-  synchronize: true,
-  logging: false,
-}
+import { User, KeyResult } from './__tests-helpers__/external-entities'
+import { startInMemoryDb, closeConnection, repository } from './__tests-helpers__/orm-connection'
 
 let mockUser: User
 let mockKeyResult: KeyResult
 
-beforeEach(async () => createConnection(connectionOptions))
+beforeEach(() => startInMemoryDb([User, KeyResult, CheckMark]))
 beforeEach(async () => {
-  const userEntity = getRepository(User)
-  mockUser = await userEntity.save({ firstName: 'John', keyResultComments: [] })
+  const userRepo = repository(User)
+  mockUser = await userRepo.save({ firstName: 'John', keyResultComments: [] })
 
-  const keyResultEntity = getRepository(KeyResult)
-  mockKeyResult = await keyResultEntity.save({ title: 'finish writing a book' })
+  const keyResultRepo = repository(KeyResult)
+  mockKeyResult = await keyResultRepo.save({ title: 'finish writing a book' })
 })
-afterEach(async () => getConnection().close())
+afterEach(closeConnection)
 
 describe('check-mark - entity', () => {
-  const checkMarkEntity = () => getRepository(CheckMark)
   const checkMarkGenerator = (customFields) => ({
     state: CheckMarkStates.UNCHECKED,
     description: 'do the dishes',
@@ -66,8 +32,8 @@ describe('check-mark - entity', () => {
     const checkMark = checkMarkGenerator({ state: CheckMarkStates.UNCHECKED })
 
     // Act
-    await checkMarkEntity().save(checkMark)
-    const result = await checkMarkEntity().findOne()
+    await repository(CheckMark).save(checkMark)
+    const result = await repository(CheckMark).findOne()
 
     // Assert
     expect(result.state).toBe(CheckMarkStates.UNCHECKED)
@@ -78,8 +44,8 @@ describe('check-mark - entity', () => {
     const checkMark = checkMarkGenerator({ state: CheckMarkStates.CHECKED })
 
     // Act
-    await checkMarkEntity().save(checkMark)
-    const result = await checkMarkEntity().findOne()
+    await repository(CheckMark).save(checkMark)
+    const result = await repository(CheckMark).findOne()
 
     // Assert
     expect(result.state).toBe(CheckMarkStates.CHECKED)
@@ -90,7 +56,7 @@ describe('check-mark - entity', () => {
     const checkMark = checkMarkGenerator({ state: 'something' }) as CheckMark
 
     // Act
-    const action = async () => checkMarkEntity().save(checkMark)
+    const action = async () => repository(CheckMark).save(checkMark)
 
     // Assert
     expect(action).rejects.toThrow()
@@ -101,8 +67,8 @@ describe('check-mark - entity', () => {
     const checkMark = checkMarkGenerator({ userId: mockUser.id })
 
     // Act
-    await checkMarkEntity().save(checkMark)
-    const result = await checkMarkEntity().findOne({ relations: ['user'] })
+    await repository(CheckMark).save(checkMark)
+    const result = await repository(CheckMark).findOne({ relations: ['user'] })
 
     // Assert
     expect(result.user.firstName).toBe(mockUser.firstName)
@@ -113,8 +79,8 @@ describe('check-mark - entity', () => {
     const checkMark = checkMarkGenerator({ keyResultId: mockKeyResult.id })
 
     // Act
-    await checkMarkEntity().save(checkMark)
-    const result = await checkMarkEntity().findOne({ relations: ['keyResult'] })
+    await repository(CheckMark).save(checkMark)
+    const result = await repository(CheckMark).findOne({ relations: ['keyResult'] })
 
     // Assert
     expect(result.keyResult.title).toBe(mockKeyResult.title)
@@ -126,11 +92,11 @@ describe('check-mark - entity', () => {
       const checkMark = checkMarkGenerator({ description: 'do homework' })
 
       // Act
-      await checkMarkEntity().save(checkMark)
-      const firstTimeSavedCheckMark = await checkMarkEntity().findOne()
+      await repository(CheckMark).save(checkMark)
+      const firstTimeSavedCheckMark = await repository(CheckMark).findOne()
 
-      await checkMarkEntity().update(firstTimeSavedCheckMark.id, { description: 'write a report' })
-      const secondTimeSavedCheckMark = await checkMarkEntity().findOne()
+      await repository(CheckMark).update(firstTimeSavedCheckMark.id, { description: 'write a report' })
+      const secondTimeSavedCheckMark = await repository(CheckMark).findOne()
 
       // Assert
       expect(firstTimeSavedCheckMark.description).toBe('do homework')
@@ -142,11 +108,11 @@ describe('check-mark - entity', () => {
       const checkMark = checkMarkGenerator({ state: CheckMarkStates.UNCHECKED })
 
       // Act
-      await checkMarkEntity().save(checkMark)
-      const firstTimeSavedCheckMark = await checkMarkEntity().findOne()
+      await repository(CheckMark).save(checkMark)
+      const firstTimeSavedCheckMark = await repository(CheckMark).findOne()
 
-      await checkMarkEntity().update(firstTimeSavedCheckMark.id, { state: CheckMarkStates.CHECKED })
-      const secondTimeSavedCheckMark = await checkMarkEntity().findOne()
+      await repository(CheckMark).update(firstTimeSavedCheckMark.id, { state: CheckMarkStates.CHECKED })
+      const secondTimeSavedCheckMark = await repository(CheckMark).findOne()
 
       // Assert
       expect(firstTimeSavedCheckMark.state).toBe(CheckMarkStates.UNCHECKED)
@@ -158,13 +124,13 @@ describe('check-mark - entity', () => {
       const checkMark = checkMarkGenerator({ state: CheckMarkStates.CHECKED })
 
       // Act
-      await checkMarkEntity().save(checkMark)
-      const firstTimeSavedCheckMark = await checkMarkEntity().findOne()
+      await repository(CheckMark).save(checkMark)
+      const firstTimeSavedCheckMark = await repository(CheckMark).findOne()
 
-      await checkMarkEntity().update(firstTimeSavedCheckMark.id, {
+      await repository(CheckMark).update(firstTimeSavedCheckMark.id, {
         state: CheckMarkStates.UNCHECKED,
       })
-      const secondTimeSavedCheckMark = await checkMarkEntity().findOne()
+      const secondTimeSavedCheckMark = await repository(CheckMark).findOne()
 
       // Assert
       expect(firstTimeSavedCheckMark.state).toBe(CheckMarkStates.CHECKED)
