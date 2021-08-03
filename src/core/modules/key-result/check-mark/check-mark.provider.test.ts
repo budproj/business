@@ -1,17 +1,20 @@
-import { CheckMarkStates } from "./check-mark.interface";
-import { CheckMark } from "./check-mark.orm-entity";
-import { CheckMarkProvider } from "./check-mark.provider";
-import { CheckMarkRepository } from "./check-mark.repository";
-import { User, KeyResult } from "./__tests-helpers__/external-entities";
-import { closeConnection, repository, startInMemoryDb, testProvider } from "./__tests-helpers__/orm-connection";
-
+import { User, KeyResult } from './__tests-helpers__/external-entities'
+import {
+  closeConnection,
+  repository,
+  startInMemoryDatabase,
+  testProvider,
+} from './__tests-helpers__/orm-connection'
+import { CheckMarkStates } from './check-mark.interface'
+import { CheckMark } from './check-mark.orm-entity'
+import { CheckMarkProvider } from './check-mark.provider'
+import { CheckMarkRepository } from './check-mark.repository'
 
 let mockUser: User
 let mockKeyResult: KeyResult
 let mockSecondKeyResult: KeyResult
 
-
-beforeEach(() => startInMemoryDb([User, KeyResult, CheckMark]))
+beforeEach(async () => startInMemoryDatabase([User, KeyResult, CheckMark]))
 beforeEach(async () => {
   const userRepo = repository(User)
   mockUser = await userRepo.save({ firstName: 'John', keyResultComments: [] })
@@ -22,23 +25,22 @@ beforeEach(async () => {
 })
 afterEach(closeConnection)
 
+const checkMarkGenerator = (customFields) => ({
+  state: CheckMarkStates.UNCHECKED,
+  description: 'do the dishes',
+  keyResultId: mockKeyResult.id,
+  userId: mockUser.id,
+  ...customFields,
+})
+const provider = () => testProvider(CheckMarkRepository, CheckMarkProvider)
+
 describe('check-mark - provider', () => {
-  const checkMarkGenerator = (customFields) => ({
-    state: CheckMarkStates.UNCHECKED,
-    description: 'do the dishes',
-    keyResultId: mockKeyResult.id,
-    userId: mockUser.id,
-    ...customFields,
-  })
-
-  const provider = () => testProvider(CheckMarkRepository, CheckMarkProvider)
-
   describe('createCheckMark', () => {
     it('should allow an unchecked check mark', async () => {
       // Arrange
       const checkMark = checkMarkGenerator({ state: CheckMarkStates.UNCHECKED })
 
-      // act
+      // Act
       const result = await provider().createCheckMark(checkMark)
 
       // Assert

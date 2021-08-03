@@ -1,14 +1,18 @@
 // Inspired by this example: https://gist.github.com/Ciantic/be6a8b8ca27ee15e2223f642b5e01549
 
+import { User, KeyResult } from './__tests-helpers__/external-entities'
+import {
+  startInMemoryDatabase,
+  closeConnection,
+  repository,
+} from './__tests-helpers__/orm-connection'
 import { CheckMarkStates } from './check-mark.interface'
 import { CheckMark } from './check-mark.orm-entity'
-import { User, KeyResult } from './__tests-helpers__/external-entities'
-import { startInMemoryDb, closeConnection, repository } from './__tests-helpers__/orm-connection'
 
 let mockUser: User
 let mockKeyResult: KeyResult
 
-beforeEach(() => startInMemoryDb([User, KeyResult, CheckMark]))
+beforeEach(async () => startInMemoryDatabase([User, KeyResult, CheckMark]))
 beforeEach(async () => {
   const userRepo = repository(User)
   mockUser = await userRepo.save({ firstName: 'John', keyResultComments: [] })
@@ -18,15 +22,15 @@ beforeEach(async () => {
 })
 afterEach(closeConnection)
 
-describe('check-mark - entity', () => {
-  const checkMarkGenerator = (customFields) => ({
-    state: CheckMarkStates.UNCHECKED,
-    description: 'do the dishes',
-    keyResultId: mockKeyResult.id,
-    userId: mockUser.id,
-    ...customFields,
-  })
+const checkMarkGenerator = (customFields) => ({
+  state: CheckMarkStates.UNCHECKED,
+  description: 'do the dishes',
+  keyResultId: mockKeyResult.id,
+  userId: mockUser.id,
+  ...customFields,
+})
 
+describe('check-mark - entity', () => {
   it('should allow an unchecked check mark', async () => {
     // Arrange
     const checkMark = checkMarkGenerator({ state: CheckMarkStates.UNCHECKED })
@@ -59,7 +63,7 @@ describe('check-mark - entity', () => {
     const action = async () => repository(CheckMark).save(checkMark)
 
     // Assert
-    expect(action).rejects.toThrow()
+    await expect(action).rejects.toThrow()
   })
 
   it('should contain an User', async () => {
@@ -95,7 +99,9 @@ describe('check-mark - entity', () => {
       await repository(CheckMark).save(checkMark)
       const firstTimeSavedCheckMark = await repository(CheckMark).findOne()
 
-      await repository(CheckMark).update(firstTimeSavedCheckMark.id, { description: 'write a report' })
+      await repository(CheckMark).update(firstTimeSavedCheckMark.id, {
+        description: 'write a report',
+      })
       const secondTimeSavedCheckMark = await repository(CheckMark).findOne()
 
       // Assert
@@ -111,7 +117,9 @@ describe('check-mark - entity', () => {
       await repository(CheckMark).save(checkMark)
       const firstTimeSavedCheckMark = await repository(CheckMark).findOne()
 
-      await repository(CheckMark).update(firstTimeSavedCheckMark.id, { state: CheckMarkStates.CHECKED })
+      await repository(CheckMark).update(firstTimeSavedCheckMark.id, {
+        state: CheckMarkStates.CHECKED,
+      })
       const secondTimeSavedCheckMark = await repository(CheckMark).findOne()
 
       // Assert
