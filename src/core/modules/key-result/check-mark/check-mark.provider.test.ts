@@ -130,4 +130,27 @@ describe('check-mark - provider', () => {
       expect(result4.keyResultId).toBe(mockSecondKeyResult.id)
     })
   })
+
+  describe('getFromKeyResult', () => {
+    it('should return a list of check marks from key result', async () => {
+      // Arrange
+      const checkMark1 = checkMarkGenerator({ keyResultId: mockKeyResult.id })
+      const checkMark2 = checkMarkGenerator({ keyResultId: mockKeyResult.id })
+      const checkMark3 = checkMarkGenerator({ keyResultId: mockKeyResult.id })
+      const checkMark4 = checkMarkGenerator({ keyResultId: mockSecondKeyResult.id })
+
+      // Act
+      const [{ id: checkMark1Id }] = await provider().createCheckMark(checkMark1)
+      const [{ id: checkMark2Id }] = await provider().createCheckMark(checkMark2)
+      const [{ id: checkMark3Id }] = await provider().createCheckMark(checkMark3)
+      const [{ id: checkMark4Id }] = await provider().createCheckMark(checkMark4)
+      const result = await provider().getFromKeyResult(mockKeyResult.id)
+
+      // Assert
+      const ids = result.map((item) => item.id)
+      expect(ids).toHaveLength(3)
+      expect(ids).toStrictEqual([checkMark1Id, checkMark2Id, checkMark3Id])
+      expect(ids.find((id) => id === checkMark4Id)).toBeUndefined()
+    })
+  })
 })

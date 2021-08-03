@@ -34,6 +34,10 @@ export class CheckMarkProvider extends CoreEntityProvider<CheckMark, CheckMarkIn
     return this.delete({ keyResultId })
   }
 
+  public async getFromKeyResult(keyResultId: string): Promise<CheckMark[]> {
+    return this.getMany({ keyResultId })
+  }
+
   protected async protectCreationQuery(query: CreationQuery<CheckMark>): Promise<CheckMark[]> {
     return query()
   }
