@@ -2,11 +2,11 @@ import { EntityRepository, WhereExpression } from 'typeorm'
 
 import { CoreEntityRepository } from '@core/core.repository'
 
-import { CheckMark } from './check-mark.orm-entity'
+import { KeyResultCheckMark } from './key-result-check-mark.orm-entity'
 
-@EntityRepository(CheckMark)
-export class CheckMarkRepository extends CoreEntityRepository<CheckMark> {
-  public entityName = CheckMark.name
+@EntityRepository(KeyResultCheckMark)
+export class KeyResultCheckMarkRepository extends CoreEntityRepository<KeyResultCheckMark> {
+  public entityName = KeyResultCheckMark.name
 
   protected addTeamWhereExpression(query: WhereExpression): WhereExpression {
     return query

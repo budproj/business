@@ -5,10 +5,10 @@ import { UserInterface } from '@core/modules/user/user.interface'
 
 import { KeyResultInterface } from '../interfaces/key-result.interface'
 
-import { CheckMarkInterface, CheckMarkStates } from './check-mark.interface'
+import { KeyResultCheckMarkInterface, CheckMarkStates } from './key-result-check-mark.interface'
 
 @Entity()
-export class CheckMark extends CoreEntity implements CheckMarkInterface {
+export class KeyResultCheckMark extends CoreEntity implements KeyResultCheckMarkInterface {
   @Column({ type: 'simple-enum', enum: CheckMarkStates, default: CheckMarkStates.UNCHECKED })
   public state: CheckMarkStates
 
@@ -19,14 +19,14 @@ export class CheckMark extends CoreEntity implements CheckMarkInterface {
   public updatedAt: Date
 
   @Column({ type: 'uuid' })
-  @RelationId((checkMark: CheckMark) => checkMark.keyResult)
+  @RelationId((checkMark: KeyResultCheckMark) => checkMark.keyResult)
   public keyResultId: KeyResultInterface['id']
 
   @ManyToOne('KeyResult', 'comments')
   public keyResult: KeyResultInterface
 
   @Column({ type: 'uuid' })
-  @RelationId((checkMark: CheckMark) => checkMark.user)
+  @RelationId((checkMark: KeyResultCheckMark) => checkMark.user)
   public userId: UserInterface['id']
 
   @ManyToOne('User', 'keyResultComments')

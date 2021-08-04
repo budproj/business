@@ -5,16 +5,16 @@ import {
   startInMemoryDatabase,
   testProvider,
 } from './__tests-helpers__/orm-connection'
-import { CheckMarkStates } from './check-mark.interface'
-import { CheckMark } from './check-mark.orm-entity'
-import { CheckMarkProvider } from './check-mark.provider'
-import { CheckMarkRepository } from './check-mark.repository'
+import { CheckMarkStates } from './key-result-check-mark.interface'
+import { KeyResultCheckMark } from './key-result-check-mark.orm-entity'
+import { KeyResultCheckMarkProvider } from './key-result-check-mark.provider'
+import { KeyResultCheckMarkRepository } from './key-result-check-mark.repository'
 
 let mockUser: User
 let mockKeyResult: KeyResult
 let mockSecondKeyResult: KeyResult
 
-beforeEach(async () => startInMemoryDatabase([User, KeyResult, CheckMark]))
+beforeEach(async () => startInMemoryDatabase([User, KeyResult, KeyResultCheckMark]))
 beforeEach(async () => {
   const userRepo = repository(User)
   mockUser = await userRepo.save({ firstName: 'John', keyResultComments: [] })
@@ -32,7 +32,7 @@ const checkMarkGenerator = (customFields) => ({
   userId: mockUser.id,
   ...customFields,
 })
-const provider = () => testProvider(CheckMarkRepository, CheckMarkProvider)
+const provider = () => testProvider(KeyResultCheckMarkRepository, KeyResultCheckMarkProvider)
 
 describe('check-mark - provider', () => {
   describe('createCheckMark', () => {
@@ -151,6 +151,23 @@ describe('check-mark - provider', () => {
       expect(ids).toHaveLength(3)
       expect(ids).toStrictEqual([checkMark1Id, checkMark2Id, checkMark3Id])
       expect(ids.find((id) => id === checkMark4Id)).toBeUndefined()
+    })
+  })
+
+  describe('getFromIndexes', () => {
+    it('should return an item from database', async () => {
+      // Arrange
+      const indexes = { state: CheckMarkStates.UNCHECKED, userId: mockUser.id }
+      const checkMark = checkMarkGenerator(indexes)
+
+      // Act
+      await provider().createCheckMark(checkMark)
+      const result = await provider().getFromIndexes(indexes)
+
+
+      // Act
+      expect(result.state).toBe(CheckMarkStates.UNCHECKED)
+      expect(result.userId).toBe(mockUser.id)
     })
   })
 })

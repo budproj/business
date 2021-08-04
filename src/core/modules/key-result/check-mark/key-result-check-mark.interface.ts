@@ -5,7 +5,7 @@ export enum CheckMarkStates {
   UNCHECKED = 'unchecked',
 }
 
-export interface CheckMarkInterface extends CoreEntityInterface {
+export interface KeyResultCheckMarkInterface extends CoreEntityInterface {
   state: CheckMarkStates
   description: string
   updatedAt: Date
@@ -13,4 +13,4 @@ export interface CheckMarkInterface extends CoreEntityInterface {
   userId: string
 }
 
-export type CheckList = CheckMarkInterface[]
+export type CheckList = KeyResultCheckMarkInterface[]
