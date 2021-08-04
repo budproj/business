@@ -10,6 +10,7 @@ import { KeyResultCommentRepository } from './comment/key-result-comment.reposit
 import { KeyResultProvider } from './key-result.provider'
 import { KeyResultRepository } from './key-result.repository'
 import { KeyResultTimelineProvider } from './timeline.provider'
+import { KeyResultCheckMarkProvider } from './check-mark/key-result-check-mark.provider'
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { KeyResultTimelineProvider } from './timeline.provider'
     KeyResultCommentProvider,
     KeyResultCheckInProvider,
     KeyResultTimelineProvider,
+    KeyResultCheckMarkProvider,
   ],
   exports: [KeyResultProvider],
 })
-export class KeyResultModule {}
+export class KeyResultModule { }

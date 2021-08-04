@@ -22,11 +22,13 @@ import { KeyResult } from './key-result.orm-entity'
 import { KeyResultRelationFilterProperties, KeyResultRepository } from './key-result.repository'
 import { KeyResultTimelineProvider } from './timeline.provider'
 import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
+import { KeyResultCheckMarkProvider } from './check-mark/key-result-check-mark.provider'
 
 @Injectable()
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
   constructor(
     public readonly keyResultCommentProvider: KeyResultCommentProvider,
+    public readonly keyResultCheckMarkProvider: KeyResultCheckMarkProvider,
     public readonly keyResultCheckInProvider: KeyResultCheckInProvider,
     public readonly timeline: KeyResultTimelineProvider,
     protected readonly repository: KeyResultRepository,
@@ -113,7 +115,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   public async getComments(
     keyResult: Partial<KeyResultInterface>,
     filters?: FindConditions<KeyResultCommentInterface>,
-    options?: GetOptions<KeyResultCommentInterface>,
+    options?: GetOptions<KeyResultCommentInterface>, Ö
   ): Promise<KeyResultComment[]> {
     const selector = {
       ...filters,
