@@ -115,7 +115,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   public async getComments(
     keyResult: Partial<KeyResultInterface>,
     filters?: FindConditions<KeyResultCommentInterface>,
-    options?: GetOptions<KeyResultCommentInterface>, Ö
+    options?: GetOptions<KeyResultCommentInterface>,
   ): Promise<KeyResultComment[]> {
     const selector = {
       ...filters,

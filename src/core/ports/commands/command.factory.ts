@@ -52,6 +52,8 @@ import { GetTeamCompanyCommand } from './get-team-company.command'
 import { GetTeamOwnerCommand } from './get-team-owner.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
 import { GetKeyResultCheckMarkCommand } from './get-key-result-check-mark.command'
+import { GetCheckListForKeyResultCommand } from './get-check-list-for-key-result.command'
+import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
 
 type CommandConstructor = new (...commandArguments: any[]) => Command<unknown>
 export type CommandType =
@@ -104,6 +106,8 @@ export type CommandType =
   | 'get-user'
   | 'update-key-result'
   | 'update-objective'
+  | 'get-check-list-for-key-result'
+  | 'toggle-check-mark'
 
 @Injectable()
 export class CommandFactory {
@@ -157,6 +161,8 @@ export class CommandFactory {
     'get-user': GetUserCommand,
     'update-key-result': UpdateKeyResultCommand,
     'update-objective': UpdateObjectiveCommand,
+    'get-check-list-for-key-result': GetCheckListForKeyResultCommand,
+    'toggle-check-mark': ToggleCheckMarkCommand,
   }
 
   constructor(private readonly core: CoreProvider) { }

@@ -11,6 +11,7 @@ import { KeyResultProvider } from './key-result.provider'
 import { KeyResultRepository } from './key-result.repository'
 import { KeyResultTimelineProvider } from './timeline.provider'
 import { KeyResultCheckMarkProvider } from './check-mark/key-result-check-mark.provider'
+import { KeyResultCheckMarkRepository } from './check-mark/key-result-check-mark.repository'
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { KeyResultCheckMarkProvider } from './check-mark/key-result-check-mark.p
       KeyResultRepository,
       KeyResultCommentRepository,
       KeyResultCheckInRepository,
+      KeyResultCheckMarkRepository,
     ]),
     TeamModule,
   ],
