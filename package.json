@@ -24,7 +24,7 @@
     "migration:run": "npm run typeorm migration:run",
     "migration:revert": "npm run typeorm migration:revert",
     "migration:format": "prettier --write 'src/migrations/*.ts'",
-    "db:seed": "./scripts/seed.sh",
+    "db:dump": "./bin/database-dump",
     "db:production:load-data": "ts-node -r tsconfig-paths/register src/database/environments/production/load-dump",
     "scripts:create-and-invite-users": "run-s build scripts:create-users scripts:invite-users",
     "scripts:create-users": "node ./scripts/createUsers.js",
