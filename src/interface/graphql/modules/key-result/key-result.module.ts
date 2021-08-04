@@ -17,6 +17,8 @@ import { KeyResultKeyResultCommentsConnectionGraphQLResolver } from './connectio
 import { KeyResultTimelineConnectionGraphQLResolver } from './connections/key-result-timeline/key-result-key-result-timeline.resolver'
 import { KeyResultsConnectionGraphQLResolver } from './connections/key-results/key-results.resolver'
 import { KeyResultGraphQLResolver } from './key-result.resolver'
+import { KeyResultKeyResultCheckMarksConnectionGraphQLResolver } from './connections/key-result-key-result-check-mark/key-result-key-result-check-marks.resolver'
+import { KeyResultCheckMarkAccessControl } from './access-control/key-result-check-mark.access-control'
 
 @Module({
   imports: [CoreModule, GraphQLConfigModule, AmplitudeModule, NotificationModule],
@@ -30,10 +32,12 @@ import { KeyResultGraphQLResolver } from './key-result.resolver'
     KeyResultKeyResultCommentsConnectionGraphQLResolver,
     KeyResultKeyResultCheckInsConnectionGraphQLResolver,
     KeyResultTimelineConnectionGraphQLResolver,
+    KeyResultKeyResultCheckMarksConnectionGraphQLResolver,
     KeyResultAccessControl,
     KeyResultCheckInAccessControl,
     KeyResultCommentAccessControl,
+    KeyResultCheckMarkAccessControl,
   ],
   exports: [KeyResultAccessControl],
 })
-export class KeyResultGraphQLModule {}
+export class KeyResultGraphQLModule { }
