@@ -19,12 +19,14 @@ import { KeyResultsConnectionGraphQLResolver } from './connections/key-results/k
 import { KeyResultGraphQLResolver } from './key-result.resolver'
 import { KeyResultKeyResultCheckMarksConnectionGraphQLResolver } from './connections/key-result-key-result-check-mark/key-result-key-result-check-marks.resolver'
 import { KeyResultCheckMarkAccessControl } from './access-control/key-result-check-mark.access-control'
+import { KeyResultCheckMarkGraphQLResolver } from './check-mark/key-result-check-mark.resolver'
 
 @Module({
   imports: [CoreModule, GraphQLConfigModule, AmplitudeModule, NotificationModule],
   providers: [
     KeyResultGraphQLResolver,
     KeyResultCommentGraphQLResolver,
+    KeyResultCheckMarkGraphQLResolver,
     KeyResultCheckInGraphQLResolver,
     KeyResultCheckInsConnectionGraphQLResolver,
     KeyResultsConnectionGraphQLResolver,
