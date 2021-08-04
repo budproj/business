@@ -56,6 +56,7 @@ import { GetCheckListForKeyResultCommand } from './get-check-list-for-key-result
 import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
 import { UpdateCheckMarkDescriptionCommand } from './update-check-mark-description.command'
 import { CreateCheckMarkCommand } from './create-check-mark.command'
+import { DeleteCheckMarkCommand } from './delete-check-mark.command'
 
 type CommandConstructor = new (...commandArguments: any[]) => Command<unknown>
 export type CommandType =
@@ -112,6 +113,7 @@ export type CommandType =
   | 'toggle-check-mark'
   | 'update-check-mark-description'
   | 'create-check-mark'
+  | 'delete-check-mark'
 
 @Injectable()
 export class CommandFactory {
@@ -169,6 +171,7 @@ export class CommandFactory {
     'toggle-check-mark': ToggleCheckMarkCommand,
     'update-check-mark-description': UpdateCheckMarkDescriptionCommand,
     'create-check-mark': CreateCheckMarkCommand,
+    'delete-check-mark': DeleteCheckMarkCommand,
   }
 
   constructor(private readonly core: CoreProvider) { }
