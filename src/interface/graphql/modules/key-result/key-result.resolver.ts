@@ -44,11 +44,16 @@ import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-r
 import { KeyResultTimelineGraphQLConnection } from './connections/key-result-timeline/key-result-key-result-timeline.connection'
 import { KeyResultGraphQLNode } from './key-result.node'
 import { KeyResultUpdateRequest } from './requests/key-result-update.request'
+import { KeyResultKeyResultCheckMarkGraphQLConnection } from './connections/key-result-key-result-check-mark/key-result-key-result-check-marks.connection'
+import { KeyResultCheckMarkFiltersRequest } from './check-mark/requests/key-result-check-mark-filters.request'
+import { KeyResultCheckMark } from '@core/modules/key-result/check-mark/key-result-check-mark.orm-entity'
+import { KeyResultCheckMarkInterface } from '@core/modules/key-result/check-mark/key-result-check-mark.interface'
+import { KeyResultCheckMarkGraphQLNode } from './check-mark/key-result-check-mark.node'
 
 @GuardedResolver(KeyResultGraphQLNode)
 export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
-  KeyResult,
-  KeyResultInterface
+KeyResult,
+KeyResultInterface
 > {
   private readonly logger = new Logger(KeyResultGraphQLResolver.name)
 
@@ -205,6 +210,27 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     const queryResult = await this.core.keyResult.getComments(keyResult, filters, queryOptions)
 
     return this.relay.marshalResponse<KeyResultCommentInterface>(queryResult, connection, keyResult)
+  }
+
+  @ResolveField('checkList', () => KeyResultKeyResultCheckMarkGraphQLConnection)
+  protected async getKeyResultChecklistForKeyResult(
+    @Args() request: KeyResultCheckMarkFiltersRequest,
+    @Parent() keyResult: KeyResult,
+  ) {
+    this.logger.log({
+      keyResult,
+      request,
+      message: 'Fetching key-result checklist',
+    })
+
+    const [filters, _, connection] = this.relay.unmarshalRequest<
+      KeyResultCheckMarkFiltersRequest,
+      KeyResultCheckMark
+    >(request)
+
+    const queryResult = await this.corePorts.dispatchCommand<KeyResultCheckMark[]>('get-check-list-for-key-result', keyResult.id)
+
+    return this.relay.marshalResponse<KeyResultCheckMarkInterface>(queryResult, connection, keyResult)
   }
 
   @ResolveField('keyResultCheckIns', () => KeyResultKeyResultCheckInsGraphQLConnection)

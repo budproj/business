@@ -16,6 +16,7 @@ import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-r
 import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-result-key-result-comments/key-result-key-result-comments.connection'
 import { KeyResultTimelineGraphQLConnection } from './connections/key-result-timeline/key-result-key-result-timeline.connection'
 import { KeyResultFormatGraphQLEnum } from './enums/key-result-format.enum'
+import { KeyResultKeyResultCheckMarkGraphQLConnection } from './connections/key-result-key-result-check-mark/key-result-key-result-check-marks.connection'
 
 @ObjectType('KeyResult', {
   implements: () => [NodeRelayGraphQLInterface, GuardedNodeGraphQLInterface],
@@ -115,6 +116,11 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
       'The timeline for this key result. It is ordered by creation date and is composed by both check-ins and comments',
   })
   public timeline?: KeyResultTimelineGraphQLConnection
+
+  @Field(() => KeyResultKeyResultCheckMarkGraphQLConnection, {
+    description: 'The check-marks for this key result',
+  })
+  public checkList: KeyResultKeyResultCheckMarkGraphQLConnection
 
   public readonly id!: string
   public readonly createdAt!: Date
