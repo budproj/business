@@ -55,6 +55,10 @@ export class GodmodeProvider implements GodmodePropertiesInterface {
       'key-result-check-in:read:any',
       'key-result-check-in:update:any',
       'key-result-check-in:delete:any',
+      'key-result-check-mark:create:any',
+      'key-result-check-mark:read:any',
+      'key-result-check-mark:update:any',
+      'key-result-check-mark:delete:any',
     ]
   }
 
