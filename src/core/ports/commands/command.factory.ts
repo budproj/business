@@ -51,27 +51,28 @@ import { GetKeyResultCommand } from './get-key-result.command'
 import { GetTeamCompanyCommand } from './get-team-company.command'
 import { GetTeamOwnerCommand } from './get-team-owner.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
+import { GetKeyResultCheckMarkCommand } from './get-key-result-check-mark.command'
 
 type CommandConstructor = new (...commandArguments: any[]) => Command<unknown>
 export type CommandType =
   | 'create-check-in'
-  | 'create-key-result'
   | 'create-key-result-comment'
+  | 'create-key-result'
   | 'create-objective'
   | 'delete-key-result'
   | 'delete-objective'
-  | 'get-cycle'
   | 'get-cycle-delta'
   | 'get-cycle-status'
-  | 'get-key-result'
-  | 'get-key-result-check-in'
+  | 'get-cycle'
   | 'get-key-result-check-in-delta'
   | 'get-key-result-check-in-list'
   | 'get-key-result-check-in-status'
   | 'get-key-result-check-in-team'
   | 'get-key-result-check-in-window-for-check-in'
-  | 'get-key-result-comment'
+  | 'get-key-result-check-in'
+  | 'get-key-result-check-mark'
   | 'get-key-result-comment-team'
+  | 'get-key-result-comment'
   | 'get-key-result-company'
   | 'get-key-result-confidence-color'
   | 'get-key-result-cycle'
@@ -79,14 +80,14 @@ export type CommandType =
   | 'get-key-result-from-check-in'
   | 'get-key-result-owner'
   | 'get-key-result-status'
-  | 'get-key-result-team'
   | 'get-key-result-team-tree'
-  | 'get-objective'
+  | 'get-key-result-team'
+  | 'get-key-result'
   | 'get-objective-delta'
   | 'get-objective-status'
   | 'get-objective-support-teams'
   | 'get-objective-team-tree'
-  | 'get-team'
+  | 'get-objective'
   | 'get-team-company'
   | 'get-team-delta'
   | 'get-team-objectives'
@@ -96,10 +97,11 @@ export type CommandType =
   | 'get-team-support-objectives'
   | 'get-team-tactical-cycle'
   | 'get-team-tree'
-  | 'get-user'
+  | 'get-team'
   | 'get-user-companies'
   | 'get-user-full-name'
   | 'get-user-team-tree'
+  | 'get-user'
   | 'update-key-result'
   | 'update-objective'
 
@@ -107,23 +109,23 @@ export type CommandType =
 export class CommandFactory {
   private readonly commands: Record<CommandType, CommandConstructor> = {
     'create-check-in': CreateKeyResultCheckInCommand,
-    'create-key-result': CreateKeyResultCommand,
     'create-key-result-comment': CreateKeyResultCommentCommand,
+    'create-key-result': CreateKeyResultCommand,
     'create-objective': CreateObjectiveCommand,
     'delete-key-result': DeleteKeyResultCommand,
     'delete-objective': DeleteObjectiveCommand,
-    'get-cycle': GetCycleCommand,
     'get-cycle-delta': GetCycleDeltaCommand,
     'get-cycle-status': GetCycleStatusCommand,
-    'get-key-result': GetKeyResultCommand,
-    'get-key-result-check-in': GetKeyResultCheckInCommand,
+    'get-cycle': GetCycleCommand,
     'get-key-result-check-in-delta': GetKeyResultCheckInDeltaCommand,
     'get-key-result-check-in-list': GetKeyResultCheckInListCommand,
     'get-key-result-check-in-status': GetKeyResultCheckInStatusCommand,
     'get-key-result-check-in-team': GetKeyResultCheckInTeamCommand,
     'get-key-result-check-in-window-for-check-in': GetKeyResultCheckInWindowForCheckInCommand,
-    'get-key-result-comment': GetKeyResultCommentCommand,
+    'get-key-result-check-in': GetKeyResultCheckInCommand,
+    'get-key-result-check-mark': GetKeyResultCheckMarkCommand,
     'get-key-result-comment-team': GetKeyResultCommentTeamCommand,
+    'get-key-result-comment': GetKeyResultCommentCommand,
     'get-key-result-company': GetKeyResultCompanyCommand,
     'get-key-result-confidence-color': GetKeyResultConfidenceColorCommand,
     'get-key-result-cycle': GetKeyResultCycleCommand,
@@ -131,14 +133,14 @@ export class CommandFactory {
     'get-key-result-from-check-in': GetKeyResultFromCheckInCommand,
     'get-key-result-owner': GetKeyResultOwnerCommand,
     'get-key-result-status': GetKeyResultStatusCommand,
-    'get-key-result-team': GetKeyResultTeamCommand,
     'get-key-result-team-tree': GetKeyResultTeamTreeCommand,
-    'get-objective': GetObjectiveCommand,
+    'get-key-result-team': GetKeyResultTeamCommand,
+    'get-key-result': GetKeyResultCommand,
     'get-objective-delta': GetObjectiveDeltaCommand,
     'get-objective-status': GetObjectiveStatusCommand,
     'get-objective-support-teams': GetObjectiveSupportTeamsCommand,
     'get-objective-team-tree': GetObjectiveTeamTreeCommand,
-    'get-team': GetTeamCommand,
+    'get-objective': GetObjectiveCommand,
     'get-team-company': GetTeamCompanyCommand,
     'get-team-delta': GetTeamDeltaCommand,
     'get-team-objectives': GetTeamObjectivesCommand,
@@ -148,15 +150,16 @@ export class CommandFactory {
     'get-team-support-objectives': GetTeamSupportObjectivesCommand,
     'get-team-tactical-cycle': GetTeamTacticalCycleCommand,
     'get-team-tree': GetTeamTreeCommand,
-    'get-user': GetUserCommand,
+    'get-team': GetTeamCommand,
     'get-user-companies': GetUserCompaniesCommand,
     'get-user-full-name': GetUserFullNameCommand,
     'get-user-team-tree': GetUserTeamTreeCommand,
+    'get-user': GetUserCommand,
     'update-key-result': UpdateKeyResultCommand,
     'update-objective': UpdateObjectiveCommand,
   }
 
-  constructor(private readonly core: CoreProvider) {}
+  constructor(private readonly core: CoreProvider) { }
 
   public buildCommand<R>(type: CommandType): Command<R> {
     const Command = this.commands[type]
