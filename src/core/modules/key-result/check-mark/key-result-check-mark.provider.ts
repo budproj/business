@@ -7,6 +7,7 @@ import { CreationQuery } from '@core/types/creation-query.type'
 import { KeyResultCheckMarkInterface, CheckMarkStates } from './key-result-check-mark.interface'
 import { KeyResultCheckMark } from './key-result-check-mark.orm-entity'
 import { KeyResultCheckMarkRepository } from './key-result-check-mark.repository'
+import { Sorting } from '@core/enums/sorting'
 
 @Injectable()
 export class KeyResultCheckMarkProvider extends CoreEntityProvider<KeyResultCheckMark, KeyResultCheckMarkInterface> {
@@ -35,7 +36,8 @@ export class KeyResultCheckMarkProvider extends CoreEntityProvider<KeyResultChec
   }
 
   public async getFromKeyResult(keyResultId: string): Promise<KeyResultCheckMark[]> {
-    return this.getMany({ keyResultId })
+    const options = { orderBy: { createdAt: Sorting.DESC } }
+    return this.getMany({ keyResultId }, undefined, options)
   }
 
   // TODO: tests
