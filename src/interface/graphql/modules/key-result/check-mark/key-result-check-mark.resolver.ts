@@ -13,6 +13,7 @@ import { Args } from "@nestjs/graphql";
 import { KeyResultCheckMarkAccessControl } from "../access-control/key-result-check-mark.access-control";
 import { KeyResultCheckMarkGraphQLNode } from "./key-result-check-mark.node";
 import { KeyResultCheckMarkCreateRequest } from "./requests/key-result-check-mark-create.request";
+import { KeyResultCheckMarkToggleRequest } from "./requests/key-result-check-mark-toggle.request";
 import { Status } from '@core/interfaces/status.interface'
 import { UserInputError } from "apollo-server-fastify";
 
@@ -64,5 +65,28 @@ KeyResultCheckMarkInterface
     if (!createdCheckMark) throw new UserInputError('We were not able to create your comment')
 
     return createdCheckMark
+  }
+
+  @GuardedMutation(KeyResultCheckMarkGraphQLNode, 'key-result-check-mark:update', {
+    name: 'toggleCheckMark',
+  })
+  protected async toggleCheckMark(
+    @Args() request: KeyResultCheckMarkToggleRequest,
+    @RequestState() state: GraphQLRequestState,
+  ) {
+    this.logger.log({
+      state,
+      request,
+      message: 'Received toggle check mark request',
+    })
+
+    const toggledCheckMark = await this.corePorts.dispatchCommand<KeyResultCheckMark>(
+      'toggle-check-mark',
+      request.data,
+    )
+
+    if (!toggledCheckMark) throw new UserInputError('We were not able to toggle this check mark')
+
+    return toggledCheckMark
   }
 }

@@ -5,12 +5,13 @@ import { Command } from './base.command'
 
 export class ToggleCheckMarkCommand extends Command<KeyResultCheckMark> {
   public async execute(checkMark: Partial<KeyResultCheckMark>): Promise<KeyResultCheckMark> {
-    const { checkCheckMark, uncheckCheckMark } = this.core.keyResult.keyResultCheckMarkProvider
+    const previousCheckMark = await this.core.keyResult.keyResultCheckMarkProvider.getFromIndexes({ id: checkMark.id })
+
     const possibleActions = {
-      [CheckMarkStates.UNCHECKED]: checkCheckMark,
-      [CheckMarkStates.CHECKED]: uncheckCheckMark,
+      [CheckMarkStates.UNCHECKED]: (id) => this.core.keyResult.keyResultCheckMarkProvider.checkCheckMark(id),
+      [CheckMarkStates.CHECKED]: (id) => this.core.keyResult.keyResultCheckMarkProvider.uncheckCheckMark(id),
     }
-    const action = possibleActions[checkMark.state]
+    const action = possibleActions[previousCheckMark.state]
 
     if (action) { return action(checkMark.id) }
   }
