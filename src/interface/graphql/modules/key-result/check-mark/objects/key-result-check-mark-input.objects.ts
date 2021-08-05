@@ -12,14 +12,14 @@ export class KeyResultCheckMarkInputObject {
 
 @InputType('KeyResultCheckMarkToggleInput', { description: 'The required data to toggle a check mark' })
 export class KeyResultCheckMarkToggleObject {
-  @Field(() => String, { description: 'The ID of the check mark' })
+  @Field(() => ID, { description: 'The ID of the check mark' })
   id: string
 }
 
 
 @InputType('KeyResultCheckMarkUpdateDescriptionInput', { description: 'The required data to update a check mark description' })
 export class KeyResultCheckMarkUpdateDescriptionInputObject {
-  @Field(() => String, { description: 'The ID of the check mark' })
+  @Field(() => ID, { description: 'The ID of the check mark' })
   id: string
 
   @Field(() => String, { description: 'The new description of the check mark' })
@@ -28,6 +28,6 @@ export class KeyResultCheckMarkUpdateDescriptionInputObject {
 
 @InputType('KeyResultCheckMarkDeleteInput', { description: 'The required data to delete a check mark' })
 export class KeyResultCheckMarkDeleteInputObject {
-  @Field(() => String, { description: 'The ID of the check mark' })
+  @Field(() => ID, { description: 'The ID of the check mark' })
   id: string
 }
