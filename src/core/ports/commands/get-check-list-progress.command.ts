@@ -18,7 +18,7 @@ export class GetCheckListProgressCommand extends Command<GetCheckListProgressCom
 
     const numberOfChecked = checkList.filter(stateFilter(CheckMarkStates.CHECKED)).length
     const total = checkList.length
-    const progress = Math.round(numberOfChecked / total * 100)
+    const progress = Math.round(numberOfChecked / total * 100) || 0
 
     return { total, numberOfChecked, progress }
   }
