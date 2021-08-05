@@ -36,7 +36,7 @@ export class KeyResultCheckMarkProvider extends CoreEntityProvider<KeyResultChec
   }
 
   public async getFromKeyResult(keyResultId: string): Promise<KeyResultCheckMark[]> {
-    const options = { orderBy: { createdAt: Sorting.DESC } }
+    const options = { orderBy: { createdAt: Sorting.ASC } }
     return this.getMany({ keyResultId }, undefined, options)
   }
 
