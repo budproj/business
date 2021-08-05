@@ -17,6 +17,8 @@ import { KeyResultCheckMarkToggleRequest } from "./requests/key-result-check-mar
 import { Status } from '@core/interfaces/status.interface'
 import { UserInputError } from "apollo-server-fastify";
 import { KeyResultCheckMarkUpdateDescriptionRequest } from "./requests/key-result-check-mark-update-description.request";
+import { KeyResultCheckMarkDeleteRequest } from "./requests/key-result-check-mark-delete.request";
+import { DeleteResultGraphQLObject } from "@interface/graphql/objects/delete-result.object";
 
 @GuardedResolver(KeyResultCheckMarkGraphQLNode)
 export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolver<
@@ -112,5 +114,28 @@ KeyResultCheckMarkInterface
     if (!updatedCheckMark) throw new UserInputError('We were not able to update this check mark description')
 
     return updatedCheckMark
+  }
+
+  @GuardedMutation(DeleteResultGraphQLObject, 'key-result-check-mark:delete', {
+    name: 'deleteCheckMark',
+  })
+  protected async deleteCheckMark(
+    @Args() request: KeyResultCheckMarkDeleteRequest,
+    @RequestState() state: GraphQLRequestState,
+  ) {
+    this.logger.log({
+      state,
+      request,
+      message: 'Received delete check mark request',
+    })
+
+    const deletedResponse = await this.corePorts.dispatchCommand<KeyResultCheckMark>(
+      'delete-check-mark',
+      request.data,
+    )
+
+    if (!deletedResponse) throw new UserInputError('We were not able to delete this check mark')
+
+    return deletedResponse
   }
 }
