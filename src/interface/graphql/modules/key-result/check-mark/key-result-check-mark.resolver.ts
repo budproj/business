@@ -16,6 +16,7 @@ import { KeyResultCheckMarkCreateRequest } from "./requests/key-result-check-mar
 import { KeyResultCheckMarkToggleRequest } from "./requests/key-result-check-mark-toggle.request";
 import { Status } from '@core/interfaces/status.interface'
 import { UserInputError } from "apollo-server-fastify";
+import { KeyResultCheckMarkUpdateDescriptionRequest } from "./requests/key-result-check-mark-update-description.request";
 
 @GuardedResolver(KeyResultCheckMarkGraphQLNode)
 export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolver<
@@ -88,5 +89,28 @@ KeyResultCheckMarkInterface
     if (!toggledCheckMark) throw new UserInputError('We were not able to toggle this check mark')
 
     return toggledCheckMark
+  }
+
+  @GuardedMutation(KeyResultCheckMarkGraphQLNode, 'key-result-check-mark:update', {
+    name: 'updateCheckMarkDescription',
+  })
+  protected async updateCheckMarkDescription(
+    @Args() request: KeyResultCheckMarkUpdateDescriptionRequest,
+    @RequestState() state: GraphQLRequestState,
+  ) {
+    this.logger.log({
+      state,
+      request,
+      message: 'Received update check mark description request',
+    })
+
+    const updatedCheckMark = await this.corePorts.dispatchCommand<KeyResultCheckMark>(
+      'update-check-mark-description',
+      request.data,
+    )
+
+    if (!updatedCheckMark) throw new UserInputError('We were not able to update this check mark description')
+
+    return updatedCheckMark
   }
 }
