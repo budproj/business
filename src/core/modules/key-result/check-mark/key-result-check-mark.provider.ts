@@ -2,20 +2,25 @@ import { Injectable } from '@nestjs/common/decorators'
 import { DeleteResult } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
+import { Sorting } from '@core/enums/sorting'
 import { CreationQuery } from '@core/types/creation-query.type'
 
 import { KeyResultCheckMarkInterface, CheckMarkStates } from './key-result-check-mark.interface'
 import { KeyResultCheckMark } from './key-result-check-mark.orm-entity'
 import { KeyResultCheckMarkRepository } from './key-result-check-mark.repository'
-import { Sorting } from '@core/enums/sorting'
 
 @Injectable()
-export class KeyResultCheckMarkProvider extends CoreEntityProvider<KeyResultCheckMark, KeyResultCheckMarkInterface> {
+export class KeyResultCheckMarkProvider extends CoreEntityProvider<
+  KeyResultCheckMark,
+  KeyResultCheckMarkInterface
+> {
   constructor(protected readonly repository: KeyResultCheckMarkRepository) {
     super(KeyResultCheckMarkProvider.name, repository)
   }
 
-  public async createCheckMark(checkMark: Partial<KeyResultCheckMarkInterface>): Promise<KeyResultCheckMark[]> {
+  public async createCheckMark(
+    checkMark: Partial<KeyResultCheckMarkInterface>,
+  ): Promise<KeyResultCheckMark[]> {
     return this.create(checkMark)
   }
 
@@ -41,11 +46,15 @@ export class KeyResultCheckMarkProvider extends CoreEntityProvider<KeyResultChec
   }
 
   // TODO: tests
-  public async getFromIndexes(indexes: Partial<KeyResultCheckMarkInterface>): Promise<KeyResultCheckMark> {
+  public async getFromIndexes(
+    indexes: Partial<KeyResultCheckMarkInterface>,
+  ): Promise<KeyResultCheckMark> {
     return this.getOne(indexes)
   }
 
-  protected async protectCreationQuery(query: CreationQuery<KeyResultCheckMark>): Promise<KeyResultCheckMark[]> {
+  protected async protectCreationQuery(
+    query: CreationQuery<KeyResultCheckMark>,
+  ): Promise<KeyResultCheckMark[]> {
     return query()
   }
 }

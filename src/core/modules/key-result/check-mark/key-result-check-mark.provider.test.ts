@@ -164,7 +164,6 @@ describe('check-mark - provider', () => {
       await provider().createCheckMark(checkMark)
       const result = await provider().getFromIndexes(indexes)
 
-
       // Act
       expect(result.state).toBe(CheckMarkStates.UNCHECKED)
       expect(result.userId).toBe(mockUser.id)

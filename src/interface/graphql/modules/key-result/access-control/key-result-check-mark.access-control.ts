@@ -3,11 +3,11 @@ import { Injectable } from '@nestjs/common'
 import { AccessControlScopes } from '@adapters/authorization/interfaces/access-control-scopes.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
+import { KeyResultCheckMark } from '@core/modules/key-result/check-mark/key-result-check-mark.orm-entity'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { KeyResultBaseAccessControl } from '@interface/graphql/modules/key-result/access-control/base.access-control'
-import { KeyResultCheckMark } from '@core/modules/key-result/check-mark/key-result-check-mark.orm-entity'
 
 type RelatedEntities = {
   keyResultCheckMark: KeyResultCheckMark
@@ -34,7 +34,9 @@ export class KeyResultCheckMarkAccessControl extends KeyResultBaseAccessControl 
     user: UserWithContext,
     keyResultCheckMarkID: string,
   ): Promise<AccessControlScopes> {
-    const { keyResultCheckMark, keyResult, teams } = await this.getRelatedEntities(keyResultCheckMarkID)
+    const { keyResultCheckMark, keyResult, teams } = await this.getRelatedEntities(
+      keyResultCheckMarkID,
+    )
 
     const isOwner = keyResultCheckMark.userId === user.id
     const isTeamLeader = await this.isTeamLeader(teams, user)

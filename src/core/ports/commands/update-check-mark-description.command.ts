@@ -4,6 +4,9 @@ import { Command } from './base.command'
 
 export class UpdateCheckMarkDescriptionCommand extends Command<KeyResultCheckMark> {
   public async execute(checkMark: Partial<KeyResultCheckMark>): Promise<KeyResultCheckMark> {
-    return this.core.keyResult.keyResultCheckMarkProvider.changeDescription(checkMark.id, checkMark.description)
+    return this.core.keyResult.keyResultCheckMarkProvider.changeDescription(
+      checkMark.id,
+      checkMark.description,
+    )
   }
 }

@@ -1,9 +1,11 @@
-import { GuardedNodeGraphQLInterface } from "@interface/graphql/adapters/authorization/interfaces/guarded-node.interface"
-import { NodePolicyGraphQLObject } from "@interface/graphql/adapters/authorization/objects/node-policy.object"
-import { NodeRelayGraphQLInterface } from "@interface/graphql/adapters/relay/interfaces/node.interface"
-import { Field, ID, ObjectType } from "@nestjs/graphql"
-import { UserGraphQLNode } from "../../user/user.node"
-import { KeyResultGraphQLNode } from "../key-result.node"
+import { Field, ID, ObjectType } from '@nestjs/graphql'
+
+import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
+import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
+import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
+
+import { UserGraphQLNode } from '../../user/user.node'
+import { KeyResultGraphQLNode } from '../key-result.node'
 
 @ObjectType('KeyResultCheckMark', {
   implements: () => [NodeRelayGraphQLInterface, GuardedNodeGraphQLInterface],
@@ -21,13 +23,14 @@ export class KeyResultCheckMarkGraphQLNode implements GuardedNodeGraphQLInterfac
   @Field(() => Date, { complexity: 0, description: 'last time the check mark was updated' })
   public readonly updatedAt!: Date
 
-
-  @Field(() => ID, { complexity: 0, description: 'The ID of the key result this check mark belongs to' })
+  @Field(() => ID, {
+    complexity: 0,
+    description: 'The ID of the key result this check mark belongs to',
+  })
   public readonly keyResultId!: string
 
   @Field(() => ID, { complexity: 0, description: 'The ID of the user this check mark belongs to' })
   public readonly userId!: string
-
 
   // **********************************************************************************************
   // RESOLVED FIELDS

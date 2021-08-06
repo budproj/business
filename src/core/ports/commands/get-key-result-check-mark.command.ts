@@ -1,5 +1,3 @@
-import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
-import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResultCheckMarkInterface } from '@core/modules/key-result/check-mark/key-result-check-mark.interface'
 import { KeyResultCheckMark } from '@core/modules/key-result/check-mark/key-result-check-mark.orm-entity'
 

@@ -1,8 +1,9 @@
 import { Field, ID, InputType } from '@nestjs/graphql'
 
-@InputType('KeyResultCheckMarkInput', { description: 'The required data to create a new check mark' })
+@InputType('KeyResultCheckMarkInput', {
+  description: 'The required data to create a new check mark',
+})
 export class KeyResultCheckMarkInputObject {
-
   @Field(() => String, { description: 'The description of the check mark' })
   description: string
 
@@ -10,16 +11,18 @@ export class KeyResultCheckMarkInputObject {
   keyResultId: string
 }
 
-@InputType('KeyResultCheckMarkToggleInput', { description: 'The required data to toggle a check mark' })
+@InputType('KeyResultCheckMarkToggleInput', {
+  description: 'The required data to toggle a check mark',
+})
 export class KeyResultCheckMarkToggleObject {
   @Field(() => ID, { description: 'The ID of the check mark' })
   id: string
 }
 
-
-@InputType('KeyResultCheckMarkUpdateDescriptionInput', { description: 'The required data to update a check mark description' })
+@InputType('KeyResultCheckMarkUpdateDescriptionInput', {
+  description: 'The required data to update a check mark description',
+})
 export class KeyResultCheckMarkUpdateDescriptionInputObject {
-
   @Field(() => String, { description: 'The new description of the check mark' })
   description: string
 }

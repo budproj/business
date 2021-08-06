@@ -14,6 +14,7 @@ import { CreationQuery } from '@core/types/creation-query.type'
 import { KeyResultCheckInInterface } from './check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from './check-in/key-result-check-in.orm-entity'
 import { KeyResultCheckInProvider } from './check-in/key-result-check-in.provider'
+import { KeyResultCheckMarkProvider } from './check-mark/key-result-check-mark.provider'
 import { KeyResultCommentInterface } from './comment/key-result-comment.interface'
 import { KeyResultComment } from './comment/key-result-comment.orm-entity'
 import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
@@ -22,7 +23,6 @@ import { KeyResult } from './key-result.orm-entity'
 import { KeyResultRelationFilterProperties, KeyResultRepository } from './key-result.repository'
 import { KeyResultTimelineProvider } from './timeline.provider'
 import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
-import { KeyResultCheckMarkProvider } from './check-mark/key-result-check-mark.provider'
 
 @Injectable()
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {

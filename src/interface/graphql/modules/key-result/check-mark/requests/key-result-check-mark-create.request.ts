@@ -1,6 +1,6 @@
 import { ArgsType, Field } from '@nestjs/graphql'
-import { KeyResultCheckMarkInputObject } from '../objects/key-result-check-mark-input.objects'
 
+import { KeyResultCheckMarkInputObject } from '../objects/key-result-check-mark-input.objects'
 
 @ArgsType()
 export class KeyResultCheckMarkCreateRequest {

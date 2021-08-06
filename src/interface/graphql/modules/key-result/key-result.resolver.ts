@@ -11,6 +11,8 @@ import { Delta } from '@core/interfaces/delta.interface'
 import { Status } from '@core/interfaces/status.interface'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
+import { KeyResultCheckMarkInterface } from '@core/modules/key-result/check-mark/key-result-check-mark.interface'
+import { KeyResultCheckMark } from '@core/modules/key-result/check-mark/key-result-check-mark.orm-entity'
 import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
 import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
@@ -38,22 +40,19 @@ import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.req
 import { StatusRequest } from '@interface/graphql/requests/status.request'
 
 import { KeyResultCheckInFiltersRequest } from './check-in/requests/key-result-check-in-filters.request'
+import { KeyResultCheckMarkFiltersRequest } from './check-mark/requests/key-result-check-mark-filters.request'
 import { KeyResultCommentFiltersRequest } from './comment/requests/key-result-comment-filters.request'
 import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.connection'
+import { KeyResultKeyResultCheckMarkGraphQLConnection } from './connections/key-result-key-result-check-mark/key-result-key-result-check-marks.connection'
 import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-result-key-result-comments/key-result-key-result-comments.connection'
 import { KeyResultTimelineGraphQLConnection } from './connections/key-result-timeline/key-result-key-result-timeline.connection'
 import { KeyResultGraphQLNode } from './key-result.node'
 import { KeyResultUpdateRequest } from './requests/key-result-update.request'
-import { KeyResultKeyResultCheckMarkGraphQLConnection } from './connections/key-result-key-result-check-mark/key-result-key-result-check-marks.connection'
-import { KeyResultCheckMarkFiltersRequest } from './check-mark/requests/key-result-check-mark-filters.request'
-import { KeyResultCheckMark } from '@core/modules/key-result/check-mark/key-result-check-mark.orm-entity'
-import { KeyResultCheckMarkInterface } from '@core/modules/key-result/check-mark/key-result-check-mark.interface'
-import { KeyResultCheckMarkGraphQLNode } from './check-mark/key-result-check-mark.node'
 
 @GuardedResolver(KeyResultGraphQLNode)
 export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
-KeyResult,
-KeyResultInterface
+  KeyResult,
+  KeyResultInterface
 > {
   private readonly logger = new Logger(KeyResultGraphQLResolver.name)
 
@@ -228,9 +227,16 @@ KeyResultInterface
       KeyResultCheckMark
     >(request)
 
-    const queryResult = await this.corePorts.dispatchCommand<KeyResultCheckMark[]>('get-check-list-for-key-result', keyResult.id)
+    const queryResult = await this.corePorts.dispatchCommand<KeyResultCheckMark[]>(
+      'get-check-list-for-key-result',
+      keyResult.id,
+    )
 
-    return this.relay.marshalResponse<KeyResultCheckMarkInterface>(queryResult, connection, keyResult)
+    return this.relay.marshalResponse<KeyResultCheckMarkInterface>(
+      queryResult,
+      connection,
+      keyResult,
+    )
   }
 
   @ResolveField('keyResultCheckIns', () => KeyResultKeyResultCheckInsGraphQLConnection)
