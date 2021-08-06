@@ -4,6 +4,9 @@ import { KeyResultCheckMarkUpdateDescriptionInputObject } from '../objects/key-r
 
 @ArgsType()
 export class KeyResultCheckMarkUpdateDescriptionRequest {
+  @Field(() => ID)
+  id: string;
+
   @Field(() => KeyResultCheckMarkUpdateDescriptionInputObject)
   public readonly data: KeyResultCheckMarkUpdateDescriptionInputObject;
 }

@@ -1,9 +1,8 @@
-import { ArgsType, Field } from '@nestjs/graphql';
-import { KeyResultCheckMarkDeleteInputObject } from '../objects/key-result-check-mark-input.objects';
+import { ArgsType, Field, ID } from '@nestjs/graphql';
 
 
 @ArgsType()
 export class KeyResultCheckMarkDeleteRequest {
-  @Field(() => KeyResultCheckMarkDeleteInputObject)
-  public readonly data: KeyResultCheckMarkDeleteInputObject;
+  @Field(() => ID)
+  public readonly id: string;
 }

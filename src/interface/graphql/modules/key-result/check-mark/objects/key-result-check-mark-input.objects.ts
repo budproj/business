@@ -19,15 +19,7 @@ export class KeyResultCheckMarkToggleObject {
 
 @InputType('KeyResultCheckMarkUpdateDescriptionInput', { description: 'The required data to update a check mark description' })
 export class KeyResultCheckMarkUpdateDescriptionInputObject {
-  @Field(() => ID, { description: 'The ID of the check mark' })
-  id: string
 
   @Field(() => String, { description: 'The new description of the check mark' })
   description: string
-}
-
-@InputType('KeyResultCheckMarkDeleteInput', { description: 'The required data to delete a check mark' })
-export class KeyResultCheckMarkDeleteInputObject {
-  @Field(() => ID, { description: 'The ID of the check mark' })
-  id: string
 }

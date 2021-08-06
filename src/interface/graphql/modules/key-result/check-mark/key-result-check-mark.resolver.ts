@@ -108,7 +108,7 @@ KeyResultCheckMarkInterface
 
     const updatedCheckMark = await this.corePorts.dispatchCommand<KeyResultCheckMark>(
       'update-check-mark-description',
-      request.data,
+      { id: request.id, ...request.data } ,
     )
 
     if (!updatedCheckMark) throw new UserInputError('We were not able to update this check mark description')
@@ -131,7 +131,7 @@ KeyResultCheckMarkInterface
 
     const deletedResponse = await this.corePorts.dispatchCommand<KeyResultCheckMark>(
       'delete-check-mark',
-      request.data,
+      request,
     )
 
     if (!deletedResponse) throw new UserInputError('We were not able to delete this check mark')
