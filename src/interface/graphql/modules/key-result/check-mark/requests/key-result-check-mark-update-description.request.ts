@@ -1,4 +1,4 @@
-import { ArgsType, Field } from '@nestjs/graphql';
+import { ArgsType, Field, ID } from '@nestjs/graphql';
 import { KeyResultCheckMarkUpdateDescriptionInputObject } from '../objects/key-result-check-mark-input.objects';
 
 
