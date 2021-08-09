@@ -40,6 +40,7 @@ import { TeamObjectivesGraphQLConnection } from './connections/team-objectives/t
 import { TeamTeamsGraphQLConnection } from './connections/team-teams/team-teams.connection'
 import { TeamUsersGraphQLConnection } from './connections/team-users/team-users.connection'
 import { TeamFiltersRequest } from './requests/team-filters.request'
+import { TeamMembersFiltersRequest } from './requests/team-members-filters.request'
 import { TeamGraphQLNode } from './team.node'
 
 @GuardedResolver(TeamGraphQLNode)
@@ -156,7 +157,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
 
   @ResolveField('users', () => TeamUsersGraphQLConnection, { nullable: true })
   protected async getUsersForTeam(
-    @Args() request: UserFiltersRequest,
+    @Args() request: TeamMembersFiltersRequest,
     @Parent() team: TeamGraphQLNode,
   ) {
     this.logger.log({
@@ -165,12 +166,16 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching users for team',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      UserFiltersRequest,
-      User
-    >(request)
+    const [filters, getOptions, connection] = this.relay.unmarshalRequest<UserFiltersRequest, User>(
+      request,
+    )
 
-    const queryResult = await this.core.team.getUsersInTeam(team.id, filters, queryOptions)
+    const queryResult = await this.corePorts.dispatchCommand<User[]>(
+      'get-team-members',
+      team.id,
+      filters,
+      getOptions,
+    )
 
     return this.relay.marshalResponse<UserInterface>(queryResult, connection, team)
   }
@@ -217,15 +222,19 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching objectives for team',
     })
 
-    const [filters, _, connection] = this.relay.unmarshalRequest<
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       ObjectiveFiltersRequest,
       Objective
     >(request)
+
+    const objectiveOrderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
+    const orderAttributes = [['objective', objectiveOrderAttributes]]
 
     const objectives = await this.corePorts.dispatchCommand<Objective[]>(
       'get-team-objectives',
       team.id,
       filters,
+      orderAttributes,
     )
 
     return this.relay.marshalResponse<ObjectiveInterface>(objectives, connection, team)
@@ -247,11 +256,14 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       Objective
     >(request)
 
+    const objectiveOrderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
+    const orderAttributes = [['objective', objectiveOrderAttributes]]
+
     const objectives = await this.corePorts.dispatchCommand<Objective[]>(
       'get-team-support-objectives',
       team.id,
       filters,
-      queryOptions,
+      orderAttributes,
     )
 
     return this.relay.marshalResponse<ObjectiveInterface>(objectives, connection, team)
@@ -273,16 +285,20 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       Objective
     >(request)
 
+    const objectiveOrderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
+    const orderAttributes = [['objective', objectiveOrderAttributes]]
+
     const objectives = await this.corePorts.dispatchCommand<Objective[]>(
       'get-team-objectives',
       team.id,
       filters,
+      orderAttributes,
     )
     const supportObjectives = await this.corePorts.dispatchCommand<Objective[]>(
       'get-team-support-objectives',
       team.id,
       filters,
-      queryOptions,
+      orderAttributes,
     )
 
     const allObjectives = uniqBy([...objectives, ...supportObjectives], 'id')

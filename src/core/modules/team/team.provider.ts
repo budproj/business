@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { filter, flatten, uniqBy } from 'lodash'
-import { Any, FindConditions } from 'typeorm'
+import { FindConditions } from 'typeorm'
 
 import { Scope } from '@adapters/policy/enums/scope.enum'
 import { CoreEntityProvider } from '@core/entity.provider'
@@ -120,24 +120,6 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
       select: selectors,
       where: whereSelector,
     })
-  }
-
-  public async getUsersInTeam(
-    teamID: string,
-    userFilters?: FindConditions<UserInterface>,
-    queryOptions?: GetOptions<UserInterface>,
-  ): Promise<UserInterface[]> {
-    const teamsBelowCurrentNode = await this.getTeamNodesTreeAfterTeam(teamID)
-
-    const teamsUsers = await Promise.all(teamsBelowCurrentNode.map(async (team) => team.users))
-    const userIDs = flatten(teamsUsers).map((user) => user.id)
-
-    const selector = {
-      ...userFilters,
-      id: Any(userIDs),
-    }
-
-    return this.userProvider.getMany(selector, undefined, queryOptions)
   }
 
   public async buildTeamQueryContext(

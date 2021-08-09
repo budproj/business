@@ -10,13 +10,9 @@
       "runtimeExecutable": "npm",
       "port": 9229,
       "timeout": 15000,
-      "runtimeArgs": [
-        "run-script",
-        "start:debug"
-      ],
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
+      "restart": true,
+      "runtimeArgs": ["run-script", "start:debug"],
+      "skipFiles": ["<node_internals>/**"],
       "serverReadyAction": {
         "pattern": "listening on http://localhost:([0-9]+)",
         "uriFormat": "http://localhost:%s/graphql",

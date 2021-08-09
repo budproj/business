@@ -8,9 +8,15 @@ import { CreatedKeyResultCommentNotification } from '@infrastructure/notificatio
 import { ChannelHashmap } from '@infrastructure/notification/types/channel-hashmap.type'
 import { NotificationData } from '@infrastructure/notification/types/notification-data.type'
 
+import { CreatedKeyResultCheckInNotification } from './created-key-result-check-in.notification'
+
 @Injectable()
 export class NotificationFactory {
-  private readonly notificationConstructors = [CreatedKeyResultCommentNotification]
+  private readonly notificationConstructors = [
+    CreatedKeyResultCommentNotification,
+    CreatedKeyResultCheckInNotification,
+  ]
+
   private readonly channels: ChannelHashmap
 
   constructor(private readonly core: CorePortsProvider, emailChannel: EmailNotificationChannel) {

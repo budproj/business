@@ -11,6 +11,7 @@ import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
+import { OrderAttribute } from '@core/types/order-attribute.type'
 
 import { KeyResultInterface } from './interfaces/key-result.interface'
 import { KeyResult } from './key-result.orm-entity'
@@ -30,17 +31,24 @@ export class KeyResultRepository extends CoreEntityRepository<KeyResult> {
   public async findWithRelationFilters(
     filterProperties: KeyResultRelationFilterProperties,
     nullableFilters?: NullableFilters,
+    orderAttributes: OrderAttribute[] = [],
   ): Promise<KeyResult[]> {
     const filters = this.buildFilters(filterProperties, nullableFilters)
 
-    return this.createQueryBuilder()
+    const query = this.createQueryBuilder()
       .where(filters.query, filters.variables)
       .leftJoinAndSelect(`${KeyResult.name}.checkIns`, KeyResultCheckIn.name)
       .leftJoinAndSelect(`${KeyResult.name}.objective`, Objective.name)
       .leftJoinAndSelect(`${KeyResult.name}.team`, Team.name)
       .leftJoinAndSelect(`${Objective.name}.cycle`, Cycle.name)
-      .orderBy(`${KeyResultCheckIn.name}.createdAt`, 'DESC')
-      .getMany()
+
+    orderAttributes.map(([attribute, direction], index) => {
+      return index === 0
+        ? query.orderBy(attribute, direction)
+        : query.addOrderBy(attribute, direction)
+    })
+
+    return query.getMany()
   }
 
   public async findByIdsRanked(ids: Array<KeyResultInterface['id']>, rank: string) {

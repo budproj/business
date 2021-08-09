@@ -53,7 +53,9 @@ import { GetKeyResultFromCheckInCommand } from './get-key-result-from-check-in.c
 import { GetKeyResultOwnerCommand } from './get-key-result-owner.command'
 import { GetKeyResultTeamTreeCommand } from './get-key-result-team-tree.command'
 import { GetKeyResultCommand } from './get-key-result.command'
+import { GetObjectiveKeyResultsCommand } from './get-objective-key-results.command'
 import { GetTeamCompanyCommand } from './get-team-company.command'
+import { GetTeamMembersCommand } from './get-team-members.command'
 import { GetTeamOwnerCommand } from './get-team-owner.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
 import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
@@ -90,12 +92,14 @@ export type CommandType =
   | 'get-key-result-team'
   | 'get-key-result'
   | 'get-objective-delta'
+  | 'get-objective-key-results'
   | 'get-objective-status'
   | 'get-objective-support-teams'
   | 'get-objective-team-tree'
   | 'get-objective'
   | 'get-team-company'
   | 'get-team-delta'
+  | 'get-team-members'
   | 'get-team-objectives'
   | 'get-team-owner'
   | 'get-team-ranked-descendants'
@@ -149,12 +153,14 @@ export class CommandFactory {
     'get-key-result-team': GetKeyResultTeamCommand,
     'get-key-result': GetKeyResultCommand,
     'get-objective-delta': GetObjectiveDeltaCommand,
+    'get-objective-key-results': GetObjectiveKeyResultsCommand,
     'get-objective-status': GetObjectiveStatusCommand,
     'get-objective-support-teams': GetObjectiveSupportTeamsCommand,
     'get-objective-team-tree': GetObjectiveTeamTreeCommand,
     'get-objective': GetObjectiveCommand,
     'get-team-company': GetTeamCompanyCommand,
     'get-team-delta': GetTeamDeltaCommand,
+    'get-team-members': GetTeamMembersCommand,
     'get-team-objectives': GetTeamObjectivesCommand,
     'get-team-owner': GetTeamOwnerCommand,
     'get-team-ranked-descendants': GetTeamRankedDescendantsCommand,

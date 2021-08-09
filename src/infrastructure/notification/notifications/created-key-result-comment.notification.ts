@@ -4,6 +4,8 @@ import {
   CREATED_KEY_RESULT_COMMENT_ACTIVITY_TYPE,
   CreatedKeyResultCommentActivity,
 } from '@adapters/activity/activities/created-key-result-comment.activity'
+import { Cadence } from '@core/modules/cycle/enums/cadence.enum'
+import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CorePortsProvider } from '@core/ports/ports.provider'
@@ -18,6 +20,7 @@ type CreatedKeyResultCommentNotificationData = {
   author: AuthorNotificationData
   keyResult: KeyResultNotificationData
   comment: CommentNotificationData
+  cycle: CycleNotificationData
 }
 
 type OwnerNotificationData = {
@@ -40,8 +43,14 @@ type CommentNotificationData = {
   content: string
 }
 
+type CycleNotificationData = {
+  isQuarterlyCadence: boolean
+  period: string
+}
+
 type RelatedData = {
   keyResult: KeyResultInterface
+  cycle: CycleInterface
   owner: UserInterface
 }
 
@@ -74,11 +83,12 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
   }
 
   public async prepare(): Promise<void> {
-    const { owner, keyResult } = await this.getRelatedData(this.activity.data.keyResultId)
+    const { owner, keyResult, cycle } = await this.getRelatedData(this.activity.data.keyResultId)
 
     const data = {
       owner: CreatedKeyResultCommentNotification.getOwnerData(owner),
       keyResult: await this.getKeyResultData(keyResult),
+      cycle: this.getCycleData(cycle),
       author: await this.getAuthorData(),
       comment: this.getCommentData(),
     }
@@ -115,6 +125,8 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       keyResultTitle: data.keyResult.title,
       keyResultConfidenceTagColor: data.keyResult.confidenceColor,
       keyResultComment: data.comment.content,
+      isQuarterlyCadence: data.cycle.isQuarterlyCadence,
+      cyclePeriod: data.cycle.period,
     }
 
     await this.channels.email.dispatch(emailData, emailMetadata)
@@ -124,10 +136,12 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     const keyResult = await this.core.dispatchCommand<KeyResultInterface>('get-key-result', {
       id: keyResultID,
     })
+    const cycle = await this.getCycle(keyResult)
     const owner = await this.core.dispatchCommand<UserInterface>('get-key-result-owner', keyResult)
 
     return {
       keyResult,
+      cycle,
       owner,
     }
   }
@@ -163,6 +177,17 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       confidenceColor,
       title: keyResult.title,
     }
+  }
+
+  private getCycleData(cycle: CycleInterface): CycleNotificationData {
+    return {
+      isQuarterlyCadence: cycle.cadence === Cadence.QUARTERLY,
+      period: cycle.period,
+    }
+  }
+
+  private async getCycle(keyResult: KeyResultInterface): Promise<CycleInterface> {
+    return this.core.dispatchCommand<CycleInterface>('get-key-result-cycle', keyResult)
   }
 
   private isOwnerAuthor(): boolean {

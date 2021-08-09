@@ -39,7 +39,12 @@ export class GetCycleStatusCommand extends BaseStatusCommand {
         id: cycleID,
       },
     }
+    const orderAttributes = this.zipEntityOrderAttributes(
+      ['keyResultCheckIn'],
+      [['createdAt']],
+      [['DESC']],
+    )
 
-    return this.core.keyResult.getEntireOKRTreeWithFilters(filters)
+    return this.core.keyResult.getWithRelationFilters(filters, orderAttributes)
   }
 }

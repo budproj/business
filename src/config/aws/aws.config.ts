@@ -17,6 +17,7 @@ export const awsConfig = registerAs(
     },
 
     ses: {
+      debug: process.env.AWS_SES_DEBUG_ENABLED === 'true',
       source: {
         name: process.env.AWS_SES_SOURCE_NAME,
         email: process.env.AWS_SES_SOURCE_EMAIL,

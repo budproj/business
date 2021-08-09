@@ -1,9 +1,10 @@
 import { differenceInCalendarWeeks } from 'date-fns'
-import { sum, maxBy, min, groupBy, filter } from 'lodash'
+import { sum, maxBy, min, groupBy, filter, zip } from 'lodash'
 
 import { GetStatusOptions, Status } from '@core/interfaces/status.interface'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { EntityOrderAttributes, Order, OrderAttribute } from '@core/types/order-attribute.type'
 
 import { Command } from './base.command'
 
@@ -81,5 +82,26 @@ export abstract class BaseStatusCommand extends Command<Status> {
     if (onlyDefinedNumbers.length === 0) return defaultValue
 
     return min(onlyDefinedNumbers)
+  }
+
+  protected zipEntityOrderAttributes(
+    entities: string[],
+    attributes: string[][],
+    orders: Order[][],
+  ): EntityOrderAttributes[] {
+    const zippedOrders = zip(attributes, orders)
+    const orderAttributes = zippedOrders.map((values) => this.zipOrderAttributes(...values))
+
+    return zip(entities, orderAttributes)
+  }
+
+  private zipOrderAttributes(attributes: string[], orders: Order[]): OrderAttribute[] {
+    const zippedValues = zip(attributes, orders)
+
+    return zippedValues.map((values) => this.buildOrderAttribute(...values))
+  }
+
+  private buildOrderAttribute(attribute: string, order: Order): OrderAttribute {
+    return [attribute, order]
   }
 }

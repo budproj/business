@@ -11,6 +11,7 @@ import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
+import { OrderAttribute } from '@core/types/order-attribute.type'
 
 import { Objective } from './objective.orm-entity'
 
@@ -26,15 +27,22 @@ export class ObjectiveRepository extends CoreEntityRepository<Objective> {
 
   public async findWithRelationFilters(
     filterProperties: ObjectiveRelationFilterProperties,
+    orderAttributes: OrderAttribute[] = [],
   ): Promise<Objective[]> {
     const filters = this.buildFilters(filterProperties)
 
-    return this.createQueryBuilder()
+    const query = this.createQueryBuilder()
       .where(filters.query, filters.variables)
       .leftJoinAndSelect(`${Objective.name}.cycle`, Cycle.name)
       .leftJoinAndSelect(`${Objective.name}.keyResults`, KeyResult.name)
-      .orderBy(`${Objective.name}.createdAt`, 'DESC')
-      .getMany()
+
+    orderAttributes.map(([attribute, direction], index) => {
+      return index === 0
+        ? query.orderBy(attribute, direction)
+        : query.addOrderBy(attribute, direction)
+    })
+
+    return query.getMany()
   }
 
   protected setupTeamQuery(query: SelectQueryBuilder<Objective>) {
