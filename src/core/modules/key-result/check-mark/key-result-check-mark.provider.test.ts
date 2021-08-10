@@ -1,3 +1,5 @@
+import { LexoRank } from 'lexorank'
+
 import { User, KeyResult } from './__tests-helpers__/external-entities'
 import {
   closeConnection,
@@ -47,6 +49,41 @@ describe('check-mark - provider', () => {
       expect(result).toHaveLength(1)
       expect(result[0].state).toBe(CheckMarkStates.UNCHECKED)
     })
+
+    describe('lexoRank', () => {
+      it('should generate a lexoRank', async () => {
+        // Arrange
+        const checkMark = checkMarkGenerator({})
+
+        // Act
+        const result = await provider().createCheckMark(checkMark)
+
+        // Assert
+        expect(result[0].lexoRank).toBeDefined()
+      })
+
+      it('should generate a lexoRank based on last item', async () => {
+        // Arrange
+        const checkMark = checkMarkGenerator({})
+        const firstRank = LexoRank.middle()
+        const secondRank = firstRank.genNext()
+
+        // Act
+        const result1 = await provider().createCheckMark(checkMark)
+        const result2 = await provider().createCheckMark(checkMark)
+
+        // Assert
+        expect(result1[0].lexoRank).toBe(firstRank.toString())
+        expect(result2[0].lexoRank).toBe(secondRank.toString())
+      })
+    })
+  })
+
+  describe('reorderCheckMark', () => {
+    it.todo('should move item to middle')
+    it.todo('should move item to start')
+    it.todo('should move item to end')
+    it.todo('should not move item if before and after is passed')
   })
 
   describe('checkCheckMark', () => {

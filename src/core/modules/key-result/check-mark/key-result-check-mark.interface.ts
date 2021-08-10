@@ -11,6 +11,7 @@ export interface KeyResultCheckMarkInterface extends CoreEntityInterface {
   updatedAt: Date
   keyResultId: string
   userId: string
+  lexoRank: string
 }
 
 export type CheckList = KeyResultCheckMarkInterface[]

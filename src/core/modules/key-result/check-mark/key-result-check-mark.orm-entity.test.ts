@@ -27,6 +27,7 @@ const checkMarkGenerator = (customFields) => ({
   description: 'do the dishes',
   keyResultId: mockKeyResult.id,
   userId: mockUser.id,
+  lexoRank: 'some-rank',
   ...customFields,
 })
 

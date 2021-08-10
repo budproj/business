@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common/decorators'
+import { LexoRank } from 'lexorank'
 import { DeleteResult } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
@@ -9,10 +10,15 @@ import { KeyResultCheckMarkInterface, CheckMarkStates } from './key-result-check
 import { KeyResultCheckMark } from './key-result-check-mark.orm-entity'
 import { KeyResultCheckMarkRepository } from './key-result-check-mark.repository'
 
+interface LexoRankItem {
+  id: string
+  lexoRank: string
+}
+
 @Injectable()
 export class KeyResultCheckMarkProvider extends CoreEntityProvider<
-  KeyResultCheckMark,
-  KeyResultCheckMarkInterface
+KeyResultCheckMark,
+KeyResultCheckMarkInterface
 > {
   constructor(protected readonly repository: KeyResultCheckMarkRepository) {
     super(KeyResultCheckMarkProvider.name, repository)
@@ -21,7 +27,21 @@ export class KeyResultCheckMarkProvider extends CoreEntityProvider<
   public async createCheckMark(
     checkMark: Partial<KeyResultCheckMarkInterface>,
   ): Promise<KeyResultCheckMark[]> {
-    return this.create(checkMark)
+    const lastItem = await this.getOne(undefined, undefined, {
+      orderBy: { lexoRank: Sorting.DESC },
+    })
+
+    const lexoRank = lastItem ? LexoRank.parse(lastItem.lexoRank).genNext() : LexoRank.middle()
+
+    const newCheckMark = {
+      ...checkMark,
+      lexoRank: lexoRank.toString(),
+    }
+
+    return this.create(newCheckMark)
+  }
+
+  public async reorderCheckMark(item: LexoRankItem, previousItem: LexoRankItem, nextItem: LexoRankItem): Promise<KeyResultCcheckMark> {
   }
 
   public async checkCheckMark(id: string): Promise<KeyResultCheckMark> {

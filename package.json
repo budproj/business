@@ -82,6 +82,7 @@
     "graphql-tools": "^7.0.1",
     "graphql-upload": "^11.0.0",
     "jwks-rsa": "^1.11.0",
+    "lexorank": "^1.0.4",
     "lodash": "^4.17.20",
     "logform": "^2.2.0",
     "nest-aws-sdk": "^1.1.1",

@@ -31,4 +31,7 @@ export class KeyResultCheckMark extends CoreEntity implements KeyResultCheckMark
 
   @ManyToOne('User', 'keyResultComments')
   public user: UserInterface
+
+  @Column({ type: 'text' })
+  public lexoRank: string
 }
