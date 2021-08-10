@@ -15,6 +15,7 @@ import { EntityOrderAttributes } from '@core/types/order-attribute.type'
 import { KeyResultCheckInInterface } from './check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from './check-in/key-result-check-in.orm-entity'
 import { KeyResultCheckInProvider } from './check-in/key-result-check-in.provider'
+import { KeyResultCheckMarkProvider } from './check-mark/key-result-check-mark.provider'
 import { KeyResultCommentInterface } from './comment/key-result-comment.interface'
 import { KeyResultComment } from './comment/key-result-comment.orm-entity'
 import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
@@ -28,6 +29,7 @@ import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
   constructor(
     public readonly keyResultCommentProvider: KeyResultCommentProvider,
+    public readonly keyResultCheckMarkProvider: KeyResultCheckMarkProvider,
     public readonly keyResultCheckInProvider: KeyResultCheckInProvider,
     public readonly timeline: KeyResultTimelineProvider,
     protected readonly repository: KeyResultRepository,

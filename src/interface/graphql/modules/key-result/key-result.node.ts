@@ -13,6 +13,7 @@ import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
 import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 
 import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.connection'
+import { KeyResultKeyResultCheckMarkGraphQLConnection } from './connections/key-result-key-result-check-mark/key-result-key-result-check-marks.connection'
 import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-result-key-result-comments/key-result-key-result-comments.connection'
 import { KeyResultTimelineGraphQLConnection } from './connections/key-result-timeline/key-result-key-result-timeline.connection'
 import { KeyResultFormatGraphQLEnum } from './enums/key-result-format.enum'
@@ -115,6 +116,11 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
       'The timeline for this key result. It is ordered by creation date and is composed by both check-ins and comments',
   })
   public timeline?: KeyResultTimelineGraphQLConnection
+
+  @Field(() => KeyResultKeyResultCheckMarkGraphQLConnection, {
+    description: 'The check-marks for this key result',
+  })
+  public checkList: KeyResultKeyResultCheckMarkGraphQLConnection
 
   public readonly id!: string
   public readonly createdAt!: Date

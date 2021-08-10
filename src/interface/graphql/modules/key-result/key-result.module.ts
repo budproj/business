@@ -8,11 +8,14 @@ import { KeyResultCheckInAccessControl } from '@interface/graphql/modules/key-re
 import { KeyResultCommentAccessControl } from '@interface/graphql/modules/key-result/access-control/key-result-comment.access-control'
 import { KeyResultAccessControl } from '@interface/graphql/modules/key-result/access-control/key-result.access-control'
 
+import { KeyResultCheckMarkAccessControl } from './access-control/key-result-check-mark.access-control'
 import { KeyResultCheckInsConnectionGraphQLResolver } from './check-in/connections/key-result-check-ins/key-result-check-ins.resolver'
 import { KeyResultCheckInGraphQLResolver } from './check-in/key-result-check-in.resolver'
+import { KeyResultCheckMarkGraphQLResolver } from './check-mark/key-result-check-mark.resolver'
 import { KeyResultCommentsConnectionGraphQLResolver } from './comment/connections/key-result-comments/key-result-comments.resolver'
 import { KeyResultCommentGraphQLResolver } from './comment/key-result-comment.resolver'
 import { KeyResultKeyResultCheckInsConnectionGraphQLResolver } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.resolver'
+import { KeyResultKeyResultCheckMarksConnectionGraphQLResolver } from './connections/key-result-key-result-check-mark/key-result-key-result-check-marks.resolver'
 import { KeyResultKeyResultCommentsConnectionGraphQLResolver } from './connections/key-result-key-result-comments/key-result-key-result-comments.resolver'
 import { KeyResultTimelineConnectionGraphQLResolver } from './connections/key-result-timeline/key-result-key-result-timeline.resolver'
 import { KeyResultsConnectionGraphQLResolver } from './connections/key-results/key-results.resolver'
@@ -23,6 +26,7 @@ import { KeyResultGraphQLResolver } from './key-result.resolver'
   providers: [
     KeyResultGraphQLResolver,
     KeyResultCommentGraphQLResolver,
+    KeyResultCheckMarkGraphQLResolver,
     KeyResultCheckInGraphQLResolver,
     KeyResultCheckInsConnectionGraphQLResolver,
     KeyResultsConnectionGraphQLResolver,
@@ -30,9 +34,11 @@ import { KeyResultGraphQLResolver } from './key-result.resolver'
     KeyResultKeyResultCommentsConnectionGraphQLResolver,
     KeyResultKeyResultCheckInsConnectionGraphQLResolver,
     KeyResultTimelineConnectionGraphQLResolver,
+    KeyResultKeyResultCheckMarksConnectionGraphQLResolver,
     KeyResultAccessControl,
     KeyResultCheckInAccessControl,
     KeyResultCommentAccessControl,
+    KeyResultCheckMarkAccessControl,
   ],
   exports: [KeyResultAccessControl],
 })

@@ -36,12 +36,17 @@ import { UpdateKeyResultCommand } from '@core/ports/commands/update-key-result.c
 import { UpdateObjectiveCommand } from '@core/ports/commands/update-objective.command'
 
 import { Command } from './base.command'
+import { CreateCheckMarkCommand } from './create-check-mark.command'
 import { CreateKeyResultCheckInCommand } from './create-key-result-check-in.command'
 import { CreateKeyResultCommentCommand } from './create-key-result-comment.command'
+import { DeleteCheckMarkCommand } from './delete-check-mark.command'
+import { GetCheckListForKeyResultCommand } from './get-check-list-for-key-result.command'
+import { GetCheckListProgressCommand } from './get-check-list-progress.command'
 import { GetCycleCommand } from './get-cycle.command'
 import { GetKeyResultCheckInListCommand } from './get-key-result-check-in-list.command'
 import { GetKeyResultCheckInTeamCommand } from './get-key-result-check-in-team.command'
 import { GetKeyResultCheckInWindowForCheckInCommand } from './get-key-result-check-in-window-for-check-in.command'
+import { GetKeyResultCheckMarkCommand } from './get-key-result-check-mark.command'
 import { GetKeyResultCompanyCommand } from './get-key-result-company.command'
 import { GetKeyResultCycleCommand } from './get-key-result-cycle.command'
 import { GetKeyResultFromCheckInCommand } from './get-key-result-from-check-in.command'
@@ -53,6 +58,8 @@ import { GetTeamCompanyCommand } from './get-team-company.command'
 import { GetTeamMembersCommand } from './get-team-members.command'
 import { GetTeamOwnerCommand } from './get-team-owner.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
+import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
+import { UpdateCheckMarkDescriptionCommand } from './update-check-mark-description.command'
 
 type CommandConstructor = new (...commandArguments: any[]) => Command<unknown>
 export type CommandType =
@@ -71,6 +78,7 @@ export type CommandType =
   | 'get-key-result-check-in-team'
   | 'get-key-result-check-in-window-for-check-in'
   | 'get-key-result-check-in'
+  | 'get-key-result-check-mark'
   | 'get-key-result-comment-team'
   | 'get-key-result-comment'
   | 'get-key-result-company'
@@ -106,6 +114,12 @@ export type CommandType =
   | 'get-user'
   | 'update-key-result'
   | 'update-objective'
+  | 'get-check-list-for-key-result'
+  | 'toggle-check-mark'
+  | 'update-check-mark-description'
+  | 'create-check-mark'
+  | 'delete-check-mark'
+  | 'get-check-list-progress'
 
 @Injectable()
 export class CommandFactory {
@@ -125,6 +139,7 @@ export class CommandFactory {
     'get-key-result-check-in-team': GetKeyResultCheckInTeamCommand,
     'get-key-result-check-in-window-for-check-in': GetKeyResultCheckInWindowForCheckInCommand,
     'get-key-result-check-in': GetKeyResultCheckInCommand,
+    'get-key-result-check-mark': GetKeyResultCheckMarkCommand,
     'get-key-result-comment-team': GetKeyResultCommentTeamCommand,
     'get-key-result-comment': GetKeyResultCommentCommand,
     'get-key-result-company': GetKeyResultCompanyCommand,
@@ -160,6 +175,12 @@ export class CommandFactory {
     'get-user': GetUserCommand,
     'update-key-result': UpdateKeyResultCommand,
     'update-objective': UpdateObjectiveCommand,
+    'get-check-list-for-key-result': GetCheckListForKeyResultCommand,
+    'toggle-check-mark': ToggleCheckMarkCommand,
+    'update-check-mark-description': UpdateCheckMarkDescriptionCommand,
+    'create-check-mark': CreateCheckMarkCommand,
+    'delete-check-mark': DeleteCheckMarkCommand,
+    'get-check-list-progress': GetCheckListProgressCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}
