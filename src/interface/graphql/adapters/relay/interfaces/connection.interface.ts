@@ -13,7 +13,8 @@ export interface Connection<N> extends RelayConnection<N> {
   description: 'This interface wraps all list connections from our schema',
 })
 export abstract class ConnectionRelayGraphQLInterface<N extends NodeRelayGraphQLInterface>
-  implements Connection<N> {
+  implements Connection<N>
+{
   @Field(() => PageInfoRelayObject, { complexity: 0 })
   public readonly pageInfo!: PageInfoRelayObject
 

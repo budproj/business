@@ -14,7 +14,8 @@ import { ObjectiveKeyResultEdgeGraphQLObject } from './objective-key-result.edge
     'A list containing a given user key-results based on the provided filters and arguments',
 })
 export class ObjectiveKeyResultsGraphQLConnection
-  implements GuardedConnectionGraphQLInterface<KeyResultGraphQLNode> {
+  implements GuardedConnectionGraphQLInterface<KeyResultGraphQLNode>
+{
   @Field(() => [ObjectiveKeyResultEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: ObjectiveKeyResultEdgeGraphQLObject[]
 

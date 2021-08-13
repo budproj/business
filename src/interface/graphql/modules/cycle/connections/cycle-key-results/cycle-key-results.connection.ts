@@ -14,7 +14,8 @@ import { CycleKeyResultEdgeGraphQLObject } from './cycle-key-result.edge'
     'A list containing a given user key-results based on the provided filters and arguments',
 })
 export class CycleKeyResultsGraphQLConnection
-  implements GuardedConnectionGraphQLInterface<KeyResultGraphQLNode> {
+  implements GuardedConnectionGraphQLInterface<KeyResultGraphQLNode>
+{
   @Field(() => [CycleKeyResultEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: CycleKeyResultEdgeGraphQLObject[]
 

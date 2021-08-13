@@ -10,7 +10,8 @@ import { KeyResultCommentGraphQLNode } from '../../comment/key-result-comment.no
   description: 'The edge for our key-result query interface',
 })
 export class KeyResultKeyResultCommentEdgeGraphQLObject
-  implements EdgeRelayGraphQLInterface<KeyResultCommentGraphQLNode> {
+  implements EdgeRelayGraphQLInterface<KeyResultCommentGraphQLNode>
+{
   @Field(() => KeyResultCommentGraphQLNode, { complexity: 1 })
   public readonly node!: KeyResultCommentGraphQLNode
 

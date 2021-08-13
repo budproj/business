@@ -14,7 +14,8 @@ import { KeyResultCheckInRootEdgeGraphQLObject } from './key-result-check-in-roo
   description: 'A list containing key-result comments based on the provided filters and arguments',
 })
 export class KeyResultCheckInsGraphQLConnection
-  implements GuardedConnectionGraphQLInterface<KeyResultCheckInGraphQLNode> {
+  implements GuardedConnectionGraphQLInterface<KeyResultCheckInGraphQLNode>
+{
   @Field(() => [KeyResultCheckInRootEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: KeyResultCheckInRootEdgeGraphQLObject[]
 

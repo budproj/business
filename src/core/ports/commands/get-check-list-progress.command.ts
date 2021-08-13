@@ -3,7 +3,10 @@ import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 
 import { Command } from './base.command'
 
-const stateFilter = (status) => ({ state }) => state === status
+const stateFilter =
+  (status) =>
+  ({ state }) =>
+    state === status
 
 export interface GetCheckListProgressCommandResult {
   numberOfChecked: number

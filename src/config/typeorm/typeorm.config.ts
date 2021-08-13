@@ -2,44 +2,41 @@ import { registerAs } from '@nestjs/config'
 
 import { TypeORMConfigInterface } from './typeorm.interface'
 
-export const typeormConfig = registerAs(
-  'typeorm',
-  (): TypeORMConfigInterface => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const cliConfig = require('./typeorm-cli.config')
+export const typeormConfig = registerAs('typeorm', (): TypeORMConfigInterface => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const cliConfig = require('./typeorm-cli.config')
 
-    return {
-      type: cliConfig.type,
+  return {
+    type: cliConfig.type,
 
-      endpoint: {
-        host: cliConfig.host,
-        port: cliConfig.port,
-        database: cliConfig.database,
+    endpoint: {
+      host: cliConfig.host,
+      port: cliConfig.port,
+      database: cliConfig.database,
+    },
+
+    authentication: {
+      user: cliConfig.username,
+      password: cliConfig.password,
+    },
+
+    pattern: {
+      file: {
+        entities: cliConfig.entities,
+        migrations: cliConfig.migrations,
       },
 
-      authentication: {
-        user: cliConfig.username,
-        password: cliConfig.password,
+      directory: {
+        migrations: cliConfig.cli.migrationsDir,
       },
+    },
 
-      pattern: {
-        file: {
-          entities: cliConfig.entities,
-          migrations: cliConfig.migrations,
-        },
+    logging: {
+      enabled: cliConfig.logging,
+    },
 
-        directory: {
-          migrations: cliConfig.cli.migrationsDir,
-        },
-      },
-
-      logging: {
-        enabled: cliConfig.logging,
-      },
-
-      conventions: {
-        naming: cliConfig.namingStrategy,
-      },
-    }
-  },
-)
+    conventions: {
+      naming: cliConfig.namingStrategy,
+    },
+  }
+})

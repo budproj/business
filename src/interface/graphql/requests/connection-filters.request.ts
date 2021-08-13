@@ -7,7 +7,7 @@ import { OrderGraphQLObject } from '../objects/order.object'
 
 @ArgsType()
 export class ConnectionFiltersRequest<
-  O extends OrderGraphQLObject = DefaultOrderGraphQLInput
+  O extends OrderGraphQLObject = DefaultOrderGraphQLInput,
 > extends ConnectionRelayRequest {
   @Field(() => ID, {
     nullable: true,

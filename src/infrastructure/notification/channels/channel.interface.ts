@@ -3,7 +3,7 @@ import { NotificationMetadata } from '@infrastructure/notification/types/notific
 
 export interface NotificationChannel<
   M extends NotificationMetadata,
-  D extends NotificationData = NotificationData
+  D extends NotificationData = NotificationData,
 > {
   dispatch(data: D, metadata: M): Promise<void>
 }

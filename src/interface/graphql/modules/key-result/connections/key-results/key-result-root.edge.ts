@@ -10,7 +10,8 @@ import { KeyResultGraphQLNode } from '../../key-result.node'
   description: 'The edge for our key-result query interface',
 })
 export class KeyResultRootEdgeGraphQLObject
-  implements EdgeRelayGraphQLInterface<KeyResultGraphQLNode> {
+  implements EdgeRelayGraphQLInterface<KeyResultGraphQLNode>
+{
   @Field(() => KeyResultGraphQLNode, { complexity: 1 })
   public readonly node!: KeyResultGraphQLNode
 

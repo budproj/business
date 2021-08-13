@@ -14,7 +14,8 @@ import { UserObjectiveEdgeGraphQLObject } from './user-objective.edge'
     'A list containing a given user objectives based on the provided filters and arguments',
 })
 export class UserObjectivesGraphQLConnection
-  implements GuardedConnectionGraphQLInterface<ObjectiveGraphQLNode> {
+  implements GuardedConnectionGraphQLInterface<ObjectiveGraphQLNode>
+{
   @Field(() => [UserObjectiveEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: UserObjectiveEdgeGraphQLObject[]
 

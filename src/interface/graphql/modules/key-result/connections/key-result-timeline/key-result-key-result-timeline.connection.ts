@@ -14,7 +14,8 @@ import { KeyResultTimelineEdgeGraphQLObject } from './key-result-timeline.edge'
     'A list with a given key-result timeline based on the provided filters and arguments',
 })
 export class KeyResultTimelineGraphQLConnection
-  implements GuardedConnectionGraphQLInterface<KeyResultTimelineEntry> {
+  implements GuardedConnectionGraphQLInterface<KeyResultTimelineEntry>
+{
   @Field(() => [KeyResultTimelineEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: KeyResultTimelineEdgeGraphQLObject[]
 

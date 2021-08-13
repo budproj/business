@@ -10,7 +10,8 @@ import { KeyResultCheckMarkGraphQLNode } from '../../check-mark/key-result-check
   description: 'The edge for our key-result query interface',
 })
 export class KeyResultKeyResultCheckMarkEdgeGraphQLObject
-  implements EdgeRelayGraphQLInterface<KeyResultCheckMarkGraphQLNode> {
+  implements EdgeRelayGraphQLInterface<KeyResultCheckMarkGraphQLNode>
+{
   @Field(() => KeyResultCheckMarkGraphQLNode, { complexity: 1 })
   public readonly node!: KeyResultCheckMarkGraphQLNode
 

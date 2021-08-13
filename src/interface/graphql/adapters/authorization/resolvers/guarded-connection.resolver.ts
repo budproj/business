@@ -21,7 +21,7 @@ import { GuardedConnectionGraphQLInterface } from '../interfaces/guarded-connect
 @Resolver(() => GuardedConnectionGraphQLInterface)
 export abstract class GuardedConnectionGraphQLResolver<
   E extends CoreEntity,
-  I extends CoreEntityInterface
+  I extends CoreEntityInterface,
 > extends BaseGraphQLResolver {
   protected readonly queryGuard: QueryGuardAdapter<E, I>
   protected readonly policyAdapter = new PolicyAdapter()

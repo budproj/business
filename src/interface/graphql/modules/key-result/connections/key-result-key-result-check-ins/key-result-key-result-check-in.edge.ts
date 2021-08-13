@@ -10,7 +10,8 @@ import { KeyResultCheckInGraphQLNode } from '../../check-in/key-result-check-in.
   description: 'The edge for our key-result query interface',
 })
 export class KeyResultKeyResultCheckInEdgeGraphQLObject
-  implements EdgeRelayGraphQLInterface<KeyResultCheckInGraphQLNode> {
+  implements EdgeRelayGraphQLInterface<KeyResultCheckInGraphQLNode>
+{
   @Field(() => KeyResultCheckInGraphQLNode, { complexity: 1 })
   public readonly node!: KeyResultCheckInGraphQLNode
 

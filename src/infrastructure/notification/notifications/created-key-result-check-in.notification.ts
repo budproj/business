@@ -141,9 +141,8 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
     const previousCheckInConfidenceColor = this.confidenceTagAdapter.getPrimaryColorFromConfidence(
       parentCheckIn?.confidence,
     )
-    const previousCheckInConfidenceBackgroundColor = this.confidenceTagAdapter.getBackgroundColorFromConfidence(
-      parentCheckIn?.confidence,
-    )
+    const previousCheckInConfidenceBackgroundColor =
+      this.confidenceTagAdapter.getBackgroundColorFromConfidence(parentCheckIn?.confidence)
 
     return {
       authorFullName,
