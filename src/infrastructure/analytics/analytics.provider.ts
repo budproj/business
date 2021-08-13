@@ -12,7 +12,7 @@ export class AnalyticsProvider implements OnModuleInit {
     this.analyticsGRPCService = this.client.getService<AnalyticsGRPCService>('AnalyticsService')
   }
 
-  public test(): any {
-    return this.analyticsGRPCService.findOne('TEST')
+  public async test(): Promise<any> {
+    return this.analyticsGRPCService.findOne({ id: 'test' }).toPromise()
   }
 }

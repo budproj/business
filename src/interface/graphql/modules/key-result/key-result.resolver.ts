@@ -18,6 +18,7 @@ import { KeyResultComment } from '@core/modules/key-result/comment/key-result-co
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
+import { AnalyticsProvider } from '@infrastructure/analytics/analytics.provider'
 import { AttachActivity } from '@interface/graphql/adapters/activity/attach-activity.decorator'
 import { RequestActivity } from '@interface/graphql/adapters/activity/request-activity.decorator'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
@@ -60,6 +61,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     protected readonly core: CoreProvider,
     protected readonly corePorts: CorePortsProvider,
     protected readonly accessControl: KeyResultAccessControl,
+    private readonly analyticsProvider: AnalyticsProvider,
   ) {
     super(Resource.KEY_RESULT, core, core.keyResult)
   }
@@ -80,6 +82,9 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     )
     if (!keyResult)
       throw new UserInputError(`We could not found an key-result with the provided arguments`)
+
+    const t = await this.analyticsProvider.test()
+    console.log(t)
 
     return keyResult
   }
