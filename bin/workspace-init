@@ -59,7 +59,7 @@ function install_dependencies {
   install_pg_client
   set_node_version
   install_node_dependencies
-  seed_database
+  import_database_dump
   migrate_database
 }
 
@@ -83,8 +83,8 @@ function install_node_dependencies {
   npm install
 }
 
-function seed_database {
-  source "${ROOT_DIR}/bin/database-seed"
+function import_database_dump {
+  source "${ROOT_DIR}/bin/import-database-dump"
 }
 
 function migrate_database {
