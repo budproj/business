@@ -1,0 +1,28 @@
+syntax = "proto3";
+package keyResult;
+
+service KeyResultService {
+  rpc GetProgressHistory (ProgressHistoryRequest) returns (ProgressHistoryResponse);
+}
+
+message ProgressHistoryRequest {
+  string keyResultId = 1;
+  DateWindow window = 2;
+  string startDate = 3;
+}
+
+enum DateWindow {
+  DAY = 0;
+  WEEK = 1;
+}
+
+message ProgressHistoryResponse {
+  repeated ProgressRecord data = 1;
+}
+
+message ProgressRecord {
+  string id = 1;
+  string keyResultId = 2;
+  float progress = 3;
+  string date = 6;
+}

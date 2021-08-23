@@ -12,7 +12,7 @@ export const analyticsConfig = registerAs(
       url: process.env.ANALYTICS_URL,
       package: process.env.ANALYTICS_PACKAGES.split(','),
       protoPath: process.env.ANALYTICS_PACKAGES.split(',').map((packageName) =>
-        join(__dirname, `../../../lib/grpc/${packageName}.proto`),
+        join(__dirname, `../../../lib/grpc/analytics/${packageName}.proto`),
       ),
     },
   }),

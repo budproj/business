@@ -8,16 +8,17 @@ services:
     image: mcr.microsoft.com/vscode/devcontainers/typescript-node:14
     command: tail -f /dev/null
     user: 1000:1000
-    network_mode: service:db-postgres
+    network_mode: host
     env_file:
       - ../.env.development
       - ../.env
     volumes:
       - ..:/workspace:cached
-    
+
   db-postgres:
     image: postgres
     container_name: business-db-postgres
+    network_mode: host
     env_file:
       - ../.env.development
       - ../.env

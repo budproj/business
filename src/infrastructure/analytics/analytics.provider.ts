@@ -1,18 +1,29 @@
 import { Inject, OnModuleInit } from '@nestjs/common'
 import { ClientGrpc } from '@nestjs/microservices'
 
-import { AnalyticsGRPCService } from './analytics.grpc-interface'
+import { AnalyticsAdapter } from '@adapters/analytics/adapter.interface'
+import { ProgressRecord } from '@adapters/analytics/progress-record.interface'
 
-export class AnalyticsProvider implements OnModuleInit {
-  private analyticsGRPCService: AnalyticsGRPCService
+import { AnalyticsDateWindow } from './analytics.enums'
+import { KeyResultGRPCService } from './analytics.interfaces'
 
-  constructor(@Inject('ANALYTICS_GRPC_SERVICE') private readonly client: ClientGrpc) {}
+export class AnalyticsProvider implements OnModuleInit, AnalyticsAdapter {
+  private keyResultGRPCService: KeyResultGRPCService
+
+  constructor(@Inject('ANALYTICS_GRPC_SERVER') private readonly client: ClientGrpc) {}
 
   public onModuleInit() {
-    this.analyticsGRPCService = this.client.getService<AnalyticsGRPCService>('AnalyticsService')
+    this.keyResultGRPCService = this.client.getService<KeyResultGRPCService>('KeyResultService')
   }
 
-  public async test(): Promise<any> {
-    return this.analyticsGRPCService.findOne({ id: 'test' }).toPromise()
+  public async getWeeklyProgressHistoryForKeyResult(
+    keyResultId: string,
+  ): Promise<ProgressRecord[]> {
+    const options = {
+      keyResultId,
+      window: AnalyticsDateWindow.WEEK,
+    }
+
+    return this.keyResultGRPCService.getProgressHistory(options).toPromise()
   }
 }

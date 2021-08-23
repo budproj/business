@@ -83,7 +83,9 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     if (!keyResult)
       throw new UserInputError(`We could not found an key-result with the provided arguments`)
 
-    const t = await this.analyticsProvider.test()
+    const t = await this.analyticsProvider.getWeeklyProgressHistoryForKeyResult(
+      '661f4a2e-4afc-4d07-abe6-40b1c3b61c10',
+    )
     console.log(t)
 
     return keyResult
