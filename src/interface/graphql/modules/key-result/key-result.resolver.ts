@@ -46,6 +46,7 @@ import { KeyResultCommentFiltersRequest } from './comment/requests/key-result-co
 import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.connection'
 import { KeyResultKeyResultCheckMarkGraphQLConnection } from './connections/key-result-key-result-check-mark/key-result-key-result-check-marks.connection'
 import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-result-key-result-comments/key-result-key-result-comments.connection'
+import { KeyResultProgressHistoryGraphQLConnection } from './connections/key-result-progress-history/key-result-progress-history.connection'
 import { KeyResultTimelineGraphQLConnection } from './connections/key-result-timeline/key-result-key-result-timeline.connection'
 import { KeyResultGraphQLNode } from './key-result.node'
 import { KeyResultUpdateRequest } from './requests/key-result-update.request'
@@ -82,11 +83,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     )
     if (!keyResult)
       throw new UserInputError(`We could not found an key-result with the provided arguments`)
-
-    const t = await this.analyticsProvider.getWeeklyProgressHistoryForKeyResult(
-      '661f4a2e-4afc-4d07-abe6-40b1c3b61c10',
-    )
-    console.log(t)
 
     return keyResult
   }
@@ -326,5 +322,27 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       )
 
     return result
+  }
+
+  @ResolveField('progressHistory', () => KeyResultProgressHistoryGraphQLConnection)
+  protected async getProgressHistoryForKeyResult(
+    @Parent() keyResult: KeyResultGraphQLNode,
+    @Args() request: ConnectionFiltersRequest,
+  ) {
+    this.logger.log({
+      keyResult,
+      request,
+      message: 'Fetching progress history for key result',
+    })
+
+    const connection = this.relay.unmarshalRequest<ConnectionFiltersRequest, KeyResult>(request)[2]
+
+    const queryResult = []
+    const t = await this.analyticsProvider.getWeeklyProgressHistoryForKeyResult(
+      '661f4a2e-4afc-4d07-abe6-40b1c3b61c10',
+    )
+    console.log(t)
+
+    return this.relay.marshalResponse(queryResult, connection, keyResult)
   }
 }
