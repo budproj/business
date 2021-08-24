@@ -3,7 +3,6 @@ import { Module } from '@nestjs/common'
 import { GraphQLConfigModule } from '@config/graphql/graphql.module'
 import { CoreModule } from '@core/core.module'
 import { AmplitudeModule } from '@infrastructure/amplitude/amplitude.module'
-import { AnalyticsModule } from '@infrastructure/analytics/analytics.module'
 import { NotificationModule } from '@infrastructure/notification/notification.module'
 import { KeyResultCheckInAccessControl } from '@interface/graphql/modules/key-result/access-control/key-result-check-in.access-control'
 import { KeyResultCommentAccessControl } from '@interface/graphql/modules/key-result/access-control/key-result-comment.access-control'
@@ -25,7 +24,7 @@ import { KeyResultGraphQLResolver } from './key-result.resolver'
 import { KeyResultProgressRecordGraphQLResolver } from './progress-record/key-result-progress-record.resolver'
 
 @Module({
-  imports: [CoreModule, GraphQLConfigModule, AmplitudeModule, NotificationModule, AnalyticsModule],
+  imports: [CoreModule, GraphQLConfigModule, AmplitudeModule, NotificationModule],
   providers: [
     KeyResultGraphQLResolver,
     KeyResultCommentGraphQLResolver,

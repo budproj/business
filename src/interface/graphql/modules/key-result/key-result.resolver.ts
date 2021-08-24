@@ -3,6 +3,7 @@ import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { UpdatedKeyResultActivity } from '@adapters/activity/activities/updated-key-result-activity'
+import { ProgressRecord } from '@adapters/analytics/progress-record.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { State } from '@adapters/state/interfaces/state.interface'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
@@ -18,7 +19,6 @@ import { KeyResultComment } from '@core/modules/key-result/comment/key-result-co
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
-import { AnalyticsProvider } from '@infrastructure/analytics/analytics.provider'
 import { AttachActivity } from '@interface/graphql/adapters/activity/attach-activity.decorator'
 import { RequestActivity } from '@interface/graphql/adapters/activity/request-activity.decorator'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
@@ -62,7 +62,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     protected readonly core: CoreProvider,
     protected readonly corePorts: CorePortsProvider,
     protected readonly accessControl: KeyResultAccessControl,
-    private readonly analyticsProvider: AnalyticsProvider,
   ) {
     super(Resource.KEY_RESULT, core, core.keyResult)
   }
@@ -335,13 +334,14 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching progress history for key result',
     })
 
-    const connection = this.relay.unmarshalRequest<ConnectionFiltersRequest, KeyResult>(request)[2]
+    const connection = this.relay.unmarshalRequest<ConnectionFiltersRequest, ProgressRecord>(
+      request,
+    )[2]
 
-    const queryResult = []
-    const t = await this.analyticsProvider.getWeeklyProgressHistoryForKeyResult(
-      '661f4a2e-4afc-4d07-abe6-40b1c3b61c10',
+    const queryResult = await this.corePorts.dispatchCommand<ProgressRecord[]>(
+      'get-key-result-progress-history',
+      keyResult.id,
     )
-    console.log(t)
 
     return this.relay.marshalResponse(queryResult, connection, keyResult)
   }

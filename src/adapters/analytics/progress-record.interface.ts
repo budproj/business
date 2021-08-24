@@ -1,6 +1,9 @@
-export interface ProgressRecord {
+import { CoreEntityInterface } from '@core/core-entity.interface'
+
+export interface ProgressRecord extends CoreEntityInterface {
+  updatedAt: Date
   progress: number
-  date: Date
   keyResultId: string
   keyResultCheckInId: string
+  date: Date
 }

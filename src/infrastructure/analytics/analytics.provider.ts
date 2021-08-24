@@ -13,7 +13,7 @@ export class AnalyticsProvider implements OnModuleInit, AnalyticsAdapter {
   constructor(@Inject('ANALYTICS_GRPC_SERVER') private readonly client: ClientGrpc) {}
 
   public onModuleInit() {
-    this.keyResultGRPCService = this.client.getService<KeyResultGRPCService>('KeyResultService')
+    this.keyResultGRPCService = this.client.getService('KeyResultService')
   }
 
   public async getWeeklyProgressHistoryForKeyResult(
@@ -23,7 +23,8 @@ export class AnalyticsProvider implements OnModuleInit, AnalyticsAdapter {
       keyResultId,
       window: AnalyticsDateWindow.WEEK,
     }
+    const response = await this.keyResultGRPCService.getProgressHistory(options).toPromise()
 
-    return this.keyResultGRPCService.getProgressHistory(options).toPromise()
+    return response.data
   }
 }
