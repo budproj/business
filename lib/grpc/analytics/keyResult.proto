@@ -3,7 +3,12 @@ package keyResult;
 
 service KeyResultService {
   rpc GetProgressHistory (ProgressHistoryRequest) returns (ProgressHistoryResponse);
+  rpc CalculateProgress (CalculateProgressRequest) returns (CalculateProgressResponse);
 }
+
+// **************************************************************************
+// Requests
+// **************************************************************************
 
 message ProgressHistoryRequest {
   string keyResultId = 1;
@@ -11,13 +16,35 @@ message ProgressHistoryRequest {
   string startDate = 3;
 }
 
+message CalculateProgressRequest {
+  float value = 1;
+  KeyResultProgressData keyResultData = 2;
+}
+
+// **************************************************************************
+// Responses
+// **************************************************************************
+
+message ProgressHistoryResponse {
+  repeated ProgressRecord data = 1;
+}
+
+message CalculateProgressResponse {
+  CalculatedProgress data = 1;
+}
+
+// **************************************************************************
+// Types
+// **************************************************************************
+
 enum DateWindow {
   DAY = 0;
   WEEK = 1;
 }
 
-message ProgressHistoryResponse {
-  repeated ProgressRecord data = 1;
+enum Type {
+  ASCENDING = 0;
+  DESCENDING = 1;
 }
 
 message ProgressRecord {
@@ -25,4 +52,14 @@ message ProgressRecord {
   string keyResultId = 2;
   float progress = 3;
   string date = 6;
+}
+
+message KeyResultProgressData {
+  float initialValue = 1;
+  float goal = 2;
+  Type type = 3;
+}
+
+message CalculatedProgress {
+  float progress = 1;
 }
