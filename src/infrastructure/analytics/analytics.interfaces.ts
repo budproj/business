@@ -1,3 +1,4 @@
+import { KeyResultData } from '@adapters/analytics/key-result-data.interface'
 import { NestJSGRPCService } from '@lib/grpc/grpc.interfaces'
 
 import { AnalyticsDateWindow } from './analytics.enums'
@@ -8,6 +9,11 @@ export interface KeyResultGRPCService {
     window?: AnalyticsDateWindow
     startDate?: string
   }) => NestJSGRPCService<AnalyticsGRPCResponse<PrimitiveProgressRecord[]>>
+
+  calculateProgress: (options: {
+    value: number
+    keyResultData: KeyResultData
+  }) => NestJSGRPCService<AnalyticsGRPCResponse<CalculatedProgress>>
 }
 
 export interface PrimitiveProgressRecord {
@@ -18,6 +24,10 @@ export interface PrimitiveProgressRecord {
   keyResultId: string
   keyResultCheckInId: string
   date: string
+}
+
+interface CalculatedProgress {
+  progress: number
 }
 
 interface AnalyticsGRPCResponse<T> {

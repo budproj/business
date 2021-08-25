@@ -2,6 +2,7 @@ import { Inject, OnModuleInit } from '@nestjs/common'
 import { ClientGrpc } from '@nestjs/microservices'
 
 import { AnalyticsAdapter } from '@adapters/analytics/adapter.interface'
+import { KeyResultData } from '@adapters/analytics/key-result-data.interface'
 import { ProgressRecord } from '@adapters/analytics/progress-record.interface'
 
 import { AnalyticsDateWindow } from './analytics.enums'
@@ -37,5 +38,15 @@ export class AnalyticsProvider implements OnModuleInit, AnalyticsAdapter {
     return response.data.map((progressRecord) =>
       AnalyticsProvider.marshalProgressRecord(progressRecord),
     )
+  }
+
+  public async calculateProgress(value: number, keyResultData: KeyResultData): Promise<number> {
+    const options = {
+      value,
+      keyResultData,
+    }
+    const response = await this.keyResultGRPCService.calculateProgress(options).toPromise()
+
+    return response.data.progress
   }
 }
