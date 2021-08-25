@@ -73,6 +73,7 @@ message CalculatedProgress {
 }
 
 message KeyResultCheckInData {
-  float value = 1;
-  string createdAt = 2;
+  string id = 1;
+  float value = 2;
+  string createdAt = 3;
 }
