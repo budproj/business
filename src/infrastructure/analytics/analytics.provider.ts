@@ -2,11 +2,15 @@ import { Inject, OnModuleInit } from '@nestjs/common'
 import { ClientGrpc } from '@nestjs/microservices'
 
 import { AnalyticsAdapter } from '@adapters/analytics/adapter.interface'
-import { KeyResultData } from '@adapters/analytics/key-result-data.interface'
 import { ProgressRecord } from '@adapters/analytics/progress-record.interface'
+import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 
 import { AnalyticsDateWindow } from './analytics.enums'
-import { KeyResultGRPCService, PrimitiveProgressRecord } from './analytics.interfaces'
+import {
+  AnalyticsGRPCResponse,
+  KeyResultGRPCService,
+  PrimitiveProgressRecord,
+} from './analytics.interfaces'
 
 export class AnalyticsProvider implements OnModuleInit, AnalyticsAdapter {
   private keyResultGRPCService: KeyResultGRPCService
@@ -28,25 +32,41 @@ export class AnalyticsProvider implements OnModuleInit, AnalyticsAdapter {
 
   public async getWeeklyProgressHistoryForKeyResult(
     keyResultId: string,
+    headKeyResultCheckInData?: KeyResultCheckIn,
   ): Promise<ProgressRecord[]> {
-    const options = {
-      keyResultId,
-      window: AnalyticsDateWindow.WEEK,
-    }
-    const response = await this.keyResultGRPCService.getProgressHistory(options).toPromise()
+    const handle = async () =>
+      headKeyResultCheckInData
+        ? this.getWeeklyProgressWithStaticHead(keyResultId, headKeyResultCheckInData)
+        : this.getHistoricWeeklyProgress(keyResultId)
+
+    const response = await handle()
 
     return response.data.map((progressRecord) =>
       AnalyticsProvider.marshalProgressRecord(progressRecord),
     )
   }
 
-  public async calculateProgress(value: number, keyResultData: KeyResultData): Promise<number> {
+  private async getWeeklyProgressWithStaticHead(
+    keyResultId: string,
+    headKeyResultCheckInData?: KeyResultCheckIn,
+  ): Promise<AnalyticsGRPCResponse<PrimitiveProgressRecord[]>> {
     const options = {
-      value,
-      keyResultData,
+      keyResultId,
+      window: AnalyticsDateWindow.WEEK,
+      headKeyResultCheckInData,
     }
-    const response = await this.keyResultGRPCService.calculateProgress(options).toPromise()
 
-    return response.data.progress
+    return this.keyResultGRPCService.getProgressHistoryWithStaticHead(options).toPromise()
+  }
+
+  private async getHistoricWeeklyProgress(
+    keyResultId: string,
+  ): Promise<AnalyticsGRPCResponse<PrimitiveProgressRecord[]>> {
+    const options = {
+      keyResultId,
+      window: AnalyticsDateWindow.WEEK,
+    }
+
+    return this.keyResultGRPCService.getProgressHistory(options).toPromise()
   }
 }

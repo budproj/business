@@ -339,14 +339,12 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   }
 
   public async getProgressHistoryForKeyResultID(id: string): Promise<ProgressRecord[]> {
-    const history = await this.analyticsProvider.getWeeklyProgressHistoryForKeyResult(id)
-
     const keyResult = await this.getFromID(id)
     const latestCheckIn = await this.keyResultCheckInProvider.getLatestFromKeyResult(keyResult)
 
-    const latestCheckInProgress = await this.analyticsProvider.calculateProgress(
-      latestCheckIn.value,
-      keyResult,
+    const history = await this.analyticsProvider.getWeeklyProgressHistoryForKeyResult(
+      id,
+      latestCheckIn,
     )
 
     return history

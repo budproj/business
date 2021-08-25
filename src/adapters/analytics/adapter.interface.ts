@@ -1,7 +1,10 @@
-import { KeyResultData } from './key-result-data.interface'
+import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
+
 import { ProgressRecord } from './progress-record.interface'
 
 export interface AnalyticsAdapter {
-  getWeeklyProgressHistoryForKeyResult: (keyResultID: string) => Promise<ProgressRecord[]>
-  calculateProgress: (value: number, keyResultData: KeyResultData) => Promise<number>
+  getWeeklyProgressHistoryForKeyResult: (
+    keyResultID: string,
+    latestCheckIn?: KeyResultCheckIn,
+  ) => Promise<ProgressRecord[]>
 }
