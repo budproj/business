@@ -14,7 +14,8 @@ import { ObjectiveRootEdgeGraphQLObject } from './objective-root.edge'
   description: 'A list containing objectives based on the provided filters and arguments',
 })
 export class ObjectivesGraphQLConnection
-  implements GuardedConnectionGraphQLInterface<ObjectiveGraphQLNode> {
+  implements GuardedConnectionGraphQLInterface<ObjectiveGraphQLNode>
+{
   @Field(() => [ObjectiveRootEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: ObjectiveRootEdgeGraphQLObject[]
 

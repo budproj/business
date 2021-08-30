@@ -12,7 +12,8 @@ import { NotificationChannel } from '../channel.interface'
 
 @Injectable()
 export class EmailNotificationChannel
-  implements NotificationChannel<EmailNotificationChannelMetadata> {
+  implements NotificationChannel<EmailNotificationChannelMetadata>
+{
   private readonly emailAdapter: EmailAdapterProvider
 
   constructor(awsSESProvider: AWSSESProvider) {

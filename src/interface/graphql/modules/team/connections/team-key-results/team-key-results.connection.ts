@@ -14,7 +14,8 @@ import { TeamKeyResultEdgeGraphQLObject } from './team-key-result.edge'
     'A list containing a given user key-results based on the provided filters and arguments',
 })
 export class TeamKeyResultsGraphQLConnection
-  implements GuardedConnectionGraphQLInterface<KeyResultGraphQLNode> {
+  implements GuardedConnectionGraphQLInterface<KeyResultGraphQLNode>
+{
   @Field(() => [TeamKeyResultEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: TeamKeyResultEdgeGraphQLObject[]
 

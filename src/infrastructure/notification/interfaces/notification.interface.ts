@@ -3,7 +3,7 @@ import { NotificationMetadata } from '@infrastructure/notification/types/notific
 
 export interface Notification<
   D extends NotificationData = NotificationData,
-  M extends NotificationMetadata = NotificationMetadata
+  M extends NotificationMetadata = NotificationMetadata,
 > {
   data: D
   metadata: M

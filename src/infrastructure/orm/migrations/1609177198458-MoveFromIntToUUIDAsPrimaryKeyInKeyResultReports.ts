@@ -1,7 +1,8 @@
 import { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class MoveFromIntToUUIDAsPrimaryKeyInKeyResultReports1609177198458
-  implements MigrationInterface {
+  implements MigrationInterface
+{
   name = 'MoveFromIntToUUIDAsPrimaryKeyInKeyResultReports1609177198458'
 
   public async up(queryRunner: QueryRunner): Promise<void> {

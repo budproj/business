@@ -11,6 +11,9 @@ import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 import { EntityOrderAttributes } from '@core/types/order-attribute.type'
+import { AnalyticsProvider } from '@infrastructure/analytics/analytics.provider'
+
+import { ProgressRecord } from '../../../adapters/analytics/progress-record.interface'
 
 import { KeyResultCheckInInterface } from './check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from './check-in/key-result-check-in.orm-entity'
@@ -33,6 +36,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     public readonly keyResultCheckInProvider: KeyResultCheckInProvider,
     public readonly timeline: KeyResultTimelineProvider,
     protected readonly repository: KeyResultRepository,
+    private readonly analyticsProvider: AnalyticsProvider,
   ) {
     super(KeyResultProvider.name, repository)
   }
@@ -332,6 +336,18 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       nullableFilters,
       orderAttributes,
     )
+  }
+
+  public async getProgressHistoryForKeyResultID(id: string): Promise<ProgressRecord[]> {
+    const keyResult = await this.getFromID(id)
+    const latestCheckIn = await this.keyResultCheckInProvider.getLatestFromKeyResult(keyResult)
+
+    const history = await this.analyticsProvider.getWeeklyProgressHistoryForKeyResult(
+      id,
+      latestCheckIn,
+    )
+
+    return history
   }
 
   protected async protectCreationQuery(

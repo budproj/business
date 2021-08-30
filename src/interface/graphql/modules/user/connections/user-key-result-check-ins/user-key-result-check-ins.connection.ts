@@ -14,7 +14,8 @@ import { UserKeyResultCheckInEdgeGraphQLObject } from './user-key-result-check-i
     'A list containing a given user key-results based on the provided filters and arguments',
 })
 export class UserKeyResultCheckInsGraphQLConnection
-  implements GuardedConnectionGraphQLInterface<KeyResultCheckInGraphQLNode> {
+  implements GuardedConnectionGraphQLInterface<KeyResultCheckInGraphQLNode>
+{
   @Field(() => [UserKeyResultCheckInEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: UserKeyResultCheckInEdgeGraphQLObject[]
 

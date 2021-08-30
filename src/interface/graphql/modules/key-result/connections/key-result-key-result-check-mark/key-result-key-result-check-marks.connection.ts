@@ -31,7 +31,8 @@ export class CheckMarkProgress {
     'A list containing key-results check marks based on the provided filters and arguments',
 })
 export class KeyResultKeyResultCheckMarkGraphQLConnection
-  implements GuardedConnectionGraphQLInterface<KeyResultCheckMarkGraphQLNode> {
+  implements GuardedConnectionGraphQLInterface<KeyResultCheckMarkGraphQLNode>
+{
   @Field(() => [KeyResultKeyResultCheckMarkEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: KeyResultKeyResultCheckMarkEdgeGraphQLObject[]
 

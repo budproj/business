@@ -14,7 +14,8 @@ import { KeyResultKeyResultCommentEdgeGraphQLObject } from './key-result-key-res
   description: 'A list containing key-results based on the provided filters and arguments',
 })
 export class KeyResultKeyResultCommentsGraphQLConnection
-  implements GuardedConnectionGraphQLInterface<KeyResultCommentGraphQLNode> {
+  implements GuardedConnectionGraphQLInterface<KeyResultCommentGraphQLNode>
+{
   @Field(() => [KeyResultKeyResultCommentEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: KeyResultKeyResultCommentEdgeGraphQLObject[]
 

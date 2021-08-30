@@ -9,9 +9,9 @@
 # Global variables
 # -------------------------------------------------------------------------------------------------
 
-DB_USER="${POSTGRES_USER:-codespace}"
+DB_USER="${POSTGRES_USER:-business}"
 DB_PASSWORD="${POSTGRES_PASSWORD:-changeme}"
-DB_NAME="${POSTGRES_DB:-business_codespace}"
+DB_NAME="${POSTGRES_DB:-business}"
 ROOT_DIR=$(git rev-parse --show-toplevel)
 
 # Entrypoint
@@ -22,7 +22,7 @@ function main {
   authenticate_pg_client
   clear_database
   create_database
-  load_seed_data
+  load_dump
 
   echo
 }
@@ -81,10 +81,10 @@ function create_database {
 # Load seed data
 # -------------------------------------------------------------------------------------------------
 
-function load_seed_data {
-  log "Loading" "Load seed data"
+function load_dump {
+  log "Loading" "Load dump"
 
-  psql -h localhost -U ${DB_USER} $DB_NAME < $ROOT_DIR/src/infrastructure/database/seed-data.sql
+  psql -h localhost -U ${DB_USER} $DB_NAME < $ROOT_DIR/src/infrastructure/database/dump.sql
 }
 
 # Helpers

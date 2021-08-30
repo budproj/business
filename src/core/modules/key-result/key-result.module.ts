@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
 import { TeamModule } from '@core/modules/team/team.module'
+import { AnalyticsModule } from '@infrastructure/analytics/analytics.module'
 
 import { KeyResultCheckInProvider } from './check-in/key-result-check-in.provider'
 import { KeyResultCheckInRepository } from './check-in/key-result-check-in.repository'
@@ -22,6 +23,7 @@ import { KeyResultTimelineProvider } from './timeline.provider'
       KeyResultCheckMarkRepository,
     ]),
     TeamModule,
+    AnalyticsModule,
   ],
   providers: [
     KeyResultProvider,

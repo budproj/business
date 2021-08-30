@@ -13,7 +13,7 @@ import { GuardedNodeGraphQLInterface } from './guarded-node.interface'
   description: 'A guarded connection is like a common connection, but with an extra policy field',
 })
 export abstract class GuardedConnectionGraphQLInterface<
-  N extends GuardedNodeGraphQLInterface
+  N extends GuardedNodeGraphQLInterface,
 > extends ConnectionRelayGraphQLInterface<N> {
   @Field(() => ConnectionPolicyGraphQLObject, {
     complexity: 1,

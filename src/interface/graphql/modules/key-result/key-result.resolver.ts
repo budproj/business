@@ -3,6 +3,7 @@ import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { UpdatedKeyResultActivity } from '@adapters/activity/activities/updated-key-result-activity'
+import { ProgressRecord } from '@adapters/analytics/progress-record.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { State } from '@adapters/state/interfaces/state.interface'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
@@ -45,6 +46,7 @@ import { KeyResultCommentFiltersRequest } from './comment/requests/key-result-co
 import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.connection'
 import { KeyResultKeyResultCheckMarkGraphQLConnection } from './connections/key-result-key-result-check-mark/key-result-key-result-check-marks.connection'
 import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-result-key-result-comments/key-result-key-result-comments.connection'
+import { KeyResultProgressHistoryGraphQLConnection } from './connections/key-result-progress-history/key-result-progress-history.connection'
 import { KeyResultTimelineGraphQLConnection } from './connections/key-result-timeline/key-result-key-result-timeline.connection'
 import { KeyResultGraphQLNode } from './key-result.node'
 import { KeyResultUpdateRequest } from './requests/key-result-update.request'
@@ -319,5 +321,28 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       )
 
     return result
+  }
+
+  @ResolveField('progressHistory', () => KeyResultProgressHistoryGraphQLConnection)
+  protected async getProgressHistoryForKeyResult(
+    @Parent() keyResult: KeyResultGraphQLNode,
+    @Args() request: ConnectionFiltersRequest,
+  ) {
+    this.logger.log({
+      keyResult,
+      request,
+      message: 'Fetching progress history for key result',
+    })
+
+    const connection = this.relay.unmarshalRequest<ConnectionFiltersRequest, ProgressRecord>(
+      request,
+    )[2]
+
+    const queryResult = await this.corePorts.dispatchCommand<ProgressRecord[]>(
+      'get-key-result-progress-history',
+      keyResult.id,
+    )
+
+    return this.relay.marshalResponse(queryResult, connection, keyResult)
   }
 }

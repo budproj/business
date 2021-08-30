@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "assets": [
+      {
+        "include": "../lib/grpc/**/*.proto",
+        "outDir": "dist/lib"
+      }
+    ]
+  }
+}

@@ -9,7 +9,8 @@ import { KeyResultGraphQLNode } from '@interface/graphql/modules/key-result/key-
   description: 'This edge represents the relation between objectives and their key-results',
 })
 export class ObjectiveKeyResultEdgeGraphQLObject
-  implements EdgeRelayGraphQLInterface<KeyResultGraphQLNode> {
+  implements EdgeRelayGraphQLInterface<KeyResultGraphQLNode>
+{
   @Field(() => KeyResultGraphQLNode, { complexity: 1 })
   public readonly node!: KeyResultGraphQLNode
 

@@ -15,6 +15,7 @@ import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.connection'
 import { KeyResultKeyResultCheckMarkGraphQLConnection } from './connections/key-result-key-result-check-mark/key-result-key-result-check-marks.connection'
 import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-result-key-result-comments/key-result-key-result-comments.connection'
+import { KeyResultProgressHistoryGraphQLConnection } from './connections/key-result-progress-history/key-result-progress-history.connection'
 import { KeyResultTimelineGraphQLConnection } from './connections/key-result-timeline/key-result-key-result-timeline.connection'
 import { KeyResultFormatGraphQLEnum } from './enums/key-result-format.enum'
 
@@ -121,6 +122,11 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
     description: 'The check-marks for this key result',
   })
   public checkList: KeyResultKeyResultCheckMarkGraphQLConnection
+
+  @Field(() => KeyResultProgressHistoryGraphQLConnection, {
+    description: 'The progress history for this key result',
+  })
+  public progressHistory?: KeyResultProgressHistoryGraphQLConnection
 
   public readonly id!: string
   public readonly createdAt!: Date

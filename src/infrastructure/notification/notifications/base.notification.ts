@@ -8,7 +8,7 @@ import { NotificationMetadata } from '@infrastructure/notification/types/notific
 export abstract class BaseNotification<
   D extends NotificationData,
   M extends NotificationMetadata = NotificationMetadata,
-  A extends Activity = Activity
+  A extends Activity = Activity,
 > {
   static activityType: string
   static notificationType: string

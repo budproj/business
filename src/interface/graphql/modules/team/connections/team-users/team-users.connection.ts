@@ -14,7 +14,8 @@ import { TeamUserEdgeGraphQLObject } from './team-user.edge'
     'A list containing a given user key-results based on the provided filters and arguments',
 })
 export class TeamUsersGraphQLConnection
-  implements GuardedConnectionGraphQLInterface<UserGraphQLNode> {
+  implements GuardedConnectionGraphQLInterface<UserGraphQLNode>
+{
   @Field(() => [TeamUserEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: TeamUserEdgeGraphQLObject[]
 

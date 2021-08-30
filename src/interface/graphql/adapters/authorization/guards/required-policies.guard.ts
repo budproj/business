@@ -10,7 +10,8 @@ import { BaseAuthorizationGraphQLReflector } from '../reflectors/base.reflector'
 @Injectable()
 export class GraphQLRequiredPoliciesGraphQLGuard
   extends BaseAuthorizationGraphQLReflector
-  implements CanActivate {
+  implements CanActivate
+{
   protected readonly godmode: GodmodeProvider
   private readonly logger = new Logger(GraphQLRequiredPoliciesGraphQLGuard.name)
 
