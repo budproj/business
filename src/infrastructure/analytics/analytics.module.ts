@@ -13,7 +13,6 @@ import { AnalyticsProvider } from './analytics.provider'
       provide: 'ANALYTICS_GRPC_SERVER',
       useFactory: (configProvider: AnalyticsConfigProvider) => {
         const { connection } = configProvider
-        console.log(connection)
 
         return ClientProxyFactory.create(connection)
       },
