@@ -83,3 +83,5 @@ spec:
                 secretKeyRef:
                   name: business-canary
                   key: aws-credentials-secret-access-key
+            - name: ANALYTICS_URL
+              value: analytics-canary.bud.traefik.mesh:9090
