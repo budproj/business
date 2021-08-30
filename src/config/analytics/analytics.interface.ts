@@ -1,4 +1,4 @@
-import { ServerCredentials } from '@grpc/grpc-js'
+import { ChannelCredentials } from '@grpc/grpc-js'
 
 export interface AnalyticsConfig {
   grpcServer: AnalyticsGRPCServerConfig
@@ -6,7 +6,7 @@ export interface AnalyticsConfig {
 
 export interface AnalyticsGRPCServerConfig {
   url: string
-  credentials: ServerCredentials
+  credentials: ChannelCredentials
   package: string[]
   protoPath: string[]
 }
