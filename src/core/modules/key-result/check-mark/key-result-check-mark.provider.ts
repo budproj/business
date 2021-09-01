@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common/decorators'
-import { DeleteResult } from 'typeorm'
+import { Any, DeleteResult } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
 import { Sorting } from '@core/enums/sorting'
@@ -50,6 +50,15 @@ export class KeyResultCheckMarkProvider extends CoreEntityProvider<
     indexes: Partial<KeyResultCheckMarkInterface>,
   ): Promise<KeyResultCheckMark> {
     return this.getOne(indexes)
+  }
+
+  public async deleteFromObjective(objectiveID: string): Promise<DeleteResult> {
+    const objectiveCheckMarks = await this.repository.getFromObjective(objectiveID)
+    const objectiveCheckMarkIDs = objectiveCheckMarks.map((checkMark) => checkMark.id)
+
+    return this.delete({
+      id: Any(objectiveCheckMarkIDs),
+    })
   }
 
   protected async protectCreationQuery(
