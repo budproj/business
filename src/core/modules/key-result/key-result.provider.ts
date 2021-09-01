@@ -291,11 +291,14 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const checkIns = await this.keyResultCheckInProvider.delete({
       keyResultId: id,
     })
+    const checkMarks = await this.keyResultCheckMarkProvider.delete({
+      keyResultId: id,
+    })
     const keyResult = await this.delete({ id })
 
     return {
-      raw: [...comments.raw, ...checkIns.raw, ...keyResult.raw],
-      affected: comments.affected + checkIns.affected + keyResult.affected,
+      raw: [...comments.raw, ...checkIns.raw, ...checkMarks.raw, ...keyResult.raw],
+      affected: comments.affected + checkIns.affected + checkMarks.affected + keyResult.affected,
     }
   }
 
