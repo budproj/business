@@ -8,7 +8,7 @@ export const ServerEnvironmentSchema = Joi.object({
   SERVER_NETWORK_ADDRESS: Joi.string().default('0.0.0.0'),
   SERVER_PREFIX: Joi.string(),
   SERVER_CORS_CREDENTIALS_ENABLED: Joi.boolean().default(true),
-  SERVER_CORS_ALLOWED_ORIGINS: Joi.string().default('*'),
+  SERVER_CORS_ALLOWED_ORIGINS: Joi.string(),
   SERVER_LOGGING_LEVEL: Joi.string()
     .valid(...Object.keys(LogLevel))
     .default('ERROR'),
