@@ -1,0 +1,97 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: business-admin
+  labels:
+    app.kubernetes.io/name: business-admin
+    app.kubernetes.io/part-of: business
+    app.kubernetes.io/component: admin
+    app.kubernetes.io/version: 1.0.0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: business-admin
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: business-admin
+        app.kubernetes.io/part-of: business
+        app.kubernetes.io/component: admin
+        app.kubernetes.io/version: 1.0.0
+    spec:
+      containers:
+        - name: business-admin
+          image: directus/directus@9.0.0-rc.91
+          ports:
+            - containerPort: 8055
+          env:
+            - name: DB_CLIENT
+              value: pg
+            - name: DB_HOST
+              value: business.cka3r3gokfjc.sa-east-1.rds.amazonaws.com
+            - name: DB_PORT
+              value: '5432'
+            - name: DB_DATABASE
+              value: business
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: business
+                  key: directus-db-username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: business
+                  key: directus-db-password
+            - name: ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: business
+                  key: directus-admin-email
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: business
+                  key: directus-admin-password
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: business-admin
+  labels:
+    app.kubernetes.io/name: business-admin
+    app.kubernetes.io/part-of: business
+    app.kubernetes.io/component: admin
+    app.kubernetes.io/version: 1.0.0
+spec:
+  selector:
+    app.kubernetes.io/name: business-admin
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8055
+      protocol: TCP
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: business-admin
+  labels:
+    app.kubernetes.io/name: business-admin
+    app.kubernetes.io/part-of: business
+    app.kubernetes.io/component: admin
+    app.kubernetes.io/version: 1.0.0
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`api.getbud.co`) && PathPrefix(`/business/admin`)
+      kind: Rule
+      services:
+        - name: business-admin
+          port: 80
+  tls:
+    certResolver: letsencrypt
+    options: {}
