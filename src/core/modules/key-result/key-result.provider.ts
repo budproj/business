@@ -349,6 +349,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const history = await this.analyticsProvider.getWeeklyProgressHistoryForKeyResult(
       id,
       latestCheckIn,
+      keyResult.createdAt,
     )
 
     return history
