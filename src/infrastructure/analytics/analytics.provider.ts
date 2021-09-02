@@ -33,11 +33,12 @@ export class AnalyticsProvider implements OnModuleInit, AnalyticsAdapter {
   public async getWeeklyProgressHistoryForKeyResult(
     keyResultId: string,
     headKeyResultCheckInData?: KeyResultCheckIn,
+    startDate?: Date,
   ): Promise<ProgressRecord[]> {
     const handle = async () =>
       headKeyResultCheckInData
-        ? this.getWeeklyProgressWithStaticHead(keyResultId, headKeyResultCheckInData)
-        : this.getHistoricWeeklyProgress(keyResultId)
+        ? this.getWeeklyProgressWithStaticHead(keyResultId, headKeyResultCheckInData, startDate)
+        : this.getHistoricWeeklyProgress(keyResultId, startDate)
 
     const response = await handle()
 
@@ -49,9 +50,11 @@ export class AnalyticsProvider implements OnModuleInit, AnalyticsAdapter {
   private async getWeeklyProgressWithStaticHead(
     keyResultId: string,
     headKeyResultCheckInData?: KeyResultCheckIn,
+    startDate?: Date,
   ): Promise<AnalyticsGRPCResponse<PrimitiveProgressRecord[]>> {
     const options = {
       keyResultId,
+      startDate: startDate.toString(),
       window: AnalyticsDateWindow.WEEK,
       headKeyResultCheckInData,
     }
@@ -61,9 +64,11 @@ export class AnalyticsProvider implements OnModuleInit, AnalyticsAdapter {
 
   private async getHistoricWeeklyProgress(
     keyResultId: string,
+    startDate?: Date,
   ): Promise<AnalyticsGRPCResponse<PrimitiveProgressRecord[]>> {
     const options = {
       keyResultId,
+      startDate: startDate.toString(),
       window: AnalyticsDateWindow.WEEK,
     }
 
