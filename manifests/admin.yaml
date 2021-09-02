@@ -65,6 +65,8 @@ spec:
                 secretKeyRef:
                   name: business
                   key: directus-secret
+            - name: PUBLIC_URL
+              value: https://admin.getbud.co/business
 ---
 kind: Service
 apiVersion: v1
