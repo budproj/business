@@ -97,7 +97,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`api.getbud.co`) && PathPrefix(`/business/admin`)
+    - match: Host(`admin.getbud.co`) && PathPrefix(`/business`)
       kind: Rule
       services:
         - name: business-admin
