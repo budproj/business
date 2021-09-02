@@ -55,6 +55,16 @@ spec:
                 secretKeyRef:
                   name: business
                   key: directus-admin-password
+            - name: KEY
+              valueFrom:
+                secretKeyRef:
+                  name: business
+                  key: directus-key
+            - name: SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: business
+                  key: directus-secret
 ---
 kind: Service
 apiVersion: v1
