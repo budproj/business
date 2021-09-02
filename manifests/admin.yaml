@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: business-admin
-          image: directus/directus@9.0.0-rc.91
+          image: directus/directus:9.0.0-rc.91
           ports:
             - containerPort: 8055
           env:
