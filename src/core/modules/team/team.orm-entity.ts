@@ -49,7 +49,12 @@ export class Team extends CoreEntity implements TeamInterface {
   @OneToMany('Team', 'parent', { nullable: true })
   public teams?: TeamInterface[]
 
-  @ManyToMany('User', 'teams', { lazy: true, nullable: true })
+  @ManyToMany('User', 'teams', {
+    lazy: true,
+    nullable: true,
+    onDelete: 'CASCADE',
+    onUpdate: 'NO ACTION',
+  })
   @JoinTable()
   public users?: Promise<UserInterface[]>
 

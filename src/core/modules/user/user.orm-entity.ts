@@ -45,7 +45,7 @@ export class User extends CoreEntity implements UserInterface {
   @Column({ nullable: true })
   public linkedInProfileAddress?: string
 
-  @ManyToMany('Team', 'users', { nullable: true })
+  @ManyToMany('Team', 'users', { nullable: true, onDelete: 'CASCADE' })
   public teams?: TeamInterface[]
 
   @OneToMany('Team', 'owner', { nullable: true })
