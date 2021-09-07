@@ -41,10 +41,9 @@ export class AnalyticsProvider implements OnModuleInit, AnalyticsAdapter {
         : this.getHistoricWeeklyProgress(keyResultId, startDate)
 
     const response = await handle()
+    const data = response?.data ?? []
 
-    return response.data.map((progressRecord) =>
-      AnalyticsProvider.marshalProgressRecord(progressRecord),
-    )
+    return data.map((progressRecord) => AnalyticsProvider.marshalProgressRecord(progressRecord))
   }
 
   private async getWeeklyProgressWithStaticHead(
