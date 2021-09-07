@@ -40,7 +40,7 @@ export abstract class BaseStatusCommand extends Command<Status> {
     baseDate ??= new Date()
     const checkInDate = latestKeyResultCheckIn?.createdAt ?? baseDate
 
-    return differenceInCalendarWeeks(baseDate, checkInDate) > 0
+    return differenceInCalendarWeeks(baseDate, checkInDate) > 1
   }
 
   protected async getKeyResultProgressesFromKeyResultList(
