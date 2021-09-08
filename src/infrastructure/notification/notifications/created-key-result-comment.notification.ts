@@ -131,7 +131,15 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       }
 
       const data = {
+        mentionedFirstName: user.firstName,
+        ownerFirstName: genericData.owner.firstName,
+        authorFullName: genericData.author.fullName,
+        authorPictureURL: genericData.author.picture,
+        keyResultTitle: genericData.keyResult.title,
+        keyResultConfidenceTagColor: genericData.keyResult.confidenceColor,
         keyResultComment: genericData.comment.content,
+        isQuarterlyCadence: genericData.cycle.isQuarterlyCadence,
+        cyclePeriod: genericData.cycle.period,
       }
 
       return { data, metadata }
