@@ -53,6 +53,10 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     return this.repository.findOne(indexes)
   }
 
+  public async getByIds(ids: string[]): Promise<User[]> {
+    return this.repository.find({ where: { id: ids } })
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<User>,
     _data: Partial<UserInterface>,
