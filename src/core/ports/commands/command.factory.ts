@@ -59,6 +59,7 @@ import { GetTeamCompanyCommand } from './get-team-company.command'
 import { GetTeamMembersCommand } from './get-team-members.command'
 import { GetTeamOwnerCommand } from './get-team-owner.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
+import { GetUsersByIdsCommand } from './get-users-by-ids.command'
 import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
 import { UpdateCheckMarkDescriptionCommand } from './update-check-mark-description.command'
 
@@ -120,6 +121,7 @@ export type CommandType =
   | 'get-user'
   | 'toggle-check-mark'
   | 'update-check-mark-description'
+  | 'get-users-by-ids'
   | 'update-key-result'
   | 'update-objective'
 
@@ -182,6 +184,7 @@ export class CommandFactory {
     'get-user': GetUserCommand,
     'toggle-check-mark': ToggleCheckMarkCommand,
     'update-check-mark-description': UpdateCheckMarkDescriptionCommand,
+    'get-users-by-ids': GetUsersByIdsCommand,
     'update-key-result': UpdateKeyResultCommand,
     'update-objective': UpdateObjectiveCommand,
   }
