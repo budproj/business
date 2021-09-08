@@ -105,10 +105,50 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     const isOwnerAuthor = this.isOwnerAuthor()
     if (isOwnerAuthor) return
 
-    await this.dispatchEmail()
+    await Promise.all([
+      this.dispatchOwnerEmail(),
+      this.dispatchMentionsEmails(),
+    ])
   }
 
-  private async dispatchEmail(): Promise<void> {
+  private async dispatchMentionsEmails(): Promise<void> {
+    const marshal = this.marshal()
+    const { data: genericData, metadata: genericMetadata } = marshal
+
+    const commentContent = genericData.comment.content
+    console.log(genericData)
+
+    const mentionsRegex = /@\[(?<name>[a-zA-Z\u00C0-\u00FF ]+)]\((?<id>[a-zA-Z\u00C0-\u00FF-]+)\)/g
+    const mentions = [...commentContent.matchAll(mentionsRegex)]
+    const usersIds = mentions.map(mention => mention.groups.id)
+
+    const users = await this.core.dispatchCommand<UserInterface[]>('get-users-by-ids', usersIds)
+
+    const emailsConfig = users.map((user) => {
+      const recipients = EmailNotificationChannel.buildRecipientsFromUsers([user])
+
+      const metadata: EmailNotificationChannelMetadata = {
+        ...genericMetadata,
+        recipients,
+        template: 'NewKeyResultCommentMention'
+      }
+
+      const data = {
+        keyResultComment: genericData.comment.content,
+      }
+
+      return { data, metadata }
+    })
+
+    const emailsPromises = emailsConfig.map(
+      ({ data, metadata }) =>
+        this.channels.email.dispatch(data, metadata)
+    )
+
+    await Promise.all(emailsPromises)
+  }
+
+  private async dispatchOwnerEmail(): Promise<void> {
     const { data, metadata } = this.marshal()
 
     const recipients = EmailNotificationChannel.buildRecipientsFromUsers([metadata.keyResultOwner])
