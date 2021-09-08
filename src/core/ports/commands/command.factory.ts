@@ -59,9 +59,9 @@ import { GetTeamCompanyCommand } from './get-team-company.command'
 import { GetTeamMembersCommand } from './get-team-members.command'
 import { GetTeamOwnerCommand } from './get-team-owner.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
+import { GetUsersByIdsCommand } from './get-users-by-ids.command'
 import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
 import { UpdateCheckMarkDescriptionCommand } from './update-check-mark-description.command'
-import { GetUsersByIdsCommand } from './get-users-by-ids.command'
 
 type CommandConstructor = new (...commandArguments: any[]) => Command<unknown>
 export type CommandType =
@@ -189,7 +189,7 @@ export class CommandFactory {
     'update-objective': UpdateObjectiveCommand,
   }
 
-  constructor(private readonly core: CoreProvider) { }
+  constructor(private readonly core: CoreProvider) {}
 
   public buildCommand<R>(type: CommandType): Command<R> {
     const Command = this.commands[type]
