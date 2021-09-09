@@ -60,9 +60,9 @@ type CreatedKeyResultCommentMetadata = {
 
 @Injectable()
 export class CreatedKeyResultCommentNotification extends BaseNotification<
-  CreatedKeyResultCommentNotificationData,
-  CreatedKeyResultCommentMetadata,
-  CreatedKeyResultCommentActivity
+CreatedKeyResultCommentNotificationData,
+CreatedKeyResultCommentMetadata,
+CreatedKeyResultCommentActivity
 > {
   static activityType = CREATED_KEY_RESULT_COMMENT_ACTIVITY_TYPE
   static notificationType = 'CreatedKeyResultComment'
