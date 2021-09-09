@@ -7,6 +7,7 @@ import {
 import { Cadence } from '@core/modules/cycle/enums/cadence.enum'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
+import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { EmailNotificationChannel } from '@infrastructure/notification/channels/email/email.channel'
@@ -21,6 +22,11 @@ type CreatedKeyResultCommentNotificationData = {
   keyResult: KeyResultNotificationData
   comment: CommentNotificationData
   cycle: CycleNotificationData
+  team: TeamNotificationData
+}
+
+type TeamNotificationData = {
+  name: string
 }
 
 type OwnerNotificationData = {
@@ -51,6 +57,7 @@ type CycleNotificationData = {
 type RelatedData = {
   keyResult: KeyResultInterface
   cycle: CycleInterface
+  team: TeamInterface
   owner: UserInterface
 }
 
@@ -84,7 +91,9 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
   }
 
   public async prepare(): Promise<void> {
-    const { owner, keyResult, cycle } = await this.getRelatedData(this.activity.data.keyResultId)
+    const { owner, keyResult, cycle, team } = await this.getRelatedData(
+      this.activity.data.keyResultId,
+    )
 
     const data = {
       owner: CreatedKeyResultCommentNotification.getOwnerData(owner),
@@ -92,6 +101,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       cycle: this.getCycleData(cycle),
       author: await this.getAuthorData(),
       comment: this.getCommentData(),
+      team: this.getTeamData(team),
     }
 
     const metadata = {
@@ -103,9 +113,6 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
   }
 
   public async dispatch(): Promise<void> {
-    const isOwnerAuthor = this.isOwnerAuthor()
-    if (isOwnerAuthor) return
-
     await Promise.all([this.dispatchOwnerEmail(), this.dispatchMentionsEmails()])
   }
 
@@ -114,11 +121,10 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     const { data: genericData, metadata: genericMetadata } = marshal
 
     const commentContent = genericData.comment.content
-    console.log(genericData)
+    const cleanCommentContent = commentContent.replace(mentionsRegex, '$1')
 
     const mentions = [...commentContent.matchAll(mentionsRegex)]
     const usersIds = mentions.map((mention) => mention.groups.id)
-    const cleanCommentContent = commentContent.replace(mentionsRegex, '$1')
 
     const users = await this.core.dispatchCommand<UserInterface[]>('get-users-by-ids', usersIds)
 
@@ -134,6 +140,8 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       const data = {
         mentionedFirstName: user.firstName,
         ownerFirstName: genericData.owner.firstName,
+        authorFirstName: genericData.owner.firstName,
+        keyResultTeam: genericData.team.name,
         authorFullName: genericData.author.fullName,
         authorPictureURL: genericData.author.picture,
         keyResultTitle: genericData.keyResult.title,
@@ -154,6 +162,9 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
   }
 
   private async dispatchOwnerEmail(): Promise<void> {
+    const isOwnerAuthor = this.isOwnerAuthor()
+    if (isOwnerAuthor) return
+
     const { data, metadata } = this.marshal()
 
     const recipients = EmailNotificationChannel.buildRecipientsFromUsers([metadata.keyResultOwner])
@@ -182,12 +193,16 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     const keyResult = await this.core.dispatchCommand<KeyResultInterface>('get-key-result', {
       id: keyResultID,
     })
-    const cycle = await this.getCycle(keyResult)
-    const owner = await this.core.dispatchCommand<UserInterface>('get-key-result-owner', keyResult)
+    const [cycle, team, owner] = await Promise.all([
+      this.getCycle(keyResult),
+      this.getTeam(keyResult),
+      this.core.dispatchCommand<UserInterface>('get-key-result-owner', keyResult),
+    ])
 
     return {
       keyResult,
       cycle,
+      team,
       owner,
     }
   }
@@ -208,6 +223,12 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
   private getCommentData(): CommentNotificationData {
     return {
       content: this.activity.data.text,
+    }
+  }
+
+  private getTeamData(team: TeamInterface): TeamNotificationData {
+    return {
+      name: team.name,
     }
   }
 
@@ -234,6 +255,10 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
 
   private async getCycle(keyResult: KeyResultInterface): Promise<CycleInterface> {
     return this.core.dispatchCommand<CycleInterface>('get-key-result-cycle', keyResult)
+  }
+
+  private async getTeam(keyResult: KeyResultInterface): Promise<TeamInterface> {
+    return this.core.dispatchCommand<TeamInterface>('get-key-result-team', keyResult)
   }
 
   private isOwnerAuthor(): boolean {

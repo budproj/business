@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { flatten, uniqBy } from 'lodash'
-import { FindConditions } from 'typeorm'
+import { FindConditions, In } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
@@ -54,7 +54,7 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
   }
 
   public async getByIds(ids: string[]): Promise<User[]> {
-    return this.repository.find({ where: { id: ids } })
+    return this.repository.find({ where: { id: In(ids) } })
   }
 
   protected async protectCreationQuery(
