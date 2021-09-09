@@ -115,9 +115,9 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     const commentContent = genericData.comment.content
     console.log(genericData)
 
-    const mentionsRegex = /@\[(?<name>[\w \u00C0-\u00FF]+)]\((?<id>[\da-f-]+)\)/g
     const mentions = [...commentContent.matchAll(mentionsRegex)]
     const usersIds = mentions.map((mention) => mention.groups.id)
+    const cleanCommentContent = commentContent.replace(mentionsRegex, '$1')
 
     const users = await this.core.dispatchCommand<UserInterface[]>('get-users-by-ids', usersIds)
 
@@ -137,7 +137,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
         authorPictureURL: genericData.author.picture,
         keyResultTitle: genericData.keyResult.title,
         keyResultConfidenceTagColor: genericData.keyResult.confidenceColor,
-        keyResultComment: genericData.comment.content,
+        keyResultComment: cleanCommentContent,
         isQuarterlyCadence: genericData.cycle.isQuarterlyCadence,
         cyclePeriod: genericData.cycle.period,
       }
@@ -156,6 +156,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     const { data, metadata } = this.marshal()
 
     const recipients = EmailNotificationChannel.buildRecipientsFromUsers([metadata.keyResultOwner])
+    const cleanCommentContent = data.comment.content.replace(mentionsRegex, '$1')
 
     const emailMetadata: EmailNotificationChannelMetadata = {
       ...metadata,
@@ -168,7 +169,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       authorPictureURL: data.author.picture,
       keyResultTitle: data.keyResult.title,
       keyResultConfidenceTagColor: data.keyResult.confidenceColor,
-      keyResultComment: data.comment.content,
+      keyResultComment: cleanCommentContent,
       isQuarterlyCadence: data.cycle.isQuarterlyCadence,
       cyclePeriod: data.cycle.period,
     }
