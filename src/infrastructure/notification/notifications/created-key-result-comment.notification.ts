@@ -115,7 +115,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     const commentContent = genericData.comment.content
     console.log(genericData)
 
-    const mentionsRegex = /@\[(?<name>[ A-Za-z\u00C0-\u00FF]+)]\((?<id>[A-Za-z\u00C0-\u00FF-]+)\)/g
+    const mentionsRegex = /@\[(?<name>[\w \u00C0-\u00FF]+)]\((?<id>[\da-f-]+)\)/g
     const mentions = [...commentContent.matchAll(mentionsRegex)]
     const usersIds = mentions.map((mention) => mention.groups.id)
 
