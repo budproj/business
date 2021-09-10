@@ -7,6 +7,7 @@ import {
 import { Cadence } from '@core/modules/cycle/enums/cadence.enum'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
+import { TeamGender } from '@core/modules/team/enums/team-gender.enum'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CorePortsProvider } from '@core/ports/ports.provider'
@@ -27,6 +28,7 @@ type CreatedKeyResultCommentNotificationData = {
 
 type TeamNotificationData = {
   name: string
+  gender: TeamGender
 }
 
 type OwnerNotificationData = {
@@ -142,6 +144,8 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
         ownerFirstName: genericData.owner.firstName,
         authorFirstName: genericData.owner.firstName,
         keyResultTeam: genericData.team.name,
+        isMaleTeam: genericData.team.gender === TeamGender.MALE,
+        isFemaleTeam: genericData.team.gender === TeamGender.FEMALE,
         authorFullName: genericData.author.fullName,
         authorPictureURL: genericData.author.picture,
         keyResultTitle: genericData.keyResult.title,
@@ -229,6 +233,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
   private getTeamData(team: TeamInterface): TeamNotificationData {
     return {
       name: team.name,
+      gender: team.gender,
     }
   }
 
