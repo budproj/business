@@ -58,7 +58,7 @@ spec:
             - name: SERVER_PREFIX
               value: business
             - name: SERVER_CORS_ALLOWED_ORIGINS
-              value: https://app.getbud.co
+              value: https://app.getbud.co,https://studio.apollographql.com
             - name: TYPEORM_LOGGING_ENABLED
               value: 'false'
             - name: GRAPHQL_DEBUG_ENABLED
