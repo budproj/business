@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 
 import { EmailAdapterProvider } from '@adapters/email/email.provider'
 import { EmailMetadata } from '@adapters/email/types/metadata.type'
+import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { AWSSESProvider } from '@infrastructure/aws/ses/ses.provider'
 import { EmailNotificationChannelMetadata } from '@infrastructure/notification/channels/email/metadata.type'
@@ -24,7 +25,9 @@ export class EmailNotificationChannel
     users: UserInterface[],
     usersCustomTemplateData?: Array<Record<string, any>>,
   ): NotificationRecipient[] {
-    return users.map((user, index) =>
+    const activeUsers = users.filter((user) => user.status === UserStatus.ACTIVE)
+
+    return activeUsers.map((user, index) =>
       EmailNotificationChannel.buildSingleRecipientFromUser(user, usersCustomTemplateData?.[index]),
     )
   }
