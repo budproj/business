@@ -1,6 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
 import { UserGender } from '@core/modules/user/enums/user-gender.enum'
+import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
@@ -11,6 +12,7 @@ import { UserKeyResultsGraphQLConnection } from './connections/user-key-results/
 import { UserObjectivesGraphQLConnection } from './connections/user-objectives/user-objectives.connection'
 import { UserTeamsGraphQLConnection } from './connections/user-teams/user-teams.connection'
 import { UserGenderGraphQLEnum } from './enums/user-gender.enum'
+import { UserStatusGraphQLEnum } from './enums/user-status.enum'
 
 @ObjectType('User', {
   implements: () => [NodeRelayGraphQLInterface, GuardedNodeGraphQLInterface],
@@ -23,6 +25,9 @@ export class UserGraphQLNode implements GuardedNodeGraphQLInterface {
 
   @Field({ complexity: 0, description: 'The user e-mail' })
   public readonly email: string
+
+  @Field(() => UserStatusGraphQLEnum, { complexity: 0, description: 'The status of this user' })
+  public readonly status: UserStatus
 
   @Field({ complexity: 0, description: 'The sub field in Auth0 (their ID)' })
   public readonly authzSub!: string
