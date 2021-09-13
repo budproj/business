@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common'
 
 import { GraphQLConfigModule } from '@config/graphql/graphql.module'
 import { CoreModule } from '@core/core.module'
-import { AmplitudeModule } from '@infrastructure/amplitude/amplitude.module'
 import { AWSModule } from '@infrastructure/aws/aws.module'
 import { UserAccessControl } from '@interface/graphql/modules/user/user.access-control'
 
@@ -14,7 +13,7 @@ import { UsersConnectionGraphQLResolver } from './connections/users/users.resolv
 import { UserGraphQLResolver } from './user.resolver'
 
 @Module({
-  imports: [CoreModule, AWSModule, GraphQLConfigModule, AmplitudeModule],
+  imports: [CoreModule, AWSModule, GraphQLConfigModule],
   providers: [
     UserGraphQLResolver,
     UsersConnectionGraphQLResolver,

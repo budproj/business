@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common'
 
 import { GraphQLConfigModule } from '@config/graphql/graphql.module'
 import { CoreModule } from '@core/core.module'
-import { AmplitudeModule } from '@infrastructure/amplitude/amplitude.module'
 import { ObjectiveKeyResultsConnectionGraphQLResolver } from '@interface/graphql/modules/objective/connections/objective-key-results/objective-key-results.resolver'
 import { ObjectiveTeamsGraphQLConnection } from '@interface/graphql/modules/objective/connections/objective-teams/objective-teams.connection'
 
@@ -11,7 +10,7 @@ import { ObjectiveAccessControl } from './objective.access-control'
 import { ObjectiveGraphQLResolver } from './objective.resolver'
 
 @Module({
-  imports: [CoreModule, GraphQLConfigModule, AmplitudeModule],
+  imports: [CoreModule, GraphQLConfigModule],
   providers: [
     ObjectiveGraphQLResolver,
     ObjectivesConnectionGraphQLResolver,
