@@ -26,6 +26,7 @@ type CreatedKeyResultCommentNotificationData = {
 }
 
 type TeamNotificationData = {
+  id: string
   name: string
 }
 
@@ -141,6 +142,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
         mentionedFirstName: user.firstName,
         ownerFirstName: genericData.owner.firstName,
         authorFirstName: genericData.owner.firstName,
+        teamId: genericData.team.id,
         keyResultTeam: genericData.team.name,
         authorFullName: genericData.author.fullName,
         authorPictureURL: genericData.author.picture,
@@ -228,6 +230,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
 
   private getTeamData(team: TeamInterface): TeamNotificationData {
     return {
+      id: team.id,
       name: team.name,
     }
   }
