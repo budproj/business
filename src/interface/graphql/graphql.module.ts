@@ -3,7 +3,6 @@ import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql'
 
 import { GraphQLConfigModule } from '@config/graphql/graphql.module'
 import { CoreModule } from '@core/core.module'
-import { AmplitudeModule } from '@infrastructure/amplitude/amplitude.module'
 
 import { PermissionsGraphQLResolver } from './adapters/authorization/resolvers/permissions.resolver'
 import { UploadGraphQLScalar } from './adapters/upload/scalars/upload.scalar'
@@ -21,7 +20,6 @@ import { GraphQLOptionsFactory } from './options.factory'
       useClass: GraphQLOptionsFactory,
     }),
     CoreModule,
-    AmplitudeModule,
     GraphQLConfigModule,
     UserGraphQLModule,
     TeamGraphQLModule,
