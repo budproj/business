@@ -4,6 +4,7 @@ import { Args } from '@nestjs/graphql'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
@@ -37,10 +38,15 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
       message: 'Fetching users with filters',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+    const [rawFilters, queryOptions, connection] = this.relay.unmarshalRequest<
       UserFiltersRequest,
       User
     >(request)
+
+    const filters = {
+      ...rawFilters,
+      status: UserStatus.ACTIVE,
+    }
 
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,

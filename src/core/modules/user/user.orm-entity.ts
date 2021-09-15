@@ -8,6 +8,7 @@ import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 
 import { UserGender } from './enums/user-gender.enum'
+import { UserStatus } from './enums/user-status.enum'
 import { UserInterface } from './user.interface'
 
 @Entity()
@@ -20,6 +21,9 @@ export class User extends CoreEntity implements UserInterface {
 
   @Column({ type: 'citext', unique: true })
   public email: string
+
+  @Column({ type: 'simple-enum', enum: UserStatus, default: UserStatus.ACTIVE })
+  public status: UserStatus
 
   @UpdateDateColumn()
   public updatedAt: Date
