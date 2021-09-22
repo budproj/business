@@ -57,6 +57,9 @@ export class User extends CoreEntity implements UserInterface {
   @OneToMany('KeyResult', 'owner', { nullable: true })
   public keyResults?: KeyResultInterface[]
 
+  @ManyToMany('KeyResult')
+  public keyResultsSupporting?: KeyResultInterface[]
+
   @OneToMany('KeyResultComment', 'user', { nullable: true })
   public keyResultComments?: KeyResultCommentInterface[]
 
