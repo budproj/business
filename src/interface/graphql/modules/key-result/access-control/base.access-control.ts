@@ -50,7 +50,10 @@ export abstract class KeyResultBaseAccessControl extends AccessControl {
   }
 
   protected isKeyResultOwner(keyResult: KeyResult, user: UserWithContext): boolean {
-    return keyResult.ownerId === user.id
+    const supportTeamIds = keyResult.supportTeamMembers.map((member) => member.id)
+    const owners = [...supportTeamIds, keyResult.ownerId]
+
+    return owners.includes(user.id)
   }
 
   protected async isKeyResultCompanyMember(
