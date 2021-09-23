@@ -111,6 +111,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
     const keyResults = await this.repository.find({
       ...queryOptions,
+      relations: ['supportTeamMembers'],
       where: whereSelector,
     })
 
