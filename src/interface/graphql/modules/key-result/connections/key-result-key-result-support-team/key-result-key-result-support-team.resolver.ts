@@ -14,6 +14,6 @@ export class KeyResultKeyResultSupportTeamConnectionGraphQLResolver extends Guar
   UserInterface
 > {
   constructor(protected readonly core: CoreProvider, accessControl: KeyResultCommentAccessControl) {
-    super(Resource.KEY_RESULT_COMMENT, core, core.user, accessControl)
+    super(Resource.KEY_RESULT_SUPPORT_TEAM, core, core.user, accessControl)
   }
 }

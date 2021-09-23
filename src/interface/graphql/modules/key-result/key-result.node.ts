@@ -105,7 +105,7 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
     description: 'A created date ordered list of key result support team users',
     nullable: true,
   })
-  public readonly supportTeam?: KeyResultKeyResultSupportTeamGraphQLConnection
+  public readonly supportTeamMembers?: KeyResultKeyResultSupportTeamGraphQLConnection
 
   @Field(() => KeyResultKeyResultCommentsGraphQLConnection, {
     description: 'A created date ordered list of key result comments for this key result',
