@@ -1,7 +1,7 @@
 import { ArgsType, Field, ID } from '@nestjs/graphql'
 
 @ArgsType()
-export class AddTeamtoUserRequest {
+export class TeamAndUserRequest {
   @Field(() => ID)
   public readonly userID: string
 

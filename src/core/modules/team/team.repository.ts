@@ -15,6 +15,10 @@ export class TeamRepository extends CoreEntityRepository<Team> {
     await this.createQueryBuilder().relation(Team.name, 'users').of(teamID).add(userID)
   }
 
+  public async removeUserFromTeam(userID: string, teamID: string): Promise<void> {
+    await this.createQueryBuilder().relation(Team.name, 'users').of(teamID).remove(userID)
+  }
+
   protected addTeamWhereExpression(
     query: WhereExpression,
     allowedTeams: Array<TeamInterface['id']>,
