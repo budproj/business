@@ -16,7 +16,7 @@ import { RequestUserWithContext } from '@interface/graphql/adapters/context/deco
 import { UserAccessControl } from '../../user.access-control'
 import { UserGraphQLNode } from '../../user.node'
 
-import { AddTeamtoUserRequest } from './requests/user-update.request'
+import { TeamAndUserRequest } from './requests/team-and-user.request'
 import { UserTeamsGraphQLConnection } from './user-teams.connection'
 
 @GuardedResolver(UserTeamsGraphQLConnection)
@@ -36,7 +36,7 @@ export class UserTeamsConnectionGraphQLResolver extends GuardedConnectionGraphQL
 
   @GuardedMutation(UserGraphQLNode, 'user:update', { name: 'addTeamToUser' })
   protected async addTeamToUserForRequestAndRequestUserWithContext(
-    @Args() request: AddTeamtoUserRequest,
+    @Args() request: TeamAndUserRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
@@ -49,5 +49,22 @@ export class UserTeamsConnectionGraphQLResolver extends GuardedConnectionGraphQL
     if (!canUpdate) throw new UnauthorizedException()
 
     return this.corePorts.dispatchCommand<User>('add-team-to-user', request)
+  }
+
+  @GuardedMutation(UserGraphQLNode, 'user:update', { name: 'removeTeamFromUser' })
+  protected async removeTeamFromUserForRequestAndRequestUserWithContext(
+    @Args() request: TeamAndUserRequest,
+    @RequestUserWithContext() userWithContext: UserWithContext,
+  ) {
+    this.logger.log({
+      userWithContext,
+      request,
+      message: 'Received remove team to user request',
+    })
+
+    const canUpdate = await this.accessControl.canUpdate(userWithContext, request.userID)
+    if (!canUpdate) throw new UnauthorizedException()
+
+    return this.corePorts.dispatchCommand<User>('remove-team-from-user', request)
   }
 }

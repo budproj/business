@@ -35,7 +35,7 @@ import { GetUserCommand } from '@core/ports/commands/get-user.command'
 import { UpdateKeyResultCommand } from '@core/ports/commands/update-key-result.command'
 import { UpdateObjectiveCommand } from '@core/ports/commands/update-objective.command'
 
-import { AddTeamToUserCommand } from './add-team-to-user'
+import { AddTeamToUserCommand } from './add-team-to-user.command'
 import { Command } from './base.command'
 import { CreateCheckMarkCommand } from './create-check-mark.command'
 import { CreateKeyResultCheckInCommand } from './create-key-result-check-in.command'
@@ -61,6 +61,7 @@ import { GetTeamMembersCommand } from './get-team-members.command'
 import { GetTeamOwnerCommand } from './get-team-owner.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
 import { GetUsersByIdsCommand } from './get-users-by-ids.command'
+import { RemoveTeamFromUserCommand } from './remove-team-from-user.command'
 import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
 import { UpdateCheckMarkDescriptionCommand } from './update-check-mark-description.command'
 
@@ -122,6 +123,7 @@ export type CommandType =
   | 'get-user-team-tree'
   | 'get-user'
   | 'get-users-by-ids'
+  | 'remove-team-from-user'
   | 'toggle-check-mark'
   | 'update-check-mark-description'
   | 'update-key-result'
@@ -186,6 +188,7 @@ export class CommandFactory {
     'get-user-team-tree': GetUserTeamTreeCommand,
     'get-user': GetUserCommand,
     'get-users-by-ids': GetUsersByIdsCommand,
+    'remove-team-from-user': RemoveTeamFromUserCommand,
     'toggle-check-mark': ToggleCheckMarkCommand,
     'update-check-mark-description': UpdateCheckMarkDescriptionCommand,
     'update-key-result': UpdateKeyResultCommand,
