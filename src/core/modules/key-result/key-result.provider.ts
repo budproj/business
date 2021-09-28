@@ -58,6 +58,21 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     })
   }
 
+  public async getSupportTeam(
+    keyResultID: string,
+  ): Promise<KeyResult['supportTeamMembers']> {
+    const whereSelector = {
+      id: keyResultID,
+    }
+
+    const response = await this.repository.findOne({
+      relations: ['supportTeamMembers'],
+      where: whereSelector,
+    })
+
+    return response.supportTeamMembers
+  }
+
   public async getFromTeams(
     teams: Partial<TeamInterface> | Array<Partial<TeamInterface>>,
     filters?: FindConditions<KeyResult>,
@@ -111,7 +126,6 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
     const keyResults = await this.repository.find({
       ...queryOptions,
-      relations: ['supportTeamMembers'],
       where: whereSelector,
     })
 

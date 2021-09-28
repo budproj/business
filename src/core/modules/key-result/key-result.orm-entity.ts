@@ -1,4 +1,13 @@
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, RelationId, UpdateDateColumn } from 'typeorm'
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  RelationId,
+  UpdateDateColumn,
+} from 'typeorm'
 
 import { CoreEntity } from '@core/core.orm-entity'
 import { KeyResultType } from '@core/modules/key-result/enums/key-result-type.enum'
