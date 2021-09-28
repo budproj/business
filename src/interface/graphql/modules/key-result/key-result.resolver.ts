@@ -18,6 +18,8 @@ import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-
 import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { UserInterface } from '@core/modules/user/user.interface'
+import { User } from '@core/modules/user/user.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { AttachActivity } from '@interface/graphql/adapters/activity/attach-activity.decorator'
 import { RequestActivity } from '@interface/graphql/adapters/activity/request-activity.decorator'
@@ -46,14 +48,12 @@ import { KeyResultCommentFiltersRequest } from './comment/requests/key-result-co
 import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.connection'
 import { KeyResultKeyResultCheckMarkGraphQLConnection } from './connections/key-result-key-result-check-mark/key-result-key-result-check-marks.connection'
 import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-result-key-result-comments/key-result-key-result-comments.connection'
+import { KeyResultKeyResultSupportTeamGraphQLConnection } from './connections/key-result-key-result-support-team/key-result-key-result-support-team.connection'
 import { KeyResultProgressHistoryGraphQLConnection } from './connections/key-result-progress-history/key-result-progress-history.connection'
 import { KeyResultTimelineGraphQLConnection } from './connections/key-result-timeline/key-result-key-result-timeline.connection'
 import { KeyResultGraphQLNode } from './key-result.node'
-import { KeyResultUpdateRequest } from './requests/key-result-update.request'
-import { KeyResultKeyResultSupportTeamGraphQLConnection } from './connections/key-result-key-result-support-team/key-result-key-result-support-team.connection'
-import { UserInterface } from '@core/modules/user/user.interface'
 import { KeyResultSupportTeamMembersFiltersRequest } from './requests/key-result-support-team-members-filters.request'
-import { User } from '@core/modules/user/user.orm-entity'
+import { KeyResultUpdateRequest } from './requests/key-result-update.request'
 
 @GuardedResolver(KeyResultGraphQLNode)
 export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
@@ -179,18 +179,18 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   @ResolveField('supportTeamMembers', () => KeyResultKeyResultSupportTeamGraphQLConnection)
   protected async getSupportTeamMembersForKeyResult(
     @Args() request: KeyResultSupportTeamMembersFiltersRequest,
-    @Parent() keyResult: KeyResultGraphQLNode
+    @Parent() keyResult: KeyResultGraphQLNode,
   ) {
     this.logger.log({
       keyResult: keyResult.supportTeamMembers,
-      message: 'Fetching supportTeamMembers'
+      message: 'Fetching supportTeamMembers',
     })
 
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest(request)
 
     const queryResult = await this.corePorts.dispatchCommand<User[]>(
       'get-key-result-support-team',
-      keyResult.id
+      keyResult.id,
     )
 
     return this.relay.marshalResponse<UserInterface>(queryResult, connection, keyResult)

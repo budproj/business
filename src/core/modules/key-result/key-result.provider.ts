@@ -58,9 +58,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     })
   }
 
-  public async getSupportTeam(
-    keyResultID: string,
-  ): Promise<KeyResult['supportTeamMembers']> {
+  public async getSupportTeam(keyResultID: string): Promise<KeyResult['supportTeamMembers']> {
     const whereSelector = {
       id: keyResultID,
     }

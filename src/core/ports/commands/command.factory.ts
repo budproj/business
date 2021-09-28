@@ -52,6 +52,7 @@ import { GetKeyResultCycleCommand } from './get-key-result-cycle.command'
 import { GetKeyResultFromCheckInCommand } from './get-key-result-from-check-in.command'
 import { GetKeyResultOwnerCommand } from './get-key-result-owner.command'
 import { GetKeyResultProgressHistoryCommand } from './get-key-result-progress-history.command'
+import { GetKeyResultSupportTeamCommand } from './get-key-result-support-team.command'
 import { GetKeyResultTeamTreeCommand } from './get-key-result-team-tree.command'
 import { GetKeyResultCommand } from './get-key-result.command'
 import { GetObjectiveKeyResultsCommand } from './get-objective-key-results.command'
@@ -62,7 +63,6 @@ import { GetUserCompaniesCommand } from './get-user-companies.command'
 import { GetUsersByIdsCommand } from './get-users-by-ids.command'
 import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
 import { UpdateCheckMarkDescriptionCommand } from './update-check-mark-description.command'
-import { GetKeyResultSupportTeamCommand } from './get-key-result-support-team.command'
 
 type CommandConstructor = new (...commandArguments: any[]) => Command<unknown>
 export type CommandType =

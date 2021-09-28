@@ -6,7 +6,6 @@ import { ConnectionFiltersRequest } from '@interface/graphql/requests/connection
 
 @ArgsType()
 export class KeyResultSupportTeamMembersFiltersRequest extends ConnectionFiltersRequest {
-
   @Field(() => DefaultOrderGraphQLInput, {
     nullable: true,
     defaultValue: {
