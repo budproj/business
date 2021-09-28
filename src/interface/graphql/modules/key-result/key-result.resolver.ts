@@ -50,6 +50,10 @@ import { KeyResultProgressHistoryGraphQLConnection } from './connections/key-res
 import { KeyResultTimelineGraphQLConnection } from './connections/key-result-timeline/key-result-key-result-timeline.connection'
 import { KeyResultGraphQLNode } from './key-result.node'
 import { KeyResultUpdateRequest } from './requests/key-result-update.request'
+import { KeyResultKeyResultSupportTeamGraphQLConnection } from './connections/key-result-key-result-support-team/key-result-key-result-support-team.connection'
+import { UserInterface } from '@core/modules/user/user.interface'
+import { KeyResultSupportTeamMembersFiltersRequest } from './requests/key-result-support-team-members-filters.request'
+import { User } from '@core/modules/user/user.orm-entity'
 
 @GuardedResolver(KeyResultGraphQLNode)
 export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
@@ -170,6 +174,26 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     })
 
     return this.core.user.getOne({ id: keyResult.ownerId })
+  }
+
+  @ResolveField('supportTeamMembers', () => KeyResultKeyResultSupportTeamGraphQLConnection)
+  protected async getSupportTeamMembersForKeyResult(
+    @Args() request: KeyResultSupportTeamMembersFiltersRequest,
+    @Parent() keyResult: KeyResultGraphQLNode
+  ) {
+    this.logger.log({
+      keyResult: keyResult.supportTeamMembers,
+      message: 'Fetching supportTeamMembers'
+    })
+
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest(request)
+
+    const queryResult = await this.corePorts.dispatchCommand<User[]>(
+      'get-key-result-support-team',
+      keyResult.id
+    )
+
+    return this.relay.marshalResponse<UserInterface>(queryResult, connection, keyResult)
   }
 
   @ResolveField('team', () => TeamGraphQLNode)
