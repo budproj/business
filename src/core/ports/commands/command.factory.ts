@@ -96,6 +96,7 @@ export type CommandType =
   | 'get-key-result-owner'
   | 'get-key-result-progress-history'
   | 'get-key-result-status'
+  | 'get-key-result-support-team'
   | 'get-key-result-team-tree'
   | 'get-key-result-team'
   | 'get-key-result'
@@ -120,12 +121,11 @@ export type CommandType =
   | 'get-user-full-name'
   | 'get-user-team-tree'
   | 'get-user'
+  | 'get-users-by-ids'
   | 'toggle-check-mark'
   | 'update-check-mark-description'
-  | 'get-users-by-ids'
   | 'update-key-result'
   | 'update-objective'
-  | 'get-key-result-support-team'
 
 @Injectable()
 export class CommandFactory {
@@ -160,6 +160,7 @@ export class CommandFactory {
     'get-key-result-owner': GetKeyResultOwnerCommand,
     'get-key-result-progress-history': GetKeyResultProgressHistoryCommand,
     'get-key-result-status': GetKeyResultStatusCommand,
+    'get-key-result-support-team': GetKeyResultSupportTeamCommand,
     'get-key-result-team-tree': GetKeyResultTeamTreeCommand,
     'get-key-result-team': GetKeyResultTeamCommand,
     'get-key-result': GetKeyResultCommand,
@@ -184,12 +185,11 @@ export class CommandFactory {
     'get-user-full-name': GetUserFullNameCommand,
     'get-user-team-tree': GetUserTeamTreeCommand,
     'get-user': GetUserCommand,
+    'get-users-by-ids': GetUsersByIdsCommand,
     'toggle-check-mark': ToggleCheckMarkCommand,
     'update-check-mark-description': UpdateCheckMarkDescriptionCommand,
-    'get-users-by-ids': GetUsersByIdsCommand,
     'update-key-result': UpdateKeyResultCommand,
     'update-objective': UpdateObjectiveCommand,
-    'get-key-result-support-team': GetKeyResultSupportTeamCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}
