@@ -1,7 +1,10 @@
 import { Field, InputType } from '@nestjs/graphql'
 import { FileUpload } from 'graphql-upload'
 
+import { UserGender } from '@core/modules/user/enums/user-gender.enum'
 import { UploadGraphQLScalar } from '@interface/graphql/adapters/upload/scalars/upload.scalar'
+
+import { UserGenderGraphQLEnum } from '../enums/user-gender.enum'
 
 @InputType('UserInput', { description: 'Data that you can assign to a given user' })
 export class UserInputObject {
@@ -38,4 +41,11 @@ export class UserInputObject {
     nullable: true,
   })
   public readonly linkedInProfileAddress?: string
+
+  @Field(() => UserGenderGraphQLEnum, {
+    complexity: 0,
+    nullable: true,
+    description: 'The gender of the user',
+  })
+  public readonly gender?: UserGender
 }
