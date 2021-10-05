@@ -40,6 +40,7 @@ import { Command } from './base.command'
 import { CreateCheckMarkCommand } from './create-check-mark.command'
 import { CreateKeyResultCheckInCommand } from './create-key-result-check-in.command'
 import { CreateKeyResultCommentCommand } from './create-key-result-comment.command'
+import { DeactivateUserCommand } from './deactivate-user.command'
 import { DeleteCheckMarkCommand } from './delete-check-mark.command'
 import { GetCheckListForKeyResultCommand } from './get-check-list-for-key-result.command'
 import { GetCheckListProgressCommand } from './get-check-list-progress.command'
@@ -73,6 +74,7 @@ export type CommandType =
   | 'create-key-result-comment'
   | 'create-key-result'
   | 'create-objective'
+  | 'deactivate-user'
   | 'delete-check-mark'
   | 'delete-key-result'
   | 'delete-objective'
@@ -138,6 +140,7 @@ export class CommandFactory {
     'create-key-result-comment': CreateKeyResultCommentCommand,
     'create-key-result': CreateKeyResultCommand,
     'create-objective': CreateObjectiveCommand,
+    'deactivate-user': DeactivateUserCommand,
     'delete-check-mark': DeleteCheckMarkCommand,
     'delete-key-result': DeleteKeyResultCommand,
     'delete-objective': DeleteObjectiveCommand,

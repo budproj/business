@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common'
+import { Logger, UnauthorizedException } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 import { FileUpload } from 'graphql-upload'
@@ -20,6 +20,7 @@ import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
+import { CorePortsProvider } from '@core/ports/ports.provider'
 import { AWSS3Provider } from '@infrastructure/aws/s3/s3.provider'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
@@ -40,6 +41,7 @@ import { UserKeyResultCommentsGraphQLConnection } from './connections/user-key-r
 import { UserKeyResultsGraphQLConnection } from './connections/user-key-results/user-key-results.connection'
 import { UserObjectivesGraphQLConnection } from './connections/user-objectives/user-objectives.connection'
 import { UserTeamsGraphQLConnection } from './connections/user-teams/user-teams.connection'
+import { UserDeactivateRequest } from './requests/user-deactivate.request'
 import { UserUpdateRequest } from './requests/user-update.request'
 import { UserGraphQLNode } from './user.node'
 
@@ -50,7 +52,8 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
   constructor(
     protected readonly core: CoreProvider,
-    accessControl: UserAccessControl,
+    protected accessControl: UserAccessControl,
+    private readonly corePorts: CorePortsProvider,
     awsS3: AWSS3Provider,
   ) {
     super(Resource.USER, core, core.user, accessControl)
@@ -114,6 +117,23 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     if (!user) throw new UserInputError(`We could not found an user with ID ${request.id}`)
 
     return user
+  }
+
+  @GuardedMutation(UserGraphQLNode, 'user:delete', { name: 'deactivateUser' })
+  protected async deactivateUserForRequestAndRequestUserWithContext(
+    @Args() request: UserDeactivateRequest,
+    @RequestUserWithContext() userWithContext: UserWithContext,
+  ) {
+    const canDelete = await this.accessControl.canDelete(userWithContext, request.id)
+    if (!canDelete) throw new UnauthorizedException()
+
+    this.logger.log({
+      userWithContext,
+      request,
+      message: 'Received deactivate user request',
+    })
+
+    return this.corePorts.dispatchCommand<User>('deactivate-user', request.id)
   }
 
   @ResolveField('fullName', () => String)
