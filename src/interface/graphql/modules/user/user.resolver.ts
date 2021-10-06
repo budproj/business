@@ -110,10 +110,12 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     })
 
     const picture = await this.parseUserPictureFileToRemoteURL(request.data.picture)
-    const newData = {
-      ...request.data,
-      picture,
-    }
+    const newData = picture
+      ? {
+          ...request.data,
+          picture,
+        }
+      : { ...request.data }
 
     try {
       const user = await this.corePorts.dispatchCommand<User>('update-user', request.id, newData)
