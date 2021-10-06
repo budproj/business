@@ -1,14 +1,11 @@
-interface SerializedException {
-  name: string
-  message: string
-  stack?: string
-  metadata?: Record<string, any>
-}
+import { ObjectLiteral } from '../types/object-literal.type'
+
+import { SerializedException } from './interfaces/serialized-exception.interface'
 
 export abstract class Exception extends Error {
   abstract name: string
 
-  constructor(readonly message: string, readonly metadata?: Record<string, any>) {
+  constructor(readonly message: string, readonly metadata?: ObjectLiteral) {
     super(message)
     Error.captureStackTrace(this, this.constructor)
   }

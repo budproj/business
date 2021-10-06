@@ -1,5 +1,4 @@
-import { InvalidSessionIDException } from '@adapters/exceptions/invalid-session-id.exception'
-
+import { InvalidSessionIDException } from './exceptions/invalid-session-id.exception'
 import { TracingInterface } from './tracing.interface'
 import { HttpRequestProperties } from './types/http-request-properties.type'
 import { MarshalFunction } from './types/marshal-function.type'
