@@ -65,6 +65,7 @@ import { GetUsersByIdsCommand } from './get-users-by-ids.command'
 import { RemoveTeamFromUserCommand } from './remove-team-from-user.command'
 import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
 import { UpdateCheckMarkDescriptionCommand } from './update-check-mark-description.command'
+import { UpdateUserCommand } from './update-user.command'
 
 type CommandConstructor = new (...commandArguments: any[]) => Command<unknown>
 export type CommandType =
@@ -130,6 +131,7 @@ export type CommandType =
   | 'update-check-mark-description'
   | 'update-key-result'
   | 'update-objective'
+  | 'update-user'
 
 @Injectable()
 export class CommandFactory {
@@ -196,6 +198,7 @@ export class CommandFactory {
     'update-check-mark-description': UpdateCheckMarkDescriptionCommand,
     'update-key-result': UpdateKeyResultCommand,
     'update-objective': UpdateObjectiveCommand,
+    'update-user': UpdateUserCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}

@@ -71,6 +71,12 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     await this.repository.update(user.id, { status: UserStatus.INACTIVE })
   }
 
+  public async updateEmailInCredentials(userID: string, email: string): Promise<void> {
+    const user = await this.getFromID(userID)
+
+    await this.credentials.updateEmail(user.authzSub, email)
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<User>,
     _data: Partial<UserInterface>,

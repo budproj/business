@@ -43,9 +43,14 @@ export class UserInputObject {
   public readonly linkedInProfileAddress?: string
 
   @Field(() => UserGenderGraphQLEnum, {
-    complexity: 0,
     nullable: true,
     description: 'The gender of the user',
   })
   public readonly gender?: UserGender
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'The new e-mail for the user',
+  })
+  public readonly email?: string
 }

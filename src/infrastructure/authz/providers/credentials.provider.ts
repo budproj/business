@@ -13,4 +13,10 @@ export class AuthzCredentialsProvider implements CredentialsAdapter {
 
     return updatedUser.blocked
   }
+
+  public async updateEmail(userID: string, email: string): Promise<boolean> {
+    const updatedUser = await this.client.updateUser(userID, { email })
+
+    return updatedUser.email === email
+  }
 }

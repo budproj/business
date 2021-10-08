@@ -4,7 +4,7 @@ import { UserInputError } from 'apollo-server-errors'
 import { Observable } from 'rxjs'
 
 import { GodmodeProvider } from '@adapters/authorization/godmode/godmode.provider'
-import { InvalidSessionIDException } from '@adapters/exceptions/invalid-session-id.exception'
+import { InvalidSessionIDException } from '@adapters/tracing/exceptions/invalid-session-id.exception'
 import { TracingInterface } from '@adapters/tracing/tracing.interface'
 import { TracingProvider } from '@adapters/tracing/tracing.provider'
 

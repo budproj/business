@@ -1,4 +1,4 @@
-import { Exception } from './base.exception'
+import { Exception } from '@core/common/exceptions/base.exception'
 
 export class InvalidSessionIDException extends Exception {
   public get name(): string {
