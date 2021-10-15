@@ -1,5 +1,9 @@
 import { ArgsType, Field } from '@nestjs/graphql'
-import { KeyResultAddUserToSupportTeamInput, KeyResultRemoveUserToSupportTeamInput } from '../inputs/key-result-support-team.input'
+
+import {
+  KeyResultAddUserToSupportTeamInput,
+  KeyResultRemoveUserToSupportTeamInput,
+} from '../inputs/key-result-support-team.input'
 
 @ArgsType()
 export class KeyResultSupportTeamCreateRequest {

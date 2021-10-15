@@ -17,12 +17,12 @@ import { KeyResultCommentGraphQLResolver } from './comment/key-result-comment.re
 import { KeyResultKeyResultCheckInsConnectionGraphQLResolver } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.resolver'
 import { KeyResultKeyResultCheckMarksConnectionGraphQLResolver } from './connections/key-result-key-result-check-mark/key-result-key-result-check-marks.resolver'
 import { KeyResultKeyResultCommentsConnectionGraphQLResolver } from './connections/key-result-key-result-comments/key-result-key-result-comments.resolver'
+import { KeyResultKeyResultSupportTeamConnectionGraphQLResolver } from './connections/key-result-key-result-support-team/key-result-key-result-support-team.resolver'
 import { KeyResultProgressHistoryConnectionGraphQLResolver } from './connections/key-result-progress-history/key-result-progress-history.resolver'
 import { KeyResultTimelineConnectionGraphQLResolver } from './connections/key-result-timeline/key-result-key-result-timeline.resolver'
 import { KeyResultsConnectionGraphQLResolver } from './connections/key-results/key-results.resolver'
 import { KeyResultGraphQLResolver } from './key-result.resolver'
 import { KeyResultProgressRecordGraphQLResolver } from './progress-record/key-result-progress-record.resolver'
-import { KeyResultKeyResultSupportTeamConnectionGraphQLResolver } from './connections/key-result-key-result-support-team/key-result-key-result-support-team.resolver'
 
 @Module({
   imports: [CoreModule, GraphQLConfigModule, AmplitudeModule, NotificationModule],

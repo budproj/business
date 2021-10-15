@@ -35,6 +35,7 @@ import { GetUserCommand } from '@core/ports/commands/get-user.command'
 import { UpdateKeyResultCommand } from '@core/ports/commands/update-key-result.command'
 import { UpdateObjectiveCommand } from '@core/ports/commands/update-objective.command'
 
+import { AddUserToKeyResultSupportTeamCommand } from './add-user-to-key-result-support-team.command'
 import { Command } from './base.command'
 import { CreateCheckMarkCommand } from './create-check-mark.command'
 import { CreateKeyResultCheckInCommand } from './create-key-result-check-in.command'
@@ -61,10 +62,9 @@ import { GetTeamMembersCommand } from './get-team-members.command'
 import { GetTeamOwnerCommand } from './get-team-owner.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
 import { GetUsersByIdsCommand } from './get-users-by-ids.command'
+import { RemoveUserToKeyResultSupportTeamCommand } from './remove-user-to-key-result-support-team.command'
 import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
 import { UpdateCheckMarkDescriptionCommand } from './update-check-mark-description.command'
-import { AddUserToKeyResultSupportTeamCommand } from './add-user-to-key-result-support-team.command'
-import { RemoveUserToKeyResultSupportTeamCommand } from './remove-user-to-key-result-support-team.command'
 
 type CommandConstructor = new (...commandArguments: any[]) => Command<unknown>
 export type CommandType =
