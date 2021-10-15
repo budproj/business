@@ -61,6 +61,7 @@ import { GetTeamCompanyCommand } from './get-team-company.command'
 import { GetTeamMembersCommand } from './get-team-members.command'
 import { GetTeamOwnerCommand } from './get-team-owner.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
+import { GetUserKeyResultsCommand } from './get-user-key-results.command'
 import { GetUsersByIdsCommand } from './get-users-by-ids.command'
 import { RemoveUserToKeyResultSupportTeamCommand } from './remove-user-to-key-result-support-team.command'
 import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
@@ -122,6 +123,7 @@ export type CommandType =
   | 'get-team'
   | 'get-user-companies'
   | 'get-user-full-name'
+  | 'get-user-key-results'
   | 'get-user-team-tree'
   | 'get-user'
   | 'get-users-by-ids'
@@ -188,6 +190,7 @@ export class CommandFactory {
     'get-team': GetTeamCommand,
     'get-user-companies': GetUserCompaniesCommand,
     'get-user-full-name': GetUserFullNameCommand,
+    'get-user-key-results': GetUserKeyResultsCommand,
     'get-user-team-tree': GetUserTeamTreeCommand,
     'get-user': GetUserCommand,
     'get-users-by-ids': GetUsersByIdsCommand,

@@ -376,6 +376,25 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return history
   }
 
+  public async getOwnedByUserID(
+    userID: string,
+    filters?: KeyResultInterface,
+  ): Promise<KeyResult[]> {
+    const selector: Partial<KeyResultInterface> = {
+      ...filters,
+      ownerId: userID,
+    }
+
+    return this.getMany(selector)
+  }
+
+  public async getAllWithUserIDInSupportTeam(
+    userID: string,
+    filters?: KeyResultInterface,
+  ): Promise<KeyResult[]> {
+    return this.repository.getWithUserInSupportTeamWithFilters(userID, filters)
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<KeyResult>,
     _data: Partial<KeyResultInterface>,

@@ -20,6 +20,7 @@ import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
+import { CorePortsProvider } from '@core/ports/ports.provider'
 import { AWSS3Provider } from '@infrastructure/aws/s3/s3.provider'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
@@ -50,6 +51,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
   constructor(
     protected readonly core: CoreProvider,
+    private readonly corePorts: CorePortsProvider,
     accessControl: UserAccessControl,
     awsS3: AWSS3Provider,
   ) {
@@ -221,12 +223,16 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching key results for user',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+    const [filters, _, connection] = this.relay.unmarshalRequest<
       KeyResultFiltersRequest,
       KeyResult
     >(request)
 
-    const queryResult = await this.core.keyResult.getFromOwner(user, filters, queryOptions)
+    const queryResult = await this.corePorts.dispatchCommand<KeyResult[]>(
+      'get-user-key-results',
+      user.id,
+      filters,
+    )
 
     return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection, user)
   }
