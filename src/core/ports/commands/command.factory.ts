@@ -63,9 +63,12 @@ import { GetUserCompaniesCommand } from './get-user-companies.command'
 import { GetUsersByIdsCommand } from './get-users-by-ids.command'
 import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
 import { UpdateCheckMarkDescriptionCommand } from './update-check-mark-description.command'
+import { AddUserToKeyResultSupportTeamCommand } from './add-user-to-key-result-support-team.command'
+import { RemoveUserToKeyResultSupportTeamCommand } from './remove-user-to-key-result-support-team.command'
 
 type CommandConstructor = new (...commandArguments: any[]) => Command<unknown>
 export type CommandType =
+  | 'add-user-to-key-result-support-team'
   | 'create-check-in'
   | 'create-check-mark'
   | 'create-key-result-comment'
@@ -122,6 +125,7 @@ export type CommandType =
   | 'get-user-team-tree'
   | 'get-user'
   | 'get-users-by-ids'
+  | 'remove-user-to-key-result-support-team'
   | 'toggle-check-mark'
   | 'update-check-mark-description'
   | 'update-key-result'
@@ -130,6 +134,7 @@ export type CommandType =
 @Injectable()
 export class CommandFactory {
   private readonly commands: Record<CommandType, CommandConstructor> = {
+    'add-user-to-key-result-support-team': AddUserToKeyResultSupportTeamCommand,
     'create-check-in': CreateKeyResultCheckInCommand,
     'create-check-mark': CreateCheckMarkCommand,
     'create-key-result-comment': CreateKeyResultCommentCommand,
@@ -186,6 +191,7 @@ export class CommandFactory {
     'get-user-team-tree': GetUserTeamTreeCommand,
     'get-user': GetUserCommand,
     'get-users-by-ids': GetUsersByIdsCommand,
+    'remove-user-to-key-result-support-team': RemoveUserToKeyResultSupportTeamCommand,
     'toggle-check-mark': ToggleCheckMarkCommand,
     'update-check-mark-description': UpdateCheckMarkDescriptionCommand,
     'update-key-result': UpdateKeyResultCommand,

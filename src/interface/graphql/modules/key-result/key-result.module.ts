@@ -22,6 +22,7 @@ import { KeyResultTimelineConnectionGraphQLResolver } from './connections/key-re
 import { KeyResultsConnectionGraphQLResolver } from './connections/key-results/key-results.resolver'
 import { KeyResultGraphQLResolver } from './key-result.resolver'
 import { KeyResultProgressRecordGraphQLResolver } from './progress-record/key-result-progress-record.resolver'
+import { KeyResultKeyResultSupportTeamConnectionGraphQLResolver } from './connections/key-result-key-result-support-team/key-result-key-result-support-team.resolver'
 
 @Module({
   imports: [CoreModule, GraphQLConfigModule, AmplitudeModule, NotificationModule],
@@ -43,6 +44,7 @@ import { KeyResultProgressRecordGraphQLResolver } from './progress-record/key-re
     KeyResultCheckMarkAccessControl,
     KeyResultProgressRecordGraphQLResolver,
     KeyResultProgressHistoryConnectionGraphQLResolver,
+    KeyResultKeyResultSupportTeamConnectionGraphQLResolver,
   ],
   exports: [KeyResultAccessControl],
 })

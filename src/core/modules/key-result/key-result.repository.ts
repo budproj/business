@@ -59,6 +59,22 @@ export class KeyResultRepository extends CoreEntityRepository<KeyResult> {
     return orderedQuery.getMany()
   }
 
+  public async addUserToSupportTeam(keyResultId: string, userId: string) {
+    const query = this.createQueryBuilder()
+
+    return query.relation(KeyResult, 'supportTeamMembers')
+      .of(keyResultId)
+      .add(userId)
+  }
+
+  public async removeUserToSupportTeam(keyResultId: string, userId: string) {
+    const query = this.createQueryBuilder()
+
+    return query.relation(KeyResult, 'supportTeamMembers')
+      .of(keyResultId)
+      .remove(userId)
+  }
+
   protected setupTeamQuery(query: SelectQueryBuilder<KeyResult>) {
     return query.leftJoinAndSelect(`${KeyResult.name}.team`, Team.name)
   }

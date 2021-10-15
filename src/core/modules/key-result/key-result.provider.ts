@@ -71,6 +71,14 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return response.supportTeamMembers
   }
 
+  public async addUserToSupportTeam(keyResultId: string, userId: string) {
+    return this.repository.addUserToSupportTeam(keyResultId, userId)
+  }
+
+  public async removeUserToSupportTeam(keyResultId: string, userId: string) {
+    return this.repository.removeUserToSupportTeam(keyResultId, userId)
+  }
+
   public async getFromTeams(
     teams: Partial<TeamInterface> | Array<Partial<TeamInterface>>,
     filters?: FindConditions<KeyResult>,
