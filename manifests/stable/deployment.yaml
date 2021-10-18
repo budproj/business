@@ -54,12 +54,12 @@ spec:
             - name: AUTHZ_CLIENT_ID
               valueFrom:
                 secretKeyRef:
-                  name: business-canary
+                  name: business
                   key: authz-client-id
             - name: AUTHZ_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: business-canary
+                  name: business
                   key: authz-client-secret
             - name: GRAPHQL_SCHEMA_FILE_PATH
               value: './dist/src/interface/graphql/schema.gql'
