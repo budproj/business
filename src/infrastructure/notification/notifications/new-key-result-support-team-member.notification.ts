@@ -87,6 +87,7 @@ export class NewKeyResultSupportTeamMemberNotification extends BaseNotification<
       keyResultTitle: data.keyResult.title,
       keyResultConfidenceColor: data.keyResultConfidenceColor,
       keyResultDescription: data.keyResult.description,
+      keyResultTeam: data.team.name,
     }
 
     await this.channels.email.dispatch(emailData, emailMetadata)
