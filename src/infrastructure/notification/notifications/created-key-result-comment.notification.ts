@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { uniqBy } from 'lodash'
 
 import {
   CREATED_KEY_RESULT_COMMENT_ACTIVITY_TYPE,
@@ -62,10 +63,12 @@ type RelatedData = {
   cycle: CycleInterface
   team: TeamInterface
   owner: UserInterface
+  supportTeam: UserInterface[]
 }
 
 type CreatedKeyResultCommentMetadata = {
   keyResultOwner: UserInterface
+  supportTeam: UserInterface[]
 } & NotificationMetadata
 
 const mentionsRegex = /@\[(?<name>[\w \u00C0-\u00FF]+)]\((?<id>[\da-f-]+)\)/g
@@ -94,7 +97,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
   }
 
   public async prepare(): Promise<void> {
-    const { owner, keyResult, cycle, team } = await this.getRelatedData(
+    const { owner, keyResult, cycle, team, supportTeam } = await this.getRelatedData(
       this.activity.data.keyResultId,
     )
 
@@ -108,6 +111,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     }
 
     const metadata = {
+      supportTeam,
       keyResultOwner: owner,
     }
 
@@ -116,7 +120,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
   }
 
   public async dispatch(): Promise<void> {
-    await Promise.all([this.dispatchOwnerEmail(), this.dispatchMentionsEmails()])
+    await Promise.all([this.dispatchOwnerAndSupportTeamEmail(), this.dispatchMentionsEmails()])
   }
 
   private async dispatchMentionsEmails(): Promise<void> {
@@ -167,14 +171,17 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     await Promise.all(emailsPromises)
   }
 
-  private async dispatchOwnerEmail(): Promise<void> {
-    const isOwnerAuthor = this.isOwnerAuthor()
-    if (isOwnerAuthor) return
-
+  private async dispatchOwnerAndSupportTeamEmail(): Promise<void> {
     const { data, metadata } = this.marshal()
 
-    const recipients = EmailNotificationChannel.buildRecipientsFromUsers([metadata.keyResultOwner])
     const cleanCommentContent = data.comment.content.replace(mentionsRegex, '$1')
+    const recipientUsers = uniqBy([metadata.keyResultOwner, ...metadata.supportTeam], 'id').filter(
+      (user) => user.id !== data.author.id,
+    )
+    const customData = recipientUsers.map((user) => ({
+      ownerFirstName: user.firstName,
+    }))
+    const recipients = EmailNotificationChannel.buildRecipientsFromUsers(recipientUsers, customData)
 
     const emailMetadata: EmailNotificationChannelMetadata = {
       ...metadata,
@@ -182,7 +189,6 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       template: 'NewKeyResultComment',
     }
     const emailData = {
-      ownerFirstName: data.owner.firstName,
       authorFullName: data.author.fullName,
       authorPictureURL: data.author.picture,
       keyResultTitle: data.keyResult.title,
@@ -199,10 +205,11 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     const keyResult = await this.core.dispatchCommand<KeyResultInterface>('get-key-result', {
       id: keyResultID,
     })
-    const [cycle, team, owner] = await Promise.all([
+    const [cycle, team, owner, supportTeam] = await Promise.all([
       this.getCycle(keyResult),
       this.getTeam(keyResult),
       this.core.dispatchCommand<UserInterface>('get-key-result-owner', keyResult),
+      this.core.dispatchCommand<UserInterface[]>('get-key-result-support-team', keyResult.id),
     ])
 
     return {
@@ -210,6 +217,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       cycle,
       team,
       owner,
+      supportTeam,
     }
   }
 
@@ -267,9 +275,5 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
 
   private async getTeam(keyResult: KeyResultInterface): Promise<TeamInterface> {
     return this.core.dispatchCommand<TeamInterface>('get-key-result-team', keyResult)
-  }
-
-  private isOwnerAuthor(): boolean {
-    return this.data.owner.id === this.data.author.id
   }
 }

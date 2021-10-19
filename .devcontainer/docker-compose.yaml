@@ -10,6 +10,7 @@ services:
     user: 1000:1000
     network_mode: host
     env_file:
+      - ../.env.local
       - ../.env.development
       - ../.env
     volumes:
@@ -20,6 +21,7 @@ services:
     container_name: business-db-postgres
     network_mode: host
     env_file:
+      - ../.env.local
       - ../.env.development
       - ../.env
     restart: unless-stopped
