@@ -2,6 +2,7 @@ import { Logger, UnauthorizedException } from '@nestjs/common'
 import { Args } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-errors'
 
+import { NewKeyResultSupportTeamMemberActivity } from '@adapters/activity/activities/new-key-result-support-team-member.activity'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { State } from '@adapters/state/interfaces/state.interface'
 import { CoreProvider } from '@core/core.provider'
@@ -9,6 +10,7 @@ import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
+import { AttachActivity } from '@interface/graphql/adapters/activity/attach-activity.decorator'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
@@ -38,6 +40,7 @@ export class KeyResultKeyResultSupportTeamConnectionGraphQLResolver extends Guar
     super(Resource.KEY_RESULT_SUPPORT_TEAM, core, core.user, accessControl)
   }
 
+  @AttachActivity(NewKeyResultSupportTeamMemberActivity)
   @GuardedMutation(KeyResultGraphQLNode, 'key-result:update', {
     name: 'addUserAsSupportTeamToKeyResult',
   })

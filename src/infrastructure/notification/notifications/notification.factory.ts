@@ -9,12 +9,14 @@ import { ChannelHashmap } from '@infrastructure/notification/types/channel-hashm
 import { NotificationData } from '@infrastructure/notification/types/notification-data.type'
 
 import { CreatedKeyResultCheckInNotification } from './created-key-result-check-in.notification'
+import { NewKeyResultSupportTeamMemberNotification } from './new-key-result-support-team-member.notification'
 
 @Injectable()
 export class NotificationFactory {
   private readonly notificationConstructors = [
     CreatedKeyResultCommentNotification,
     CreatedKeyResultCheckInNotification,
+    NewKeyResultSupportTeamMemberNotification,
   ]
 
   private readonly channels: ChannelHashmap

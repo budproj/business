@@ -2,12 +2,15 @@ import { State } from '@adapters/state/interfaces/state.interface'
 
 import { ActivityMetadata } from '../types/activity-metadata.type'
 
-export abstract class Activity<D = any, C extends State = State> {
+export abstract class Activity<D = any, C extends State = State, R = Record<string, any>> {
   public readonly type: string
   public readonly metadata: ActivityMetadata
 
-  protected constructor(public data: D, public context: C) {
-    this.metadata = this.marshalMetadata(context)
+  protected constructor(public data: D, public context: C, public request?: R) {
+    this.metadata = this.marshalMetadata({
+      ...context,
+      ...request,
+    })
   }
 
   public attachToContext(data: Partial<C>): void {
