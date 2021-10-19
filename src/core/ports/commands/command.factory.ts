@@ -35,11 +35,13 @@ import { GetUserCommand } from '@core/ports/commands/get-user.command'
 import { UpdateKeyResultCommand } from '@core/ports/commands/update-key-result.command'
 import { UpdateObjectiveCommand } from '@core/ports/commands/update-objective.command'
 
+import { AddTeamToUserCommand } from './add-team-to-user.command'
 import { AddUserToKeyResultSupportTeamCommand } from './add-user-to-key-result-support-team.command'
 import { Command } from './base.command'
 import { CreateCheckMarkCommand } from './create-check-mark.command'
 import { CreateKeyResultCheckInCommand } from './create-key-result-check-in.command'
 import { CreateKeyResultCommentCommand } from './create-key-result-comment.command'
+import { DeactivateUserCommand } from './deactivate-user.command'
 import { DeleteCheckMarkCommand } from './delete-check-mark.command'
 import { GetCheckListForKeyResultCommand } from './get-check-list-for-key-result.command'
 import { GetCheckListProgressCommand } from './get-check-list-progress.command'
@@ -63,18 +65,22 @@ import { GetTeamOwnerCommand } from './get-team-owner.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
 import { GetUserKeyResultsCommand } from './get-user-key-results.command'
 import { GetUsersByIdsCommand } from './get-users-by-ids.command'
+import { RemoveTeamFromUserCommand } from './remove-team-from-user.command'
 import { RemoveUserToKeyResultSupportTeamCommand } from './remove-user-to-key-result-support-team.command'
 import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
 import { UpdateCheckMarkDescriptionCommand } from './update-check-mark-description.command'
+import { UpdateUserCommand } from './update-user.command'
 
 type CommandConstructor = new (...commandArguments: any[]) => Command<unknown>
 export type CommandType =
+  | 'add-team-to-user'
   | 'add-user-to-key-result-support-team'
   | 'create-check-in'
   | 'create-check-mark'
   | 'create-key-result-comment'
   | 'create-key-result'
   | 'create-objective'
+  | 'deactivate-user'
   | 'delete-check-mark'
   | 'delete-key-result'
   | 'delete-objective'
@@ -127,21 +133,25 @@ export type CommandType =
   | 'get-user-team-tree'
   | 'get-user'
   | 'get-users-by-ids'
+  | 'remove-team-from-user'
   | 'remove-user-to-key-result-support-team'
   | 'toggle-check-mark'
   | 'update-check-mark-description'
   | 'update-key-result'
   | 'update-objective'
+  | 'update-user'
 
 @Injectable()
 export class CommandFactory {
   private readonly commands: Record<CommandType, CommandConstructor> = {
+    'add-team-to-user': AddTeamToUserCommand,
     'add-user-to-key-result-support-team': AddUserToKeyResultSupportTeamCommand,
     'create-check-in': CreateKeyResultCheckInCommand,
     'create-check-mark': CreateCheckMarkCommand,
     'create-key-result-comment': CreateKeyResultCommentCommand,
     'create-key-result': CreateKeyResultCommand,
     'create-objective': CreateObjectiveCommand,
+    'deactivate-user': DeactivateUserCommand,
     'delete-check-mark': DeleteCheckMarkCommand,
     'delete-key-result': DeleteKeyResultCommand,
     'delete-objective': DeleteObjectiveCommand,
@@ -194,11 +204,13 @@ export class CommandFactory {
     'get-user-team-tree': GetUserTeamTreeCommand,
     'get-user': GetUserCommand,
     'get-users-by-ids': GetUsersByIdsCommand,
+    'remove-team-from-user': RemoveTeamFromUserCommand,
     'remove-user-to-key-result-support-team': RemoveUserToKeyResultSupportTeamCommand,
     'toggle-check-mark': ToggleCheckMarkCommand,
     'update-check-mark-description': UpdateCheckMarkDescriptionCommand,
     'update-key-result': UpdateKeyResultCommand,
     'update-objective': UpdateObjectiveCommand,
+    'update-user': UpdateUserCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}

@@ -1,4 +1,5 @@
 import { CoreEntityInterface } from '@core/core-entity.interface'
+import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 
 export interface ObjectiveInterface extends CoreEntityInterface {
   title: string
@@ -6,4 +7,5 @@ export interface ObjectiveInterface extends CoreEntityInterface {
   cycleId: string
   ownerId: string
   teamId?: string
+  cycle: CycleInterface
 }

@@ -16,7 +16,12 @@ export class GetTeamStatusCommand extends BaseStatusCommand {
     teamID: string,
     options: GetTeamStatusOptions = this.defaultOptions,
   ): Promise<Status> {
-    const keyResults = await this.getKeyResultsFromTeam(teamID, options)
+    const anchorDate = new Date()
+    const rawKeyResults = await this.getKeyResultsFromTeam(teamID, options)
+    const keyResults = rawKeyResults.filter(
+      (keyResult) => keyResult.objective.cycle.dateStart < anchorDate,
+    )
+
     const [cycleCheckIns, progresses, confidences] = await this.unzipKeyResultGroup(keyResults)
 
     const latestCheckIn = this.getLatestCheckInFromList(cycleCheckIns)

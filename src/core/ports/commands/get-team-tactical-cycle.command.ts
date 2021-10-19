@@ -23,11 +23,16 @@ export class GetTeamTacticalCycleCommand extends Command<Cycle | undefined> {
     teamID: string,
     options: GetTeamTacticalCycleOptions = this.defaultOptions,
   ): Promise<Cycle | undefined> {
-    const teamCycles = await this.core.cycle.getFromTeamsWithFilters({ id: teamID })
-    const teamHasCycles = teamCycles.length > 0
+    const anchorDate = new Date()
+    const teamCycles = await this.core.cycle.getFromTeamsWithFilters({
+      id: teamID,
+    })
+
+    const teamValidCycles = teamCycles.filter((cycle) => cycle.dateStart <= anchorDate)
+    const teamHasCycles = teamValidCycles.length > 0
 
     return teamHasCycles
-      ? GetTeamTacticalCycleCommand.getClosestCycle(teamCycles)
+      ? GetTeamTacticalCycleCommand.getClosestCycle(teamValidCycles)
       : this.handleMissingCycles(teamID, options)
   }
 

@@ -192,6 +192,14 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return this.repository.findOne({ id })
   }
 
+  public async addUserToTeam(userID: string, teamID: string): Promise<void> {
+    await this.repository.addUserToTeam(userID, teamID)
+  }
+
+  public async removeUserFromTeam(userID: string, teamID: string): Promise<void> {
+    await this.repository.removeUserFromTeam(userID, teamID)
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<Team>,
     _data: Partial<TeamInterface>,

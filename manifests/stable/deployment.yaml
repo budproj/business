@@ -47,8 +47,20 @@ spec:
                   key: typeorm-password
             - name: AUTHZ_ISSUER
               value: https://getbud.us.auth0.com/
+            - name: AUTHZ_DOMAIN
+              value: getbud.us.auth0.com
             - name: AUTHZ_AUDIENCE
               value: https://api.getbud.co/business
+            - name: AUTHZ_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: business
+                  key: authz-client-id
+            - name: AUTHZ_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: business
+                  key: authz-client-secret
             - name: GRAPHQL_SCHEMA_FILE_PATH
               value: './dist/src/interface/graphql/schema.gql'
             - name: SERVER_LOGGING_LEVEL
@@ -84,6 +96,6 @@ spec:
                   name: business
                   key: aws-credentials-secret-access-key
             - name: ANALYTICS_URL
-              value: analytics.bud.svc.cluster.local:50051
+              value: analytics-stable.bud.svc.cluster.local:50051
             - name: ANALYTICS_PACKAGES
               value: keyResult

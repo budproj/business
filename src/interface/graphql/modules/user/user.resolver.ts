@@ -1,8 +1,7 @@
-import { Logger } from '@nestjs/common'
+import { Logger, UnauthorizedException } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 import { FileUpload } from 'graphql-upload'
-import { pickBy } from 'lodash'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
@@ -18,6 +17,7 @@ import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
+import { EmailAlreadyExistsException } from '@core/modules/user/exceptions/email-already-exists.exception'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
@@ -41,6 +41,8 @@ import { UserKeyResultCommentsGraphQLConnection } from './connections/user-key-r
 import { UserKeyResultsGraphQLConnection } from './connections/user-key-results/user-key-results.connection'
 import { UserObjectivesGraphQLConnection } from './connections/user-objectives/user-objectives.connection'
 import { UserTeamsGraphQLConnection } from './connections/user-teams/user-teams.connection'
+import { EmailAlreadyExistsApolloError } from './exceptions/email-already-exists.exception'
+import { UserDeactivateRequest } from './requests/user-deactivate.request'
 import { UserUpdateRequest } from './requests/user-update.request'
 import { UserGraphQLNode } from './user.node'
 
@@ -51,8 +53,8 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
   constructor(
     protected readonly core: CoreProvider,
+    protected accessControl: UserAccessControl,
     private readonly corePorts: CorePortsProvider,
-    accessControl: UserAccessControl,
     awsS3: AWSS3Provider,
   ) {
     super(Resource.USER, core, core.user, accessControl)
@@ -98,6 +100,9 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     @Args() request: UserUpdateRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
+    const canUpdate = await this.accessControl.canUpdate(userWithContext, request.id)
+    if (!canUpdate) throw new UnauthorizedException()
+
     this.logger.log({
       userWithContext,
       request,
@@ -105,17 +110,43 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     })
 
     const picture = await this.parseUserPictureFileToRemoteURL(request.data.picture)
-    const user = await this.queryGuard.updateWithActionScopeConstraint(
-      { id: request.id },
-      pickBy({
-        ...request.data,
-        picture,
-      }),
-      userWithContext,
-    )
-    if (!user) throw new UserInputError(`We could not found an user with ID ${request.id}`)
+    const newData = picture
+      ? {
+          ...request.data,
+          picture,
+        }
+      : { ...request.data }
 
-    return user
+    try {
+      const user = await this.corePorts.dispatchCommand<User>('update-user', request.id, newData)
+      if (!user) throw new UserInputError(`We could not found an user with ID ${request.id}`)
+
+      return user
+    } catch (catchedError: unknown) {
+      const error =
+        catchedError instanceof EmailAlreadyExistsException
+          ? new EmailAlreadyExistsApolloError(catchedError.message)
+          : catchedError
+
+      throw error
+    }
+  }
+
+  @GuardedMutation(UserGraphQLNode, 'user:delete', { name: 'deactivateUser' })
+  protected async deactivateUserForRequestAndRequestUserWithContext(
+    @Args() request: UserDeactivateRequest,
+    @RequestUserWithContext() userWithContext: UserWithContext,
+  ) {
+    const canDelete = await this.accessControl.canDelete(userWithContext, request.id)
+    if (!canDelete) throw new UnauthorizedException()
+
+    this.logger.log({
+      userWithContext,
+      request,
+      message: 'Received deactivate user request',
+    })
+
+    return this.corePorts.dispatchCommand<User>('deactivate-user', request.id)
   }
 
   @ResolveField('fullName', () => String)

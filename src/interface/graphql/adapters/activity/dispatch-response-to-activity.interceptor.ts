@@ -7,7 +7,6 @@ import { map } from 'rxjs/operators'
 import { Activity } from '@adapters/activity/activities/base.activity'
 import { ActivityAdapter } from '@adapters/activity/activity.adapter'
 import { ActivityConstructor } from '@adapters/activity/types/activity-constructor.type'
-import { AmplitudeProvider } from '@infrastructure/amplitude/amplitude.provider'
 import { NotificationProvider } from '@infrastructure/notification/notification.provider'
 import { GraphQLContext } from '@interface/graphql/adapters/context/interfaces/context.interface'
 
@@ -17,13 +16,8 @@ import { GraphQLRequestState } from '../context/interfaces/request-state.interfa
 export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor<T> {
   private readonly activityAdapter: ActivityAdapter
 
-  constructor(
-    private readonly reflector: Reflector,
-    amplitudeProvider: AmplitudeProvider,
-    notificationProvider: NotificationProvider,
-  ) {
+  constructor(private readonly reflector: Reflector, notificationProvider: NotificationProvider) {
     this.activityAdapter = new ActivityAdapter({
-      amplitude: amplitudeProvider,
       notification: notificationProvider,
     })
   }
