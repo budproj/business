@@ -1,4 +1,13 @@
-import { Column, Entity, ManyToOne, OneToMany, RelationId, UpdateDateColumn } from 'typeorm'
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  RelationId,
+  UpdateDateColumn,
+} from 'typeorm'
 
 import { CoreEntity } from '@core/core.orm-entity'
 import { KeyResultType } from '@core/modules/key-result/enums/key-result-type.enum'
@@ -37,6 +46,10 @@ export class KeyResult extends CoreEntity implements KeyResultInterface {
 
   @ManyToOne('User', 'keyResults')
   public owner: UserInterface
+
+  @ManyToMany('User')
+  @JoinTable()
+  public supportTeamMembers: UserInterface[]
 
   @Column()
   @RelationId((keyResult: KeyResult) => keyResult.objective)

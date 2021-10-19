@@ -58,6 +58,27 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     })
   }
 
+  public async getSupportTeam(keyResultID: string): Promise<KeyResult['supportTeamMembers']> {
+    const whereSelector = {
+      id: keyResultID,
+    }
+
+    const response = await this.repository.findOne({
+      relations: ['supportTeamMembers'],
+      where: whereSelector,
+    })
+
+    return response.supportTeamMembers
+  }
+
+  public async addUserToSupportTeam(keyResultId: string, userId: string) {
+    return this.repository.addUserToSupportTeam(keyResultId, userId)
+  }
+
+  public async removeUserToSupportTeam(keyResultId: string, userId: string) {
+    return this.repository.removeUserToSupportTeam(keyResultId, userId)
+  }
+
   public async getFromTeams(
     teams: Partial<TeamInterface> | Array<Partial<TeamInterface>>,
     filters?: FindConditions<KeyResult>,
@@ -353,6 +374,25 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     )
 
     return history
+  }
+
+  public async getOwnedByUserID(
+    userID: string,
+    filters?: KeyResultInterface,
+  ): Promise<KeyResult[]> {
+    const selector: Partial<KeyResultInterface> = {
+      ...filters,
+      ownerId: userID,
+    }
+
+    return this.getMany(selector)
+  }
+
+  public async getAllWithUserIDInSupportTeam(
+    userID: string,
+    filters?: KeyResultInterface,
+  ): Promise<KeyResult[]> {
+    return this.repository.getWithUserInSupportTeamWithFilters(userID, filters)
   }
 
   protected async protectCreationQuery(

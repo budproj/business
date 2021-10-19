@@ -254,12 +254,16 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching key results for user',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+    const [filters, _, connection] = this.relay.unmarshalRequest<
       KeyResultFiltersRequest,
       KeyResult
     >(request)
 
-    const queryResult = await this.core.keyResult.getFromOwner(user, filters, queryOptions)
+    const queryResult = await this.corePorts.dispatchCommand<KeyResult[]>(
+      'get-user-key-results',
+      user.id,
+      filters,
+    )
 
     return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection, user)
   }

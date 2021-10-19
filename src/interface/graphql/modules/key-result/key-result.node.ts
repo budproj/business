@@ -15,6 +15,7 @@ import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-result-key-result-check-ins/key-result-key-result-check-ins.connection'
 import { KeyResultKeyResultCheckMarkGraphQLConnection } from './connections/key-result-key-result-check-mark/key-result-key-result-check-marks.connection'
 import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-result-key-result-comments/key-result-key-result-comments.connection'
+import { KeyResultKeyResultSupportTeamGraphQLConnection } from './connections/key-result-key-result-support-team/key-result-key-result-support-team.connection'
 import { KeyResultProgressHistoryGraphQLConnection } from './connections/key-result-progress-history/key-result-progress-history.connection'
 import { KeyResultTimelineGraphQLConnection } from './connections/key-result-timeline/key-result-key-result-timeline.connection'
 import { KeyResultFormatGraphQLEnum } from './enums/key-result-format.enum'
@@ -99,6 +100,12 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
   // **********************************************************************************************
   // CONNECTION FIELDS
   // **********************************************************************************************
+
+  @Field(() => KeyResultKeyResultSupportTeamGraphQLConnection, {
+    description: 'A created date ordered list of key result support team users',
+    nullable: true,
+  })
+  public readonly supportTeamMembers?: KeyResultKeyResultSupportTeamGraphQLConnection
 
   @Field(() => KeyResultKeyResultCommentsGraphQLConnection, {
     description: 'A created date ordered list of key result comments for this key result',

@@ -36,6 +36,7 @@ import { UpdateKeyResultCommand } from '@core/ports/commands/update-key-result.c
 import { UpdateObjectiveCommand } from '@core/ports/commands/update-objective.command'
 
 import { AddTeamToUserCommand } from './add-team-to-user.command'
+import { AddUserToKeyResultSupportTeamCommand } from './add-user-to-key-result-support-team.command'
 import { Command } from './base.command'
 import { CreateCheckMarkCommand } from './create-check-mark.command'
 import { CreateKeyResultCheckInCommand } from './create-key-result-check-in.command'
@@ -54,6 +55,7 @@ import { GetKeyResultCycleCommand } from './get-key-result-cycle.command'
 import { GetKeyResultFromCheckInCommand } from './get-key-result-from-check-in.command'
 import { GetKeyResultOwnerCommand } from './get-key-result-owner.command'
 import { GetKeyResultProgressHistoryCommand } from './get-key-result-progress-history.command'
+import { GetKeyResultSupportTeamCommand } from './get-key-result-support-team.command'
 import { GetKeyResultTeamTreeCommand } from './get-key-result-team-tree.command'
 import { GetKeyResultCommand } from './get-key-result.command'
 import { GetObjectiveKeyResultsCommand } from './get-objective-key-results.command'
@@ -61,8 +63,10 @@ import { GetTeamCompanyCommand } from './get-team-company.command'
 import { GetTeamMembersCommand } from './get-team-members.command'
 import { GetTeamOwnerCommand } from './get-team-owner.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
+import { GetUserKeyResultsCommand } from './get-user-key-results.command'
 import { GetUsersByIdsCommand } from './get-users-by-ids.command'
 import { RemoveTeamFromUserCommand } from './remove-team-from-user.command'
+import { RemoveUserToKeyResultSupportTeamCommand } from './remove-user-to-key-result-support-team.command'
 import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
 import { UpdateCheckMarkDescriptionCommand } from './update-check-mark-description.command'
 import { UpdateUserCommand } from './update-user.command'
@@ -70,6 +74,7 @@ import { UpdateUserCommand } from './update-user.command'
 type CommandConstructor = new (...commandArguments: any[]) => Command<unknown>
 export type CommandType =
   | 'add-team-to-user'
+  | 'add-user-to-key-result-support-team'
   | 'create-check-in'
   | 'create-check-mark'
   | 'create-key-result-comment'
@@ -101,6 +106,7 @@ export type CommandType =
   | 'get-key-result-owner'
   | 'get-key-result-progress-history'
   | 'get-key-result-status'
+  | 'get-key-result-support-team'
   | 'get-key-result-team-tree'
   | 'get-key-result-team'
   | 'get-key-result'
@@ -123,10 +129,12 @@ export type CommandType =
   | 'get-team'
   | 'get-user-companies'
   | 'get-user-full-name'
+  | 'get-user-key-results'
   | 'get-user-team-tree'
   | 'get-user'
   | 'get-users-by-ids'
   | 'remove-team-from-user'
+  | 'remove-user-to-key-result-support-team'
   | 'toggle-check-mark'
   | 'update-check-mark-description'
   | 'update-key-result'
@@ -137,6 +145,7 @@ export type CommandType =
 export class CommandFactory {
   private readonly commands: Record<CommandType, CommandConstructor> = {
     'add-team-to-user': AddTeamToUserCommand,
+    'add-user-to-key-result-support-team': AddUserToKeyResultSupportTeamCommand,
     'create-check-in': CreateKeyResultCheckInCommand,
     'create-check-mark': CreateCheckMarkCommand,
     'create-key-result-comment': CreateKeyResultCommentCommand,
@@ -168,6 +177,7 @@ export class CommandFactory {
     'get-key-result-owner': GetKeyResultOwnerCommand,
     'get-key-result-progress-history': GetKeyResultProgressHistoryCommand,
     'get-key-result-status': GetKeyResultStatusCommand,
+    'get-key-result-support-team': GetKeyResultSupportTeamCommand,
     'get-key-result-team-tree': GetKeyResultTeamTreeCommand,
     'get-key-result-team': GetKeyResultTeamCommand,
     'get-key-result': GetKeyResultCommand,
@@ -190,10 +200,12 @@ export class CommandFactory {
     'get-team': GetTeamCommand,
     'get-user-companies': GetUserCompaniesCommand,
     'get-user-full-name': GetUserFullNameCommand,
+    'get-user-key-results': GetUserKeyResultsCommand,
     'get-user-team-tree': GetUserTeamTreeCommand,
     'get-user': GetUserCommand,
     'get-users-by-ids': GetUsersByIdsCommand,
     'remove-team-from-user': RemoveTeamFromUserCommand,
+    'remove-user-to-key-result-support-team': RemoveUserToKeyResultSupportTeamCommand,
     'toggle-check-mark': ToggleCheckMarkCommand,
     'update-check-mark-description': UpdateCheckMarkDescriptionCommand,
     'update-key-result': UpdateKeyResultCommand,

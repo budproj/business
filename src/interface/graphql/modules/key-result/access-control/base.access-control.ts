@@ -18,7 +18,7 @@ export abstract class KeyResultBaseAccessControl extends AccessControl {
 
     const teams = await this.core.dispatchCommand<Team[]>('get-key-result-team-tree', keyResult)
 
-    const isKeyResultOwner = this.isKeyResultOwner(keyResult, user)
+    const isKeyResultOwner = await this.isKeyResultOwner(keyResult, user)
     const isTeamLeader = await this.isTeamLeader(teams, user)
     const isCompanyMember = await this.isKeyResultCompanyMember(keyResult, user)
 
@@ -49,8 +49,16 @@ export abstract class KeyResultBaseAccessControl extends AccessControl {
     return this.core.dispatchCommand<Team[]>('get-key-result-team-tree', keyResult)
   }
 
-  protected isKeyResultOwner(keyResult: KeyResult, user: UserWithContext): boolean {
-    return keyResult.ownerId === user.id
+  protected async isKeyResultOwner(keyResult: KeyResult, user: UserWithContext): Promise<boolean> {
+    const supportTeam = await this.core.dispatchCommand<KeyResult['supportTeamMembers']>(
+      'get-key-result-support-team',
+      keyResult.id,
+    )
+    const supportTeamIds = supportTeam.map((member) => member.id)
+
+    const owners = [...supportTeamIds, keyResult.ownerId]
+
+    return owners.includes(user.id)
   }
 
   protected async isKeyResultCompanyMember(
