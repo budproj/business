@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { uniqBy } from 'lodash'
 
 import {
   CreatedCheckInActivity,
@@ -120,7 +121,13 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
       'get-team-members',
       keyResult.teamId,
     )
-    const teamMembers = keyResultTeamMembers.filter((member) => member.id !== author.id)
+    const keyResultSupportTeamMembers = await this.core.dispatchCommand<UserInterface[]>(
+      'get-key-result-support-team',
+      keyResult.id,
+    )
+    const keyResultMembers = uniqBy([...keyResultTeamMembers, ...keyResultSupportTeamMembers], 'id')
+
+    const teamMembers = keyResultMembers.filter((member) => member.id !== author.id)
 
     return {
       keyResult,
