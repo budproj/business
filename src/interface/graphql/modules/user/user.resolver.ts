@@ -30,7 +30,6 @@ import { RequestUserWithContext } from '@interface/graphql/adapters/context/deco
 import { UploadGraphQLProvider } from '@interface/graphql/adapters/upload/upload.provider'
 import { KeyResultCheckInFiltersRequest } from '@interface/graphql/modules/key-result/check-in/requests/key-result-check-in-filters.request'
 import { KeyResultCommentFiltersRequest } from '@interface/graphql/modules/key-result/comment/requests/key-result-comment-filters.request'
-import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/requests/key-result-filters.request'
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
 import { TeamFiltersRequest } from '@interface/graphql/modules/team/requests/team-filters.request'
 import { UserAccessControl } from '@interface/graphql/modules/user/user.access-control'
@@ -43,6 +42,7 @@ import { UserObjectivesGraphQLConnection } from './connections/user-objectives/u
 import { UserTeamsGraphQLConnection } from './connections/user-teams/user-teams.connection'
 import { EmailAlreadyExistsApolloError } from './exceptions/email-already-exists.exception'
 import { UserDeactivateRequest } from './requests/user-deactivate.request'
+import { UserKeyResultsRequest } from './requests/user-key-results.request'
 import { UserUpdateRequest } from './requests/user-update.request'
 import { UserGraphQLNode } from './user.node'
 
@@ -245,7 +245,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
   @ResolveField('keyResults', () => UserKeyResultsGraphQLConnection, { nullable: true })
   protected async getKeyResultsForRequestAndUser(
-    @Args() request: KeyResultFiltersRequest,
+    @Args() request: UserKeyResultsRequest,
     @Parent() user: UserGraphQLNode,
   ) {
     this.logger.log({
@@ -254,15 +254,19 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching key results for user',
     })
 
-    const [filters, _, connection] = this.relay.unmarshalRequest<
-      KeyResultFiltersRequest,
-      KeyResult
-    >(request)
+    const [options, _, connection] = this.relay.unmarshalRequest<UserKeyResultsRequest, KeyResult>(
+      request,
+    )
+
+    const { active, ...filters } = options
 
     const queryResult = await this.corePorts.dispatchCommand<KeyResult[]>(
       'get-user-key-results',
       user.id,
       filters,
+      {
+        active,
+      },
     )
 
     return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection, user)
