@@ -34,11 +34,9 @@ export class KeyResultCheckMarkAccessControl extends KeyResultBaseAccessControl 
     user: UserWithContext,
     keyResultCheckMarkID: string,
   ): Promise<AccessControlScopes> {
-    const { keyResultCheckMark, keyResult, teams } = await this.getRelatedEntities(
-      keyResultCheckMarkID,
-    )
+    const { keyResult, teams } = await this.getRelatedEntities(keyResultCheckMarkID)
 
-    const isOwner = keyResultCheckMark.userId === user.id
+    const isOwner = await this.isKeyResultOwner(keyResult, user)
     const isTeamLeader = await this.isTeamLeader(teams, user)
     const isCompanyMember = await this.isKeyResultCompanyMember(keyResult, user)
 
