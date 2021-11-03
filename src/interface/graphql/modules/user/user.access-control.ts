@@ -8,10 +8,16 @@ import { Team } from '@core/modules/team/team.orm-entity'
 import { User } from '@core/modules/user/user.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
-type RelatedEntities = {
+type EntityRelatedEntities = {
   user: User
   teams: Team[]
   companies: Team[]
+}
+
+type ContextRelatedEntities = {
+  team: Team
+  teams: Team[]
+  company: Team
 }
 
 @Injectable()
@@ -27,13 +33,19 @@ export class UserAccessControl extends AccessControl {
   }
 
   protected async resolveContextScopes(
-    _user: UserWithContext,
-    _teamID: string,
+    user: UserWithContext,
+    teamID: string,
   ): Promise<AccessControlScopes> {
+    const { team, teams, company } = await this.getContextRelatedEntities(teamID)
+
+    const isTeamLeader = await this.isTeamLeader(teams, user)
+    const isCompanyMember = await this.isCompanyMember([company], user)
+    const isOwner = team.ownerId === user.id
+
     return {
-      isOwner: false,
-      isTeamLeader: false,
-      isCompanyMember: false,
+      isOwner,
+      isTeamLeader,
+      isCompanyMember,
     }
   }
 
@@ -41,7 +53,7 @@ export class UserAccessControl extends AccessControl {
     requestUser: UserWithContext,
     userID: string,
   ): Promise<AccessControlScopes> {
-    const { user, teams, companies } = await this.getRelatedEntities(userID)
+    const { user, teams, companies } = await this.getEntityRelatedEntities(userID)
 
     const isSameUser = UserAccessControl.isSameUser(user, requestUser)
     const isTeamLeader = await this.isTeamLeader(teams, requestUser)
@@ -54,7 +66,7 @@ export class UserAccessControl extends AccessControl {
     }
   }
 
-  private async getRelatedEntities(userID: string): Promise<RelatedEntities> {
+  private async getEntityRelatedEntities(userID: string): Promise<EntityRelatedEntities> {
     const user = await this.core.dispatchCommand<User>('get-user', { id: userID })
     const teams = await this.core.dispatchCommand<Team[]>('get-user-team-tree', user)
     const companies = await this.core.dispatchCommand<Team[]>('get-user-companies', user)
@@ -63,6 +75,20 @@ export class UserAccessControl extends AccessControl {
       user,
       teams,
       companies,
+    }
+  }
+
+  private async getContextRelatedEntities(teamID: string): Promise<ContextRelatedEntities> {
+    const teamIndexes = { id: teamID }
+
+    const team = await this.core.dispatchCommand<Team>('get-team', teamIndexes)
+    const teams = await this.core.dispatchCommand<Team[]>('get-team-tree', teamIndexes)
+    const company = await this.core.dispatchCommand<Team>('get-team-company', team)
+
+    return {
+      team,
+      teams,
+      company,
     }
   }
 }
