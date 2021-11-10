@@ -8,6 +8,9 @@ export class AuthzClientProvider {
   private readonly logger = new Logger(AuthzClientProvider.name)
   private readonly mgmtClient: ManagementClient
   private readonly authClient: AuthenticationClient
+  private get defaultNewUserRole() {
+    return 'Team Member'
+  }
 
   constructor(private readonly config: AuthzConfigProvider) {
     this.authClient = new AuthenticationClient({
@@ -39,7 +42,15 @@ export class AuthzClientProvider {
   public async newUser(data: CreateUserData): Promise<User> {
     try {
       this.logger.debug(`Creating new user`)
-      return await this.mgmtClient.createUser(data)
+
+      const user = await this.mgmtClient.createUser(data)
+
+      const availableRoles = await this.mgmtClient.getRoles()
+      const role = availableRoles.find((r) => r.name === this.defaultNewUserRole)
+
+      await this.mgmtClient.assignRolestoUser({ id: user.user_id }, { roles: [role.id] })
+
+      return user
     } catch (error: unknown) {
       this.logger.error(error)
       throw error
