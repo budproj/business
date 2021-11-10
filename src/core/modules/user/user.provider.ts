@@ -94,8 +94,11 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
 
   public async createUser(data: UserInterface): Promise<User> {
     const createdData = await this.create(data)
+    const user = createdData[0]
 
-    return createdData[0]
+    await this.credentials.invite(user.email)
+
+    return user
   }
 
   protected async protectCreationQuery(

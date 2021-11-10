@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { CreateUserData, ManagementClient, User } from 'auth0'
+import { AuthenticationClient, CreateUserData, ManagementClient, User } from 'auth0'
 
 import { AuthzConfigProvider } from '@config/authz/authz.provider'
 
@@ -7,8 +7,14 @@ import { AuthzConfigProvider } from '@config/authz/authz.provider'
 export class AuthzClientProvider {
   private readonly logger = new Logger(AuthzClientProvider.name)
   private readonly mgmtClient: ManagementClient
+  private readonly authClient: AuthenticationClient
 
   constructor(private readonly config: AuthzConfigProvider) {
+    this.authClient = new AuthenticationClient({
+      domain: this.config.domain,
+      clientId: this.config.credentials.clientID,
+    })
+
     this.mgmtClient = new ManagementClient({
       domain: this.config.domain,
       clientId: this.config.credentials.clientID,
@@ -34,6 +40,16 @@ export class AuthzClientProvider {
     try {
       this.logger.debug(`Creating new user`)
       return await this.mgmtClient.createUser(data)
+    } catch (error: unknown) {
+      this.logger.error(error)
+      throw error
+    }
+  }
+
+  public async inviteUser(email: string): Promise<void> {
+    try {
+      this.logger.debug(`Inviting user with e-mail ${email}`)
+      await this.authClient.requestChangePasswordEmail({ email, connection: this.connection })
     } catch (error: unknown) {
       this.logger.error(error)
       throw error

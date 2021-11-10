@@ -35,4 +35,8 @@ export class AuthzCredentialsProvider implements CredentialsAdapter {
 
     return updatedUser.email === email
   }
+
+  public async invite(email: string): Promise<void> {
+    await this.client.inviteUser(email)
+  }
 }
