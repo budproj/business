@@ -6,4 +6,5 @@ export const AuthzEnvironmentSchema = Joi.object({
   AUTHZ_AUDIENCE: Joi.string().uri().required(),
   AUTHZ_CLIENT_ID: Joi.string().required(),
   AUTHZ_CLIENT_SECRET: Joi.string().required(),
+  AUTHZ_CONNECTION: Joi.string().default('Username-Password-Authentication'),
 })

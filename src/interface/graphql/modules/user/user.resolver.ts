@@ -1,4 +1,4 @@
-import { Logger, UnauthorizedException } from '@nestjs/common'
+import { InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 import { FileUpload } from 'graphql-upload'
@@ -41,6 +41,7 @@ import { UserKeyResultsGraphQLConnection } from './connections/user-key-results/
 import { UserObjectivesGraphQLConnection } from './connections/user-objectives/user-objectives.connection'
 import { UserTeamsGraphQLConnection } from './connections/user-teams/user-teams.connection'
 import { EmailAlreadyExistsApolloError } from './exceptions/email-already-exists.exception'
+import { UserCreateRequest } from './requests/user-create.request'
 import { UserDeactivateRequest } from './requests/user-deactivate.request'
 import { UserKeyResultsRequest } from './requests/user-key-results.request'
 import { UserUpdateRequest } from './requests/user-update.request'
@@ -147,6 +148,30 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     })
 
     return this.corePorts.dispatchCommand<User>('deactivate-user', request.id)
+  }
+
+  @GuardedMutation(UserGraphQLNode, 'user:create', { name: 'createUser' })
+  protected async createUserForRequestAndRequestUserWithContext(
+    @Args() request: UserCreateRequest,
+    @RequestUserWithContext() userWithContext: UserWithContext,
+  ) {
+    const { teamID, ...newUserData } = request.data
+
+    const canCreate = await this.accessControl.canCreate(userWithContext, teamID)
+    if (!canCreate) throw new UnauthorizedException()
+
+    this.logger.log({
+      userWithContext,
+      request,
+      message: 'Received create user request',
+    })
+
+    const createdUser = await this.corePorts.dispatchCommand<User>('create-user', newUserData)
+    if (!createdUser) throw new InternalServerErrorException('We were not able to create your user')
+
+    await this.corePorts.dispatchCommand('add-team-to-user', { teamID, userID: createdUser.id })
+
+    return createdUser
   }
 
   @ResolveField('fullName', () => String)

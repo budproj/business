@@ -8,6 +8,7 @@ export const authzConfig = registerAs(
     domain: process.env.AUTHZ_DOMAIN,
     issuer: process.env.AUTHZ_ISSUER,
     audience: process.env.AUTHZ_AUDIENCE,
+    connection: process.env.AUTHZ_CONNECTION,
 
     credentials: {
       clientID: process.env.AUTHZ_CLIENT_ID,

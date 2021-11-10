@@ -19,6 +19,10 @@ export class AuthzConfigProvider {
     return this.configService.get<string>('authz.audience')
   }
 
+  get connection(): string {
+    return this.configService.get<string>('authz.connection')
+  }
+
   get credentials(): AuthzCredentialsInterface {
     return this.configService.get<AuthzCredentialsInterface>('authz.credentials')
   }
