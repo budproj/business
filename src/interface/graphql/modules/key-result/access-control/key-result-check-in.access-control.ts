@@ -38,16 +38,16 @@ export class KeyResultCheckInAccessControl extends KeyResultBaseAccessControl {
     user: UserWithContext,
     keyResultCheckInID: string,
   ): Promise<AccessControlScopes> {
-    const { keyResultCheckIn, keyResult, teams } = await this.getRelatedEntities(keyResultCheckInID)
+    const { keyResult, teams } = await this.getRelatedEntities(keyResultCheckInID)
 
-    const isCheckInAuthor = KeyResultCheckInAccessControl.isCheckInAuthor(keyResultCheckIn, user)
+    const isOwner = await this.isKeyResultOwner(keyResult, user)
     const isTeamLeader = await this.isTeamLeader(teams, user)
     const isCompanyMember = await this.isKeyResultCompanyMember(keyResult, user)
 
     return {
       isTeamLeader,
       isCompanyMember,
-      isOwner: isCheckInAuthor,
+      isOwner,
     }
   }
 
