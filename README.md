@@ -4,7 +4,7 @@
   <br>
 </p>
 <p align="center">
-Main backend application, designed for both application and domain layers.
+Main backend application, designed for both application and domain layers
 </p>
 
 ## 📖 About this
