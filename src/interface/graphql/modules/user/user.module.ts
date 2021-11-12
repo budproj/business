@@ -23,5 +23,6 @@ import { UserGraphQLResolver } from './user.resolver'
     UserKeyResultCommentsConnectionGraphQLResolver,
     UserAccessControl,
   ],
+  exports: [UserAccessControl],
 })
 export class UserGraphQLModule {}

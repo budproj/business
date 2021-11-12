@@ -2,6 +2,7 @@ export interface AuthzConfigInterface {
   domain: string
   issuer: string
   audience: string
+  connection: string
   credentials: AuthzCredentialsInterface
 }
 

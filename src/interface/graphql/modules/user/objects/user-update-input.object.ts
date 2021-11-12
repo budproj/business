@@ -6,8 +6,10 @@ import { UploadGraphQLScalar } from '@interface/graphql/adapters/upload/scalars/
 
 import { UserGenderGraphQLEnum } from '../enums/user-gender.enum'
 
-@InputType('UserInput', { description: 'Data that you can assign to a given user' })
-export class UserInputObject {
+@InputType('UserUpdateInput', {
+  description: 'Data that you can assign to a given user while updating it',
+})
+export class UserUpdateInputObject {
   @Field(() => String, { description: 'The first name of the user', nullable: true })
   public readonly firstName?: string
 

@@ -3,6 +3,7 @@ import { flatten, uniqBy } from 'lodash'
 import { FindConditions, In } from 'typeorm'
 
 import { CredentialsAdapter } from '@adapters/credentials/credentials.adapter'
+import { Credential, NewCredentialData } from '@adapters/credentials/credentials.interface'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
@@ -11,7 +12,7 @@ import { CreationQuery } from '@core/types/creation-query.type'
 import { AuthzCredentialsProvider } from '@infrastructure/authz/providers/credentials.provider'
 
 import { UserStatus } from './enums/user-status.enum'
-import { UserInterface } from './user.interface'
+import { UserCredentialsAdditionalData, UserInterface } from './user.interface'
 import { User } from './user.orm-entity'
 import { UserRepository } from './user.repository'
 
@@ -75,6 +76,29 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     const user = await this.getFromID(userID)
 
     await this.credentials.updateEmail(user.authzSub, email)
+  }
+
+  public async generateCredentials(
+    email: string,
+    additionalData?: UserCredentialsAdditionalData,
+  ): Promise<Credential> {
+    const credentialData: NewCredentialData = {
+      name: '',
+      email,
+      password: this.credentials.generatePassword(),
+      ...additionalData,
+    }
+
+    return this.credentials.create(credentialData)
+  }
+
+  public async createUser(data: UserInterface): Promise<User> {
+    const createdData = await this.create(data)
+    const user = createdData[0]
+
+    await this.credentials.invite(user.email)
+
+    return user
   }
 
   protected async protectCreationQuery(
