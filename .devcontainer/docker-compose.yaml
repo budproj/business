@@ -4,28 +4,40 @@ volumes:
   postgres:
 
 services:
-  dev-app:
-    image: mcr.microsoft.com/vscode/devcontainers/typescript-node:14
+  workspace:
+    image: mcr.microsoft.com/vscode/ntainers/typescript-node:14
+    container_name: bud-business-workspace
     command: tail -f /dev/null
     user: 1000:1000
-    network_mode: host
+    depends_on:
+      - db-postgres
+      - broker-nats
     env_file:
-      - ../.env.local
-      - ../.env.development
+      - ../.env.secret
       - ../.env
     volumes:
       - ..:/workspace:cached
 
   db-postgres:
     image: postgres
-    container_name: business-db-postgres
-    network_mode: host
-    env_file:
-      - ../.env.local
-      - ../.env.development
-      - ../.env
+    container_name: bud-business-db-postgres
     restart: unless-stopped
+    env_file:
+      - ../.env.secret
+      - ../.env
     volumes:
       - type: volume
         source: postgres
         target: ${POSTGRES_DATA:-/data/postgres}
+    ports:
+      - ${POSTGRES_PORT:-5432}:${POSTGRES_PORT:-5432}
+
+  broker-nats:
+    image: nats
+    container_name: bud-business-broker-nats
+    env_file:
+      - ../.env.secret
+      - ../.env
+    restart: unless-stopped
+    ports:
+      - ${NATS_PORT:-4222}:4222
