@@ -13,7 +13,6 @@ services:
       - db-postgres
       - broker-nats
     env_file:
-      - ../.env.secret
       - ../.env
     volumes:
       - ..:/workspace:cached
@@ -23,7 +22,6 @@ services:
     container_name: bud-business-db-postgres
     restart: unless-stopped
     env_file:
-      - ../.env.secret
       - ../.env
     volumes:
       - type: volume
@@ -36,7 +34,6 @@ services:
     image: nats
     container_name: bud-business-broker-nats
     env_file:
-      - ../.env.secret
       - ../.env
     restart: unless-stopped
     ports:

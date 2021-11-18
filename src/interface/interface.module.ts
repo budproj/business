@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common'
 
-import { NatsModule } from '@interface/nats/nats.module'
+import { TasksModule } from '@interface/tasks/tasks.module'
 
 import { GraphQLModule } from './graphql/graphql.module'
 
 @Module({
-  imports: [GraphQLModule, NatsModule],
+  imports: [GraphQLModule, TasksModule],
 })
 export class InterfaceModule {}
