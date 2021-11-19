@@ -5,8 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e959aa6a-e82d-426c-b0f3-dc8939c6d5d2" name="Default Changelist" comment="chore: updates eslint Idea">
-      <change afterPath="$PROJECT_DIR$/manifests/canary/canary-jobs.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/manifests/canary/canary-jobs.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/manifests/canary/canary-jobs.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,7 +84,7 @@
       <workItem from="1637171564722" duration="21000" />
       <workItem from="1637171635448" duration="10851000" />
       <workItem from="1637258881862" duration="4263000" />
-      <workItem from="1637349228013" duration="795000" />
+      <workItem from="1637349228013" duration="987000" />
     </task>
     <task id="LOCAL-00001" summary="chore: updating env structure">
       <created>1637180757948</created>
