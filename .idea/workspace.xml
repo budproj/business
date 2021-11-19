@@ -5,21 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e959aa6a-e82d-426c-b0f3-dc8939c6d5d2" name="Default Changelist" comment="chore: updates eslint Idea">
-      <change afterPath="$PROJECT_DIR$/src/adapters/message-broker/message-broker.interface.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/config/tasks/tasks-environment.schema.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/config/tasks/tasks.config.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/config/tasks/tasks.interface.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/config/tasks/tasks.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/config/tasks/tasks.provider.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/infrastructure/nats/nats.interface.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/infrastructure/nats/nats.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/infrastructure/nats/nats.provider.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.devcontainer/docker-compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.devcontainer/docker-compose.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/manifests/canary/canary-jobs.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/interface/interface.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/interface.module.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/interface/nats/nats.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/tasks/tasks.module.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/interface/nats/nats.provider.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/tasks/tasks.provider.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,6 +85,7 @@
       <workItem from="1637171564722" duration="21000" />
       <workItem from="1637171635448" duration="10851000" />
       <workItem from="1637258881862" duration="4263000" />
+      <workItem from="1637349228013" duration="795000" />
     </task>
     <task id="LOCAL-00001" summary="chore: updating env structure">
       <created>1637180757948</created>
