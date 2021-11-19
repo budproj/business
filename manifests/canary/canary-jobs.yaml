@@ -1,5 +1,5 @@
 ---
-apiVersion: batch/v1
+apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   name: business-dummy-canary
@@ -21,5 +21,5 @@ spec:
             command:
             - /bin/sh
             - -c
-            - 'nats pub dummy "dispatch" --server nats.nats.svc.cluster.local:4222'
+            - nats pub dummy "dispatch" --server nats.nats.svc.cluster.local:4222
           restartPolicy: OnFailure
