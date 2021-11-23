@@ -42,6 +42,7 @@ type ResolvedData = {
   checkIn: KeyResultCheckInInterface
   author: UserInterface
   authorFullName: string
+  authorInitials: string
   previousCheckInConfidenceColor: string
   previousCheckInConfidenceBackgroundColor: string
   hasPreviousCheckIn: boolean
@@ -151,8 +152,14 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
     const previousCheckInConfidenceBackgroundColor =
       this.confidenceTagAdapter.getBackgroundColorFromConfidence(parentCheckIn?.confidence)
 
+    const authorInitials = await this.core.dispatchCommand<string>(
+      'get-user-initials',
+      this.activity.context.user,
+    )
+
     return {
       authorFullName,
+      authorInitials,
       previousCheckInConfidenceColor,
       previousCheckInConfidenceBackgroundColor,
       checkIn: this.activity.data,
@@ -182,6 +189,7 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
       isFemaleTeam: data.team.gender === TeamGender.FEMALE,
       teamName: data.team.name,
       authorFirstName: data.author.firstName,
+      authorInitials: data.authorInitials,
       isQuarterlyCadence: data.cycle.cadence === Cadence.QUARTERLY,
       cyclePeriod: data.cycle.period,
       authorPictureURL: data.author.picture,
@@ -226,6 +234,7 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
       cyclePeriod: data.cycle.period,
       authorPictureURL: data.author.picture,
       authorFullName: data.authorFullName,
+      authorInitials: data.authorInitials,
       keyResultTitle: data.keyResult.title,
       keyResultPreviousConfidenceTagColorPrimary: data.previousCheckInConfidenceColor,
       keyResultPreviousConfidenceTagColorBackground: data.previousCheckInConfidenceBackgroundColor,

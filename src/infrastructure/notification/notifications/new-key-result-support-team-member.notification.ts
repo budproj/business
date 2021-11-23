@@ -31,6 +31,7 @@ type RelatedData = {
 
 type ResolvedData = {
   authorFullName: string
+  authorInitials: string
   keyResultConfidenceColor: string
 }
 
@@ -84,6 +85,7 @@ export class NewKeyResultSupportTeamMemberNotification extends BaseNotification<
       cyclePeriod: data.cycle.period,
       authorPictureURL: data.author.picture,
       authorFullName: data.authorFullName,
+      authorInitials: data.authorInitials,
       keyResultTitle: data.keyResult.title,
       keyResultConfidenceColor: data.keyResultConfidenceColor,
       keyResultDescription: data.keyResult.description,
@@ -124,8 +126,14 @@ export class NewKeyResultSupportTeamMemberNotification extends BaseNotification<
       relatedData.keyResult,
     )
 
+    const authorInitials = await this.core.dispatchCommand<string>(
+      'get-user-initials',
+      this.activity.context.user,
+    )
+
     return {
       authorFullName,
+      authorInitials,
       keyResultConfidenceColor,
     }
   }

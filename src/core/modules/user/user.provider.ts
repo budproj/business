@@ -101,6 +101,13 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     return user
   }
 
+  public buildUserInitials(data: UserInterface): string {
+    const firstLetter = data.firstName[0]
+    const lastLetter = data?.lastName.split(' ').slice(-1).join()[0]
+
+    return firstLetter + lastLetter
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<User>,
     _data: Partial<UserInterface>,
