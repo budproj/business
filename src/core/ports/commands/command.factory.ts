@@ -30,6 +30,7 @@ import { GetTeamTacticalCycleCommand } from '@core/ports/commands/get-team-tacti
 import { GetTeamTreeCommand } from '@core/ports/commands/get-team-tree.command'
 import { GetTeamCommand } from '@core/ports/commands/get-team.command'
 import { GetUserFullNameCommand } from '@core/ports/commands/get-user-full-name.command'
+import { GetUserInitialsCommand } from '@core/ports/commands/get-user-initials.command'
 import { GetUserTeamTreeCommand } from '@core/ports/commands/get-user-team-tree.command'
 import { GetUserCommand } from '@core/ports/commands/get-user.command'
 import { UpdateKeyResultCommand } from '@core/ports/commands/update-key-result.command'
@@ -78,8 +79,8 @@ export type CommandType =
   | 'add-user-to-key-result-support-team'
   | 'create-check-in'
   | 'create-check-mark'
-  | 'create-key-result-comment'
   | 'create-key-result'
+  | 'create-key-result-comment'
   | 'create-objective'
   | 'create-user'
   | 'deactivate-user'
@@ -88,18 +89,19 @@ export type CommandType =
   | 'delete-objective'
   | 'get-check-list-for-key-result'
   | 'get-check-list-progress'
+  | 'get-cycle'
   | 'get-cycle-delta'
   | 'get-cycle-status'
-  | 'get-cycle'
+  | 'get-key-result'
+  | 'get-key-result-check-in'
   | 'get-key-result-check-in-delta'
   | 'get-key-result-check-in-list'
   | 'get-key-result-check-in-status'
   | 'get-key-result-check-in-team'
   | 'get-key-result-check-in-window-for-check-in'
-  | 'get-key-result-check-in'
   | 'get-key-result-check-mark'
-  | 'get-key-result-comment-team'
   | 'get-key-result-comment'
+  | 'get-key-result-comment-team'
   | 'get-key-result-company'
   | 'get-key-result-confidence-color'
   | 'get-key-result-cycle'
@@ -109,15 +111,15 @@ export type CommandType =
   | 'get-key-result-progress-history'
   | 'get-key-result-status'
   | 'get-key-result-support-team'
-  | 'get-key-result-team-tree'
   | 'get-key-result-team'
-  | 'get-key-result'
+  | 'get-key-result-team-tree'
+  | 'get-objective'
   | 'get-objective-delta'
   | 'get-objective-key-results'
   | 'get-objective-status'
   | 'get-objective-support-teams'
   | 'get-objective-team-tree'
-  | 'get-objective'
+  | 'get-team'
   | 'get-team-company'
   | 'get-team-delta'
   | 'get-team-members'
@@ -128,12 +130,12 @@ export type CommandType =
   | 'get-team-support-objectives'
   | 'get-team-tactical-cycle'
   | 'get-team-tree'
-  | 'get-team'
+  | 'get-user'
   | 'get-user-companies'
   | 'get-user-full-name'
+  | 'get-user-initials'
   | 'get-user-key-results'
   | 'get-user-team-tree'
-  | 'get-user'
   | 'get-users-by-ids'
   | 'remove-team-from-user'
   | 'remove-user-to-key-result-support-team'
@@ -150,8 +152,8 @@ export class CommandFactory {
     'add-user-to-key-result-support-team': AddUserToKeyResultSupportTeamCommand,
     'create-check-in': CreateKeyResultCheckInCommand,
     'create-check-mark': CreateCheckMarkCommand,
-    'create-key-result-comment': CreateKeyResultCommentCommand,
     'create-key-result': CreateKeyResultCommand,
+    'create-key-result-comment': CreateKeyResultCommentCommand,
     'create-objective': CreateObjectiveCommand,
     'create-user': CreateUserCommand,
     'deactivate-user': DeactivateUserCommand,
@@ -160,18 +162,19 @@ export class CommandFactory {
     'delete-objective': DeleteObjectiveCommand,
     'get-check-list-for-key-result': GetCheckListForKeyResultCommand,
     'get-check-list-progress': GetCheckListProgressCommand,
+    'get-cycle': GetCycleCommand,
     'get-cycle-delta': GetCycleDeltaCommand,
     'get-cycle-status': GetCycleStatusCommand,
-    'get-cycle': GetCycleCommand,
+    'get-key-result': GetKeyResultCommand,
+    'get-key-result-check-in': GetKeyResultCheckInCommand,
     'get-key-result-check-in-delta': GetKeyResultCheckInDeltaCommand,
     'get-key-result-check-in-list': GetKeyResultCheckInListCommand,
     'get-key-result-check-in-status': GetKeyResultCheckInStatusCommand,
     'get-key-result-check-in-team': GetKeyResultCheckInTeamCommand,
     'get-key-result-check-in-window-for-check-in': GetKeyResultCheckInWindowForCheckInCommand,
-    'get-key-result-check-in': GetKeyResultCheckInCommand,
     'get-key-result-check-mark': GetKeyResultCheckMarkCommand,
-    'get-key-result-comment-team': GetKeyResultCommentTeamCommand,
     'get-key-result-comment': GetKeyResultCommentCommand,
+    'get-key-result-comment-team': GetKeyResultCommentTeamCommand,
     'get-key-result-company': GetKeyResultCompanyCommand,
     'get-key-result-confidence-color': GetKeyResultConfidenceColorCommand,
     'get-key-result-cycle': GetKeyResultCycleCommand,
@@ -181,15 +184,15 @@ export class CommandFactory {
     'get-key-result-progress-history': GetKeyResultProgressHistoryCommand,
     'get-key-result-status': GetKeyResultStatusCommand,
     'get-key-result-support-team': GetKeyResultSupportTeamCommand,
-    'get-key-result-team-tree': GetKeyResultTeamTreeCommand,
     'get-key-result-team': GetKeyResultTeamCommand,
-    'get-key-result': GetKeyResultCommand,
+    'get-key-result-team-tree': GetKeyResultTeamTreeCommand,
+    'get-objective': GetObjectiveCommand,
     'get-objective-delta': GetObjectiveDeltaCommand,
     'get-objective-key-results': GetObjectiveKeyResultsCommand,
     'get-objective-status': GetObjectiveStatusCommand,
     'get-objective-support-teams': GetObjectiveSupportTeamsCommand,
     'get-objective-team-tree': GetObjectiveTeamTreeCommand,
-    'get-objective': GetObjectiveCommand,
+    'get-team': GetTeamCommand,
     'get-team-company': GetTeamCompanyCommand,
     'get-team-delta': GetTeamDeltaCommand,
     'get-team-members': GetTeamMembersCommand,
@@ -200,12 +203,12 @@ export class CommandFactory {
     'get-team-support-objectives': GetTeamSupportObjectivesCommand,
     'get-team-tactical-cycle': GetTeamTacticalCycleCommand,
     'get-team-tree': GetTeamTreeCommand,
-    'get-team': GetTeamCommand,
+    'get-user': GetUserCommand,
     'get-user-companies': GetUserCompaniesCommand,
     'get-user-full-name': GetUserFullNameCommand,
+    'get-user-initials': GetUserInitialsCommand,
     'get-user-key-results': GetUserKeyResultsCommand,
     'get-user-team-tree': GetUserTeamTreeCommand,
-    'get-user': GetUserCommand,
     'get-users-by-ids': GetUsersByIdsCommand,
     'remove-team-from-user': RemoveTeamFromUserCommand,
     'remove-user-to-key-result-support-team': RemoveUserToKeyResultSupportTeamCommand,
