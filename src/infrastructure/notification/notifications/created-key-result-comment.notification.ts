@@ -41,6 +41,7 @@ type OwnerNotificationData = {
 type AuthorNotificationData = {
   id: string
   fullName: string
+  initials: string
   picture: string
 }
 
@@ -154,6 +155,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
         isFemaleTeam: genericData.team.gender === TeamGender.FEMALE,
         authorFullName: genericData.author.fullName,
         authorPictureURL: genericData.author.picture,
+        authorInitials: genericData.author.initials,
         keyResultTitle: genericData.keyResult.title,
         keyResultConfidenceTagColor: genericData.keyResult.confidenceColor,
         keyResultComment: cleanCommentContent,
@@ -190,6 +192,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     }
     const emailData = {
       authorFullName: data.author.fullName,
+      authorInitials: data.author.initials,
       authorPictureURL: data.author.picture,
       keyResultTitle: data.keyResult.title,
       keyResultConfidenceTagColor: data.keyResult.confidenceColor,
@@ -227,8 +230,14 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       this.activity.context.user,
     )
 
+    const initials = await this.core.dispatchCommand<string>(
+      'get-user-initials',
+      this.activity.context.user,
+    )
+
     return {
       fullName,
+      initials,
       id: this.activity.context.user.id,
       picture: this.activity.context.user.picture,
     }
