@@ -99,3 +99,5 @@ spec:
               value: analytics-canary.bud.svc.cluster.local:50051
             - name: ANALYTICS_PACKAGES
               value: keyResult
+            - name: TASKS_NATS_SERVERS
+              value: nats.nats.svc.cluster.local:4222

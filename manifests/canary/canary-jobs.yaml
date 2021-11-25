@@ -1,0 +1,25 @@
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: business-dummy-canary
+  labels:
+    app.kubernetes.io/name: business-dummy-canary
+    app.kubernetes.io/part-of: business
+    app.kubernetes.io/component: backend-application
+    app.kubernetes.io/version: 1.0.0
+spec:
+  schedule: "0 0 * * FRI"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: dispatch
+            image: synadia/nats-box:0.6.0
+            imagePullPolicy: IfNotPresent
+            command:
+            - /bin/sh
+            - -c
+            - nats pub dummy "dispatch" --server nats.nats.svc.cluster.local:4222
+          restartPolicy: OnFailure

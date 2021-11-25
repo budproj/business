@@ -1,6 +1,6 @@
 {
   "dockerComposeFile": "docker-compose.yaml",
-  "service": "dev-app",
+  "service": "workspace",
   "workspaceFolder": "/workspace",
   "postCreateCommand": "bin/workspace-init",
   "settings": {
