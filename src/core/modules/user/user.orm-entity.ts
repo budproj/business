@@ -6,6 +6,7 @@ import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
+import { UserSettingInterface } from '@core/modules/user/setting/user-setting.interface'
 
 import { UserGender } from './enums/user-gender.enum'
 import { UserStatus } from './enums/user-status.enum'
@@ -69,4 +70,7 @@ export class User extends CoreEntity implements UserInterface {
 
   @OneToMany('KeyResultCheckIn', 'user', { nullable: true })
   public keyResultCheckIns?: KeyResultCheckInInterface[]
+
+  @OneToMany('UserSetting', 'user', { nullable: true })
+  public settings?: UserSettingInterface[]
 }
