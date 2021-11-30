@@ -72,7 +72,7 @@ type CreatedKeyResultCommentMetadata = {
   supportTeam: UserInterface[]
 } & NotificationMetadata
 
-const mentionsRegex = /@\[(?<name>[\w \u00C0-\u00FF]+)]\((?<id>[\da-f-]+)\)/g
+const mentionsRegex = /@\[(?<name>[\w \u00C0-\u00FF-]+)]\((?<id>[\da-f-]+)\)/g
 @Injectable()
 export class CreatedKeyResultCommentNotification extends BaseNotification<
   CreatedKeyResultCommentNotificationData,
