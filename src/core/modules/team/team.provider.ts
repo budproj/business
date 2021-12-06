@@ -28,6 +28,12 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     super(TeamProvider.name, repository)
   }
 
+  public async createTeam(data: TeamInterface): Promise<Team> {
+    const createdData = await this.create(data)
+
+    return createdData[0]
+  }
+
   public async getFromOwner(
     user: UserInterface,
     filters?: FindConditions<Team>,

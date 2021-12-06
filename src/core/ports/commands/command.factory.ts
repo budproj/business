@@ -42,6 +42,7 @@ import { Command } from './base.command'
 import { CreateCheckMarkCommand } from './create-check-mark.command'
 import { CreateKeyResultCheckInCommand } from './create-key-result-check-in.command'
 import { CreateKeyResultCommentCommand } from './create-key-result-comment.command'
+import { CreateTeamCommand } from './create-team.command'
 import { CreateUserCommand } from './create-user.command'
 import { DeactivateUserCommand } from './deactivate-user.command'
 import { DeleteCheckMarkCommand } from './delete-check-mark.command'
@@ -71,6 +72,7 @@ import { RemoveTeamFromUserCommand } from './remove-team-from-user.command'
 import { RemoveUserToKeyResultSupportTeamCommand } from './remove-user-to-key-result-support-team.command'
 import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
 import { UpdateCheckMarkDescriptionCommand } from './update-check-mark-description.command'
+import { UpdateTeamCommand } from './update-team.command'
 import { UpdateUserCommand } from './update-user.command'
 
 type CommandConstructor = new (...commandArguments: any[]) => Command<unknown>
@@ -81,6 +83,7 @@ export type CommandType =
   | 'create-check-mark'
   | 'create-key-result'
   | 'create-key-result-comment'
+  | 'create-team'
   | 'create-objective'
   | 'create-user'
   | 'deactivate-user'
@@ -143,6 +146,7 @@ export type CommandType =
   | 'update-check-mark-description'
   | 'update-key-result'
   | 'update-objective'
+  | 'update-team'
   | 'update-user'
 
 @Injectable()
@@ -155,6 +159,7 @@ export class CommandFactory {
     'create-key-result': CreateKeyResultCommand,
     'create-key-result-comment': CreateKeyResultCommentCommand,
     'create-objective': CreateObjectiveCommand,
+    'create-team': CreateTeamCommand,
     'create-user': CreateUserCommand,
     'deactivate-user': DeactivateUserCommand,
     'delete-check-mark': DeleteCheckMarkCommand,
@@ -216,6 +221,7 @@ export class CommandFactory {
     'update-check-mark-description': UpdateCheckMarkDescriptionCommand,
     'update-key-result': UpdateKeyResultCommand,
     'update-objective': UpdateObjectiveCommand,
+    'update-team': UpdateTeamCommand,
     'update-user': UpdateUserCommand,
   }
 
