@@ -8,6 +8,7 @@ import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
+import { UserSettingProvider } from '@core/modules/user/setting/user-setting.provider'
 import { CreationQuery } from '@core/types/creation-query.type'
 import { AuthzCredentialsProvider } from '@infrastructure/authz/providers/credentials.provider'
 
@@ -20,7 +21,11 @@ import { UserRepository } from './user.repository'
 export class UserProvider extends CoreEntityProvider<User, UserInterface> {
   private readonly credentials: CredentialsAdapter
 
-  constructor(protected readonly repository: UserRepository, authz: AuthzCredentialsProvider) {
+  constructor(
+    public readonly setting: UserSettingProvider,
+    protected readonly repository: UserRepository,
+    authz: AuthzCredentialsProvider,
+  ) {
     super(UserProvider.name, repository)
 
     this.credentials = authz

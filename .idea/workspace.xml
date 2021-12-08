@@ -4,18 +4,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e959aa6a-e82d-426c-b0f3-dc8939c6d5d2" name="Default Changelist" comment="chore: updates eslint Idea">
-      <change afterPath="$PROJECT_DIR$/src/core/modules/user/setting/user-setting.enums.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/core/modules/user/setting/user-setting.interface.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/core/modules/user/setting/user-settings.orm-entity.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/infrastructure/orm/migrations/1638297492226-AddUserSetting.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/setting/user-setting.enums.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/setting/user-setting.node.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/setting/user-setting.resolver.ts" afterDir="false" />
+    <list default="true" id="e959aa6a-e82d-426c-b0f3-dc8939c6d5d2" name="Default Changelist" comment="feat(user): adds user-setting base structure">
+      <change afterPath="$PROJECT_DIR$/src/core/modules/user/setting/user-setting.provider.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/modules/user/setting/user-setting.repository.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/core/ports/commands/get-user-settings.command.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/connections/user-user-settings/user-user-setting.edge.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/connections/user-user-settings/user-user-settings.connection.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/connections/user-user-settings/user-user-settings.resolver.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/setting/requests/user-setting-filters.request.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/adapters/policy/enums/resource.enum.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/adapters/policy/enums/resource.enum.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/modules/user/user.orm-entity.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/modules/user/user.orm-entity.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/interface/graphql/modules/user/user.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/user.module.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/modules/user/user.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/modules/user/user.module.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/modules/user/user.provider.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/modules/user/user.provider.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/ports/commands/command.factory.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ports/commands/command.factory.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/interface/graphql/modules/user/user.node.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/user.node.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/interface/graphql/modules/user/user.resolver.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/user.resolver.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,7 +60,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/interface/graphql/modules/user/access-control" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/core/ports/commands" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.standard" value="true" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
@@ -71,11 +73,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/core/ports/commands" />
+      <recent name="$PROJECT_DIR$/src/interface/graphql/modules/user/setting/requests" />
+      <recent name="$PROJECT_DIR$/src/core/modules/user/setting" />
+      <recent name="$PROJECT_DIR$/src/interface/graphql/modules/user/connections" />
       <recent name="$PROJECT_DIR$/src/interface/graphql/modules/user/access-control" />
-      <recent name="$PROJECT_DIR$/src/interface/graphql/modules/user/settings" />
-      <recent name="$PROJECT_DIR$/src/config" />
-      <recent name="$PROJECT_DIR$/src/interface/nats" />
-      <recent name="$PROJECT_DIR$" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/interface/graphql/modules/user" />
@@ -110,7 +112,10 @@
       <workItem from="1637612991925" duration="7000" />
       <workItem from="1638190506674" duration="1000" />
       <workItem from="1638294133195" duration="17000" />
-      <workItem from="1638294158203" duration="3356000" />
+      <workItem from="1638294158203" duration="4746000" />
+      <workItem from="1638988205274" duration="40000" />
+      <workItem from="1638988251401" duration="5000" />
+      <workItem from="1638990767116" duration="2718000" />
     </task>
     <task id="LOCAL-00001" summary="chore: updating env structure">
       <created>1637180757948</created>
@@ -147,7 +152,14 @@
       <option name="project" value="LOCAL" />
       <updated>1637259718617</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="feat(user): adds user-setting base structure">
+      <created>1638298213294</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1638298213294</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -169,7 +181,8 @@
     <MESSAGE value="chore: updating env structure" />
     <MESSAGE value="feat(nats): creates our first connection" />
     <MESSAGE value="chore: updates eslint Idea" />
-    <option name="LAST_COMMIT_MESSAGE" value="chore: updates eslint Idea" />
+    <MESSAGE value="feat(user): adds user-setting base structure" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(user): adds user-setting base structure" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

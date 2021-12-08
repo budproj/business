@@ -31,6 +31,7 @@ import { GetTeamTreeCommand } from '@core/ports/commands/get-team-tree.command'
 import { GetTeamCommand } from '@core/ports/commands/get-team.command'
 import { GetUserFullNameCommand } from '@core/ports/commands/get-user-full-name.command'
 import { GetUserInitialsCommand } from '@core/ports/commands/get-user-initials.command'
+import { GetUserSettingsCommand } from '@core/ports/commands/get-user-settings.command'
 import { GetUserTeamTreeCommand } from '@core/ports/commands/get-user-team-tree.command'
 import { GetUserCommand } from '@core/ports/commands/get-user.command'
 import { UpdateKeyResultCommand } from '@core/ports/commands/update-key-result.command'
@@ -135,6 +136,7 @@ export type CommandType =
   | 'get-user-full-name'
   | 'get-user-initials'
   | 'get-user-key-results'
+  | 'get-user-settings'
   | 'get-user-team-tree'
   | 'get-users-by-ids'
   | 'remove-team-from-user'
@@ -208,6 +210,7 @@ export class CommandFactory {
     'get-user-full-name': GetUserFullNameCommand,
     'get-user-initials': GetUserInitialsCommand,
     'get-user-key-results': GetUserKeyResultsCommand,
+    'get-user-settings': GetUserSettingsCommand,
     'get-user-team-tree': GetUserTeamTreeCommand,
     'get-users-by-ids': GetUsersByIdsCommand,
     'remove-team-from-user': RemoveTeamFromUserCommand,
