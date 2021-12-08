@@ -79,7 +79,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     @Args() request: TeamCreateRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    const { parentID, ...newTeamData } = request.data
+
+    const { parentID, ...data } = request.data
 
     const canCreate = await this.accessControl.canCreate(userWithContext, parentID)
     if (!canCreate) throw new UnauthorizedException()
@@ -90,7 +91,15 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Received create team request',
     })
 
-    const createdTeam = await this.corePorts.dispatchCommand<Team>('create-team', request.data)
+    const payload = {
+      name: data.name,
+      description: data.description,
+      gender: data.gender,
+      ownerId: data.ownerID,
+      parentId: parentID,
+    }
+
+    const createdTeam = await this.corePorts.dispatchCommand<Team>('create-team', payload)
     if (!createdTeam) throw new InternalServerErrorException('We were not able to create your user')
 
     return createdTeam
