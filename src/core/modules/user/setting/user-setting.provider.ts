@@ -19,6 +19,12 @@ export class UserSettingProvider extends CoreEntityProvider<UserSetting, UserSet
     })
   }
 
+  public async createOne(data: Partial<UserSettingInterface>): Promise<UserSetting> {
+    const setting = await this.create(data)
+
+    return setting[0]
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<UserSetting>,
     _data: Partial<UserSettingInterface>,

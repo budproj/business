@@ -36,6 +36,7 @@ import { GetUserTeamTreeCommand } from '@core/ports/commands/get-user-team-tree.
 import { GetUserCommand } from '@core/ports/commands/get-user.command'
 import { UpdateKeyResultCommand } from '@core/ports/commands/update-key-result.command'
 import { UpdateObjectiveCommand } from '@core/ports/commands/update-objective.command'
+import { UpdateUserSettingCommand } from '@core/ports/commands/update-user-setting.command'
 
 import { AddTeamToUserCommand } from './add-team-to-user.command'
 import { AddUserToKeyResultSupportTeamCommand } from './add-user-to-key-result-support-team.command'
@@ -146,6 +147,7 @@ export type CommandType =
   | 'update-key-result'
   | 'update-objective'
   | 'update-user'
+  | 'update-user-setting'
 
 @Injectable()
 export class CommandFactory {
@@ -220,6 +222,7 @@ export class CommandFactory {
     'update-key-result': UpdateKeyResultCommand,
     'update-objective': UpdateObjectiveCommand,
     'update-user': UpdateUserCommand,
+    'update-user-setting': UpdateUserSettingCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}

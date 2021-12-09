@@ -4,20 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e959aa6a-e82d-426c-b0f3-dc8939c6d5d2" name="Default Changelist" comment="feat(user): adds user-setting base structure">
-      <change afterPath="$PROJECT_DIR$/src/core/modules/user/setting/user-setting.provider.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/core/modules/user/setting/user-setting.repository.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/core/ports/commands/get-user-settings.command.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/connections/user-user-settings/user-user-setting.edge.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/connections/user-user-settings/user-user-settings.connection.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/connections/user-user-settings/user-user-settings.resolver.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/setting/requests/user-setting-filters.request.ts" afterDir="false" />
+    <list default="true" id="e959aa6a-e82d-426c-b0f3-dc8939c6d5d2" name="Default Changelist" comment="feat(setting): adds a way to fetch user settings">
+      <change afterPath="$PROJECT_DIR$/src/core/ports/commands/update-user-setting.command.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/setting/requests/user-setting-update.request.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/modules/user/user.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/modules/user/user.module.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/modules/user/user.provider.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/modules/user/user.provider.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/prod.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/modules/user/setting/user-setting.provider.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/modules/user/setting/user-setting.provider.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/core/ports/commands/command.factory.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ports/commands/command.factory.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/interface/graphql/modules/user/user.node.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/user.node.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/interface/graphql/modules/user/user.resolver.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/user.resolver.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/interface/graphql/modules/user/setting/user-setting.resolver.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/setting/user-setting.resolver.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -115,7 +109,8 @@
       <workItem from="1638294158203" duration="4746000" />
       <workItem from="1638988205274" duration="40000" />
       <workItem from="1638988251401" duration="5000" />
-      <workItem from="1638990767116" duration="2718000" />
+      <workItem from="1638990767116" duration="2823000" />
+      <workItem from="1639079918252" duration="1698000" />
     </task>
     <task id="LOCAL-00001" summary="chore: updating env structure">
       <created>1637180757948</created>
@@ -159,7 +154,14 @@
       <option name="project" value="LOCAL" />
       <updated>1638298213294</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="feat(setting): adds a way to fetch user settings">
+      <created>1638993556842</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1638993556842</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -182,7 +184,20 @@
     <MESSAGE value="feat(nats): creates our first connection" />
     <MESSAGE value="chore: updates eslint Idea" />
     <MESSAGE value="feat(user): adds user-setting base structure" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(user): adds user-setting base structure" />
+    <MESSAGE value="feat(setting): adds a way to fetch user settings" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(setting): adds a way to fetch user settings" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/core/ports/commands/update-user-setting.command.ts</url>
+          <line>9</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
