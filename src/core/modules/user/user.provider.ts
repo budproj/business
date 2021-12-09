@@ -113,6 +113,12 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     return firstLetter + lastLetter
   }
 
+  public async updateUserProperty(userID: string, key: string, value: string): Promise<void> {
+    const user = await this.getOne({ id: userID })
+
+    return this.credentials.updateUserProperty(user.authzSub, key, value)
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<User>,
     _data: Partial<UserInterface>,

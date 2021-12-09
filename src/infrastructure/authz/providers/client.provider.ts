@@ -66,4 +66,13 @@ export class AuthzClientProvider {
       throw error
     }
   }
+
+  public async updateUserMetadata(userID: string, key: string, value: string): Promise<void> {
+    await this.mgmtClient.updateUserMetadata(
+      { id: userID },
+      {
+        [key]: value,
+      },
+    )
+  }
 }
