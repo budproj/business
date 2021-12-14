@@ -46,11 +46,11 @@ spec:
                   name: business-canary
                   key: typeorm-password
             - name: AUTHZ_ISSUER
-              value: https://getbud.us.auth0.com/
+              value: https://auth.getbud.co/
             - name: AUTHZ_AUDIENCE
               value: https://api.getbud.co/business
             - name: AUTHZ_DOMAIN
-              value: getbud.us.auth0.com
+              value: auth.getbud.co
             - name: AUTHZ_CLIENT_ID
               valueFrom:
                 secretKeyRef:
