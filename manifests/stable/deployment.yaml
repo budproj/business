@@ -46,9 +46,9 @@ spec:
                   name: business
                   key: typeorm-password
             - name: AUTHZ_ISSUER
-              value: https://getbud.us.auth0.com/
+              value: https://auth.getbud.co/
             - name: AUTHZ_DOMAIN
-              value: getbud.us.auth0.com
+              value: auth.getbud.co
             - name: AUTHZ_AUDIENCE
               value: https://api.getbud.co/business
             - name: AUTHZ_CLIENT_ID
@@ -99,3 +99,5 @@ spec:
               value: analytics-stable.bud.svc.cluster.local:50051
             - name: ANALYTICS_PACKAGES
               value: keyResult
+            - name: TASKS_NATS_SERVERS
+              value: nats.nats.svc.cluster.local:4222
