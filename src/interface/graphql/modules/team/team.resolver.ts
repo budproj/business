@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common'
+import { InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 import { uniqBy } from 'lodash'
@@ -19,6 +19,7 @@ import { Team } from '@core/modules/team/team.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
+import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
@@ -39,8 +40,10 @@ import { TeamKeyResultsGraphQLConnection } from './connections/team-key-results/
 import { TeamObjectivesGraphQLConnection } from './connections/team-objectives/team-objectives.connection'
 import { TeamTeamsGraphQLConnection } from './connections/team-teams/team-teams.connection'
 import { TeamUsersGraphQLConnection } from './connections/team-users/team-users.connection'
+import { TeamCreateRequest } from './requests/team-create.request'
 import { TeamFiltersRequest } from './requests/team-filters.request'
 import { TeamMembersFiltersRequest } from './requests/team-members-filters.request'
+import { TeamAccessControl } from './team.access-control'
 import { TeamGraphQLNode } from './team.node'
 
 @GuardedResolver(TeamGraphQLNode)
@@ -50,8 +53,9 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   constructor(
     protected readonly core: CoreProvider,
     protected readonly corePorts: CorePortsProvider,
+    protected readonly accessControl: TeamAccessControl,
   ) {
-    super(Resource.TEAM, core, core.team)
+    super(Resource.TEAM, core, core.team, accessControl)
   }
 
   @GuardedQuery(TeamGraphQLNode, 'team:read', { name: 'team' })
@@ -68,6 +72,37 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     if (!team) throw new UserInputError(`We could not found a team with the provided arguments`)
 
     return team
+  }
+
+  @GuardedMutation(TeamGraphQLNode, 'team:create', { name: 'createTeam' })
+  protected async createTeamForRequestAndRequestUserWithContext(
+    @Args() request: TeamCreateRequest,
+    @RequestUserWithContext() userWithContext: UserWithContext,
+  ) {
+
+    const { parentID, ...data } = request.data
+
+    const canCreate = await this.accessControl.canCreate(userWithContext, parentID)
+    if (!canCreate) throw new UnauthorizedException()
+
+    this.logger.log({
+      userWithContext,
+      request,
+      message: 'Received create team request',
+    })
+
+    const payload = {
+      name: data.name,
+      description: data.description,
+      gender: data.gender,
+      ownerId: data.ownerID,
+      parentId: parentID,
+    }
+
+    const createdTeam = await this.corePorts.dispatchCommand<Team>('create-team', payload)
+    if (!createdTeam) throw new InternalServerErrorException('We were not able to create your user')
+
+    return createdTeam
   }
 
   @ResolveField('status', () => StatusGraphQLObject)

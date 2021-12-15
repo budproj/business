@@ -13,6 +13,7 @@ import { TeamObjectivesConnectionGraphQLResolver } from './connections/team-obje
 import { TeamTeamsConnectionGraphQLResolver } from './connections/team-teams/team-teams.resolver'
 import { TeamUsersConnectionGraphQLResolver } from './connections/team-users/team-users.resolver'
 import { TeamsConnectionGraphQLResolver } from './connections/teams/teams.resolver'
+import { TeamAccessControl } from './team.access-control'
 import { TeamGraphQLResolver } from './team.resolver'
 
 @Module({
@@ -24,6 +25,7 @@ import { TeamGraphQLResolver } from './team.resolver'
     UserGraphQLModule,
   ],
   providers: [
+    TeamAccessControl,
     TeamGraphQLResolver,
     TeamsConnectionGraphQLResolver,
     TeamUsersConnectionGraphQLResolver,
