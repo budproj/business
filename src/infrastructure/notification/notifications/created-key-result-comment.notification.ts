@@ -183,7 +183,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     const customData = recipientUsers.map((user) => ({
       ownerFirstName: user.firstName,
     }))
-    const recipients = EmailNotificationChannel.buildRecipientsFromUsers(recipientUsers, customData)
+    const recipients = await this.buildRecipients(recipientUsers, customData)
 
     const emailMetadata: EmailNotificationChannelMetadata = {
       ...metadata,
