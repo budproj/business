@@ -18,6 +18,7 @@ import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { EmailAlreadyExistsException } from '@core/modules/user/exceptions/email-already-exists.exception'
+import { Key } from '@core/modules/user/setting/user-setting.enums'
 import { UserSettingInterface } from '@core/modules/user/setting/user-setting.interface'
 import { UserSetting } from '@core/modules/user/setting/user-settings.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
@@ -159,7 +160,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     @Args() request: UserCreateRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    const { teamID, ...newUserData } = request.data
+    const { teamID, locale, ...newUserData } = request.data
 
     const canCreate = await this.accessControl.canCreate(userWithContext, teamID)
     if (!canCreate) throw new UnauthorizedException()
@@ -170,10 +171,23 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Received create user request',
     })
 
-    const createdUser = await this.corePorts.dispatchCommand<User>('create-user', newUserData)
+    const createdUser = await this.corePorts.dispatchCommand<User>('create-user', newUserData, {
+      autoInvite: !locale,
+    })
     if (!createdUser) throw new InternalServerErrorException('We were not able to create your user')
 
     await this.corePorts.dispatchCommand('add-team-to-user', { teamID, userID: createdUser.id })
+
+    if (locale) {
+      await this.corePorts.dispatchCommand<UserSetting>(
+        'update-user-setting',
+        createdUser.id,
+        Key.LOCALE,
+        locale,
+      )
+
+      await this.corePorts.dispatchCommand('invite-user', createdUser.id, createdUser.email)
+    }
 
     return createdUser
   }

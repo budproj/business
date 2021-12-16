@@ -34,6 +34,7 @@ import { GetUserInitialsCommand } from '@core/ports/commands/get-user-initials.c
 import { GetUserSettingsCommand } from '@core/ports/commands/get-user-settings.command'
 import { GetUserTeamTreeCommand } from '@core/ports/commands/get-user-team-tree.command'
 import { GetUserCommand } from '@core/ports/commands/get-user.command'
+import { InviteUserCommand } from '@core/ports/commands/invite-user.command'
 import { UpdateKeyResultCommand } from '@core/ports/commands/update-key-result.command'
 import { UpdateObjectiveCommand } from '@core/ports/commands/update-objective.command'
 import { UpdateUserSettingCommand } from '@core/ports/commands/update-user-setting.command'
@@ -85,8 +86,8 @@ export type CommandType =
   | 'create-check-mark'
   | 'create-key-result'
   | 'create-key-result-comment'
-  | 'create-team'
   | 'create-objective'
+  | 'create-team'
   | 'create-user'
   | 'deactivate-user'
   | 'delete-check-mark'
@@ -143,6 +144,7 @@ export type CommandType =
   | 'get-user-settings'
   | 'get-user-team-tree'
   | 'get-users-by-ids'
+  | 'invite-user'
   | 'remove-team-from-user'
   | 'remove-user-to-key-result-support-team'
   | 'toggle-check-mark'
@@ -220,6 +222,7 @@ export class CommandFactory {
     'get-user-settings': GetUserSettingsCommand,
     'get-user-team-tree': GetUserTeamTreeCommand,
     'get-users-by-ids': GetUsersByIdsCommand,
+    'invite-user': InviteUserCommand,
     'remove-team-from-user': RemoveTeamFromUserCommand,
     'remove-user-to-key-result-support-team': RemoveUserToKeyResultSupportTeamCommand,
     'toggle-check-mark': ToggleCheckMarkCommand,

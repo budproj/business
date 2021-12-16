@@ -97,11 +97,11 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     return this.credentials.create(credentialData)
   }
 
-  public async createUser(data: UserInterface): Promise<User> {
+  public async createUser(data: UserInterface, autoInvite = true): Promise<User> {
     const createdData = await this.create(data)
     const user = createdData[0]
 
-    await this.credentials.invite(user.email)
+    if (autoInvite) await this.invite(user.email)
 
     return user
   }
@@ -117,6 +117,10 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     const user = await this.getOne({ id: userID })
 
     return this.credentials.updateUserProperty(user.authzSub, key, value)
+  }
+
+  public async invite(email: string): Promise<void> {
+    await this.credentials.invite(email)
   }
 
   protected async protectCreationQuery(

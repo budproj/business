@@ -31,4 +31,10 @@ export class UserCreateInputObject {
     description: 'The ID of the primary team for this user',
   })
   public readonly teamID: string
+
+  @Field(() => String, {
+    nullable: true,
+    description: 'The locale for this user',
+  })
+  public readonly locale?: string
 }

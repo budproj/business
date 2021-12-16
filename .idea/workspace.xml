@@ -4,9 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e959aa6a-e82d-426c-b0f3-dc8939c6d5d2" name="Default Changelist" comment="feat(email): adds locale to check-in e-mails">
+    <list default="true" id="e959aa6a-e82d-426c-b0f3-dc8939c6d5d2" name="Default Changelist" comment="feat(email): adds locale while creating a new user">
+      <change afterPath="$PROJECT_DIR$/src/core/ports/commands/invite-user.command.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/infrastructure/notification/notifications/new-key-result-support-team-member.notification.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/notification/notifications/new-key-result-support-team-member.notification.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/modules/user/user.provider.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/modules/user/user.provider.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/ports/commands/command.factory.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ports/commands/command.factory.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/ports/commands/create-user.command.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ports/commands/create-user.command.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/interface/graphql/modules/user/objects/user-create-input.object.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/objects/user-create-input.object.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/interface/graphql/modules/user/user.resolver.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/user.resolver.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -110,7 +115,8 @@
       <workItem from="1638990767116" duration="2823000" />
       <workItem from="1639079918252" duration="3466000" />
       <workItem from="1639510024695" duration="4495000" />
-      <workItem from="1639591047198" duration="5508000" />
+      <workItem from="1639591047198" duration="6199000" />
+      <workItem from="1639664917280" duration="1688000" />
     </task>
     <task id="LOCAL-00001" summary="chore: updating env structure">
       <created>1637180757948</created>
@@ -196,7 +202,14 @@
       <option name="project" value="LOCAL" />
       <updated>1639596527027</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="feat(email): adds locale to support team">
+      <created>1639596641664</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1639596641664</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -225,7 +238,9 @@
     <MESSAGE value="feat(email): adds localization upon sending" />
     <MESSAGE value="feat(email): refactor mentions sending logic + add locale" />
     <MESSAGE value="feat(email): adds locale to check-in e-mails" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(email): adds locale to check-in e-mails" />
+    <MESSAGE value="feat(email): adds locale to support team" />
+    <MESSAGE value="feat(email): adds locale while creating a new user" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(email): adds locale while creating a new user" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
