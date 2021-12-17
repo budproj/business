@@ -1,15 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
-import { AuthzCredentialsInterface } from './authz.interface'
+import { AuthzCredentialsInterface, AuthzDomainsInterface } from './authz.interface'
 
 @Injectable()
 export class AuthzConfigProvider {
   constructor(private readonly configService: ConfigService) {}
-
-  get domain(): string {
-    return this.configService.get<string>('authz.domain')
-  }
 
   get issuer(): string {
     return this.configService.get<string>('authz.issuer')
@@ -25,5 +21,9 @@ export class AuthzConfigProvider {
 
   get credentials(): AuthzCredentialsInterface {
     return this.configService.get<AuthzCredentialsInterface>('authz.credentials')
+  }
+
+  get domains(): AuthzDomainsInterface {
+    return this.configService.get<AuthzDomainsInterface>('authz.domains')
   }
 }

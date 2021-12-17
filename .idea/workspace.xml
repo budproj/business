@@ -5,13 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e959aa6a-e82d-426c-b0f3-dc8939c6d5d2" name="Default Changelist" comment="feat(email): adds locale while creating a new user">
-      <change afterPath="$PROJECT_DIR$/src/core/ports/commands/invite-user.command.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/modules/user/user.provider.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/modules/user/user.provider.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/ports/commands/command.factory.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ports/commands/command.factory.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/ports/commands/create-user.command.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ports/commands/create-user.command.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/interface/graphql/modules/user/objects/user-create-input.object.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/objects/user-create-input.object.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/interface/graphql/modules/user/user.resolver.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/graphql/modules/user/user.resolver.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/manifests/canary/canary-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/manifests/canary/canary-deployment.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/manifests/stable/deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/manifests/stable/deployment.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config/authz/authz-environment.schema.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/authz/authz-environment.schema.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config/authz/authz.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/authz/authz.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config/authz/authz.interface.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/authz/authz.interface.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/config/authz/authz.provider.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/authz/authz.provider.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/infrastructure/authz/providers/client.provider.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/authz/providers/client.provider.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -116,7 +118,9 @@
       <workItem from="1639079918252" duration="3466000" />
       <workItem from="1639510024695" duration="4495000" />
       <workItem from="1639591047198" duration="6199000" />
-      <workItem from="1639664917280" duration="1688000" />
+      <workItem from="1639664917280" duration="1831000" />
+      <workItem from="1639713425777" duration="121000" />
+      <workItem from="1639761623509" duration="254000" />
     </task>
     <task id="LOCAL-00001" summary="chore: updating env structure">
       <created>1637180757948</created>
@@ -209,7 +213,14 @@
       <option name="project" value="LOCAL" />
       <updated>1639596641664</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="feat(email): adds locale while creating a new user">
+      <created>1639666678226</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1639666678227</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

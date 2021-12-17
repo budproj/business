@@ -14,12 +14,12 @@ export class AuthzClientProvider {
 
   constructor(private readonly config: AuthzConfigProvider) {
     this.authClient = new AuthenticationClient({
-      domain: this.config.domain,
+      domain: this.config.domains.default,
       clientId: this.config.credentials.clientID,
     })
 
     this.mgmtClient = new ManagementClient({
-      domain: this.config.domain,
+      domain: this.config.domains.mgmt,
       clientId: this.config.credentials.clientID,
       clientSecret: this.config.credentials.clientSecret,
     })
