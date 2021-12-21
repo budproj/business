@@ -18,6 +18,9 @@ import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { EmailAlreadyExistsException } from '@core/modules/user/exceptions/email-already-exists.exception'
+import { Key } from '@core/modules/user/setting/user-setting.enums'
+import { UserSettingInterface } from '@core/modules/user/setting/user-setting.interface'
+import { UserSetting } from '@core/modules/user/setting/user-settings.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
@@ -32,6 +35,8 @@ import { KeyResultCheckInFiltersRequest } from '@interface/graphql/modules/key-r
 import { KeyResultCommentFiltersRequest } from '@interface/graphql/modules/key-result/comment/requests/key-result-comment-filters.request'
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
 import { TeamFiltersRequest } from '@interface/graphql/modules/team/requests/team-filters.request'
+import { UserSettingsGraphQLConnection } from '@interface/graphql/modules/user/connections/user-user-settings/user-user-settings.connection'
+import { UserSettingFiltersRequest } from '@interface/graphql/modules/user/setting/requests/user-setting-filters.request'
 import { UserAccessControl } from '@interface/graphql/modules/user/user.access-control'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
@@ -155,7 +160,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     @Args() request: UserCreateRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    const { teamID, ...newUserData } = request.data
+    const { teamID, locale, ...newUserData } = request.data
 
     const canCreate = await this.accessControl.canCreate(userWithContext, teamID)
     if (!canCreate) throw new UnauthorizedException()
@@ -166,10 +171,23 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Received create user request',
     })
 
-    const createdUser = await this.corePorts.dispatchCommand<User>('create-user', newUserData)
+    const createdUser = await this.corePorts.dispatchCommand<User>('create-user', newUserData, {
+      autoInvite: !locale,
+    })
     if (!createdUser) throw new InternalServerErrorException('We were not able to create your user')
 
     await this.corePorts.dispatchCommand('add-team-to-user', { teamID, userID: createdUser.id })
+
+    if (locale) {
+      await this.corePorts.dispatchCommand<UserSetting>(
+        'update-user-setting',
+        createdUser.id,
+        Key.LOCALE,
+        locale,
+      )
+
+      await this.corePorts.dispatchCommand('invite-user', createdUser.id, createdUser.email)
+    }
 
     return createdUser
   }
@@ -349,6 +367,33 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     )
 
     return this.relay.marshalResponse<KeyResultCheckInInterface>(queryResult, connection, user)
+  }
+
+  @ResolveField('settings', () => UserSettingsGraphQLConnection, {
+    nullable: true,
+  })
+  protected async getSettingsForRequestAndUser(
+    @Args() request: UserSettingFiltersRequest,
+    @Parent() user: UserGraphQLNode,
+  ) {
+    this.logger.log({
+      user,
+      request,
+      message: 'Fetching settings for user',
+    })
+
+    const [filters, _, connection] = this.relay.unmarshalRequest<
+      UserSettingFiltersRequest,
+      UserSetting
+    >(request)
+
+    const settings = await this.corePorts.dispatchCommand<UserSetting[]>(
+      'get-user-settings',
+      user.id,
+      filters.keys,
+    )
+
+    return this.relay.marshalResponse<UserSettingInterface>(settings, connection, user)
   }
 
   private async parseUserPictureFileToRemoteURL(

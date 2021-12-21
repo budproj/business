@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { uniq } from 'lodash'
 
 import { EmailAdapterProvider } from '@adapters/email/email.provider'
 import { EmailMetadata } from '@adapters/email/types/metadata.type'
@@ -47,12 +48,61 @@ export class EmailNotificationChannel
     }
   }
 
+  static localizeMetadata(
+    metadata: EmailNotificationChannelMetadata,
+  ): EmailNotificationChannelMetadata[] {
+    const recipientLocales = EmailNotificationChannel.getLocalesFromMetadata(metadata)
+
+    return EmailNotificationChannel.groupMetadataByRecipientLocale(metadata, recipientLocales)
+  }
+
+  static getLocalesFromMetadata(
+    metadata: EmailNotificationChannelMetadata,
+    defaultLocale = 'pt-BR',
+  ): string[] {
+    const rawLocales: string[] = [
+      defaultLocale,
+      ...metadata.recipients.map((recipient) => recipient.customTemplateData?.locale),
+    ]
+
+    return uniq(rawLocales)
+  }
+
+  static groupMetadataByRecipientLocale(
+    metadata: EmailNotificationChannelMetadata,
+    locales: string[],
+    defaultLocale = 'pt-BR',
+  ): EmailNotificationChannelMetadata[] {
+    const localizedMetadataHashmap: Record<string, EmailNotificationChannelMetadata> = {}
+
+    for (const locale of locales) {
+      localizedMetadataHashmap[locale] = {
+        ...metadata,
+        recipients: [],
+        template: `${metadata.template}_${locale}`,
+      }
+    }
+
+    for (const recipient of metadata.recipients) {
+      const recipientLocale = recipient.customTemplateData?.locale ?? defaultLocale
+      localizedMetadataHashmap[recipientLocale].recipients.push(recipient)
+    }
+
+    const localizedMetadata = Object.values(localizedMetadataHashmap)
+
+    return localizedMetadata.filter((metadata) => metadata.recipients.length > 0)
+  }
+
   public async dispatch(
     data: NotificationData,
-    metadata: EmailNotificationChannelMetadata,
+    rawMetadata: EmailNotificationChannelMetadata,
   ): Promise<void> {
-    const marshaledMetadata = EmailNotificationChannel.marshalMetadata(metadata)
+    const localizedMetadata = EmailNotificationChannel.localizeMetadata(rawMetadata)
+    const dispatchPromises = localizedMetadata.map(async (metadata) => {
+      const marshaledMetadata = EmailNotificationChannel.marshalMetadata(metadata)
+      await this.emailAdapter.send(data, marshaledMetadata)
+    })
 
-    await this.emailAdapter.send(data, marshaledMetadata)
+    await Promise.all(dispatchPromises)
   }
 }

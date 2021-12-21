@@ -49,6 +49,8 @@ spec:
               value: https://auth.getbud.co/
             - name: AUTHZ_DOMAIN
               value: auth.getbud.co
+            - name: AUTHZ_MGMT_DOMAIN
+              value: getbud.us.auth0.com
             - name: AUTHZ_AUDIENCE
               value: https://api.getbud.co/business
             - name: AUTHZ_CLIENT_ID

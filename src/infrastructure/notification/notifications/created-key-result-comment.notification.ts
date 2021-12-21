@@ -12,7 +12,6 @@ import { TeamGender } from '@core/modules/team/enums/team-gender.enum'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CorePortsProvider } from '@core/ports/ports.provider'
-import { EmailNotificationChannel } from '@infrastructure/notification/channels/email/email.channel'
 import { EmailNotificationChannelMetadata } from '@infrastructure/notification/channels/email/metadata.type'
 import { BaseNotification } from '@infrastructure/notification/notifications/base.notification'
 import { ChannelHashmap } from '@infrastructure/notification/types/channel-hashmap.type'
@@ -136,41 +135,33 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
 
     const users = await this.core.dispatchCommand<UserInterface[]>('get-users-by-ids', usersIds)
 
-    const emailsConfig = users.map((user) => {
-      const recipients = EmailNotificationChannel.buildRecipientsFromUsers([user])
+    const customData = users.map((user) => ({
+      mentionedFirstName: user.firstName,
+    }))
+    const recipients = await this.buildRecipients(users, customData)
+    const metadata: EmailNotificationChannelMetadata = {
+      ...genericMetadata,
+      recipients,
+      template: 'NewKeyResultCommentMention',
+    }
 
-      const metadata: EmailNotificationChannelMetadata = {
-        ...genericMetadata,
-        recipients,
-        template: 'NewKeyResultCommentMention',
-      }
+    const emailData = {
+      authorFirstName: genericData.owner.firstName,
+      teamId: genericData.team.id,
+      keyResultTeam: genericData.team.name,
+      isMaleTeam: genericData.team.gender === TeamGender.MALE,
+      isFemaleTeam: genericData.team.gender === TeamGender.FEMALE,
+      authorFullName: genericData.author.fullName,
+      authorPictureURL: genericData.author.picture,
+      authorInitials: genericData.author.initials,
+      keyResultTitle: genericData.keyResult.title,
+      keyResultConfidenceTagColor: genericData.keyResult.confidenceColor,
+      keyResultComment: cleanCommentContent,
+      isQuarterlyCadence: genericData.cycle.isQuarterlyCadence,
+      cyclePeriod: genericData.cycle.period,
+    }
 
-      const data = {
-        mentionedFirstName: user.firstName,
-        ownerFirstName: genericData.owner.firstName,
-        authorFirstName: genericData.owner.firstName,
-        teamId: genericData.team.id,
-        keyResultTeam: genericData.team.name,
-        isMaleTeam: genericData.team.gender === TeamGender.MALE,
-        isFemaleTeam: genericData.team.gender === TeamGender.FEMALE,
-        authorFullName: genericData.author.fullName,
-        authorPictureURL: genericData.author.picture,
-        authorInitials: genericData.author.initials,
-        keyResultTitle: genericData.keyResult.title,
-        keyResultConfidenceTagColor: genericData.keyResult.confidenceColor,
-        keyResultComment: cleanCommentContent,
-        isQuarterlyCadence: genericData.cycle.isQuarterlyCadence,
-        cyclePeriod: genericData.cycle.period,
-      }
-
-      return { data, metadata }
-    })
-
-    const emailsPromises = emailsConfig.map(async ({ data, metadata }) =>
-      this.channels.email.dispatch(data, metadata),
-    )
-
-    await Promise.all(emailsPromises)
+    await this.channels.email.dispatch(emailData, metadata)
   }
 
   private async dispatchOwnerAndSupportTeamEmail(): Promise<void> {
@@ -183,7 +174,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     const customData = recipientUsers.map((user) => ({
       ownerFirstName: user.firstName,
     }))
-    const recipients = EmailNotificationChannel.buildRecipientsFromUsers(recipientUsers, customData)
+    const recipients = await this.buildRecipients(recipientUsers, customData)
 
     const emailMetadata: EmailNotificationChannelMetadata = {
       ...metadata,

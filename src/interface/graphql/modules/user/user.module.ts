@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common'
 import { GraphQLConfigModule } from '@config/graphql/graphql.module'
 import { CoreModule } from '@core/core.module'
 import { AWSModule } from '@infrastructure/aws/aws.module'
+import { UserSettingGraphQLResolver } from '@interface/graphql/modules/user/setting/user-setting.resolver'
 import { UserAccessControl } from '@interface/graphql/modules/user/user.access-control'
 
 import { UserKeyResultCommentsConnectionGraphQLResolver } from './connections/user-key-result-comments/user-key-result-comments.resolver'
@@ -16,6 +17,7 @@ import { UserGraphQLResolver } from './user.resolver'
   imports: [CoreModule, AWSModule, GraphQLConfigModule],
   providers: [
     UserGraphQLResolver,
+    UserSettingGraphQLResolver,
     UsersConnectionGraphQLResolver,
     UserTeamsConnectionGraphQLResolver,
     UserObjectivesConnectionGraphQLResolver,

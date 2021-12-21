@@ -1,6 +1,7 @@
 export enum Resource {
   PERMISSION = 'permission',
   USER = 'user',
+  USER_SETTING = 'user-setting',
   TEAM = 'team',
   CYCLE = 'cycle',
   OBJECTIVE = 'objective',

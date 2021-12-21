@@ -8,6 +8,7 @@ import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
+import { UserSettingProvider } from '@core/modules/user/setting/user-setting.provider'
 import { CreationQuery } from '@core/types/creation-query.type'
 import { AuthzCredentialsProvider } from '@infrastructure/authz/providers/credentials.provider'
 
@@ -20,7 +21,11 @@ import { UserRepository } from './user.repository'
 export class UserProvider extends CoreEntityProvider<User, UserInterface> {
   private readonly credentials: CredentialsAdapter
 
-  constructor(protected readonly repository: UserRepository, authz: AuthzCredentialsProvider) {
+  constructor(
+    public readonly setting: UserSettingProvider,
+    protected readonly repository: UserRepository,
+    authz: AuthzCredentialsProvider,
+  ) {
     super(UserProvider.name, repository)
 
     this.credentials = authz
@@ -92,11 +97,11 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     return this.credentials.create(credentialData)
   }
 
-  public async createUser(data: UserInterface): Promise<User> {
+  public async createUser(data: UserInterface, autoInvite = true): Promise<User> {
     const createdData = await this.create(data)
     const user = createdData[0]
 
-    await this.credentials.invite(user.email)
+    if (autoInvite) await this.invite(user.email)
 
     return user
   }
@@ -106,6 +111,16 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     const lastLetter = data?.lastName.split(' ').slice(-1).join()[0]
 
     return firstLetter + lastLetter
+  }
+
+  public async updateUserProperty(userID: string, key: string, value: string): Promise<void> {
+    const user = await this.getOne({ id: userID })
+
+    return this.credentials.updateUserProperty(user.authzSub, key, value)
+  }
+
+  public async invite(email: string): Promise<void> {
+    await this.credentials.invite(email)
   }
 
   protected async protectCreationQuery(

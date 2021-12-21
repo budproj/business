@@ -12,7 +12,6 @@ import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
-import { EmailNotificationChannel } from '../channels/email/email.channel'
 import { EmailNotificationChannelMetadata } from '../channels/email/metadata.type'
 import { ChannelHashmap } from '../types/channel-hashmap.type'
 import { NotificationMetadata } from '../types/notification-metadata.type'
@@ -67,9 +66,7 @@ export class NewKeyResultSupportTeamMemberNotification extends BaseNotification<
   public async dispatch(): Promise<void> {
     const { data, metadata } = this.marshal()
 
-    const recipients = EmailNotificationChannel.buildRecipientsFromUsers([
-      data.newSupportTeamMember,
-    ])
+    const recipients = await this.buildRecipients([data.newSupportTeamMember])
 
     const emailMetadata: EmailNotificationChannelMetadata = {
       ...metadata,

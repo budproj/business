@@ -39,4 +39,8 @@ export class AuthzCredentialsProvider implements CredentialsAdapter {
   public async invite(email: string): Promise<void> {
     await this.client.inviteUser(email)
   }
+
+  public async updateUserProperty(userID: string, key: string, value: string): Promise<void> {
+    await this.client.updateUserMetadata(userID, key, value)
+  }
 }

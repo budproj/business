@@ -79,7 +79,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     @Args() request: TeamCreateRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-
     const { parentID, ...data } = request.data
 
     const canCreate = await this.accessControl.canCreate(userWithContext, parentID)

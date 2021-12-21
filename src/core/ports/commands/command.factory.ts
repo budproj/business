@@ -31,10 +31,13 @@ import { GetTeamTreeCommand } from '@core/ports/commands/get-team-tree.command'
 import { GetTeamCommand } from '@core/ports/commands/get-team.command'
 import { GetUserFullNameCommand } from '@core/ports/commands/get-user-full-name.command'
 import { GetUserInitialsCommand } from '@core/ports/commands/get-user-initials.command'
+import { GetUserSettingsCommand } from '@core/ports/commands/get-user-settings.command'
 import { GetUserTeamTreeCommand } from '@core/ports/commands/get-user-team-tree.command'
 import { GetUserCommand } from '@core/ports/commands/get-user.command'
+import { InviteUserCommand } from '@core/ports/commands/invite-user.command'
 import { UpdateKeyResultCommand } from '@core/ports/commands/update-key-result.command'
 import { UpdateObjectiveCommand } from '@core/ports/commands/update-objective.command'
+import { UpdateUserSettingCommand } from '@core/ports/commands/update-user-setting.command'
 
 import { AddTeamToUserCommand } from './add-team-to-user.command'
 import { AddUserToKeyResultSupportTeamCommand } from './add-user-to-key-result-support-team.command'
@@ -83,8 +86,8 @@ export type CommandType =
   | 'create-check-mark'
   | 'create-key-result'
   | 'create-key-result-comment'
-  | 'create-team'
   | 'create-objective'
+  | 'create-team'
   | 'create-user'
   | 'deactivate-user'
   | 'delete-check-mark'
@@ -138,8 +141,10 @@ export type CommandType =
   | 'get-user-full-name'
   | 'get-user-initials'
   | 'get-user-key-results'
+  | 'get-user-settings'
   | 'get-user-team-tree'
   | 'get-users-by-ids'
+  | 'invite-user'
   | 'remove-team-from-user'
   | 'remove-user-to-key-result-support-team'
   | 'toggle-check-mark'
@@ -148,6 +153,7 @@ export type CommandType =
   | 'update-objective'
   | 'update-team'
   | 'update-user'
+  | 'update-user-setting'
 
 @Injectable()
 export class CommandFactory {
@@ -213,8 +219,10 @@ export class CommandFactory {
     'get-user-full-name': GetUserFullNameCommand,
     'get-user-initials': GetUserInitialsCommand,
     'get-user-key-results': GetUserKeyResultsCommand,
+    'get-user-settings': GetUserSettingsCommand,
     'get-user-team-tree': GetUserTeamTreeCommand,
     'get-users-by-ids': GetUsersByIdsCommand,
+    'invite-user': InviteUserCommand,
     'remove-team-from-user': RemoveTeamFromUserCommand,
     'remove-user-to-key-result-support-team': RemoveUserToKeyResultSupportTeamCommand,
     'toggle-check-mark': ToggleCheckMarkCommand,
@@ -223,6 +231,7 @@ export class CommandFactory {
     'update-objective': UpdateObjectiveCommand,
     'update-team': UpdateTeamCommand,
     'update-user': UpdateUserCommand,
+    'update-user-setting': UpdateUserSettingCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}
