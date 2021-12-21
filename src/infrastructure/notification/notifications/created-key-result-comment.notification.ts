@@ -176,6 +176,8 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     }))
     const recipients = await this.buildRecipients(recipientUsers, customData)
 
+    if (recipients.length === 0) return
+
     const emailMetadata: EmailNotificationChannelMetadata = {
       ...metadata,
       recipients,
