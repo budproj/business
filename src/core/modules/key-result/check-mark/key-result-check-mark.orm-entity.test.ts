@@ -144,5 +144,27 @@ describe('check-mark - entity', () => {
       expect(firstTimeSavedCheckMark.state).toBe(CheckMarkStates.CHECKED)
       expect(secondTimeSavedCheckMark.state).toBe(CheckMarkStates.UNCHECKED)
     })
+
+    it('should be able to assign a checkmark to an user', async () => {
+      // Arrange
+      const checkMark = checkMarkGenerator({})
+
+      // Act
+      await repository(KeyResultCheckMark).save(checkMark)
+      const firstTimeSavedCheckMark = await repository(KeyResultCheckMark).findOne({
+        relations: ['assignedUser'],
+      })
+
+      await repository(KeyResultCheckMark).update(firstTimeSavedCheckMark.id, {
+        assignedUserId: mockUser.id,
+      })
+      const secondTimeSavedCheckMark = await repository(KeyResultCheckMark).findOne({
+        relations: ['assignedUser'],
+      })
+
+      // Assert
+      expect(firstTimeSavedCheckMark.assignedUser).toBeNull()
+      expect(secondTimeSavedCheckMark.assignedUser.firstName).toBe(mockUser.firstName)
+    })
   })
 })

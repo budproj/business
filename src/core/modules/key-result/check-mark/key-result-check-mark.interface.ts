@@ -10,6 +10,7 @@ export interface KeyResultCheckMarkInterface extends CoreEntityInterface {
   description: string
   updatedAt: Date
   keyResultId: string
+  assignedUserId?: string
   userId: string
 }
 
