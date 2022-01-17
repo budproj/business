@@ -21,6 +21,7 @@ import { KeyResultCheckMarkGraphQLNode } from './key-result-check-mark.node'
 import { KeyResultCheckMarkCreateRequest } from './requests/key-result-check-mark-create.request'
 import { KeyResultCheckMarkDeleteRequest } from './requests/key-result-check-mark-delete.request'
 import { KeyResultCheckMarkToggleRequest } from './requests/key-result-check-mark-toggle.request'
+import { KeyResultCheckMarkUpdateAssigneeRequest } from './requests/key-result-check-mark-update-assignee.request'
 import { KeyResultCheckMarkUpdateDescriptionRequest } from './requests/key-result-check-mark-update-description.request'
 
 @GuardedResolver(KeyResultCheckMarkGraphQLNode)
@@ -121,6 +122,30 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
 
     if (!updatedCheckMark)
       throw new UserInputError('We were not able to update this check mark description')
+
+    return updatedCheckMark
+  }
+
+  @GuardedMutation(KeyResultCheckMarkGraphQLNode, 'key-result-check-mark:update', {
+    name: 'updateCheckMarkAssignee',
+  })
+  protected async updateCheckMarkAssignee(
+    @Args() request: KeyResultCheckMarkUpdateAssigneeRequest,
+    @RequestState() state: GraphQLRequestState,
+  ) {
+    this.logger.log({
+      state,
+      request,
+      message: 'Received update check mark assignee request',
+    })
+
+    const updatedCheckMark = await this.corePorts.dispatchCommand<KeyResultCheckMark>(
+      'update-check-mark-assignee',
+      { id: request.id, ...request.data },
+    )
+
+    if (!updatedCheckMark)
+      throw new UserInputError('We were not able to update this check mark assignee')
 
     return updatedCheckMark
   }

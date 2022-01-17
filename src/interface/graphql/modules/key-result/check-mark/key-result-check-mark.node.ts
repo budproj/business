@@ -29,8 +29,15 @@ export class KeyResultCheckMarkGraphQLNode implements GuardedNodeGraphQLInterfac
   })
   public readonly keyResultId!: string
 
-  @Field(() => ID, { complexity: 0, description: 'The ID of the user this check mark belongs to' })
+  @Field(() => ID, { complexity: 0, description: 'The ID of the user who created this check mark' })
   public readonly userId!: string
+
+  @Field(() => ID, {
+    complexity: 0,
+    nullable: true,
+    description: 'The ID of the user this check mark is assigned to',
+  })
+  public readonly assignedUserId?: string
 
   // **********************************************************************************************
   // RESOLVED FIELDS
@@ -44,9 +51,15 @@ export class KeyResultCheckMarkGraphQLNode implements GuardedNodeGraphQLInterfac
 
   @Field(() => UserGraphQLNode, {
     complexity: 1,
-    description: 'The user that owns this check mark',
+    description: 'The user that created this check mark',
   })
   public readonly user!: UserGraphQLNode
+
+  @Field(() => UserGraphQLNode, {
+    complexity: 1,
+    description: 'The user this check mark is assigned to',
+  })
+  public readonly assignedUser?: UserGraphQLNode
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS
