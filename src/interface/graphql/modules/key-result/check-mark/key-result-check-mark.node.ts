@@ -37,7 +37,7 @@ export class KeyResultCheckMarkGraphQLNode implements GuardedNodeGraphQLInterfac
     nullable: true,
     description: 'The ID of the user this check mark is assigned to',
   })
-  public readonly assignedUserId?: string
+  public readonly assignedUserId: string
 
   // **********************************************************************************************
   // RESOLVED FIELDS
@@ -59,7 +59,7 @@ export class KeyResultCheckMarkGraphQLNode implements GuardedNodeGraphQLInterfac
     complexity: 1,
     description: 'The user this check mark is assigned to',
   })
-  public readonly assignedUser?: UserGraphQLNode
+  public readonly assignedUser: UserGraphQLNode
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS
