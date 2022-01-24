@@ -32,6 +32,7 @@ const checkMarkGenerator = (customFields) => ({
   description: 'do the dishes',
   keyResultId: mockKeyResult.id,
   userId: mockUser.id,
+  assignedUserId: mockUser.id,
   ...customFields,
 })
 const provider = () => testProvider(KeyResultCheckMarkRepository, KeyResultCheckMarkProvider)
@@ -187,22 +188,6 @@ describe('check-mark - provider', () => {
       // Assert
       expect(before.assignedUserId).toBe(mockUser.id)
       expect(after.assignedUserId).toBe(mockSecondUser.id)
-    })
-
-    it('should allow remove assigned', async () => {
-      // Arrange
-      const checkMarkId = '940ef077-a373-46bc-83f7-4ce93c806edc'
-      const baseCheckMark = checkMarkGenerator({ id: checkMarkId, assignedUserId: mockUser.id })
-
-      // Act
-      await provider().createCheckMark(baseCheckMark)
-      const before = await provider().getOne({ id: checkMarkId })
-      await provider().changeAssigned(checkMarkId)
-      const after = await provider().getOne({ id: checkMarkId })
-
-      // Assert
-      expect(before.assignedUserId).toBe(mockUser.id)
-      expect(after.assignedUserId).toBeNull()
     })
   })
 })

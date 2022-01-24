@@ -32,7 +32,7 @@ export class KeyResultCheckMarkProvider extends CoreEntityProvider<
     return this.update({ id }, { state: CheckMarkStates.UNCHECKED })
   }
 
-  public async changeAssigned(id: string, userId?: string): Promise<KeyResultCheckMark> {
+  public async changeAssigned(id: string, userId: string): Promise<KeyResultCheckMark> {
     return this.update({ id }, { assignedUserId: userId })
   }
 

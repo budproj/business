@@ -10,12 +10,15 @@ import { CheckMarkStates } from './key-result-check-mark.interface'
 import { KeyResultCheckMark } from './key-result-check-mark.orm-entity'
 
 let mockUser: User
+let mockSecondUser: User
 let mockKeyResult: KeyResult
 
 beforeEach(async () => startInMemoryDatabase([User, KeyResult, KeyResultCheckMark]))
 beforeEach(async () => {
   const userRepo = repository(User)
   mockUser = await userRepo.save({ firstName: 'John', keyResultComments: [] })
+
+  mockSecondUser = await userRepo.save({ firstName: 'Karl', keyResultComments: [] })
 
   const keyResultRepo = repository(KeyResult)
   mockKeyResult = await keyResultRepo.save({ title: 'finish writing a book' })
@@ -27,6 +30,7 @@ const checkMarkGenerator = (customFields) => ({
   description: 'do the dishes',
   keyResultId: mockKeyResult.id,
   userId: mockUser.id,
+  assignedUserId: mockUser.id,
   ...customFields,
 })
 
@@ -156,15 +160,15 @@ describe('check-mark - entity', () => {
       })
 
       await repository(KeyResultCheckMark).update(firstTimeSavedCheckMark.id, {
-        assignedUserId: mockUser.id,
+        assignedUserId: mockSecondUser.id,
       })
       const secondTimeSavedCheckMark = await repository(KeyResultCheckMark).findOne({
         relations: ['assignedUser'],
       })
 
       // Assert
-      expect(firstTimeSavedCheckMark.assignedUser).toBeNull()
-      expect(secondTimeSavedCheckMark.assignedUser.firstName).toBe(mockUser.firstName)
+      expect(firstTimeSavedCheckMark.assignedUser.firstName).toBe(mockUser.firstName)
+      expect(secondTimeSavedCheckMark.assignedUser.firstName).toBe(mockSecondUser.firstName)
     })
   })
 })
