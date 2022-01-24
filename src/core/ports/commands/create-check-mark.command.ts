@@ -15,6 +15,7 @@ export class CreateCheckMarkCommand extends Command<KeyResultCheckMark> {
       description: checkMark.description,
       state: CheckMarkStates.UNCHECKED,
       keyResultId: checkMark.keyResultId,
+      assignedUserId: user.id,
       userId: user.id,
     }
 
