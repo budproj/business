@@ -31,6 +31,6 @@ export class KeyResultCheckMarkUpdateDescriptionInputObject {
   description: 'The required data to update a check mark assigned user',
 })
 export class KeyResultCheckMarkUpdateAssigneeInputObject {
-  @Field(() => String, { description: 'The new user id to assign the check mark' })
+  @Field(() => ID, { description: 'The new user id to assign the check mark' })
   assignedUserId: string
 }

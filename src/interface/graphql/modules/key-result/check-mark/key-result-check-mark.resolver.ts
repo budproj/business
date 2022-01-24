@@ -1,5 +1,5 @@
 import { Logger, UnauthorizedException } from '@nestjs/common'
-import { Args } from '@nestjs/graphql'
+import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
@@ -7,6 +7,7 @@ import { CoreProvider } from '@core/core.provider'
 import { Status } from '@core/interfaces/status.interface'
 import { KeyResultCheckMarkInterface } from '@core/modules/key-result/check-mark/key-result-check-mark.interface'
 import { KeyResultCheckMark } from '@core/modules/key-result/check-mark/key-result-check-mark.orm-entity'
+import { User } from '@core/modules/user/user.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
@@ -15,6 +16,7 @@ import { RequestState } from '@interface/graphql/adapters/context/decorators/req
 import { GraphQLRequestState } from '@interface/graphql/adapters/context/interfaces/request-state.interface'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
 
+import { UserGraphQLNode } from '../../user/user.node'
 import { KeyResultCheckMarkAccessControl } from '../access-control/key-result-check-mark.access-control'
 
 import { KeyResultCheckMarkGraphQLNode } from './key-result-check-mark.node'
@@ -171,5 +173,19 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
     if (!deletedResponse) throw new UserInputError('We were not able to delete this check mark')
 
     return deletedResponse
+  }
+
+  @ResolveField('assignedUser', () => UserGraphQLNode)
+  protected async getOwnerForKeyResult(@Parent() checkMark: KeyResultCheckMarkGraphQLNode) {
+    this.logger.log({
+      checkMark,
+      message: 'Fetching user assigned to check mark',
+    })
+
+    const user = await this.corePorts.dispatchCommand<User>('get-user', {
+      id: checkMark.assignedUserId,
+    })
+
+    return user
   }
 }
