@@ -8,10 +8,7 @@ export class GetObjectiveStatusCommand extends BaseStatusCommand {
     options: GetStatusOptions = this.defaultOptions,
   ): Promise<Status> {
     const keyResults = await this.getKeyResultsFromObjective(objectiveID, options)
-    const [objectiveCheckIns, progresses, confidences] = await this.unzipKeyResultGroup(
-      keyResults,
-      options,
-    )
+    const [objectiveCheckIns, progresses, confidences] = await this.unzipKeyResultGroup(keyResults)
 
     const latestCheckIn = this.getLatestCheckInFromList(objectiveCheckIns)
     const isOutdated = this.isOutdated(latestCheckIn)
@@ -45,6 +42,8 @@ export class GetObjectiveStatusCommand extends BaseStatusCommand {
       [['DESC']],
     )
 
-    return this.core.keyResult.getWithRelationFilters(filters, orderAttributes)
+    const keyResults = await this.core.keyResult.getWithRelationFilters(filters, orderAttributes)
+
+    return this.removeKeyResultCheckInsBeforeDate(keyResults, options.date)
   }
 }

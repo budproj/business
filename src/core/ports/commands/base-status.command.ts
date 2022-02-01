@@ -55,19 +55,11 @@ export abstract class BaseStatusCommand extends Command<Status> {
 
   protected async unzipKeyResultGroup(
     keyResults: KeyResult[],
-    options: GetStatusOptions = {},
   ): Promise<[KeyResultCheckInInterface[], number[], number[]]> {
-    const cleanedKeyResults = keyResults.map((keyResult) => ({
-      ...keyResult,
-      checkIns: keyResult.checkIns.filter((checkIn) =>
-        options.date ? checkIn.createdAt < options.date : checkIn,
-      ),
-    }))
-
-    const objectiveKeyResults = groupBy(cleanedKeyResults, 'objectiveId')
+    const objectiveKeyResults = groupBy(keyResults, 'objectiveId')
     const keyResultsByObjective = Object.values(objectiveKeyResults)
 
-    const latestCheckIns = cleanedKeyResults.map((keyResult) => keyResult.checkIns[0])
+    const latestCheckIns = keyResults.map((keyResult) => keyResult.checkIns[0])
 
     const groupedKeyResultsProgressPromise = keyResultsByObjective.map(async (keyResultList) =>
       this.getKeyResultProgressesFromKeyResultList(keyResultList),
@@ -101,6 +93,16 @@ export abstract class BaseStatusCommand extends Command<Status> {
     const orderAttributes = zippedOrders.map((values) => this.zipOrderAttributes(...values))
 
     return zip(entities, orderAttributes)
+  }
+
+  protected removeKeyResultCheckInsBeforeDate(
+    rawKeyResults: KeyResult[],
+    date?: Date,
+  ): KeyResult[] {
+    return rawKeyResults.map((keyResult) => ({
+      ...keyResult,
+      checkIns: keyResult.checkIns.filter((checkIn) => (date ? checkIn.createdAt < date : checkIn)),
+    }))
   }
 
   private zipOrderAttributes(attributes: string[], orders: Order[]): OrderAttribute[] {
