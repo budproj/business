@@ -5,15 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e959aa6a-e82d-426c-b0f3-dc8939c6d5d2" name="Default Changelist" comment="feat(email): adds locale while creating a new user">
-      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/manifests/canary/canary-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/manifests/canary/canary-deployment.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/manifests/stable/deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/manifests/stable/deployment.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config/authz/authz-environment.schema.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/authz/authz-environment.schema.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config/authz/authz.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/authz/authz.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config/authz/authz.interface.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/authz/authz.interface.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config/authz/authz.provider.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/authz/authz.provider.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/infrastructure/authz/providers/client.provider.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/infrastructure/authz/providers/client.provider.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/ports/commands/base-status.command.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ports/commands/base-status.command.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/ports/commands/get-objective-status.command.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ports/commands/get-objective-status.command.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,7 +50,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/core/ports/commands" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../budproj/rick-and-morty-boilerplate" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.standard" value="true" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
@@ -121,6 +115,12 @@
       <workItem from="1639664917280" duration="1831000" />
       <workItem from="1639713425777" duration="121000" />
       <workItem from="1639761623509" duration="254000" />
+      <workItem from="1641906388398" duration="3000" />
+      <workItem from="1641992377692" duration="1000" />
+      <workItem from="1642472294053" duration="6000" />
+      <workItem from="1642685868776" duration="15000" />
+      <workItem from="1642698128834" duration="269000" />
+      <workItem from="1643736295962" duration="3090000" />
     </task>
     <task id="LOCAL-00001" summary="chore: updating env structure">
       <created>1637180757948</created>
@@ -252,6 +252,24 @@
     <MESSAGE value="feat(email): adds locale to support team" />
     <MESSAGE value="feat(email): adds locale while creating a new user" />
     <option name="LAST_COMMIT_MESSAGE" value="feat(email): adds locale while creating a new user" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/core/ports/commands/get-objective-delta.command.ts</url>
+          <line>24</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/core/ports/commands/base-status.command.ts</url>
+          <line>66</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="16" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

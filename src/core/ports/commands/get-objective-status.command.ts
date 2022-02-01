@@ -8,7 +8,10 @@ export class GetObjectiveStatusCommand extends BaseStatusCommand {
     options: GetStatusOptions = this.defaultOptions,
   ): Promise<Status> {
     const keyResults = await this.getKeyResultsFromObjective(objectiveID, options)
-    const [objectiveCheckIns, progresses, confidences] = await this.unzipKeyResultGroup(keyResults)
+    const [objectiveCheckIns, progresses, confidences] = await this.unzipKeyResultGroup(
+      keyResults,
+      options,
+    )
 
     const latestCheckIn = this.getLatestCheckInFromList(objectiveCheckIns)
     const isOutdated = this.isOutdated(latestCheckIn)
@@ -30,9 +33,6 @@ export class GetObjectiveStatusCommand extends BaseStatusCommand {
   ): Promise<KeyResult[]> {
     const filters = {
       keyResult: {
-        createdAt: options.date,
-      },
-      keyResultCheckIn: {
         createdAt: options.date,
       },
       objective: {

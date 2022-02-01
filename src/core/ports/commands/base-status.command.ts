@@ -55,11 +55,19 @@ export abstract class BaseStatusCommand extends Command<Status> {
 
   protected async unzipKeyResultGroup(
     keyResults: KeyResult[],
+    options: GetStatusOptions = {},
   ): Promise<[KeyResultCheckInInterface[], number[], number[]]> {
-    const objectiveKeyResults = groupBy(keyResults, 'objectiveId')
+    const cleanedKeyResults = keyResults.map((keyResult) => ({
+      ...keyResult,
+      checkIns: keyResult.checkIns.filter((checkIn) =>
+        options.date ? checkIn.createdAt < options.date : checkIn,
+      ),
+    }))
+
+    const objectiveKeyResults = groupBy(cleanedKeyResults, 'objectiveId')
     const keyResultsByObjective = Object.values(objectiveKeyResults)
 
-    const latestCheckIns = keyResults.map((keyResult) => keyResult.checkIns[0])
+    const latestCheckIns = cleanedKeyResults.map((keyResult) => keyResult.checkIns[0])
 
     const groupedKeyResultsProgressPromise = keyResultsByObjective.map(async (keyResultList) =>
       this.getKeyResultProgressesFromKeyResultList(keyResultList),
