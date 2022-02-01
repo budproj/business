@@ -46,9 +46,6 @@ export class GetTeamStatusCommand extends BaseStatusCommand {
       keyResult: {
         createdAt: options.date,
       },
-      keyResultCheckIn: {
-        createdAt: options.date,
-      },
       team: {
         id: teamID,
       },
@@ -60,6 +57,8 @@ export class GetTeamStatusCommand extends BaseStatusCommand {
       [['DESC']],
     )
 
-    return this.core.keyResult.getWithRelationFilters(filters, orderAttributes)
+    const keyResults = await this.core.keyResult.getWithRelationFilters(filters, orderAttributes)
+
+    return this.removeKeyResultCheckInsBeforeDate(keyResults, options.date)
   }
 }

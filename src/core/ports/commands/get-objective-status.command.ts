@@ -32,9 +32,6 @@ export class GetObjectiveStatusCommand extends BaseStatusCommand {
       keyResult: {
         createdAt: options.date,
       },
-      keyResultCheckIn: {
-        createdAt: options.date,
-      },
       objective: {
         id: objectiveID,
       },
@@ -45,6 +42,8 @@ export class GetObjectiveStatusCommand extends BaseStatusCommand {
       [['DESC']],
     )
 
-    return this.core.keyResult.getWithRelationFilters(filters, orderAttributes)
+    const keyResults = await this.core.keyResult.getWithRelationFilters(filters, orderAttributes)
+
+    return this.removeKeyResultCheckInsBeforeDate(keyResults, options.date)
   }
 }

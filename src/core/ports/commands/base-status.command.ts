@@ -95,6 +95,16 @@ export abstract class BaseStatusCommand extends Command<Status> {
     return zip(entities, orderAttributes)
   }
 
+  protected removeKeyResultCheckInsBeforeDate(
+    rawKeyResults: KeyResult[],
+    date?: Date,
+  ): KeyResult[] {
+    return rawKeyResults.map((keyResult) => ({
+      ...keyResult,
+      checkIns: keyResult.checkIns.filter((checkIn) => (date ? checkIn.createdAt < date : checkIn)),
+    }))
+  }
+
   private zipOrderAttributes(attributes: string[], orders: Order[]): OrderAttribute[] {
     const zippedValues = zip(attributes, orders)
 
