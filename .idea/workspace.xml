@@ -5,10 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e959aa6a-e82d-426c-b0f3-dc8939c6d5d2" name="Default Changelist" comment="feat(email): adds locale while creating a new user">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/ports/commands/base-status.command.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ports/commands/base-status.command.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/ports/commands/get-objective-status.command.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ports/commands/get-objective-status.command.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/ports/commands/get-team-status.command.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ports/commands/get-team-status.command.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/ports/commands/get-cycle-status.command.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ports/commands/get-cycle-status.command.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -122,6 +119,7 @@
       <workItem from="1642685868776" duration="15000" />
       <workItem from="1642698128834" duration="269000" />
       <workItem from="1643736295962" duration="3939000" />
+      <workItem from="1643998170749" duration="85000" />
     </task>
     <task id="LOCAL-00001" summary="chore: updating env structure">
       <created>1637180757948</created>
