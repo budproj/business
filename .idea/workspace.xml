@@ -5,13 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e959aa6a-e82d-426c-b0f3-dc8939c6d5d2" name="Default Changelist" comment="feat(email): adds locale while creating a new user">
-      <change afterPath="$PROJECT_DIR$/src/interface/graphql/adapters/authorization/objects/resource-policy.object.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/workspace.module.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/workspace.node.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/workspace.resolver.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/adapters/authorization/godmode/godmode.provider.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/adapters/authorization/godmode/godmode.provider.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/adapters/policy/enums/resource.enum.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/adapters/policy/enums/resource.enum.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/adapters/policy/policy.adapter.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/adapters/policy/policy.adapter.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/interface/graphql/adapters/authorization/objects/permissions.object.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/graphql/adapters/authorization/objects/permissions.object.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/interface/graphql/graphql.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/graphql/graphql.module.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/workspace.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/workspace.module.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,7 +52,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/interface/graphql/adapters/authorization/objects" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/interface/graphql/modules/workspace" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.standard" value="true" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
@@ -67,8 +65,8 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/src/interface/graphql/adapters/authorization/objects" />
       <recent name="$PROJECT_DIR$/src/interface/graphql/modules/workspace" />
+      <recent name="$PROJECT_DIR$/src/interface/graphql/adapters/authorization/objects" />
       <recent name="$PROJECT_DIR$/src/core/ports/commands" />
       <recent name="$PROJECT_DIR$/src/interface/graphql/modules/user/setting/requests" />
       <recent name="$PROJECT_DIR$/src/core/modules/user/setting" />
@@ -128,7 +126,7 @@
       <workItem from="1643998170749" duration="85000" />
       <workItem from="1644258397962" duration="22000" />
       <workItem from="1644258426656" duration="27000" />
-      <workItem from="1644258460262" duration="2487000" />
+      <workItem from="1644258460262" duration="4252000" />
     </task>
     <task id="LOCAL-00001" summary="chore: updating env structure">
       <created>1637180757948</created>
