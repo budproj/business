@@ -7,6 +7,7 @@ import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
+import { User } from '@core/modules/user/user.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
@@ -66,6 +67,16 @@ export class WorkspaceGraphQLResolver extends GuardedNodeGraphQLResolver<Team, T
       message: 'Received create workspace request',
     })
 
-    return {}
+    const rootUser = await this.corePorts.dispatchCommand<User>('create-user', request.data.user)
+    const team = await this.corePorts.dispatchCommand<Team>('create-team', {
+      ...request.data.team,
+      ownerId: rootUser.id,
+    })
+    await this.corePorts.dispatchCommand('add-team-to-user', {
+      userID: rootUser.id,
+      teamID: team.id,
+    })
+
+    return team
   }
 }
