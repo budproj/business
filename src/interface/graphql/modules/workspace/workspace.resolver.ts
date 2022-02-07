@@ -67,7 +67,9 @@ export class WorkspaceGraphQLResolver extends GuardedNodeGraphQLResolver<Team, T
       message: 'Received create workspace request',
     })
 
-    const rootUser = await this.corePorts.dispatchCommand<User>('create-user', request.data.user)
+    const rootUser = await this.corePorts.dispatchCommand<User>('create-user', request.data.user, {
+      autoInvite: request.data.options.autoInvite,
+    })
     const team = await this.corePorts.dispatchCommand<Team>('create-team', {
       ...request.data.team,
       ownerId: rootUser.id,

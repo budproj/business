@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="e959aa6a-e82d-426c-b0f3-dc8939c6d5d2" name="Default Changelist" comment="feat(email): adds locale while creating a new user">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/objects/workspace-create-input.object.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/objects/workspace-create-input.object.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/workspace.resolver.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/workspace.resolver.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -123,7 +124,7 @@
       <workItem from="1643998170749" duration="85000" />
       <workItem from="1644258397962" duration="22000" />
       <workItem from="1644258426656" duration="27000" />
-      <workItem from="1644258460262" duration="5948000" />
+      <workItem from="1644258460262" duration="6380000" />
     </task>
     <task id="LOCAL-00001" summary="chore: updating env structure">
       <created>1637180757948</created>

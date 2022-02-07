@@ -66,6 +66,17 @@ class WorkspaceCycleCreateInputObject {
   public readonly dateEnd!: Date
 }
 
+@InputType('WorkspaceCreateOptions', {
+  description: 'Options to customize your workspace creation',
+})
+class WorkspaceCreateOptionsObject {
+  @Field({
+    description: 'Define if we should automatically invite the new root user',
+    nullable: true,
+  })
+  public readonly autoInvite!: boolean
+}
+
 @InputType('WorkspaceCreateInput', {
   description: 'Data that you need to provide while creating a new workspace',
 })
@@ -89,4 +100,12 @@ export class WorkspaceCreateInputObject {
     description: 'The initial quarterly cycle of the workspace',
   })
   public readonly quarterlyCycle!: WorkspaceCycleCreateInputObject
+
+  @Field(() => WorkspaceCreateOptionsObject, {
+    description: 'Options to customize the workspace creation',
+    defaultValue: {
+      autoInvite: true,
+    },
+  })
+  public readonly options!: WorkspaceCreateOptionsObject
 }
