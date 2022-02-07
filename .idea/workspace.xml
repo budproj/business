@@ -5,11 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e959aa6a-e82d-426c-b0f3-dc8939c6d5d2" name="Default Changelist" comment="feat(email): adds locale while creating a new user">
-      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/workspace.node.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/workspace.resolver.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/objects/workspace-create-input.object.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/requests/workspace-create.request.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/workspace.access-control.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/interface/graphql/graphql.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/graphql/graphql.module.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/workspace.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/workspace.module.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/workspace.resolver.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/workspace.resolver.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -126,7 +127,7 @@
       <workItem from="1643998170749" duration="85000" />
       <workItem from="1644258397962" duration="22000" />
       <workItem from="1644258426656" duration="27000" />
-      <workItem from="1644258460262" duration="4252000" />
+      <workItem from="1644258460262" duration="5583000" />
     </task>
     <task id="LOCAL-00001" summary="chore: updating env structure">
       <created>1637180757948</created>
