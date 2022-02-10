@@ -74,6 +74,7 @@ import { GetUsersByIdsCommand } from './get-users-by-ids.command'
 import { RemoveTeamFromUserCommand } from './remove-team-from-user.command'
 import { RemoveUserToKeyResultSupportTeamCommand } from './remove-user-to-key-result-support-team.command'
 import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
+import { UpdateCheckMarkAssigneeCommand } from './update-check-mark-assignee.command'
 import { UpdateCheckMarkDescriptionCommand } from './update-check-mark-description.command'
 import { UpdateTeamCommand } from './update-team.command'
 import { UpdateUserCommand } from './update-user.command'
@@ -148,6 +149,7 @@ export type CommandType =
   | 'remove-team-from-user'
   | 'remove-user-to-key-result-support-team'
   | 'toggle-check-mark'
+  | 'update-check-mark-assignee'
   | 'update-check-mark-description'
   | 'update-key-result'
   | 'update-objective'
@@ -226,6 +228,7 @@ export class CommandFactory {
     'remove-team-from-user': RemoveTeamFromUserCommand,
     'remove-user-to-key-result-support-team': RemoveUserToKeyResultSupportTeamCommand,
     'toggle-check-mark': ToggleCheckMarkCommand,
+    'update-check-mark-assignee': UpdateCheckMarkAssigneeCommand,
     'update-check-mark-description': UpdateCheckMarkDescriptionCommand,
     'update-key-result': UpdateKeyResultCommand,
     'update-objective': UpdateObjectiveCommand,

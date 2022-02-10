@@ -8,6 +8,8 @@ import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserSettingInterface } from '@core/modules/user/setting/user-setting.interface'
 
+import { KeyResultCheckMarkInterface } from '../key-result/check-mark/key-result-check-mark.interface'
+
 import { UserGender } from './enums/user-gender.enum'
 import { UserStatus } from './enums/user-status.enum'
 import { UserInterface } from './user.interface'
@@ -73,4 +75,7 @@ export class User extends CoreEntity implements UserInterface {
 
   @OneToMany('UserSetting', 'user', { nullable: true })
   public settings?: UserSettingInterface[]
+
+  @OneToMany('KeyResultCheckMark', 'assignedUser', { nullable: true })
+  public keyResultAssignedCheckMarks?: KeyResultCheckMarkInterface[]
 }
