@@ -26,3 +26,11 @@ export class KeyResultCheckMarkUpdateDescriptionInputObject {
   @Field(() => String, { description: 'The new description of the check mark' })
   description: string
 }
+
+@InputType('KeyResultCheckMarkUpdateAssigneeInput', {
+  description: 'The required data to update a check mark assigned user',
+})
+export class KeyResultCheckMarkUpdateAssigneeInputObject {
+  @Field(() => ID, { description: 'The new user id to assign the check mark' })
+  assignedUserId: string
+}

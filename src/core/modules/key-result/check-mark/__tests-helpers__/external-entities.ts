@@ -8,6 +8,8 @@ export class User extends CoreEntity {
   firstName: string
 
   keyResultComments: string[]
+
+  keyResultAssignedCheckMarks: string[]
 }
 
 @Entity()

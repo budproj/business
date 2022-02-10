@@ -31,4 +31,11 @@ export class KeyResultCheckMark extends CoreEntity implements KeyResultCheckMark
 
   @ManyToOne('User', 'keyResultComments')
   public user: UserInterface
+
+  @Column({ type: 'uuid', nullable: true })
+  @RelationId((checkMark: KeyResultCheckMark) => checkMark.assignedUser)
+  public assignedUserId: UserInterface['id']
+
+  @ManyToOne('User', 'keyResultAssignedCheckMarks')
+  public assignedUser: UserInterface
 }

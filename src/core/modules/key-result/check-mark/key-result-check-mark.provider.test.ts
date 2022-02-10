@@ -11,6 +11,7 @@ import { KeyResultCheckMarkProvider } from './key-result-check-mark.provider'
 import { KeyResultCheckMarkRepository } from './key-result-check-mark.repository'
 
 let mockUser: User
+let mockSecondUser: User
 let mockKeyResult: KeyResult
 let mockSecondKeyResult: KeyResult
 
@@ -18,6 +19,7 @@ beforeEach(async () => startInMemoryDatabase([User, KeyResult, KeyResultCheckMar
 beforeEach(async () => {
   const userRepo = repository(User)
   mockUser = await userRepo.save({ firstName: 'John', keyResultComments: [] })
+  mockSecondUser = await userRepo.save({ firstName: 'Maria', keyResultComments: [] })
 
   const keyResultRepo = repository(KeyResult)
   mockKeyResult = await keyResultRepo.save({ title: 'finish writing a book' })
@@ -30,6 +32,7 @@ const checkMarkGenerator = (customFields) => ({
   description: 'do the dishes',
   keyResultId: mockKeyResult.id,
   userId: mockUser.id,
+  assignedUserId: mockUser.id,
   ...customFields,
 })
 const provider = () => testProvider(KeyResultCheckMarkRepository, KeyResultCheckMarkProvider)
@@ -167,6 +170,24 @@ describe('check-mark - provider', () => {
       // Act
       expect(result.state).toBe(CheckMarkStates.UNCHECKED)
       expect(result.userId).toBe(mockUser.id)
+    })
+  })
+
+  describe('changeAssigned', () => {
+    it('should change assigned to another user', async () => {
+      // Arrange
+      const checkMarkId = '940ef077-a373-46bc-83f7-4ce93c806edc'
+      const baseCheckMark = checkMarkGenerator({ id: checkMarkId, assignedUserId: mockUser.id })
+
+      // Act
+      await provider().createCheckMark(baseCheckMark)
+      const before = await provider().getOne({ id: checkMarkId })
+      await provider().changeAssigned(checkMarkId, mockSecondUser.id)
+      const after = await provider().getOne({ id: checkMarkId })
+
+      // Assert
+      expect(before.assignedUserId).toBe(mockUser.id)
+      expect(after.assignedUserId).toBe(mockSecondUser.id)
     })
   })
 })
