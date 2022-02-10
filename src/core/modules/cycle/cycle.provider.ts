@@ -125,6 +125,11 @@ export class CycleProvider extends CoreEntityProvider<Cycle, CycleInterface> {
     return this.repository.findOne({ id })
   }
 
+  public async createCycle(data: CycleInterface): Promise<Cycle> {
+    const queryResult = await this.create(data)
+    return queryResult[0]
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<Cycle>,
     _data: Partial<CycleInterface>,

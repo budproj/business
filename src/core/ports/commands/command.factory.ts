@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 import { CoreProvider } from '@core/core.provider'
+import { CreateCycleCommand } from '@core/ports/commands/create-cycle.command'
 import { CreateKeyResultCommand } from '@core/ports/commands/create-key-result.command'
 import { CreateObjectiveCommand } from '@core/ports/commands/create-objective.command'
 import { DeleteKeyResultCommand } from '@core/ports/commands/delete-key-result.command'
@@ -156,6 +157,7 @@ export type CommandType =
   | 'update-team'
   | 'update-user'
   | 'update-user-setting'
+  | 'create-cycle'
 
 @Injectable()
 export class CommandFactory {
@@ -164,6 +166,7 @@ export class CommandFactory {
     'add-user-to-key-result-support-team': AddUserToKeyResultSupportTeamCommand,
     'create-check-in': CreateKeyResultCheckInCommand,
     'create-check-mark': CreateCheckMarkCommand,
+    'create-cycle': CreateCycleCommand,
     'create-key-result': CreateKeyResultCommand,
     'create-key-result-comment': CreateKeyResultCommentCommand,
     'create-objective': CreateObjectiveCommand,

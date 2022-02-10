@@ -5,6 +5,8 @@ import { UserInputError } from 'apollo-server-fastify'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
+import { Cadence } from '@core/modules/cycle/enums/cadence.enum'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { User } from '@core/modules/user/user.orm-entity'
@@ -77,6 +79,23 @@ export class WorkspaceGraphQLResolver extends GuardedNodeGraphQLResolver<Team, T
     await this.corePorts.dispatchCommand('add-team-to-user', {
       userID: rootUser.id,
       teamID: team.id,
+    })
+
+    const yearlyCycle = await this.corePorts.dispatchCommand<Cycle>('create-cycle', {
+      period: request.data.yearlyCycle.period,
+      cadence: Cadence.YEARLY,
+      dateStart: request.data.yearlyCycle.dateStart,
+      dateEnd: request.data.yearlyCycle.dateEnd,
+      teamId: team.id,
+    })
+
+    await this.corePorts.dispatchCommand<Cycle>('create-cycle', {
+      period: request.data.quarterlyCycle.period,
+      cadence: Cadence.QUARTERLY,
+      dateStart: request.data.quarterlyCycle.dateStart,
+      dateEnd: request.data.quarterlyCycle.dateEnd,
+      teamId: team.id,
+      parentId: yearlyCycle.id,
     })
 
     return team
