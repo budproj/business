@@ -10,6 +10,7 @@ import { CheckMarkStates } from '@core/modules/key-result/check-mark/key-result-
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { TeamGender } from '@core/modules/team/enums/team-gender.enum'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
+import { UserGender } from '@core/modules/user/enums/user-gender.enum'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { EmailNotificationChannelMetadata } from '@infrastructure/notification/channels/email/metadata.type'
@@ -152,15 +153,31 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
       recipients,
       template: 'AssignedUserCheckmark',
     }
+
+    const assignedUserFullName = await this.core.dispatchCommand<string>(
+      'get-user-full-name',
+      data.assignedUser,
+    )
+
     const emailData = {
-      authorFullName: data.author.fullName,
+      assignedUserFullName,
+      assignedUserFirstName: data.assignedUser.firstName,
+      isMale: data.assignedUser.gender === UserGender.MALE,
+      isFemale: data.assignedUser.gender === UserGender.FEMALE,
+      assignedUserPicture: data.assignedUser.picture,
+
+      actionUserFullName: data.author.fullName,
+      actionUserPicture: data.author.picture,
       authorInitials: data.author.initials,
-      authorPictureURL: data.author.picture,
-      keyResultTitle: data.keyResult.title,
-      checkMark: data.checkMark,
-      keyResultConfidenceTagColor: data.keyResult.confidenceColor,
+
+      checkMarkDescription: data.checkMark.description,
+      isCheckMarkChecked: data.checkMark.state === CheckMarkStates.CHECKED,
+      teamId: data.team.id,
+
       isQuarterlyCadence: data.cycle.isQuarterlyCadence,
       cyclePeriod: data.cycle.period,
+      keyResultConfidenceColor: data.keyResult.confidenceColor,
+      keyResultTitle: data.keyResult.title,
     }
 
     await this.channels.email.dispatch(emailData, emailMetadata)
