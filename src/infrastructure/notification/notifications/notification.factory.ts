@@ -9,6 +9,7 @@ import { ChannelHashmap } from '@infrastructure/notification/types/channel-hashm
 import { NotificationData } from '@infrastructure/notification/types/notification-data.type'
 
 import { CreatedKeyResultCheckInNotification } from './created-key-result-check-in.notification'
+import { CreatedKeyResultCheckMarkNotification } from './created-key-result-check-mark.notification'
 import { NewKeyResultSupportTeamMemberNotification } from './new-key-result-support-team-member.notification'
 
 @Injectable()
@@ -17,6 +18,7 @@ export class NotificationFactory {
     CreatedKeyResultCommentNotification,
     CreatedKeyResultCheckInNotification,
     NewKeyResultSupportTeamMemberNotification,
+    CreatedKeyResultCheckMarkNotification,
   ]
 
   private readonly channels: ChannelHashmap

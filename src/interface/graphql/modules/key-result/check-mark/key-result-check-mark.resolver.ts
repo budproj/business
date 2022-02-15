@@ -2,6 +2,7 @@ import { Logger, UnauthorizedException } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
+import { CreatedKeyResultCheckMarkActivity } from '@adapters/activity/activities/created-key-result-checkmark.activity'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { CoreProvider } from '@core/core.provider'
 import { Status } from '@core/interfaces/status.interface'
@@ -9,6 +10,7 @@ import { KeyResultCheckMarkInterface } from '@core/modules/key-result/check-mark
 import { KeyResultCheckMark } from '@core/modules/key-result/check-mark/key-result-check-mark.orm-entity'
 import { User } from '@core/modules/user/user.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
+import { AttachActivity } from '@interface/graphql/adapters/activity/attach-activity.decorator'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
@@ -128,6 +130,7 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
     return updatedCheckMark
   }
 
+  @AttachActivity(CreatedKeyResultCheckMarkActivity)
   @GuardedMutation(KeyResultCheckMarkGraphQLNode, 'key-result-check-mark:update', {
     name: 'updateCheckMarkAssignee',
   })
