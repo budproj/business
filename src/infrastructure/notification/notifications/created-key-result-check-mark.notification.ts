@@ -150,7 +150,7 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
     const emailMetadata: EmailNotificationChannelMetadata = {
       ...metadata,
       recipients,
-      template: 'NewKeyResultComment',
+      template: 'AssignedUserCheckmark',
     }
     const emailData = {
       authorFullName: data.author.fullName,
