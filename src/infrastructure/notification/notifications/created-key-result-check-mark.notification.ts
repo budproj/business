@@ -140,6 +140,8 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
   private async dispatchAssignedCheckMarkEmail(): Promise<void> {
     const { data, metadata } = this.marshal()
 
+    if (data.assignedUser.id === data.author.id) return
+
     const recipientUsers = [data.assignedUser]
     const customData = recipientUsers.map((user) => ({
       ownerFirstName: user.firstName,
