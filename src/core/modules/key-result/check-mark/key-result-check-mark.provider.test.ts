@@ -27,7 +27,7 @@ beforeEach(async () => {
 })
 afterEach(closeConnection)
 
-const checkMarkGenerator = (customFields) => ({
+const checkMarkGenerator = (customFields: Partial<KeyResultCheckMark>) => ({
   state: CheckMarkStates.UNCHECKED,
   description: 'do the dishes',
   keyResultId: mockKeyResult.id,
@@ -188,6 +188,37 @@ describe('check-mark - provider', () => {
       // Assert
       expect(before.assignedUserId).toBe(mockUser.id)
       expect(after.assignedUserId).toBe(mockSecondUser.id)
+    })
+  })
+
+  describe('getFromAssignedUser', () => {
+    it('should return a list of check marks from user', async () => {
+      // Arrange
+      const checkMark1 = checkMarkGenerator({ assignedUserId: mockUser.id })
+      const checkMark2 = checkMarkGenerator({ assignedUserId: mockUser.id })
+      const checkMark3 = checkMarkGenerator({
+        assignedUserId: mockUser.id,
+        keyResultId: mockSecondKeyResult.id,
+      })
+      const checkMark4 = checkMarkGenerator({ assignedUserId: mockSecondUser.id })
+
+      // Act
+      const creationResults = await Promise.all([
+        provider().createCheckMark(checkMark1),
+        provider().createCheckMark(checkMark2),
+        provider().createCheckMark(checkMark3),
+        provider().createCheckMark(checkMark4),
+      ])
+      const [checkMark1Id, checkMark2Id, checkMark3Id, checkMark4Id] = creationResults.map(
+        ([{ id }]) => id,
+      )
+      const result = await provider().getFromAssignedUser(mockUser.id)
+
+      // Assert
+      const ids = result.map((item) => item.id)
+      expect(ids).toHaveLength(3)
+      expect(ids).toStrictEqual([checkMark1Id, checkMark2Id, checkMark3Id])
+      expect(ids.find((id) => id === checkMark4Id)).toBeUndefined()
     })
   })
 })

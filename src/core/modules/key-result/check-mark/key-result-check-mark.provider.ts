@@ -49,6 +49,10 @@ export class KeyResultCheckMarkProvider extends CoreEntityProvider<
     return this.getMany({ keyResultId }, undefined, options)
   }
 
+  public async getFromAssignedUser(userId: string): Promise<KeyResultCheckMark[]> {
+    return this.getMany({ assignedUserId: userId })
+  }
+
   // TODO: tests
   public async getFromIndexes(
     indexes: Partial<KeyResultCheckMarkInterface>,
