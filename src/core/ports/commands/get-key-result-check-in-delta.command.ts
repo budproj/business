@@ -29,6 +29,21 @@ export class GetKeyResultCheckInDeltaCommand extends BaseDeltaCommand<KeyResultC
       currentStatus.latestCheckIn?.parentId,
     )
 
+    if (!previousStatus.latestCheckIn) {
+      const keyResultCheckIn = await this.core.keyResult.keyResultCheckInProvider.getOne({ id: keyResultCheckInID })
+      const keyResult = await this.core.keyResult.getFromID(keyResultCheckIn.keyResultId)
+      const initialCheckIn = {
+        id: '',
+        userId: keyResult.ownerId,
+        value: keyResult.initialValue,
+        confidence: 100,
+        keyResultId: keyResult.id,
+        createdAt: keyResult.createdAt,
+      }
+
+      previousStatus.latestCheckIn = initialCheckIn
+    }
+
     return this.marshal(currentStatus, previousStatus)
   }
 
