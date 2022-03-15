@@ -241,6 +241,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   protected async getKeyResultChecklistForKeyResult(
     @Args() request: KeyResultCheckMarkFiltersRequest,
     @Parent() keyResult: KeyResult,
+    @RequestState() state: State,
   ) {
     this.logger.log({
       keyResult,
@@ -256,6 +257,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     const queryResult = await this.corePorts.dispatchCommand<KeyResultCheckMark[]>(
       'get-check-list-for-key-result',
       keyResult.id,
+      filters.onlyAssignedToMe ? state.user.id : undefined,
     )
 
     return this.relay.marshalResponse<KeyResultCheckMarkInterface>(

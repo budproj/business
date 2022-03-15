@@ -44,9 +44,15 @@ export class KeyResultCheckMarkProvider extends CoreEntityProvider<
     return this.delete({ keyResultId })
   }
 
-  public async getFromKeyResult(keyResultId: string): Promise<KeyResultCheckMark[]> {
+  public async getFromKeyResult(
+    keyResultId: string,
+    assignedUserId?: string,
+  ): Promise<KeyResultCheckMark[]> {
     const options = { orderBy: { createdAt: Sorting.ASC } }
-    return this.getMany({ keyResultId }, undefined, options)
+
+    const searchObject = assignedUserId ? { keyResultId, assignedUserId } : { keyResultId }
+
+    return this.getMany(searchObject, undefined, options)
   }
 
   public async getFromAssignedUser(userId: string): Promise<KeyResultCheckMark[]> {

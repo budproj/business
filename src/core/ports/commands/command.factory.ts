@@ -51,6 +51,7 @@ import { DeactivateUserCommand } from './deactivate-user.command'
 import { DeleteCheckMarkCommand } from './delete-check-mark.command'
 import { GetCheckListForKeyResultCommand } from './get-check-list-for-key-result.command'
 import { GetCheckListProgressCommand } from './get-check-list-progress.command'
+import { GetCheckListOfUserCommand } from './get-checklist-of-user'
 import { GetCycleCommand } from './get-cycle.command'
 import { GetKeyResultCheckInListCommand } from './get-key-result-check-in-list.command'
 import { GetKeyResultCheckInTeamCommand } from './get-key-result-check-in-team.command'
@@ -64,6 +65,7 @@ import { GetKeyResultProgressHistoryCommand } from './get-key-result-progress-hi
 import { GetKeyResultSupportTeamCommand } from './get-key-result-support-team.command'
 import { GetKeyResultTeamTreeCommand } from './get-key-result-team-tree.command'
 import { GetKeyResultCommand } from './get-key-result.command'
+import { GetKeyResultsContainingUserChecklistCommand } from './get-key-results-containing-user-checklist'
 import { GetObjectiveKeyResultsCommand } from './get-objective-key-results.command'
 import { GetTeamCompanyCommand } from './get-team-company.command'
 import { GetTeamMembersCommand } from './get-team-members.command'
@@ -95,6 +97,7 @@ export type CommandType =
   | 'delete-key-result'
   | 'delete-objective'
   | 'get-check-list-for-key-result'
+  | 'get-check-list-of-user'
   | 'get-check-list-progress'
   | 'get-cycle'
   | 'get-cycle-delta'
@@ -120,6 +123,7 @@ export type CommandType =
   | 'get-key-result-support-team'
   | 'get-key-result-team'
   | 'get-key-result-team-tree'
+  | 'get-key-results-containing-user-checklist'
   | 'get-objective'
   | 'get-objective-delta'
   | 'get-objective-key-results'
@@ -174,6 +178,7 @@ export class CommandFactory {
     'delete-key-result': DeleteKeyResultCommand,
     'delete-objective': DeleteObjectiveCommand,
     'get-check-list-for-key-result': GetCheckListForKeyResultCommand,
+    'get-check-list-of-user': GetCheckListOfUserCommand,
     'get-check-list-progress': GetCheckListProgressCommand,
     'get-cycle': GetCycleCommand,
     'get-cycle-delta': GetCycleDeltaCommand,
@@ -199,6 +204,7 @@ export class CommandFactory {
     'get-key-result-support-team': GetKeyResultSupportTeamCommand,
     'get-key-result-team': GetKeyResultTeamCommand,
     'get-key-result-team-tree': GetKeyResultTeamTreeCommand,
+    'get-key-results-containing-user-checklist': GetKeyResultsContainingUserChecklistCommand,
     'get-objective': GetObjectiveCommand,
     'get-objective-delta': GetObjectiveDeltaCommand,
     'get-objective-key-results': GetObjectiveKeyResultsCommand,

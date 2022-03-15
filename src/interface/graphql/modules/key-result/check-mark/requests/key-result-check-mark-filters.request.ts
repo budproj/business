@@ -6,8 +6,15 @@ import { ConnectionFiltersRequest } from '@interface/graphql/requests/connection
 @ArgsType()
 export class KeyResultCheckMarkFiltersRequest extends ConnectionFiltersRequest {
   @Field(() => ID, {
-    description: 'Fetches key-result checklist from a given user',
+    description: 'Fetches key-result checklist created by a given user',
     nullable: true,
   })
   public readonly userId?: UserGraphQLNode['id']
+
+  @Field({
+    description: 'If true, show only check marks assigned to the user',
+    defaultValue: false,
+    nullable: true,
+  })
+  public readonly onlyAssignedToMe?: boolean
 }
