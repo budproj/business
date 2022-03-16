@@ -13,7 +13,7 @@ export class GetKeyResultsContainingUserChecklistCommand extends Command<KeyResu
 
     const keyResultsIds = uniq(checkmarks.map((checkmark) => checkmark.keyResultId))
 
-    const keyResults = await this.core.keyResult.getManyByIds(keyResultsIds)
+    const keyResults = await this.core.keyResult.getByIdsWhoAreInActiveCycles(keyResultsIds)
 
     return keyResults
   }

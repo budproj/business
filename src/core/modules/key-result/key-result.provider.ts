@@ -395,8 +395,18 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return this.repository.getWithUserInSupportTeamWithFilters(userID, filters)
   }
 
-  public async getManyByIds(keyResultsIds: string[]): Promise<KeyResult[]> {
-    return this.repository.find({ where: { id: In(keyResultsIds) } })
+  public async getByIdsWhoAreInActiveCycles(keyResultsIds: string[]): Promise<KeyResult[]> {
+    return this.repository.find({
+      relations: ['objective', 'objective.cycle'],
+      where: {
+        id: In(keyResultsIds),
+        objective: {
+          cycle: {
+            active: true,
+          },
+        },
+      },
+    })
   }
 
   protected async protectCreationQuery(
