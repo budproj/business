@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { uniqBy, pickBy, omitBy, identity, isEmpty } from 'lodash'
-import { Any, DeleteResult, FindConditions } from 'typeorm'
+import { Any, DeleteResult, FindConditions, In } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
@@ -393,6 +393,20 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     filters?: KeyResultInterface,
   ): Promise<KeyResult[]> {
     return this.repository.getWithUserInSupportTeamWithFilters(userID, filters)
+  }
+
+  public async getByIdsWhoAreInActiveCycles(keyResultsIds: string[]): Promise<KeyResult[]> {
+    return this.repository.find({
+      relations: ['objective', 'objective.cycle'],
+      where: {
+        id: In(keyResultsIds),
+        objective: {
+          cycle: {
+            active: true,
+          },
+        },
+      },
+    })
   }
 
   protected async protectCreationQuery(

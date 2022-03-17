@@ -301,15 +301,16 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       request,
     )
 
-    const { active, ...filters } = options
+    const { active, hasUserCheckMarks, ...filters } = options
+    const command = hasUserCheckMarks
+      ? 'get-key-results-containing-user-checklist'
+      : 'get-user-key-results'
 
     const queryResult = await this.corePorts.dispatchCommand<KeyResult[]>(
-      'get-user-key-results',
+      command,
       user.id,
       filters,
-      {
-        active,
-      },
+      { active },
     )
 
     return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection, user)
