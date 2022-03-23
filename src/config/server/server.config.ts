@@ -13,11 +13,6 @@ export const serverConfig = registerAs(
     isCodespaces: process.env.CODESPACES === 'true',
     prefix: process.env.SERVER_PREFIX,
 
-    cors: {
-      credentialsEnabled: process.env.SERVER_CORS_CREDENTIALS_ENABLED === 'true',
-      allowedOrigins: process.env.SERVER_CORS_ALLOWED_ORIGINS?.split(','),
-    },
-
     logging: {
       level: LogLevel[process.env.SERVER_LOGGING_LEVEL],
       serviceName: process.env.SERVER_LOGGING_SERVICE_NAME,

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
-import { ServerCORSConfigInterface, ServerLoggingConfigInterface } from './server.interface'
+import { ServerLoggingConfigInterface } from './server.interface'
 
 @Injectable()
 export class ServerConfigProvider {
@@ -25,10 +25,6 @@ export class ServerConfigProvider {
 
   get prefix(): string | undefined {
     return this.configService.get<string | undefined>('server.prefix')
-  }
-
-  get cors(): ServerCORSConfigInterface {
-    return this.configService.get<ServerCORSConfigInterface>('server.cors')
   }
 
   get logging(): ServerLoggingConfigInterface {

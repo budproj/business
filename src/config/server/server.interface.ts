@@ -5,7 +5,6 @@ export interface ServerConfigInterface {
   host: string
   networkAddress: string
   isCodespaces: boolean
-  cors: ServerCORSConfigInterface
   logging: ServerLoggingConfigInterface
   prefix?: string
 }
@@ -13,9 +12,4 @@ export interface ServerConfigInterface {
 export interface ServerLoggingConfigInterface {
   level: LogLevel
   serviceName: string
-}
-
-export interface ServerCORSConfigInterface {
-  credentialsEnabled: boolean
-  allowedOrigins: string[]
 }

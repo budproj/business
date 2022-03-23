@@ -71,7 +71,7 @@ spec:
               value: business@canary
             - name: SERVER_PREFIX
               value: business
-            - name: SERVER_CORS_ALLOWED_ORIGINS
+            - name: GRAPHQL_CORS_ALLOWED_ORIGINS
               value: https://app.canary.getbud.co,https://studio.apollographql.com
             - name: TYPEORM_LOGGING_ENABLED
               value: 'true'
