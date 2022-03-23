@@ -9,7 +9,7 @@ import { BaseResolver } from '@interface/graphql/decorators/base-resolver.decora
 import { GraphQLRequiredPoliciesGraphQLGuard } from '../guards/required-policies.guard'
 import { TokenGraphQLGuard } from '../guards/token.guard'
 
-export function GuardedResolver(GraphQLObject: Class) {
+export function GuardedResolver(GraphQLObject: Class<any>) {
   return applyDecorators(
     BaseResolver(),
     UseGuards(TokenGraphQLGuard, GraphQLRequiredPoliciesGraphQLGuard),

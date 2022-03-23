@@ -1,3 +1,4 @@
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import { Module } from '@nestjs/common'
 import { GraphQLModule as NestGraphQLModule } from '@nestjs/graphql'
 
@@ -15,7 +16,8 @@ import { GraphQLOptionsFactory } from './options.factory'
 
 @Module({
   imports: [
-    NestGraphQLModule.forRootAsync({
+    NestGraphQLModule.forRootAsync<ApolloDriverConfig>({
+      driver: ApolloDriver,
       imports: [GraphQLConfigModule],
       useClass: GraphQLOptionsFactory,
     }),
