@@ -1,32 +1,35 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
-import { NodePolicyGraphQLObject } from './node-policy.object'
+import { ResourcePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/resource-policy.object'
 
 @ObjectType('Permissions', {
   description: 'Defines all user permissions for each entity in our domain',
 })
 export class PermissionsGraphQLObject {
-  @Field(() => NodePolicyGraphQLObject, { complexity: 0 })
-  public readonly user!: NodePolicyGraphQLObject
+  @Field(() => ResourcePolicyGraphQLObject, { complexity: 0 })
+  public readonly user!: ResourcePolicyGraphQLObject
 
-  @Field(() => NodePolicyGraphQLObject, { complexity: 0 })
-  public readonly team!: NodePolicyGraphQLObject
+  @Field(() => ResourcePolicyGraphQLObject, { complexity: 0 })
+  public readonly team!: ResourcePolicyGraphQLObject
 
-  @Field(() => NodePolicyGraphQLObject, { complexity: 0 })
-  public readonly cycle!: NodePolicyGraphQLObject
+  @Field(() => ResourcePolicyGraphQLObject, { complexity: 0 })
+  public readonly cycle!: ResourcePolicyGraphQLObject
 
-  @Field(() => NodePolicyGraphQLObject, { complexity: 0 })
-  public readonly objective!: NodePolicyGraphQLObject
+  @Field(() => ResourcePolicyGraphQLObject, { complexity: 0 })
+  public readonly objective!: ResourcePolicyGraphQLObject
 
-  @Field(() => NodePolicyGraphQLObject, { complexity: 0 })
-  public readonly keyResult!: NodePolicyGraphQLObject
+  @Field(() => ResourcePolicyGraphQLObject, { complexity: 0 })
+  public readonly keyResult!: ResourcePolicyGraphQLObject
 
-  @Field(() => NodePolicyGraphQLObject, { complexity: 0 })
-  public readonly keyResultCheckIn!: NodePolicyGraphQLObject
+  @Field(() => ResourcePolicyGraphQLObject, { complexity: 0 })
+  public readonly keyResultCheckIn!: ResourcePolicyGraphQLObject
 
-  @Field(() => NodePolicyGraphQLObject, { complexity: 0 })
-  public readonly keyResultComment!: NodePolicyGraphQLObject
+  @Field(() => ResourcePolicyGraphQLObject, { complexity: 0 })
+  public readonly keyResultComment!: ResourcePolicyGraphQLObject
 
-  @Field(() => NodePolicyGraphQLObject, { complexity: 0 })
-  public readonly keyResultCustomList!: NodePolicyGraphQLObject
+  @Field(() => ResourcePolicyGraphQLObject, { complexity: 0 })
+  public readonly keyResultCustomList!: ResourcePolicyGraphQLObject
+
+  @Field(() => ResourcePolicyGraphQLObject, { complexity: 0 })
+  public readonly workspace!: ResourcePolicyGraphQLObject
 }

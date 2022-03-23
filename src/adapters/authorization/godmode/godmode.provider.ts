@@ -59,6 +59,10 @@ export class GodmodeProvider implements GodmodePropertiesInterface {
       'key-result-check-mark:read:any',
       'key-result-check-mark:update:any',
       'key-result-check-mark:delete:any',
+      'workspace:create:any',
+      'workspace:read:any',
+      'workspace:update:any',
+      'workspace:delete:any',
     ]
   }
 

@@ -5,8 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e959aa6a-e82d-426c-b0f3-dc8939c6d5d2" name="Default Changelist" comment="feat(email): adds locale while creating a new user">
+<<<<<<< HEAD
+      <change afterPath="$PROJECT_DIR$/src/core/ports/commands/create-cycle.command.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/modules/cycle/cycle.provider.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/modules/cycle/cycle.provider.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/ports/commands/command.factory.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ports/commands/command.factory.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/workspace.resolver.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface/graphql/modules/workspace/workspace.resolver.ts" afterDir="false" />
+=======
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/core/ports/commands/get-key-result-check-in-delta.command.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ports/commands/get-key-result-check-in-delta.command.ts" afterDir="false" />
+>>>>>>> main
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,7 +24,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$" value="feature/create-cycle" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -49,7 +57,11 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+<<<<<<< HEAD
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/core/ports/commands" />
+=======
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../execution-mode" />
+>>>>>>> main
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.standard" value="true" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
@@ -66,10 +78,10 @@
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/core/ports/commands" />
+      <recent name="$PROJECT_DIR$/src/interface/graphql/modules/workspace" />
+      <recent name="$PROJECT_DIR$/src/interface/graphql/adapters/authorization/objects" />
       <recent name="$PROJECT_DIR$/src/interface/graphql/modules/user/setting/requests" />
       <recent name="$PROJECT_DIR$/src/core/modules/user/setting" />
-      <recent name="$PROJECT_DIR$/src/interface/graphql/modules/user/connections" />
-      <recent name="$PROJECT_DIR$/src/interface/graphql/modules/user/access-control" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/interface/graphql/modules/user" />
@@ -124,6 +136,11 @@
       <workItem from="1642698128834" duration="269000" />
       <workItem from="1643736295962" duration="3939000" />
       <workItem from="1643998170749" duration="85000" />
+<<<<<<< HEAD
+      <workItem from="1644258397962" duration="22000" />
+      <workItem from="1644258426656" duration="27000" />
+      <workItem from="1644258460262" duration="6380000" />
+=======
       <workItem from="1645409620086" duration="59000" />
       <workItem from="1645409688506" duration="55000" />
       <workItem from="1645409753769" duration="121000" />
@@ -137,6 +154,7 @@
       <workItem from="1645418953492" duration="48000" />
       <workItem from="1645555932552" duration="125000" />
       <workItem from="1645564874013" duration="14000" />
+>>>>>>> main
     </task>
     <task id="LOCAL-00001" summary="chore: updating env structure">
       <created>1637180757948</created>
