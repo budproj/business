@@ -1,11 +1,8 @@
 // Inspired by this example: https://gist.github.com/Ciantic/be6a8b8ca27ee15e2223f642b5e01549
 
+import { startInMemoryDatabase, closeConnection, repository } from '@tests/helpers/orm-connection'
+
 import { User, KeyResult } from './__tests-helpers__/external-entities'
-import {
-  startInMemoryDatabase,
-  closeConnection,
-  repository,
-} from './__tests-helpers__/orm-connection'
 import { CheckMarkStates } from './key-result-check-mark.interface'
 import { KeyResultCheckMark } from './key-result-check-mark.orm-entity'
 

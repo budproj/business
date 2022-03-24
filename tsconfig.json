@@ -16,6 +16,7 @@
       "@core/*": ["src/core/*"],
       "@interface/*": ["src/interface/*"],
       "@infrastructure/*": ["src/infrastructure/*"],
+      "@tests/*": ["tests/*"],
       "@lib/*": ["lib/*"]
     },
     "incremental": true,

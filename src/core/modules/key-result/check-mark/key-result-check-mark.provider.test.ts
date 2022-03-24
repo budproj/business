@@ -1,11 +1,12 @@
-import { User, KeyResult } from './__tests-helpers__/external-entities'
+import { TaskStates as CheckMarkStates } from '@core/modules/task/task.interface'
 import {
   closeConnection,
   repository,
   startInMemoryDatabase,
   testProvider,
-} from './__tests-helpers__/orm-connection'
-import { CheckMarkStates } from './key-result-check-mark.interface'
+} from '@tests/helpers/orm-connection'
+
+import { User, KeyResult } from './__tests-helpers__/external-entities'
 import { KeyResultCheckMark } from './key-result-check-mark.orm-entity'
 import { KeyResultCheckMarkProvider } from './key-result-check-mark.provider'
 import { KeyResultCheckMarkRepository } from './key-result-check-mark.repository'
