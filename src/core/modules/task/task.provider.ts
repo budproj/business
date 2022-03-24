@@ -29,6 +29,10 @@ export class TaskProvider extends CoreEntityProvider<Task, TaskInterface> {
     return this.update({ id }, { state: TaskStates.UNCHECKED })
   }
 
+  public async updateDescription(id: string, description: string): Promise<Task> {
+    return this.update({ id }, { description })
+  }
+
   public async deleteTaskById(id: string): Promise<DeleteResult> {
     return this.delete({ id })
   }
@@ -39,10 +43,6 @@ export class TaskProvider extends CoreEntityProvider<Task, TaskInterface> {
 
   public async getAllTasks(assignedUserId: string): Promise<Task[]> {
     return this.getMany({ assignedUserId })
-  }
-
-  public async deleteAllTasksFromUser(assignedUserId: string): Promise<DeleteResult> {
-    return this.delete({ assignedUserId })
   }
 
   protected async protectCreationQuery(
