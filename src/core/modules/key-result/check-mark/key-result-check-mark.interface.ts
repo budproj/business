@@ -1,17 +1,9 @@
-import { CoreEntityInterface } from '@core/core-entity.interface'
+import { TaskInterface, TaskStates } from '@core/modules/task/task.interface'
 
-export enum CheckMarkStates {
-  CHECKED = 'checked',
-  UNCHECKED = 'unchecked',
-}
-
-export interface KeyResultCheckMarkInterface extends CoreEntityInterface {
-  state: CheckMarkStates
-  description: string
-  updatedAt: Date
-  keyResultId: string
+export type CheckMarkStates = TaskStates
+export const CheckMarkStates = { ...TaskStates }
+export interface KeyResultCheckMarkInterface extends TaskInterface {
   assignedUserId: string
-  userId: string
 }
 
 export type CheckList = KeyResultCheckMarkInterface[]

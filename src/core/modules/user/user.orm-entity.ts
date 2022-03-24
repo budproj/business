@@ -5,6 +5,7 @@ import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key
 import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
+import { TaskInterface } from '@core/modules/task/task.interface'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserSettingInterface } from '@core/modules/user/setting/user-setting.interface'
 
@@ -78,4 +79,7 @@ export class User extends CoreEntity implements UserInterface {
 
   @OneToMany('KeyResultCheckMark', 'assignedUser', { nullable: true })
   public keyResultAssignedCheckMarks?: KeyResultCheckMarkInterface[]
+
+  @OneToMany('Task', 'user', { nullable: true })
+  public tasks?: TaskInterface[]
 }
