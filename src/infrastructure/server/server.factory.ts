@@ -43,10 +43,6 @@ export class ServerFactory {
 
     application.setGlobalPrefix(config.prefix ?? '')
     application.useLogger(logger)
-    application.enableCors({
-      credentials: config.cors.credentialsEnabled,
-      origin: config.cors.allowedOrigins,
-    })
 
     await this.launchServer(application, logger, config)
   }

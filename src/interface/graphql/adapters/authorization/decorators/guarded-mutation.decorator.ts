@@ -7,7 +7,7 @@ import { Action } from '@adapters/policy/types/action.type'
 import { GuardedGraphQLRequest } from './guarded-graphql-request.decorator'
 
 export function GuardedMutation(
-  GraphQLObject: Class,
+  GraphQLObject: Class<any>,
   actions: Action[] | Action,
   mutationOptions: MutationOptions,
 ) {

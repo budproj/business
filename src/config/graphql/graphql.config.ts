@@ -26,5 +26,10 @@ export const graphqlConfig = registerAs(
     schema: {
       filePath: process.env.GRAPHQL_SCHEMA_FILE_PATH,
     },
+
+    cors: {
+      credentialsEnabled: process.env.GRAPHQL_CORS_CREDENTIALS_ENABLED === 'true',
+      allowedOrigins: process.env.GRAPHQL_CORS_ALLOWED_ORIGINS?.split(','),
+    },
   }),
 )
