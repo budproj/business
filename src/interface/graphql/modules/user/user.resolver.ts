@@ -51,6 +51,10 @@ import { UserDeactivateRequest } from './requests/user-deactivate.request'
 import { UserKeyResultsRequest } from './requests/user-key-results.request'
 import { UserUpdateRequest } from './requests/user-update.request'
 import { UserGraphQLNode } from './user.node'
+import { UserTasksGraphQLConnection } from './connections/user-tasks/user-tasks.connection'
+import { Task } from '@core/modules/task/task.orm-entity'
+import { TaskInterface } from '@core/modules/task/task.interface'
+import { UserTasksRequest } from './task/requests/user-tasks.request'
 
 @GuardedResolver(UserGraphQLNode)
 export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserInterface> {
@@ -368,6 +372,28 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     )
 
     return this.relay.marshalResponse<KeyResultCheckInInterface>(queryResult, connection, user)
+  }
+
+  @ResolveField('tasks', () => UserTasksGraphQLConnection, { nullable: true })
+  protected async getTasksForRequestAndUser(
+    @Args() request: UserTasksRequest,
+    @Parent() user: UserGraphQLNode,
+  ) {
+    this.logger.log({
+      user,
+      request,
+      message: 'Fetching tasks for user',
+    })
+
+    const [options, _, connection] = this.relay.unmarshalRequest<UserTasksRequest, Task>(request)
+
+    const queryResult = await this.corePorts.dispatchCommand<Task[]>(
+      'get-tasks-from-user',
+      user.id,
+      options,
+    )
+
+    return this.relay.marshalResponse<TaskInterface>(queryResult, connection, user)
   }
 
   @ResolveField('settings', () => UserSettingsGraphQLConnection, {

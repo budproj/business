@@ -171,7 +171,7 @@ export type CommandType =
   | 'delete-task'
   | 'toggle-task'
   | 'update-task-description'
-  | 'get-task-from-user'
+  | 'get-tasks-from-user'
 
 @Injectable()
 export class CommandFactory {
@@ -258,7 +258,7 @@ export class CommandFactory {
     'delete-task': DeleteTaskCommand,
     'toggle-task': ToggleTaskCommand,
     'update-task-description': UpdateTaskDescriptionCommand,
-    'get-task-from-user': GetTasksFromUserCommand,
+    'get-tasks-from-user': GetTasksFromUserCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}

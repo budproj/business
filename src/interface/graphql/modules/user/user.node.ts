@@ -11,6 +11,7 @@ import { UserKeyResultCheckInsGraphQLConnection } from './connections/user-key-r
 import { UserKeyResultCommentsGraphQLConnection } from './connections/user-key-result-comments/user-key-result-comments.connection'
 import { UserKeyResultsGraphQLConnection } from './connections/user-key-results/user-key-results.connection'
 import { UserObjectivesGraphQLConnection } from './connections/user-objectives/user-objectives.connection'
+import { UserTasksGraphQLConnection } from './connections/user-tasks/user-tasks.connection'
 import { UserTeamsGraphQLConnection } from './connections/user-teams/user-teams.connection'
 import { UserGenderGraphQLEnum } from './enums/user-gender.enum'
 import { UserStatusGraphQLEnum } from './enums/user-status.enum'
@@ -133,6 +134,13 @@ export class UserGraphQLNode implements GuardedNodeGraphQLInterface {
     description: 'The creation date ordered list of key result check-ins created by this user',
   })
   public readonly keyResultCheckIns?: UserKeyResultCheckInsGraphQLConnection
+
+  @Field(() => UserTasksGraphQLConnection, {
+    complexity: 0,
+    nullable: true,
+    description: 'A list of tasks that this user has created, ordered by creation date',
+  })
+  public readonly tasks?: UserTasksGraphQLConnection
 
   @Field(() => UserSettingsGraphQLConnection, {
     complexity: 0,
