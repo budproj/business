@@ -3,7 +3,6 @@ import { DeleteResult } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
-import { UserProvider } from '@core/modules/user/user.provider'
 import { CreationQuery } from '@core/types/creation-query.type'
 
 import { TaskInterface, TaskStates } from './task.interface'
@@ -12,10 +11,7 @@ import { TaskRepository } from './task.repository'
 
 @Injectable()
 export class TaskProvider extends CoreEntityProvider<Task, TaskInterface> {
-  constructor(
-    protected readonly repository: TaskRepository,
-    protected readonly user: UserProvider,
-  ) {
+  constructor(protected readonly repository: TaskRepository) {
     super(TaskProvider.name, repository)
   }
 
