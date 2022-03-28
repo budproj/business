@@ -11,10 +11,8 @@ export class GetTasksFromUserCommand extends Command<Task[]> {
   public async execute(userId: User['id'], options?: Options): Promise<Task[]> {
     const shouldGetOnlyUnchecked = options?.onlyUnchecked ?? false
 
-    const queryToExecute = shouldGetOnlyUnchecked
-      ? this.core.task.getAllTasks
-      : this.core.task.getAllUncheckedTasks
-
-    return queryToExecute(userId)
+    return shouldGetOnlyUnchecked
+      ? this.core.task.getAllUncheckedTasks(userId)
+      : this.core.task.getAllTasks(userId)
   }
 }

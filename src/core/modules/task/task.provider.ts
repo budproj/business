@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common/decorators'
 import { DeleteResult } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
@@ -9,6 +10,7 @@ import { TaskInterface, TaskStates } from './task.interface'
 import { Task } from './task.orm-entity'
 import { TaskRepository } from './task.repository'
 
+@Injectable()
 export class TaskProvider extends CoreEntityProvider<Task, TaskInterface> {
   constructor(
     protected readonly repository: TaskRepository,

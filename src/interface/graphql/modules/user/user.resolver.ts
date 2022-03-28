@@ -15,6 +15,8 @@ import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-resu
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
+import { TaskInterface } from '@core/modules/task/task.interface'
+import { Task } from '@core/modules/task/task.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { EmailAlreadyExistsException } from '@core/modules/user/exceptions/email-already-exists.exception'
@@ -44,17 +46,15 @@ import { UserKeyResultCheckInsGraphQLConnection } from './connections/user-key-r
 import { UserKeyResultCommentsGraphQLConnection } from './connections/user-key-result-comments/user-key-result-comments.connection'
 import { UserKeyResultsGraphQLConnection } from './connections/user-key-results/user-key-results.connection'
 import { UserObjectivesGraphQLConnection } from './connections/user-objectives/user-objectives.connection'
+import { UserTasksGraphQLConnection } from './connections/user-tasks/user-tasks.connection'
 import { UserTeamsGraphQLConnection } from './connections/user-teams/user-teams.connection'
 import { EmailAlreadyExistsApolloError } from './exceptions/email-already-exists.exception'
 import { UserCreateRequest } from './requests/user-create.request'
 import { UserDeactivateRequest } from './requests/user-deactivate.request'
 import { UserKeyResultsRequest } from './requests/user-key-results.request'
 import { UserUpdateRequest } from './requests/user-update.request'
-import { UserGraphQLNode } from './user.node'
-import { UserTasksGraphQLConnection } from './connections/user-tasks/user-tasks.connection'
-import { Task } from '@core/modules/task/task.orm-entity'
-import { TaskInterface } from '@core/modules/task/task.interface'
 import { UserTasksRequest } from './task/requests/user-tasks.request'
+import { UserGraphQLNode } from './user.node'
 
 @GuardedResolver(UserGraphQLNode)
 export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserInterface> {
