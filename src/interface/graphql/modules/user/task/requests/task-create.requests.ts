@@ -5,7 +5,7 @@ import { ConnectionFiltersRequest } from '@interface/graphql/requests/connection
 @ArgsType()
 export class TaskCreateRequest extends ConnectionFiltersRequest {
   @Field({
-    nullable: true,
+    nullable: false,
     description: 'The description of the task being created',
   })
   description: string
