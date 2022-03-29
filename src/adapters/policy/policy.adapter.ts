@@ -26,6 +26,7 @@ export class PolicyAdapter {
     Resource.KEY_RESULT_CHECK_IN,
     Resource.KEY_RESULT_COMMENT,
     Resource.WORKSPACE,
+    Resource.USER_TASK,
   ]
 
   static drillUp<T extends string = string>(value: string): T {
