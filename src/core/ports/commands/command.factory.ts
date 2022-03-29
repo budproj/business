@@ -70,6 +70,7 @@ import { GetKeyResultTeamTreeCommand } from './get-key-result-team-tree.command'
 import { GetKeyResultCommand } from './get-key-result.command'
 import { GetKeyResultsContainingUserChecklistCommand } from './get-key-results-containing-user-checklist'
 import { GetObjectiveKeyResultsCommand } from './get-objective-key-results.command'
+import { GetTaskByIdCommand } from './get-task-by-id.command'
 import { GetTasksFromUserCommand } from './get-tasks-from-user.command'
 import { GetTeamCompanyCommand } from './get-team-company.command'
 import { GetTeamMembersCommand } from './get-team-members.command'
@@ -172,6 +173,7 @@ export type CommandType =
   | 'toggle-task'
   | 'update-task-description'
   | 'get-tasks-from-user'
+  | 'get-task-by-id'
 
 @Injectable()
 export class CommandFactory {
@@ -259,6 +261,7 @@ export class CommandFactory {
     'toggle-task': ToggleTaskCommand,
     'update-task-description': UpdateTaskDescriptionCommand,
     'get-tasks-from-user': GetTasksFromUserCommand,
+    'get-task-by-id': GetTaskByIdCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}

@@ -43,6 +43,10 @@ export class TaskProvider extends CoreEntityProvider<Task, TaskInterface> {
     return this.getMany({ assignedUserId })
   }
 
+  public async getTaskById(id: string): Promise<Task> {
+    return this.getOne({ id })
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<Task>,
     _data: Partial<TaskInterface>,
