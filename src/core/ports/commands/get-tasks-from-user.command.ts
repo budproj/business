@@ -1,3 +1,4 @@
+import { GetOptions } from '@core/interfaces/get-options'
 import { Task } from '@core/modules/task/task.orm-entity'
 import { User } from '@core/modules/user/user.orm-entity'
 
@@ -8,11 +9,15 @@ export interface Options {
 }
 
 export class GetTasksFromUserCommand extends Command<Task[]> {
-  public async execute(userId: User['id'], options?: Options): Promise<Task[]> {
+  public async execute(
+    userId: User['id'],
+    options?: Options,
+    getOptions?: GetOptions<Task>,
+  ): Promise<Task[]> {
     const shouldGetOnlyUnchecked = options?.onlyUnchecked ?? false
 
     return shouldGetOnlyUnchecked
-      ? this.core.task.getAllUncheckedTasks(userId)
-      : this.core.task.getAllTasks(userId)
+      ? this.core.task.getAllUncheckedTasks(userId, getOptions)
+      : this.core.task.getAllTasks(userId, getOptions)
   }
 }

@@ -3,6 +3,7 @@ import { DeleteResult } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
+import { GetOptions } from '@core/interfaces/get-options'
 import { CreationQuery } from '@core/types/creation-query.type'
 
 import { TaskInterface, TaskStates } from './task.interface'
@@ -35,12 +36,15 @@ export class TaskProvider extends CoreEntityProvider<Task, TaskInterface> {
     return this.delete({ id })
   }
 
-  public async getAllUncheckedTasks(assignedUserId: string): Promise<Task[]> {
-    return this.getMany({ assignedUserId, state: TaskStates.UNCHECKED })
+  public async getAllUncheckedTasks(
+    assignedUserId: string,
+    getOptions: GetOptions<Task>,
+  ): Promise<Task[]> {
+    return this.getMany({ assignedUserId, state: TaskStates.UNCHECKED }, undefined, getOptions)
   }
 
-  public async getAllTasks(assignedUserId: string): Promise<Task[]> {
-    return this.getMany({ assignedUserId })
+  public async getAllTasks(assignedUserId: string, getOptions: GetOptions<Task>): Promise<Task[]> {
+    return this.getMany({ assignedUserId }, undefined, getOptions)
   }
 
   public async getTaskById(id: string): Promise<Task> {

@@ -385,12 +385,15 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching tasks for user',
     })
 
-    const [options, _, connection] = this.relay.unmarshalRequest<UserTasksRequest, Task>(request)
+    const [options, getOptions, connection] = this.relay.unmarshalRequest<UserTasksRequest, Task>(
+      request,
+    )
 
     const queryResult = await this.corePorts.dispatchCommand<Task[]>(
       'get-tasks-from-user',
       user.id,
       options,
+      getOptions,
     )
 
     return this.relay.marshalResponse<TaskInterface>(queryResult, connection, user)
