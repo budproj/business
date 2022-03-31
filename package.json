@@ -68,6 +68,8 @@
     "@nestjs/passport": "^8.2.1",
     "@nestjs/platform-fastify": "^8.4.2",
     "@nestjs/typeorm": "^8.0.3",
+    "@sentry/node": "^6.19.3",
+    "@sentry/tracing": "^6.19.3",
     "@types/lodash": "^4.14.180",
     "@types/passport-jwt": "^3.0.6",
     "apollo-server-core": "^3.6.5",
