@@ -103,3 +103,10 @@ spec:
               value: keyResult
             - name: TASKS_NATS_SERVERS
               value: nats.nats.svc.cluster.local:4222
+            - name: SENTRY_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: business-canary
+                  key: sentry-dsn
+            - name: SENTRY_SAMPLE_RATE
+              value: '1'
