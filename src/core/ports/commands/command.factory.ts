@@ -46,10 +46,12 @@ import { Command } from './base.command'
 import { CreateCheckMarkCommand } from './create-check-mark.command'
 import { CreateKeyResultCheckInCommand } from './create-key-result-check-in.command'
 import { CreateKeyResultCommentCommand } from './create-key-result-comment.command'
+import { CreateTaskCommand } from './create-task.command'
 import { CreateTeamCommand } from './create-team.command'
 import { CreateUserCommand } from './create-user.command'
 import { DeactivateUserCommand } from './deactivate-user.command'
 import { DeleteCheckMarkCommand } from './delete-check-mark.command'
+import { DeleteTaskCommand } from './delete-task.command'
 import { GetCheckListForKeyResultCommand } from './get-check-list-for-key-result.command'
 import { GetCheckListProgressCommand } from './get-check-list-progress.command'
 import { GetCheckListOfUserCommand } from './get-checklist-of-user'
@@ -68,6 +70,8 @@ import { GetKeyResultTeamTreeCommand } from './get-key-result-team-tree.command'
 import { GetKeyResultCommand } from './get-key-result.command'
 import { GetKeyResultsContainingUserChecklistCommand } from './get-key-results-containing-user-checklist'
 import { GetObjectiveKeyResultsCommand } from './get-objective-key-results.command'
+import { GetTaskByIdCommand } from './get-task-by-id.command'
+import { GetTasksFromUserCommand } from './get-tasks-from-user.command'
 import { GetTeamCompanyCommand } from './get-team-company.command'
 import { GetTeamMembersCommand } from './get-team-members.command'
 import { GetTeamOwnerCommand } from './get-team-owner.command'
@@ -77,8 +81,10 @@ import { GetUsersByIdsCommand } from './get-users-by-ids.command'
 import { RemoveTeamFromUserCommand } from './remove-team-from-user.command'
 import { RemoveUserToKeyResultSupportTeamCommand } from './remove-user-to-key-result-support-team.command'
 import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
+import { ToggleTaskCommand } from './toggle-task.command'
 import { UpdateCheckMarkAssigneeCommand } from './update-check-mark-assignee.command'
 import { UpdateCheckMarkDescriptionCommand } from './update-check-mark-description.command'
+import { UpdateTaskDescriptionCommand } from './update-task-description.command'
 import { UpdateTeamCommand } from './update-team.command'
 import { UpdateUserCommand } from './update-user.command'
 
@@ -162,6 +168,12 @@ export type CommandType =
   | 'update-user'
   | 'update-user-setting'
   | 'create-cycle'
+  | 'create-task'
+  | 'delete-task'
+  | 'toggle-task'
+  | 'update-task-description'
+  | 'get-tasks-from-user'
+  | 'get-task-by-id'
 
 @Injectable()
 export class CommandFactory {
@@ -244,6 +256,12 @@ export class CommandFactory {
     'update-team': UpdateTeamCommand,
     'update-user': UpdateUserCommand,
     'update-user-setting': UpdateUserSettingCommand,
+    'create-task': CreateTaskCommand,
+    'delete-task': DeleteTaskCommand,
+    'toggle-task': ToggleTaskCommand,
+    'update-task-description': UpdateTaskDescriptionCommand,
+    'get-tasks-from-user': GetTasksFromUserCommand,
+    'get-task-by-id': GetTaskByIdCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}

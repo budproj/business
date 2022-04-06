@@ -11,12 +11,14 @@ import { UserKeyResultsConnectionGraphQLResolver } from './connections/user-key-
 import { UserObjectivesConnectionGraphQLResolver } from './connections/user-objectives/user-objectives.resolver'
 import { UserTeamsConnectionGraphQLResolver } from './connections/user-teams/user-teams.resolver'
 import { UsersConnectionGraphQLResolver } from './connections/users/users.resolver'
+import { TaskGraphQLResolver } from './task/task.resolver'
 import { UserGraphQLResolver } from './user.resolver'
 
 @Module({
   imports: [CoreModule, AWSModule, GraphQLConfigModule],
   providers: [
     UserGraphQLResolver,
+    TaskGraphQLResolver,
     UserSettingGraphQLResolver,
     UsersConnectionGraphQLResolver,
     UserTeamsConnectionGraphQLResolver,
