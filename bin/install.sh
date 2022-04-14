@@ -76,10 +76,6 @@ check_env_file () {
     echo ".env file exists, skipping"
   fi
   echo
-
-  cat ./conf/$1 | while read line; do
-    $line
-  done
 }
 
 run_docker_compose () {
