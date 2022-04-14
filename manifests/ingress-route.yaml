@@ -24,4 +24,5 @@ spec:
           port: 80
   tls:
     certResolver: letsencrypt
-    options: {}
+    options:
+      minVersion: VersionTLS12
