@@ -206,6 +206,10 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     await this.repository.removeUserFromTeam(userID, teamID)
   }
 
+  public async getUserCompaniesTeams(companyIDs: string[]) {
+    return this.getTeamNodesTreeAfterTeam(companyIDs)
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<Team>,
     _data: Partial<TeamInterface>,
@@ -223,10 +227,6 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     const companyIDs = companies.map((company) => company.id)
 
     return this.getChildren(companyIDs, filters, options)
-  }
-
-  private async getUserCompaniesTeams(companyIDs: string[]) {
-    return this.getTeamNodesTreeAfterTeam(companyIDs)
   }
 
   private async getNodesFromTeams(

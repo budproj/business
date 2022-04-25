@@ -79,6 +79,31 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return this.repository.removeUserToSupportTeam(keyResultId, userId)
   }
 
+  public async getKeyResultsQuantity(teamsIds: Array<TeamInterface['id']>) {
+    return this.repository.count({ where: { teamId: In(teamsIds) } })
+  }
+
+  public async getConfidenceKeyResultsQuantity(teamsIds: Array<TeamInterface['id']>) {
+    const keyResults = await this.repository.find({ where: { teamId: In(teamsIds) } })
+
+    const confidences = Promise.all(
+      keyResults.map(async (keyResult) => {
+        const checkIn = await this.keyResultCheckInProvider.getLatestFromKeyResult(keyResult)
+        if (checkIn) {
+          return checkIn.confidence
+        }
+
+        return 100
+      }),
+    )
+    return {
+      highConfidence: (await confidences).filter((element) => element === 100).length,
+      mediumConfidence: (await confidences).filter((element) => element === 66).length,
+      lowConfidence: (await confidences).filter((element) => element === 32).length,
+      barrier: (await confidences).filter((element) => element === -1).length,
+    }
+  }
+
   public async getFromTeams(
     teams: Partial<TeamInterface> | Array<Partial<TeamInterface>>,
     filters?: FindConditions<KeyResult>,

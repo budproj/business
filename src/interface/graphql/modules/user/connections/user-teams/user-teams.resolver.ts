@@ -1,5 +1,5 @@
 import { Logger, UnauthorizedException } from '@nestjs/common'
-import { Args } from '@nestjs/graphql'
+import { Args, ResolveField } from '@nestjs/graphql'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
@@ -16,6 +16,7 @@ import { RequestUserWithContext } from '@interface/graphql/adapters/context/deco
 import { UserAccessControl } from '../../user.access-control'
 import { UserGraphQLNode } from '../../user.node'
 
+import { QuantityNode } from './requests/quantity-request'
 import { TeamAndUserRequest } from './requests/team-and-user.request'
 import { UserTeamsGraphQLConnection } from './user-teams.connection'
 
@@ -66,5 +67,18 @@ export class UserTeamsConnectionGraphQLResolver extends GuardedConnectionGraphQL
     if (!canUpdate) throw new UnauthorizedException()
 
     return this.corePorts.dispatchCommand<User>('remove-team-from-user', request)
+  }
+
+  @ResolveField('quantities', () => QuantityNode)
+  protected async quantities(@RequestUserWithContext() userWithContext: UserWithContext) {
+    this.logger.log({
+      userWithContext,
+      message: 'Quantities of the company',
+    })
+
+    return this.corePorts.dispatchCommand(
+      'get-objectives-and-key-results-quantities',
+      userWithContext,
+    )
   }
 }
