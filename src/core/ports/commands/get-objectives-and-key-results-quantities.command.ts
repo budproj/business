@@ -8,16 +8,18 @@ export class GetObjectivesAndKeyResultQuantities extends Command<any> {
 
     const userReachableTeamsIds = userReachableTeams.map((team) => team.id)
 
-    const keyResultsQuantity = await this.core.keyResult.getKeyResultsQuantity(
-      userReachableTeamsIds,
-    )
-    const objectivesQuantity = await this.core.objective.getObjectivesQuantity(
-      userReachableTeamsIds,
-    )
+    const keyResultsQuantityPromise =
+      this.core.keyResult.getActiveKeyResultsQuantity(userReachableTeamsIds)
+    const objectivesQuantityPromise =
+      this.core.objective.getObjectivesQuantity(userReachableTeamsIds)
+    const confidencesPromise =
+      this.core.keyResult.getActiveConfidenceKeyResultsQuantity(userReachableTeamsIds)
 
-    const confidences = await this.core.keyResult.getConfidenceKeyResultsQuantity(
-      userReachableTeamsIds,
-    )
+    const [keyResultsQuantity, objectivesQuantity, confidences] = await Promise.all([
+      keyResultsQuantityPromise,
+      objectivesQuantityPromise,
+      confidencesPromise,
+    ])
 
     return {
       keyResultsQuantity,

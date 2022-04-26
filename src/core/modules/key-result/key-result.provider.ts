@@ -22,6 +22,7 @@ import { KeyResultCheckMarkProvider } from './check-mark/key-result-check-mark.p
 import { KeyResultCommentInterface } from './comment/key-result-comment.interface'
 import { KeyResultComment } from './comment/key-result-comment.orm-entity'
 import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
+import { KeyResultConfidenceValue } from './enums/key-result-confidence.enum'
 import { KeyResultInterface } from './interfaces/key-result.interface'
 import { KeyResult } from './key-result.orm-entity'
 import { KeyResultRelationFilterProperties, KeyResultRepository } from './key-result.repository'
@@ -79,28 +80,53 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return this.repository.removeUserToSupportTeam(keyResultId, userId)
   }
 
-  public async getKeyResultsQuantity(teamsIds: Array<TeamInterface['id']>) {
-    return this.repository.count({ where: { teamId: In(teamsIds) } })
+  public async getActiveKeyResultsQuantity(teamsIds: Array<TeamInterface['id']>) {
+    return this.repository.count({
+      relations: ['objective', 'objective.cycle'],
+      where: {
+        teamId: In(teamsIds),
+        objective: {
+          cycle: {
+            active: true,
+          },
+        },
+      },
+    })
   }
 
-  public async getConfidenceKeyResultsQuantity(teamsIds: Array<TeamInterface['id']>) {
-    const keyResults = await this.repository.find({ where: { teamId: In(teamsIds) } })
+  public async getActiveConfidenceKeyResultsQuantity(teamsIds: Array<TeamInterface['id']>) {
+    const keyResults = await this.repository.find({
+      relations: ['objective', 'objective.cycle'],
+      where: {
+        teamId: In(teamsIds),
+        objective: {
+          cycle: {
+            active: true,
+          },
+        },
+      },
+    })
 
-    const confidences = Promise.all(
+    const highConfidenceDefaultValue = KeyResultConfidenceValue.HIGH
+
+    const confidences = await Promise.all(
       keyResults.map(async (keyResult) => {
         const checkIn = await this.keyResultCheckInProvider.getLatestFromKeyResult(keyResult)
         if (checkIn) {
           return checkIn.confidence
         }
 
-        return 100
+        return highConfidenceDefaultValue
       }),
     )
     return {
-      highConfidence: (await confidences).filter((element) => element === 100).length,
-      mediumConfidence: (await confidences).filter((element) => element === 66).length,
-      lowConfidence: (await confidences).filter((element) => element === 32).length,
-      barrier: (await confidences).filter((element) => element === -1).length,
+      highConfidence: confidences.filter((element) => element === KeyResultConfidenceValue.HIGH)
+        .length,
+      mediumConfidence: confidences.filter((element) => element === KeyResultConfidenceValue.MEDIUM)
+        .length,
+      lowConfidence: confidences.filter((element) => element === KeyResultConfidenceValue.LOW)
+        .length,
+      barrier: confidences.filter((element) => element === KeyResultConfidenceValue.BARRIER).length,
     }
   }
 

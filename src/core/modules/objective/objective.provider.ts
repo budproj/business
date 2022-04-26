@@ -40,7 +40,6 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
   }
 
   public async getObjectivesQuantity(teamsIds: Array<TeamInterface['id']>) {
-    console.log(await this.repository.find({ where: { teamId: In(teamsIds) } }))
     return this.repository.count({ where: { teamId: In(teamsIds) } })
   }
 
