@@ -42,6 +42,45 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     super(KeyResultProvider.name, repository)
   }
 
+  public async getKeyResults(
+    teamsIds: Array<TeamInterface['id']>,
+    filters?: FindConditions<KeyResult>,
+    options?: GetOptions<KeyResult>,
+    active = true,
+    confidence?: KeyResultConfidenceValue,
+  ): Promise<KeyResult[]> {
+    const queryOptions = this.repository.marshalGetOptions(options)
+    const whereSelector = {
+      ...filters,
+      teamId: In(teamsIds),
+      objective: {
+        cycle: {
+          active: active ? true : undefined,
+        },
+      },
+    }
+
+    const keyResults = await this.repository.find({
+      ...queryOptions,
+      where: whereSelector,
+      relations: active ? ['objective', 'objective.cycle', 'checkIns'] : undefined,
+    })
+
+    if (confidence) {
+      console.log({ confidence })
+      return keyResults.filter((keyResult) => {
+        const latestCheckIn = keyResult.checkIns[keyResult.checkIns.length - 1]
+        if (!latestCheckIn) {
+          return confidence === 100
+        }
+
+        return latestCheckIn.confidence === confidence
+      })
+    }
+
+    return keyResults
+  }
+
   public async getFromOwner(
     user: UserInterface,
     filters?: FindConditions<KeyResult>,
