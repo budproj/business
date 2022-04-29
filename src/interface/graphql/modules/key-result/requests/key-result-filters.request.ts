@@ -21,4 +21,18 @@ export class KeyResultFiltersRequest extends ConnectionFiltersRequest {
     description: 'Define the expected order for our key-result edges',
   })
   public order?: DefaultOrderGraphQLInput
+
+  // @Field(() => Boolean, {
+  //   description: 'Define if the query user wants only active or all key results',
+  //   nullable: true,
+  //   defaultValue: true,
+  // })
+  // public active?: boolean
+
+  // @Field(() => Number, {
+  //   description: 'Define the confidence of the key results',
+  //   nullable: true,
+  //   defaultValue: undefined,
+  // })
+  // public confidence?: number
 }
