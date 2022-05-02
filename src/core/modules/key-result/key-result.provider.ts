@@ -68,7 +68,13 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
     if (typeof confidence === 'number') {
       const keyResultsWithConfidence = keyResults.filter((keyResult) => {
-        const latestCheckIn = keyResult.checkIns[keyResult.checkIns.length - 1]
+        console.log('------------------')
+        console.log({ keyResult })
+        console.log('------------------')
+        const checkins = keyResult.checkIns.sort(
+          (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+        )
+        const latestCheckIn = checkins[keyResult.checkIns.length - 1]
         if (!latestCheckIn) {
           return confidence === 100
         }
