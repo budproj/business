@@ -30,6 +30,10 @@ export class ConfidenceTagAdapter {
     return CONFIDENCE_TAG_BACKGROUND_COLORS[confidenceTag]
   }
 
+  public getConfidenceFromTag(confidence: ConfidenceTag): number {
+    return CONFIDENCE_TAG_THRESHOLDS[confidence]
+  }
+
   private getConfidenceTagIndexFromConfidence(confidence: number): number {
     const confidenceTag = this.getTagForConfidence(confidence)
 

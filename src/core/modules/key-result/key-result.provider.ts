@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common'
-import { uniqBy, pickBy, omitBy, identity, isEmpty } from 'lodash'
+import { uniqBy, pickBy, omitBy, identity, isEmpty, maxBy } from 'lodash'
 import { Any, DeleteResult, FindConditions, In } from 'typeorm'
 
+import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
+import { DEFAULT_CONFIDENCE } from '@adapters/confidence-tag/confidence-tag.constants'
+import { ConfidenceTag } from '@adapters/confidence-tag/confidence-tag.enum'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
@@ -31,6 +34,8 @@ import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
 
 @Injectable()
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
+  private readonly confidenceTagAdapter = new ConfidenceTagAdapter()
+
   constructor(
     public readonly keyResultCommentProvider: KeyResultCommentProvider,
     public readonly keyResultCheckMarkProvider: KeyResultCheckMarkProvider,
@@ -47,7 +52,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     filters?: FindConditions<KeyResult>,
     options?: GetOptions<KeyResult>,
     active = true,
-    confidence?: KeyResultConfidenceValue,
+    confidence?: ConfidenceTag,
   ): Promise<KeyResult[]> {
     const queryOptions = this.repository.marshalGetOptions(options)
     const whereSelector = {
@@ -60,26 +65,31 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       },
     }
 
+    const relations = []
+
+    if (active) {
+      relations.push('objective', 'objective.cycle')
+    }
+
+    if (confidence) {
+      relations.push('checkIns')
+    }
+
     const keyResults = await this.repository.find({
       ...queryOptions,
       where: whereSelector,
-      relations: active ? ['objective', 'objective.cycle', 'checkIns'] : undefined,
+      relations,
     })
 
-    if (typeof confidence === 'number') {
+    if (confidence) {
+      const confidenceNumber = this.confidenceTagAdapter.getConfidenceFromTag(confidence)
       const keyResultsWithConfidence = keyResults.filter((keyResult) => {
-        console.log('------------------')
-        console.log({ keyResult })
-        console.log('------------------')
-        const checkins = keyResult.checkIns.sort(
-          (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
-        )
-        const latestCheckIn = checkins[keyResult.checkIns.length - 1]
-        if (!latestCheckIn) {
-          return confidence === 100
+        const latestCheckin = maxBy(keyResult.checkIns, 'createdAt')
+        if (!latestCheckin) {
+          return confidenceNumber === DEFAULT_CONFIDENCE
         }
 
-        return latestCheckIn.confidence === confidence
+        return latestCheckin.confidence === confidenceNumber
       })
 
       return keyResultsWithConfidence
@@ -166,12 +176,9 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       }),
     )
     return {
-      highConfidence: confidences.filter((element) => element === KeyResultConfidenceValue.HIGH)
-        .length,
-      mediumConfidence: confidences.filter((element) => element === KeyResultConfidenceValue.MEDIUM)
-        .length,
-      lowConfidence: confidences.filter((element) => element === KeyResultConfidenceValue.LOW)
-        .length,
+      high: confidences.filter((element) => element === KeyResultConfidenceValue.HIGH).length,
+      medium: confidences.filter((element) => element === KeyResultConfidenceValue.MEDIUM).length,
+      low: confidences.filter((element) => element === KeyResultConfidenceValue.LOW).length,
       barrier: confidences.filter((element) => element === KeyResultConfidenceValue.BARRIER).length,
     }
   }

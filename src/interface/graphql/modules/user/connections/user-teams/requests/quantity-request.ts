@@ -9,13 +9,13 @@ export class QuantityNode {
   public readonly objectivesQuantity: number
 
   @Field(() => Number)
-  public readonly highConfidence: number
+  public readonly high: number
 
   @Field(() => Number)
-  public readonly mediumConfidence: number
+  public readonly medium: number
 
   @Field(() => Number)
-  public readonly lowConfidence: number
+  public readonly low: number
 
   @Field(() => Number)
   public readonly barrier: number

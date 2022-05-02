@@ -1,5 +1,6 @@
-import { ArgsType, Field, ID, Int } from '@nestjs/graphql'
+import { ArgsType, Field, ID } from '@nestjs/graphql'
 
+import { ConfidenceTag } from '@adapters/confidence-tag/confidence-tag.enum'
 import { SortingGraphQLEnum } from '@interface/graphql/enums/sorting.enum'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DefaultOrderGraphQLInput } from '@interface/graphql/objects/default-order.object'
@@ -29,9 +30,9 @@ export class KeyResultFiltersRequest extends ConnectionFiltersRequest {
   })
   public active?: boolean
 
-  @Field(() => Int, {
+  @Field(() => String, {
     description: 'Define the confidence of the key results',
     nullable: true,
   })
-  public confidence?: number
+  public confidence?: ConfidenceTag
 }
