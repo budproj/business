@@ -343,22 +343,30 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   @ResolveField('keyResults', () => TeamKeyResultsGraphQLConnection, { nullable: true })
   protected async getKeyResultsForTeam(
     @Args() request: KeyResultFiltersRequest,
-    @Parent() team: TeamGraphQLNode,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
-      team,
+      userWithContext,
       request,
       message: 'Fetching key-results for team',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+    const [options, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultFiltersRequest,
       KeyResult
     >(request)
+    const { confidence, active, ...filters } = options
 
-    const queryResult = await this.core.keyResult.getFromTeams(team, filters, queryOptions)
+    const keyResults = await this.corePorts.dispatchCommand<KeyResult[]>(
+      'get-key-results',
+      userWithContext,
+      filters,
+      queryOptions,
+      active,
+      confidence,
+    )
 
-    return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection, team)
+    return this.relay.marshalResponse<KeyResultInterface>(keyResults, connection)
   }
 
   @ResolveField('delta', () => DeltaGraphQLObject)

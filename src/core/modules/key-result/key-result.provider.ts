@@ -66,9 +66,8 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       relations: active ? ['objective', 'objective.cycle', 'checkIns'] : undefined,
     })
 
-    if (confidence) {
-      console.log({ confidence })
-      return keyResults.filter((keyResult) => {
+    if (typeof confidence === 'number') {
+      const keyResultsWithConfidence = keyResults.filter((keyResult) => {
         const latestCheckIn = keyResult.checkIns[keyResult.checkIns.length - 1]
         if (!latestCheckIn) {
           return confidence === 100
@@ -76,6 +75,8 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
         return latestCheckIn.confidence === confidence
       })
+
+      return keyResultsWithConfidence
     }
 
     return keyResults

@@ -48,15 +48,6 @@ export class KeyResultsConnectionGraphQLResolver extends GuardedConnectionGraphQ
       KeyResult
     >(request)
 
-    console.log({ request })
-
-    const queryResults = await this.corePorts.dispatchCommand<KeyResult[]>(
-      'get-key-results',
-      userWithContext,
-      filters,
-      queryOptions,
-    )
-
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,
       userWithContext,

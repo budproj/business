@@ -1,4 +1,4 @@
-import { ArgsType, Field, ID } from '@nestjs/graphql'
+import { ArgsType, Field, ID, Int } from '@nestjs/graphql'
 
 import { SortingGraphQLEnum } from '@interface/graphql/enums/sorting.enum'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
@@ -22,17 +22,16 @@ export class KeyResultFiltersRequest extends ConnectionFiltersRequest {
   })
   public order?: DefaultOrderGraphQLInput
 
-  // @Field(() => Boolean, {
-  //   description: 'Define if the query user wants only active or all key results',
-  //   nullable: true,
-  //   defaultValue: true,
-  // })
-  // public active?: boolean
+  @Field(() => Boolean, {
+    description: 'Define if the query user wants only active or all key results',
+    nullable: true,
+    defaultValue: true,
+  })
+  public active?: boolean
 
-  // @Field(() => Number, {
-  //   description: 'Define the confidence of the key results',
-  //   nullable: true,
-  //   defaultValue: undefined,
-  // })
-  // public confidence?: number
+  @Field(() => Int, {
+    description: 'Define the confidence of the key results',
+    nullable: true,
+  })
+  public confidence?: number
 }
