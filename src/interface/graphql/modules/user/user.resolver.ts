@@ -222,9 +222,8 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       Team
     >(request)
 
-    const queryResult = await this.core.team.getUserCompanies(user, filters, queryOptions)
-
-    return this.relay.marshalResponse<Team>(queryResult, connection, user)
+    const userCompanies = await this.core.team.getUserCompanies(user, filters, queryOptions)
+    return this.relay.marshalResponse<Team>(userCompanies, connection, user)
   }
 
   @ResolveField('teams', () => UserTeamsGraphQLConnection, { nullable: true })
@@ -305,7 +304,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       request,
     )
 
-    const { active, hasUserCheckMarks, ...filters } = options
+    const { active, hasUserCheckMarks, confidence, ...filters } = options
     const command = hasUserCheckMarks
       ? 'get-key-results-containing-user-checklist'
       : 'get-user-key-results'
@@ -314,7 +313,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       command,
       user.id,
       filters,
-      { active },
+      { active, confidence },
     )
 
     return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection, user)
