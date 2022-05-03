@@ -1,6 +1,5 @@
 import { ArgsType, Field, ID } from '@nestjs/graphql'
 
-import { ConfidenceTag } from '@adapters/confidence-tag/confidence-tag.enum'
 import { SortingGraphQLEnum } from '@interface/graphql/enums/sorting.enum'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DefaultOrderGraphQLInput } from '@interface/graphql/objects/default-order.object'
@@ -22,17 +21,4 @@ export class KeyResultFiltersRequest extends ConnectionFiltersRequest {
     description: 'Define the expected order for our key-result edges',
   })
   public order?: DefaultOrderGraphQLInput
-
-  @Field(() => Boolean, {
-    description: 'Define if the query user wants only active or all key results',
-    nullable: true,
-    defaultValue: true,
-  })
-  public active?: boolean
-
-  @Field(() => String, {
-    description: 'Define the confidence of the key results',
-    nullable: true,
-  })
-  public confidence?: ConfidenceTag
 }

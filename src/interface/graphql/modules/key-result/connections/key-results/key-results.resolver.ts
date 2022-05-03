@@ -13,7 +13,7 @@ import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/au
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { KeyResultAccessControl } from '@interface/graphql/modules/key-result/access-control/key-result.access-control'
 
-import { KeyResultsRequest } from '../../requests/key-results.request'
+import { KeyResultFiltersRequest } from '../../requests/key-result-filters.request'
 
 import { KeyResultsGraphQLConnection } from './key-results.connection'
 
@@ -34,7 +34,7 @@ export class KeyResultsConnectionGraphQLResolver extends GuardedConnectionGraphQ
 
   @GuardedQuery(KeyResultsGraphQLConnection, 'key-result:read', { name: 'keyResults' })
   protected async getKeyResultsForRequestAndRequestUserWithContext(
-    @Args() request: KeyResultsRequest,
+    @Args() request: KeyResultFiltersRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
@@ -44,7 +44,7 @@ export class KeyResultsConnectionGraphQLResolver extends GuardedConnectionGraphQ
     })
 
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      KeyResultsRequest,
+      KeyResultFiltersRequest,
       KeyResult
     >(request)
 
