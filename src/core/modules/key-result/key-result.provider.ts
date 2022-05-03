@@ -47,6 +47,12 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     super(KeyResultProvider.name, repository)
   }
 
+  public getLatestCheckInFromList(
+    checkInList: KeyResultCheckInInterface[],
+  ): KeyResultCheckInInterface | undefined {
+    return maxBy(checkInList, 'createdAt')
+  }
+
   public async getKeyResults(
     teamsIds: Array<TeamInterface['id']>,
     filters?: FindConditions<KeyResult>,
@@ -84,7 +90,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     if (confidence) {
       const confidenceNumber = this.confidenceTagAdapter.getConfidenceFromTag(confidence)
       const keyResultsWithConfidence = keyResults.filter((keyResult) => {
-        const latestCheckin = maxBy(keyResult.checkIns, 'createdAt')
+        const latestCheckin = this.getLatestCheckInFromList(keyResult.checkIns)
         if (!latestCheckin) {
           return confidenceNumber === DEFAULT_CONFIDENCE
         }
@@ -152,7 +158,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
   public async getActiveConfidenceKeyResultsQuantity(teamsIds: Array<TeamInterface['id']>) {
     const keyResults = await this.repository.find({
-      relations: ['objective', 'objective.cycle'],
+      relations: ['objective', 'objective.cycle', 'checkIns'],
       where: {
         teamId: In(teamsIds),
         objective: {
@@ -165,16 +171,15 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
     const highConfidenceDefaultValue = KeyResultConfidenceValue.HIGH
 
-    const confidences = await Promise.all(
-      keyResults.map(async (keyResult) => {
-        const checkIn = await this.keyResultCheckInProvider.getLatestFromKeyResult(keyResult)
-        if (checkIn) {
-          return checkIn.confidence
-        }
+    const confidences = keyResults.map((keyResult) => {
+      const latestCheckin = this.getLatestCheckInFromList(keyResult.checkIns)
+      if (latestCheckin) {
+        return latestCheckin.confidence
+      }
 
-        return highConfidenceDefaultValue
-      }),
-    )
+      return highConfidenceDefaultValue
+    })
+
     return {
       high: confidences.filter((element) => element === KeyResultConfidenceValue.HIGH).length,
       medium: confidences.filter((element) => element === KeyResultConfidenceValue.MEDIUM).length,
