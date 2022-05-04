@@ -61,7 +61,9 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
       this.getRootTeamForTeam(team, filters, options),
     )
 
-    return Promise.all(companyPromises)
+    const rootCompanies = await Promise.all(companyPromises)
+    const unrepeatedRootCompanies = uniqBy(rootCompanies, 'id')
+    return unrepeatedRootCompanies
   }
 
   public async getTeamNodesTreeAfterTeam(
