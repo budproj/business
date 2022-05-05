@@ -3,7 +3,10 @@ import { uniqBy, pickBy, omitBy, identity, isEmpty, maxBy } from 'lodash'
 import { Any, DeleteResult, FindConditions, In } from 'typeorm'
 
 import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
-import { DEFAULT_CONFIDENCE } from '@adapters/confidence-tag/confidence-tag.constants'
+import {
+  DEFAULT_CONFIDENCE,
+  CONFIDENCE_TAG_THRESHOLDS,
+} from '@adapters/confidence-tag/confidence-tag.constants'
 import { ConfidenceTag } from '@adapters/confidence-tag/confidence-tag.enum'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
@@ -25,7 +28,6 @@ import { KeyResultCheckMarkProvider } from './check-mark/key-result-check-mark.p
 import { KeyResultCommentInterface } from './comment/key-result-comment.interface'
 import { KeyResultComment } from './comment/key-result-comment.orm-entity'
 import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
-import { KeyResultConfidenceValue } from './enums/key-result-confidence.enum'
 import { KeyResultInterface } from './interfaces/key-result.interface'
 import { KeyResult } from './key-result.orm-entity'
 import { KeyResultRelationFilterProperties, KeyResultRepository } from './key-result.repository'
@@ -169,7 +171,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       },
     })
 
-    const highConfidenceDefaultValue = KeyResultConfidenceValue.HIGH
+    const highConfidenceDefaultValue = CONFIDENCE_TAG_THRESHOLDS.high
 
     const confidences = keyResults.map((keyResult) => {
       const latestCheckin = this.getLatestCheckInFromList(keyResult.checkIns)
@@ -181,10 +183,11 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     })
 
     return {
-      high: confidences.filter((element) => element === KeyResultConfidenceValue.HIGH).length,
-      medium: confidences.filter((element) => element === KeyResultConfidenceValue.MEDIUM).length,
-      low: confidences.filter((element) => element === KeyResultConfidenceValue.LOW).length,
-      barrier: confidences.filter((element) => element === KeyResultConfidenceValue.BARRIER).length,
+      high: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.high).length,
+      medium: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.medium).length,
+      low: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.low).length,
+      barrier: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.barrier)
+        .length,
     }
   }
 
