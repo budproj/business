@@ -69,7 +69,9 @@ import { GetKeyResultSupportTeamCommand } from './get-key-result-support-team.co
 import { GetKeyResultTeamTreeCommand } from './get-key-result-team-tree.command'
 import { GetKeyResultCommand } from './get-key-result.command'
 import { GetKeyResultsContainingUserChecklistCommand } from './get-key-results-containing-user-checklist'
+import { GetKeyResults } from './get-key-results.command'
 import { GetObjectiveKeyResultsCommand } from './get-objective-key-results.command'
+import { GetObjectivesAndKeyResultQuantities } from './get-objectives-and-key-results-quantities.command'
 import { GetTaskByIdCommand } from './get-task-by-id.command'
 import { GetTasksFromUserCommand } from './get-tasks-from-user.command'
 import { GetTeamCompanyCommand } from './get-team-company.command'
@@ -174,6 +176,8 @@ export type CommandType =
   | 'update-task-description'
   | 'get-tasks-from-user'
   | 'get-task-by-id'
+  | 'get-objectives-and-key-results-quantities'
+  | 'get-key-results'
 
 @Injectable()
 export class CommandFactory {
@@ -262,6 +266,8 @@ export class CommandFactory {
     'update-task-description': UpdateTaskDescriptionCommand,
     'get-tasks-from-user': GetTasksFromUserCommand,
     'get-task-by-id': GetTaskByIdCommand,
+    'get-objectives-and-key-results-quantities': GetObjectivesAndKeyResultQuantities,
+    'get-key-results': GetKeyResults,
   }
 
   constructor(private readonly core: CoreProvider) {}

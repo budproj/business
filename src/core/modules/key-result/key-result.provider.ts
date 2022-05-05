@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common'
-import { uniqBy, pickBy, omitBy, identity, isEmpty } from 'lodash'
+import { uniqBy, pickBy, omitBy, identity, isEmpty, maxBy } from 'lodash'
 import { Any, DeleteResult, FindConditions, In } from 'typeorm'
 
+import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
+import {
+  DEFAULT_CONFIDENCE,
+  CONFIDENCE_TAG_THRESHOLDS,
+} from '@adapters/confidence-tag/confidence-tag.constants'
+import { ConfidenceTag } from '@adapters/confidence-tag/confidence-tag.enum'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
@@ -30,6 +36,8 @@ import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
 
 @Injectable()
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
+  private readonly confidenceTagAdapter = new ConfidenceTagAdapter()
+
   constructor(
     public readonly keyResultCommentProvider: KeyResultCommentProvider,
     public readonly keyResultCheckMarkProvider: KeyResultCheckMarkProvider,
@@ -39,6 +47,58 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     private readonly analyticsProvider: AnalyticsProvider,
   ) {
     super(KeyResultProvider.name, repository)
+  }
+
+  public getLatestCheckInFromList(
+    checkInList: KeyResultCheckInInterface[],
+  ): KeyResultCheckInInterface | undefined {
+    return maxBy(checkInList, 'createdAt')
+  }
+
+  public async getKeyResults(
+    teamsIds: Array<TeamInterface['id']>,
+    filters?: FindConditions<KeyResult>,
+    options?: GetOptions<KeyResult>,
+    active = true,
+    confidence?: ConfidenceTag,
+  ): Promise<KeyResult[]> {
+    const queryOptions = this.repository.marshalGetOptions(options)
+    const whereSelector = {
+      ...filters,
+      teamId: In(teamsIds),
+      objective: {
+        cycle: {
+          active: active ? true : undefined,
+        },
+      },
+    }
+
+    const relations = [
+     ...(active ? ['objective', 'objective.cycle'] : []),
+     ...(confidence ? ['checkIns'] : []),
+    ]
+
+    const keyResults = await this.repository.find({
+      ...queryOptions,
+      where: whereSelector,
+      relations,
+    })
+
+    if (confidence) {
+      const confidenceNumber = this.confidenceTagAdapter.getConfidenceFromTag(confidence)
+      const keyResultsWithConfidence = keyResults.filter((keyResult) => {
+        const latestCheckin = this.getLatestCheckInFromList(keyResult.checkIns)
+        if (!latestCheckin) {
+          return confidenceNumber === DEFAULT_CONFIDENCE
+        }
+
+        return latestCheckin.confidence === confidenceNumber
+      })
+
+      return keyResultsWithConfidence
+    }
+
+    return keyResults
   }
 
   public async getFromOwner(
@@ -77,6 +137,53 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
   public async removeUserToSupportTeam(keyResultId: string, userId: string) {
     return this.repository.removeUserToSupportTeam(keyResultId, userId)
+  }
+
+  public async getActiveKeyResultsQuantity(teamsIds: Array<TeamInterface['id']>) {
+    return this.repository.count({
+      relations: ['objective', 'objective.cycle'],
+      where: {
+        teamId: In(teamsIds),
+        objective: {
+          cycle: {
+            active: true,
+          },
+        },
+      },
+    })
+  }
+
+  public async getActiveConfidenceKeyResultsQuantity(teamsIds: Array<TeamInterface['id']>) {
+    const keyResults = await this.repository.find({
+      relations: ['objective', 'objective.cycle', 'checkIns'],
+      where: {
+        teamId: In(teamsIds),
+        objective: {
+          cycle: {
+            active: true,
+          },
+        },
+      },
+    })
+
+    const highConfidenceDefaultValue = CONFIDENCE_TAG_THRESHOLDS.high
+
+    const confidences = keyResults.map((keyResult) => {
+      const latestCheckin = this.getLatestCheckInFromList(keyResult.checkIns)
+      if (latestCheckin) {
+        return latestCheckin.confidence
+      }
+
+      return highConfidenceDefaultValue
+    })
+
+    return {
+      high: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.high).length,
+      medium: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.medium).length,
+      low: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.low).length,
+      barrier: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.barrier)
+        .length,
+    }
   }
 
   public async getFromTeams(

@@ -6,6 +6,7 @@ import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { CorePortsProvider } from '@core/ports/ports.provider'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
@@ -23,7 +24,11 @@ export class KeyResultsConnectionGraphQLResolver extends GuardedConnectionGraphQ
 > {
   private readonly logger = new Logger(KeyResultsConnectionGraphQLResolver.name)
 
-  constructor(protected readonly core: CoreProvider, accessControl: KeyResultAccessControl) {
+  constructor(
+    protected readonly core: CoreProvider,
+    accessControl: KeyResultAccessControl,
+    protected readonly corePorts: CorePortsProvider,
+  ) {
     super(Resource.KEY_RESULT, core, core.keyResult, accessControl)
   }
 

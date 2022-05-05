@@ -26,10 +26,10 @@ import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authoriz
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
 import { CycleFiltersRequest } from '@interface/graphql/modules/cycle/requests/cycle-filters.request'
-import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/requests/key-result-filters.request'
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
 import { TeamStatusRequest } from '@interface/graphql/modules/team/requests/team-status.request'
 import { UserFiltersRequest } from '@interface/graphql/modules/user/requests/user-filters.request'
+import { UserKeyResultsRequest } from '@interface/graphql/modules/user/requests/user-key-results.request'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
 import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
@@ -342,7 +342,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
 
   @ResolveField('keyResults', () => TeamKeyResultsGraphQLConnection, { nullable: true })
   protected async getKeyResultsForTeam(
-    @Args() request: KeyResultFiltersRequest,
+    @Args() request: UserKeyResultsRequest,
     @Parent() team: TeamGraphQLNode,
   ) {
     this.logger.log({
@@ -351,14 +351,22 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching key-results for team',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      KeyResultFiltersRequest,
+    const [options, queryOptions, connection] = this.relay.unmarshalRequest<
+      UserKeyResultsRequest,
       KeyResult
     >(request)
+    const { confidence, active, ...filters } = options
 
-    const queryResult = await this.core.keyResult.getFromTeams(team, filters, queryOptions)
+    const keyResults = await this.corePorts.dispatchCommand<KeyResult[]>(
+      'get-key-results',
+      team,
+      filters,
+      queryOptions,
+      active,
+      confidence,
+    )
 
-    return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection, team)
+    return this.relay.marshalResponse<KeyResultInterface>(keyResults, connection, team)
   }
 
   @ResolveField('delta', () => DeltaGraphQLObject)

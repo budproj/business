@@ -6,6 +6,7 @@ import { ConnectionRelayGraphQLInterface } from '@interface/graphql/adapters/rel
 import { PageInfoRelayObject } from '@interface/graphql/adapters/relay/objects/page-info.object'
 import { TeamGraphQLNode } from '@interface/graphql/modules/team/team.node'
 
+import { QuantityNode } from './requests/quantity-request'
 import { UserTeamEdgeGraphQLObject } from './user-team.edge'
 
 @ObjectType('UserTeams', {
@@ -21,7 +22,7 @@ export class UserTeamsGraphQLConnection
   // **********************************************************************************************
   // ABSTRACTED FIELDS
   // **********************************************************************************************
-
+  public readonly quantities!: QuantityNode
   public readonly pageInfo!: PageInfoRelayObject
   public readonly policy!: ConnectionPolicyGraphQLObject
   public readonly parentNodeId!: string

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { omitBy, pickBy, isEmpty, identity } from 'lodash'
-import { Any, FindConditions } from 'typeorm'
+import { Any, FindConditions, In } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
@@ -11,6 +11,8 @@ import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-resu
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 import { EntityOrderAttributes } from '@core/types/order-attribute.type'
+
+import { TeamInterface } from '../team/interfaces/team.interface'
 
 import { ObjectiveInterface } from './interfaces/objective.interface'
 import { DEFAULT_CONFIDENCE, DEFAULT_PROGRESS } from './objective.constants'
@@ -35,6 +37,10 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
       confidence,
       createdAt: date,
     }
+  }
+
+  public async getObjectivesQuantity(teamsIds: Array<TeamInterface['id']>) {
+    return this.repository.count({ where: { teamId: In(teamsIds) } })
   }
 
   public async getFromOwner(
