@@ -73,15 +73,10 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       },
     }
 
-    const relations = []
-
-    if (active) {
-      relations.push('objective', 'objective.cycle')
-    }
-
-    if (confidence) {
-      relations.push('checkIns')
-    }
+    const relations = [
+     ...(active ? ['objective', 'objective.cycle'] : []),
+     ...(confidence ? ['checkIns'] : []),
+    ]
 
     const keyResults = await this.repository.find({
       ...queryOptions,
