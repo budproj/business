@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { uniqBy, pickBy, omitBy, identity, isEmpty, maxBy } from 'lodash'
-import { Any, DeleteResult, FindConditions, In } from 'typeorm'
+import { uniqBy, pickBy, omitBy, identity, isEmpty, maxBy, flatten } from 'lodash'
+import { Any, Brackets, DeleteResult, FindConditions, In } from 'typeorm'
 
 import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
 import {
@@ -20,6 +20,8 @@ import { EntityOrderAttributes } from '@core/types/order-attribute.type'
 import { AnalyticsProvider } from '@infrastructure/analytics/analytics.provider'
 
 import { ProgressRecord } from '../../../adapters/analytics/progress-record.interface'
+import { Cycle } from '../cycle/cycle.orm-entity'
+import { Cadence } from '../cycle/enums/cadence.enum'
 
 import { KeyResultCheckInInterface } from './check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from './check-in/key-result-check-in.orm-entity'
@@ -74,8 +76,8 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     }
 
     const relations = [
-     ...(active ? ['objective', 'objective.cycle'] : []),
-     ...(confidence ? ['checkIns'] : []),
+      ...(active ? ['objective', 'objective.cycle'] : []),
+      ...(confidence ? ['checkIns'] : []),
     ]
 
     const keyResults = await this.repository.find({
@@ -243,6 +245,26 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     })
 
     return uniqBy(keyResults, 'id')
+  }
+
+  public async getCadencelyKeyResultsFromUser(userID: UserInterface['id'], cadence: Cadence) {
+    const keyResults = await this.repository
+      .createQueryBuilder()
+      .innerJoin(`${KeyResult.name}.objective`, 'objective')
+      .innerJoin(Cycle, 'cycle', 'cycle.id = objective.cycle_id')
+      .leftJoin(`${KeyResult.name}.supportTeamMembers`, 'supportTeamMembers')
+      .where(
+        new Brackets((qb) => {
+          qb.where('KeyResult.ownerId = :userID', { userID }).orWhere(
+            'supportTeamMembers.id = :userId',
+            { userId: userID },
+          )
+        }),
+      )
+      .andWhere('cycle.cadence = :cadence', { cadence })
+      .getMany()
+
+    return keyResults
   }
 
   public async getComments(
@@ -514,6 +536,12 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
         },
       },
     })
+  }
+
+  public getUniqueKeyResults(...lists: KeyResult[][]): KeyResult[] {
+    const flattenedLists = flatten(lists)
+
+    return uniqBy(flattenedLists, 'id')
   }
 
   protected async protectCreationQuery(

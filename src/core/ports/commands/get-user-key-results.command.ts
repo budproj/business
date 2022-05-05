@@ -1,4 +1,4 @@
-import { flatten, intersectionBy, keyBy, uniq, uniqBy } from 'lodash'
+import { intersectionBy, keyBy, uniq } from 'lodash'
 
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
@@ -21,16 +21,13 @@ export class GetUserKeyResultsCommand extends Command<KeyResult[]> {
       filters,
     )
 
-    const allKeyResults = this.getUniqueKeyResults(ownedKeyResults, supportTeamKeyResults)
+    const allKeyResults = this.core.keyResult.getUniqueKeyResults(
+      ownedKeyResults,
+      supportTeamKeyResults,
+    )
     const keyResults = await this.applyOptions(allKeyResults, options)
 
     return keyResults
-  }
-
-  private getUniqueKeyResults(...lists: KeyResult[][]): KeyResult[] {
-    const flattenedLists = flatten(lists)
-
-    return uniqBy(flattenedLists, 'id')
   }
 
   private async applyOptions(keyResults: KeyResult[], options?: Options): Promise<KeyResult[]> {
