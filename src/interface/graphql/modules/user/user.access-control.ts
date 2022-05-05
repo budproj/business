@@ -32,6 +32,25 @@ export class UserAccessControl extends AccessControl {
     return user.id === requestUser.id
   }
 
+  public async isInTheSameCompany(user: UserWithContext, userIdFromRequest: string) {
+    const partialUser: Partial<User> = { id: userIdFromRequest }
+
+    const userCompanies = await this.core.dispatchCommand<Team[]>('get-user-companies', user)
+    const userFromRequestCompanies = await this.core.dispatchCommand<Team[]>(
+      'get-user-companies',
+      partialUser,
+    )
+
+    const userFromRequestCompaniesIds = new Set(
+      userFromRequestCompanies.map((company) => company.id),
+    )
+    return userCompanies
+      .map((company) => company.id)
+      .some((company) => {
+        return userFromRequestCompaniesIds.has(company)
+      })
+  }
+
   protected async resolveContextScopes(
     user: UserWithContext,
     teamID: string,

@@ -1,4 +1,9 @@
-import { InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common'
+import {
+  ForbiddenException,
+  InternalServerErrorException,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 import { FileUpload } from 'graphql-upload'
@@ -396,6 +401,39 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     )
 
     return this.relay.marshalResponse<TaskInterface>(queryResult, connection, user)
+  }
+
+  @ResolveField('quarterlyProgress', () => Number)
+  protected async getKeyResultsQuarterlyProgress(
+    @RequestUserWithContext() userWithContext: UserWithContext,
+    @Parent() user: UserGraphQLNode,
+  ) {
+    console.log({ user: userWithContext.id })
+    console.log({ user2: user.id })
+    const isInTheSameCompany = await this.accessControl.isInTheSameCompany(userWithContext, user.id)
+    console.log(isInTheSameCompany)
+    if (!isInTheSameCompany) throw new ForbiddenException()
+    const progress = await this.corePorts.dispatchCommand<number>(
+      'get-user-quarterly-progress',
+      user.id,
+    )
+
+    return progress
+  }
+
+  @ResolveField('yearlyProgress', () => Number)
+  protected async getKeyResultsYearlyProgress(
+    @RequestUserWithContext() userWithContext: UserWithContext,
+    @Parent() user: UserGraphQLNode,
+  ) {
+    const isInTheSameCompany = await this.accessControl.isInTheSameCompany(userWithContext, user.id)
+    if (!isInTheSameCompany) throw new ForbiddenException()
+    const progress = await this.corePorts.dispatchCommand<number>(
+      'get-user-yearly-progress',
+      user.id,
+    )
+
+    return progress
   }
 
   @ResolveField('settings', () => UserSettingsGraphQLConnection, {

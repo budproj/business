@@ -19,9 +19,6 @@ export class UserKeyResultsGraphQLConnection
   @Field(() => [UserKeyResultEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: UserKeyResultEdgeGraphQLObject[]
 
-  public readonly quarterlyProgress!: number
-  public readonly yearlyProgress!: number
-
   // **********************************************************************************************
   // ABSTRACTED FIELDS
   // **********************************************************************************************
