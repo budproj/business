@@ -39,8 +39,16 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     }
   }
 
-  public async getObjectivesQuantity(teamsIds: Array<TeamInterface['id']>) {
-    return this.repository.count({ where: { teamId: In(teamsIds) } })
+  public async getActiveObjectivesQuantity(teamsIds: Array<TeamInterface['id']>) {
+    return this.repository.count({
+      relations: ['cycle'],
+      where: {
+        teamId: In(teamsIds),
+        cycle: {
+          active: true,
+        },
+      },
+    })
   }
 
   public async getFromOwner(
