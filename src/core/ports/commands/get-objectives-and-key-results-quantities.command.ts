@@ -13,7 +13,7 @@ export class GetObjectivesAndKeyResultQuantities extends Command<any> {
     const keyResultsQuantityPromise =
       this.core.keyResult.getActiveKeyResultsQuantity(userReachableTeamsIds)
     const objectivesQuantityPromise =
-      this.core.objective.getObjectivesQuantity(userReachableTeamsIds)
+      this.core.objective.getActiveObjectivesQuantity(userReachableTeamsIds)
     const confidencesPromise =
       this.core.keyResult.getActiveConfidenceKeyResultsQuantity(userReachableTeamsIds)
 
