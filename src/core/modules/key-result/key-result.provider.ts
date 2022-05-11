@@ -544,6 +544,25 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return uniqBy(flattenedLists, 'id')
   }
 
+  public async getProgress(keyResult: KeyResult): Promise<number> {
+    const latestCheckIn = await this.keyResultCheckInProvider.getLatestFromKeyResult(keyResult)
+    const progress = await this.getCheckInProgress(latestCheckIn, keyResult)
+    return progress
+  }
+
+  public async getProgressSum(keyResults: KeyResult[]): Promise<number> {
+    const keyResultProgresses = await Promise.all(
+      keyResults.map(async (keyResult) => this.getProgress(keyResult)),
+    )
+
+    const progressSum = keyResultProgresses.reduce(
+      (progressSum, currentProgress) => progressSum + currentProgress,
+      0,
+    )
+
+    return progressSum
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<KeyResult>,
     _data: Partial<KeyResultInterface>,

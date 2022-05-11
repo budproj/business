@@ -11,17 +11,9 @@ export class GetUserYearlyProgressCommand extends Command<KeyResult[]> {
       Cadence.YEARLY,
     )
 
-    const progress = await keyResults.reduce(async (previous, currentKeyResult) => {
-      const latestCheckIn = await this.core.keyResult.getLatestCheckInForKeyResultAtDate(
-        currentKeyResult.id,
-        new Date(),
-      )
+    const progress = await this.core.keyResult.getProgressSum(keyResults)
+    const averageProgress = progress / keyResults.length
 
-      const progress = await this.core.keyResult.getCheckInProgress(latestCheckIn, currentKeyResult)
-
-      return (await previous) + progress
-    }, Promise.resolve(0))
-
-    return progress / keyResults.length
+    return averageProgress
   }
 }
