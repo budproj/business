@@ -247,7 +247,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return uniqBy(keyResults, 'id')
   }
 
-  public async getCadencelyKeyResultsFromUser(userID: UserInterface['id'], cadence: Cadence) {
+  public async getKeyResultsFromUserByCadence(userID: UserInterface['id'], cadence: Cadence) {
     const keyResults = await this.repository
       .createQueryBuilder()
       .innerJoin(`${KeyResult.name}.objective`, 'objective')

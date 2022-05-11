@@ -6,7 +6,7 @@ import { Command } from './base.command'
 
 export class GetUserYearlyProgressCommand extends Command<KeyResult[]> {
   public async execute(userID: UserInterface['id']): Promise<any> {
-    const keyResults = await this.core.keyResult.getCadencelyKeyResultsFromUser(
+    const keyResults = await this.core.keyResult.getKeyResultsFromUserByCadence(
       userID,
       Cadence.YEARLY,
     )
