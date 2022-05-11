@@ -28,7 +28,7 @@ import { EmailAlreadyExistsException } from '@core/modules/user/exceptions/email
 import { Key } from '@core/modules/user/setting/user-setting.enums'
 import { UserSettingInterface } from '@core/modules/user/setting/user-setting.interface'
 import { UserSetting } from '@core/modules/user/setting/user-settings.orm-entity'
-import { UserInterface } from '@core/modules/user/user.interface'
+import { UserInterface, UserReportProgress } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { AWSS3Provider } from '@infrastructure/aws/s3/s3.provider'
@@ -54,6 +54,7 @@ import { UserObjectivesGraphQLConnection } from './connections/user-objectives/u
 import { UserTasksGraphQLConnection } from './connections/user-tasks/user-tasks.connection'
 import { UserTeamsGraphQLConnection } from './connections/user-teams/user-teams.connection'
 import { EmailAlreadyExistsApolloError } from './exceptions/email-already-exists.exception'
+import { UserReportProgressObject } from './objects/user-report-progress.object'
 import { UserCreateRequest } from './requests/user-create.request'
 import { UserDeactivateRequest } from './requests/user-deactivate.request'
 import { UserKeyResultsRequest } from './requests/user-key-results.request'
@@ -403,17 +404,14 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return this.relay.marshalResponse<TaskInterface>(queryResult, connection, user)
   }
 
-  @ResolveField('quarterlyProgress', () => Number)
+  @ResolveField('quarterlyProgress', () => UserReportProgressObject, { nullable: true })
   protected async getKeyResultsQuarterlyProgress(
     @RequestUserWithContext() userWithContext: UserWithContext,
     @Parent() user: UserGraphQLNode,
   ) {
-    console.log({ user: userWithContext.id })
-    console.log({ user2: user.id })
     const isInTheSameCompany = await this.accessControl.isInTheSameCompany(userWithContext, user.id)
-    console.log(isInTheSameCompany)
     if (!isInTheSameCompany) throw new ForbiddenException()
-    const progress = await this.corePorts.dispatchCommand<number>(
+    const progress = await this.corePorts.dispatchCommand<UserReportProgress>(
       'get-user-quarterly-progress',
       user.id,
     )
@@ -421,14 +419,14 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return progress
   }
 
-  @ResolveField('yearlyProgress', () => Number)
+  @ResolveField('yearlyProgress', () => UserReportProgressObject, { nullable: true })
   protected async getKeyResultsYearlyProgress(
     @RequestUserWithContext() userWithContext: UserWithContext,
     @Parent() user: UserGraphQLNode,
   ) {
     const isInTheSameCompany = await this.accessControl.isInTheSameCompany(userWithContext, user.id)
     if (!isInTheSameCompany) throw new ForbiddenException()
-    const progress = await this.corePorts.dispatchCommand<number>(
+    const progress = await this.corePorts.dispatchCommand<UserReportProgress>(
       'get-user-yearly-progress',
       user.id,
     )

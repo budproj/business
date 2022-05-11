@@ -14,6 +14,9 @@ export class GetUserQuarterlyProgressCommand extends Command<KeyResult[]> {
     const progress = await this.core.keyResult.getProgressSum(keyResults)
     const averageProgress = progress / keyResults.length
 
-    return averageProgress
+    return {
+      showProgress: keyResults.length > 0,
+      progress: averageProgress,
+    }
   }
 }
