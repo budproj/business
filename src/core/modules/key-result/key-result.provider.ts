@@ -262,6 +262,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
         }),
       )
       .andWhere('cycle.cadence = :cadence', { cadence })
+      .andWhere('cycle.active = true')
       .getMany()
 
     return keyResults
