@@ -11,12 +11,19 @@ export class GetUserYearlyProgressCommand extends Command<KeyResult[]> {
       Cadence.YEARLY,
     )
 
-    const progress = await this.core.keyResult.getProgressSum(keyResults)
-    const averageProgress = progress / keyResults.length
+    if (keyResults.length > 0) {
+      const progress = await this.core.keyResult.getProgressSum(keyResults)
+      const averageProgress = progress / keyResults.length
+
+      return {
+        showProgress: keyResults.length > 0,
+        progress: averageProgress,
+      }
+    }
 
     return {
-      showProgress: keyResults.length > 0,
-      progress: averageProgress,
+      showProgress: false,
+      progress: 0,
     }
   }
 }
