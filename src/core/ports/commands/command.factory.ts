@@ -72,6 +72,7 @@ import { GetKeyResultsContainingUserChecklistCommand } from './get-key-results-c
 import { GetKeyResults } from './get-key-results.command'
 import { GetObjectiveKeyResultsCommand } from './get-objective-key-results.command'
 import { GetObjectivesAndKeyResultQuantities } from './get-objectives-and-key-results-quantities.command'
+import { GetObjectivesCommand } from './get-objectives.command'
 import { GetTaskByIdCommand } from './get-task-by-id.command'
 import { GetTasksFromUserCommand } from './get-tasks-from-user.command'
 import { GetTeamCompanyCommand } from './get-team-company.command'
@@ -184,6 +185,7 @@ export type CommandType =
   | 'get-users-with-individual-okr'
   | 'get-user-quarterly-progress'
   | 'get-user-yearly-progress'
+  | 'get-objectives'
 
 @Injectable()
 export class CommandFactory {
@@ -277,6 +279,7 @@ export class CommandFactory {
     'get-users-with-individual-okr': GetUsersWithIndividualOkr,
     'get-user-quarterly-progress': GetUserQuarterlyProgressCommand,
     'get-user-yearly-progress': GetUserYearlyProgressCommand,
+    'get-objectives': GetObjectivesCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}
