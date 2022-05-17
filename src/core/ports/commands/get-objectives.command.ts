@@ -10,7 +10,9 @@ export class GetObjectivesCommand extends Command<any> {
   static marshalFilters(filters: ObjectiveInterface, aditionalFilters: AditionalFiltersProperties) {
     return {
       objective: filters,
-      ...(aditionalFilters.active ? { cycle: { active: aditionalFilters.active } } : {}),
+      ...(typeof aditionalFilters.active === 'boolean'
+        ? { cycle: { active: aditionalFilters.active } }
+        : {}),
     }
   }
 

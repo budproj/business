@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { omitBy, pickBy, isEmpty, identity } from 'lodash'
+import { omitBy, isEmpty } from 'lodash'
 import { Any, FindConditions, In } from 'typeorm'
 
 import { CoreEntityProvider } from '@core/entity.provider'
@@ -128,9 +128,9 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     const orderAttributes = this.marshalEntityOrderAttributes(entityOrderAttributes)
     const cleanedRelationFilters = omitBy(
       {
-        objective: pickBy(filters.objective, identity),
-        cycle: pickBy(filters.cycle, identity),
-        keyResult: pickBy(filters.keyResult, identity),
+        objective: typeof filters.objective === undefined ? {} : filters.objective,
+        cycle: typeof filters.cycle === undefined ? {} : filters.cycle,
+        keyResult: typeof filters.keyResult === undefined ? {} : filters.keyResult,
       },
       isEmpty,
     )
