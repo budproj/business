@@ -7,6 +7,7 @@ import { CoreProvider } from '@core/core.provider'
 import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
+import { CorePortsProvider } from '@core/ports/ports.provider'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
@@ -23,7 +24,10 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
 > {
   private readonly logger = new Logger(UsersConnectionGraphQLResolver.name)
 
-  constructor(protected readonly core: CoreProvider) {
+  constructor(
+    protected readonly core: CoreProvider,
+    private readonly corePorts: CorePortsProvider,
+  ) {
     super(Resource.USER, core, core.user)
   }
 
@@ -43,10 +47,15 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
       User
     >(request)
 
+    console.log({ rawFilters, queryOptions, connection })
+
     const filters = {
       ...rawFilters,
       status: UserStatus.ACTIVE,
     }
+    const teste = await this.corePorts.dispatchCommand('get-users-with-individual-okr')
+
+    console.log({ teste })
 
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,

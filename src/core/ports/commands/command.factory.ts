@@ -80,6 +80,7 @@ import { GetTeamOwnerCommand } from './get-team-owner.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
 import { GetUserKeyResultsCommand } from './get-user-key-results.command'
 import { GetUsersByIdsCommand } from './get-users-by-ids.command'
+import { GetUsersWithIndividualOkr } from './get-users-with-individual-okr.command'
 import { RemoveTeamFromUserCommand } from './remove-team-from-user.command'
 import { RemoveUserToKeyResultSupportTeamCommand } from './remove-user-to-key-result-support-team.command'
 import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
@@ -178,6 +179,7 @@ export type CommandType =
   | 'get-task-by-id'
   | 'get-objectives-and-key-results-quantities'
   | 'get-key-results'
+  | 'get-users-with-individual-okr'
 
 @Injectable()
 export class CommandFactory {
@@ -268,6 +270,7 @@ export class CommandFactory {
     'get-task-by-id': GetTaskByIdCommand,
     'get-objectives-and-key-results-quantities': GetObjectivesAndKeyResultQuantities,
     'get-key-results': GetKeyResults,
+    'get-users-with-individual-okr': GetUsersWithIndividualOkr,
   }
 
   constructor(private readonly core: CoreProvider) {}
