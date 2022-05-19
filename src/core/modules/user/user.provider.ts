@@ -70,15 +70,13 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     return this.repository.find({ where: { id: In(ids) } })
   }
 
-  public async getUsersWithObjectives(user: User): Promise<User[]> {
-    const arrayOfTeams = (await this.getUserTeams(user)).map((team) => team.id)
-
+  public async getUsersWithActiveObjectives(teamsIds: Array<TeamInterface['id']>): Promise<User[]> {
     const users = await this.repository
       .createQueryBuilder()
       .innerJoin(`${User.name}.objectives`, 'objective')
       .innerJoinAndSelect(`${User.name}.teams`, 'team')
       .where('objective.teamId IS NULL')
-      .andWhere('team.id IN(:...teamsIds)', { teamsIds: arrayOfTeams })
+      .andWhere('team.id IN(:...teamsIds)', { teamsIds })
       .getMany()
 
     return users
