@@ -91,6 +91,24 @@ export abstract class CoreEntityRepository<E> extends Repository<E> {
     ])
   }
 
+  public buildQueryFromFilters(
+    filters: Record<string, Partial<CoreEntityInterface>>,
+    nullableFilters: NullableFilters,
+  ): string {
+    const filterEntries = Object.entries(filters)
+    const queries = filterEntries.flatMap(([entity, entityFilters]) => {
+      const entityKey = this.entityKeyHashmap[entity] as string
+      const entityFilterKeys = Object.keys(entityFilters)
+      const entityNullableFilters = nullableFilters[entity]
+
+      return entityFilterKeys.map((key) =>
+        this.buildFilterQuery(entityKey, entity, key, entityNullableFilters),
+      )
+    })
+
+    return queries.join(' AND ')
+  }
+
   protected setupTeamQuery(query: SelectQueryBuilder<E>) {
     return query
   }
@@ -125,24 +143,6 @@ export abstract class CoreEntityRepository<E> extends Repository<E> {
       query,
       variables,
     }
-  }
-
-  private buildQueryFromFilters(
-    filters: Record<string, Partial<CoreEntityInterface>>,
-    nullableFilters: NullableFilters,
-  ): string {
-    const filterEntries = Object.entries(filters)
-    const queries = filterEntries.map(([entity, entityFilters]) => {
-      const entityKey = this.entityKeyHashmap[entity] as string
-      const entityFilterKeys = Object.keys(entityFilters)
-      const entityNullableFilters = nullableFilters[entity]
-
-      return entityFilterKeys.flatMap((key) =>
-        this.buildFilterQuery(entityKey, entity, key, entityNullableFilters),
-      )
-    })
-
-    return queries.join(' AND ')
   }
 
   private buildFilterQuery(
