@@ -47,15 +47,23 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
       User
     >(request)
 
-    console.log({ rawFilters, queryOptions, connection })
+    // Caso o filtro de OKR's individuais esteja ativo, os filters e as options não estão disponíveis por dificuldade de implementação na arquitetura atual do projeto. Foi mal futuro dev que vai ler isso!!
+
+    if (rawFilters.onlyWithIndividualObjectives) {
+      console.log('foi')
+      const usersWithIndividualOkr = await this.corePorts.dispatchCommand<User[]>(
+        'get-users-with-individual-okr',
+        userWithContext,
+      )
+      return this.relay.marshalResponse<User>(usersWithIndividualOkr, connection)
+    }
 
     const filters = {
       ...rawFilters,
       status: UserStatus.ACTIVE,
     }
-    const teste = await this.corePorts.dispatchCommand('get-users-with-individual-okr')
 
-    console.log({ teste })
+    delete filters.onlyWithIndividualObjectives
 
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,

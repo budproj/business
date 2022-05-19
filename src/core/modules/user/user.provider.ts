@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { flatten, uniqBy } from 'lodash'
-import { Brackets, FindConditions, In } from 'typeorm'
+import { FindConditions, In } from 'typeorm'
 
 import { CredentialsAdapter } from '@adapters/credentials/credentials.adapter'
 import { Credential, NewCredentialData } from '@adapters/credentials/credentials.interface'
@@ -70,20 +70,15 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     return this.repository.find({ where: { id: In(ids) } })
   }
 
-  public async getUsersWithObjectives(
-    filters?: FindConditions<User>,
-    options?: GetOptions<User>,
-  ): Promise<User[]> {
-    const queryOptions = this.repository.marshalGetOptions(options)
+  public async getUsersWithObjectives(user: User): Promise<User[]> {
+    const arrayOfTeams = (await this.getUserTeams(user)).map((team) => team.id)
 
     const users = await this.repository
       .createQueryBuilder()
       .innerJoin(`${User.name}.objectives`, 'objective')
-      .where(
-        new Brackets((qb) => {
-          qb.where('objective.teamId IS NULL')
-        }),
-      )
+      .innerJoinAndSelect(`${User.name}.teams`, 'team')
+      .where('objective.teamId IS NULL')
+      .andWhere('team.id IN(:...teamsIds)', { teamsIds: arrayOfTeams })
       .getMany()
 
     return users
