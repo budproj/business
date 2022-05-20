@@ -32,7 +32,7 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
   }
 
   public async getUserTeams(
-    user: UserInterface,
+    user: Partial<UserInterface>,
     filters?: FindConditions<TeamInterface>,
     options?: GetOptions<TeamInterface>,
   ): Promise<TeamInterface[]> {

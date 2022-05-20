@@ -257,7 +257,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     const queryResult = await this.corePorts.dispatchCommand<KeyResultCheckMark[]>(
       'get-check-list-for-key-result',
       keyResult.id,
-      filters.onlyAssignedToMe ? state.user.id : undefined,
+      filters.onlyAssignedToMe ? state.user.id : filters?.userId,
     )
 
     return this.relay.marshalResponse<KeyResultCheckMarkInterface>(
