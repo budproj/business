@@ -79,6 +79,8 @@ import { GetTeamMembersCommand } from './get-team-members.command'
 import { GetTeamOwnerCommand } from './get-team-owner.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
 import { GetUserKeyResultsCommand } from './get-user-key-results.command'
+import { GetUserQuarterlyProgressCommand } from './get-user-quarterly-progress.command'
+import { GetUserYearlyProgressCommand } from './get-user-yearly-progress.command'
 import { GetUsersByIdsCommand } from './get-users-by-ids.command'
 import { GetUsersWithIndividualOkr } from './get-users-with-individual-okr.command'
 import { RemoveTeamFromUserCommand } from './remove-team-from-user.command'
@@ -180,6 +182,8 @@ export type CommandType =
   | 'get-objectives-and-key-results-quantities'
   | 'get-key-results'
   | 'get-users-with-individual-okr'
+  | 'get-user-quarterly-progress'
+  | 'get-user-yearly-progress'
 
 @Injectable()
 export class CommandFactory {
@@ -271,6 +275,8 @@ export class CommandFactory {
     'get-objectives-and-key-results-quantities': GetObjectivesAndKeyResultQuantities,
     'get-key-results': GetKeyResults,
     'get-users-with-individual-okr': GetUsersWithIndividualOkr,
+    'get-user-quarterly-progress': GetUserQuarterlyProgressCommand,
+    'get-user-yearly-progress': GetUserYearlyProgressCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}

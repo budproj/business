@@ -22,3 +22,8 @@ export interface UserCredentialsAdditionalData {
   name?: string
   password?: string
 }
+
+export interface UserReportProgress {
+  showProgress: boolean
+  progress: number
+}
