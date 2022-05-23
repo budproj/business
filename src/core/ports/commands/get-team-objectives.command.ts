@@ -15,13 +15,15 @@ export class GetTeamObjectivesCommand extends Command<Objective[]> {
     teamId: string,
     properties: Partial<GetTeamObjectivesProperties>,
   ): ObjectiveRelationFilterProperties {
+    const { active, ...objectiveFilters } = properties
+    const cycleFilters = typeof active === 'boolean' ? { cycle: { active } } : {}
+
     return {
       objective: {
         teamId,
+        ...objectiveFilters,
       },
-      cycle: {
-        active: properties.active,
-      },
+      ...cycleFilters,
     }
   }
 
