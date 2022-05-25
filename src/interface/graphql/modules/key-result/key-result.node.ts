@@ -55,7 +55,11 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
   @Field(() => ID, { complexity: 0, description: 'The object ID that this key result belongs to' })
   public readonly objectiveId!: string
 
-  @Field(() => ID, { complexity: 0, description: 'The team ID that this key result belongs to' })
+  @Field(() => ID, {
+    complexity: 0,
+    nullable: true,
+    description: 'The team ID that this key result belongs to',
+  })
   public readonly teamId!: string
 
   @Field({

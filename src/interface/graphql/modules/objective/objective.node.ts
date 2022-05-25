@@ -27,7 +27,11 @@ export class ObjectiveGraphQLNode implements GuardedNodeGraphQLInterface {
   @Field(() => ID, { complexity: 0, description: 'The cycle ID that owns this objective' })
   public readonly cycleId!: string
 
-  @Field(() => ID, { complexity: 0, description: 'The team ID that owns this objective' })
+  @Field(() => ID, {
+    complexity: 0,
+    nullable: true,
+    description: 'The team ID that owns this objective',
+  })
   public readonly teamId!: string
 
   @Field(() => ID, { complexity: 0, description: 'The user ID that owns this objective' })

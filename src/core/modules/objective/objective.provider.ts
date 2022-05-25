@@ -135,7 +135,15 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
       isEmpty,
     )
 
-    return this.repository.findWithRelationFilters(cleanedRelationFilters, orderAttributes)
+    const nullableFilters = {
+      objective: ['teamId'],
+    }
+
+    return this.repository.findWithRelationFilters(
+      cleanedRelationFilters,
+      nullableFilters,
+      orderAttributes,
+    )
   }
 
   public async createObjective(objectiveData: ObjectiveInterface): Promise<Objective> {
