@@ -18,7 +18,6 @@ export class UserFiltersRequest extends ConnectionFiltersRequest<UserOrderInputO
 
   @Field(() => Boolean, {
     nullable: true,
-    defaultValue: false,
     description: 'Define if the query should return only users with individual objectives',
   })
   public onlyWithIndividualObjectives?: boolean
