@@ -9,6 +9,7 @@ export class GetUserQuarterlyProgressCommand extends Command<KeyResult[]> {
     const keyResults = await this.core.keyResult.getKeyResultsFromUserByCadence(
       userID,
       Cadence.QUARTERLY,
+      true,
     )
 
     if (keyResults.length > 0) {

@@ -247,8 +247,12 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return uniqBy(keyResults, 'id')
   }
 
-  public async getKeyResultsFromUserByCadence(userID: UserInterface['id'], cadence: Cadence) {
-    const keyResults = await this.repository
+  public async getKeyResultsFromUserByCadence(
+    userID: UserInterface['id'],
+    cadence: Cadence,
+    isKeyResultsFromCompany?: boolean,
+  ) {
+    let query = this.repository
       .createQueryBuilder()
       .innerJoin(`${KeyResult.name}.objective`, 'objective')
       .innerJoin(Cycle, 'cycle', 'cycle.id = objective.cycle_id')
@@ -263,7 +267,12 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       )
       .andWhere('cycle.cadence = :cadence', { cadence })
       .andWhere('cycle.active = true')
-      .getMany()
+
+    if (isKeyResultsFromCompany) {
+      query = query.andWhere(`${KeyResult.name}.teamId IS NOT NULL`)
+    }
+
+    const keyResults = await query.getMany()
 
     return keyResults
   }
