@@ -125,7 +125,11 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: ObjectiveCreateRequest,
     @RequestState() state: State,
   ) {
-    const canCreate = await this.accessControl.canCreate(state.user, request.data.teamId)
+    const canCreate = await this.accessControl.canCreate(
+      state.user,
+      request.data.teamId,
+      request.data.ownerId,
+    )
     if (!canCreate) throw new UnauthorizedException()
 
     this.logger.log({
