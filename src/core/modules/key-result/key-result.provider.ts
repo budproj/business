@@ -272,9 +272,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       query = query.andWhere(`${KeyResult.name}.teamId IS NOT NULL`)
     }
 
-    const keyResults = await query.getMany()
-
-    return keyResults
+    return query.getMany()
   }
 
   public async getComments(
