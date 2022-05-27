@@ -4,6 +4,7 @@ import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-resu
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
+import { ObjectiveKeyResultAccessControl } from '@interface/graphql/modules/objective/access-control/objective-key-result.access-control'
 
 import { ObjectiveKeyResultsGraphQLConnection } from './objective-key-results.connection'
 
@@ -12,7 +13,10 @@ export class ObjectiveKeyResultsConnectionGraphQLResolver extends GuardedConnect
   KeyResult,
   KeyResultInterface
 > {
-  constructor(protected readonly core: CoreProvider) {
-    super(Resource.KEY_RESULT, core, core.keyResult)
+  constructor(
+    protected readonly core: CoreProvider,
+    accessControl: ObjectiveKeyResultAccessControl,
+  ) {
+    super(Resource.KEY_RESULT, core, core.keyResult, accessControl)
   }
 }
