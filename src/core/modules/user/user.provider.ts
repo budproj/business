@@ -7,6 +7,7 @@ import { Credential, NewCredentialData } from '@adapters/credentials/credentials
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
+import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserSettingProvider } from '@core/modules/user/setting/user-setting.provider'
 import { CreationQuery } from '@core/types/creation-query.type'
@@ -75,8 +76,10 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
       .createQueryBuilder()
       .innerJoin(`${User.name}.objectives`, 'objective')
       .innerJoinAndSelect(`${User.name}.teams`, 'team')
+      .innerJoin(Cycle, 'cycle', 'cycle.id = objective.cycle_id')
       .where('objective.teamId IS NULL')
       .andWhere('team.id IN(:...teamsIds)', { teamsIds })
+      .andWhere('cycle.active IS TRUE')
       .getMany()
 
     return users
