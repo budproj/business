@@ -50,7 +50,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   constructor(
     protected readonly core: CoreProvider,
     protected readonly corePorts: CorePortsProvider,
-    accessControl: ObjectiveBaseAccessControl,
+    protected readonly accessControl: ObjectiveBaseAccessControl,
   ) {
     super(Resource.OBJECTIVE, core, core.objective, accessControl)
   }
