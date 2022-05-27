@@ -129,7 +129,11 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: KeyResultCreateRequest,
     @RequestState() state: State,
   ) {
-    const canCreate = await this.accessControl.canCreate(state.user, request.data.teamId)
+    const canCreate = await this.accessControl.canCreate(
+      state.user,
+      request.data.teamId,
+      request.data.ownerId,
+    )
     if (!canCreate) throw new UnauthorizedException()
 
     this.logger.log({

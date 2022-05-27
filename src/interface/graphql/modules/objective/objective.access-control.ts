@@ -51,7 +51,9 @@ export class ObjectiveAccessControl extends AccessControl {
     const objective = await this.core.dispatchCommand<Objective>('get-objective', {
       id: objectiveID,
     })
-    const teams = await this.core.dispatchCommand<Team[]>('get-objective-team-tree', objective)
+    const teams = objective.teamId
+      ? await this.core.dispatchCommand<Team[]>('get-objective-team-tree', objective)
+      : []
 
     const isObjectiveOwner = ObjectiveAccessControl.isObjectiveOwner(objective, user)
     const isTeamLeader = await this.isTeamLeader(teams, user)

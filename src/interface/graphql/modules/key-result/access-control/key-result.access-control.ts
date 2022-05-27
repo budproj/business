@@ -17,7 +17,16 @@ export class KeyResultAccessControl extends KeyResultBaseAccessControl {
   protected async resolveContextScopes(
     user: UserWithContext,
     teamID: string,
+    ownerId: string,
   ): Promise<AccessControlScopes> {
+    if (!teamID) {
+      return {
+        isTeamLeader: false,
+        isCompanyMember: false,
+        isOwner: ownerId === user.id,
+      }
+    }
+
     return this.resolveTeamContext(user, teamID)
   }
 
