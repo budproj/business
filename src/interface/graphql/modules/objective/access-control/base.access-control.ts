@@ -9,7 +9,7 @@ import { Team } from '@core/modules/team/team.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
 @Injectable()
-export class ObjectiveAccessControl extends AccessControl {
+export class ObjectiveBaseAccessControl extends AccessControl {
   protected readonly resource = Resource.OBJECTIVE
 
   constructor(protected core: CorePortsProvider) {
@@ -55,7 +55,7 @@ export class ObjectiveAccessControl extends AccessControl {
       ? await this.core.dispatchCommand<Team[]>('get-objective-team-tree', objective)
       : []
 
-    const isObjectiveOwner = ObjectiveAccessControl.isObjectiveOwner(objective, user)
+    const isObjectiveOwner = ObjectiveBaseAccessControl.isObjectiveOwner(objective, user)
     const isTeamLeader = await this.isTeamLeader(teams, user)
     const isCompanyMember = await this.isCompanyMember(teams, user)
 

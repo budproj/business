@@ -21,8 +21,8 @@ import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authoriz
 import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
+import { ObjectiveBaseAccessControl } from '@interface/graphql/modules/objective/access-control/base.access-control'
 import { ObjectiveTeamsGraphQLConnection } from '@interface/graphql/modules/objective/connections/objective-teams/objective-teams.connection'
-import { ObjectiveAccessControl } from '@interface/graphql/modules/objective/objective.access-control'
 import { ObjectiveCreateRequest } from '@interface/graphql/modules/objective/requests/objective-create.request'
 import { ObjectiveUpdateRequest } from '@interface/graphql/modules/objective/requests/objective-update.request'
 import { TeamFiltersRequest } from '@interface/graphql/modules/team/requests/team-filters.request'
@@ -50,7 +50,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   constructor(
     protected readonly core: CoreProvider,
     protected readonly corePorts: CorePortsProvider,
-    accessControl: ObjectiveAccessControl,
+    accessControl: ObjectiveBaseAccessControl,
   ) {
     super(Resource.OBJECTIVE, core, core.objective, accessControl)
   }

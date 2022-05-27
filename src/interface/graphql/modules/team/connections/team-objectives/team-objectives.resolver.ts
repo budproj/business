@@ -4,7 +4,7 @@ import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
-import { ObjectiveAccessControl } from '@interface/graphql/modules/objective/objective.access-control'
+import { ObjectiveBaseAccessControl } from '@interface/graphql/modules/objective/access-control/base.access-control'
 
 import { TeamObjectivesGraphQLConnection } from './team-objectives.connection'
 
@@ -13,7 +13,7 @@ export class TeamObjectivesConnectionGraphQLResolver extends GuardedConnectionGr
   Objective,
   ObjectiveInterface
 > {
-  constructor(protected readonly core: CoreProvider, accessControl: ObjectiveAccessControl) {
+  constructor(protected readonly core: CoreProvider, accessControl: ObjectiveBaseAccessControl) {
     super(Resource.OBJECTIVE, core, core.objective, accessControl)
   }
 }

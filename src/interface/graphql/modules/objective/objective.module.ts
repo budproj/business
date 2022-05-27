@@ -5,8 +5,8 @@ import { CoreModule } from '@core/core.module'
 import { ObjectiveKeyResultsConnectionGraphQLResolver } from '@interface/graphql/modules/objective/connections/objective-key-results/objective-key-results.resolver'
 import { ObjectiveTeamsGraphQLConnection } from '@interface/graphql/modules/objective/connections/objective-teams/objective-teams.connection'
 
+import { ObjectiveBaseAccessControl } from './access-control/base.access-control'
 import { ObjectivesConnectionGraphQLResolver } from './connections/objectives/objectives.resolver'
-import { ObjectiveAccessControl } from './objective.access-control'
 import { ObjectiveGraphQLResolver } from './objective.resolver'
 
 @Module({
@@ -16,8 +16,8 @@ import { ObjectiveGraphQLResolver } from './objective.resolver'
     ObjectivesConnectionGraphQLResolver,
     ObjectiveKeyResultsConnectionGraphQLResolver,
     ObjectiveTeamsGraphQLConnection,
-    ObjectiveAccessControl,
+    ObjectiveBaseAccessControl,
   ],
-  exports: [ObjectiveAccessControl],
+  exports: [ObjectiveBaseAccessControl],
 })
 export class ObjectiveGraphQLModule {}
