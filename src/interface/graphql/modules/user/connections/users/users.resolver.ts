@@ -50,7 +50,6 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
     // Caso o filtro de OKR's individuais esteja ativo, os filters e as options não estão disponíveis por dificuldade de implementação na arquitetura atual do projeto. Foi mal futuro dev que vai ler isso!!
 
     if (rawFilters.onlyWithIndividualObjectives) {
-      console.log('foi')
       const usersWithIndividualOkr = await this.corePorts.dispatchCommand<User[]>(
         'get-users-with-individual-okr',
         userWithContext,
