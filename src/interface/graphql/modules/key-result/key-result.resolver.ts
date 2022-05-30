@@ -75,8 +75,8 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: NodeIndexesRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    const canCreate = await this.accessControl.canCreate(userWithContext, request.id)
-    if (!canCreate) throw new UnauthorizedException()
+    const canRead = await this.accessControl.canRead(userWithContext, request.id)
+    if (!canRead) throw new UnauthorizedException()
 
     this.logger.log({
       request,
