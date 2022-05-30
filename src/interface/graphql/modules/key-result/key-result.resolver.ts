@@ -75,15 +75,16 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: NodeIndexesRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
+    const canCreate = await this.accessControl.canCreate(userWithContext, request.id)
+    if (!canCreate) throw new UnauthorizedException()
+
     this.logger.log({
       request,
       message: 'Fetching key-result with provided indexes',
     })
 
-    const keyResult = await this.queryGuard.getOneWithActionScopeConstraint(
-      request,
-      userWithContext,
-    )
+    const keyResult = await this.corePorts.dispatchCommand<KeyResult>('get-key-result', request)
+
     if (!keyResult)
       throw new UserInputError(`We could not found an key-result with the provided arguments`)
 
