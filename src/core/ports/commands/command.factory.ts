@@ -4,6 +4,7 @@ import { CoreProvider } from '@core/core.provider'
 import { CreateCycleCommand } from '@core/ports/commands/create-cycle.command'
 import { CreateKeyResultCommand } from '@core/ports/commands/create-key-result.command'
 import { CreateObjectiveCommand } from '@core/ports/commands/create-objective.command'
+import { DeleteCycleCommand } from '@core/ports/commands/delete-cycle.command'
 import { DeleteKeyResultCommand } from '@core/ports/commands/delete-key-result.command'
 import { DeleteObjectiveCommand } from '@core/ports/commands/delete-objective.command'
 import { GetCycleDeltaCommand } from '@core/ports/commands/get-cycle-delta.command'
@@ -36,6 +37,7 @@ import { GetUserSettingsCommand } from '@core/ports/commands/get-user-settings.c
 import { GetUserTeamTreeCommand } from '@core/ports/commands/get-user-team-tree.command'
 import { GetUserCommand } from '@core/ports/commands/get-user.command'
 import { InviteUserCommand } from '@core/ports/commands/invite-user.command'
+import { UpdateCycleCommand } from '@core/ports/commands/update-cycle.command'
 import { UpdateKeyResultCommand } from '@core/ports/commands/update-key-result.command'
 import { UpdateObjectiveCommand } from '@core/ports/commands/update-objective.command'
 import { UpdateUserSettingCommand } from '@core/ports/commands/update-user-setting.command'
@@ -168,6 +170,8 @@ export type CommandType =
   | 'update-check-mark-description'
   | 'update-key-result'
   | 'update-objective'
+  | 'update-cycle'
+  | 'delete-cycle'
   | 'update-team'
   | 'update-user'
   | 'update-user-setting'
@@ -274,6 +278,8 @@ export class CommandFactory {
     'get-key-results': GetKeyResults,
     'get-user-quarterly-progress': GetUserQuarterlyProgressCommand,
     'get-user-yearly-progress': GetUserYearlyProgressCommand,
+    'update-cycle': UpdateCycleCommand,
+    'delete-cycle': DeleteCycleCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}
