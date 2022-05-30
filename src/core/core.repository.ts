@@ -101,9 +101,10 @@ export abstract class CoreEntityRepository<E> extends Repository<E> {
       const entityFilterKeys = Object.keys(entityFilters)
       const entityNullableFilters = nullableFilters[entity]
 
-      return entityFilterKeys.map((key) =>
-        this.buildFilterQuery(entityKey, entity, key, entityNullableFilters),
-      )
+      return entityFilterKeys.map((key) => {
+        const value = filters[entity][key]
+        return this.buildFilterQuery(entityKey, entity, key, entityNullableFilters, value)
+      })
     })
 
     return queries.join(' AND ')
@@ -150,6 +151,7 @@ export abstract class CoreEntityRepository<E> extends Repository<E> {
     entity: string,
     key: string,
     nullableFilters?: string[],
+    value?: unknown,
   ): string {
     const isNullable = nullableFilters?.includes(key)
     const nullableQuery = isNullable ? `OR ${entityName}.${key} IS NULL` : ''
@@ -158,7 +160,9 @@ export abstract class CoreEntityRepository<E> extends Repository<E> {
         ? this.filterOperatorHashmap[key]
         : this.filterOperatorHashmap.default
 
-    return `(${entityName}.${key} ${operator} :${entity}_${key} ${nullableQuery})`
+    return `(${entityName}.${key} ${
+      value === null ? 'IS NULL' : `${operator} :${entity}_${key} ${nullableQuery}`
+    })`
   }
 
   private buildVariablesFromFilters(

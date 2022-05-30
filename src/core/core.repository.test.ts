@@ -16,7 +16,7 @@ describe('CoreRepository', () => {
 
   describe('buildQueryFromFilters', () => {
     it('should build a query with only one entity filter', () => {
-      // Arrenge
+      // Arrange
       const filters = {
         cycle: {
           id: '2343197f-6bd7-4336-b276-dd94a4a7951d',
@@ -35,7 +35,7 @@ describe('CoreRepository', () => {
     })
 
     it('should build a query with only two entity filter', () => {
-      // Arrenge
+      // Arrange
       const filters = {
         cycle: {
           active: true,
@@ -57,7 +57,7 @@ describe('CoreRepository', () => {
     })
 
     it('should build a query with only three entity filter', () => {
-      // Arrenge
+      // Arrange
       const filters = {
         keyResult: {
           createdAt: {},
@@ -84,7 +84,7 @@ describe('CoreRepository', () => {
     })
 
     it('should build a query with one entity and two columns filter', () => {
-      // Arrenge
+      // Arrange
       const filters = {
         objective: {
           ownerId: '123',
@@ -104,7 +104,7 @@ describe('CoreRepository', () => {
     })
 
     it('should build a query with two entity and two columns filter', () => {
-      // Arrenge
+      // Arrange
       const filters = {
         objective: {
           ownerId: '123',
@@ -128,7 +128,7 @@ describe('CoreRepository', () => {
     })
 
     it('should build a query with three entity and three columns filter', () => {
-      // Arrenge
+      // Arrange
       const filters = {
         objective: {
           cycleId: '000',
@@ -153,6 +153,66 @@ describe('CoreRepository', () => {
       )
     })
 
-    it.todo('CREATE TESTCASES TO TEST NULLABLE FILTERS')
+    describe('Nullable filters', () => {
+      it('should add OR {field} IS NULL if the the filter has any of the nullable fielters', () => {
+        // Arrange
+        const currentDate = '2022-01-01 12:00:00'
+        const filters = {
+          keyResultCheckIn: {
+            createdAt: currentDate,
+          },
+        } as any
+
+        const nullableFilters = {
+          keyResultCheckIn: ['createdAt'],
+        }
+
+        // Act
+        const result = dummyService.buildQueryFromFilters(filters, nullableFilters)
+
+        // Assert
+        expect(result).toBe(
+          '(KeyResultCheckIn.createdAt < :keyResultCheckIn_createdAt OR KeyResultCheckIn.createdAt IS NULL)',
+        )
+      })
+
+      it('should add {field} IS NULL if the the filter is null', () => {
+        // Arrange
+        const filters = {
+          objective: {
+            // eslint-disable-next-line unicorn/no-null
+            teamId: null,
+          },
+        } as any
+
+        const nullableFilters = {}
+
+        // Act
+        const result = dummyService.buildQueryFromFilters(filters, nullableFilters)
+
+        // Assert
+        expect(result).toBe('(Objective.teamId IS NULL)')
+      })
+
+      it('should ignore the nullable filter if the filter query is null', () => {
+        // Arrange
+        const filters = {
+          objective: {
+            // eslint-disable-next-line unicorn/no-null
+            teamId: null,
+          },
+        } as any
+
+        const nullableFilters = {
+          objective: ['teamId'],
+        }
+
+        // Act
+        const result = dummyService.buildQueryFromFilters(filters, nullableFilters)
+
+        // Assert
+        expect(result).toBe('(Objective.teamId IS NULL)')
+      })
+    })
   })
 })

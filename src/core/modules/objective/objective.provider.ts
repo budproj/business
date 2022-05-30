@@ -135,9 +135,7 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
       isEmpty,
     )
 
-    const nullableFilters = {
-      objective: ['teamId'],
-    }
+    const nullableFilters = {}
 
     return this.repository.findWithRelationFilters(
       cleanedRelationFilters,
