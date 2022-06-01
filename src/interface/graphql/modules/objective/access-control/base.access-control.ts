@@ -26,9 +26,15 @@ export class ObjectiveBaseAccessControl extends AccessControl {
     ownerId: string,
   ): Promise<AccessControlScopes> {
     if (!teamID) {
+      const userCompanies = await this.core.dispatchCommand<Team[]>('get-user-team-tree', {
+        id: ownerId,
+      })
+
+      const isCompanyMember = await this.isCompanyMember(userCompanies, user)
+
       return {
         isTeamLeader: false,
-        isCompanyMember: false,
+        isCompanyMember,
         isOwner: ownerId === user.id,
       }
     }
