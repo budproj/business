@@ -25,4 +25,10 @@ export class UserKeyResultsRequest extends KeyResultFiltersRequest {
     nullable: true,
   })
   public confidence?: ConfidenceTag
+
+  @Field(() => Boolean, {
+    description: 'A flag that defines if we should fetch only key-results from a company',
+    nullable: true,
+  })
+  public onlyKeyResultsFromCompany?: boolean
 }
