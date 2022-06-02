@@ -58,12 +58,12 @@ export class KeyResult extends CoreEntity implements KeyResultInterface {
   @ManyToOne('Objective', 'keyResults')
   public objective: ObjectiveInterface
 
-  @Column()
+  @Column({ nullable: true })
   @RelationId((keyResult: KeyResult) => keyResult.team)
-  public teamId: TeamInterface['id']
+  public teamId?: TeamInterface['id']
 
-  @ManyToOne('Team', 'keyResults')
-  public team: TeamInterface
+  @ManyToOne('Team', 'keyResults', { nullable: true })
+  public team?: TeamInterface
 
   @Column({ type: 'text', nullable: true })
   public description?: string

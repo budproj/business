@@ -91,6 +91,25 @@ export abstract class CoreEntityRepository<E> extends Repository<E> {
     ])
   }
 
+  public buildQueryFromFilters(
+    filters: Record<string, Partial<CoreEntityInterface>>,
+    nullableFilters: NullableFilters,
+  ): string {
+    const filterEntries = Object.entries(filters)
+    const queries = filterEntries.flatMap(([entity, entityFilters]) => {
+      const entityKey = this.entityKeyHashmap[entity] as string
+      const entityFilterKeys = Object.keys(entityFilters)
+      const entityNullableFilters = nullableFilters[entity]
+
+      return entityFilterKeys.map((key) => {
+        const value = filters[entity][key]
+        return this.buildFilterQuery(entityKey, entity, key, entityNullableFilters, value)
+      })
+    })
+
+    return queries.join(' AND ')
+  }
+
   protected setupTeamQuery(query: SelectQueryBuilder<E>) {
     return query
   }
@@ -127,29 +146,12 @@ export abstract class CoreEntityRepository<E> extends Repository<E> {
     }
   }
 
-  private buildQueryFromFilters(
-    filters: Record<string, Partial<CoreEntityInterface>>,
-    nullableFilters: NullableFilters,
-  ): string {
-    const filterEntries = Object.entries(filters)
-    const queries = filterEntries.map(([entity, entityFilters]) => {
-      const entityKey = this.entityKeyHashmap[entity] as string
-      const entityFilterKeys = Object.keys(entityFilters)
-      const entityNullableFilters = nullableFilters[entity]
-
-      return entityFilterKeys.flatMap((key) =>
-        this.buildFilterQuery(entityKey, entity, key, entityNullableFilters),
-      )
-    })
-
-    return queries.join(' AND ')
-  }
-
   private buildFilterQuery(
     entityName: string,
     entity: string,
     key: string,
     nullableFilters?: string[],
+    value?: unknown,
   ): string {
     const isNullable = nullableFilters?.includes(key)
     const nullableQuery = isNullable ? `OR ${entityName}.${key} IS NULL` : ''
@@ -158,7 +160,9 @@ export abstract class CoreEntityRepository<E> extends Repository<E> {
         ? this.filterOperatorHashmap[key]
         : this.filterOperatorHashmap.default
 
-    return `(${entityName}.${key} ${operator} :${entity}_${key} ${nullableQuery})`
+    return `(${entityName}.${key} ${
+      value === null ? 'IS NULL' : `${operator} :${entity}_${key} ${nullableQuery}`
+    })`
   }
 
   private buildVariablesFromFilters(

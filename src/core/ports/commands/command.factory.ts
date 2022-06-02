@@ -72,6 +72,7 @@ import { GetKeyResultsContainingUserChecklistCommand } from './get-key-results-c
 import { GetKeyResults } from './get-key-results.command'
 import { GetObjectiveKeyResultsCommand } from './get-objective-key-results.command'
 import { GetObjectivesAndKeyResultQuantities } from './get-objectives-and-key-results-quantities.command'
+import { GetObjectivesCommand } from './get-objectives.command'
 import { GetTaskByIdCommand } from './get-task-by-id.command'
 import { GetTasksFromUserCommand } from './get-tasks-from-user.command'
 import { GetTeamCompanyCommand } from './get-team-company.command'
@@ -82,6 +83,7 @@ import { GetUserKeyResultsCommand } from './get-user-key-results.command'
 import { GetUserQuarterlyProgressCommand } from './get-user-quarterly-progress.command'
 import { GetUserYearlyProgressCommand } from './get-user-yearly-progress.command'
 import { GetUsersByIdsCommand } from './get-users-by-ids.command'
+import { GetUsersWithIndividualOkr } from './get-users-with-individual-okr.command'
 import { RemoveTeamFromUserCommand } from './remove-team-from-user.command'
 import { RemoveUserToKeyResultSupportTeamCommand } from './remove-user-to-key-result-support-team.command'
 import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
@@ -180,8 +182,10 @@ export type CommandType =
   | 'get-task-by-id'
   | 'get-objectives-and-key-results-quantities'
   | 'get-key-results'
+  | 'get-users-with-individual-okr'
   | 'get-user-quarterly-progress'
   | 'get-user-yearly-progress'
+  | 'get-objectives'
 
 @Injectable()
 export class CommandFactory {
@@ -272,8 +276,10 @@ export class CommandFactory {
     'get-task-by-id': GetTaskByIdCommand,
     'get-objectives-and-key-results-quantities': GetObjectivesAndKeyResultQuantities,
     'get-key-results': GetKeyResults,
+    'get-users-with-individual-okr': GetUsersWithIndividualOkr,
     'get-user-quarterly-progress': GetUserQuarterlyProgressCommand,
     'get-user-yearly-progress': GetUserYearlyProgressCommand,
+    'get-objectives': GetObjectivesCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}

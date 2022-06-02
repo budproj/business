@@ -7,6 +7,7 @@ import { CoreProvider } from '@core/core.provider'
 import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
+import { CorePortsProvider } from '@core/ports/ports.provider'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
@@ -23,7 +24,10 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
 > {
   private readonly logger = new Logger(UsersConnectionGraphQLResolver.name)
 
-  constructor(protected readonly core: CoreProvider) {
+  constructor(
+    protected readonly core: CoreProvider,
+    private readonly corePorts: CorePortsProvider,
+  ) {
     super(Resource.USER, core, core.user)
   }
 
@@ -43,10 +47,22 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
       User
     >(request)
 
+    // Caso o filtro de OKR's individuais esteja ativo, os filters e as options não estão disponíveis por dificuldade de implementação na arquitetura atual do projeto. Foi mal futuro dev que vai ler isso!!
+
+    if (rawFilters.onlyWithIndividualObjectives) {
+      const usersWithIndividualOkr = await this.corePorts.dispatchCommand<User[]>(
+        'get-users-with-individual-okr',
+        userWithContext,
+      )
+      return this.relay.marshalResponse<User>(usersWithIndividualOkr, connection)
+    }
+
     const filters = {
       ...rawFilters,
       status: UserStatus.ACTIVE,
     }
+
+    delete filters.onlyWithIndividualObjectives
 
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,

@@ -38,7 +38,9 @@ export class KeyResultCheckMarkAccessControl extends KeyResultBaseAccessControl 
 
     const isOwner = await this.isKeyResultOwner(keyResult, user)
     const isTeamLeader = await this.isTeamLeader(teams, user)
-    const isCompanyMember = await this.isKeyResultCompanyMember(keyResult, user)
+    const isCompanyMember = keyResult.teamId
+      ? await this.isKeyResultCompanyMember(keyResult, user)
+      : false
 
     return {
       isTeamLeader,

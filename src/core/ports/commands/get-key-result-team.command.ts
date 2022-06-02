@@ -5,6 +5,10 @@ import { Command } from './base.command'
 
 export class GetKeyResultTeamCommand extends Command<Team> {
   public async execute(keyResult: KeyResult): Promise<Team> {
+    if (!keyResult.teamId) {
+      return
+    }
+
     return this.core.team.getFromIndexes({ id: keyResult.teamId })
   }
 }
