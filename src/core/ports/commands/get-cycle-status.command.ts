@@ -8,7 +8,12 @@ export class GetCycleStatusCommand extends BaseStatusCommand {
     options: GetStatusOptions = this.defaultOptions,
   ): Promise<Status> {
     const keyResults = (await this.getKeyResultsFromCycle(cycleID, options)) as any
-    const [cycleCheckIns, progresses, confidences] = await this.unzipKeyResultGroup(keyResults)
+
+    const filteredKeyResults = keyResults.filter((keyResult) => keyResult.teamId !== null)
+
+    const [cycleCheckIns, progresses, confidences] = await this.unzipKeyResultGroup(
+      filteredKeyResults,
+    )
 
     const latestCheckIn = this.getLatestCheckInFromList(cycleCheckIns)
     const isOutdated = this.isOutdated(latestCheckIn)

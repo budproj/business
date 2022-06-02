@@ -310,7 +310,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       request,
     )
 
-    const { active, hasUserCheckMarks, confidence, ...filters } = options
+    const { active, hasUserCheckMarks, confidence, onlyKeyResultsFromCompany, ...filters } = options
     const command = hasUserCheckMarks
       ? 'get-key-results-containing-user-checklist'
       : 'get-user-key-results'
@@ -321,8 +321,10 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       filters,
       { active, confidence },
     )
-
-    return this.relay.marshalResponse<KeyResultInterface>(queryResult, connection, user)
+    // eslint-disable-next-line no-warning-comments
+    // TODO: Esse filtro deve ser removido quando o backend for refatorado. O filtro pode ser feito dentro dos comandos, mas como a feature precisava ser entregue, foi feito dessa forma.
+const filteredResults = onlyKeyResultsFromCompany ? queryResult.filter((keyResult) => keyResult.teamId !== null) :  queryResult;
+    return this.relay.marshalResponse<KeyResultInterface>(filteredResults, connection, user)
   }
 
   @ResolveField('keyResultComments', () => UserKeyResultCommentsGraphQLConnection, {

@@ -80,6 +80,7 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
       .where('objective.teamId IS NULL')
       .andWhere('team.id IN(:...teamsIds)', { teamsIds })
       .andWhere('cycle.active IS TRUE')
+      .orderBy(`${User.name}.firstName`, 'ASC')
       .getMany()
 
     return users
