@@ -1,15 +1,32 @@
-FROM node:15.5.1-alpine3.10
+FROM node:15.5.1-alpine3.10 AS build
 
-USER root
+ARG GITHUB_TOKEN
+
+ENV NODE_ENV="development"
+
+WORKDIR /build
+
+COPY ./package.json ./
+COPY ./package-lock.json ./
+COPY ./.npmrc ./
+COPY ./bin ./bin
+
+RUN npm i --ignore-scripts
+
+COPY . ./
+
+RUN npm run build
+
+FROM node:15.5.1-alpine3.10 AS final
 
 ENV NODE_ENV="production"
 
 WORKDIR /usr/app
 
-COPY package.json ./
-COPY package-lock.json ./
-RUN npm install --ignore-scripts
+COPY --from=build /build/package.json ./
+COPY --from=build /build/package-lock.json ./
+COPY --from=build /build/dist dist
 
-COPY dist dist
+RUN npm i --ignore=dev --ignore-scripts
 
-CMD [ "npm", "start" ]
+CMD [ "npm", "run", "start:prod" ]

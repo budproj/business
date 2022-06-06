@@ -1,0 +1,6 @@
+node_modules
+dist
+.waypoint
+.env
+data.db
+Dockerfile
