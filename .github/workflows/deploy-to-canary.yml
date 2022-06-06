@@ -1,10 +1,11 @@
 name: deployToCanary
 
+
 on:
+  workflow_dispatch: {}
   push:
     branches:
       - 'main'
-      - 'ci/deploy-to-canary'
 
 jobs:
   DeployToCanary:
