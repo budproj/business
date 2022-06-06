@@ -27,4 +27,6 @@ COPY --from=build /build/package.json ./
 COPY --from=build /build/package-lock.json ./
 COPY --from=build /build/dist dist
 
+RUN npm i --ignore=dev --ignore-scripts
+
 CMD [ "npm", "run", "start:prod" ]

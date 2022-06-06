@@ -3,3 +3,4 @@ dist
 .waypoint
 .env
 data.db
+Dockerfile
