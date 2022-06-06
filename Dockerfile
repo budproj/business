@@ -27,4 +27,4 @@ COPY --from=build /build/package.json ./
 COPY --from=build /build/package-lock.json ./
 COPY --from=build /build/dist dist
 
-CMD [ "npm", "start:prod" ]
+CMD [ "npm", "run", "start:prod" ]
