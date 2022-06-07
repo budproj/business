@@ -86,4 +86,9 @@ export class AuthzClientProvider {
     )
     await this.mgmtClient.assignRolestoUser({ id: authzSubUserId }, { roles: [roleWithId.id] })
   }
+
+  public async getUserRole(authzSubUserId: string) {
+    const userRoles = await this.mgmtClient.getUserRoles({ id: authzSubUserId })
+    return userRoles[0]
+  }
 }

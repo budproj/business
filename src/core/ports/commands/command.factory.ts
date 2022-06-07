@@ -83,6 +83,7 @@ import { GetTeamOwnerCommand } from './get-team-owner.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
 import { GetUserKeyResultsCommand } from './get-user-key-results.command'
 import { GetUserQuarterlyProgressCommand } from './get-user-quarterly-progress.command'
+import { GetUserRoleCommand } from './get-user-role.command'
 import { GetUserYearlyProgressCommand } from './get-user-yearly-progress.command'
 import { GetUsersByIdsCommand } from './get-users-by-ids.command'
 import { GetUsersWithIndividualOkr } from './get-users-with-individual-okr.command'
@@ -192,6 +193,7 @@ export type CommandType =
   | 'get-user-yearly-progress'
   | 'get-objectives'
   | 'update-user-role'
+  | 'get-user-role'
 
 @Injectable()
 export class CommandFactory {
@@ -289,6 +291,7 @@ export class CommandFactory {
     'delete-cycle': DeleteCycleCommand,
     'get-objectives': GetObjectivesCommand,
     'update-user-role': UpdateUserRoleCommand,
+    'get-user-role': GetUserRoleCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}
