@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
+import { Role } from 'auth0'
 import { FileUpload } from 'graphql-upload'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
@@ -55,6 +56,7 @@ import { UserTasksGraphQLConnection } from './connections/user-tasks/user-tasks.
 import { UserTeamsGraphQLConnection } from './connections/user-teams/user-teams.connection'
 import { EmailAlreadyExistsApolloError } from './exceptions/email-already-exists.exception'
 import { UserReportProgressObject } from './objects/user-report-progress.object'
+import { UserRoleObject } from './objects/user-role-object'
 import { UserCreateRequest } from './requests/user-create.request'
 import { UserDeactivateRequest } from './requests/user-deactivate.request'
 import { UserKeyResultsRequest } from './requests/user-key-results.request'
@@ -223,6 +225,16 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       request.authzSubUserId,
       request.role,
     )
+  }
+
+  @ResolveField('role', () => UserRoleObject)
+  protected async getRoleForUser(@Parent() user: UserGraphQLNode) {
+    this.logger.log({
+      user,
+      message: 'Fetching user full name',
+    })
+
+    return this.corePorts.dispatchCommand<Role>('get-user-role', user.authzSub)
   }
 
   @ResolveField('fullName', () => String)
