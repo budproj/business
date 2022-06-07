@@ -94,6 +94,7 @@ import { UpdateCheckMarkAssigneeCommand } from './update-check-mark-assignee.com
 import { UpdateCheckMarkDescriptionCommand } from './update-check-mark-description.command'
 import { UpdateTaskDescriptionCommand } from './update-task-description.command'
 import { UpdateTeamCommand } from './update-team.command'
+import { UpdateUserRoleCommand } from './update-user-role.command'
 import { UpdateUserCommand } from './update-user.command'
 
 type CommandConstructor = new (...commandArguments: any[]) => Command<unknown>
@@ -190,6 +191,7 @@ export type CommandType =
   | 'get-user-quarterly-progress'
   | 'get-user-yearly-progress'
   | 'get-objectives'
+  | 'update-user-role'
 
 @Injectable()
 export class CommandFactory {
@@ -286,6 +288,7 @@ export class CommandFactory {
     'update-cycle': UpdateCycleCommand,
     'delete-cycle': DeleteCycleCommand,
     'get-objectives': GetObjectivesCommand,
+    'update-user-role': UpdateUserRoleCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}
