@@ -33,7 +33,7 @@ export class KeyResultInput {
   @Field(() => ID, { description: 'The object ID that this key result belongs to' })
   public readonly objectiveId: string
 
-  @Field(() => ID, { description: 'The team ID that this key result belongs to' })
+  @Field(() => ID, { nullable: true, description: 'The team ID that this key result belongs to' })
   public readonly teamId: string
 
   @Field({

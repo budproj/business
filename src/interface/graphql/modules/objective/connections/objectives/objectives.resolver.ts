@@ -6,6 +6,7 @@ import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
+import { CorePortsProvider } from '@core/ports/ports.provider'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
@@ -22,7 +23,10 @@ export class ObjectivesConnectionGraphQLResolver extends GuardedConnectionGraphQ
 > {
   private readonly logger = new Logger(ObjectivesConnectionGraphQLResolver.name)
 
-  constructor(protected readonly core: CoreProvider) {
+  constructor(
+    protected readonly core: CoreProvider,
+    private readonly corePorts: CorePortsProvider,
+  ) {
     super(Resource.OBJECTIVE, core, core.objective)
   }
 
@@ -37,16 +41,16 @@ export class ObjectivesConnectionGraphQLResolver extends GuardedConnectionGraphQ
       message: 'Fetching objectives with filters',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+    const [options, _, connection] = this.relay.unmarshalRequest<
       ObjectiveFiltersRequest,
       Objective
     >(request)
+    const { active, ...filters } = options
+    const command = 'get-objectives'
 
-    const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
-      filters,
-      userWithContext,
-      queryOptions,
-    )
+    const queryResult = await this.corePorts.dispatchCommand<Objective[]>(command, filters, {
+      active,
+    })
 
     return this.relay.marshalResponse<Objective>(queryResult, connection)
   }

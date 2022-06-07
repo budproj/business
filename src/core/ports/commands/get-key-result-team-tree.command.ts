@@ -5,6 +5,10 @@ import { Command } from './base.command'
 
 export class GetKeyResultTeamTreeCommand extends Command<Team[]> {
   public async execute(keyResult: Partial<KeyResultInterface>): Promise<Team[]> {
+    if (!keyResult.teamId) {
+      return []
+    }
+
     const keyResultTeamIndexes = { id: keyResult.teamId }
     const keyResultTeam = await this.core.team.getFromIndexes(keyResultTeamIndexes)
 

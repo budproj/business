@@ -16,7 +16,9 @@ export abstract class KeyResultBaseAccessControl extends AccessControl {
     })
     if (!keyResult) throw new UserInputError('We could not find a key-result for your request')
 
-    const teams = await this.core.dispatchCommand<Team[]>('get-key-result-team-tree', keyResult)
+    const teams = keyResult.teamId
+      ? await this.core.dispatchCommand<Team[]>('get-key-result-team-tree', keyResult)
+      : await this.core.dispatchCommand<Team[]>('get-user-team-tree', { id: keyResult.ownerId })
 
     const isKeyResultOwner = await this.isKeyResultOwner(keyResult, user)
     const isTeamLeader = await this.isTeamLeader(teams, user)

@@ -9,6 +9,7 @@ export class GetUserYearlyProgressCommand extends Command<KeyResult[]> {
     const keyResults = await this.core.keyResult.getKeyResultsFromUserByCadence(
       userID,
       Cadence.YEARLY,
+      true,
     )
 
     if (keyResults.length > 0) {

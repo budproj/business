@@ -12,6 +12,6 @@ export interface KeyResultInterface extends CoreEntityInterface {
   updatedAt: Date
   ownerId: string
   objectiveId: string
-  teamId: string
+  teamId?: string
   description?: string
 }

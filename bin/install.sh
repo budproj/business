@@ -6,24 +6,23 @@ Color_Off='\033[0m'
 POSTGRES_PORT=5432
 
 check_dependencies () {
-  DEPENDENCIES=(
-    docker
-    docker-compose
-    psql
-    nc
-  )
+  DEPENDENCIES="docker docker-compose psql nc"
 
-  not_installed_count=0;
+
   echo 'Testing if all dependencies are installed...'
   echo
 
-  for program in "${DEPENDENCIES[@]}"; do
+  not_installed_count=0;
+  set -- $DEPENDENCIES
+  while [ -n "$1" ]; do
+    program=$1
     if hash "$program" &>/dev/null; then
       echo -e "${Green}$program${Color_Off} found"
     else
       echo -e "${Red}$program${Color_Off} is not installed";
       ((not_installed_count++))
     fi
+    shift
   done
 
   if [[ $not_installed_count -gt 0 ]]; then
@@ -121,4 +120,6 @@ run() {
   echo 
 }
 
-run
+if [ "${NODE_ENV}" != "production" ]; then
+  run
+fi
