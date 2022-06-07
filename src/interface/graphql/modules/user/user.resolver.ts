@@ -58,6 +58,7 @@ import { UserReportProgressObject } from './objects/user-report-progress.object'
 import { UserCreateRequest } from './requests/user-create.request'
 import { UserDeactivateRequest } from './requests/user-deactivate.request'
 import { UserKeyResultsRequest } from './requests/user-key-results.request'
+import { UserUpdateRoleRequest } from './requests/user-update-role.request'
 import { UserUpdateRequest } from './requests/user-update.request'
 import { UserTasksRequest } from './task/requests/user-tasks.request'
 import { UserGraphQLNode } from './user.node'
@@ -202,6 +203,28 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return createdUser
   }
 
+  @GuardedMutation(UserGraphQLNode, 'user:update', { name: 'updateUserRole', nullable: true })
+  protected async updateUserRoleForRequestAndRequestUserWithContext(
+    @Args() request: UserUpdateRoleRequest,
+    @RequestUserWithContext() userWithContext: UserWithContext,
+  ) {
+    console.log({ request, userWithContext })
+    // Const canUpdate = await this.accessControl.canUpdate(userWithContext, request.authzSubUserId)
+    // if (!canUpdate) throw new UnauthorizedException()
+
+    this.logger.log({
+      userWithContext,
+      request,
+      message: 'Received update user role request',
+    })
+
+    await this.corePorts.dispatchCommand<User>(
+      'update-user-role',
+      request.authzSubUserId,
+      request.role,
+    )
+  }
+
   @ResolveField('fullName', () => String)
   protected async getFullNameForUser(@Parent() user: UserGraphQLNode) {
     this.logger.log({
@@ -323,7 +346,9 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     )
     // eslint-disable-next-line no-warning-comments
     // TODO: Esse filtro deve ser removido quando o backend for refatorado. O filtro pode ser feito dentro dos comandos, mas como a feature precisava ser entregue, foi feito dessa forma.
-const filteredResults = onlyKeyResultsFromCompany ? queryResult.filter((keyResult) => keyResult.teamId !== null) :  queryResult;
+    const filteredResults = onlyKeyResultsFromCompany
+      ? queryResult.filter((keyResult) => keyResult.teamId !== null)
+      : queryResult
     return this.relay.marshalResponse<KeyResultInterface>(filteredResults, connection, user)
   }
 

@@ -75,4 +75,15 @@ export class AuthzClientProvider {
       },
     )
   }
+
+  public async updateUserRole(authzSubUserId: string, role: string) {
+    const availableRoles = await this.mgmtClient.getRoles()
+    const roleWithId = availableRoles.find((r) => r.name === role)
+    const userRoles = await this.mgmtClient.getUserRoles({ id: authzSubUserId })
+    await this.mgmtClient.removeRolesFromUser(
+      { id: authzSubUserId },
+      { roles: userRoles.map((r) => r.id) },
+    )
+    await this.mgmtClient.assignRolestoUser({ id: authzSubUserId }, { roles: [roleWithId.id] })
+  }
 }

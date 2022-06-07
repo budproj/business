@@ -20,7 +20,7 @@ import { UserRepository } from './user.repository'
 
 @Injectable()
 export class UserProvider extends CoreEntityProvider<User, UserInterface> {
-  private readonly credentials: CredentialsAdapter
+  public credentials: CredentialsAdapter
 
   constructor(
     public readonly setting: UserSettingProvider,

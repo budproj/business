@@ -7,4 +7,5 @@ export interface CredentialsAdapter {
   updateEmail(userID: string, email: string): Promise<boolean>
   invite(email: string): Promise<void>
   updateUserProperty(userID: string, key: string, value: string): Promise<void>
+  updateUserRole(authzSubUserId: string, role: string): Promise<void>
 }
