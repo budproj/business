@@ -7,66 +7,32 @@ import { UserInterface } from '@core/modules/user/user.interface'
 import { AuthzToken } from '@infrastructure/authz/interfaces/authz-token.interface'
 
 import { GodmodePropertiesInterface } from './interfaces/godmode-properties.interface'
+import roles from './roles'
 
 export class GodmodeProvider implements GodmodePropertiesInterface {
   public readonly enabled: boolean
+  public readonly role: string
   private readonly authz: PolicyAdapter
 
   constructor(properties: GodmodePropertiesInterface) {
     this.enabled = properties.enabled
     this.authz = new PolicyAdapter()
+
+    if (!Object.keys(roles).includes(properties.role.toLowerCase()))
+      throw new Error('Invalid role, check your environment variables')
+
+    this.role = properties.role
   }
 
   static get placeholder(): string {
     return 'GOD'
   }
 
-  static get permissions(): Permission[] {
-    return [
-      'permission:create:any',
-      'permission:read:any',
-      'permission:update:any',
-      'permission:create:any',
-      'user:create:any',
-      'user:read:any',
-      'user:update:any',
-      'user:delete:any',
-      'team:create:any',
-      'team:read:any',
-      'team:update:any',
-      'team:delete:any',
-      'cycle:create:any',
-      'cycle:read:any',
-      'cycle:update:any',
-      'cycle:delete:any',
-      'objective:create:any',
-      'objective:read:any',
-      'objective:update:any',
-      'objective:delete:any',
-      'key-result:create:any',
-      'key-result:read:any',
-      'key-result:update:any',
-      'key-result:delete:any',
-      'key-result-comment:create:any',
-      'key-result-comment:read:any',
-      'key-result-comment:update:any',
-      'key-result-comment:delete:any',
-      'key-result-check-in:create:any',
-      'key-result-check-in:read:any',
-      'key-result-check-in:update:any',
-      'key-result-check-in:delete:any',
-      'key-result-check-mark:create:any',
-      'key-result-check-mark:read:any',
-      'key-result-check-mark:update:any',
-      'key-result-check-mark:delete:any',
-      'workspace:create:any',
-      'workspace:read:any',
-      'workspace:update:any',
-      'workspace:delete:any',
-    ]
+  public get permissions(): Permission[] {
+    return roles[this.role.toLowerCase()]
   }
 
-  static get token(): AuthzToken {
+  public get token(): AuthzToken {
     return {
       iss: GodmodeProvider.placeholder,
       sub: GodmodeProvider.placeholder,
@@ -75,7 +41,7 @@ export class GodmodeProvider implements GodmodePropertiesInterface {
       aud: [GodmodeProvider.placeholder],
       iat: 0,
       exp: 0,
-      permissions: GodmodeProvider.permissions,
+      permissions: this.permissions,
     }
   }
 
@@ -90,13 +56,12 @@ export class GodmodeProvider implements GodmodePropertiesInterface {
     user: UserInterface,
     teams: TeamInterface[],
   ): UserWithContext {
-    const { token } = GodmodeProvider
-    const resourcePolicy = this.authz.getResourcePolicyFromPermissions(token.permissions)
+    const resourcePolicy = this.authz.getResourcePolicyFromPermissions(this.token.permissions)
 
     return {
       ...user,
       teams,
-      token,
+      token: this.token,
       resourcePolicy,
     }
   }
