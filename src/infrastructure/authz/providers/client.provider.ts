@@ -91,4 +91,9 @@ export class AuthzClientProvider {
     const userRoles = await this.mgmtClient.getUserRoles({ id: authzSubUserId })
     return userRoles[0]
   }
+
+  public async requestChangePassword(email: string): Promise<void> {
+    this.logger.debug(`Request changing password and sending e-mail to ${email}`)
+    await this.authClient.requestChangePasswordEmail({ email, connection: this.connection })
+  }
 }
