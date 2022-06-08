@@ -211,8 +211,8 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     console.log({ request, userWithContext })
-    // Const canUpdate = await this.accessControl.canUpdate(userWithContext, request.authzSubUserId)
-    // if (!canUpdate) throw new UnauthorizedException()
+    const canUpdate = await this.accessControl.canUpdate(userWithContext, request.id)
+    if (!canUpdate) throw new UnauthorizedException()
 
     this.logger.log({
       userWithContext,
@@ -220,11 +220,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Received update user role request',
     })
 
-    await this.corePorts.dispatchCommand<User>(
-      'update-user-role',
-      request.authzSubUserId,
-      request.role,
-    )
+    await this.corePorts.dispatchCommand<User>('update-user-role', request.id, request.role)
   }
 
   @ResolveField('role', () => UserRoleObject)
@@ -234,7 +230,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching user full name',
     })
 
-    return this.corePorts.dispatchCommand<Role>('get-user-role', user.authzSub)
+    return this.corePorts.dispatchCommand<Role>('get-user-role', user.id)
   }
 
   @ResolveField('fullName', () => String)
