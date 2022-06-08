@@ -53,4 +53,8 @@ export class AuthzCredentialsProvider implements CredentialsAdapter {
     const role = await this.client.getUserRole(authzSubUserId)
     return role
   }
+
+  public async requestChangeUserPassword(email: string): Promise<void> {
+    await this.client.requestChangePassword(email)
+  }
 }

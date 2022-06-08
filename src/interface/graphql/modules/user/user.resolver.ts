@@ -60,6 +60,7 @@ import { UserRoleObject } from './objects/user-role-object'
 import { UserCreateRequest } from './requests/user-create.request'
 import { UserDeactivateRequest } from './requests/user-deactivate.request'
 import { UserKeyResultsRequest } from './requests/user-key-results.request'
+import { UserRquest } from './requests/user-request.request'
 import { UserUpdateRoleRequest } from './requests/user-update-role.request'
 import { UserUpdateRequest } from './requests/user-update.request'
 import { UserTasksRequest } from './task/requests/user-tasks.request'
@@ -221,6 +222,21 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     })
 
     await this.corePorts.dispatchCommand<User>('update-user-role', request.id, request.role)
+  }
+
+  @GuardedMutation(UserGraphQLNode, 'user:update', {
+    name: 'requestChangeUserPasswordEmail',
+    nullable: true,
+  })
+  protected async requestChangeUserPasswordEmailForRequestAndRequestUserWithContext(
+    @Args() request: UserRquest,
+  ) {
+    this.logger.log({
+      request,
+      message: 'Received update user role request',
+    })
+
+    await this.corePorts.dispatchCommand<User>('request-change-user-password-email', request.id)
   }
 
   @ResolveField('role', () => UserRoleObject)

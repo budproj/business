@@ -11,4 +11,5 @@ export interface CredentialsAdapter {
   updateUserProperty(userID: string, key: string, value: string): Promise<void>
   updateUserRole(authzSubUserId: string, role: string): Promise<void>
   getUserRole(authzSubUserId: string): Promise<Role>
+  requestChangeUserPassword(email: string): Promise<void>
 }
