@@ -89,6 +89,7 @@ import { GetUsersByIdsCommand } from './get-users-by-ids.command'
 import { GetUsersWithIndividualOkr } from './get-users-with-individual-okr.command'
 import { RemoveTeamFromUserCommand } from './remove-team-from-user.command'
 import { RemoveUserToKeyResultSupportTeamCommand } from './remove-user-to-key-result-support-team.command'
+import { RequestChangeUserPasswordEmailCommand } from './request-change-user-password-email.command'
 import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
 import { ToggleTaskCommand } from './toggle-task.command'
 import { UpdateCheckMarkAssigneeCommand } from './update-check-mark-assignee.command'
@@ -194,6 +195,7 @@ export type CommandType =
   | 'get-objectives'
   | 'update-user-role'
   | 'get-user-role'
+  | 'request-change-user-password-email'
 
 @Injectable()
 export class CommandFactory {
@@ -292,6 +294,7 @@ export class CommandFactory {
     'get-objectives': GetObjectivesCommand,
     'update-user-role': UpdateUserRoleCommand,
     'get-user-role': GetUserRoleCommand,
+    'request-change-user-password-email': RequestChangeUserPasswordEmailCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}
