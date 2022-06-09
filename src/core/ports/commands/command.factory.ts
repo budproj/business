@@ -87,6 +87,7 @@ import { GetUserRoleCommand } from './get-user-role.command'
 import { GetUserYearlyProgressCommand } from './get-user-yearly-progress.command'
 import { GetUsersByIdsCommand } from './get-users-by-ids.command'
 import { GetUsersWithIndividualOkr } from './get-users-with-individual-okr.command'
+import { ReactivateUserCommand } from './reactivate-user.command'
 import { RemoveTeamFromUserCommand } from './remove-team-from-user.command'
 import { RemoveUserToKeyResultSupportTeamCommand } from './remove-user-to-key-result-support-team.command'
 import { RequestChangeUserPasswordEmailCommand } from './request-change-user-password-email.command'
@@ -196,6 +197,7 @@ export type CommandType =
   | 'update-user-role'
   | 'get-user-role'
   | 'request-change-user-password-email'
+  | 'reactivate-user'
 
 @Injectable()
 export class CommandFactory {
@@ -295,6 +297,7 @@ export class CommandFactory {
     'update-user-role': UpdateUserRoleCommand,
     'get-user-role': GetUserRoleCommand,
     'request-change-user-password-email': RequestChangeUserPasswordEmailCommand,
+    'reactivate-user': ReactivateUserCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}

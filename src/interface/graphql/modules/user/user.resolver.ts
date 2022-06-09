@@ -8,6 +8,7 @@ import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 import { Role } from 'auth0'
 import { FileUpload } from 'graphql-upload'
+import { intersection } from 'lodash'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
@@ -47,6 +48,7 @@ import { UserSettingsGraphQLConnection } from '@interface/graphql/modules/user/c
 import { UserSettingFiltersRequest } from '@interface/graphql/modules/user/setting/requests/user-setting-filters.request'
 import { UserAccessControl } from '@interface/graphql/modules/user/user.access-control'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
+import { Permission as UserPermission } from 'src/adapters/policy/types/permission.type'
 
 import { UserKeyResultCheckInsGraphQLConnection } from './connections/user-key-result-check-ins/user-key-result-check-ins.connection'
 import { UserKeyResultCommentsGraphQLConnection } from './connections/user-key-result-comments/user-key-result-comments.connection'
@@ -58,7 +60,7 @@ import { EmailAlreadyExistsApolloError } from './exceptions/email-already-exists
 import { UserReportProgressObject } from './objects/user-report-progress.object'
 import { UserRoleObject } from './objects/user-role-object'
 import { UserCreateRequest } from './requests/user-create.request'
-import { UserDeactivateRequest } from './requests/user-deactivate.request'
+import { UserDeactivateAndReactivateRequest } from './requests/user-deactivate-and-reactivate.request'
 import { UserKeyResultsRequest } from './requests/user-key-results.request'
 import { UserRquest } from './requests/user-request.request'
 import { UserUpdateRoleRequest } from './requests/user-update-role.request'
@@ -154,7 +156,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
   @GuardedMutation(UserGraphQLNode, 'user:delete', { name: 'deactivateUser' })
   protected async deactivateUserForRequestAndRequestUserWithContext(
-    @Args() request: UserDeactivateRequest,
+    @Args() request: UserDeactivateAndReactivateRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     const canDelete = await this.accessControl.canDelete(userWithContext, request.id)
@@ -167,6 +169,23 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     })
 
     return this.corePorts.dispatchCommand<User>('deactivate-user', request.id)
+  }
+
+  @GuardedMutation(UserGraphQLNode, 'user:delete', { name: 'reactivateUser' })
+  protected async reactivateUserForRequestAndRequestUserWithContext(
+    @Args() request: UserDeactivateAndReactivateRequest,
+    @RequestUserWithContext() userWithContext: UserWithContext,
+  ) {
+    const canDelete = await this.accessControl.canDelete(userWithContext, request.id)
+    if (!canDelete) throw new UnauthorizedException()
+
+    this.logger.log({
+      userWithContext,
+      request,
+      message: 'Received reactivate user request',
+    })
+
+    return this.corePorts.dispatchCommand<User>('reactivate-user', request.id)
   }
 
   @GuardedMutation(UserGraphQLNode, 'user:create', { name: 'createUser' })
@@ -211,8 +230,8 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     @Args() request: UserUpdateRoleRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    console.log({ request, userWithContext })
-    const canUpdate = await this.accessControl.canUpdate(userWithContext, request.id)
+    const permissionsArray: UserPermission[] = ['user:update:any', 'user:update:company']
+    const canUpdate = intersection(userWithContext.token.permissions, permissionsArray).length > 0
     if (!canUpdate) throw new UnauthorizedException()
 
     this.logger.log({
@@ -222,6 +241,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     })
 
     await this.corePorts.dispatchCommand<User>('update-user-role', request.id, request.role)
+    return this.corePorts.dispatchCommand<User>('get-user', request.id)
   }
 
   @GuardedMutation(UserGraphQLNode, 'user:update', {
