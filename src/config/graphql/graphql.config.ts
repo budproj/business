@@ -21,6 +21,7 @@ export const graphqlConfig = registerAs(
 
     godmode: {
       enabled: process.env.GRAPHQL_GODMODE_ENABLED === 'true',
+      role: process.env.GRAPHQL_GODMODE_ROLE || 'god',
     },
 
     schema: {
