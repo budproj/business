@@ -259,7 +259,8 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     await this.corePorts.dispatchCommand<User>('request-change-user-password-email', request.id)
   }
 
-  @ResolveField('role', () => UserRoleObject)
+  // Precisamos por esse nome para este resolvefield por causa da existência do campo "role", da tabela de usuário
+  @ResolveField('authzRole', () => UserRoleObject)
   protected async getRoleForUser(@Parent() user: UserGraphQLNode) {
     this.logger.log({
       user,
@@ -290,10 +291,17 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching companies for user',
     })
 
+    console.log({ request })
+    console.log(
+      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    )
+
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       TeamFiltersRequest,
       Team
     >(request)
+
+    console.log({ filters, queryOptions, connection })
 
     const userCompanies = await this.core.team.getUserCompanies(user, filters, queryOptions)
     return this.relay.marshalResponse<Team>(userCompanies, connection, user)
