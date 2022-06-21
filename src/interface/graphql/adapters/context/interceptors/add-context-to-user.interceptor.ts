@@ -27,13 +27,13 @@ export class AddContextToUserInterceptor implements NestInterceptor {
     const graphqlContext = GqlExecutionContext.create(executionContext)
     const request: GraphQLRequest = graphqlContext.getContext().req
 
-    request.state.user = this.godmode.enabled
+    request.userWithContext = this.godmode.enabled
       ? await this.godmode.getGodUser(this.core)
       : await this.getRequestUser(request)
 
     this.logger.debug({
-      requestUser: request.state.user,
-      message: `Selected user with ID ${request.state.user.id} for current request`,
+      requestUser: request.userWithContext,
+      message: `Selected user with ID ${request.userWithContext?.id.toString()} for current request`,
     })
 
     return next.handle()

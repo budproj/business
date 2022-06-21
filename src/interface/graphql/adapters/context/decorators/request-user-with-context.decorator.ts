@@ -10,6 +10,6 @@ export const RequestUserWithContext = createParamDecorator<UserWithContext>(
     const graphqlContext = GqlExecutionContext.create(executionContext)
     const request: GraphQLRequest = graphqlContext.getContext().req
 
-    return request.state.user
+    return request.userWithContext
   },
 )
