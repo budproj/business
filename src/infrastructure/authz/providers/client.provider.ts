@@ -80,6 +80,11 @@ export class AuthzClientProvider {
     const availableRoles = await this.mgmtClient.getRoles()
     const roleWithId = availableRoles.find((r) => r.name === role)
     const userRoles = await this.mgmtClient.getUserRoles({ id: authzSubUserId })
+    if (userRoles.length === 0) {
+      await this.mgmtClient.assignRolestoUser({ id: authzSubUserId }, { roles: [roleWithId.id] })
+      return
+    }
+
     await this.mgmtClient.removeRolesFromUser(
       { id: authzSubUserId },
       { roles: userRoles.map((r) => r.id) },
