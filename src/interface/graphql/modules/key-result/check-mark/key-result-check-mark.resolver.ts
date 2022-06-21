@@ -15,9 +15,7 @@ import { AttachActivity } from '@interface/graphql/adapters/activity/attach-acti
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
-import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
-import { GraphQLRequestState } from '@interface/graphql/adapters/context/interfaces/request-state.interface'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
 
 import { UserGraphQLNode } from '../../user/user.node'
