@@ -32,8 +32,10 @@ export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor
     ).getContext()
   }
 
-  static getRequestState(executionContext: ExecutionContext): GraphQLRequestState {
-    return DispatchResponseToActivityInterceptor.getContext(executionContext).req.state
+  static getRequestUserData(executionContext: ExecutionContext): GraphQLRequestState {
+    const { req } = DispatchResponseToActivityInterceptor.getContext(executionContext)
+    const { userWithContext, tracing } = req
+    return { user: userWithContext, tracing }
   }
 
   static getContextActivity(executionContext: ExecutionContext): Activity {
@@ -54,14 +56,14 @@ export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor
   }
 
   private buildActivity(data: T, executionContext: ExecutionContext): Activity<T> {
-    const state = DispatchResponseToActivityInterceptor.getRequestState(executionContext)
+    const userData = DispatchResponseToActivityInterceptor.getRequestUserData(executionContext)
     const request = DispatchResponseToActivityInterceptor.getRequest(executionContext)
     const Activity = this.reflector.get<ActivityConstructor<T>>(
       'activity',
       executionContext.getHandler(),
     )
 
-    return new Activity(data, state, request)
+    return new Activity(data, userData, request)
   }
 
   private async handleResult(data: T, executionContext: ExecutionContext): Promise<T> {
