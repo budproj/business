@@ -4,7 +4,7 @@ import { UserInputError } from 'apollo-server-errors'
 
 import { NewKeyResultSupportTeamMemberActivity } from '@adapters/activity/activities/new-key-result-support-team-member.activity'
 import { Resource } from '@adapters/policy/enums/resource.enum'
-import { State } from '@adapters/state/interfaces/state.interface'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
@@ -14,7 +14,7 @@ import { AttachActivity } from '@interface/graphql/adapters/activity/attach-acti
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
-import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
+import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 
 import { KeyResultAccessControl } from '../../access-control/key-result.access-control'
 import { KeyResultGraphQLNode } from '../../key-result.node'
@@ -46,13 +46,13 @@ export class KeyResultKeyResultSupportTeamConnectionGraphQLResolver extends Guar
   })
   protected async addUser(
     @Args() request: KeyResultSupportTeamCreateRequest,
-    @RequestState() state: State,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    const canUpdate = await this.accessControl.canUpdate(state.user, request.data.keyResultId)
+    const canUpdate = await this.accessControl.canUpdate(userWithContext, request.data.keyResultId)
     if (!canUpdate) throw new UnauthorizedException()
 
     this.logger.log({
-      state,
+      userWithContext,
       request,
       message: 'Received add user to support team request',
     })
@@ -77,13 +77,13 @@ export class KeyResultKeyResultSupportTeamConnectionGraphQLResolver extends Guar
   })
   protected async removeUser(
     @Args() request: KeyResultSupportTeamRemoveRequest,
-    @RequestState() state: State,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    const canUpdate = await this.accessControl.canUpdate(state.user, request.data.keyResultId)
+    const canUpdate = await this.accessControl.canUpdate(userWithContext, request.data.keyResultId)
     if (!canUpdate) throw new UnauthorizedException()
 
     this.logger.log({
-      state,
+      userWithContext,
       request,
       message: 'Received remove user to support team request',
     })

@@ -16,9 +16,7 @@ import { GuardedMutation } from '@interface/graphql/adapters/authorization/decor
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
-import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
-import { GraphQLRequestState } from '@interface/graphql/adapters/context/interfaces/request-state.interface'
 import { KeyResultCheckInDeltaGraphQLObject } from '@interface/graphql/modules/key-result/check-in/objects/key-result-check-in-delta.object'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
@@ -79,14 +77,14 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   })
   protected async createKeyResultCheckInForRequestAndRequestUserWithContext(
     @Args() request: KeyResultCheckInCreateRequest,
-    @RequestState() state: GraphQLRequestState,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    const canCreate = await this.accessControl.canCreate(state.user, request.data.keyResultId)
+    const canCreate = await this.accessControl.canCreate(userWithContext, request.data.keyResultId)
     if (!canCreate) throw new UnauthorizedException()
 
     this.logger.log({
       request,
-      state,
+      userWithContext,
       message: 'Received create check-in request',
     })
 
@@ -99,7 +97,10 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
         'You cannot create this check-in, because that key-result is not active anymore',
       )
 
-    const keyResultCheckIn = await this.core.keyResult.buildCheckInForUser(state.user, request.data)
+    const keyResultCheckIn = await this.core.keyResult.buildCheckInForUser(
+      userWithContext,
+      request.data,
+    )
     const createdCheckIn = await this.corePorts.dispatchCommand<KeyResultCheckIn>(
       'create-check-in',
       keyResultCheckIn,
@@ -108,7 +109,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
     if (!createdCheckIn) throw new UserInputError('We were not able to create your check-in')
 
     this.logger.log({
-      state,
+      userWithContext,
       keyResultCheckIn,
       message: 'Created a new check-in in our database',
     })

@@ -4,6 +4,7 @@ import { UserInputError } from 'apollo-server-fastify'
 
 import { CreatedKeyResultCheckMarkActivity } from '@adapters/activity/activities/created-key-result-checkmark.activity'
 import { Resource } from '@adapters/policy/enums/resource.enum'
+import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
 import { Status } from '@core/interfaces/status.interface'
 import { KeyResultCheckMarkInterface } from '@core/modules/key-result/check-mark/key-result-check-mark.interface'
@@ -15,6 +16,7 @@ import { GuardedMutation } from '@interface/graphql/adapters/authorization/decor
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
+import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { GraphQLRequestState } from '@interface/graphql/adapters/context/interfaces/request-state.interface'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
 
@@ -53,13 +55,13 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
   })
   protected async createKeyResultCheckMark(
     @Args() request: KeyResultCheckMarkCreateRequest,
-    @RequestState() state: GraphQLRequestState,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    const canCreate = await this.accessControl.canCreate(state.user, request.data.keyResultId)
+    const canCreate = await this.accessControl.canCreate(userWithContext, request.data.keyResultId)
     if (!canCreate) throw new UnauthorizedException()
 
     this.logger.log({
-      state,
+      userWithContext,
       request,
       message: 'Received create check mark request',
     })
@@ -75,7 +77,7 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
 
     const createdCheckMark = await this.corePorts.dispatchCommand<KeyResultCheckMark>(
       'create-check-mark',
-      { checkMark: request.data, user: state.user },
+      { checkMark: request.data, user: userWithContext },
     )
 
     if (!createdCheckMark) throw new UserInputError('We were not able to create your comment')
@@ -88,10 +90,10 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
   })
   protected async toggleCheckMark(
     @Args() request: KeyResultCheckMarkToggleRequest,
-    @RequestState() state: GraphQLRequestState,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
-      state,
+      userWithContext,
       request,
       message: 'Received toggle check mark request',
     })
@@ -111,10 +113,10 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
   })
   protected async updateCheckMarkDescription(
     @Args() request: KeyResultCheckMarkUpdateDescriptionRequest,
-    @RequestState() state: GraphQLRequestState,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
-      state,
+      userWithContext,
       request,
       message: 'Received update check mark description request',
     })
@@ -136,10 +138,10 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
   })
   protected async updateCheckMarkAssignee(
     @Args() request: KeyResultCheckMarkUpdateAssigneeRequest,
-    @RequestState() state: GraphQLRequestState,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
-      state,
+      userWithContext,
       request,
       message: 'Received update check mark assignee request',
     })
@@ -160,10 +162,10 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
   })
   protected async deleteCheckMark(
     @Args() request: KeyResultCheckMarkDeleteRequest,
-    @RequestState() state: GraphQLRequestState,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
-      state,
+      userWithContext,
       request,
       message: 'Received delete check mark request',
     })

@@ -27,7 +27,6 @@ import { GuardedMutation } from '@interface/graphql/adapters/authorization/decor
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
-import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { KeyResultAccessControl } from '@interface/graphql/modules/key-result/access-control/key-result.access-control'
 import { KeyResultCreateRequest } from '@interface/graphql/modules/key-result/requests/key-result-create.request'
@@ -95,14 +94,14 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedMutation(KeyResultGraphQLNode, 'key-result:update', { name: 'updateKeyResult' })
   protected async updateKeyResultForRequestAndRequestUserWithContext(
     @Args() request: KeyResultUpdateRequest,
-    @RequestState() state: State,
+    @RequestUserWithContext() userWithContext: UserWithContext,
     @RequestActivity() activity: UpdatedKeyResultActivity,
   ) {
-    const canUpdate = await this.accessControl.canUpdate(state.user, request.id)
+    const canUpdate = await this.accessControl.canUpdate(userWithContext, request.id)
     if (!canUpdate) throw new UnauthorizedException()
 
     this.logger.log({
-      state,
+      userWithContext,
       request,
       message: 'Received update key-result request',
     })
@@ -128,17 +127,17 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedMutation(KeyResultGraphQLNode, 'key-result:create', { name: 'createKeyResult' })
   protected async createKeyResultForRequestUsingState(
     @Args() request: KeyResultCreateRequest,
-    @RequestState() state: State,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     const canCreate = await this.accessControl.canCreate(
-      state.user,
+      userWithContext,
       request.data.teamId,
       request.data.ownerId,
     )
     if (!canCreate) throw new UnauthorizedException()
 
     this.logger.log({
-      state,
+      userWithContext,
       request,
       message: 'Received create key-result request',
     })
@@ -154,13 +153,13 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedMutation(DeleteResultGraphQLObject, 'key-result:delete', { name: 'deleteKeyResult' })
   protected async deleteKeyResultForRequestUsingState(
     @Args() request: NodeDeleteRequest,
-    @RequestState() state: State,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    const canDelete = await this.accessControl.canDelete(state.user, request.id)
+    const canDelete = await this.accessControl.canDelete(userWithContext, request.id)
     if (!canDelete) throw new UnauthorizedException()
 
     this.logger.log({
-      state,
+      userWithContext,
       request,
       message: 'Received delete key-result request',
     })
@@ -246,9 +245,10 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   protected async getKeyResultChecklistForKeyResult(
     @Args() request: KeyResultCheckMarkFiltersRequest,
     @Parent() keyResult: KeyResult,
-    @RequestState() state: State,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     this.logger.log({
+      userWithContext,
       keyResult,
       request,
       message: 'Fetching key-result checklist',
@@ -262,7 +262,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     const queryResult = await this.corePorts.dispatchCommand<KeyResultCheckMark[]>(
       'get-check-list-for-key-result',
       keyResult.id,
-      filters.onlyAssignedToMe ? state.user.id : filters?.userId,
+      filters.onlyAssignedToMe ? userWithContext.id : filters?.userId,
     )
 
     return this.relay.marshalResponse<KeyResultCheckMarkInterface>(

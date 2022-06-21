@@ -15,9 +15,7 @@ import { GuardedMutation } from '@interface/graphql/adapters/authorization/decor
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
-import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
-import { GraphQLRequestState } from '@interface/graphql/adapters/context/interfaces/request-state.interface'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
@@ -74,13 +72,13 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   })
   protected async createKeyResultCommentForRequestAndRequestUserWithContext(
     @Args() request: KeyResultCommentCreateRequest,
-    @RequestState() state: GraphQLRequestState,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    const canCreate = await this.accessControl.canCreate(state.user, request.data.keyResultId)
+    const canCreate = await this.accessControl.canCreate(userWithContext, request.data.keyResultId)
     if (!canCreate) throw new UnauthorizedException()
 
     this.logger.log({
-      state,
+      userWithContext,
       request,
       message: 'Received create comment request',
     })
@@ -94,7 +92,10 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
         'You cannot create this keyResultComment, because that key-result is not active anymore',
       )
 
-    const keyResultComment = this.core.keyResult.createUserCommentData(state.user, request.data)
+    const keyResultComment = this.core.keyResult.createUserCommentData(
+      userWithContext,
+      request.data,
+    )
     const createdComment = await this.corePorts.dispatchCommand<KeyResultComment>(
       'create-key-result-comment',
       keyResultComment,
