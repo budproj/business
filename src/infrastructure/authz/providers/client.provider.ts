@@ -89,7 +89,16 @@ export class AuthzClientProvider {
 
   public async getUserRole(authzSubUserId: string) {
     const userRoles = await this.mgmtClient.getUserRoles({ id: authzSubUserId })
-    return userRoles[0]
+    return userRoles.length > 0
+      ? userRoles[0]
+      : {
+          // eslint-disable-next-line unicorn/no-null
+          id: null,
+          // eslint-disable-next-line unicorn/no-null
+          name: null,
+          // eslint-disable-next-line unicorn/no-null
+          description: null,
+        }
   }
 
   public async requestChangePassword(email: string): Promise<void> {
