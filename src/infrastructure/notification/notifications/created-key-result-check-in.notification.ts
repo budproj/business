@@ -117,10 +117,9 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
     const team = await this.core.dispatchCommand<TeamInterface>('get-team', {
       id: keyResult.teamId,
     })
-    const keyResultTeamMembers = await this.core.dispatchCommand<UserInterface[]>(
-      'get-team-members',
-      keyResult.teamId,
-    )
+    const keyResultTeamMembers = keyResult.teamId
+      ? await this.core.dispatchCommand<UserInterface[]>('get-team-members', keyResult.teamId)
+      : []
     const keyResultSupportTeamMembers = await this.core.dispatchCommand<UserInterface[]>(
       'get-key-result-support-team',
       keyResult.id,
