@@ -4,12 +4,18 @@ import { Field, ObjectType } from '@nestjs/graphql'
   description: 'An object continaing the role of the user in the auth0 system.',
 })
 export class UserRoleObject {
-  @Field()
-  public readonly id: string
+  @Field({
+    nullable: true,
+  })
+  public readonly id?: string
 
-  @Field()
-  public readonly name: string
+  @Field({
+    nullable: true,
+  })
+  public readonly name?: string
 
-  @Field()
-  public readonly description: string
+  @Field({
+    nullable: true,
+  })
+  public readonly description?: string
 }
