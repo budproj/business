@@ -141,7 +141,7 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
   private async getResolvedData(parentCheckIn: KeyResultCheckInInterface): Promise<ResolvedData> {
     const authorFullName = await this.core.dispatchCommand<string>(
       'get-user-full-name',
-      this.activity.context.user,
+      this.activity.context.userWithContext,
     )
 
     const previousCheckInConfidenceColor = this.confidenceTagAdapter.getPrimaryColorFromConfidence(
@@ -152,7 +152,7 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
 
     const authorInitials = await this.core.dispatchCommand<string>(
       'get-user-initials',
-      this.activity.context.user,
+      this.activity.context.userWithContext,
     )
 
     return {
@@ -161,7 +161,7 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
       previousCheckInConfidenceColor,
       previousCheckInConfidenceBackgroundColor,
       checkIn: this.activity.data,
-      author: this.activity.context.user,
+      author: this.activity.context.userWithContext,
       hasPreviousCheckIn: Boolean(parentCheckIn),
     }
   }

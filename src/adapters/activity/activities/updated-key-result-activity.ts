@@ -1,11 +1,11 @@
-import { State } from '@adapters/state/interfaces/state.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { GraphQLRequest } from '@interface/graphql/adapters/context/interfaces/request.interface'
 
 import { Activity } from './base.activity'
 
 export const UPDATED_KEY_RESULT_ACTIVITY_TYPE = 'ACTIVITY::KEY-RESULT::UPDATED'
 
-interface UpdatedKeyResultContext extends State {
+interface UpdatedKeyResultContext extends Partial<GraphQLRequest> {
   originalKeyResult: KeyResult
 }
 

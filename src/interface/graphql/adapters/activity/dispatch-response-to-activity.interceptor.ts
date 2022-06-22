@@ -10,7 +10,7 @@ import { ActivityConstructor } from '@adapters/activity/types/activity-construct
 import { NotificationProvider } from '@infrastructure/notification/notification.provider'
 import { GraphQLContext } from '@interface/graphql/adapters/context/interfaces/context.interface'
 
-import { GraphQLRequestState } from '../context/interfaces/request-state.interface'
+import { GraphQLRequest } from '../context/interfaces/request.interface'
 
 @Injectable({ scope: Scope.REQUEST })
 export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor<T> {
@@ -32,10 +32,10 @@ export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor
     ).getContext()
   }
 
-  static getRequestUserData(executionContext: ExecutionContext): GraphQLRequestState {
+  static getRequestUserData(executionContext: ExecutionContext): Partial<GraphQLRequest> {
     const { req } = DispatchResponseToActivityInterceptor.getContext(executionContext)
     const { userWithContext, tracing } = req
-    return { user: userWithContext, tracing }
+    return { userWithContext, tracing }
   }
 
   static getContextActivity(executionContext: ExecutionContext): Activity {

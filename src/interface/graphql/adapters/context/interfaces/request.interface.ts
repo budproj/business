@@ -5,11 +5,9 @@ import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { TracingInterface } from '@adapters/tracing/tracing.interface'
 
 import { GraphQLRequestHeaders } from './request-headers.interface'
-import { GraphQLRequestState } from './request-state.interface'
 
 export interface GraphQLRequest extends FastifyRequest {
   headers: GraphQLRequestHeaders
-  state: GraphQLRequestState
   user: AuthorizationUser
   userWithContext?: UserWithContext
   tracing?: TracingInterface
