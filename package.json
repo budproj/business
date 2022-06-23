@@ -35,7 +35,7 @@
     "git:tag:canary": "git tag canary -f && git push origin canary -f",
     "git:tag:remove-canary": "git tag -d canary",
     "git:tag:stable": "git tag stable -f && git push origin stable -f",
-    "waypoint:build": "waypoint build",
+    "waypoint:build": "waypoint build -var=\"GITHUB_TOKEN=$GITHUB_TOKEN\"",
     "waypoint:deploy": "waypoint deploy",
     "waypoint:up": "waypoint up",
     "prepare": "husky install"
