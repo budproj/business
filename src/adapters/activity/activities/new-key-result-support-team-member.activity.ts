@@ -1,5 +1,5 @@
-import { State } from '@adapters/state/interfaces/state.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { GraphQLRequest } from '@interface/graphql/adapters/context/interfaces/request.interface'
 
 import { Activity } from './base.activity'
 
@@ -16,7 +16,7 @@ export class NewKeyResultSupportTeamMemberActivity extends Activity<KeyResult> {
 
   constructor(
     public readonly data: KeyResult,
-    public readonly context: State,
+    public readonly context: Partial<GraphQLRequest>,
     public readonly request: Request,
   ) {
     super(data, context, request)

@@ -21,10 +21,10 @@ export class TraceGraphQLRequestInterceptor implements NestInterceptor {
     const request: GraphQLRequest = graphqlContext.getContext().req
 
     const tracingData = this.getTracingData(request)
-    request.state.tracing = tracingData
+    request.tracing = tracingData
 
     this.logger.debug({
-      requestTracing: request.state.tracing,
+      requestTracing: request.tracing,
       message: 'Attached tracing on current request',
     })
 

@@ -1,8 +1,12 @@
-import { State } from '@adapters/state/interfaces/state.interface'
+import { GraphQLRequest } from '@interface/graphql/adapters/context/interfaces/request.interface'
 
 import { ActivityMetadata } from '../types/activity-metadata.type'
 
-export abstract class Activity<D = any, C extends State = State, R = Record<string, any>> {
+export abstract class Activity<
+  D = any,
+  C extends Partial<GraphQLRequest> = Partial<GraphQLRequest>,
+  R = Record<string, any>,
+> {
   public readonly type: string
   public readonly metadata: ActivityMetadata
 
@@ -23,7 +27,7 @@ export abstract class Activity<D = any, C extends State = State, R = Record<stri
 
   protected marshalMetadata(context: C): ActivityMetadata {
     return {
-      userID: context.user.id,
+      userID: context.userWithContext.id,
       sessionID: context.tracing.sessionID,
       timestamp: Date.now(),
     }
