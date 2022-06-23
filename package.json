@@ -37,7 +37,7 @@
     "git:tag:stable": "git tag stable -f && git push origin stable -f",
     "waypoint:build": "waypoint build -var=\"GITHUB_TOKEN=$GITHUB_TOKEN\"",
     "waypoint:deploy": "waypoint deploy",
-    "waypoint:up": "waypoint up",
+    "waypoint:up": "waypoint up -var=\"GITHUB_TOKEN=$GITHUB_TOKEN\"",
     "prepare": "husky install"
   },
   "author": "delucca <delucca@pm.me>",
