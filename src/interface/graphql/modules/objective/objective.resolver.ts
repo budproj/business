@@ -3,7 +3,6 @@ import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
-import { State } from '@adapters/state/interfaces/state.interface'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
 import { Delta } from '@core/interfaces/delta.interface'
@@ -18,7 +17,6 @@ import { GuardedMutation } from '@interface/graphql/adapters/authorization/decor
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
-import { RequestState } from '@interface/graphql/adapters/context/decorators/request-state.decorator'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
 import { ObjectiveBaseAccessControl } from '@interface/graphql/modules/objective/access-control/base.access-control'
@@ -78,13 +76,13 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedMutation(ObjectiveGraphQLNode, 'objective:update', { name: 'updateObjective' })
   protected async updateObjectiveForRequestAndRequestUserWithContext(
     @Args() request: ObjectiveUpdateRequest,
-    @RequestState() state: State,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    const canUpdate = await this.accessControl.canUpdate(state.user, request.id)
+    const canUpdate = await this.accessControl.canUpdate(userWithContext, request.id)
     if (!canUpdate) throw new UnauthorizedException()
 
     this.logger.log({
-      state,
+      userWithContext,
       request,
       message: 'Received update objective request',
     })
@@ -103,13 +101,13 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedMutation(DeleteResultGraphQLObject, 'objective:delete', { name: 'deleteObjective' })
   protected async deleteObjectiveForRequestUsingState(
     @Args() request: NodeDeleteRequest,
-    @RequestState() state: State,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    const canDelete = await this.accessControl.canDelete(state.user, request.id)
+    const canDelete = await this.accessControl.canDelete(userWithContext, request.id)
     if (!canDelete) throw new UnauthorizedException()
 
     this.logger.log({
-      state,
+      userWithContext,
       request,
       message: 'Received delete objective request',
     })
@@ -123,17 +121,17 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   @GuardedMutation(ObjectiveGraphQLNode, 'objective:create', { name: 'createObjective' })
   protected async createObjectiveForRequestUsingState(
     @Args() request: ObjectiveCreateRequest,
-    @RequestState() state: State,
+    @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
     const canCreate = await this.accessControl.canCreate(
-      state.user,
+      userWithContext,
       request.data.teamId,
       request.data.ownerId,
     )
     if (!canCreate) throw new UnauthorizedException()
 
     this.logger.log({
-      state,
+      userWithContext,
       request,
       message: 'Received create objective request',
     })

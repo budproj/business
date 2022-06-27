@@ -1,8 +1,17 @@
 project = "business"
 
+variable "GITHUB_TOKEN" {
+  type = string
+  default = ""
+}
+
 app "app" {
   build {
-    use "docker" {}
+    use "docker" {
+      build_args = {
+        "GITHUB_TOKEN" = var.GITHUB_TOKEN
+      }
+    }
 
     registry {
       use "aws-ecr" {
