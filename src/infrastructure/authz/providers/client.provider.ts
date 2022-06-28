@@ -75,4 +75,39 @@ export class AuthzClientProvider {
       },
     )
   }
+
+  public async updateUserRole(authzSubUserId: string, role: string) {
+    const availableRoles = await this.mgmtClient.getRoles()
+    const roleWithId = availableRoles.find((r) => r.name === role)
+    const userRoles = await this.mgmtClient.getUserRoles({ id: authzSubUserId })
+    if (userRoles.length === 0) {
+      await this.mgmtClient.assignRolestoUser({ id: authzSubUserId }, { roles: [roleWithId.id] })
+      return
+    }
+
+    await this.mgmtClient.removeRolesFromUser(
+      { id: authzSubUserId },
+      { roles: userRoles.map((r) => r.id) },
+    )
+    await this.mgmtClient.assignRolestoUser({ id: authzSubUserId }, { roles: [roleWithId.id] })
+  }
+
+  public async getUserRole(authzSubUserId: string) {
+    const userRoles = await this.mgmtClient.getUserRoles({ id: authzSubUserId })
+    return userRoles.length > 0
+      ? userRoles[0]
+      : {
+          // eslint-disable-next-line unicorn/no-null
+          id: null,
+          // eslint-disable-next-line unicorn/no-null
+          name: null,
+          // eslint-disable-next-line unicorn/no-null
+          description: null,
+        }
+  }
+
+  public async requestChangePassword(email: string): Promise<void> {
+    this.logger.debug(`Request changing password and sending e-mail to ${email}`)
+    await this.authClient.requestChangePasswordEmail({ email, connection: this.connection })
+  }
 }

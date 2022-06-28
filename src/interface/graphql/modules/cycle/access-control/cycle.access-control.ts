@@ -42,7 +42,7 @@ export class CycleAccessControl extends AccessControl {
     })
     if (!cycle) throw new UserInputError('We could not find a cycle for your request')
 
-    const team = await this.core.dispatchCommand<Team>('get-team', cycle.team)
+    const team = await this.core.dispatchCommand<Team>('get-team', { id: cycle.teamId })
 
     const isTeamLeader = await this.isTeamLeader([team], user)
     const isCompanyMember = await this.isCompanyMember([team], user)

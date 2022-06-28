@@ -3,7 +3,6 @@ import { Any } from 'typeorm'
 
 import { GetOptions } from '@core/interfaces/get-options'
 import { Team } from '@core/modules/team/team.orm-entity'
-import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 
@@ -38,7 +37,6 @@ export class GetTeamMembersCommand extends Command<User[]> {
     const selector = {
       ...filters,
       id: Any(userIDs),
-      status: UserStatus.ACTIVE,
     }
 
     return this.core.user.getMany(selector, undefined, options)

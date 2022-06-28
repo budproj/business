@@ -57,12 +57,14 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
       return this.relay.marshalResponse<User>(usersWithIndividualOkr, connection)
     }
 
-    const filters = {
-      ...rawFilters,
-      status: UserStatus.ACTIVE,
-    }
+    const filters = rawFilters.withInactives
+      ? {
+          ...rawFilters,
+        }
+      : { ...rawFilters, status: UserStatus.ACTIVE }
 
     delete filters.onlyWithIndividualObjectives
+    delete filters.withInactives
 
     const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
       filters,

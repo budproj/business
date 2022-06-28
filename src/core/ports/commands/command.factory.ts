@@ -83,17 +83,21 @@ import { GetTeamOwnerCommand } from './get-team-owner.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
 import { GetUserKeyResultsCommand } from './get-user-key-results.command'
 import { GetUserQuarterlyProgressCommand } from './get-user-quarterly-progress.command'
+import { GetUserRoleCommand } from './get-user-role.command'
 import { GetUserYearlyProgressCommand } from './get-user-yearly-progress.command'
 import { GetUsersByIdsCommand } from './get-users-by-ids.command'
 import { GetUsersWithIndividualOkr } from './get-users-with-individual-okr.command'
+import { ReactivateUserCommand } from './reactivate-user.command'
 import { RemoveTeamFromUserCommand } from './remove-team-from-user.command'
 import { RemoveUserToKeyResultSupportTeamCommand } from './remove-user-to-key-result-support-team.command'
+import { RequestChangeUserPasswordEmailCommand } from './request-change-user-password-email.command'
 import { ToggleCheckMarkCommand } from './toggle-check-mark.command'
 import { ToggleTaskCommand } from './toggle-task.command'
 import { UpdateCheckMarkAssigneeCommand } from './update-check-mark-assignee.command'
 import { UpdateCheckMarkDescriptionCommand } from './update-check-mark-description.command'
 import { UpdateTaskDescriptionCommand } from './update-task-description.command'
 import { UpdateTeamCommand } from './update-team.command'
+import { UpdateUserRoleCommand } from './update-user-role.command'
 import { UpdateUserCommand } from './update-user.command'
 
 type CommandConstructor = new (...commandArguments: any[]) => Command<unknown>
@@ -190,6 +194,10 @@ export type CommandType =
   | 'get-user-quarterly-progress'
   | 'get-user-yearly-progress'
   | 'get-objectives'
+  | 'update-user-role'
+  | 'get-user-role'
+  | 'request-change-user-password-email'
+  | 'reactivate-user'
 
 @Injectable()
 export class CommandFactory {
@@ -286,6 +294,10 @@ export class CommandFactory {
     'update-cycle': UpdateCycleCommand,
     'delete-cycle': DeleteCycleCommand,
     'get-objectives': GetObjectivesCommand,
+    'update-user-role': UpdateUserRoleCommand,
+    'get-user-role': GetUserRoleCommand,
+    'request-change-user-password-email': RequestChangeUserPasswordEmailCommand,
+    'reactivate-user': ReactivateUserCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}

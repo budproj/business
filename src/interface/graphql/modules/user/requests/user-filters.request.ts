@@ -21,4 +21,10 @@ export class UserFiltersRequest extends ConnectionFiltersRequest<UserOrderInputO
     description: 'Define if the query should return only users with individual objectives',
   })
   public onlyWithIndividualObjectives?: boolean
+
+  @Field(() => Boolean, {
+    nullable: true,
+    description: 'Define if the query should return only active users or not',
+  })
+  public withInactives?: boolean
 }

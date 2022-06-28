@@ -16,6 +16,7 @@ import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
+import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
@@ -200,9 +201,16 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching users for team',
     })
 
-    const [filters, getOptions, connection] = this.relay.unmarshalRequest<UserFiltersRequest, User>(
-      request,
-    )
+    const [rawFilters, getOptions, connection] = this.relay.unmarshalRequest<
+      UserFiltersRequest,
+      User
+    >(request)
+
+    const filters = rawFilters.withInactives
+      ? { ...rawFilters }
+      : { ...rawFilters, status: UserStatus.ACTIVE }
+
+    delete filters.withInactives
 
     const queryResult = await this.corePorts.dispatchCommand<User[]>(
       'get-team-members',

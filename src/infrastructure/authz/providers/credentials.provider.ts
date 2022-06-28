@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { Role } from 'auth0'
 
 import { CredentialsAdapter } from '@adapters/credentials/credentials.adapter'
 import { NewCredentialData, Credential } from '@adapters/credentials/credentials.interface'
@@ -30,6 +31,12 @@ export class AuthzCredentialsProvider implements CredentialsAdapter {
     return updatedUser.blocked
   }
 
+  public async unblockUser(userID: string): Promise<boolean> {
+    const updatedUser = await this.client.updateUser(userID, { blocked: false })
+
+    return updatedUser.blocked
+  }
+
   public async updateEmail(userID: string, email: string): Promise<boolean> {
     const updatedUser = await this.client.updateUser(userID, { email })
 
@@ -42,5 +49,18 @@ export class AuthzCredentialsProvider implements CredentialsAdapter {
 
   public async updateUserProperty(userID: string, key: string, value: string): Promise<void> {
     await this.client.updateUserMetadata(userID, key, value)
+  }
+
+  public async updateUserRole(authzSubUserId: string, role: string): Promise<void> {
+    await this.client.updateUserRole(authzSubUserId, role)
+  }
+
+  public async getUserRole(authzSubUserId: string): Promise<Role> {
+    const role = await this.client.getUserRole(authzSubUserId)
+    return role
+  }
+
+  public async requestChangeUserPassword(email: string): Promise<void> {
+    await this.client.requestChangePassword(email)
   }
 }
