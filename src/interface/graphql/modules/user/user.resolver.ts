@@ -296,8 +296,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       Team
     >(request)
 
-    console.log({ filters, queryOptions, connection })
-
     const userCompanies = await this.core.team.getUserCompanies(user, filters, queryOptions)
     return this.relay.marshalResponse<Team>(userCompanies, connection, user)
   }
