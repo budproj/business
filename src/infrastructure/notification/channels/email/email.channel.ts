@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { uniq } from 'lodash'
 
 import { EmailAdapterProvider } from '@adapters/email/email.provider'
+import { EmailMetadata } from '@adapters/email/types/metadata.type'
 import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { AWSSESProvider } from '@infrastructure/aws/ses/ses.provider'
@@ -20,9 +21,7 @@ export class EmailNotificationChannel
     this.emailAdapter = new EmailAdapterProvider(awsSESProvider)
   }
 
-  static marshalMetadata(
-    metadata: EmailNotificationChannelMetadata,
-  ): EmailNotificationChannelMetadata {
+  static marshalMetadata(metadata: EmailNotificationChannelMetadata): EmailMetadata {
     return metadata
   }
 
