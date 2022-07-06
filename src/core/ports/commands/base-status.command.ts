@@ -36,9 +36,10 @@ export abstract class BaseStatusCommand extends Command<Status> {
   protected isOutdated(
     latestKeyResultCheckIn?: KeyResultCheckInInterface,
     baseDate?: Date,
+    fallbackDate?: Date,
   ): boolean {
-    baseDate ??= new Date()
-    const checkInDate = latestKeyResultCheckIn?.createdAt ?? baseDate
+    fallbackDate ??= new Date()
+    const checkInDate = latestKeyResultCheckIn?.createdAt ?? fallbackDate
 
     return differenceInCalendarWeeks(baseDate, checkInDate) > 1
   }
