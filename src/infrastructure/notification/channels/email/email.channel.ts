@@ -27,9 +27,14 @@ export class EmailNotificationChannel
     usersCustomTemplateData?: Array<Record<string, any>>,
   ): NotificationRecipient[] {
     const activeUsers = users.filter((user) => user.status === UserStatus.ACTIVE)
+    const activeUsersId = new Set(activeUsers.map((user) => user.id))
+
+    const filteredCustomData = usersCustomTemplateData.filter((userCustomData) =>
+      activeUsersId.has(userCustomData.userId),
+    )
 
     return activeUsers.map((user, index) =>
-      EmailNotificationChannel.buildSingleRecipientFromUser(user, usersCustomTemplateData?.[index]),
+      EmailNotificationChannel.buildSingleRecipientFromUser(user, filteredCustomData?.[index]),
     )
   }
 
