@@ -94,7 +94,7 @@ export class NewKeyResultSupportTeamMemberNotification extends BaseNotification<
 
   private async getRelatedData(): Promise<RelatedData> {
     const author =
-      this.activity.context.user ??
+      this.activity.context.userWithContext ??
       (await this.core.dispatchCommand<UserInterface>('get-user', { id: this.metadata.userID }))
     const newSupportTeamMember = await this.core.dispatchCommand<UserInterface>('get-user', {
       id: this.activity.request.userId,
@@ -125,7 +125,7 @@ export class NewKeyResultSupportTeamMemberNotification extends BaseNotification<
 
     const authorInitials = await this.core.dispatchCommand<string>(
       'get-user-initials',
-      this.activity.context.user,
+      this.activity.context.userWithContext,
     )
 
     return {

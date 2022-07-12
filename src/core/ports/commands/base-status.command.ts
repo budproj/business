@@ -1,4 +1,4 @@
-import { differenceInCalendarWeeks } from 'date-fns'
+import { differenceInDays } from 'date-fns'
 import { sum, maxBy, min, groupBy, filter, zip } from 'lodash'
 
 import { GetStatusOptions, Status } from '@core/interfaces/status.interface'
@@ -36,11 +36,12 @@ export abstract class BaseStatusCommand extends Command<Status> {
   protected isOutdated(
     latestKeyResultCheckIn?: KeyResultCheckInInterface,
     baseDate?: Date,
+    fallbackDate?: Date,
   ): boolean {
-    baseDate ??= new Date()
-    const checkInDate = latestKeyResultCheckIn?.createdAt ?? baseDate
+    fallbackDate ??= new Date()
+    const checkInDate = latestKeyResultCheckIn?.createdAt ?? fallbackDate
 
-    return differenceInCalendarWeeks(baseDate, checkInDate) > 1
+    return differenceInDays(baseDate, checkInDate) > 6
   }
 
   protected async getKeyResultProgressesFromKeyResultList(

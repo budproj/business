@@ -220,19 +220,19 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
   private async getAuthorData(): Promise<AuthorNotificationData> {
     const fullName = await this.core.dispatchCommand<string>(
       'get-user-full-name',
-      this.activity.context.user,
+      this.activity.context.userWithContext,
     )
 
     const initials = await this.core.dispatchCommand<string>(
       'get-user-initials',
-      this.activity.context.user,
+      this.activity.context.userWithContext,
     )
 
     return {
       fullName,
       initials,
-      id: this.activity.context.user.id,
-      picture: this.activity.context.user.picture,
+      id: this.activity.context.userWithContext.id,
+      picture: this.activity.context.userWithContext.picture,
     }
   }
 
