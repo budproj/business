@@ -9,6 +9,7 @@ metadata:
     app.kubernetes.io/component: backend-application
     app.kubernetes.io/version: 1.0.0
 spec:
+  revisionHistoryLimit: 0
   replicas: 1
   selector:
     matchLabels:
