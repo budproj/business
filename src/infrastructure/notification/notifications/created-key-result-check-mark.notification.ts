@@ -144,6 +144,7 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
 
     const recipientUsers = [data.assignedUser]
     const customData = recipientUsers.map((user) => ({
+      userId: user.id,
       ownerFirstName: user.firstName,
     }))
     const recipients = await this.buildRecipients(recipientUsers, customData)
