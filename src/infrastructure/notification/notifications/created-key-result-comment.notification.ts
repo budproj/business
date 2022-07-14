@@ -136,6 +136,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     const users = await this.core.dispatchCommand<UserInterface[]>('get-users-by-ids', usersIds)
 
     const customData = users.map((user) => ({
+      userId: user.id,
       mentionedFirstName: user.firstName,
     }))
     const recipients = await this.buildRecipients(users, customData)
@@ -172,6 +173,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       (user) => user.id !== data.author.id,
     )
     const customData = recipientUsers.map((user) => ({
+      userId: user.id,
       ownerFirstName: user.firstName,
     }))
     const recipients = await this.buildRecipients(recipientUsers, customData)

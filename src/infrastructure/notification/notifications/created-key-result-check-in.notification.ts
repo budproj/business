@@ -110,6 +110,11 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
       },
     )
 
+    const keyResultOwner = await this.core.dispatchCommand<UserInterface>(
+      'get-key-result-owner',
+      keyResult,
+    )
+
     const author = await this.core.dispatchCommand<UserInterface>('get-user', {
       id: checkIn.userId,
     })
@@ -117,14 +122,20 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
     const team = await this.core.dispatchCommand<TeamInterface>('get-team', {
       id: keyResult.teamId,
     })
+
     const keyResultTeamMembers = keyResult.teamId
       ? await this.core.dispatchCommand<UserInterface[]>('get-team-members', keyResult.teamId)
       : []
+
     const keyResultSupportTeamMembers = await this.core.dispatchCommand<UserInterface[]>(
       'get-key-result-support-team',
       keyResult.id,
     )
-    const keyResultMembers = uniqBy([...keyResultTeamMembers, ...keyResultSupportTeamMembers], 'id')
+
+    const keyResultMembers = uniqBy(
+      [keyResultOwner, ...keyResultTeamMembers, ...keyResultSupportTeamMembers],
+      'id',
+    )
 
     const teamMembers = keyResultMembers.filter((member) => member.id !== author.id)
 
@@ -170,6 +181,7 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
     const { data, metadata } = this.marshal()
 
     const customData = metadata.teamMembers.map((member) => ({
+      userId: member.id,
       recipientFirstName: member.firstName,
     }))
     const recipients = await this.buildRecipients(metadata.teamMembers, customData)
@@ -208,6 +220,7 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
     const { data, metadata } = this.marshal()
 
     const customData = metadata.teamMembers.map((member) => ({
+      userId: member.id,
       recipientFirstName: member.firstName,
     }))
     const recipients = await this.buildRecipients(metadata.teamMembers, customData)
