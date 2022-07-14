@@ -28,7 +28,10 @@ export class GetTeamTacticalCycleCommand extends Command<Cycle | undefined> {
       id: teamID,
     })
 
-    const teamValidCycles = teamCycles.filter((cycle) => cycle.dateStart <= anchorDate)
+    const teamValidCycles = teamCycles
+      .filter((cycle) => cycle.active)
+      .filter((cycle) => cycle.dateStart <= anchorDate)
+
     const teamHasCycles = teamValidCycles.length > 0
 
     return teamHasCycles
