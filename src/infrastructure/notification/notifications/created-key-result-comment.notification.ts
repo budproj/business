@@ -45,6 +45,7 @@ type AuthorNotificationData = {
 }
 
 type KeyResultNotificationData = {
+  id: string
   title: string
   confidenceColor: string
 }
@@ -157,6 +158,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       keyResultTitle: genericData.keyResult.title,
       keyResultConfidenceTagColor: genericData.keyResult.confidenceColor,
       keyResultComment: cleanCommentContent,
+      keyResultId: genericData.keyResult.id,
       isQuarterlyCadence: genericData.cycle.isQuarterlyCadence,
       cyclePeriod: genericData.cycle.period,
     }
@@ -189,6 +191,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       authorPictureURL: data.author.picture,
       keyResultTitle: data.keyResult.title,
       keyResultConfidenceTagColor: data.keyResult.confidenceColor,
+      keyResultId: data.keyResult.id,
       keyResultComment: cleanCommentContent,
       isQuarterlyCadence: data.cycle.isQuarterlyCadence,
       cyclePeriod: data.cycle.period,
@@ -260,6 +263,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
 
     return {
       confidenceColor,
+      id: keyResult.id,
       title: keyResult.title,
     }
   }
