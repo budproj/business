@@ -48,6 +48,7 @@ type AuthorNotificationData = {
 }
 
 type KeyResultNotificationData = {
+  id: string
   title: string
   confidenceColor: string
 }
@@ -181,6 +182,7 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
       cyclePeriod: data.cycle.period,
       keyResultConfidenceColor: data.keyResult.confidenceColor,
       keyResultTitle: data.keyResult.title,
+      keyResultId: data.keyResult.id,
     }
 
     await this.channels.email.dispatch(emailData, emailMetadata)
@@ -262,6 +264,7 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
 
     return {
       confidenceColor,
+      id: keyResult.id,
       title: keyResult.title,
     }
   }
