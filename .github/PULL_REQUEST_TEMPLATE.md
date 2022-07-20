@@ -1,25 +1,40 @@
-## ☕ Purpose
+## 🎢 Motivation
 
-A brief summary about the purpose of this PR.
+A brief summary of the purpose of this PR.
 
-## 🧐 Checklist
+## 🔧 Solution
 
-- [x] A feature that will work with this PR
-- [ ] A feature that I'm still working on
+How the implementation works or fixes the issue.
 
-## 🐞 Testing
+## 🚨  Testing
 
-A brief description about how the reviewer can test my PR.
+A brief description of how the reviewer can test my PR.
 
-~~~shell
-# don't forget to insert cli commands
-~~~
+## 🃏 Task Card
 
-## 🍩 Further details
+Link to issue on Jira
 
-Anything that the reviewer should know before approving it.
+- [`BUD22-123`](https://)
 
 ## 🔗 Related PRs
 
 This PR is related to some other PRs in different services, they are:
-* [`project#PR_NUMBER`](https://)
+
+- [`project#PR_NUMBER`](https://)
+
+## 🍩 Validation
+
+Who tested this PR?
+
+### Canary
+
+- [ ] Marcelo
+- [ ] Gustavo
+- [ ] Aline
+
+### Dev
+
+- [ ] Perin
+- [ ] Guilherme
+- [ ] Rodrigo
+- [ ] Diego
