@@ -1,3 +1,5 @@
+import { randomUUID } from 'crypto'
+
 import { Injectable } from '@nestjs/common'
 
 import {
@@ -308,6 +310,7 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
     const recipients = await this.buildRecipients(recipientUsers, this.channels.messageBroker)
 
     const messages = recipients.map((recipient) => ({
+      messageId: randomUUID(),
       type: 'taskAssign',
       timestamp: new Date(metadata.timestamp).toISOString(),
       recipientId: recipient.id,

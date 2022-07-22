@@ -1,3 +1,5 @@
+import { randomUUID } from 'crypto'
+
 import { Injectable } from '@nestjs/common'
 import { uniqBy } from 'lodash'
 
@@ -285,6 +287,7 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
     )
 
     const messages = notificationRecipients.map((recipient) => ({
+      messageId: randomUUID(),
       type: 'checkin',
       timestamp: new Date(metadata.timestamp).toISOString(),
       recipientId: recipient.id,

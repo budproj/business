@@ -1,3 +1,5 @@
+import { randomUUID } from 'crypto'
+
 import { Injectable } from '@nestjs/common'
 
 import {
@@ -155,6 +157,7 @@ export class NewKeyResultSupportTeamMemberNotification extends BaseNotification<
     )
 
     const messages = recipients.map((recipient) => ({
+      messageId: randomUUID(),
       type: 'supportTeam',
       timestamp: new Date(metadata.timestamp).toISOString(),
       recipientId: recipient.id,

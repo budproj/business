@@ -1,3 +1,5 @@
+import { randomUUID } from 'crypto'
+
 import { Injectable } from '@nestjs/common'
 import { uniqBy } from 'lodash'
 
@@ -331,6 +333,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     )
 
     const messages = recipients.map((recipient) => ({
+      messageId: randomUUID(),
       type: 'taggedInComment',
       timestamp: new Date(metadata.timestamp).toISOString(),
       recipientId: recipient.authzSub,
@@ -362,6 +365,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     )
 
     const messages = recipientUsers.map((recipient) => ({
+      messageId: randomUUID(),
       type: 'commentOnKR',
       timestamp: new Date(metadata.timestamp).toISOString(),
       recipientId: recipient.authzSub,
