@@ -156,7 +156,7 @@ export class NewKeyResultSupportTeamMemberNotification extends BaseNotification<
 
     const messages = recipients.map((recipient) => ({
       type: 'supportTeam',
-      timestamp: metadata.timestamp,
+      timestamp: new Date(metadata.timestamp).toISOString(),
       recipientId: recipient.id,
       properties: {
         sender: {

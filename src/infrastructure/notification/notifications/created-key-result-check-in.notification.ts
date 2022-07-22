@@ -286,7 +286,7 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
 
     const messages = notificationRecipients.map((recipient) => ({
       type: 'checkin',
-      timestamp: metadata.timestamp,
+      timestamp: new Date(metadata.timestamp).toISOString(),
       recipientId: recipient.id,
       properties: {
         sender: {

@@ -309,7 +309,7 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
 
     const messages = recipients.map((recipient) => ({
       type: 'taskAssign',
-      timestamp: metadata.timestamp,
+      timestamp: new Date(metadata.timestamp).toISOString(),
       recipientId: recipient.id,
       properties: {
         sender: {

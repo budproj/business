@@ -332,7 +332,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
 
     const messages = recipients.map((recipient) => ({
       type: 'taggedInComment',
-      timestamp: metadata.timestamp,
+      timestamp: new Date(metadata.timestamp).toISOString(),
       recipientId: recipient.authzSub,
       properties: {
         sender: {
@@ -363,7 +363,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
 
     const messages = recipientUsers.map((recipient) => ({
       type: 'commentOnKR',
-      timestamp: metadata.timestamp,
+      timestamp: new Date(metadata.timestamp).toISOString(),
       recipientId: recipient.authzSub,
       properties: {
         sender: {
