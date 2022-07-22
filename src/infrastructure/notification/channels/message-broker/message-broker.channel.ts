@@ -29,7 +29,7 @@ export class MessageBrokerNotificationChannel
     await this.messageBrokerAdapter.publish(topic, data)
   }
 
-  public async dispatchAll(topic: string, data: NotificationData[]): Promise<void> {
+  public async dispatchMultiple(topic: string, data: NotificationData[]): Promise<void> {
     const messagesPromises = data
       .map((notification) => JSON.stringify(notification))
       .map(async (notification) => this.dispatch(topic, notification))

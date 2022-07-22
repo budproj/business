@@ -303,6 +303,6 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
       },
     }))
 
-    await this.channels.messageBroker.dispatchAll('notifications', messages)
+    await this.channels.messageBroker.dispatchMultiple('notification', messages)
   }
 }

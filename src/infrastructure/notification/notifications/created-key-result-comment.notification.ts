@@ -351,7 +351,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       },
     }))
 
-    await this.channels.messageBroker.dispatchAll('notifications', messages)
+    await this.channels.messageBroker.dispatchMultiple('notification', messages)
   }
 
   private async dispatchOwnerAndSupportTeamMessaging(): Promise<void> {
@@ -382,6 +382,6 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       },
     }))
 
-    await this.channels.messageBroker.dispatchAll('notifications', messages)
+    await this.channels.messageBroker.dispatchMultiple('notification', messages)
   }
 }
