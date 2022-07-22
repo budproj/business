@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { pick } from 'lodash'
-import { Codec, connect, Msg, NatsConnection, NatsError, StringCodec } from 'nats'
+import { Codec, connect, Msg, NatsConnection, NatsError, JSONCodec } from 'nats'
 
 import { MessageBrokerInterface } from '@adapters/message-broker/interface/message-broker.interface'
 import { Handler, MessageData, MessageException } from '@adapters/message-broker/types'
@@ -12,7 +12,7 @@ export class NatsProvider implements MessageBrokerInterface {
   private readonly codec: Codec<string>
 
   constructor() {
-    this.codec = StringCodec()
+    this.codec = JSONCodec()
   }
 
   public async connect(endpoints: string[]): Promise<void> {
