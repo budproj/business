@@ -103,7 +103,7 @@ spec:
             - name: ANALYTICS_PACKAGES
               value: keyResult
             - name: TASKS_NATS_SERVERS
-              value: nats.nats.svc.cluster.local:4222
+              value: nats-canary.nats.svc.cluster.local:4222
             - name: SENTRY_DSN
               valueFrom:
                 secretKeyRef:
