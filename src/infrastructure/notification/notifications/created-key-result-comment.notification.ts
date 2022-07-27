@@ -325,7 +325,12 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     const { data, metadata } = this.marshal()
 
     const commentContent = data.comment.content
-    const recipientIds = this.getIdFromMentionedUsers(commentContent)
+    const mentionedIds = this.getIdFromMentionedUsers(commentContent)
+    const ownerAndSupportTeamIds = uniqBy([metadata.keyResultOwner, ...metadata.supportTeam], 'id')
+
+    const recipientIds = mentionedIds.filter((userId) =>
+      ownerAndSupportTeamIds.map((user) => user.id).includes(userId),
+    )
 
     const recipients = await this.core.dispatchCommand<UserInterface[]>(
       'get-users-by-ids',
