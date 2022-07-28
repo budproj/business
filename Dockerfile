@@ -1,4 +1,4 @@
-FROM node:15.5.1-alpine3.10 AS build
+FROM node:16.16.0-alpine3.15 AS build
 
 ARG GITHUB_TOKEN
 
@@ -17,7 +17,7 @@ COPY . ./
 
 RUN npm run build
 
-FROM node:15.5.1-alpine3.10 AS final
+FROM node:16.16.0-alpine3.15 AS final
 
 ENV NODE_ENV="production"
 

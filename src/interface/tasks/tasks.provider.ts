@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 
-import { MessageData, MessageException } from '@adapters/message-broker/message-broker.interface'
+import { MessageData } from '@adapters/message-broker/types/message-data.type'
+import { MessageException } from '@adapters/message-broker/types/message-exception.type'
 import { TasksConfigProvider } from '@config/tasks/tasks.provider'
 import { NatsProvider } from '@infrastructure/nats/nats.provider'
 
@@ -12,7 +13,6 @@ export class TasksProvider implements OnModuleInit {
 
   public async onModuleInit() {
     await this.nats.connect(this.config.nats.servers)
-    this.nats.subscribe('dummy', this.dummy.bind(this))
   }
 
   protected dummy(error: MessageException, data: MessageData): void {

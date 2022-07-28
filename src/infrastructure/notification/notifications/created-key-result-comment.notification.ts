@@ -1,3 +1,5 @@
+import { randomUUID } from 'crypto'
+
 import { Injectable } from '@nestjs/common'
 import { uniqBy } from 'lodash'
 
@@ -14,8 +16,11 @@ import { UserInterface } from '@core/modules/user/user.interface'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { EmailNotificationChannelMetadata } from '@infrastructure/notification/channels/email/metadata.type'
 import { BaseNotification } from '@infrastructure/notification/notifications/base.notification'
-import { ChannelHashmap } from '@infrastructure/notification/types/channel-hashmap.type'
 import { NotificationMetadata } from '@infrastructure/notification/types/notification-metadata.type'
+
+import { EmailRecipient } from '../types/email-recipient.type'
+
+import { NotificationChannelHashMap } from './notification.factory'
 
 type CreatedKeyResultCommentNotificationData = {
   owner: OwnerNotificationData
@@ -39,6 +44,8 @@ type OwnerNotificationData = {
 
 type AuthorNotificationData = {
   id: string
+  authzSub: string
+  firstName: string
   fullName: string
   initials: string
   picture: string
@@ -51,6 +58,7 @@ type KeyResultNotificationData = {
 }
 
 type CommentNotificationData = {
+  id: string
   content: string
 }
 
@@ -84,7 +92,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
 
   constructor(
     activity: CreatedKeyResultCommentActivity,
-    channels: ChannelHashmap,
+    channels: NotificationChannelHashMap,
     core: CorePortsProvider,
   ) {
     super(activity, channels, core, CreatedKeyResultCommentNotification.notificationType)
@@ -121,7 +129,13 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
   }
 
   public async dispatch(): Promise<void> {
-    await Promise.all([this.dispatchOwnerAndSupportTeamEmail(), this.dispatchMentionsEmails()])
+    await Promise.all([this.dispatchOwnerAndSupportTeam(), this.dispatchMentions()])
+  }
+
+  getIdFromMentionedUsers(comment: string) {
+    const mentions = [...comment.matchAll(mentionsRegex)]
+    const usersIds = mentions.map((mention) => mention.groups.id)
+    return usersIds
   }
 
   private async dispatchMentionsEmails(): Promise<void> {
@@ -130,17 +144,29 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
 
     const commentContent = genericData.comment.content
     const cleanCommentContent = commentContent.replace(mentionsRegex, '$1')
+    const mentionedIds = this.getIdFromMentionedUsers(commentContent)
+    const ownerAndSupportTeamIds = uniqBy(
+      [genericMetadata.keyResultOwner, ...genericMetadata.supportTeam],
+      'id',
+    )
 
-    const mentions = [...commentContent.matchAll(mentionsRegex)]
-    const usersIds = mentions.map((mention) => mention.groups.id)
+    const recipientIds = mentionedIds.filter(
+      (userId) => !ownerAndSupportTeamIds.map((user) => user.id).includes(userId),
+    )
 
-    const users = await this.core.dispatchCommand<UserInterface[]>('get-users-by-ids', usersIds)
+    const users = await this.core.dispatchCommand<UserInterface[]>('get-users-by-ids', recipientIds)
 
     const customData = users.map((user) => ({
       userId: user.id,
       mentionedFirstName: user.firstName,
     }))
-    const recipients = await this.buildRecipients(users, customData)
+
+    const recipients = (await this.buildRecipients(
+      users,
+      this.channels.email,
+      customData,
+    )) as EmailRecipient[]
+
     const metadata: EmailNotificationChannelMetadata = {
       ...genericMetadata,
       recipients,
@@ -178,7 +204,11 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       userId: user.id,
       ownerFirstName: user.firstName,
     }))
-    const recipients = await this.buildRecipients(recipientUsers, customData)
+    const recipients = (await this.buildRecipients(
+      recipientUsers,
+      this.channels.email,
+      customData,
+    )) as EmailRecipient[]
 
     if (recipients.length === 0) return
 
@@ -237,12 +267,15 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       fullName,
       initials,
       id: this.activity.context.userWithContext.id,
+      authzSub: this.activity.context.userWithContext.authzSub,
+      firstName: this.activity.context.userWithContext.firstName,
       picture: this.activity.context.userWithContext.picture,
     }
   }
 
   private getCommentData(): CommentNotificationData {
     return {
+      id: this.activity.data.id,
       content: this.activity.data.text,
     }
   }
@@ -283,5 +316,89 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
 
   private async getTeam(keyResult: KeyResultInterface): Promise<TeamInterface> {
     return this.core.dispatchCommand<TeamInterface>('get-key-result-team', keyResult)
+  }
+
+  private async dispatchMentions(): Promise<void> {
+    await Promise.all([this.dispatchMentionsEmails(), this.dispatchMentionsMessaging()])
+  }
+
+  private async dispatchOwnerAndSupportTeam(): Promise<void> {
+    await Promise.all([
+      this.dispatchOwnerAndSupportTeamEmail(),
+      this.dispatchOwnerAndSupportTeamMessaging(),
+    ])
+  }
+
+  private async dispatchMentionsMessaging(): Promise<void> {
+    const { data, metadata } = this.marshal()
+
+    const commentContent = data.comment.content
+    const mentionedIds = this.getIdFromMentionedUsers(commentContent)
+    const ownerAndSupportTeamIds = uniqBy([metadata.keyResultOwner, ...metadata.supportTeam], 'id')
+
+    const recipientIds = mentionedIds.filter(
+      (userId) => !ownerAndSupportTeamIds.map((user) => user.id).includes(userId),
+    )
+
+    const recipients = await this.core.dispatchCommand<UserInterface[]>(
+      'get-users-by-ids',
+      recipientIds,
+    )
+
+    const messages = recipients.map((recipient) => ({
+      messageId: randomUUID(),
+      type: 'taggedInComment',
+      timestamp: new Date(metadata.timestamp).toISOString(),
+      recipientId: recipient.authzSub,
+      properties: {
+        sender: {
+          id: data.author.authzSub,
+          name: data.author.firstName,
+          picture: data.author.picture,
+        },
+        keyResult: {
+          id: data.keyResult.id,
+          name: data.keyResult.title,
+        },
+        comment: {
+          id: data.comment.id,
+          content: data.comment.content,
+        },
+      },
+    }))
+
+    await this.channels.messageBroker.dispatchMultiple('notification', messages)
+  }
+
+  private async dispatchOwnerAndSupportTeamMessaging(): Promise<void> {
+    const { data, metadata } = this.marshal()
+
+    const recipientUsers = uniqBy([metadata.keyResultOwner, ...metadata.supportTeam], 'id').filter(
+      (user) => user.id !== data.author.id,
+    )
+
+    const messages = recipientUsers.map((recipient) => ({
+      messageId: randomUUID(),
+      type: 'commentOnKR',
+      timestamp: new Date(metadata.timestamp).toISOString(),
+      recipientId: recipient.authzSub,
+      properties: {
+        sender: {
+          id: data.author.authzSub,
+          name: data.author.firstName,
+          picture: data.author.picture,
+        },
+        keyResult: {
+          id: data.keyResult.id,
+          name: data.keyResult.title,
+        },
+        comment: {
+          id: data.comment.id,
+          content: data.comment.content,
+        },
+      },
+    }))
+
+    await this.channels.messageBroker.dispatchMultiple('notification', messages)
   }
 }
