@@ -2,16 +2,12 @@ import { Injectable } from '@nestjs/common'
 import { pick } from 'lodash'
 import { Codec, connect, Msg, NatsConnection, NatsError, StringCodec } from 'nats'
 
-import {
-  Handler,
-  MessageBroker,
-  MessageData,
-  MessageException,
-} from '@adapters/message-broker/message-broker.interface'
+import { MessageBrokerInterface } from '@adapters/message-broker/interface/message-broker.interface'
+import { Handler, MessageData, MessageException } from '@adapters/message-broker/types'
 import { NatsHandler } from '@infrastructure/nats/nats.interface'
 
 @Injectable()
-export class NatsProvider implements MessageBroker {
+export class NatsProvider implements MessageBrokerInterface {
   private connection: NatsConnection
   private readonly codec: Codec<string>
 
@@ -31,6 +27,11 @@ export class NatsProvider implements MessageBroker {
     })
   }
 
+  public publish(topic: string, message: string): void {
+    const encodedMessage = this.encode(message)
+    this.connection.publish(topic, encodedMessage)
+  }
+
   private buildCallback(handler: Handler): NatsHandler {
     return async (error, message) => {
       const [exception, data] = this.decode(error, message)
@@ -43,5 +44,10 @@ export class NatsProvider implements MessageBroker {
     const decodedData = this.codec.decode(message.data)
 
     return [exception, decodedData]
+  }
+
+  private encode(message: string): MessageData {
+    const encodedData = this.codec.encode(message)
+    return encodedData
   }
 }

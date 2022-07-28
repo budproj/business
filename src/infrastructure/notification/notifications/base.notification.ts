@@ -2,12 +2,11 @@ import { Activity } from '@adapters/activity/activities/base.activity'
 import { UserSetting } from '@core/modules/user/setting/user-settings.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CorePortsProvider } from '@core/ports/ports.provider'
-import { EmailNotificationChannel } from '@infrastructure/notification/channels/email/email.channel'
 import { Notification } from '@infrastructure/notification/interfaces/notification.interface'
-import { ChannelHashmap } from '@infrastructure/notification/types/channel-hashmap.type'
 import { NotificationData } from '@infrastructure/notification/types/notification-data.type'
 import { NotificationMetadata } from '@infrastructure/notification/types/notification-metadata.type'
-import { NotificationRecipient } from '@infrastructure/notification/types/recipient.type'
+
+import { NotificationChannelHashMap, ChannelsRecipients } from './notification.factory'
 
 export abstract class BaseNotification<
   D extends NotificationData,
@@ -22,7 +21,7 @@ export abstract class BaseNotification<
 
   protected constructor(
     protected readonly activity: A,
-    protected readonly channels: ChannelHashmap,
+    protected readonly channels: NotificationChannelHashMap,
     protected readonly core: CorePortsProvider,
     notificationType: string,
   ) {
@@ -45,15 +44,16 @@ export abstract class BaseNotification<
 
   protected async buildRecipients(
     recipients: UserInterface[],
+    channel: NotificationChannelHashMap[keyof NotificationChannelHashMap],
     originalCustomData?: Array<Record<string, any>>,
-  ): Promise<NotificationRecipient[]> {
+  ): Promise<ChannelsRecipients[]> {
     const usersLocale = await this.getLocaleFromUsers(recipients)
     const customData = usersLocale.map((locale, index) => ({
       locale,
       ...originalCustomData?.[index],
     }))
 
-    return EmailNotificationChannel.buildRecipientsFromUsers(recipients, customData)
+    return channel.buildRecipientsFromUsers(recipients, customData)
   }
 
   private async getLocaleFromUsers(users: UserInterface[]): Promise<string[]> {

@@ -2,19 +2,17 @@ import { Injectable } from '@nestjs/common'
 import { uniq } from 'lodash'
 
 import { EmailAdapterProvider } from '@adapters/email/email.provider'
-import { EmailMetadata } from '@adapters/email/types/metadata.type'
 import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { AWSSESProvider } from '@infrastructure/aws/ses/ses.provider'
+import { NotificationChannel } from '@infrastructure/notification/channels/channel.interface'
 import { EmailNotificationChannelMetadata } from '@infrastructure/notification/channels/email/metadata.type'
+import { EmailRecipient } from '@infrastructure/notification/types/email-recipient.type'
 import { NotificationData } from '@infrastructure/notification/types/notification-data.type'
-import { NotificationRecipient } from '@infrastructure/notification/types/recipient.type'
-
-import { NotificationChannel } from '../channel.interface'
 
 @Injectable()
 export class EmailNotificationChannel
-  implements NotificationChannel<EmailNotificationChannelMetadata>
+  implements NotificationChannel<EmailNotificationChannelMetadata, '', EmailRecipient>
 {
   private readonly emailAdapter: EmailAdapterProvider
 
@@ -25,7 +23,7 @@ export class EmailNotificationChannel
   static buildRecipientsFromUsers(
     users: UserInterface[],
     usersCustomTemplateData?: Array<Record<string, any>>,
-  ): NotificationRecipient[] {
+  ): EmailRecipient[] {
     const activeUsers = users.filter((user) => user.status === UserStatus.ACTIVE)
     const activeUsersId = new Set(activeUsers.map((user) => user.id))
 
@@ -38,18 +36,21 @@ export class EmailNotificationChannel
     )
   }
 
-  static marshalMetadata(metadata: EmailNotificationChannelMetadata): EmailMetadata {
+  static marshalMetadata(
+    metadata: EmailNotificationChannelMetadata,
+  ): EmailNotificationChannelMetadata {
     return metadata
   }
 
   static buildSingleRecipientFromUser(
     user: UserInterface,
     customTemplateData?: Record<string, any>,
-  ): NotificationRecipient {
+  ): EmailRecipient {
     return {
-      customTemplateData,
+      id: user.id,
       name: user.firstName,
       address: user.email,
+      customTemplateData,
     }
   }
 
@@ -109,5 +110,16 @@ export class EmailNotificationChannel
     })
 
     await Promise.all(dispatchPromises)
+  }
+
+  public buildRecipientsFromUsers(
+    users: UserInterface[],
+    metadata?: EmailNotificationChannelMetadata | Array<Record<string, any>>,
+  ): EmailRecipient[] {
+    const activeUsers = users.filter((user) => user.status === UserStatus.ACTIVE)
+    const recipients = activeUsers.map((user, index) =>
+      EmailNotificationChannel.buildSingleRecipientFromUser(user, metadata?.[index]),
+    )
+    return recipients
   }
 }

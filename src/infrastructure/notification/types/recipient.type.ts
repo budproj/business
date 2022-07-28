@@ -1,5 +1,6 @@
-export type NotificationRecipient = {
-  name: string
-  address: string
-  customTemplateData?: Record<string, any>
+import { User } from '@core/modules/user/user.orm-entity'
+
+export type Recipient = {
+  id: User['id'] | User['authzSub']
+  name?: string
 }

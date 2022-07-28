@@ -15,8 +15,11 @@ import { UserInterface } from '@core/modules/user/user.interface'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { EmailNotificationChannelMetadata } from '@infrastructure/notification/channels/email/metadata.type'
 import { BaseNotification } from '@infrastructure/notification/notifications/base.notification'
-import { ChannelHashmap } from '@infrastructure/notification/types/channel-hashmap.type'
 import { NotificationMetadata } from '@infrastructure/notification/types/notification-metadata.type'
+
+import { EmailRecipient } from '../types/email-recipient.type'
+
+import { NotificationChannelHashMap } from './notification.factory'
 
 type CreatedKeyResultCheckMarkNotificationData = {
   owner: OwnerNotificationData
@@ -42,6 +45,8 @@ type OwnerNotificationData = {
 
 type AuthorNotificationData = {
   id: string
+  authzSub: string
+  firstName: string
   fullName: string
   initials: string
   picture: string
@@ -54,6 +59,7 @@ type KeyResultNotificationData = {
 }
 
 type CheckMarkNotificationData = {
+  id: string
   state: CheckMarkStates
   description: string
   updatedAt: Date
@@ -93,7 +99,7 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
 
   constructor(
     activity: CreatedKeyResultCheckMarkActivity,
-    channels: ChannelHashmap,
+    channels: NotificationChannelHashMap,
     core: CorePortsProvider,
   ) {
     super(activity, channels, core, CreatedKeyResultCheckMarkNotification.notificationType)
@@ -136,6 +142,7 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
 
   public async dispatch(): Promise<void> {
     await this.dispatchAssignedCheckMarkEmail()
+    await this.dispatchAssignedCheckMarkMessaging()
   }
 
   private async dispatchAssignedCheckMarkEmail(): Promise<void> {
@@ -148,7 +155,12 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
       userId: user.id,
       ownerFirstName: user.firstName,
     }))
-    const recipients = await this.buildRecipients(recipientUsers, customData)
+
+    const recipients = (await this.buildRecipients(
+      recipientUsers,
+      this.channels.email,
+      customData,
+    )) as EmailRecipient[]
 
     if (recipients.length === 0) return
 
@@ -231,12 +243,15 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
       fullName,
       initials,
       id: this.activity.context.userWithContext.id,
+      firstName: this.activity.context.userWithContext.firstName,
+      authzSub: this.activity.context.userWithContext.authzSub,
       picture: this.activity.context.userWithContext.picture,
     }
   }
 
   private getCheckMarkData(): CheckMarkNotificationData {
     return {
+      id: this.activity.data.id,
       state: this.activity.data.state,
       description: this.activity.data.description,
       updatedAt: this.activity.data.updatedAt,
@@ -282,5 +297,37 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
 
   private async getTeam(keyResult: KeyResultInterface): Promise<TeamInterface> {
     return this.core.dispatchCommand<TeamInterface>('get-key-result-team', keyResult)
+  }
+
+  private async dispatchAssignedCheckMarkMessaging(): Promise<void> {
+    const { data, metadata } = this.marshal()
+
+    if (data.assignedUser.id === data.author.id) return
+
+    const recipientUsers = [data.assignedUser]
+    const recipients = await this.buildRecipients(recipientUsers, this.channels.messageBroker)
+
+    const messages = recipients.map((recipient) => ({
+      type: 'taskAssign',
+      timestamp: metadata.timestamp,
+      recipientId: recipient.id,
+      properties: {
+        sender: {
+          id: data.author.authzSub,
+          name: data.author.firstName,
+          picture: data.author.picture,
+        },
+        keyResult: {
+          id: data.keyResult.id,
+          name: data.keyResult.title,
+        },
+        task: {
+          id: data.checkMark.id,
+          name: data.checkMark.description,
+        },
+      },
+    }))
+
+    await this.channels.messageBroker.dispatchAll('notifications', messages)
   }
 }

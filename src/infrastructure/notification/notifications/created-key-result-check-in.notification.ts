@@ -17,10 +17,11 @@ import { UserInterface } from '@core/modules/user/user.interface'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
 import { EmailNotificationChannelMetadata } from '../channels/email/metadata.type'
-import { ChannelHashmap } from '../types/channel-hashmap.type'
+import { EmailRecipient } from '../types/email-recipient.type'
 import { NotificationMetadata } from '../types/notification-metadata.type'
 
 import { BaseNotification } from './base.notification'
+import { NotificationChannelHashMap } from './notification.factory'
 
 type CreatedCheckInData = RelatedData & ResolvedData
 
@@ -57,7 +58,11 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
   static notificationType = 'CreatedKeyResultCheckIn'
   private readonly confidenceTagAdapter = new ConfidenceTagAdapter()
 
-  constructor(activity: CreatedCheckInActivity, channels: ChannelHashmap, core: CorePortsProvider) {
+  constructor(
+    activity: CreatedCheckInActivity,
+    channels: NotificationChannelHashMap,
+    core: CorePortsProvider,
+  ) {
     super(activity, channels, core, CreatedKeyResultCheckInNotification.notificationType)
   }
 
@@ -88,14 +93,18 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
     if (
       data.checkIn.confidence === CONFIDENCE_TAG_THRESHOLDS.barrier &&
       data.parentCheckIn?.confidence !== CONFIDENCE_TAG_THRESHOLDS.barrier
-    )
+    ) {
       void this.dispatchBarrierEmail()
+      void this.dispatchBarrierOrLowConfidenceMessaging()
+    }
 
     if (
       data.checkIn.confidence === CONFIDENCE_TAG_THRESHOLDS.low &&
       data.parentCheckIn?.confidence !== CONFIDENCE_TAG_THRESHOLDS.low
-    )
+    ) {
       void this.dispatchLowConfidenceEmail()
+      void this.dispatchBarrierOrLowConfidenceMessaging()
+    }
   }
 
   private async getRelatedData(checkIn: KeyResultCheckInInterface): Promise<RelatedData> {
@@ -184,7 +193,12 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
       userId: member.id,
       recipientFirstName: member.firstName,
     }))
-    const recipients = await this.buildRecipients(metadata.teamMembers, customData)
+
+    const recipients = (await this.buildRecipients(
+      metadata.teamMembers,
+      this.channels.email,
+      customData,
+    )) as EmailRecipient[]
 
     const emailMetadata: EmailNotificationChannelMetadata = {
       ...metadata,
@@ -224,7 +238,12 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
       userId: member.id,
       recipientFirstName: member.firstName,
     }))
-    const recipients = await this.buildRecipients(metadata.teamMembers, customData)
+
+    const recipients = (await this.buildRecipients(
+      metadata.teamMembers,
+      this.channels.email,
+      customData,
+    )) as EmailRecipient[]
 
     const emailMetadata: EmailNotificationChannelMetadata = {
       ...metadata,
@@ -255,5 +274,35 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
     }
 
     await this.channels.email.dispatch(emailData, emailMetadata)
+  }
+
+  private async dispatchBarrierOrLowConfidenceMessaging(): Promise<void> {
+    const { data, metadata } = this.marshal()
+
+    const notificationRecipients = await this.buildRecipients(
+      metadata.teamMembers,
+      this.channels.messageBroker,
+    )
+
+    const messages = notificationRecipients.map((recipient) => ({
+      type: 'checkin',
+      timestamp: metadata.timestamp,
+      recipientId: recipient.id,
+      properties: {
+        sender: {
+          id: data.author.authzSub,
+          name: data.author.firstName,
+          picture: data.author.picture,
+        },
+        keyResult: {
+          id: data.keyResult.id,
+          name: data.keyResult.title,
+        },
+        previousConfidance: data.parentCheckIn?.confidence,
+        newConfidence: data.checkIn.confidence,
+      },
+    }))
+
+    await this.channels.messageBroker.dispatchAll('notifications', messages)
   }
 }

@@ -13,10 +13,11 @@ import { UserInterface } from '@core/modules/user/user.interface'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
 import { EmailNotificationChannelMetadata } from '../channels/email/metadata.type'
-import { ChannelHashmap } from '../types/channel-hashmap.type'
+import { EmailRecipient } from '../types/email-recipient.type'
 import { NotificationMetadata } from '../types/notification-metadata.type'
 
 import { BaseNotification } from './base.notification'
+import { NotificationChannelHashMap } from './notification.factory'
 
 type Data = RelatedData & ResolvedData
 
@@ -47,7 +48,7 @@ export class NewKeyResultSupportTeamMemberNotification extends BaseNotification<
 
   constructor(
     activity: NewKeyResultSupportTeamMemberActivity,
-    channels: ChannelHashmap,
+    channels: NotificationChannelHashMap,
     core: CorePortsProvider,
   ) {
     super(activity, channels, core, NewKeyResultSupportTeamMemberNotification.notificationType)
@@ -64,33 +65,10 @@ export class NewKeyResultSupportTeamMemberNotification extends BaseNotification<
   }
 
   public async dispatch(): Promise<void> {
-    const { data, metadata } = this.marshal()
-
-    const recipients = await this.buildRecipients([data.newSupportTeamMember])
-
-    const emailMetadata: EmailNotificationChannelMetadata = {
-      ...metadata,
-      recipients,
-      template: 'NewKeyResultSupportTeamMember',
-    }
-    const emailData = {
-      recipientFirstName: data.newSupportTeamMember.firstName,
-      authorFirstName: data.author.firstName,
-      isMaleTeam: data.team.gender === TeamGender.MALE,
-      isFemaleTeam: data.team.gender === TeamGender.FEMALE,
-      isQuarterlyCadence: data.cycle.cadence === Cadence.QUARTERLY,
-      cyclePeriod: data.cycle.period,
-      authorPictureURL: data.author.picture,
-      authorFullName: data.authorFullName,
-      authorInitials: data.authorInitials,
-      keyResultTitle: data.keyResult.title,
-      keyResultConfidenceColor: data.keyResultConfidenceColor,
-      keyResultDescription: data.keyResult.description,
-      keyResultTeam: data.team.name,
-      keyResultId: data.keyResult.id,
-    }
-
-    await this.channels.email.dispatch(emailData, emailMetadata)
+    await Promise.all([
+      this.dispatchSupportTeamMemberEmail(),
+      this.dispatchSupportTeamMemberMessaging(),
+    ])
   }
 
   private async getRelatedData(): Promise<RelatedData> {
@@ -134,5 +112,65 @@ export class NewKeyResultSupportTeamMemberNotification extends BaseNotification<
       authorInitials,
       keyResultConfidenceColor,
     }
+  }
+
+  private async dispatchSupportTeamMemberEmail(): Promise<void> {
+    const { data, metadata } = this.marshal()
+
+    const recipients = (await this.buildRecipients(
+      [data.newSupportTeamMember],
+      this.channels.email,
+    )) as EmailRecipient[]
+
+    const emailMetadata: EmailNotificationChannelMetadata = {
+      ...metadata,
+      recipients,
+      template: 'NewKeyResultSupportTeamMember',
+    }
+    const emailData = {
+      recipientFirstName: data.newSupportTeamMember.firstName,
+      authorFirstName: data.author.firstName,
+      isMaleTeam: data.team.gender === TeamGender.MALE,
+      isFemaleTeam: data.team.gender === TeamGender.FEMALE,
+      isQuarterlyCadence: data.cycle.cadence === Cadence.QUARTERLY,
+      cyclePeriod: data.cycle.period,
+      authorPictureURL: data.author.picture,
+      authorFullName: data.authorFullName,
+      authorInitials: data.authorInitials,
+      keyResultTitle: data.keyResult.title,
+      keyResultConfidenceColor: data.keyResultConfidenceColor,
+      keyResultDescription: data.keyResult.description,
+      keyResultTeam: data.team.name,
+    }
+
+    await this.channels.email.dispatch(emailData, emailMetadata)
+  }
+
+  private async dispatchSupportTeamMemberMessaging(): Promise<void> {
+    const { data, metadata } = this.marshal()
+
+    const recipients = await this.buildRecipients(
+      [data.newSupportTeamMember],
+      this.channels.messageBroker,
+    )
+
+    const messages = recipients.map((recipient) => ({
+      type: 'supportTeam',
+      timestamp: metadata.timestamp,
+      recipientId: recipient.id,
+      properties: {
+        sender: {
+          id: data.author.authzSub,
+          name: data.author.firstName,
+          picture: data.author.picture,
+        },
+        keyResult: {
+          id: data.keyResult.id,
+          name: data.keyResult.title,
+        },
+      },
+    }))
+
+    await this.channels.messageBroker.dispatchAll('notifications', messages)
   }
 }
