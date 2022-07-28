@@ -5,7 +5,7 @@ import { TeamGender } from '@core/modules/team/enums/team-gender.enum'
 import { TeamGenderGraphQLEnum } from '../enums/team-gender.enum'
 
 @InputType('TeamCreateInput', {
-  description: 'Data that you need to provide while creating a new user',
+  description: 'Data that you need to provide while creating a new team',
 })
 export class TeamCreateInputObject {
   @Field(() => String, { description: 'The name of the team' })

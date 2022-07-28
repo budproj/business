@@ -44,6 +44,7 @@ import { TeamUsersGraphQLConnection } from './connections/team-users/team-users.
 import { TeamCreateRequest } from './requests/team-create.request'
 import { TeamFiltersRequest } from './requests/team-filters.request'
 import { TeamMembersFiltersRequest } from './requests/team-members-filters.request'
+import { TeamUpdateRequest } from './requests/team-update.request'
 import { TeamAccessControl } from './team.access-control'
 import { TeamGraphQLNode } from './team.node'
 
@@ -100,9 +101,32 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     }
 
     const createdTeam = await this.corePorts.dispatchCommand<Team>('create-team', payload)
-    if (!createdTeam) throw new InternalServerErrorException('We were not able to create your user')
+    if (!createdTeam) throw new InternalServerErrorException('We were not able to create your team')
 
     return createdTeam
+  }
+
+  @GuardedMutation(TeamGraphQLNode, 'team:update', { name: 'updateTeam' })
+  protected async updateTeamForRequestAndRequestUserWithContext(
+    @Args() request: TeamUpdateRequest,
+    @RequestUserWithContext() userWithContext: UserWithContext,
+  ) {
+    const canUpdate = await this.accessControl.canUpdate(userWithContext, request.id)
+    if (!canUpdate) throw new UnauthorizedException()
+
+    this.logger.log({
+      userWithContext,
+      request,
+      message: 'Received update team request',
+    })
+
+    const updatedTeam = await this.corePorts.dispatchCommand<Team>('update-team', request.id, {
+      ...request.data,
+    })
+
+    if (!updatedTeam) throw new InternalServerErrorException('We were not able to update your team')
+
+    return updatedTeam
   }
 
   @ResolveField('status', () => StatusGraphQLObject)

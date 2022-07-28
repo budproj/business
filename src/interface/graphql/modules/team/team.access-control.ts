@@ -1,4 +1,4 @@
-import { Injectable, NotImplementedException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 
 import { AccessControl } from '@adapters/authorization/access-control.adapter'
 import { AccessControlScopes } from '@adapters/authorization/interfaces/access-control-scopes.interface'
@@ -21,6 +21,10 @@ export class TeamAccessControl extends AccessControl {
     super(core)
   }
 
+  isTeamOwner(user: UserWithContext, team: Team): boolean {
+    return user.id === team.ownerId
+  }
+
   protected async resolveContextScopes(
     user: UserWithContext,
     parentTeamID?: string,
@@ -39,10 +43,20 @@ export class TeamAccessControl extends AccessControl {
   }
 
   protected async resolveEntityScopes(
-    _requestUser: UserWithContext,
-    _userID: string,
+    requestUser: UserWithContext,
+    teamID: string,
   ): Promise<AccessControlScopes> {
-    throw new NotImplementedException()
+    const { company, team } = await this.getContextRelatedEntities(teamID)
+
+    const isOwner = this.isTeamOwner(requestUser, team)
+    const isTeamLeader = await this.isTeamLeader([team], requestUser)
+    const isCompanyMember = await this.isCompanyMember([company], requestUser)
+
+    return {
+      isOwner,
+      isTeamLeader,
+      isCompanyMember,
+    }
   }
 
   private async getContextRelatedEntities(teamID: string): Promise<ContextRelatedEntities> {
