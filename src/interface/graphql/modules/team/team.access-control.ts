@@ -5,7 +5,6 @@ import { AccessControlScopes } from '@adapters/authorization/interfaces/access-c
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
-import { User } from '@core/modules/user/user.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
 type ContextRelatedEntities = {
@@ -22,7 +21,7 @@ export class TeamAccessControl extends AccessControl {
     super(core)
   }
 
-  isSameUser(user: UserWithContext, team: Team): boolean {
+  isTeamOwner(user: UserWithContext, team: Team): boolean {
     return user.id === team.ownerId
   }
 
@@ -47,27 +46,17 @@ export class TeamAccessControl extends AccessControl {
     requestUser: UserWithContext,
     teamID: string,
   ): Promise<AccessControlScopes> {
-    const team = await this.core.dispatchCommand<Team>('get-team', { id: teamID })
+    const { company, team } = await this.getContextRelatedEntities(teamID)
 
-    const { companies } = await this.getEntityRelatedEntities(requestUser.id)
-
-    const isOwner = this.isSameUser(requestUser, team)
+    const isOwner = this.isTeamOwner(requestUser, team)
     const isTeamLeader = await this.isTeamLeader([team], requestUser)
-    const isCompanyMember = await this.isCompanyMember(companies, requestUser)
+    const isCompanyMember = await this.isCompanyMember([company], requestUser)
 
     return {
       isOwner,
       isTeamLeader,
       isCompanyMember,
     }
-  }
-
-  private async getEntityRelatedEntities(userID: string) {
-    const user = await this.core.dispatchCommand<User>('get-user', { id: userID })
-
-    const companies = await this.core.dispatchCommand<Team[]>('get-user-companies', user)
-
-    return { companies }
   }
 
   private async getContextRelatedEntities(teamID: string): Promise<ContextRelatedEntities> {
