@@ -144,9 +144,17 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
 
     const commentContent = genericData.comment.content
     const cleanCommentContent = commentContent.replace(mentionsRegex, '$1')
-    const usersIds = this.getIdFromMentionedUsers(commentContent)
+    const mentionedIds = this.getIdFromMentionedUsers(commentContent)
+    const ownerAndSupportTeamIds = uniqBy(
+      [genericMetadata.keyResultOwner, ...genericMetadata.supportTeam],
+      'id',
+    )
 
-    const users = await this.core.dispatchCommand<UserInterface[]>('get-users-by-ids', usersIds)
+    const recipientIds = mentionedIds.filter(
+      (userId) => !ownerAndSupportTeamIds.map((user) => user.id).includes(userId),
+    )
+
+    const users = await this.core.dispatchCommand<UserInterface[]>('get-users-by-ids', recipientIds)
 
     const customData = users.map((user) => ({
       userId: user.id,
@@ -328,8 +336,8 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     const mentionedIds = this.getIdFromMentionedUsers(commentContent)
     const ownerAndSupportTeamIds = uniqBy([metadata.keyResultOwner, ...metadata.supportTeam], 'id')
 
-    const recipientIds = mentionedIds.filter((userId) =>
-      ownerAndSupportTeamIds.map((user) => user.id).includes(userId),
+    const recipientIds = mentionedIds.filter(
+      (userId) => !ownerAndSupportTeamIds.map((user) => user.id).includes(userId),
     )
 
     const recipients = await this.core.dispatchCommand<UserInterface[]>(
