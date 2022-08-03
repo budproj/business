@@ -21,8 +21,8 @@ export class TeamUpdateInputObject {
   gender?: TeamGender
 
   @Field(() => ID, { description: 'The user id of the team owner', nullable: true })
-  ownerID?: string
+  ownerId?: string
 
   @Field(() => ID, { description: 'The id of the parent team', nullable: true })
-  parentID?: string
+  parentId?: string
 }
