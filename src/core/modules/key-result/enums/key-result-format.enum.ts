@@ -3,4 +3,5 @@ export enum KeyResultFormat {
   PERCENTAGE = 'PERCENTAGE',
   COIN_BRL = 'COIN_BRL',
   COIN_USD = 'COIN_USD',
+  COIN_EUR = 'COIN_EUR',
 }
