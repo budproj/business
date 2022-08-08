@@ -350,7 +350,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       userWithContext,
       message: 'Fetching if is team leader for user',
     })
-    const isTeamLeader = await this.accessControl.publicIsTeamLeader(userWithContext)
+    const isTeamLeader = await this.accessControl.isUserTeamLeader(userWithContext)
 
     return isTeamLeader
   }
