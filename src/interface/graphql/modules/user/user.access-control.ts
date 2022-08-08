@@ -51,7 +51,7 @@ export class UserAccessControl extends AccessControl {
       })
   }
 
-  public async publicIsTeamLeader(user: UserWithContext): Promise<boolean> {
+  public async isUserTeamLeader(user: UserWithContext): Promise<boolean> {
     const { teams } = await this.getEntityRelatedEntities(user.id)
 
     const isTeamLeader = await this.isTeamLeader(teams, user)
