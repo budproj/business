@@ -15,9 +15,11 @@ import { RequestUserWithContext } from '@interface/graphql/adapters/context/deco
 
 import { UserAccessControl } from '../../user.access-control'
 import { UserGraphQLNode } from '../../user.node'
+import { UsersGraphQLConnection } from '../users/users.connection'
 
 import { QuantityNode } from './requests/quantity-request'
 import { TeamAndUserRequest } from './requests/team-and-user.request'
+import { TeamAndUsersRequest } from './requests/team-and-users.request'
 import { UserTeamsGraphQLConnection } from './user-teams.connection'
 
 @GuardedResolver(UserTeamsGraphQLConnection)
@@ -50,6 +52,35 @@ export class UserTeamsConnectionGraphQLResolver extends GuardedConnectionGraphQL
     if (!canUpdate) throw new UnauthorizedException()
 
     return this.corePorts.dispatchCommand<User>('add-team-to-user', request)
+  }
+
+  @GuardedMutation(UsersGraphQLConnection, 'user:update', { name: 'addTeamToUsers' })
+  protected async addTeamToUsersForRequestAndRequestUserWithContext(
+    @Args() request: TeamAndUsersRequest,
+    @RequestUserWithContext() userWithContext: UserWithContext,
+  ) {
+    this.logger.log({
+      userWithContext,
+      request,
+      message: 'Received add team to users request',
+    })
+
+    const [{ usersIDs: usersToAddTeam, teamID }, __, connection] = this.relay.unmarshalRequest<
+      TeamAndUsersRequest,
+      User
+    >(request)
+
+    const usersWithAddedTeamsPromises = usersToAddTeam.map(async (userID) => {
+      const userRequest = {
+        userID,
+        teamID,
+      }
+
+      return this.addTeamToUserForRequestAndRequestUserWithContext(userRequest, userWithContext)
+    })
+
+    const usersWithAddedTeams = await Promise.all(usersWithAddedTeamsPromises)
+    return this.relay.marshalResponse<User>(usersWithAddedTeams, connection)
   }
 
   @GuardedMutation(UserGraphQLNode, 'user:update', { name: 'removeTeamFromUser' })
