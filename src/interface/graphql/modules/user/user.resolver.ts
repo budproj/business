@@ -342,6 +342,19 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return this.relay.marshalResponse<TeamInterface>(queryResult, connection, user)
   }
 
+  @ResolveField('isTeamLeader', () => Boolean, { nullable: true })
+  protected async getIsTeamLeaderForRequestAndUser(
+    @RequestUserWithContext() userWithContext: UserWithContext,
+  ) {
+    this.logger.log({
+      userWithContext,
+      message: 'Fetching if is team leader for user',
+    })
+    const isTeamLeader = await this.accessControl.publicIsTeamLeader(userWithContext)
+
+    return isTeamLeader
+  }
+
   @ResolveField('objectives', () => UserObjectivesGraphQLConnection, { nullable: true })
   protected async getObjectivesForRequestAndUser(
     @Args() request: ObjectiveFiltersRequest,
