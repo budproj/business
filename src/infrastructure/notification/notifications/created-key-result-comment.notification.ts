@@ -70,7 +70,7 @@ type CycleNotificationData = {
 type RelatedData = {
   keyResult: KeyResultInterface
   cycle: CycleInterface
-  team: TeamInterface
+  team?: TeamInterface
   owner: UserInterface
   supportTeam: UserInterface[]
 }
@@ -280,12 +280,20 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     }
   }
 
-  private getTeamData(team: TeamInterface): TeamNotificationData {
-    return {
-      id: team.id,
-      name: team.name,
-      gender: team.gender,
+  private getTeamData(team?: TeamInterface): TeamNotificationData {
+    const fallbackTeamData = {
+      id: '',
+      name: '',
+      gender: TeamGender.NEUTRAL,
     }
+
+    return team
+      ? {
+          id: team.id,
+          name: team.name,
+          gender: team.gender,
+        }
+      : fallbackTeamData
   }
 
   private async getKeyResultData(
@@ -314,8 +322,10 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     return this.core.dispatchCommand<CycleInterface>('get-key-result-cycle', keyResult)
   }
 
-  private async getTeam(keyResult: KeyResultInterface): Promise<TeamInterface> {
-    return this.core.dispatchCommand<TeamInterface>('get-key-result-team', keyResult)
+  private async getTeam(keyResult: KeyResultInterface): Promise<TeamInterface | undefined> {
+    if (keyResult.teamId) {
+      return this.core.dispatchCommand<TeamInterface>('get-key-result-team', keyResult)
+    }
   }
 
   private async dispatchMentions(): Promise<void> {
