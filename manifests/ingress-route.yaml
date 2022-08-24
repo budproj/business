@@ -15,7 +15,7 @@ spec:
     - match: Host(`api.getbud.co`) && PathPrefix(`/business`)
       kind: Rule
       services:
-        - name: business-stable
+        - name: business-canary
           port: 80
     - match: Host(`api.canary.getbud.co`) && PathPrefix(`/business`)
       kind: Rule
