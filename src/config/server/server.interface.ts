@@ -7,6 +7,7 @@ export interface ServerConfigInterface {
   isCodespaces: boolean
   logging: ServerLoggingConfigInterface
   prefix?: string
+  nats: string[]
 }
 
 export interface ServerLoggingConfigInterface {
