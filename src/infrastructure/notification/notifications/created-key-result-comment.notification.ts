@@ -129,7 +129,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
   }
 
   public async dispatch(): Promise<void> {
-    await Promise.all([this.dispatchOwnerAndSupportTeam(), this.dispatchMentions()])
+    await Promise.allSettled([this.dispatchOwnerAndSupportTeam(), this.dispatchMentions()])
   }
 
   getIdFromMentionedUsers(comment: string) {

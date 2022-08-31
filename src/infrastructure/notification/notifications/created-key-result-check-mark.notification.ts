@@ -143,8 +143,10 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
   }
 
   public async dispatch(): Promise<void> {
-    await this.dispatchAssignedCheckMarkEmail()
-    await this.dispatchAssignedCheckMarkMessaging()
+    await Promise.allSettled([
+      this.dispatchAssignedCheckMarkEmail(),
+      this.dispatchAssignedCheckMarkMessaging(),
+    ])
   }
 
   private async dispatchAssignedCheckMarkEmail(): Promise<void> {

@@ -67,7 +67,7 @@ export class NewKeyResultSupportTeamMemberNotification extends BaseNotification<
   }
 
   public async dispatch(): Promise<void> {
-    await Promise.all([
+    await Promise.allSettled([
       this.dispatchSupportTeamMemberEmail(),
       this.dispatchSupportTeamMemberMessaging(),
     ])
