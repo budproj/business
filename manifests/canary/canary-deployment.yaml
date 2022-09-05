@@ -115,7 +115,7 @@ spec:
       initContainers:
         - name: business-app-canary-execute-migrations
           image: 904333181156.dkr.ecr.sa-east-1.amazonaws.com/business:$ECR_TAG
-          command: ['npm', 'run', 'migration:run']
+          command: ['npx', 'typeorm', '--config', 'dist/src/config/typeorm/typeorm-cli.config.js', 'migration:run']
           env:
             - name: TYPEORM_HOST
               value: business.cka3r3gokfjc.sa-east-1.rds.amazonaws.com
@@ -133,3 +133,15 @@ spec:
                 secretKeyRef:
                   name: business-canary
                   key: typeorm-password
+            - name: TYPEORM_CONNECTION_TYPE
+              value: 'postgres'
+            - name: TYPEORM_ENTITIES
+              value: 'dist/src/**/*.orm-entity.js'
+            - name: TYPEORM_MIGRATIONS
+              value: 'dist/src/infrastructure/orm/migrations/*.js'
+            - name: TYPEORM_MIGRATIONS_DIR
+              value: 'src/infrastructure/orm/migrations'
+            - name: TYPEORM_LOGGING_ENABLED
+              value: 'false'
+            - name: TYPEORM_CONVENTION_NAMING_ENABLED
+              value: 'true'
