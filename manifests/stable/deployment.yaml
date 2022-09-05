@@ -110,3 +110,25 @@ spec:
                   key: sentry-dsn
             - name: SENTRY_SAMPLE_RATE
               value: '1'
+
+      initContainers:
+        - name: business-app-prod-execute-migrations
+          image: 904333181156.dkr.ecr.sa-east-1.amazonaws.com/business:$ECR_TAG
+          command: ['npm', 'run', 'migration:run']
+          env:
+            - name: TYPEORM_HOST
+              value: business.cka3r3gokfjc.sa-east-1.rds.amazonaws.com
+            - name: TYPEORM_PORT
+              value: '5432'
+            - name: TYPEORM_DATABASE
+              value: business
+            - name: TYPEORM_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: business-canary
+                  key: typeorm-username
+            - name: TYPEORM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: business-canary
+                  key: typeorm-password
