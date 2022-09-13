@@ -76,7 +76,7 @@ spec:
             - name: TYPEORM_LOGGING_ENABLED
               value: 'false'
             - name: GRAPHQL_DEBUG_ENABLED
-              value: 'false'
+              value: 'true'
             - name: GRAPHQL_PLAYGROUND_ENABLED
               value: 'false'
             - name: GRAPHQL_INSTROSPECTION_ENABLED
@@ -114,7 +114,14 @@ spec:
       initContainers:
         - name: business-app-prod-execute-migrations
           image: 904333181156.dkr.ecr.sa-east-1.amazonaws.com/business:$ECR_TAG
-          command: ['npx', 'typeorm', '--config', 'dist/src/config/typeorm/typeorm-cli.config.js', 'migration:run']
+          command:
+            [
+              'npx',
+              'typeorm',
+              '--config',
+              'dist/src/config/typeorm/typeorm-cli.config.js',
+              'migration:run',
+            ]
           env:
             - name: TYPEORM_HOST
               value: business.cka3r3gokfjc.sa-east-1.rds.amazonaws.com
