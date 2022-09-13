@@ -66,7 +66,7 @@ spec:
             - name: GRAPHQL_SCHEMA_FILE_PATH
               value: './dist/src/interface/graphql/schema.gql'
             - name: SERVER_LOGGING_LEVEL
-              value: ERROR
+              value: DEBUG
             - name: SERVER_LOGGING_SERVICE_NAME
               value: business@stable
             - name: SERVER_PREFIX
@@ -114,14 +114,7 @@ spec:
       initContainers:
         - name: business-app-prod-execute-migrations
           image: 904333181156.dkr.ecr.sa-east-1.amazonaws.com/business:$ECR_TAG
-          command:
-            [
-              'npx',
-              'typeorm',
-              '--config',
-              'dist/src/config/typeorm/typeorm-cli.config.js',
-              'migration:run',
-            ]
+          command: ['npx', 'typeorm', '--config', 'dist/src/config/typeorm/typeorm-cli.config.js', 'migration:run']
           env:
             - name: TYPEORM_HOST
               value: business.cka3r3gokfjc.sa-east-1.rds.amazonaws.com
