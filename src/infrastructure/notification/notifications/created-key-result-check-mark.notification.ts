@@ -78,7 +78,7 @@ type CycleNotificationData = {
 type RelatedData = {
   keyResult: KeyResultInterface
   cycle: CycleInterface
-  team: TeamInterface
+  team?: TeamInterface
   owner: UserInterface
   supportTeam: UserInterface[]
   assignedUser: UserInterface
@@ -143,8 +143,10 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
   }
 
   public async dispatch(): Promise<void> {
-    await this.dispatchAssignedCheckMarkEmail()
-    await this.dispatchAssignedCheckMarkMessaging()
+    await Promise.allSettled([
+      this.dispatchAssignedCheckMarkEmail(),
+      this.dispatchAssignedCheckMarkMessaging(),
+    ])
   }
 
   private async dispatchAssignedCheckMarkEmail(): Promise<void> {
@@ -264,11 +266,19 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
   }
 
   private getTeamData(team: TeamInterface): TeamNotificationData {
-    return {
-      id: team.id,
-      name: team.name,
-      gender: team.gender,
+    const fallbackTeamData = {
+      id: '',
+      name: '',
+      gender: TeamGender.NEUTRAL,
     }
+
+    return team
+      ? {
+          id: team.id,
+          name: team.name,
+          gender: team.gender,
+        }
+      : fallbackTeamData
   }
 
   private async getKeyResultData(
@@ -298,7 +308,9 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
   }
 
   private async getTeam(keyResult: KeyResultInterface): Promise<TeamInterface> {
-    return this.core.dispatchCommand<TeamInterface>('get-key-result-team', keyResult)
+    if (keyResult.teamId) {
+      return this.core.dispatchCommand<TeamInterface>('get-key-result-team', keyResult)
+    }
   }
 
   private async dispatchAssignedCheckMarkMessaging(): Promise<void> {
