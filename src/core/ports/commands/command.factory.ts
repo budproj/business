@@ -35,6 +35,7 @@ import { GetUserFullNameCommand } from '@core/ports/commands/get-user-full-name.
 import { GetUserInitialsCommand } from '@core/ports/commands/get-user-initials.command'
 import { GetUserSettingsCommand } from '@core/ports/commands/get-user-settings.command'
 import { GetUserTeamTreeCommand } from '@core/ports/commands/get-user-team-tree.command'
+import { GetUserWithTeamsBySubCommand } from '@core/ports/commands/get-user-with-teams-from-sub.command'
 import { GetUserCommand } from '@core/ports/commands/get-user.command'
 import { InviteUserCommand } from '@core/ports/commands/invite-user.command'
 import { UpdateCycleCommand } from '@core/ports/commands/update-cycle.command'
@@ -99,105 +100,116 @@ import { UpdateTaskDescriptionCommand } from './update-task-description.command'
 import { UpdateTeamCommand } from './update-team.command'
 import { UpdateUserRoleCommand } from './update-user-role.command'
 import { UpdateUserCommand } from './update-user.command'
+import { VerifyToken } from './verify-token.command'
 
 type CommandConstructor = new (...commandArguments: any[]) => Command<unknown>
-export type CommandType =
-  | 'add-team-to-user'
-  | 'add-user-to-key-result-support-team'
-  | 'create-check-in'
-  | 'create-check-mark'
-  | 'create-key-result'
-  | 'create-key-result-comment'
-  | 'create-objective'
-  | 'create-team'
-  | 'create-user'
-  | 'deactivate-user'
-  | 'delete-check-mark'
-  | 'delete-key-result'
-  | 'delete-objective'
-  | 'get-check-list-for-key-result'
-  | 'get-check-list-of-user'
-  | 'get-check-list-progress'
-  | 'get-cycle'
-  | 'get-cycle-delta'
-  | 'get-cycle-status'
-  | 'get-key-result'
-  | 'get-key-result-check-in'
-  | 'get-key-result-check-in-delta'
-  | 'get-key-result-check-in-list'
-  | 'get-key-result-check-in-status'
-  | 'get-key-result-check-in-team'
-  | 'get-key-result-check-in-window-for-check-in'
-  | 'get-key-result-check-mark'
-  | 'get-key-result-comment'
-  | 'get-key-result-comment-team'
-  | 'get-key-result-company'
-  | 'get-key-result-confidence-color'
-  | 'get-key-result-cycle'
-  | 'get-key-result-delta'
-  | 'get-key-result-from-check-in'
-  | 'get-key-result-owner'
-  | 'get-key-result-progress-history'
-  | 'get-key-result-status'
-  | 'get-key-result-support-team'
-  | 'get-key-result-team'
-  | 'get-key-result-team-tree'
-  | 'get-key-results-containing-user-checklist'
-  | 'get-objective'
-  | 'get-objective-delta'
-  | 'get-objective-key-results'
-  | 'get-objective-status'
-  | 'get-objective-support-teams'
-  | 'get-objective-team-tree'
-  | 'get-team'
-  | 'get-team-company'
-  | 'get-team-delta'
-  | 'get-team-members'
-  | 'get-team-objectives'
-  | 'get-team-owner'
-  | 'get-team-ranked-descendants'
-  | 'get-team-status'
-  | 'get-team-support-objectives'
-  | 'get-team-tactical-cycle'
-  | 'get-team-tree'
-  | 'get-user'
-  | 'get-user-companies'
-  | 'get-user-full-name'
-  | 'get-user-initials'
-  | 'get-user-key-results'
-  | 'get-user-settings'
-  | 'get-user-team-tree'
-  | 'get-users-by-ids'
-  | 'invite-user'
-  | 'remove-team-from-user'
-  | 'remove-user-to-key-result-support-team'
-  | 'toggle-check-mark'
-  | 'update-check-mark-assignee'
-  | 'update-check-mark-description'
-  | 'update-key-result'
-  | 'update-objective'
-  | 'update-cycle'
-  | 'delete-cycle'
-  | 'update-team'
-  | 'update-user'
-  | 'update-user-setting'
-  | 'create-cycle'
-  | 'create-task'
-  | 'delete-task'
-  | 'toggle-task'
-  | 'update-task-description'
-  | 'get-tasks-from-user'
-  | 'get-task-by-id'
-  | 'get-objectives-and-key-results-quantities'
-  | 'get-key-results'
-  | 'get-users-with-individual-okr'
-  | 'get-user-quarterly-progress'
-  | 'get-user-yearly-progress'
-  | 'get-objectives'
-  | 'update-user-role'
-  | 'get-user-role'
-  | 'request-change-user-password-email'
-  | 'reactivate-user'
+
+const commandTypes = [
+  'add-team-to-user',
+  'add-user-to-key-result-support-team',
+  'create-check-in',
+  'create-check-mark',
+  'create-key-result',
+  'create-key-result-comment',
+  'create-objective',
+  'create-team',
+  'create-user',
+  'deactivate-user',
+  'delete-check-mark',
+  'delete-key-result',
+  'delete-objective',
+  'get-check-list-for-key-result',
+  'get-check-list-of-user',
+  'get-check-list-progress',
+  'get-cycle',
+  'get-cycle-delta',
+  'get-cycle-status',
+  'get-key-result',
+  'get-key-result-check-in',
+  'get-key-result-check-in-delta',
+  'get-key-result-check-in-list',
+  'get-key-result-check-in-status',
+  'get-key-result-check-in-team',
+  'get-key-result-check-in-window-for-check-in',
+  'get-key-result-check-mark',
+  'get-key-result-comment',
+  'get-key-result-comment-team',
+  'get-key-result-company',
+  'get-key-result-confidence-color',
+  'get-key-result-cycle',
+  'get-key-result-delta',
+  'get-key-result-from-check-in',
+  'get-key-result-owner',
+  'get-key-result-progress-history',
+  'get-key-result-status',
+  'get-key-result-support-team',
+  'get-key-result-team',
+  'get-key-result-team-tree',
+  'get-key-results-containing-user-checklist',
+  'get-objective',
+  'get-objective-delta',
+  'get-objective-key-results',
+  'get-objective-status',
+  'get-objective-support-teams',
+  'get-objective-team-tree',
+  'get-team',
+  'get-team-company',
+  'get-team-delta',
+  'get-team-members',
+  'get-team-objectives',
+  'get-team-owner',
+  'get-team-ranked-descendants',
+  'get-team-status',
+  'get-team-support-objectives',
+  'get-team-tactical-cycle',
+  'get-team-tree',
+  'get-user',
+  'get-user-companies',
+  'get-user-full-name',
+  'get-user-initials',
+  'get-user-key-results',
+  'get-user-settings',
+  'get-user-team-tree',
+  'get-user-with-teams-by-sub',
+  'get-users-by-ids',
+  'invite-user',
+  'remove-team-from-user',
+  'remove-user-to-key-result-support-team',
+  'toggle-check-mark',
+  'update-check-mark-assignee',
+  'update-check-mark-description',
+  'update-key-result',
+  'update-objective',
+  'update-cycle',
+  'delete-cycle',
+  'update-team',
+  'update-user',
+  'update-user-setting',
+  'create-cycle',
+  'create-task',
+  'delete-task',
+  'toggle-task',
+  'update-task-description',
+  'get-tasks-from-user',
+  'get-task-by-id',
+  'get-objectives-and-key-results-quantities',
+  'get-key-results',
+  'get-users-with-individual-okr',
+  'get-user-quarterly-progress',
+  'get-user-yearly-progress',
+  'get-objectives',
+  'update-user-role',
+  'get-user-role',
+  'request-change-user-password-email',
+  'reactivate-user',
+  'verify-token',
+] as const
+
+export type CommandType = typeof commandTypes[number]
+
+export const isOfTypeCommand = (command: string): command is CommandType => {
+  return (commandTypes as readonly string[]).includes(command)
+}
 
 @Injectable()
 export class CommandFactory {
@@ -268,6 +280,7 @@ export class CommandFactory {
     'get-user-key-results': GetUserKeyResultsCommand,
     'get-user-settings': GetUserSettingsCommand,
     'get-user-team-tree': GetUserTeamTreeCommand,
+    'get-user-with-teams-by-sub': GetUserWithTeamsBySubCommand,
     'get-users-by-ids': GetUsersByIdsCommand,
     'invite-user': InviteUserCommand,
     'remove-team-from-user': RemoveTeamFromUserCommand,
@@ -298,6 +311,7 @@ export class CommandFactory {
     'get-user-role': GetUserRoleCommand,
     'request-change-user-password-email': RequestChangeUserPasswordEmailCommand,
     'reactivate-user': ReactivateUserCommand,
+    'verify-token': VerifyToken,
   }
 
   constructor(private readonly core: CoreProvider) {}
