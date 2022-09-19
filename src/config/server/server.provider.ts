@@ -30,4 +30,8 @@ export class ServerConfigProvider {
   get logging(): ServerLoggingConfigInterface {
     return this.configService.get<ServerLoggingConfigInterface>('server.logging')
   }
+
+  get natsServers(): string[] {
+    return this.configService.get<string[]>('server.nats')
+  }
 }

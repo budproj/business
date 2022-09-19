@@ -17,5 +17,7 @@ export const serverConfig = registerAs(
       level: LogLevel[process.env.SERVER_LOGGING_LEVEL],
       serviceName: process.env.SERVER_LOGGING_SERVICE_NAME,
     },
+
+    nats: process.env.TASKS_NATS_SERVERS.split(','),
   }),
 )
