@@ -58,6 +58,7 @@ import { DeleteTaskCommand } from './delete-task.command'
 import { GetCheckListForKeyResultCommand } from './get-check-list-for-key-result.command'
 import { GetCheckListProgressCommand } from './get-check-list-progress.command'
 import { GetCheckListOfUserCommand } from './get-checklist-of-user'
+import { GetCompaniesCommand } from './get-companies.command'
 import { GetCycleCommand } from './get-cycle.command'
 import { GetKeyResultCheckInListCommand } from './get-key-result-check-in-list.command'
 import { GetKeyResultCheckInTeamCommand } from './get-key-result-check-in-team.command'
@@ -121,6 +122,7 @@ const commandTypes = [
   'get-check-list-for-key-result',
   'get-check-list-of-user',
   'get-check-list-progress',
+  'get-companies',
   'get-cycle',
   'get-cycle-delta',
   'get-cycle-status',
@@ -231,6 +233,7 @@ export class CommandFactory {
     'get-check-list-for-key-result': GetCheckListForKeyResultCommand,
     'get-check-list-of-user': GetCheckListOfUserCommand,
     'get-check-list-progress': GetCheckListProgressCommand,
+    'get-companies': GetCompaniesCommand,
     'get-cycle': GetCycleCommand,
     'get-cycle-delta': GetCycleDeltaCommand,
     'get-cycle-status': GetCycleStatusCommand,
