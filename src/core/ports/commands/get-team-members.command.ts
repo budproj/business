@@ -8,7 +8,7 @@ import { User } from '@core/modules/user/user.orm-entity'
 
 import { Command } from './base.command'
 
-interface Filters extends Partial<UserInterface> {
+export interface Filters extends Partial<UserInterface> {
   resolveTree?: boolean
 }
 
