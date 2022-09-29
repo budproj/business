@@ -186,7 +186,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
   ): Promise<Team> {
     let rootTeam = await this.getOne({ id: team.id })
 
-    while (rootTeam?.parentId !== rootTeam.id) {
+    while (rootTeam.parentId && rootTeam.parentId !== rootTeam.id) {
       // Since we're dealing with a linked list, where we need to evaluate each step before trying
       // the next one, we can disable the following eslint rule
       // eslint-disable-next-line no-await-in-loop
