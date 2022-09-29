@@ -14,10 +14,10 @@ interface GetUsersFromTeamProperties {
 
 export class GetUsersFromTeam extends Command<User[]> {
   public async execute({ teamID, filters }: GetUsersFromTeamProperties): Promise<User[]> {
-    const queryFilters = filters.withInactives
-      ? { ...filters }
-      : { ...filters, status: UserStatus.ACTIVE }
+    const { withInactives } = filters
+    delete filters.withInactives
 
+    const queryFilters = withInactives ? { ...filters } : { ...filters, status: UserStatus.ACTIVE }
     const getTeamMembersCommand = this.factory.buildCommand<User[]>('get-team-members')
 
     return getTeamMembersCommand.execute(teamID, queryFilters)
