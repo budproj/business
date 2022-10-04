@@ -212,6 +212,15 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return this.getTeamNodesTreeAfterTeam(companyIDs)
   }
 
+  public async getAllCompanies() {
+    return this.repository.find({
+      where: {
+        // eslint-disable-next-line unicorn/no-null
+        parentId: null,
+      },
+    })
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<Team>,
     _data: Partial<TeamInterface>,
