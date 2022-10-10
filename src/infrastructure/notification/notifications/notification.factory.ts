@@ -16,6 +16,7 @@ import { Recipient } from '../types/recipient.type'
 import { CreatedKeyResultCheckInNotification } from './created-key-result-check-in.notification'
 import { CreatedKeyResultCheckMarkNotification } from './created-key-result-check-mark.notification'
 import { NewKeyResultSupportTeamMemberNotification } from './new-key-result-support-team-member.notification'
+import { PendingTasksNotification } from './pending-tasks.notification'
 
 export type Channels = EmailNotificationChannel | MessageBrokerNotificationChannel
 export type ChannelsMetadata = EmailNotificationChannelMetadata | MessageBrokerChannelMetadata
@@ -34,6 +35,7 @@ export class NotificationFactory {
     CreatedKeyResultCheckInNotification,
     NewKeyResultSupportTeamMemberNotification,
     CreatedKeyResultCheckMarkNotification,
+    PendingTasksNotification,
   ]
 
   private readonly channels: NotificationChannelHashMap
