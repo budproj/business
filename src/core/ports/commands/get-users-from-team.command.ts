@@ -12,7 +12,18 @@ interface GetUsersFromTeamProperties {
 export class GetUsersFromTeam extends Command<User[]> {
   public async execute({ teamID, filters }: GetUsersFromTeamProperties): Promise<User[]> {
     const getTeamMembersCommand = this.factory.buildCommand<User[]>('get-team-members')
+    const getUserTeamTree = this.factory.buildCommand<Team[]>('get-user-team-tree')
 
-    return getTeamMembersCommand.execute(teamID, filters)
+    const users = await getTeamMembersCommand.execute(teamID, filters)
+
+    const usersWithTeams = await Promise.all(
+      users.map(async (user) => {
+        const teams = await getUserTeamTree.execute(user)
+
+        return { ...user, teams }
+      }),
+    )
+
+    return usersWithTeams
   }
 }
