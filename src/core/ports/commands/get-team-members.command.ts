@@ -10,6 +10,7 @@ import { Command } from './base.command'
 
 export interface Filters extends Partial<UserInterface> {
   resolveTree?: boolean
+  withTeams?: boolean
 }
 
 export class GetTeamMembersCommand extends Command<User[]> {

@@ -16,14 +16,17 @@ export class GetUsersFromTeam extends Command<User[]> {
 
     const users = await getTeamMembersCommand.execute(teamID, filters)
 
-    const usersWithTeams = await Promise.all(
-      users.map(async (user) => {
-        const teams = await getUserTeamTree.execute(user)
+    if (filters.withTeams) {
+      const usersWithTeams = await Promise.all(
+        users.map(async (user) => {
+          const teams = await getUserTeamTree.execute(user)
 
-        return { ...user, teams }
-      }),
-    )
+          return { ...user, teams }
+        }),
+      )
+      return usersWithTeams
+    }
 
-    return usersWithTeams
+    return users
   }
 }
