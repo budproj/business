@@ -89,6 +89,7 @@ import { GetUserQuarterlyProgressCommand } from './get-user-quarterly-progress.c
 import { GetUserRoleCommand } from './get-user-role.command'
 import { GetUserYearlyProgressCommand } from './get-user-yearly-progress.command'
 import { GetUsersByIdsCommand } from './get-users-by-ids.command'
+import { GetUsersFromTeam } from './get-users-from-team.command'
 import { GetUsersWithIndividualOkr } from './get-users-with-individual-okr.command'
 import { ReactivateUserCommand } from './reactivate-user.command'
 import { RemoveTeamFromUserCommand } from './remove-team-from-user.command'
@@ -207,6 +208,7 @@ const commandTypes = [
   'reactivate-user',
   'verify-token',
   'check-if-user-has-pending-key-results',
+  'get-users-from-team',
 ] as const
 
 export type CommandType = typeof commandTypes[number]
@@ -318,6 +320,7 @@ export class CommandFactory {
     'reactivate-user': ReactivateUserCommand,
     'verify-token': VerifyToken,
     'check-if-user-has-pending-key-results': CheckIfUserHasPendingKeyResultCommand,
+    'get-users-from-team': GetUsersFromTeam,
   }
 
   constructor(private readonly core: CoreProvider) {}
