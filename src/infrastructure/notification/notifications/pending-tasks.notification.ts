@@ -100,7 +100,7 @@ export class PendingTasksNotification extends BaseNotification<
     const emailMetadata: EmailNotificationChannelMetadata = {
       ...metadata,
       recipients,
-      template: 'pendenciesReminder',
+      template: 'PendenciesReminder',
     }
 
     await this.channels.email.dispatch({}, emailMetadata)
