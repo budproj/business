@@ -88,6 +88,7 @@ export class PendingTasksNotification extends BaseNotification<
     const { data, metadata } = this.marshal()
 
     const customData = data.map((user) => ({
+      userId: user.id,
       recipientFirstName: user.firstName,
     }))
 
