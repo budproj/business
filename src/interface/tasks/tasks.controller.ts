@@ -28,14 +28,14 @@ export class TasksController {
     const context = {
       userWithContext: user,
     }
-    const a = new GenericActivity<unknown, unknown>(
+    const activity = new GenericActivity<unknown, unknown>(
       commandName,
       data,
       context as Partial<GraphQLRequest>,
       undefined,
     )
 
-    await this.notification.dispatch(a)
+    await this.notification.dispatch(activity)
   }
 
   @MessagePattern('core-ports.*')
