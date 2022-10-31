@@ -1,4 +1,4 @@
-import { flatten } from 'lodash'
+import { flatten, omit } from 'lodash'
 import { Any } from 'typeorm'
 
 import { GetOptions } from '@core/interfaces/get-options'
@@ -10,6 +10,7 @@ import { Command } from './base.command'
 
 export interface Filters extends Partial<UserInterface> {
   resolveTree?: boolean
+  withTeams?: boolean
 }
 
 export class GetTeamMembersCommand extends Command<User[]> {
@@ -18,11 +19,12 @@ export class GetTeamMembersCommand extends Command<User[]> {
     { resolveTree, ...entityFilters }: Filters = {},
     options?: GetOptions<User>,
   ): Promise<User[]> {
+    const filteredEntiityFilters = omit(entityFilters, 'withTeams')
     const teams = resolveTree
       ? await this.core.team.getTeamNodesTreeAfterTeam(teamID)
       : [await this.core.team.getOne({ id: teamID })]
 
-    return this.getUsers(teams, entityFilters, options)
+    return this.getUsers(teams, filteredEntiityFilters, options)
   }
 
   private async getUsers(

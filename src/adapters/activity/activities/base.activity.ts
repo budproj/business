@@ -27,8 +27,8 @@ export abstract class Activity<
 
   protected marshalMetadata(context: C): ActivityMetadata {
     return {
-      userID: context.userWithContext.id,
-      sessionID: context.tracing.sessionID,
+      userID: context.userWithContext?.id,
+      sessionID: context.tracing?.sessionID,
       timestamp: Date.now(),
     }
   }

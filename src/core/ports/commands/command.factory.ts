@@ -46,6 +46,7 @@ import { UpdateUserSettingCommand } from '@core/ports/commands/update-user-setti
 import { AddTeamToUserCommand } from './add-team-to-user.command'
 import { AddUserToKeyResultSupportTeamCommand } from './add-user-to-key-result-support-team.command'
 import { Command } from './base.command'
+import { CheckIfUserHasPendingKeyResultCommand } from './check-if-user-has-pending-key-results.command'
 import { CreateCheckMarkCommand } from './create-check-mark.command'
 import { CreateKeyResultCheckInCommand } from './create-key-result-check-in.command'
 import { CreateKeyResultCommentCommand } from './create-key-result-comment.command'
@@ -206,6 +207,7 @@ const commandTypes = [
   'request-change-user-password-email',
   'reactivate-user',
   'verify-token',
+  'check-if-user-has-pending-key-results',
   'get-users-from-team',
 ] as const
 
@@ -317,6 +319,7 @@ export class CommandFactory {
     'request-change-user-password-email': RequestChangeUserPasswordEmailCommand,
     'reactivate-user': ReactivateUserCommand,
     'verify-token': VerifyToken,
+    'check-if-user-has-pending-key-results': CheckIfUserHasPendingKeyResultCommand,
     'get-users-from-team': GetUsersFromTeam,
   }
 
