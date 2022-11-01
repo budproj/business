@@ -40,6 +40,10 @@ export class AWSSESProvider implements EmailProviderInterface {
     })
 
     await this.remote.sendBulkTemplatedEmail(parameters).promise()
+
+    this.logger.debug({
+      message: 'Email sent',
+    })
   }
 
   private buildTemplateEmailParams(
