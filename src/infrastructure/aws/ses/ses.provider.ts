@@ -39,11 +39,7 @@ export class AWSSESProvider implements EmailProviderInterface {
       message: 'Sending e-mail with AWS SES',
     })
 
-    try {
-      await this.remote.sendBulkTemplatedEmail(parameters).promise()
-    } catch (error: unknown) {
-      this.logger.error(error)
-    }
+    await this.remote.sendBulkTemplatedEmail(parameters).promise()
 
     this.logger.debug({
       message: 'Email sent',
