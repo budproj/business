@@ -86,6 +86,12 @@ spec:
               value: sa-east-1
             - name: AWS_S3_BUCKET_NAME
               value: business.s3.getbud.co
+            - name: AWS_SES_SOURCE_NAME
+              value: Bud
+            - name: AWS_SES_SOURCE_EMAIL
+              value: hey@getbud.co
+            - name: AWS_SES_DEBUG_ENABLED
+              value: 'true'
             - name: AMPLITUDE_API_KEY
               value: 9314f6f12a26e6a5989287b16d030c30
             - name: AWS_CREDENTIALS_ACCESS_KEY_ID
