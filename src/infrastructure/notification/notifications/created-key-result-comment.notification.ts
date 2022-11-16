@@ -21,6 +21,7 @@ import { NotificationMetadata } from '@infrastructure/notification/types/notific
 import { EmailRecipient } from '../types/email-recipient.type'
 
 import { NotificationChannelHashMap } from './notification.factory'
+import { cleanComment } from './utils'
 
 type CreatedKeyResultCommentNotificationData = {
   owner: OwnerNotificationData
@@ -143,7 +144,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     const { data: genericData, metadata: genericMetadata } = marshal
 
     const commentContent = genericData.comment.content
-    const cleanCommentContent = commentContent.replace(mentionsRegex, '$1')
+    const cleanCommentContent = cleanComment(commentContent)
     const mentionedIds = this.getIdFromMentionedUsers(commentContent)
     const ownerAndSupportTeamIds = uniqBy(
       [genericMetadata.keyResultOwner, ...genericMetadata.supportTeam],
@@ -196,7 +197,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
   private async dispatchOwnerAndSupportTeamEmail(): Promise<void> {
     const { data, metadata } = this.marshal()
 
-    const cleanCommentContent = data.comment.content.replace(mentionsRegex, '$1')
+    const cleanCommentContent = cleanComment(data.comment.content)
     const recipientUsers = uniqBy([metadata.keyResultOwner, ...metadata.supportTeam], 'id').filter(
       (user) => user.id !== data.author.id,
     )
