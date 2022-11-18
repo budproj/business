@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/component: backend-application
     app.kubernetes.io/version: 1.0.0
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app.kubernetes.io/name: business-stable
