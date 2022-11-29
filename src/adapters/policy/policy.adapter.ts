@@ -21,6 +21,7 @@ export class PolicyAdapter {
     Resource.USER,
     Resource.TEAM,
     Resource.CYCLE,
+    Resource.FLAGS,
     Resource.OBJECTIVE,
     Resource.KEY_RESULT,
     Resource.KEY_RESULT_CHECK_IN,
