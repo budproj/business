@@ -81,6 +81,7 @@ import { GetObjectivesCommand } from './get-objectives.command'
 import { GetTaskByIdCommand } from './get-task-by-id.command'
 import { GetTasksFromUserCommand } from './get-tasks-from-user.command'
 import { GetTeamCompanyCommand } from './get-team-company.command'
+import { GetTeamFlagsCommand } from './get-team-flags.command'
 import { GetTeamMembersCommand } from './get-team-members.command'
 import { GetTeamOwnerCommand } from './get-team-owner.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
@@ -209,6 +210,7 @@ const commandTypes = [
   'verify-token',
   'check-if-user-has-pending-key-results',
   'get-users-from-team',
+  'get-team-flags',
 ] as const
 
 export type CommandType = typeof commandTypes[number]
@@ -321,6 +323,7 @@ export class CommandFactory {
     'verify-token': VerifyToken,
     'check-if-user-has-pending-key-results': CheckIfUserHasPendingKeyResultCommand,
     'get-users-from-team': GetUsersFromTeam,
+    'get-team-flags': GetTeamFlagsCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}

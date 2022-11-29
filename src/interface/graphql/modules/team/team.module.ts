@@ -13,6 +13,8 @@ import { TeamObjectivesConnectionGraphQLResolver } from './connections/team-obje
 import { TeamTeamsConnectionGraphQLResolver } from './connections/team-teams/team-teams.resolver'
 import { TeamUsersConnectionGraphQLResolver } from './connections/team-users/team-users.resolver'
 import { TeamsConnectionGraphQLResolver } from './connections/teams/teams.resolver'
+import { FlagsAccessControl } from './flags/flags.access-control'
+import { FlagsGraphQLResolver } from './flags/flags.resolver'
 import { TeamAccessControl } from './team.access-control'
 import { TeamGraphQLResolver } from './team.resolver'
 
@@ -27,6 +29,8 @@ import { TeamGraphQLResolver } from './team.resolver'
   providers: [
     TeamAccessControl,
     TeamGraphQLResolver,
+    FlagsAccessControl,
+    FlagsGraphQLResolver,
     TeamsConnectionGraphQLResolver,
     TeamUsersConnectionGraphQLResolver,
     TeamTeamsConnectionGraphQLResolver,
