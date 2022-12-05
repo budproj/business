@@ -17,6 +17,7 @@ import { RequestUserWithContext } from '@interface/graphql/adapters/context/deco
 
 import { FlagsAccessControl } from './flags.access-control'
 import { FlagsGraphQLNode } from './flags.node'
+import { TeamFlagsObject } from './objects/team-flags.object'
 import { TeamFlagsRequest } from './requests/team-flags.request'
 
 @GuardedResolver(FlagsGraphQLNode)
@@ -31,8 +32,8 @@ export class FlagsGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamI
     super(Resource.FLAGS, core, core.team, accessControl)
   }
 
-  @GuardedQuery(FlagsGraphQLNode, 'flags:read', { name: 'getTeamFlags' })
-  protected async getTeamForRequestAndRequestUserWithContext(
+  @GuardedQuery(TeamFlagsObject, 'flags:read', { name: 'getTeamFlags' })
+  protected async getTeamFlagsForRequestAndRequestUserWithContext(
     @Args() request: TeamFlagsRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
@@ -41,7 +42,35 @@ export class FlagsGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamI
 
     this.logger.log({
       request,
-      message: 'Fetching users for team',
+      message: 'Fetching team flags for team',
+    })
+
+    const { outdated, low, noRelated, barrier } = await this.corePorts.dispatchCommand<TeamFlag>(
+      'get-team-flags',
+      request.id,
+    )
+
+    const teamFlagsByQuantity = {
+      outdatedLength: outdated.length,
+      lowLength: low.length,
+      noRelatedLength: noRelated.length,
+      barrierLength: barrier.length,
+    }
+
+    return teamFlagsByQuantity
+  }
+
+  @GuardedQuery(FlagsGraphQLNode, 'flags:read', { name: 'getTeamFlagsData' })
+  protected async getTeamFlagsDataForRequestAndRequestUserWithContext(
+    @Args() request: TeamFlagsRequest,
+    @RequestUserWithContext() userWithContext: UserWithContext,
+  ) {
+    const canRead = await this.accessControl.canRead(userWithContext, request.id)
+    if (!canRead) throw new UnauthorizedException()
+
+    this.logger.log({
+      request,
+      message: 'Fetching team flags data for team',
     })
 
     const [, _, connection] = this.relay.unmarshalRequest<TeamFlagsRequest, User>(request)
@@ -51,13 +80,13 @@ export class FlagsGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamI
       request.id,
     )
 
-    const teamFlags = {
+    const teamFlagsData = {
       outdated: this.relay.marshalResponse<KeyResult>(outdated, connection),
       barrier: this.relay.marshalResponse<KeyResult>(barrier, connection),
       low: this.relay.marshalResponse<KeyResult>(low, connection),
       noRelated: this.relay.marshalResponse<User>(noRelated, connection),
     }
 
-    return teamFlags
+    return teamFlagsData
   }
 }
