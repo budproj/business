@@ -3,6 +3,7 @@ import { differenceInDays } from 'date-fns'
 import { ConfidenceTag } from '@adapters/confidence-tag/confidence-tag.enum'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
+import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 
 import { BaseStatusCommand } from './base-status.command'
 
@@ -61,7 +62,9 @@ export class GetTeamFlagsCommand extends BaseStatusCommand {
     const teamUsers = await team.users
     const teamOwner = await this.core.user.getFromID(team.ownerId)
 
-    const allUsersFromTeam = [...teamUsers, teamOwner]
+    const allUsersFromTeam = [...teamUsers, teamOwner].filter(
+      (user) => user.status === UserStatus.ACTIVE,
+    )
 
     const noRelatedToOkr = allUsersFromTeam.filter(
       ({ id }) => ![...keyResultOwnersIds, ...keyResultSupportTeamIDs].includes(id),
