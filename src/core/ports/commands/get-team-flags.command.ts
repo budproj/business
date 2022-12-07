@@ -51,7 +51,7 @@ export class GetTeamFlagsCommand extends BaseStatusCommand {
         )
 
         const isOutdated = latestCheckIn
-          ? this.isOutdated(latestCheckIn)
+          ? this.isOutdated(latestCheckIn, new Date())
           : differenceInDays(Date.now(), keyResult.createdAt) > 6
 
         return isOutdated
