@@ -21,13 +21,19 @@ export class GetTeamFlagsCommand extends BaseStatusCommand {
       .flat()
       .map(({ id }) => id)
 
-    const keyResultsFromTeamWithLowConfidence = await this.core.keyResult.getKeyResultsByConfidence(
-      teamId,
+    const keyResultsFromTeamWithLowConfidence = await this.core.keyResult.getKeyResults(
+      [teamId],
+      undefined,
+      undefined,
+      true,
       ConfidenceTag.LOW,
     )
 
-    const keyResultsFromTeamWithBarrier = await this.core.keyResult.getKeyResultsByConfidence(
-      teamId,
+    const keyResultsFromTeamWithBarrier = await this.core.keyResult.getKeyResults(
+      [teamId],
+      undefined,
+      undefined,
+      true,
       ConfidenceTag.BARRIER,
     )
 

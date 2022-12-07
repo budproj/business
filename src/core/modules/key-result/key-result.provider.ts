@@ -103,38 +103,6 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return keyResults
   }
 
-  public async getKeyResultsByConfidence(
-    teamId: TeamInterface['id'],
-    confidence?: ConfidenceTag,
-  ): Promise<KeyResult[]> {
-    const keyResults = await this.repository.find({ where: { teamId } })
-
-    const asyncFilter = async (array: KeyResult[], predicate: (element: KeyResult) => void) => {
-      const results = await Promise.all(array.map((element) => predicate(element)))
-
-      return array.filter((_v, index) => results[index])
-    }
-
-    if (confidence) {
-      const confidenceNumber = this.confidenceTagAdapter.getConfidenceFromTag(confidence)
-      const keyResultsWithConfidence = await asyncFilter(
-        keyResults,
-        async (keyResult: KeyResult) => {
-          const latestCheckin = await this.getLatestCheckInForKeyResultAtDate(keyResult.id)
-          if (!latestCheckin) {
-            return confidenceNumber === DEFAULT_CONFIDENCE
-          }
-
-          return latestCheckin.confidence === confidenceNumber
-        },
-      )
-
-      return keyResultsWithConfidence
-    }
-
-    return keyResults
-  }
-
   public async getFromOwner(
     user: UserInterface,
     filters?: FindConditions<KeyResult>,
