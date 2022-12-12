@@ -59,10 +59,12 @@ export class GetTeamFlagsCommand extends BaseStatusCommand {
       },
     )
 
-    const teamUsers = await team.users
     const teamOwner = await this.core.user.getFromID(team.ownerId)
+    const teamUsers = await team.users
 
-    const allUsersFromTeam = [...teamUsers, teamOwner].filter(
+    const uniqueUsers = teamUsers.filter((user) => user.id !== teamOwner.id)
+
+    const allUsersFromTeam = [...uniqueUsers, teamOwner].filter(
       (user) => user.status === UserStatus.ACTIVE,
     )
 
