@@ -32,4 +32,7 @@ export class PermissionsGraphQLObject {
 
   @Field(() => ResourcePolicyGraphQLObject, { complexity: 0 })
   public readonly workspace!: ResourcePolicyGraphQLObject
+
+  @Field(() => ResourcePolicyGraphQLObject, { complexity: 0 })
+  public readonly flags!: ResourcePolicyGraphQLObject
 }

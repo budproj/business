@@ -3,6 +3,7 @@ export enum Resource {
   USER = 'user',
   USER_SETTING = 'user-setting',
   TEAM = 'team',
+  FLAGS = 'flags',
   CYCLE = 'cycle',
   OBJECTIVE = 'objective',
   KEY_RESULT = 'key-result',
