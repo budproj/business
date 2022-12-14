@@ -1,24 +1,63 @@
 ---
 name: Tech debt
-about: Record a tech debt of our serverless infrastructure
+about: Template to describe our technical debts.
 title: ''
-labels: 'tech debt'
+labels: tech debt
 assignees: ''
 
 ---
 
-## 💩 How it is currently developed
+## Title :pushpin:
+A title for technical debt
 
-A clear and concise description of how the solution is currently developed.
+## Age :skull:
+- [ ] LEGACY
+- [ ] CREATED NOW
 
-## 🌟 What is the optimal solution
+## Estimated cost :money_with_wings:
+- [ ] SMALL
+- [ ] MEDIUM
+- [ ] LARGE
 
-An explanation about how it should work in an ideal scenario.
+## Description :clipboard:
+A clear and concise description of what the tech debt is and the reason of being created
 
-## 😓 Why we did that way
 
-Some relevant context information explaining why we've decided to develop that way.
+## Impact :bomb:
+Description of the current or possible impact of this tech debt.
 
-## 💣 What are the possible impacts
 
-Some possible danger areas and what could happen if that debt is not solved.
+## Proposed solutions :squirrel: 
+_How would you fix it?_
+
+> (if don't you have any solution in mind, write it:
+
+This Tech debts still don't have any proposed solution.
+
+> (if you have solutions in mind, describe it below)
+
+Solution 1.
+
+- How 
+
+- Pros :green_heart:
+
+- Cons :broken_heart:
+
+
+Solution 2.
+
+- How 
+
+- Pros :green_heart:
+
+- Cons :broken_heart:
+
+
+## Observations :thinking:
+
+### Files related
+
+[files related](files_related_link.file)
+
+#### Depends on [issue](link_to_related_issue)
