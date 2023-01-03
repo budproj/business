@@ -12,8 +12,4 @@ export class AmplitudeConfigProvider {
   get userProfileUrl(): string {
     return this.configService.get<string>('amplitude.userProfileUrl')
   }
-
-  get nodeEnv(): string {
-    return this.configService.get<string>('amplitude.nodeEnv')
-  }
 }

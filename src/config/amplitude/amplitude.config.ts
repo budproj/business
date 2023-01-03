@@ -7,6 +7,5 @@ export const amplitudeConfig = registerAs(
   (): AmplitudeConfigInterface => ({
     userProfileUrl: process.env.AMPLITUDE_USER_PROFILE_URL,
     amplitudeSecretKey: process.env.AMPLITUDE_SECRET_KEY,
-    nodeEnv: process.env.NODE_ENV,
   }),
 )
