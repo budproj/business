@@ -117,6 +117,11 @@ spec:
                   key: sentry-dsn
             - name: SENTRY_SAMPLE_RATE
               value: '1'
+            - name: AMPLITUDE_SECRET_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: business-canary
+                    key: amplitude-secret-key
 
       initContainers:
         - name: business-app-canary-execute-migrations

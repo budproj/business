@@ -110,6 +110,11 @@ spec:
                   key: sentry-dsn
             - name: SENTRY_SAMPLE_RATE
               value: '1'
+            - name: AMPLITUDE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: business
+                  key: amplitude-secret-key
 
       initContainers:
         - name: business-app-prod-execute-migrations
@@ -125,12 +130,12 @@ spec:
             - name: TYPEORM_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: business-canary
+                  name: business
                   key: typeorm-username
             - name: TYPEORM_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: business-canary
+                  name: business
                   key: typeorm-password
             - name: TYPEORM_CONNECTION_TYPE
               value: 'postgres'
