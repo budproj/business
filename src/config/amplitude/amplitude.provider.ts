@@ -5,12 +5,8 @@ import { ConfigService } from '@nestjs/config'
 export class AmplitudeConfigProvider {
   constructor(private readonly configService: ConfigService) {}
 
-  get devSecretKey(): string {
-    return this.configService.get<string>('amplitude.devSecretKey')
-  }
-
-  get prodSecretKey(): string {
-    return this.configService.get<string>('amplitude.prodSecretKey')
+  get amplitudeSecretKey(): string {
+    return this.configService.get<string>('amplitude.amplitudeSecretKey')
   }
 
   get userProfileUrl(): string {

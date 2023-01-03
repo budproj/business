@@ -15,13 +15,11 @@ export class UserProfileProvider implements UserProfileAdapter {
     userId: UserInterface['id'],
   ): Promise<UserAmplitudeDataProperties> {
     const url = this.configService.userProfileUrl
-    const { nodeEnv, devSecretKey, prodSecretKey } = this.configService
-
-    const secretKey = nodeEnv === 'development' ? devSecretKey : prodSecretKey
+    const { amplitudeSecretKey } = this.configService
 
     const { data } = await axios.get<UserAmplitudeDataProperties>(url, {
       params: { user_id: userId, get_amp_props: true },
-      headers: { authorization: `Api-Key ${secretKey}` },
+      headers: { authorization: `Api-Key ${amplitudeSecretKey}` },
     })
     return data
   }
