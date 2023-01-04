@@ -117,6 +117,8 @@ spec:
                   key: sentry-dsn
             - name: SENTRY_SAMPLE_RATE
               value: '1'
+            - name: AMPLITUDE_USER_PROFILE_URL
+              value: https://profile-api.amplitude.com/v1/userprofile
             - name: AMPLITUDE_SECRET_KEY
               valueFrom:
                 secretKeyRef:
