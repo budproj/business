@@ -18,5 +18,16 @@ export const authzConfig = registerAs(
       default: process.env.AUTHZ_DOMAIN,
       mgmt: process.env.AUTHZ_MGMT_DOMAIN,
     },
+
+    scalability: {
+      tokenProvider: {
+        enableCache: true,
+        cacheTTLInSeconds: 10,
+      },
+      retry: {
+        enabled: true,
+        maxRetries: 10,
+      },
+    },
   }),
 )

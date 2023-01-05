@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
-import { AuthzCredentialsInterface, AuthzDomainsInterface } from './authz.interface'
+import {
+  AuthzCredentialsInterface,
+  AuthzDomainsInterface,
+  AuthzScalabilityInterface,
+} from './authz.interface'
 
 @Injectable()
 export class AuthzConfigProvider {
@@ -25,5 +29,9 @@ export class AuthzConfigProvider {
 
   get domains(): AuthzDomainsInterface {
     return this.configService.get<AuthzDomainsInterface>('authz.domains')
+  }
+
+  get scalability(): AuthzScalabilityInterface {
+    return this.configService.get<AuthzScalabilityInterface>('authz.scalability')
   }
 }

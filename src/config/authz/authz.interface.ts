@@ -4,6 +4,7 @@ export interface AuthzConfigInterface {
   connection: string
   credentials: AuthzCredentialsInterface
   domains: AuthzDomainsInterface
+  scalability: AuthzScalabilityInterface
 }
 
 export interface AuthzCredentialsInterface {
@@ -14,4 +15,15 @@ export interface AuthzCredentialsInterface {
 export interface AuthzDomainsInterface {
   default: string
   mgmt: string
+}
+
+export interface AuthzScalabilityInterface {
+  tokenProvider: {
+    enableCache: boolean
+    cacheTTLInSeconds: number
+  }
+  retry: {
+    enabled: boolean
+    maxRetries: number
+  }
 }
