@@ -42,6 +42,7 @@ import { UpdateCycleCommand } from '@core/ports/commands/update-cycle.command'
 import { UpdateKeyResultCommand } from '@core/ports/commands/update-key-result.command'
 import { UpdateObjectiveCommand } from '@core/ports/commands/update-objective.command'
 import { UpdateUserSettingCommand } from '@core/ports/commands/update-user-setting.command'
+import { GetUserKeyResultsProgressCommand } from 'src/core/ports/commands/get-user-key-results-progress.command'
 
 import { AddTeamToUserCommand } from './add-team-to-user.command'
 import { AddUserToKeyResultSupportTeamCommand } from './add-user-to-key-result-support-team.command'
@@ -211,6 +212,7 @@ const commandTypes = [
   'check-if-user-has-pending-key-results',
   'get-users-from-team',
   'get-team-flags',
+  'get-user-key-results-progress',
 ] as const
 
 export type CommandType = typeof commandTypes[number]
@@ -324,6 +326,7 @@ export class CommandFactory {
     'check-if-user-has-pending-key-results': CheckIfUserHasPendingKeyResultCommand,
     'get-users-from-team': GetUsersFromTeam,
     'get-team-flags': GetTeamFlagsCommand,
+    'get-user-key-results-progress': GetUserKeyResultsProgressCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}

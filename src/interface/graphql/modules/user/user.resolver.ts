@@ -14,6 +14,7 @@ import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { VisibilityStorageEnum } from '@adapters/storage/enums/visilibity.enum'
 import { CoreProvider } from '@core/core.provider'
+import { Delta } from '@core/interfaces/delta.interface'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-result-comment.interface'
@@ -57,6 +58,7 @@ import { UserObjectivesGraphQLConnection } from './connections/user-objectives/u
 import { UserTasksGraphQLConnection } from './connections/user-tasks/user-tasks.connection'
 import { UserTeamsGraphQLConnection } from './connections/user-teams/user-teams.connection'
 import { EmailAlreadyExistsApolloError } from './exceptions/email-already-exists.exception'
+import { UserKeyResultsProgressAndDeltaObject } from './objects/user-key-results-progress-and-delta.object'
 import { UserReportProgressObject } from './objects/user-report-progress.object'
 import { UserRoleObject } from './objects/user-role-object'
 import { UserCreateRequest } from './requests/user-create.request'
@@ -408,6 +410,23 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       ? queryResult.filter((keyResult) => keyResult.teamId !== null)
       : queryResult
     return this.relay.marshalResponse<KeyResultInterface>(filteredResults, connection, user)
+  }
+
+  @ResolveField('keyResultsProgress', () => UserKeyResultsProgressAndDeltaObject, {
+    nullable: true,
+  })
+  protected async getUserKeyResultsProgressForRequestAndUser(@Parent() user: UserGraphQLNode) {
+    this.logger.log({
+      user,
+      message: 'Fetching user key results progress',
+    })
+
+    const queryResult = await this.corePorts.dispatchCommand<{ progress: number; delta: Delta }>(
+      'get-user-key-results-progress',
+      user.id,
+    )
+
+    return queryResult
   }
 
   @ResolveField('keyResultComments', () => UserKeyResultCommentsGraphQLConnection, {
