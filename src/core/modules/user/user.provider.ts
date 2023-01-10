@@ -11,6 +11,8 @@ import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserSettingProvider } from '@core/modules/user/setting/user-setting.provider'
 import { CreationQuery } from '@core/types/creation-query.type'
+import { UserProfileAdapter } from '@infrastructure/amplitude/adapters/user-profil.adapter'
+import { UserProfileProvider } from '@infrastructure/amplitude/providers/user-profile.provider'
 import { AuthzCredentialsProvider } from '@infrastructure/authz/providers/credentials.provider'
 
 import { UserStatus } from './enums/user-status.enum'
@@ -21,15 +23,18 @@ import { UserRepository } from './user.repository'
 @Injectable()
 export class UserProvider extends CoreEntityProvider<User, UserInterface> {
   public credentials: CredentialsAdapter
+  public amplitude: UserProfileAdapter
 
   constructor(
     public readonly setting: UserSettingProvider,
     protected readonly repository: UserRepository,
     authz: AuthzCredentialsProvider,
+    amplitude: UserProfileProvider,
   ) {
     super(UserProvider.name, repository)
 
     this.credentials = authz
+    this.amplitude = amplitude
   }
 
   public async getUserTeams(

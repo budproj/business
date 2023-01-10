@@ -86,6 +86,7 @@ import { GetTeamMembersCommand } from './get-team-members.command'
 import { GetTeamOwnerCommand } from './get-team-owner.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
 import { GetUserKeyResultsCommand } from './get-user-key-results.command'
+import { GetUserAmplitudeData } from './get-user-last-access.command'
 import { GetUserQuarterlyProgressCommand } from './get-user-quarterly-progress.command'
 import { GetUserRoleCommand } from './get-user-role.command'
 import { GetUserYearlyProgressCommand } from './get-user-yearly-progress.command'
@@ -211,6 +212,7 @@ const commandTypes = [
   'check-if-user-has-pending-key-results',
   'get-users-from-team',
   'get-team-flags',
+  'get-user-profile-amplitude',
 ] as const
 
 export type CommandType = typeof commandTypes[number]
@@ -324,6 +326,7 @@ export class CommandFactory {
     'check-if-user-has-pending-key-results': CheckIfUserHasPendingKeyResultCommand,
     'get-users-from-team': GetUsersFromTeam,
     'get-team-flags': GetTeamFlagsCommand,
+    'get-user-profile-amplitude': GetUserAmplitudeData,
   }
 
   constructor(private readonly core: CoreProvider) {}
