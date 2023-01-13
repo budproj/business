@@ -1,4 +1,6 @@
 import { differenceInDays } from 'date-fns'
+import { flatten } from 'lodash'
+import { Any } from 'typeorm'
 
 import { ConfidenceTag } from '@adapters/confidence-tag/confidence-tag.enum'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
@@ -10,7 +12,15 @@ import { BaseStatusCommand } from './base-status.command'
 export class GetTeamFlagsCommand extends BaseStatusCommand {
   public async execute(teamId: TeamInterface['id']): Promise<any> {
     const keyResultsFromTeam = await this.core.keyResult.getKeyResults([teamId])
-    const team = await this.core.team.getFromID(teamId)
+    const teams = await this.core.team.getTeamNodesTreeAfterTeam(teamId)
+
+    const teamUsersPromises = teams.map(async (team) => team.users)
+    const teamsUsers = await Promise.all(teamUsersPromises)
+
+    const userIDs = flatten(teamsUsers).map((u) => u.id)
+    const selector = {
+      id: Any(userIDs),
+    }
 
     const keyResultOwnersIds = keyResultsFromTeam.map(({ ownerId }) => ownerId)
     const keyResultsSupportTeam = keyResultsFromTeam.map(async (keyResult) => {
@@ -59,12 +69,17 @@ export class GetTeamFlagsCommand extends BaseStatusCommand {
       },
     )
 
-    const teamOwner = await this.core.user.getFromID(team.ownerId)
-    const teamUsers = await team.users
+    const teamUsers = await this.core.user.getMany(selector)
 
-    const uniqueUsers = teamUsers.filter((user) => user.id !== teamOwner.id)
+    const teamsOwnerPromises = teams.map(async ({ ownerId }) =>
+      this.core.user.getOne({ id: ownerId }),
+    )
 
-    const allUsersFromTeam = [...uniqueUsers, teamOwner].filter(
+    const teamOwners = await Promise.all(teamsOwnerPromises)
+
+    const uniqueUsers = teamUsers.filter((user) => !teamOwners.includes(user))
+
+    const allUsersFromTeam = [...uniqueUsers, ...teamOwners].filter(
       (user) => user.status === UserStatus.ACTIVE,
     )
 
