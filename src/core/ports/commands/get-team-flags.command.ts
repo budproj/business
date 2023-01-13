@@ -70,16 +70,12 @@ export class GetTeamFlagsCommand extends BaseStatusCommand {
     )
 
     const teamUsers = await this.core.user.getMany(selector)
+    const teamOwnerId = (await this.core.team.getOne({ id: teamId })).ownerId
+    const teamOwner = await this.core.user.getFromID(teamOwnerId)
 
-    const teamsOwnerPromises = teams.map(async ({ ownerId }) =>
-      this.core.user.getOne({ id: ownerId }),
-    )
+    const uniqueUsers = teamUsers.filter((user) => teamOwner?.id !== user.id)
 
-    const teamOwners = await Promise.all(teamsOwnerPromises)
-
-    const uniqueUsers = teamUsers.filter((user) => !teamOwners.includes(user))
-
-    const allUsersFromTeam = [...uniqueUsers, ...teamOwners].filter(
+    const allUsersFromTeam = [...uniqueUsers, teamOwner].filter(
       (user) => user.status === UserStatus.ACTIVE,
     )
 
