@@ -422,10 +422,11 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching user key results progress',
     })
 
-    const queryResult = await this.corePorts.dispatchCommand<{ progress: number; delta: Delta }>(
-      'get-user-key-results-progress',
-      user.id,
-    )
+    const queryResult = await this.corePorts.dispatchCommand<{
+      progress: number
+      delta: Delta
+      latestCheckIn: Date
+    }>('get-user-key-results-progress', user.id)
 
     return queryResult
   }

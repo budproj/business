@@ -1,3 +1,5 @@
+import { isAfter } from 'date-fns'
+
 import { Delta } from '@core/interfaces/delta.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { User } from '@core/modules/user/user.orm-entity'
@@ -7,6 +9,7 @@ import { Command } from './base.command'
 interface GetUserKeyResultsProgressCommandProperties {
   progress: number
   delta: Delta
+  latestCheckIn: Date
 }
 
 export class GetUserKeyResultsProgressCommand extends Command<GetUserKeyResultsProgressCommandProperties> {
@@ -34,9 +37,16 @@ export class GetUserKeyResultsProgressCommand extends Command<GetUserKeyResultsP
             progress: previous.delta.progress + delta.progress,
             confidence: previous.delta.confidence + delta.progress,
           },
+          latestCheckIn: isAfter(latestCheckIn.createdAt, previous.latestCheckIn)
+            ? latestCheckIn.createdAt
+            : previous.latestCheckIn,
         }
       },
-      Promise.resolve({ progress: 0, delta: { progress: 0, confidence: 0 } }),
+      Promise.resolve({
+        progress: 0,
+        delta: { progress: 0, confidence: 0 },
+        latestCheckIn: new Date(1900),
+      }),
     )
 
     return {
@@ -45,6 +55,7 @@ export class GetUserKeyResultsProgressCommand extends Command<GetUserKeyResultsP
         progress: keyResultsProgressAndDeltaSum?.delta?.progress / filteredKeyResults.length,
         confidence: keyResultsProgressAndDeltaSum?.delta?.confidence / filteredKeyResults.length,
       },
+      latestCheckIn: keyResultsProgressAndDeltaSum.latestCheckIn,
     }
   }
 }

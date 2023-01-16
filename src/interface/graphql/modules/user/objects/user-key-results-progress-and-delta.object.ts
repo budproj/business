@@ -1,5 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
+import { Delta } from '@core/interfaces/delta.interface'
 import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
 import { OrderGraphQLObject } from '@interface/graphql/objects/order.object'
 
@@ -15,5 +16,10 @@ export class UserKeyResultsProgressAndDeltaObject extends OrderGraphQLObject {
   @Field(() => DeltaGraphQLObject, {
     nullable: true,
   })
-  public delta!: { progress: number; confidence: number }
+  public delta!: Delta
+
+  @Field(() => Date, {
+    nullable: true,
+  })
+  public latestCheckIn!: Date
 }
