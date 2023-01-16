@@ -4,8 +4,13 @@ import { User } from '@core/modules/user/user.orm-entity'
 
 import { Command } from './base.command'
 
-export class GetUserKeyResultsProgressCommand extends Command<any> {
-  public async execute(userID: User['id']): Promise<any> {
+interface GetUserKeyResultsProgressCommandProperties {
+  progress: number
+  delta: Delta
+}
+
+export class GetUserKeyResultsProgressCommand extends Command<GetUserKeyResultsProgressCommandProperties> {
+  public async execute(userID: User['id']): Promise<GetUserKeyResultsProgressCommandProperties> {
     const getKeyResults = this.factory.buildCommand<KeyResult[]>('get-user-key-results')
     const getKeyResultsDelta = this.factory.buildCommand<Delta>('get-key-result-delta')
 

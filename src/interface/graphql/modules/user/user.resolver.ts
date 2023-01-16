@@ -58,6 +58,7 @@ import { UserObjectivesGraphQLConnection } from './connections/user-objectives/u
 import { UserTasksGraphQLConnection } from './connections/user-tasks/user-tasks.connection'
 import { UserTeamsGraphQLConnection } from './connections/user-teams/user-teams.connection'
 import { EmailAlreadyExistsApolloError } from './exceptions/email-already-exists.exception'
+import { UserKeyResultsCheckListProgressObject } from './objects/user-key-results-check-list-progress.object'
 import { UserKeyResultsProgressAndDeltaObject } from './objects/user-key-results-progress-and-delta.object'
 import { UserReportProgressObject } from './objects/user-report-progress.object'
 import { UserRoleObject } from './objects/user-role-object'
@@ -425,6 +426,25 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       'get-user-key-results-progress',
       user.id,
     )
+
+    return queryResult
+  }
+
+  @ResolveField('keyResultsCheckListProgress', () => UserKeyResultsCheckListProgressObject, {
+    nullable: true,
+  })
+  protected async getUserKeyResultsCheckListProgressForRequestAndUser(
+    @Parent() user: UserGraphQLNode,
+  ) {
+    this.logger.log({
+      user,
+      message: 'Fetching user key results checklist progress',
+    })
+
+    const queryResult = await this.corePorts.dispatchCommand<{
+      checked: number
+      total: number
+    }>('get-user-check-list-progress', user.id)
 
     return queryResult
   }
