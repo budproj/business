@@ -55,6 +55,9 @@ initiate_env_file () {
   echo "And the Amplitude Secret Key"
   read AMPLITUDE_SECRET_KEY
 
+  echo "And the Flagsmith Server Side Secret Key:"
+  read FLAGSMITH_SERVER_ENVIRONMENT_KEY
+
   echo "Copying .env.example to .env"
   cp .env.example .env
 
@@ -66,6 +69,7 @@ initiate_env_file () {
     AUTHZ_CLIENT_SECRET=$AUTHZ_CLIENT_SECRET
     SENTRY_DSN=$SENTRY_DSN
     AMPLITUDE_SECRET_KEY=$AMPLITUDE_SECRET_KEY
+    FLAGSMITH_SERVER_ENVIRONMENT_KEY=$FLAGSMITH_SERVER_ENVIRONMENT_KEY
   " >> .env
 
   echo -e "${Green}Awesome! .env is now configured.${Color_Off}"
