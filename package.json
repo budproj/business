@@ -84,6 +84,7 @@
     "fast-csv": "^4.3.6",
     "fastify": "^3.27.4",
     "fastify-cors": "^6.0.3",
+    "flagsmith-nodejs": "^2.5.1",
     "graphql": "^16.3.0",
     "graphql-relay": "^0.10.0",
     "graphql-tools": "^8.2.3",
