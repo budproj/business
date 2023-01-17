@@ -124,6 +124,11 @@ spec:
                 secretKeyRef:
                   name: business-canary
                   key: amplitude-secret-key
+            - name: FLAGSMITH_SERVER_ENVIRONMENT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: business-canary
+                  key: flagsmith-server-environment-key
 
       initContainers:
         - name: business-app-canary-execute-migrations
