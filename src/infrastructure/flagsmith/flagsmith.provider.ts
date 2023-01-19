@@ -1,13 +1,22 @@
 import { Injectable } from '@nestjs/common'
-import Flagsmith, { Flags } from 'flagsmith-nodejs'
+import FlagsmithType, { Flags } from 'flagsmith-nodejs'
 
 import { FlagsmithConfigProvider } from '@config/flagsmith/flagsmith.provider'
 
 import { Traits } from './types/traits.data'
 
+// TODO: Tech Debt
+// Flagsmith is bugged using import,
+// we need to migrate to esm module system
+// this will cause changes in all codebase
+// and primaly in typeorm parts.
+//
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Flagsmith = require('flagsmith-nodejs')
+
 @Injectable()
 export class FlagsmithProvider {
-  flagsmith: Flagsmith
+  flagsmith: FlagsmithType
 
   constructor(protected readonly config: FlagsmithConfigProvider) {
     this.flagsmith = new Flagsmith(config)
