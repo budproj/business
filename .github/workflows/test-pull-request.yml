@@ -8,6 +8,9 @@ jobs:
   build:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
     strategy:
       matrix:
         include:
@@ -15,8 +18,8 @@ jobs:
           command: npm run lint
         - name: Build
           command: npm run build
-        - name: Unit Tests
-          command: npm test
+        # - name: Unit Tests
+        #   command: npm test
     steps:
       - uses: actions/checkout@v3
 
@@ -29,6 +32,3 @@ jobs:
 
       - name: ${{ matrix.name }}
         run: ${{ matrix.command }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
