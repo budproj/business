@@ -18,8 +18,8 @@ jobs:
           command: npm run lint
         - name: Build
           command: npm run build
-        # - name: Unit Tests
-        #   command: npm test
+        - name: Unit Tests
+          command: npm test
     steps:
       - uses: actions/checkout@v3
 
