@@ -28,6 +28,6 @@ export class Task extends CoreEntity implements TaskInterface {
   @Column({ type: 'text' })
   public description: string
 
-  @Column({ type: 'enum', enum: TaskStates, default: TaskStates.UNCHECKED })
+  @Column({ type: 'simple-enum', enum: TaskStates, default: TaskStates.UNCHECKED })
   public state: TaskStates
 }
