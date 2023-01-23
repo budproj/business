@@ -19,4 +19,7 @@ export class KeyResultCheckInObject {
 
   @Field({ description: 'The parent id', nullable: true })
   parentId?: string
+
+  @Field({ description: 'The date that the check-in was created', nullable: true })
+  createdAt?: string
 }
