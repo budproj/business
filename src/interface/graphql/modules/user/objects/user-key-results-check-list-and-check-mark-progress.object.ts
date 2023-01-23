@@ -5,7 +5,7 @@ import { OrderGraphQLObject } from '@interface/graphql/objects/order.object'
 @ObjectType('UserKeyResultsCheckListProgress', {
   description: 'Defines the expected output of the key results check list progress command',
 })
-export class UserKeyResultsCheckListProgressObject extends OrderGraphQLObject {
+export class UserKeyResultsCheckListAndCheckMarkProgressObject extends OrderGraphQLObject {
   @Field(() => Number, {
     nullable: true,
   })

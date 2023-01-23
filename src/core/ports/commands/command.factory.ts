@@ -42,7 +42,6 @@ import { UpdateCycleCommand } from '@core/ports/commands/update-cycle.command'
 import { UpdateKeyResultCommand } from '@core/ports/commands/update-key-result.command'
 import { UpdateObjectiveCommand } from '@core/ports/commands/update-objective.command'
 import { UpdateUserSettingCommand } from '@core/ports/commands/update-user-setting.command'
-import { GetUserKeyResultsProgressCommand } from 'src/core/ports/commands/get-user-key-results-progress.command'
 
 import { AddTeamToUserCommand } from './add-team-to-user.command'
 import { AddUserToKeyResultSupportTeamCommand } from './add-user-to-key-result-support-team.command'
@@ -85,8 +84,9 @@ import { GetTeamCompanyCommand } from './get-team-company.command'
 import { GetTeamFlagsCommand } from './get-team-flags.command'
 import { GetTeamMembersCommand } from './get-team-members.command'
 import { GetTeamOwnerCommand } from './get-team-owner.command'
-import { GetUserCheckListProgressCommand } from './get-user-check-list-progress.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
+import { GetUserIndicators } from './get-user-indicators.command'
+import { GetUserKeyResultStatus } from './get-user-key-results-status.command'
 import { GetUserKeyResultsCommand } from './get-user-key-results.command'
 import { GetUserQuarterlyProgressCommand } from './get-user-quarterly-progress.command'
 import { GetUserRoleCommand } from './get-user-role.command'
@@ -213,8 +213,8 @@ const commandTypes = [
   'check-if-user-has-pending-key-results',
   'get-users-from-team',
   'get-team-flags',
-  'get-user-key-results-progress',
-  'get-user-check-list-progress',
+  'get-user-key-results-status',
+  'get-user-indicators',
 ] as const
 
 export type CommandType = typeof commandTypes[number]
@@ -328,8 +328,8 @@ export class CommandFactory {
     'check-if-user-has-pending-key-results': CheckIfUserHasPendingKeyResultCommand,
     'get-users-from-team': GetUsersFromTeam,
     'get-team-flags': GetTeamFlagsCommand,
-    'get-user-key-results-progress': GetUserKeyResultsProgressCommand,
-    'get-user-check-list-progress': GetUserCheckListProgressCommand,
+    'get-user-key-results-status': GetUserKeyResultStatus,
+    'get-user-indicators': GetUserIndicators,
   }
 
   constructor(private readonly core: CoreProvider) {}

@@ -1,8 +1,11 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
 import { Delta } from '@core/interfaces/delta.interface'
+import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
 import { OrderGraphQLObject } from '@interface/graphql/objects/order.object'
+
+import { KeyResultCheckInObject } from './user-key-results-check-in.object'
 
 @ObjectType('UserKeyResultsProgressAndDelta', {
   description: 'Defines the expected output of the key results progress command',
@@ -18,8 +21,8 @@ export class UserKeyResultsProgressAndDeltaObject extends OrderGraphQLObject {
   })
   public delta!: Delta
 
-  @Field(() => Date, {
+  @Field(() => KeyResultCheckInObject, {
     nullable: true,
   })
-  public latestCheckIn!: Date
+  public latestCheckIn!: KeyResultCheckInInterface
 }

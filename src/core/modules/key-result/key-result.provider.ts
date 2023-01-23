@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { uniqBy, pickBy, omitBy, identity, isEmpty, maxBy, flatten } from 'lodash'
+import { uniqBy, pickBy, omitBy, identity, isEmpty, maxBy, flatten, keyBy, uniq } from 'lodash'
 import { Any, Brackets, DeleteResult, FindConditions, In } from 'typeorm'
 
 import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
@@ -12,6 +12,8 @@ import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
 import { DEFAULT_PROGRESS } from '@core/modules/key-result/check-in/key-result-check-in.constants'
+import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
+import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
@@ -21,7 +23,9 @@ import { AnalyticsProvider } from '@infrastructure/analytics/analytics.provider'
 
 import { ProgressRecord } from '../../../adapters/analytics/progress-record.interface'
 import { Cycle } from '../cycle/cycle.orm-entity'
+import { CycleProvider } from '../cycle/cycle.provider'
 import { Cadence } from '../cycle/enums/cadence.enum'
+import { ObjectiveProvider } from '../objective/objective.provider'
 
 import { KeyResultCheckInInterface } from './check-in/key-result-check-in.interface'
 import { KeyResultCheckIn } from './check-in/key-result-check-in.orm-entity'
@@ -30,8 +34,6 @@ import { KeyResultCheckMarkProvider } from './check-mark/key-result-check-mark.p
 import { KeyResultCommentInterface } from './comment/key-result-comment.interface'
 import { KeyResultComment } from './comment/key-result-comment.orm-entity'
 import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
-import { KeyResultInterface } from './interfaces/key-result.interface'
-import { KeyResult } from './key-result.orm-entity'
 import { KeyResultRelationFilterProperties, KeyResultRepository } from './key-result.repository'
 import { KeyResultTimelineProvider } from './timeline.provider'
 import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
@@ -44,6 +46,8 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     public readonly keyResultCommentProvider: KeyResultCommentProvider,
     public readonly keyResultCheckMarkProvider: KeyResultCheckMarkProvider,
     public readonly keyResultCheckInProvider: KeyResultCheckInProvider,
+    protected readonly objectiveProvider: ObjectiveProvider,
+    protected readonly cycleProvider: CycleProvider,
     public readonly timeline: KeyResultTimelineProvider,
     protected readonly repository: KeyResultRepository,
     private readonly analyticsProvider: AnalyticsProvider,
@@ -569,6 +573,24 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     )
 
     return progressSum
+  }
+
+  public async filterActiveKeyResultsFromList(keyResults: KeyResult[]): Promise<KeyResult[]> {
+    const objectiveIDs = uniq(keyResults.map((keyResult) => keyResult.objectiveId))
+    const objectivePromises = objectiveIDs.map(async (objectiveID) =>
+      this.objectiveProvider.getFromID(objectiveID),
+    )
+    const objectives = await Promise.all(objectivePromises)
+    const objectivesHashmap = keyBy(objectives, 'id')
+
+    const cycleIDs = uniq(objectives.map((objective) => objective.cycleId))
+    const cyclePromises = cycleIDs.map(async (cycleID) => this.cycleProvider.getFromID(cycleID))
+    const cycles = await Promise.all(cyclePromises)
+    const cyclesHashmap = keyBy(cycles, 'id')
+
+    return keyResults.filter(
+      (keyResult) => cyclesHashmap[objectivesHashmap[keyResult.objectiveId].cycleId].active,
+    )
   }
 
   protected async protectCreationQuery(
