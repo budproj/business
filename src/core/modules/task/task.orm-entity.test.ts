@@ -1,21 +1,23 @@
 import { closeConnection, repository, startInMemoryDatabase } from '@tests/helpers/orm-connection'
 
+import { User } from './__tests-helpers__/external-entities'
 import { TaskStates } from './task.interface'
 import { Task } from './task.orm-entity'
 
-beforeEach(async () => startInMemoryDatabase([Task]))
+let mockUser: User
+
+beforeEach(async () => startInMemoryDatabase([Task, User]))
 beforeEach(async () => {
-  // Const userRepo = repository(User)
-  // mockUser = await userRepo.save({ firstName: 'John', keyResultComments: [] })
-  // mockSecondUser = await userRepo.save({ firstName: 'Karl', keyResultComments: [] })
-  // const keyResultRepo = repository(KeyResult)
-  // mockKeyResult = await keyResultRepo.save({ title: 'finish writing a book' })
+  const userRepo = repository(User)
+
+  mockUser = await userRepo.save({ firstName: 'John', keyResultComments: [] })
 })
 afterEach(closeConnection)
 
-const taskGenerator = (customFields) => ({
+const taskGenerator = (customFields): Task => ({
   description: 'do homework',
   state: TaskStates.UNCHECKED,
+  userId: mockUser.id,
   ...customFields,
 })
 

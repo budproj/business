@@ -52,6 +52,9 @@ initiate_env_file () {
   echo "Last one, our Sentry DSN url:"
   read SENTRY_DSN
 
+  echo "And the Amplitude Secret Key"
+  read AMPLITUDE_SECRET_KEY
+
   echo "Copying .env.example to .env"
   cp .env.example .env
 
@@ -62,6 +65,7 @@ initiate_env_file () {
     AUTHZ_CLIENT_ID=$AUTHZ_CLIENT_ID
     AUTHZ_CLIENT_SECRET=$AUTHZ_CLIENT_SECRET
     SENTRY_DSN=$SENTRY_DSN
+    AMPLITUDE_SECRET_KEY=$AMPLITUDE_SECRET_KEY
   " >> .env
 
   echo -e "${Green}Awesome! .env is now configured.${Color_Off}"

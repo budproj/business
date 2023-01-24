@@ -7,11 +7,11 @@ export const KeyResultTimelineEntryGraphQLUnion = createUnionType({
   name: 'KeyResultTimelineEntryUnion',
   types: () => [KeyResultCheckInGraphQLNode, KeyResultCommentGraphQLNode],
   resolveType(value) {
-    if (value.value || value.value === 0) {
+    if ('value' in value) {
       return KeyResultCheckInGraphQLNode
     }
 
-    if (value.text) {
+    if ('text' in value) {
       return KeyResultCommentGraphQLNode
     }
   },

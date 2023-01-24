@@ -22,6 +22,8 @@ export class AuthzClientProvider {
       domain: this.config.domains.mgmt,
       clientId: this.config.credentials.clientID,
       clientSecret: this.config.credentials.clientSecret,
+      tokenProvider: this.config.scalability.tokenProvider,
+      retry: this.config.scalability.retry,
     })
   }
 

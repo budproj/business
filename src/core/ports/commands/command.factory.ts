@@ -88,6 +88,7 @@ import { GetUserCompaniesCommand } from './get-user-companies.command'
 import { GetUserIndicators } from './get-user-indicators.command'
 import { GetUserKeyResultStatus } from './get-user-key-results-status.command'
 import { GetUserKeyResultsCommand } from './get-user-key-results.command'
+import { GetUserAmplitudeData } from './get-user-last-access.command'
 import { GetUserQuarterlyProgressCommand } from './get-user-quarterly-progress.command'
 import { GetUserRoleCommand } from './get-user-role.command'
 import { GetUserYearlyProgressCommand } from './get-user-yearly-progress.command'
@@ -215,6 +216,7 @@ const commandTypes = [
   'get-team-flags',
   'get-user-key-results-status',
   'get-user-indicators',
+  'get-user-profile-amplitude',
 ] as const
 
 export type CommandType = typeof commandTypes[number]
@@ -330,6 +332,7 @@ export class CommandFactory {
     'get-team-flags': GetTeamFlagsCommand,
     'get-user-key-results-status': GetUserKeyResultStatus,
     'get-user-indicators': GetUserIndicators,
+    'get-user-profile-amplitude': GetUserAmplitudeData,
   }
 
   constructor(private readonly core: CoreProvider) {}
