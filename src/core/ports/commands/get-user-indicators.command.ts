@@ -8,9 +8,6 @@ export class GetUserIndicators extends BaseDeltaCommand {
   public async execute(userID: User['id'], options: GetStatusOptions = {}): Promise<any> {
     const getUserKeyResultsStatus = this.factory.buildCommand<Status>('get-user-key-results-status')
 
-    const checkmarks = await this.core.keyResult.keyResultCheckMarkProvider.getFromAssignedUser(
-      userID,
-    )
     const comparisonDate = this.getComparisonDate()
     const currentStatus = await getUserKeyResultsStatus.execute(userID, options)
     const previousStatus = await getUserKeyResultsStatus.execute(userID, {
@@ -26,8 +23,10 @@ export class GetUserIndicators extends BaseDeltaCommand {
         latestCheckIn: currentStatus.latestCheckIn,
       },
       keyResultsCheckListProgress: {
-        total: checkmarks.length,
-        checked: checkmarks.filter((checkmark) => checkmark.state === TaskStates.CHECKED).length,
+        total: currentStatus.checkmarks.length,
+        checked: currentStatus.checkmarks.filter(
+          (checkmark) => checkmark.state === TaskStates.CHECKED,
+        ).length,
       },
       keyResultsCheckInProgress: {
         total: currentStatus.total,

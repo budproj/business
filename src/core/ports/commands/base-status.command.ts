@@ -1,5 +1,5 @@
 import { differenceInDays } from 'date-fns'
-import { sum, maxBy, min, groupBy, filter, zip } from 'lodash'
+import { sum, maxBy, min, groupBy, filter, zip, flatten } from 'lodash'
 
 import { GetStatusOptions, Status } from '@core/interfaces/status.interface'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
@@ -144,14 +144,22 @@ export abstract class BaseStatusCommand extends Command<Status> {
     const latestCheckIn = this.getLatestCheckInFromList(allUserLatestCheckIns)
     const isOutdated = this.isOutdated(latestCheckIn)
 
-    const upToDateCheckIns = allUserLatestCheckIns.filter(
-      (checkIn) => !this.isOutdated(checkIn, new Date()),
+    const upToDateCheckIns = allUserLatestCheckIns.filter((checkIn) => {
+      if (!checkIn) return false
+      return !this.isOutdated(checkIn, new Date())
+    })
+
+    const checkmarks = await Promise.all(
+      filteredKeyResults.map(async (keyResult) => {
+        return this.core.keyResult.keyResultCheckMarkProvider.getFromKeyResult(keyResult.id, id)
+      }),
     )
 
     return {
       isOutdated,
       latestCheckIn,
       allUpToDateCheckIns: upToDateCheckIns,
+      checkmarks: flatten(checkmarks),
       reportDate: latestCheckIn?.createdAt,
       progress: this.getAverage(progresses),
       confidence: this.getMin(confidences),
