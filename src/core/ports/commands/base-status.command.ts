@@ -163,7 +163,7 @@ export abstract class BaseStatusCommand extends Command<Status> {
       reportDate: latestCheckIn?.createdAt,
       progress: this.getAverage(progresses),
       confidence: this.getMin(confidences),
-      total: keyResults.length,
+      total: filteredKeyResults.length,
     }
   }
 
