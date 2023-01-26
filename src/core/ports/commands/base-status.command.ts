@@ -145,7 +145,7 @@ export abstract class BaseStatusCommand extends Command<Status> {
     const isOutdated = this.isOutdated(latestCheckIn)
 
     const upToDateCheckIns = allUserLatestCheckIns.filter((checkIn) => {
-      if (!checkIn) return false
+      if (!checkIn) return true
       return !this.isOutdated(checkIn, new Date())
     })
 
