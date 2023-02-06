@@ -3,6 +3,7 @@ import { differenceInDays } from 'date-fns'
 import { Status } from '@core/interfaces/status.interface'
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
+import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 import { User } from '@core/modules/user/user.orm-entity'
 
 import { Command } from './base.command'
@@ -31,7 +32,7 @@ export class GetTeamScore extends Command<any> {
     const getUserKeyResultsStatus = this.factory.buildCommand<Status>('get-user-key-results-status')
     const getUserCompaines = this.factory.buildCommand<Team[]>('get-user-companies')
 
-    const users = await getTeamMembersCommand.execute(teamID)
+    const users = await getTeamMembersCommand.execute(teamID, { status: UserStatus.ACTIVE })
 
     const usersWithLastCheckInAndRoutines = await Promise.all(
       users.map(async (user) => {
