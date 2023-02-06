@@ -29,7 +29,7 @@ export class UserRoutineObject {
   })
   public readonly timestamp: Date
 
-  @Field(() => UserRoutineAnswerObject, {
+  @Field(() => [UserRoutineAnswerObject], {
     nullable: true,
   })
   public readonly answers: UserRoutineAnswerObject[]
