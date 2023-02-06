@@ -84,6 +84,7 @@ import { GetTeamCompanyCommand } from './get-team-company.command'
 import { GetTeamFlagsCommand } from './get-team-flags.command'
 import { GetTeamMembersCommand } from './get-team-members.command'
 import { GetTeamOwnerCommand } from './get-team-owner.command'
+import { GetTeamScore } from './get-team-score.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
 import { GetUserIndicators } from './get-user-indicators.command'
 import { GetUserKeyResultStatus } from './get-user-key-results-status.command'
@@ -217,6 +218,7 @@ const commandTypes = [
   'get-user-key-results-status',
   'get-user-indicators',
   'get-user-profile-amplitude',
+  'get-team-score',
 ] as const
 
 export type CommandType = typeof commandTypes[number]
@@ -333,6 +335,7 @@ export class CommandFactory {
     'get-user-key-results-status': GetUserKeyResultStatus,
     'get-user-indicators': GetUserIndicators,
     'get-user-profile-amplitude': GetUserAmplitudeData,
+    'get-team-score': GetTeamScore,
   }
 
   constructor(private readonly core: CoreProvider) {}
