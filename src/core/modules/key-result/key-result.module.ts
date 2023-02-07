@@ -4,6 +4,11 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { TeamModule } from '@core/modules/team/team.module'
 import { AnalyticsModule } from '@infrastructure/analytics/analytics.module'
 
+import { CycleProvider } from '../cycle/cycle.provider'
+import { CycleRepository } from '../cycle/cycle.repository'
+import { ObjectiveProvider } from '../objective/objective.provider'
+import { ObjectiveRepository } from '../objective/objective.repository'
+
 import { KeyResultCheckInProvider } from './check-in/key-result-check-in.provider'
 import { KeyResultCheckInRepository } from './check-in/key-result-check-in.repository'
 import { KeyResultCheckMarkProvider } from './check-mark/key-result-check-mark.provider'
@@ -21,6 +26,8 @@ import { KeyResultTimelineProvider } from './timeline.provider'
       KeyResultCommentRepository,
       KeyResultCheckInRepository,
       KeyResultCheckMarkRepository,
+      CycleRepository,
+      ObjectiveRepository,
     ]),
     TeamModule,
     AnalyticsModule,
@@ -31,6 +38,8 @@ import { KeyResultTimelineProvider } from './timeline.provider'
     KeyResultCheckInProvider,
     KeyResultTimelineProvider,
     KeyResultCheckMarkProvider,
+    CycleProvider,
+    ObjectiveProvider,
   ],
   exports: [KeyResultProvider],
 })

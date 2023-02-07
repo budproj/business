@@ -99,4 +99,6 @@ export const squadMember = [
   'user:update:team',
   'workspace:read:company',
   'workspace:read:owns',
+  'flags:read:team',
+  'flags:read:company',
 ]

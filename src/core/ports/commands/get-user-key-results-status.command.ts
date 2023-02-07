@@ -1,11 +1,11 @@
 import { GetStatusOptions, Status } from '@core/interfaces/status.interface'
 import { BaseStatusCommand } from '@core/ports/commands/base-status.command'
 
-export class GetObjectiveStatusCommand extends BaseStatusCommand {
+export class GetUserKeyResultStatus extends BaseStatusCommand {
   public async execute(
-    objectiveID: string,
+    userId: string,
     options: GetStatusOptions = this.defaultOptions,
   ): Promise<Status> {
-    return this.getStatus(objectiveID, options, true)
+    return this.getStatus(userId, options, false)
   }
 }

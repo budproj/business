@@ -59,6 +59,7 @@ import { UserTasksGraphQLConnection } from './connections/user-tasks/user-tasks.
 import { UserTeamsGraphQLConnection } from './connections/user-teams/user-teams.connection'
 import { EmailAlreadyExistsApolloError } from './exceptions/email-already-exists.exception'
 import { UserProfileAmplitudeDataObject } from './objects/user-amplitude-data-object'
+import { UserIndicatorsObject } from './objects/user-indicators.object'
 import { UserReportProgressObject } from './objects/user-report-progress.object'
 import { UserRoleObject } from './objects/user-role-object'
 import { UserCreateRequest } from './requests/user-create.request'
@@ -410,6 +411,20 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       ? queryResult.filter((keyResult) => keyResult.teamId !== null)
       : queryResult
     return this.relay.marshalResponse<KeyResultInterface>(filteredResults, connection, user)
+  }
+
+  @ResolveField('userIndicators', () => UserIndicatorsObject, {
+    nullable: true,
+  })
+  protected async getUserIndicatorsForRequestAndUser(@Parent() user: UserGraphQLNode) {
+    this.logger.log({
+      user,
+      message: 'Fetching user key results progress',
+    })
+
+    const queryResult = await this.corePorts.dispatchCommand('get-user-indicators', user.id)
+
+    return queryResult
   }
 
   @ResolveField('keyResultComments', () => UserKeyResultCommentsGraphQLConnection, {

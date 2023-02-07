@@ -1,5 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql'
 
+import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { UserGender } from '@core/modules/user/enums/user-gender.enum'
 import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
@@ -15,6 +16,8 @@ import { UserTasksGraphQLConnection } from './connections/user-tasks/user-tasks.
 import { UserTeamsGraphQLConnection } from './connections/user-teams/user-teams.connection'
 import { UserGenderGraphQLEnum } from './enums/user-gender.enum'
 import { UserStatusGraphQLEnum } from './enums/user-status.enum'
+import { KeyResultCheckInObject } from './objects/user-key-results-check-in.object'
+import { UserRoutineObject } from './objects/user-routine.object'
 
 @ObjectType('User', {
   implements: () => [NodeRelayGraphQLInterface, GuardedNodeGraphQLInterface],
@@ -148,6 +151,18 @@ export class UserGraphQLNode implements GuardedNodeGraphQLInterface {
     description: 'The list of custom settings for the user',
   })
   public readonly settings?: UserSettingsGraphQLConnection
+
+  @Field(() => UserRoutineObject, {
+    description: 'The routine that comes from the routines microservice',
+    nullable: true,
+  })
+  public readonly lastRoutine?: UserRoutineObject
+
+  @Field(() => KeyResultCheckInObject, {
+    description: 'The routine that comes from the routines microservice',
+    nullable: true,
+  })
+  public readonly latestCheckIn?: KeyResultCheckInInterface
 
   // **********************************************************************************************
   // ABSTRACTED FIELDS

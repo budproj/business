@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 
 import { AuthzModule } from '@infrastructure/authz/authz.module'
+import { NatsModule } from '@interface/nats/nats.module'
 
 import { CoreProvider } from './core.provider'
 import { CycleModule } from './modules/cycle/cycle.module'
@@ -21,6 +22,7 @@ import { CorePortsProvider } from './ports/ports.provider'
     KeyResultModule,
     TaskModule,
     AuthzModule,
+    NatsModule,
   ],
   providers: [CoreProvider, CorePortsProvider, CommandFactory],
   exports: [CoreProvider, CorePortsProvider],
