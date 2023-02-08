@@ -36,6 +36,7 @@ export class GetTeamScore extends Command<any> {
 
     const users = await getTeamMembersCommand.execute(teamID, queryFilters)
 
+
     const usersWithLastCheckInAndRoutines = await Promise.all(
       users.map(async (user) => {
         const companies = await getUserCompaines.execute(user)
