@@ -17,10 +17,21 @@ export class UserProfileProvider implements UserProfileAdapter {
     const url = this.configService.userProfileUrl
     const { amplitudeSecretKey } = this.configService
 
-    const { data } = await axios.get<UserAmplitudeDataProperties>(url, {
-      params: { user_id: userId, get_amp_props: true },
-      headers: { authorization: `Api-Key ${amplitudeSecretKey}` },
-    })
-    return data
+    try {
+      const { data } = await axios.get<UserAmplitudeDataProperties>(url, {
+        params: { user_id: userId, get_amp_props: true },
+        headers: { authorization: `Api-Key ${amplitudeSecretKey}` },
+      })
+
+      return data
+    } catch {
+      return {
+        userData: {
+          amp_props: {
+            last_used: 'never_accessed',
+          },
+        },
+      }
+    }
   }
 }
