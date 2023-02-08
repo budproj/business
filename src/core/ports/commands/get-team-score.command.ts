@@ -32,7 +32,10 @@ export class GetTeamScore extends Command<any> {
     const getUserKeyResultsStatus = this.factory.buildCommand<Status>('get-user-key-results-status')
     const getUserCompaines = this.factory.buildCommand<Team[]>('get-user-companies')
 
-    const users = await getTeamMembersCommand.execute(teamID, { status: UserStatus.ACTIVE })
+    const queryFilters = { status: UserStatus.ACTIVE }
+
+    const users = await getTeamMembersCommand.execute(teamID, queryFilters)
+
 
     const usersWithLastCheckInAndRoutines = await Promise.all(
       users.map(async (user) => {
