@@ -33,4 +33,10 @@ export class UserFiltersRequest extends ConnectionFiltersRequest<UserOrderInputO
     description: 'Define if the query should return with the indicators or not',
   })
   public withIndicators?: boolean
+
+  @Field(() => Boolean, {
+    nullable: true,
+    description: 'Define if the query should return all users of the team or just the default (10)',
+  })
+  public allUsers?: boolean
 }

@@ -27,7 +27,10 @@ interface Routine {
 }
 
 export class GetTeamScore extends Command<any> {
-  public async execute(teamID: Team['id']): Promise<UserWithLastCheckInAndRoutines[]> {
+  public async execute(
+    teamID: Team['id'],
+    allUsers = false,
+  ): Promise<UserWithLastCheckInAndRoutines[]> {
     const getTeamMembersCommand = this.factory.buildCommand<User[]>('get-team-members')
     const getUserKeyResultsStatus = this.factory.buildCommand<Status>('get-user-key-results-status')
     const getUserCompaines = this.factory.buildCommand<Team[]>('get-user-companies')
@@ -54,7 +57,7 @@ export class GetTeamScore extends Command<any> {
       return this.getUserScore(b) - this.getUserScore(a)
     })
 
-    return sortedUsers.slice(0, 10)
+    return allUsers ? sortedUsers : sortedUsers.slice(0, 10)
   }
 
   private getUserScore(user: UserWithLastCheckInAndRoutines) {

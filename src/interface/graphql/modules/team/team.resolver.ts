@@ -250,8 +250,18 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       )
     }
 
+    if (rawFilters.allUsers && !rawFilters.withIndicators) {
+      throw new NotImplementedException(
+        'You are trying to fetch with the allUsers filter but that filter is only used with withIndicators filter.',
+      )
+    }
+
     if (rawFilters.withIndicators) {
-      const queryResult = await this.corePorts.dispatchCommand<User[]>('get-team-score', team.id)
+      const queryResult = await this.corePorts.dispatchCommand<User[]>(
+        'get-team-score',
+        team.id,
+        rawFilters.allUsers,
+      )
 
       return this.relay.marshalResponse(queryResult, connection, team)
     }
@@ -262,6 +272,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
 
     delete filters.withInactives
     delete filters.withIndicators
+    delete filters.allUsers
 
     const queryResult = await this.corePorts.dispatchCommand<User[]>(
       'get-team-members',
