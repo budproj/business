@@ -31,4 +31,11 @@ export class UserKeyResultsRequest extends KeyResultFiltersRequest {
     nullable: true,
   })
   public onlyKeyResultsFromCompany?: boolean
+
+  @Field(() => Boolean, {
+    description:
+      'A flag that defines if we should fetch only key-results that the user is owner or not',
+    nullable: true,
+  })
+  public onlyOwnerKeyResults?: boolean
 }

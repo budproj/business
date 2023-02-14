@@ -7,6 +7,7 @@ import { Command } from './base.command'
 
 type Options = {
   active?: boolean
+  onlyOwnerKeyResults?: boolean
 }
 
 export class GetUserKeyResultsCommand extends Command<KeyResult[]> {
@@ -16,6 +17,13 @@ export class GetUserKeyResultsCommand extends Command<KeyResult[]> {
     options?: Options,
   ): Promise<KeyResult[]> {
     const ownedKeyResults = await this.core.keyResult.getOwnedByUserID(userID, filters)
+
+    if (options.onlyOwnerKeyResults) {
+      const keyResults = await this.applyOptions(ownedKeyResults, options)
+
+      return keyResults
+    }
+
     const supportTeamKeyResults = await this.core.keyResult.getAllWithUserIDInSupportTeam(
       userID,
       filters,
