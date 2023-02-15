@@ -101,8 +101,8 @@ spec:
               value: analytics-stable.bud.svc.cluster.local:50051
             - name: ANALYTICS_PACKAGES
               value: keyResult
-            - name: TASKS_NATS_SERVERS
-              value: nats.nats.svc.cluster.local:4222
+            - name: RABBITMQ_SERVER
+              value: amqp://rabbitmq.nats.svc.cluster.local:5672
             - name: SENTRY_DSN
               valueFrom:
                 secretKeyRef:
