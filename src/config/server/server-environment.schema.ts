@@ -11,4 +11,5 @@ export const ServerEnvironmentSchema = Joi.object({
     .valid(...Object.keys(LogLevel))
     .default('ERROR'),
   SERVER_LOGGING_SERVICE_NAME: Joi.string().default('business@unknown'),
+  RABBITMQ_SERVER: Joi.string().required(),
 })

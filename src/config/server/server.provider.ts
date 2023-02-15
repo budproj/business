@@ -31,7 +31,7 @@ export class ServerConfigProvider {
     return this.configService.get<ServerLoggingConfigInterface>('server.logging')
   }
 
-  get natsServers(): string[] {
-    return this.configService.get<string[]>('server.nats')
+  get rabbitMQServer(): string {
+    return this.configService.get<string>('server.rabbitmq')
   }
 }
