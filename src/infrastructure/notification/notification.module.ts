@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 
-import { NatsClient } from '@config/tasks/client'
+import { RabbitMQClient } from '@config/tasks/client'
 import { CoreModule } from '@core/core.module'
 import { AWSModule } from '@infrastructure/aws/aws.module'
 import { EmailNotificationChannel } from '@infrastructure/notification/channels/email/email.channel'
@@ -9,7 +9,7 @@ import { NotificationProvider } from '@infrastructure/notification/notification.
 import { NotificationFactory } from '@infrastructure/notification/notifications/notification.factory'
 
 @Module({
-  imports: [CoreModule, AWSModule, NatsClient],
+  imports: [CoreModule, AWSModule, RabbitMQClient],
   providers: [
     NotificationProvider,
     NotificationFactory,

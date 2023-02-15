@@ -56,6 +56,7 @@
   },
   "dependencies": {
     "@amplitude/node": "^1.9.2",
+    "@golevelup/nestjs-rabbitmq": "^3.4.0",
     "@grpc/grpc-js": "^1.5.9",
     "@grpc/proto-loader": "^0.6.9",
     "@hapi/joi": "^17.1.1",

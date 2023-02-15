@@ -1,6 +1,5 @@
 import { LoggerService } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
-import { Transport } from '@nestjs/microservices'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import { processRequest } from 'graphql-upload'
 
@@ -53,13 +52,6 @@ export class ServerFactory {
     application: NestFastifyApplication,
     config: ServerConfigProvider,
   ): Promise<void> {
-    application.connectMicroservice({
-      transport: Transport.NATS,
-      options: {
-        servers: config.natsServers,
-      },
-    })
-
     await application.startAllMicroservices()
   }
 
