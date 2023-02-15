@@ -12,12 +12,12 @@ interface FieldNodes {
 }
 
 export default function GetResolvedFieldsInEdgesAndNodes(info: ResolvedFieldInfo): Set<string> {
-  const selectionSet = info?.fieldNodes[0]?.selectionSet?.selections
+  const edgeFields = info.fieldNodes[0].selectionSet.selections.find(
+    (selection) => selection.name.value === 'edges',
+  )
 
-  const edgeFields = selectionSet.find((selection) => selection.name.value === 'edges')
-
-  const nodeFields = edgeFields?.selectionSet.selections.find(
+  const nodeFields = edgeFields.selectionSet.selections.find(
     (selection) => selection.name.value === 'node',
   )
-  return new Set(nodeFields?.selectionSet.selections.map((selection) => selection.name.value))
+  return new Set(nodeFields.selectionSet.selections.map((selection) => selection.name.value))
 }

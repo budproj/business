@@ -39,4 +39,6 @@ export const god = [
   'workspace:read:any',
   'workspace:update:any',
   'workspace:delete:any',
+  'flags:read:team',
+  'flags:read:company',
 ]
