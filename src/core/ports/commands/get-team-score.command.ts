@@ -43,9 +43,10 @@ export class GetTeamScore extends Command<any> {
 
         const userWithCompanies = { ...user, companies }
 
-        const lastRoutine = await this.core.nats.sendMessage<any, Routine[]>('user-last-routine', {
-          user: userWithCompanies,
-        })
+        const lastRoutine = await this.core.nats.sendMessage<Routine[]>(
+          'routines-microservice.user-last-routine',
+          { user: userWithCompanies },
+        )
 
         const { latestCheckIn } = await getUserKeyResultsStatus.execute(user.id)
 

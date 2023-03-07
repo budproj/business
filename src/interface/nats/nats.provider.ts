@@ -1,12 +1,21 @@
-import { Inject, Injectable } from '@nestjs/common'
-import { ClientProxy } from '@nestjs/microservices'
-import { lastValueFrom } from 'rxjs'
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq'
+import { Injectable } from '@nestjs/common'
 
 @Injectable()
 export class NatsProvider {
-  constructor(@Inject('NATS_SERVICE') private readonly adapter: ClientProxy) {}
+  constructor(private readonly rabbitmq: AmqpConnection) {}
 
-  public async sendMessage<T, R>(channel: string, data: T): Promise<R> {
-    return lastValueFrom<R>(this.adapter.send(channel, data))
+  /**
+   * Sends a message to a rabbitmq channel and wait for it's response.
+   *
+   * @param channel the rabbitmq channel do send the message to
+   * @param payload  the payload to be send
+   */
+  public async sendMessage<R>(channel: string, payload: unknown): Promise<R> {
+    return this.rabbitmq.request<R>({
+      exchange: 'bud',
+      routingKey: channel,
+      payload,
+    })
   }
 }
