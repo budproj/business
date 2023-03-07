@@ -28,8 +28,8 @@ export class TasksController {
 
   @RabbitRPC({
     exchange: 'bud',
-    queue: 'busines.notification-ports',
-    routingKey: 'busines.notification-ports.#',
+    queue: 'business.notification-ports',
+    routingKey: 'business.notification-ports.#',
     errorHandler: defaultNackErrorHandler,
     queueOptions: {
       deadLetterExchange: 'dead',
@@ -60,8 +60,8 @@ export class TasksController {
 
   @RabbitRPC({
     exchange: 'bud',
-    queue: 'busines.core-ports',
-    routingKey: 'busines.core-ports.#',
+    queue: 'business.core-ports',
+    routingKey: 'business.core-ports.#',
     errorHandler: defaultNackErrorHandler,
     queueOptions: { deadLetterExchange: 'dead' },
   })
