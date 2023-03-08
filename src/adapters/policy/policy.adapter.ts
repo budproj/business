@@ -83,7 +83,7 @@ export class PolicyAdapter {
   public commandStatementIsDenyingAll(statement: CommandStatement): boolean {
     const effects = uniq(Object.values(statement))
 
-    return effects === [Effect.DENY]
+    return effects[0] === Effect.DENY
   }
 
   public getActionsFromPermissions(permissions: Permission[]): Action[] {

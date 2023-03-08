@@ -107,9 +107,6 @@
     "winston": "^3.6.0"
   },
   "devDependencies": {
-    "@budproj/eslint-config-base-ts": "^1.0.5",
-    "@budproj/eslint-config-prettier-ts": "^1.0.0",
-    "@budproj/prettier-config": "^1.0.0",
     "@nestjs/schematics": "^8.0.8",
     "@nestjs/testing": "^8.4.2",
     "@types/auth0": "^2.34.14",

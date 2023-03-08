@@ -31,7 +31,7 @@ function main {
 # -------------------------------------------------------------------------------------------------
 
 function validate_requirements {
-  validate_bash_dependency
+#  validate_bash_dependency
   validate_psql_dependency
 }
 

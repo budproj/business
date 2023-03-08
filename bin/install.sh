@@ -49,11 +49,14 @@ initiate_env_file () {
   echo "And the Auth0 Client Secret:"
   read AUTHZ_CLIENT_SECRET
 
-  echo "Last one, our Sentry DSN url:"
+  echo "And our Sentry DSN url:"
   read SENTRY_DSN
 
   echo "And the Amplitude Secret Key"
   read AMPLITUDE_SECRET_KEY
+
+  echo "And the Flagsmith Server Environment Key"
+  read FLAGSMITH_SERVER_ENVIRONMENT_KEY
 
   echo "Copying .env.example to .env"
   cp .env.example .env
@@ -66,6 +69,7 @@ initiate_env_file () {
     AUTHZ_CLIENT_SECRET=$AUTHZ_CLIENT_SECRET
     SENTRY_DSN=$SENTRY_DSN
     AMPLITUDE_SECRET_KEY=$AMPLITUDE_SECRET_KEY
+    FLAGSMITH_SERVER_ENVIRONMENT_KEY=$FLAGSMITH_SERVER_ENVIRONMENT_KEY
   " >> .env
 
   echo -e "${Green}Awesome! .env is now configured.${Color_Off}"
@@ -113,6 +117,14 @@ run_migrations () {
   echo
 }
 
+run_typeorm_config() {
+  echo "running typeorm config"
+  npm run typeorm:run
+
+  echo -e "${Green}Awesome! Typeorm config executed.${Color_Off}"
+  echo
+}
+
 run() {
   check_dependencies
   check_env_file
@@ -121,9 +133,11 @@ run() {
   run_migrations
 
   echo -e "${Green}Awesome! everything is now configured and dependencies are running, just start the application. with 'npm run start:dev'${Color_Off}"
-  echo 
+  echo
 }
 
 if [ "${NODE_ENV}" != "production" ]; then
   run
 fi
+
+java -jar schemaspy-6.1.0.jar -t pgsql -db business -host localhost -u business -p changeme -o ./schemaspy -dp postgresql-42.5.3.jar -s public -noads
