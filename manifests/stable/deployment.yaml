@@ -102,7 +102,10 @@ spec:
             - name: ANALYTICS_PACKAGES
               value: keyResult
             - name: RABBITMQ_SERVER
-              value: amqp://rabbitmq.nats.svc.cluster.local:5672
+              valueFrom:
+                secretKeyRef:
+                  name: business
+                  key: rabbitmq-connection-string
             - name: SENTRY_DSN
               valueFrom:
                 secretKeyRef:
