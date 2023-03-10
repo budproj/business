@@ -1,4 +1,4 @@
-import { Injectable, Logger, Scope } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 
 import { Activity } from '@adapters/activity/activities/base.activity'
 import { ActivityDispatcher } from '@adapters/activity/interfaces/activity-dispatcher.interface'
