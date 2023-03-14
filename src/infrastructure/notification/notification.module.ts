@@ -6,10 +6,10 @@ import { EmailNotificationChannel } from '@infrastructure/notification/channels/
 import { MessageBrokerNotificationChannel } from '@infrastructure/notification/channels/message-broker/message-broker.channel'
 import { NotificationProvider } from '@infrastructure/notification/notification.provider'
 import { NotificationFactory } from '@infrastructure/notification/notifications/notification.factory'
-import { NatsClient } from '@interface/nats/client'
+import { RabbitMQClient } from '@interface/nats/client'
 
 @Module({
-  imports: [CoreModule, AWSModule, NatsClient],
+  imports: [CoreModule, AWSModule, RabbitMQClient],
   providers: [
     NotificationProvider,
     NotificationFactory,

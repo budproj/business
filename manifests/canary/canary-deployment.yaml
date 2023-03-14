@@ -108,8 +108,11 @@ spec:
               value: analytics-canary.bud.svc.cluster.local:50051
             - name: ANALYTICS_PACKAGES
               value: keyResult
-            - name: TASKS_NATS_SERVERS
-              value: nats-canary.nats.svc.cluster.local:4222
+            - name: RABBITMQ_SERVER
+              valueFrom:
+                secretKeyRef:
+                  name: business-canary
+                  key: rabbitmq-connection-string
             - name: SENTRY_DSN
               valueFrom:
                 secretKeyRef:
