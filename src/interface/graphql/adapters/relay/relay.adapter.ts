@@ -1,4 +1,4 @@
-import { connectionFromArray, cursorToOffset } from 'graphql-relay'
+import { connectionFromArray } from 'graphql-relay'
 import { omit, pick } from 'lodash'
 
 import { CoreEntity } from '@core/core.orm-entity'
@@ -13,7 +13,7 @@ export class RelayGraphQLAdapter {
   static getConnectionOffset(connection: ConnectionRelayRequest): number {
     if (!connection.after) return 0
 
-    return cursorToOffset(connection.after) + 1
+    return connection.after
   }
 
   public getNodeRequest<R extends ConnectionRelayRequest>(request: R): NodeRequest<R> {
@@ -41,7 +41,8 @@ export class RelayGraphQLAdapter {
     connectionRequest: ConnectionRelayRequest,
     parentNode?: NodeRelayGraphQLInterface,
   ): Connection<N> {
-    const connection = connectionFromArray(nodes, connectionRequest)
+    const connection = connectionFromArray(nodes, {})
+    console.log({ nodes, connectionRequest, connection })
 
     return {
       ...connection,
