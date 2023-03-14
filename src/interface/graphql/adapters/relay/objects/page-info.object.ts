@@ -30,4 +30,11 @@ export class PageInfoRelayObject {
     description: 'The cursor ID of the last element in our nodes list',
   })
   public readonly endCursor!: ConnectionCursor
+
+  @Field(() => Number, {
+    nullable: true,
+    description: 'The offset of that specific edge',
+    defaultValue: 0,
+  })
+  public readonly offset: number
 }
