@@ -15,6 +15,7 @@ import { CADENCE_RANK } from './cycle.constants'
 import { Cycle } from './cycle.orm-entity'
 import { CycleRepository } from './cycle.repository'
 import { CycleSpecification } from './cycle.specification'
+import { Cadence } from './enums/cadence.enum'
 import { CycleInterface } from './interfaces/cycle.interface'
 
 @Injectable()
@@ -37,6 +38,7 @@ export class CycleProvider extends CoreEntityProvider<Cycle, CycleInterface> {
     const whereSelector = {
       ...filters,
       teamId: teamIDsFilter,
+      cadence: Cadence.QUARTERLY,
     }
 
     return this.repository.find({
