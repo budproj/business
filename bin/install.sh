@@ -91,7 +91,7 @@ run_docker_compose () {
 
   docker-compose stop
   docker-compose rm -f
-  docker-compose up -d
+  docker-compose up -d rabbitmq db-postgres
 
   echo
   echo -e "${Green}Awesome! Docker-compose containers are now accessible.${Color_Off}"
