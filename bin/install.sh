@@ -81,6 +81,11 @@ check_env_file () {
   echo
 }
 
+create_docker_networks () {
+  echo "Creating (if doesn't exists) docker networks"
+  docker network create bud-rabbitmq || true
+}
+
 run_docker_compose () {
   echo "Stopping and reinstanciating docker-compose containers"
 
@@ -116,6 +121,7 @@ run_migrations () {
 run() {
   check_dependencies
   check_env_file
+  create_docker_networks
   run_docker_compose
   run_first_database_import
   run_migrations
