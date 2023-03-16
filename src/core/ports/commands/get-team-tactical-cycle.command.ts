@@ -1,6 +1,7 @@
 import { sortBy } from 'lodash'
 
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
+import { Cadence } from '@core/modules/cycle/enums/cadence.enum'
 
 import { Command } from './base.command'
 
@@ -24,9 +25,12 @@ export class GetTeamTacticalCycleCommand extends Command<Cycle | undefined> {
     options: GetTeamTacticalCycleOptions = this.defaultOptions,
   ): Promise<Cycle | undefined> {
     const anchorDate = new Date()
-    const teamCycles = await this.core.cycle.getFromTeamsWithFilters({
-      id: teamID,
-    })
+    const teamCycles = await this.core.cycle.getFromTeamsWithFilters(
+      {
+        id: teamID,
+      },
+      { cadence: Cadence.QUARTERLY },
+    )
 
     const teamValidCycles = teamCycles
       .filter((cycle) => cycle.active)
