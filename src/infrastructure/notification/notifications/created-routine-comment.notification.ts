@@ -77,7 +77,7 @@ export class CreatedRoutineCommentInRoutineNotification extends BaseNotification
   }
 
   public async dispatch(): Promise<void> {
-    // Await this.dispatchCommentInRoutineNotificationEmail()
+    await this.dispatchCommentInRoutineNotificationEmail()
     await this.dispatchCommentInRoutineNotificationMessage()
   }
 
