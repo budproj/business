@@ -40,7 +40,7 @@ export class TasksController {
     @RabbitRequest() request: RabbitMQRequestStructure,
   ) {
     const { routingKey } = request.fields
-    const [_, commandName] = routingKey.split('.')
+    const commandName = routingKey.split('.')[2]
 
     const user = await this.corePorts.dispatchCommand<UserInterface>('get-user', {
       id: payload.userId,
