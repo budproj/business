@@ -337,7 +337,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     const { data, metadata } = this.marshal()
 
     const commentContent = data.comment.content
-    const mentionedIds = this.getIdFromMentionedUsers(commentContent)
+    const mentionedIds = getMentionedUserIdsFromComments(commentContent)
     const ownerAndSupportTeamIds = uniqBy([metadata.keyResultOwner, ...metadata.supportTeam], 'id')
 
     const recipientIds = mentionedIds.filter(
