@@ -149,7 +149,10 @@ export abstract class BaseStatusCommand extends Command<Status> {
       return !this.isOutdated(checkIn, new Date())
     })
 
-    const checkmarks = await this.core.keyResult.keyResultCheckMarkProvider.getFromAssignedUser(id)
+    const checkmarks = await this.core.keyResult.keyResultCheckMarkProvider.getFromAssignedUser(
+      id,
+      true,
+    )
 
     return {
       isOutdated,

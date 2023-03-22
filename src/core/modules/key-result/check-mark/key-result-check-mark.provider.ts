@@ -55,7 +55,17 @@ export class KeyResultCheckMarkProvider extends CoreEntityProvider<
     return this.getMany(searchObject, undefined, options)
   }
 
-  public async getFromAssignedUser(userId: string): Promise<KeyResultCheckMark[]> {
+  public async getFromAssignedUser(
+    userId: string,
+    fromActiveCycles = false,
+  ): Promise<KeyResultCheckMark[]> {
+    if (fromActiveCycles) {
+      return this.repository.find({
+        where: { assignedUserId: userId, keyResult: { objective: { cycle: { active: true } } } },
+        relations: ['keyResult', 'keyResult.objective', 'keyResult.objective.cycle'],
+      })
+    }
+
     return this.getMany({ assignedUserId: userId })
   }
 
