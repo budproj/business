@@ -27,21 +27,21 @@ services:
       - 5672:5672
       - 8081:15672
 
-  # business:
-  #   build:
-  #       context: .
-  #       args:
-  #         GITHUB_TOKEN: $GITHUB_TOKEN
-  #         SENTRY_AUTH_TOKEN: 'b6f2dd2050764192880ec25049ebf0b538103570277b4fdb9004275dbe8630fb'
-  #   ports:
-  #     - 8080:8080
-  #   depends_on:
-  #     - rabbitmq
-  #   networks:
-  #     - bud-business
-  #     - bud-rabbitmq
-  #   env_file:
-  #     - ./.env.docker
+  business:
+    build:
+        context: .
+        args:
+          GITHUB_TOKEN: $GITHUB_TOKEN
+          SENTRY_AUTH_TOKEN: 'b6f2dd2050764192880ec25049ebf0b538103570277b4fdb9004275dbe8630fb'
+    ports:
+      - 8080:8080
+    depends_on:
+      - rabbitmq
+    networks:
+      - bud-business
+      - bud-rabbitmq
+    env_file:
+      - ./.env.docker
 
 networks:
   bud-rabbitmq:
