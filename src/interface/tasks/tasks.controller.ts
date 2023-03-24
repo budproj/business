@@ -1,5 +1,10 @@
+import {
+  defaultNackErrorHandler,
+  RabbitPayload,
+  RabbitRequest,
+  RabbitRPC,
+} from '@golevelup/nestjs-rabbitmq'
 import { Controller, Logger } from '@nestjs/common'
-import { Ctx, MessagePattern, NatsContext, Payload } from '@nestjs/microservices'
 import { GraphQLRequest } from 'apollo-server-core'
 
 import { GenericActivity } from '@adapters/activity/activities/generic-activity'
@@ -7,6 +12,10 @@ import { UserInterface } from '@core/modules/user/user.interface'
 import { isOfTypeCommand } from '@core/ports/commands/command.factory'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { NotificationProvider } from '@infrastructure/notification/notification.provider'
+
+interface RabbitMQRequestStructure {
+  fields: { routingKey: string }
+}
 
 @Controller()
 export class TasksController {
@@ -17,20 +26,31 @@ export class TasksController {
     private readonly notification: NotificationProvider,
   ) {}
 
-  @MessagePattern('notification-ports.*')
-  async useNotification(@Payload() data: any, @Ctx() natsContext: NatsContext) {
-    const messageName = natsContext.getSubject()
-    const [_, commandName] = messageName.split('.')
+  @RabbitRPC({
+    exchange: 'bud',
+    queue: 'business.notification-ports',
+    routingKey: 'business.notification-ports.#',
+    errorHandler: defaultNackErrorHandler,
+    queueOptions: {
+      deadLetterExchange: 'dead',
+    },
+  })
+  async useNotification(
+    @RabbitPayload() payload: any,
+    @RabbitRequest() request: RabbitMQRequestStructure,
+  ) {
+    const { routingKey } = request.fields
+    const [_, commandName] = routingKey.split('.')
 
     const user = await this.corePorts.dispatchCommand<UserInterface>('get-user', {
-      id: data.userId,
+      id: payload.userId,
     })
     const context = {
       userWithContext: user,
     }
     const activity = new GenericActivity<unknown, unknown>(
       commandName,
-      data,
+      payload,
       context as Partial<GraphQLRequest>,
       undefined,
     )
@@ -38,26 +58,37 @@ export class TasksController {
     await this.notification.dispatch(activity)
   }
 
-  @MessagePattern('core-ports.*')
-  async useUsersPorts(@Payload() data: string, @Ctx() context: NatsContext): Promise<unknown> {
-    const messageName = context.getSubject()
+  @RabbitRPC({
+    exchange: 'bud',
+    queue: 'business.core-ports',
+    routingKey: 'business.core-ports.#',
+    errorHandler: defaultNackErrorHandler,
+    queueOptions: { deadLetterExchange: 'dead' },
+  })
+  async useUsersPorts(
+    @RabbitPayload() payload: any,
+    @RabbitRequest() request: RabbitMQRequestStructure,
+  ): Promise<unknown> {
+    const { routingKey } = request.fields
+
+    console.log('core-ports', routingKey)
 
     this.logger.log({
-      message: `New ${messageName} message received`,
+      message: `New ${routingKey} message received`,
     })
 
-    const [_, commandName] = messageName.split('.')
+    const commandName = routingKey.split('.')[2]
 
     if (!commandName || !isOfTypeCommand(commandName)) {
       return 'Invalid Command'
     }
 
     this.logger.log({
-      data,
+      payload,
       message: `Executing the ${commandName} command`,
     })
 
-    const dataReturned = await this.corePorts.dispatchCommand<unknown>(commandName, data)
+    const dataReturned = await this.corePorts.dispatchCommand<unknown>(commandName, payload)
 
     this.logger.log({
       data: dataReturned,

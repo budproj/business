@@ -343,6 +343,9 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
       },
     }))
 
-    await this.channels.messageBroker.dispatchMultiple('notification', messages)
+    await this.channels.messageBroker.dispatchMultiple(
+      'notifications-microservice.notification',
+      messages,
+    )
   }
 }

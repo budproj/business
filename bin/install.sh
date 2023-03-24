@@ -81,12 +81,17 @@ check_env_file () {
   echo
 }
 
+create_docker_networks () {
+  echo "Creating (if doesn't exists) docker networks"
+  docker network create bud-rabbitmq || true
+}
+
 run_docker_compose () {
   echo "Stopping and reinstanciating docker-compose containers"
 
   docker-compose stop
   docker-compose rm -f
-  docker-compose up -d
+  docker-compose up -d rabbitmq db-postgres
 
   echo
   echo -e "${Green}Awesome! Docker-compose containers are now accessible.${Color_Off}"
@@ -116,6 +121,7 @@ run_migrations () {
 run() {
   check_dependencies
   check_env_file
+  create_docker_networks
   run_docker_compose
   run_first_database_import
   run_migrations

@@ -11,6 +11,7 @@ import { Command } from './base.command'
 interface UserWithLastCheckInAndRoutines extends User {
   latestCheckIn: KeyResultCheckInInterface
   lastRoutine: Routine
+  total: number
 }
 
 interface Routine {
@@ -43,13 +44,14 @@ export class GetTeamScore extends Command<any> {
 
         const userWithCompanies = { ...user, companies }
 
-        const lastRoutine = await this.core.nats.sendMessage<any, Routine[]>('user-last-routine', {
-          user: userWithCompanies,
-        })
+        const lastRoutine = await this.core.nats.sendMessage<Routine[]>(
+          'routines-microservice.user-last-routine',
+          { user: userWithCompanies },
+        )
 
-        const { latestCheckIn } = await getUserKeyResultsStatus.execute(user.id)
+        const { latestCheckIn, total } = await getUserKeyResultsStatus.execute(user.id)
 
-        return { ...user, lastRoutine: lastRoutine[0], latestCheckIn }
+        return { ...user, lastRoutine: lastRoutine[0], latestCheckIn, total }
       }),
     )
 
@@ -97,22 +99,24 @@ export class GetTeamScore extends Command<any> {
       addScore(4)
     }
 
-    if (user.latestCheckIn) {
-      const daysDifference = differenceInDays(new Date(), user.latestCheckIn.createdAt)
+    if (user.total > 0) {
+      if (user.latestCheckIn) {
+        const daysDifference = differenceInDays(new Date(), user.latestCheckIn.createdAt)
 
-      if ([0, 1, 2, 3, 4, 5, 6, 7].includes(daysDifference)) {
-        addScore(0)
-      } else if ([8].includes(daysDifference)) {
-        addScore(1)
-      } else if ([9].includes(daysDifference)) {
-        addScore(2)
-      } else if ([10].includes(daysDifference)) {
-        addScore(3)
+        if ([0, 1, 2, 3, 4, 5, 6, 7].includes(daysDifference)) {
+          addScore(0)
+        } else if ([8].includes(daysDifference)) {
+          addScore(1)
+        } else if ([9].includes(daysDifference)) {
+          addScore(2)
+        } else if ([10].includes(daysDifference)) {
+          addScore(3)
+        } else {
+          addScore(4)
+        }
       } else {
         addScore(4)
       }
-    } else {
-      addScore(4)
     }
 
     return score

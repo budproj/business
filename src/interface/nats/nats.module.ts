@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common'
 
-import { NatsClient } from './client'
+import { RabbitMQClient } from './client'
 import { NatsProvider } from './nats.provider'
 
 @Module({
-  imports: [NatsClient],
+  imports: [RabbitMQClient],
   providers: [NatsProvider],
   exports: [NatsProvider],
 })

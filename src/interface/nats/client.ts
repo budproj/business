@@ -1,18 +1,17 @@
-import { ClientsModule, Transport } from '@nestjs/microservices'
+import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq'
+import { DynamicModule } from '@nestjs/common'
 
 import { ServerConfigModule } from '@config/server/server.module'
 import { ServerConfigProvider } from '@config/server/server.provider'
 
-export const NatsClient = ClientsModule.registerAsync([
-  {
-    name: 'NATS_SERVICE',
-    imports: [ServerConfigModule],
-    inject: [ServerConfigProvider],
-    useFactory: async (configService: ServerConfigProvider) => ({
-      transport: Transport.NATS,
-      options: {
-        servers: configService.natsServers,
-      },
-    }),
+export const RabbitMQClient: DynamicModule = RabbitMQModule.forRootAsync(RabbitMQModule, {
+  imports: [ServerConfigModule],
+  inject: [ServerConfigProvider],
+  useFactory: (configService: ServerConfigProvider) => {
+    return {
+      exchanges: [{ name: 'bud', type: 'topic' }],
+      uri: configService.rabbitMQServer,
+      enableControllerDiscovery: true,
+    }
   },
-])
+})
