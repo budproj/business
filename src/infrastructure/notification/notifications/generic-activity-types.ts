@@ -1,4 +1,4 @@
 export const GenericActivityTypes = {
-  PendenciesNotification: 'PENDENCIES-NOTIFICATION',
-  CommentInRoutineNotification: 'COMMENT-IN-ROUTINE-NOTIFICATION',
+  PendenciesNotification: 'pendencies-notification',
+  CommentInRoutineNotification: 'comment-in-routine-notification',
 }

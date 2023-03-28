@@ -32,7 +32,7 @@ type Data = ResolvedData & RelatedData
 
 type RelatedData = {
   userThatCommented: UserWithCompanies
-  userWithAnsweredRoutine: User
+  answeredRoutine: { userId: string }
   comment: Comment
 }
 
@@ -40,16 +40,17 @@ type Metadata = NotificationMetadata
 
 interface ActivityData {
   userThatCommented: UserWithCompanies
-  userWithAnsweredRoutine: User
+  answeredRoutine: { userId: string }
   comment: Comment
 }
 
 type ResolvedData = {
   userThatCommented: UserWithCompanies
-  userWithAnsweredRoutine: User
+  answeredRoutine: { userId: string }
   comment: Comment
   answerId: string
   userThatCommentedInitials: string
+  userThatAnsweredTheRoutine: User
 }
 
 @Injectable()
@@ -82,9 +83,9 @@ export class CreatedRoutineCommentInRoutineNotification extends BaseNotification
   }
 
   private async getRelatedData(): Promise<RelatedData> {
-    const { comment, userThatCommented, userWithAnsweredRoutine } = this.activity.data
+    const { comment, userThatCommented, answeredRoutine } = this.activity.data
 
-    return { comment, userThatCommented, userWithAnsweredRoutine }
+    return { comment, userThatCommented, answeredRoutine }
   }
 
   private async getResolvedData(relatedData: RelatedData): Promise<ResolvedData> {
@@ -95,10 +96,15 @@ export class CreatedRoutineCommentInRoutineNotification extends BaseNotification
       relatedData.userThatCommented,
     )
 
+    const userThatAnsweredTheRoutine = await this.core.dispatchCommand<User>('get-user', {
+      id: relatedData.answeredRoutine.userId,
+    })
+
     return {
       ...relatedData,
       userThatCommentedInitials,
       answerId,
+      userThatAnsweredTheRoutine,
     }
   }
 
@@ -106,12 +112,12 @@ export class CreatedRoutineCommentInRoutineNotification extends BaseNotification
     const { data, metadata } = this.marshal()
 
     const customData = {
-      userId: data.userWithAnsweredRoutine.id,
-      recipientFirstName: data.userWithAnsweredRoutine.firstName,
+      userId: data.userThatAnsweredTheRoutine.id,
+      recipientFirstName: data.userThatAnsweredTheRoutine.firstName,
     }
 
     const recipients = (await this.buildRecipients(
-      [data.userWithAnsweredRoutine],
+      [data.userThatAnsweredTheRoutine],
       this.channels.email,
       [customData],
     )) as EmailRecipient[]
@@ -140,7 +146,7 @@ export class CreatedRoutineCommentInRoutineNotification extends BaseNotification
   private async dispatchCommentInRoutineNotificationMessage(): Promise<void> {
     const { data, metadata } = this.marshal()
 
-    const recipientUsers = [data.userWithAnsweredRoutine]
+    const recipientUsers = [data.userThatAnsweredTheRoutine]
 
     const isCommentTagged = isTagged(data.comment.content)
 
@@ -166,6 +172,9 @@ export class CreatedRoutineCommentInRoutineNotification extends BaseNotification
       },
     }))
 
-    await this.channels.messageBroker.dispatchMultiple('notification', messages)
+    await this.channels.messageBroker.dispatchMultiple(
+      'notifications-microservice.notification',
+      messages,
+    )
   }
 }
