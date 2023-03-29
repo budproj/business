@@ -7,6 +7,11 @@ export interface TypeORMConfigInterface {
   pattern: TypeORMPatternConfigInterface
   logging: TypeORMLoggingConfigInterface
   conventions: TypeORMConventionsConfigInterface
+  extra: TypeORMExtraConfigInterface
+}
+
+export interface TypeORMExtraConfigInterface {
+  max: number
 }
 
 export interface TypeORMEndpointConfigInterface {
