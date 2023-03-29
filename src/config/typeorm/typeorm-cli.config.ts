@@ -17,4 +17,7 @@ export = {
   cli: {
     migrationsDir: process.env.TYPEORM_MIGRATIONS_DIR,
   },
+  extra: {
+    max: process.env.TYPEORM_MAX_CONNECTION_POOL,
+  },
 }

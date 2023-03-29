@@ -120,6 +120,8 @@ spec:
                 secretKeyRef:
                   name: business
                   key: amplitude-secret-key
+            - name: TYPEORM_MAX_CONNECTION_POOL
+              value: '25'
 
       initContainers:
         - name: business-app-prod-execute-migrations
@@ -154,3 +156,5 @@ spec:
               value: 'false'
             - name: TYPEORM_CONVENTION_NAMING_ENABLED
               value: 'true'
+            - name: TYPEORM_MAX_CONNECTION_POOL
+              value: '10'
