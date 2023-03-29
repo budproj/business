@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { uniqBy } from 'lodash'
 
-import { GenericActivity, GenericTypes } from '@adapters/activity/activities/generic-activity'
+import { GenericActivity } from '@adapters/activity/activities/generic-activity'
 import { User } from '@core/modules/user/user.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
@@ -10,6 +10,7 @@ import { EmailRecipient } from '../types/email-recipient.type'
 import { NotificationMetadata } from '../types/notification-metadata.type'
 
 import { BaseNotification } from './base.notification'
+import { GenericActivityTypes } from './generic-activity-types'
 import { NotificationChannelHashMap } from './notification.factory'
 
 type Data = User[]
@@ -32,7 +33,7 @@ export class PendingTasksNotification extends BaseNotification<
   Metadata,
   GenericActivity<ActivityData, never>
 > {
-  static activityType = GenericTypes
+  static activityType = GenericActivityTypes.PendenciesNotification
   static notificationType = 'PendenciesNotification'
 
   constructor(
