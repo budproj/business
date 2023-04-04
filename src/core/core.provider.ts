@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 import { AuthJwtProvider } from '@infrastructure/authz/providers/jwt.provider'
+import { NatsProvider } from '@interface/nats/nats.provider'
 
 import { CycleProvider } from './modules/cycle/cycle.provider'
 import { KeyResultProvider } from './modules/key-result/key-result.provider'
@@ -19,5 +20,6 @@ export class CoreProvider {
     public readonly keyResult: KeyResultProvider,
     public readonly task: TaskProvider,
     public readonly jwt: AuthJwtProvider,
+    public readonly nats: NatsProvider,
   ) {}
 }

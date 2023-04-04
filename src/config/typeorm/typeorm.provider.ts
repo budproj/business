@@ -7,6 +7,7 @@ import {
   TypeORMEndpointConfigInterface,
   TypeORMLoggingConfigInterface,
   TypeORMPatternConfigInterface,
+  TypeORMExtraConfigInterface,
 } from './typeorm.interface'
 
 @Injectable()
@@ -35,5 +36,9 @@ export class TypeORMConfigProvider {
 
   get conventions(): TypeORMConventionsConfigInterface {
     return this.configService.get<TypeORMConventionsConfigInterface>('typeorm.conventions')
+  }
+
+  get extra(): TypeORMExtraConfigInterface {
+    return this.configService.get<TypeORMExtraConfigInterface>('typeorm.extra')
   }
 }

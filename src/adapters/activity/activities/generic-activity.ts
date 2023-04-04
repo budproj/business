@@ -2,8 +2,6 @@ import { GraphQLRequest } from '@interface/graphql/adapters/context/interfaces/r
 
 import { Activity } from './base.activity'
 
-export const GenericTypes = 'PENDENCIES-NOTIFICATION'
-
 export class GenericActivity<D, R> extends Activity {
   constructor(
     public type: string,

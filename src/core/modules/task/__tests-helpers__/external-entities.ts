@@ -1,0 +1,13 @@
+import { Column, Entity } from 'typeorm'
+
+import { CoreEntity } from '@core/core.orm-entity'
+
+@Entity()
+export class User extends CoreEntity {
+  @Column()
+  firstName: string
+
+  keyResultComments: string[]
+
+  keyResultAssignedCheckMarks: string[]
+}

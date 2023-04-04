@@ -1,6 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common'
-import { ClientProxy } from '@nestjs/microservices'
-import { lastValueFrom } from 'rxjs'
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq'
+import { Injectable } from '@nestjs/common'
 
 import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 import { UserInterface } from '@core/modules/user/user.interface'
@@ -14,7 +13,7 @@ import { NotificationChannel } from '../channel.interface'
 export class MessageBrokerNotificationChannel
   implements NotificationChannel<MessageBrokerChannelMetadata>
 {
-  constructor(@Inject('NATS_SERVICE') private readonly messageBrokerAdapter: ClientProxy) {}
+  constructor(private readonly messageBrokerAdapter: AmqpConnection) {}
 
   public buildRecipientsFromUsers(users: UserInterface[]): Recipient[] {
     const activeUsers = users.filter((user) => user.status === UserStatus.ACTIVE)
@@ -22,9 +21,7 @@ export class MessageBrokerNotificationChannel
   }
 
   public async dispatch(topic: string, data: NotificationData): Promise<any> {
-    const responseObservable = this.messageBrokerAdapter.send(topic, data)
-    const responsePromise = await lastValueFrom(responseObservable)
-    return responsePromise
+    return this.messageBrokerAdapter.publish('bud', topic, data)
   }
 
   public async dispatchMultiple(topic: string, data: NotificationData[]): Promise<any> {

@@ -21,6 +21,7 @@ import { NotificationMetadata } from '@infrastructure/notification/types/notific
 import { EmailRecipient } from '../types/email-recipient.type'
 
 import { NotificationChannelHashMap } from './notification.factory'
+import { cleanComment, getMentionedUserIdsFromComments } from './utils'
 
 type CreatedKeyResultCommentNotificationData = {
   owner: OwnerNotificationData
@@ -80,7 +81,6 @@ type CreatedKeyResultCommentMetadata = {
   supportTeam: UserInterface[]
 } & NotificationMetadata
 
-const mentionsRegex = /@\[(?<name>[\w \u00C0-\u00FF-]+)]\((?<id>[\da-f-]+)\)/g
 @Injectable()
 export class CreatedKeyResultCommentNotification extends BaseNotification<
   CreatedKeyResultCommentNotificationData,
@@ -132,19 +132,13 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     await Promise.allSettled([this.dispatchOwnerAndSupportTeam(), this.dispatchMentions()])
   }
 
-  getIdFromMentionedUsers(comment: string) {
-    const mentions = [...comment.matchAll(mentionsRegex)]
-    const usersIds = mentions.map((mention) => mention.groups.id)
-    return usersIds
-  }
-
   private async dispatchMentionsEmails(): Promise<void> {
     const marshal = this.marshal()
     const { data: genericData, metadata: genericMetadata } = marshal
 
     const commentContent = genericData.comment.content
-    const cleanCommentContent = commentContent.replace(mentionsRegex, '$1')
-    const mentionedIds = this.getIdFromMentionedUsers(commentContent)
+    const cleanCommentContent = cleanComment(commentContent)
+    const mentionedIds = getMentionedUserIdsFromComments(commentContent)
     const ownerAndSupportTeamIds = uniqBy(
       [genericMetadata.keyResultOwner, ...genericMetadata.supportTeam],
       'id',
@@ -196,7 +190,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
   private async dispatchOwnerAndSupportTeamEmail(): Promise<void> {
     const { data, metadata } = this.marshal()
 
-    const cleanCommentContent = data.comment.content.replace(mentionsRegex, '$1')
+    const cleanCommentContent = cleanComment(data.comment.content)
     const recipientUsers = uniqBy([metadata.keyResultOwner, ...metadata.supportTeam], 'id').filter(
       (user) => user.id !== data.author.id,
     )
@@ -343,7 +337,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     const { data, metadata } = this.marshal()
 
     const commentContent = data.comment.content
-    const mentionedIds = this.getIdFromMentionedUsers(commentContent)
+    const mentionedIds = getMentionedUserIdsFromComments(commentContent)
     const ownerAndSupportTeamIds = uniqBy([metadata.keyResultOwner, ...metadata.supportTeam], 'id')
 
     const recipientIds = mentionedIds.filter(
@@ -377,7 +371,10 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       },
     }))
 
-    await this.channels.messageBroker.dispatchMultiple('notification', messages)
+    await this.channels.messageBroker.dispatchMultiple(
+      'notifications-microservice.notification',
+      messages,
+    )
   }
 
   private async dispatchOwnerAndSupportTeamMessaging(): Promise<void> {
@@ -409,6 +406,9 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       },
     }))
 
-    await this.channels.messageBroker.dispatchMultiple('notification', messages)
+    await this.channels.messageBroker.dispatchMultiple(
+      'notifications-microservice.notification',
+      messages,
+    )
   }
 }

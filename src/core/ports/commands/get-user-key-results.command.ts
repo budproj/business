@@ -1,4 +1,4 @@
-import { intersectionBy, keyBy, uniq } from 'lodash'
+import { intersectionBy } from 'lodash'
 
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
@@ -7,6 +7,7 @@ import { Command } from './base.command'
 
 type Options = {
   active?: boolean
+  onlyOwnerKeyResults?: boolean
 }
 
 export class GetUserKeyResultsCommand extends Command<KeyResult[]> {
@@ -16,6 +17,13 @@ export class GetUserKeyResultsCommand extends Command<KeyResult[]> {
     options?: Options,
   ): Promise<KeyResult[]> {
     const ownedKeyResults = await this.core.keyResult.getOwnedByUserID(userID, filters)
+
+    if (options.onlyOwnerKeyResults) {
+      const keyResults = await this.applyOptions(ownedKeyResults, options)
+
+      return keyResults
+    }
+
     const supportTeamKeyResults = await this.core.keyResult.getAllWithUserIDInSupportTeam(
       userID,
       filters,
@@ -38,28 +46,10 @@ export class GetUserKeyResultsCommand extends Command<KeyResult[]> {
     if (options.active)
       filteredKeyResults = intersectionBy(
         filteredKeyResults,
-        await this.filterActiveKeyResultsFromList(keyResults),
+        await this.core.keyResult.filterActiveKeyResultsFromList(keyResults),
         'id',
       )
 
     return filteredKeyResults
-  }
-
-  private async filterActiveKeyResultsFromList(keyResults: KeyResult[]): Promise<KeyResult[]> {
-    const objectiveIDs = uniq(keyResults.map((keyResult) => keyResult.objectiveId))
-    const objectivePromises = objectiveIDs.map(async (objectiveID) =>
-      this.core.objective.getFromID(objectiveID),
-    )
-    const objectives = await Promise.all(objectivePromises)
-    const objectivesHashmap = keyBy(objectives, 'id')
-
-    const cycleIDs = uniq(objectives.map((objective) => objective.cycleId))
-    const cyclePromises = cycleIDs.map(async (cycleID) => this.core.cycle.getFromID(cycleID))
-    const cycles = await Promise.all(cyclePromises)
-    const cyclesHashmap = keyBy(cycles, 'id')
-
-    return keyResults.filter(
-      (keyResult) => cyclesHashmap[objectivesHashmap[keyResult.objectiveId].cycleId].active,
-    )
   }
 }

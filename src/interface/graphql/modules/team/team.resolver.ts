@@ -1,5 +1,10 @@
-import { InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common'
-import { Args, Parent, ResolveField } from '@nestjs/graphql'
+import {
+  InternalServerErrorException,
+  Logger,
+  NotImplementedException,
+  UnauthorizedException,
+} from '@nestjs/common'
+import { Args, Parent, ResolveField, Info } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 import { uniqBy } from 'lodash'
 
@@ -25,6 +30,9 @@ import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorato
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
+import GetResolvedFieldsInEdgesAndNodes, {
+  ResolvedFieldInfo,
+} from '@interface/graphql/helpers/get-resolved-fields-in-edges-and-nodes.helper'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
 import { CycleFiltersRequest } from '@interface/graphql/modules/cycle/requests/cycle-filters.request'
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
@@ -218,6 +226,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   protected async getUsersForTeam(
     @Args() request: TeamMembersFiltersRequest,
     @Parent() team: TeamGraphQLNode,
+    @Info() info: ResolvedFieldInfo,
   ) {
     this.logger.log({
       team,
@@ -230,11 +239,40 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       User
     >(request)
 
+    const requestedFields = GetResolvedFieldsInEdgesAndNodes(info)
+
+    if (
+      (requestedFields.has('lastRoutine') || requestedFields.has('latestCheckIn')) &&
+      !rawFilters.withIndicators
+    ) {
+      throw new NotImplementedException(
+        'You are trying to fetch lastRoutine or latestCheckIn without the withIndicators filter.',
+      )
+    }
+
+    if (rawFilters.allUsers && !rawFilters.withIndicators) {
+      throw new NotImplementedException(
+        'You are trying to fetch with the allUsers filter but that filter is only used with withIndicators filter.',
+      )
+    }
+
+    if (rawFilters.withIndicators) {
+      const queryResult = await this.corePorts.dispatchCommand<User[]>(
+        'get-team-score',
+        team.id,
+        rawFilters.allUsers,
+      )
+
+      return this.relay.marshalResponse(queryResult, connection, team)
+    }
+
     const filters = rawFilters.withInactives
       ? { ...rawFilters }
       : { ...rawFilters, status: UserStatus.ACTIVE }
 
     delete filters.withInactives
+    delete filters.withIndicators
+    delete filters.allUsers
 
     const queryResult = await this.corePorts.dispatchCommand<User[]>(
       'get-team-members',

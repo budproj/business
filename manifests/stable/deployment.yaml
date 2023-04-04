@@ -101,8 +101,11 @@ spec:
               value: analytics-stable.bud.svc.cluster.local:50051
             - name: ANALYTICS_PACKAGES
               value: keyResult
-            - name: TASKS_NATS_SERVERS
-              value: nats.nats.svc.cluster.local:4222
+            - name: RABBITMQ_SERVER
+              valueFrom:
+                secretKeyRef:
+                  name: business
+                  key: rabbitmq-connection-string
             - name: SENTRY_DSN
               valueFrom:
                 secretKeyRef:
@@ -122,6 +125,8 @@ spec:
                 secretKeyRef:
                   name: business
                   key: flagsmith-server-environment-key
+            - name: TYPEORM_MAX_CONNECTION_POOL
+              value: '25'
 
       initContainers:
         - name: business-app-prod-execute-migrations
@@ -156,3 +161,5 @@ spec:
               value: 'false'
             - name: TYPEORM_CONVENTION_NAMING_ENABLED
               value: 'true'
+            - name: TYPEORM_MAX_CONNECTION_POOL
+              value: '10'
