@@ -120,6 +120,11 @@ spec:
                 secretKeyRef:
                   name: business
                   key: amplitude-secret-key
+            - name: FLAGSMITH_SERVER_ENVIRONMENT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: business
+                  key: flagsmith-server-environment-key
             - name: TYPEORM_MAX_CONNECTION_POOL
               value: '25'
 
