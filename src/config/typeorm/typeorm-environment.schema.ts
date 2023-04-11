@@ -12,4 +12,5 @@ export const TypeORMEnvironmentSchema = Joi.object({
   TYPEORM_MIGRATIONS_DIR: Joi.string().default('src/infrastructure/orm/migrations'),
   TYPEORM_LOGGING_ENABLED: Joi.boolean().default(false),
   TYPEORM_CONVENTION_NAMING_ENABLED: Joi.boolean().default(true),
+  TYPEORM_MAX_CONNECTION_POOL: Joi.number().default(10),
 })

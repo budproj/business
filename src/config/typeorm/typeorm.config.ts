@@ -38,5 +38,9 @@ export const typeormConfig = registerAs('typeorm', (): TypeORMConfigInterface =>
     conventions: {
       naming: cliConfig.namingStrategy,
     },
+
+    extra: {
+      max: cliConfig.extra.max,
+    },
   }
 })
