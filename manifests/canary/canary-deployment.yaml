@@ -127,6 +127,8 @@ spec:
                 secretKeyRef:
                   name: business-canary
                   key: amplitude-secret-key
+            - name: TYPEORM_MAX_CONNECTION_POOL
+              value: '1'
 
       initContainers:
         - name: business-app-canary-execute-migrations
@@ -161,3 +163,5 @@ spec:
               value: 'false'
             - name: TYPEORM_CONVENTION_NAMING_ENABLED
               value: 'true'
+            - name: TYPEORM_MAX_CONNECTION_POOL
+              value: '1'
