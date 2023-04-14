@@ -6,6 +6,7 @@ export interface TypeORMConfigInterface {
   authentication: TypeORMAuthenticationConfigInterface
   pattern: TypeORMPatternConfigInterface
   logging: TypeORMLoggingConfigInterface
+  poolSize: number
   conventions: TypeORMConventionsConfigInterface
   extra: TypeORMExtraConfigInterface
 }

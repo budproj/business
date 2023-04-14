@@ -35,6 +35,8 @@ export const typeormConfig = registerAs('typeorm', (): TypeORMConfigInterface =>
       enabled: cliConfig.logging,
     },
 
+    poolSize: cliConfig.poolSize,
+
     conventions: {
       naming: cliConfig.namingStrategy,
     },

@@ -34,6 +34,10 @@ export class TypeORMConfigProvider {
     return this.configService.get<TypeORMLoggingConfigInterface>('typeorm.logging')
   }
 
+  get poolSize(): number {
+    return Number.parseInt(this.configService.get<string>('typeorm.poolSize'), 10)
+  }
+
   get conventions(): TypeORMConventionsConfigInterface {
     return this.configService.get<TypeORMConventionsConfigInterface>('typeorm.conventions')
   }

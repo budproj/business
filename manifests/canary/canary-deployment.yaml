@@ -161,3 +161,5 @@ spec:
               value: 'false'
             - name: TYPEORM_CONVENTION_NAMING_ENABLED
               value: 'true'
+            - name: TYPEORM_MAX_CONNECTION_POOL
+              value: '10'
