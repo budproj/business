@@ -8,6 +8,7 @@ export = {
   password: process.env.TYPEORM_PASSWORD,
   database: process.env.TYPEORM_DATABASE,
   logging: process.env.TYPEORM_LOGGING_ENABLED === 'true',
+  poolSize: Number.parseInt(process.env.TYPEORM_MAX_CONNECTION_POOL, 10),
   namingStrategy:
     process.env.TYPEORM_CONVENTION_NAMING_ENABLED === 'true'
       ? new SnakeNamingStrategy()
@@ -18,6 +19,6 @@ export = {
     migrationsDir: process.env.TYPEORM_MIGRATIONS_DIR,
   },
   extra: {
-    max: process.env.TYPEORM_MAX_CONNECTION_POOL,
+    max: Number.parseInt(process.env.TYPEORM_MAX_CONNECTION_POOL, 10),
   },
 }

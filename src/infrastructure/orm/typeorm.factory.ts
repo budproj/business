@@ -17,11 +17,15 @@ export class TypeORMFactory implements TypeOrmOptionsFactory {
       password: this.config.authentication.password,
       namingStrategy: this.config.conventions.naming,
       logging: this.config.logging.enabled,
+      poolSize: this.config.poolSize,
       entities: this.config.pattern.file.entities,
       migrations: this.config.pattern.file.migrations,
       cli: {
         migrationsDir: this.config.pattern.directory.migrations,
       },
+      extra: {
+        max: this.config.extra.max,
+      }
     }
   }
 }
