@@ -7,6 +7,9 @@ export class ObjectiveAttributesInput {
   @Field({ description: 'The title of the objective', nullable: true })
   public readonly title?: string
 
+  @Field({ description: 'The description of the objective', nullable: true })
+  public readonly description?: string
+
   @Field(() => ID, { description: 'The ID of the cycle for that objective', nullable: true })
   public readonly cycleId?: string
 
