@@ -13,6 +13,9 @@ export class Objective extends CoreEntity implements ObjectiveInterface {
   @Column()
   public title: string
 
+  @Column({ nullable: true })
+  public description?: string
+
   @UpdateDateColumn()
   public updatedAt: Date
 
