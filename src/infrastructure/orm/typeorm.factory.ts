@@ -25,7 +25,7 @@ export class TypeORMFactory implements TypeOrmOptionsFactory {
       },
       extra: {
         max: this.config.extra.max,
-      }
+      },
     }
   }
 }
