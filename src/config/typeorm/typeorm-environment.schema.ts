@@ -13,4 +13,5 @@ export const TypeORMEnvironmentSchema = Joi.object({
   TYPEORM_LOGGING_ENABLED: Joi.boolean().default(false),
   TYPEORM_CONVENTION_NAMING_ENABLED: Joi.boolean().default(true),
   TYPEORM_MAX_CONNECTION_POOL: Joi.number().default(10),
+  TYPEORM_CONNECTION_POOL_TIMEOUT_S: Joi.number().default(60),
 })
