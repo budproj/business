@@ -20,5 +20,6 @@ export = {
   },
   extra: {
     max: Number.parseInt(process.env.TYPEORM_MAX_CONNECTION_POOL, 10),
+    idleTimeoutMillis: Number.parseInt(process.env.TYPEORM_CONNECTION_POOL_TIMEOUT_S, 10) * 1000,
   },
 }

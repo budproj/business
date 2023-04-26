@@ -43,6 +43,7 @@ export const typeormConfig = registerAs('typeorm', (): TypeORMConfigInterface =>
 
     extra: {
       max: cliConfig.extra.max,
+      idleTimeoutMillis: cliConfig.extra.idleTimeoutMillis,
     },
   }
 })

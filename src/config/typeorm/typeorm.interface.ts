@@ -13,6 +13,7 @@ export interface TypeORMConfigInterface {
 
 export interface TypeORMExtraConfigInterface {
   max: number
+  idleTimeoutMillis: number
 }
 
 export interface TypeORMEndpointConfigInterface {
