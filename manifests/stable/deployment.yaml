@@ -121,7 +121,9 @@ spec:
                   name: business
                   key: amplitude-secret-key
             - name: TYPEORM_MAX_CONNECTION_POOL
-              value: '25'
+              value: '40'
+            - name: TYPEORM_CONNECTION_POOL_TIMEOUT_S
+              value: '300'
 
       initContainers:
         - name: business-app-prod-execute-migrations
@@ -158,3 +160,5 @@ spec:
               value: 'true'
             - name: TYPEORM_MAX_CONNECTION_POOL
               value: '10'
+            - name: TYPEORM_CONNECTION_POOL_TIMEOUT_S
+              value: '60'
