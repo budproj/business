@@ -31,6 +31,7 @@ import { KeyResultCheckMarkProvider } from './check-mark/key-result-check-mark.p
 import { KeyResultCommentInterface } from './comment/key-result-comment.interface'
 import { KeyResultComment } from './comment/key-result-comment.orm-entity'
 import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
+import { KeyResultStateInterface } from './interfaces/key-result-state.interface'
 import { KeyResultRelationFilterProperties, KeyResultRepository } from './key-result.repository'
 import { KeyResultTimelineProvider } from './timeline.provider'
 import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
@@ -407,6 +408,17 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const keyResult = await this.getOne({ id: checkInData.keyResultId })
     const previousCheckIn = await this.keyResultCheckInProvider.getLatestFromKeyResult(keyResult)
 
+    const keyResultStateBeforeCheckin: KeyResultStateInterface = {
+      author: keyResult.owner,
+      description: keyResult.description,
+      format: keyResult.format,
+      goal: keyResult.goal,
+      mode: keyResult.mode,
+      ownerId: keyResult.ownerId,
+      title: keyResult.title,
+      type: keyResult.type,
+    }
+
     return {
       userId: user.id,
       keyResultId: checkInData.keyResultId,
@@ -414,6 +426,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       confidence: checkInData.confidence,
       comment: checkInData.comment,
       parentId: previousCheckIn?.id,
+      keyResultStateBeforeCheckin,
     }
   }
 
