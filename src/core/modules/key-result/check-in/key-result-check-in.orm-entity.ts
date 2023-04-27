@@ -3,6 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToOne, RelationId } from 'typ
 import { CoreEntity } from '@core/core.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 
+import { KeyResultStateInterface } from '../interfaces/key-result-state.interface'
 import { KeyResultInterface } from '../interfaces/key-result.interface'
 
 import { KeyResultCheckInInterface } from './key-result-check-in.interface'
@@ -39,4 +40,7 @@ export class KeyResultCheckIn extends CoreEntity implements KeyResultCheckInInte
   @OneToOne('KeyResultCheckIn', 'id', { nullable: true })
   @JoinColumn()
   public parent?: KeyResultCheckInInterface
+
+  @Column({ type: 'json', nullable: true })
+  public keyResultStateBeforeCheckin?: KeyResultStateInterface
 }
