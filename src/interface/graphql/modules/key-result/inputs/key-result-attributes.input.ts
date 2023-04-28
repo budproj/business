@@ -1,5 +1,7 @@
 import { Field, Float, ID, InputType } from '@nestjs/graphql'
 
+import { KeyResultFormat } from '@core/modules/key-result/enums/key-result-format.enum'
+
 @InputType('KeyResultAttributesInput', {
   description: 'Data that you can assign to a given key-result',
 })
@@ -27,4 +29,7 @@ export class KeyResultAttributesInput {
     nullable: true,
   })
   public readonly description?: string
+
+  @Field(() => KeyResultFormat, { description: 'The format of the key result', nullable: true })
+  public readonly format?: KeyResultFormat
 }
