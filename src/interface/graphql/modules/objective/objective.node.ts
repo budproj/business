@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql'
 
+import { ObjectiveMode } from '@core/modules/objective/enums/objective-mode.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
@@ -23,6 +24,9 @@ export class ObjectiveGraphQLNode implements GuardedNodeGraphQLInterface {
 
   @Field({ complexity: 0, description: 'The description of the objective', nullable: true })
   public readonly description!: string
+
+  @Field({ complexity: 0, description: 'The mode of the objective' })
+  public readonly mode?: ObjectiveMode
 
   @Field({ complexity: 0, description: 'The last update date of the objective' })
   public readonly updatedAt!: Date

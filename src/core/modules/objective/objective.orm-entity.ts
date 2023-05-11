@@ -6,6 +6,7 @@ import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-resu
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 
+import { ObjectiveMode } from './enums/objective-mode.enum'
 import { ObjectiveInterface } from './interfaces/objective.interface'
 
 @Entity()
@@ -42,4 +43,7 @@ export class Objective extends CoreEntity implements ObjectiveInterface {
 
   @OneToMany('KeyResult', 'objective', { nullable: true })
   public keyResults?: KeyResultInterface[]
+
+  @Column({ type: 'simple-enum', enum: ObjectiveMode, default: ObjectiveMode.PUBLISHED })
+  public mode: ObjectiveMode
 }
