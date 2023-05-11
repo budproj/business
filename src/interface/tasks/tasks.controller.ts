@@ -12,6 +12,7 @@ import { UserInterface } from '@core/modules/user/user.interface'
 import { isOfTypeCommand } from '@core/ports/commands/command.factory'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { NotificationProvider } from '@infrastructure/notification/notification.provider'
+import { Stopwatch } from "@lib/logger/pino.decorator";
 
 interface RabbitMQRequestStructure {
   fields: { routingKey: string }
@@ -58,6 +59,7 @@ export class TasksController {
     await this.notification.dispatch(activity)
   }
 
+  @Stopwatch()
   @RabbitRPC({
     exchange: 'bud',
     queue: 'business.core-ports',
@@ -71,11 +73,11 @@ export class TasksController {
   ): Promise<unknown> {
     const { routingKey } = request.fields
 
-    console.log('core-ports', routingKey)
-
-    this.logger.log({
-      message: `New ${routingKey} message received`,
-    })
+    // console.log('core-ports', routingKey)
+    //
+    // this.logger.log({
+    //   message: `New ${routingKey} message received`,
+    // })
 
     const commandName = routingKey.split('.')[2]
 
@@ -83,17 +85,17 @@ export class TasksController {
       return 'Invalid Command'
     }
 
-    this.logger.log({
-      payload,
-      message: `Executing the ${commandName} command`,
-    })
+    // this.logger.log({
+    //   payload,
+    //   message: `Executing the ${commandName} command`,
+    // })
 
     const dataReturned = await this.corePorts.dispatchCommand<unknown>(commandName, payload)
 
-    this.logger.log({
-      data: dataReturned,
-      message: `${commandName} data retunerd`,
-    })
+    // this.logger.log({
+    //   data: dataReturned,
+    //   message: `${commandName} data retunerd`,
+    // })
 
     return dataReturned
   }

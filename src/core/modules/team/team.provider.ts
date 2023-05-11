@@ -9,6 +9,7 @@ import { GetOptions } from '@core/interfaces/get-options'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { UserProvider } from '@core/modules/user/user.provider'
 import { CreationQuery } from '@core/types/creation-query.type'
+import { Stopwatch } from "@lib/logger/pino.decorator";
 
 import { TeamInterface } from './interfaces/team.interface'
 import { Team } from './team.orm-entity'
@@ -34,6 +35,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return createdData[0]
   }
 
+  @Stopwatch()
   public async getFromOwner(
     user: UserInterface,
     filters?: FindConditions<Team>,
@@ -51,6 +53,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     })
   }
 
+  @Stopwatch()
   public async getUserCompanies(
     user: UserInterface,
     filters?: FindConditions<Team>,
@@ -66,6 +69,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return unrepeatedRootCompanies
   }
 
+  @Stopwatch()
   public async getTeamNodesTreeAfterTeam(
     teamIDs: string | string[],
     filters?: FindConditions<TeamInterface>,
@@ -88,6 +92,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     )
   }
 
+  @Stopwatch()
   public async getTeamNodesTreeBeforeTeam(
     teams: Partial<TeamInterface> | Array<Partial<TeamInterface>>,
     selectors?: TeamEntityKey[],
@@ -101,6 +106,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return this.getNodesFromTeams(initialNodes, 'above', undefined, undefined, selectors, relations)
   }
 
+  @Stopwatch()
   public async getUserCompaniesAndDepartments(
     user: UserInterface,
     filters?: FindConditions<Team>,
@@ -112,6 +118,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return [...companies, ...departments]
   }
 
+  @Stopwatch()
   public async getParentTeam(
     team: TeamInterface,
     selectors?: TeamEntityKey[],
@@ -130,6 +137,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     })
   }
 
+  @Stopwatch()
   public async buildTeamQueryContext(
     user: UserInterface,
     constraint: Scope = Scope.OWNS,
@@ -153,6 +161,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     }
   }
 
+  @Stopwatch()
   public async getChildren(
     teamIDs: string | string[],
     filters?: FindConditions<Team>,
@@ -179,6 +188,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return this.repository.findOne(indexes)
   }
 
+  @Stopwatch()
   public async getRootTeamForTeam(
     team: Partial<TeamInterface>,
     filters?: FindConditions<Team>,
@@ -229,6 +239,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return []
   }
 
+  @Stopwatch()
   private async getUserCompaniesDepartments(
     user: UserInterface,
     filters?: FindConditions<Team>,
@@ -240,6 +251,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return this.getChildren(companyIDs, filters, options)
   }
 
+  @Stopwatch()
   private async getNodesFromTeams(
     nodes: Team[],
     direction: 'above' | 'below',
