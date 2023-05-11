@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { filter, flatten, uniqBy } from 'lodash'
-import { FindConditions } from 'typeorm'
+import { FindConditions, In } from 'typeorm'
 
 import { Scope } from '@adapters/policy/enums/scope.enum'
 import { CoreEntityProvider } from '@core/entity.provider'
@@ -64,11 +64,60 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
       this.getRootTeamForTeam(team, filters, options),
     )
 
+    // TODO: rewrite using a single query instead of many queries (low priority, since almost all users belong to a single company)
     const rootCompanies = await Promise.all(companyPromises)
     const unrepeatedRootCompanies = uniqBy(rootCompanies, 'id')
     return unrepeatedRootCompanies
   }
 
+  @Stopwatch({ includeReturn: true })
+  public async getDescendantsTeams(
+    parentTeamIds: string[],
+    // TODO: implement additional parameters
+    // filters?: FindConditions<TeamInterface>,
+    // queryOptions?: GetOptions<TeamInterface>,
+    // selectors?: TeamEntityKey[],
+    // relations?: TeamEntityRelation[],
+  ): Promise<Team[]> {
+
+    // const teams = await this.getMany({
+    //   id: In(parentTeamIds)
+    // });
+    //
+    // const descendants = await Promise.all(
+    //   teams.map((team) =>
+    //     this.treeRepository.findDescendants(team)
+    //   )
+    // );
+    //
+    // return [...teams, ...descendants.flat()];
+
+    const teams = await this.repository.query(
+      `WITH RECURSIVE team_tree
+        AS (SELECT *
+            FROM team
+            WHERE id = ANY($1)
+
+            UNION ALL
+
+            SELECT tn.*
+            FROM team tn,
+                 team_tree tt
+            WHERE tn.parent_id = tt.id)
+       SELECT DISTINCT id
+       FROM team_tree
+       ORDER BY id`,
+      [parentTeamIds]
+    );
+
+    return await this.getMany({
+      id: In(teams.map(({ id }) => id))
+    });
+  }
+
+  /**
+   * @deprecated use getDescendantsTeams instead
+   */
   @Stopwatch()
   public async getTeamNodesTreeAfterTeam(
     teamIDs: string | string[],
@@ -78,9 +127,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     relations?: TeamEntityRelation[],
   ): Promise<Team[]> {
     const teamIDList = Array.isArray(teamIDs) ? teamIDs : [teamIDs]
-    const initialNodes: Team[] = await Promise.all(
-      teamIDList.map(async (id) => this.getOne({ id })),
-    )
+    const initialNodes: Team[] = await this.getMany({ id: In(teamIDList) })
 
     return this.getNodesFromTeams(
       initialNodes,
@@ -99,9 +146,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     relations?: TeamEntityRelation[],
   ): Promise<Team[]> {
     const teamsAsArray = Array.isArray(teams) ? teams : [teams]
-    const initialNodes: Team[] = await Promise.all(
-      teamsAsArray.map(async (team) => this.getOne({ id: team.id })),
-    )
+    const initialNodes: Team[] = await this.getMany({ id: In(teamsAsArray.map(team => team.id)) })
 
     return this.getNodesFromTeams(initialNodes, 'above', undefined, undefined, selectors, relations)
   }
@@ -112,8 +157,9 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     filters?: FindConditions<Team>,
     options?: GetOptions<Team>,
   ): Promise<Team[]> {
+    // TODO: rewrite using a single query
     const companies = await this.getUserCompanies(user, filters, options)
-    const departments = await this.getUserCompaniesDepartments(user, filters, options)
+    const departments = await this.getCompaniesDepartments(companies, filters, options)
 
     return [...companies, ...departments]
   }
@@ -144,6 +190,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
   ): Promise<CoreQueryContext> {
     const context = this.buildContext(user, constraint)
 
+    // TODO: rewrite using a single query
     const userCompanies = await this.getUserCompanies(user)
     const userCompanyIDs = userCompanies.map((company) => company.id)
     const userCompaniesTeams = await this.getUserCompaniesTeams(userCompanyIDs)
@@ -196,6 +243,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
   ): Promise<Team> {
     let rootTeam = await this.getOne({ id: team.id })
 
+    // TODO: rewrite this method using a recursive query
     while (rootTeam.parentId && rootTeam.parentId !== rootTeam.id) {
       // Since we're dealing with a linked list, where we need to evaluate each step before trying
       // the next one, we can disable the following eslint rule
@@ -219,7 +267,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
   }
 
   public async getUserCompaniesTeams(companyIDs: string[]) {
-    return this.getTeamNodesTreeAfterTeam(companyIDs)
+    return this.getDescendantsTeams(companyIDs)
   }
 
   public async getAllCompanies() {
@@ -240,17 +288,20 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
   }
 
   @Stopwatch()
-  private async getUserCompaniesDepartments(
-    user: UserInterface,
+  private async getCompaniesDepartments(
+    companies: Team[],
     filters?: FindConditions<Team>,
     options?: GetOptions<Team>,
   ) {
-    const companies = await this.getUserCompanies(user)
+    // TODO: rewrite using a single query
     const companyIDs = companies.map((company) => company.id)
 
     return this.getChildren(companyIDs, filters, options)
   }
 
+  /**
+   * @deprecated this method is way too slow and should be replaced with a single query
+   */
   @Stopwatch()
   private async getNodesFromTeams(
     nodes: Team[],

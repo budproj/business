@@ -23,7 +23,7 @@ export class GetTeamMembersCommand extends Command<User[]> {
   ): Promise<User[]> {
     const filteredEntiityFilters = omit(entityFilters, 'withTeams')
     const teams = resolveTree
-      ? await this.core.team.getTeamNodesTreeAfterTeam(teamID)
+      ? await this.core.team.getDescendantsTeams([teamID])
       : [await this.core.team.getOne({ id: teamID })]
 
     return this.getUsers(teams, filteredEntiityFilters, options)
