@@ -1,6 +1,7 @@
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 import { User } from '@core/modules/user/user.orm-entity'
+import { Stopwatch } from "@lib/logger/pino.decorator";
 
 import { Command } from './base.command'
 import { Filters } from './get-team-members.command'
@@ -13,6 +14,7 @@ interface GetUsersFromTeamProperties {
 }
 
 export class GetUsersFromTeam extends Command<User[]> {
+  @Stopwatch()
   public async execute({ teamID, filters }: GetUsersFromTeamProperties): Promise<User[]> {
     const { withInactives, withTeams, ...otherFilters } = filters
     const queryFilters = withInactives

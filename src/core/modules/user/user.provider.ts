@@ -14,6 +14,7 @@ import { CreationQuery } from '@core/types/creation-query.type'
 import { UserProfileAdapter } from '@infrastructure/amplitude/adapters/user-profil.adapter'
 import { UserProfileProvider } from '@infrastructure/amplitude/providers/user-profile.provider'
 import { AuthzCredentialsProvider } from '@infrastructure/authz/providers/credentials.provider'
+import { Stopwatch } from "@lib/logger/pino.decorator";
 
 import { UserStatus } from './enums/user-status.enum'
 import { UserCredentialsAdditionalData, UserInterface } from './user.interface'
@@ -37,6 +38,7 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     this.amplitude = amplitude
   }
 
+  @Stopwatch()
   public async getUserTeams(
     user: Partial<UserInterface>,
     filters?: FindConditions<TeamInterface>,
@@ -76,6 +78,7 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     return this.repository.find({ where: { id: In(ids) } })
   }
 
+  @Stopwatch()
   public async getUsersWithActiveObjectives(teamsIds: Array<TeamInterface['id']>): Promise<User[]> {
     const users = await this.repository
       .createQueryBuilder()

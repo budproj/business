@@ -2,9 +2,9 @@ import { LoggerService } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import { processRequest } from 'graphql-upload'
+import { Logger } from 'nestjs-pino'
 
 import { ServerConfigProvider } from '@config/server/server.provider'
-import { buildLogger } from '@lib/logger/logger.factory'
 
 import { ServerModule } from './server.module'
 
@@ -39,7 +39,7 @@ export class ServerFactory {
 
   private async launch(application: NestFastifyApplication): Promise<void> {
     const config = application.get<ServerConfigProvider>(ServerConfigProvider)
-    const logger = buildLogger(config.logging.level, config.logging.serviceName)
+    const logger = application.get(Logger);
 
     application.setGlobalPrefix(config.prefix ?? '')
     application.useLogger(logger)
