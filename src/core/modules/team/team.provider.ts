@@ -70,27 +70,13 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return unrepeatedRootCompanies
   }
 
-  @Stopwatch({ includeReturn: true })
-  public async getDescendantsTeams(
+  @Stopwatch()
+  public async getDescendantsByIds(
     parentTeamIds: string[],
-    // TODO: implement additional parameters
-    // filters?: FindConditions<TeamInterface>,
-    // queryOptions?: GetOptions<TeamInterface>,
-    // selectors?: TeamEntityKey[],
-    // relations?: TeamEntityRelation[],
+    includeParentTeams = true,
+    filters?: FindConditions<TeamInterface>,
+    queryOptions?: GetOptions<TeamInterface>,
   ): Promise<Team[]> {
-
-    // const teams = await this.getMany({
-    //   id: In(parentTeamIds)
-    // });
-    //
-    // const descendants = await Promise.all(
-    //   teams.map((team) =>
-    //     this.treeRepository.findDescendants(team)
-    //   )
-    // );
-    //
-    // return [...teams, ...descendants.flat()];
 
     const teams = await this.repository.query(
       `WITH RECURSIVE team_tree
@@ -106,37 +92,15 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
             WHERE tn.parent_id = tt.id)
        SELECT DISTINCT id
        FROM team_tree
+       WHERE ($2 IS TRUE OR id != ANY($1))
        ORDER BY id`,
-      [parentTeamIds]
+      [parentTeamIds, !!includeParentTeams]
     );
 
     return await this.getMany({
+      ...filters,
       id: In(teams.map(({ id }) => id))
-    });
-  }
-
-  /**
-   * @deprecated use getDescendantsTeams instead
-   */
-  @Stopwatch()
-  public async getTeamNodesTreeAfterTeam(
-    teamIDs: string | string[],
-    filters?: FindConditions<TeamInterface>,
-    queryOptions?: GetOptions<TeamInterface>,
-    selectors?: TeamEntityKey[],
-    relations?: TeamEntityRelation[],
-  ): Promise<Team[]> {
-    const teamIDList = Array.isArray(teamIDs) ? teamIDs : [teamIDs]
-    const initialNodes: Team[] = await this.getMany({ id: In(teamIDList) })
-
-    return this.getNodesFromTeams(
-      initialNodes,
-      'below',
-      filters,
-      queryOptions,
-      selectors,
-      relations,
-    )
+    }, undefined, queryOptions);
   }
 
   @Stopwatch()
@@ -193,7 +157,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     // TODO: rewrite using a single query
     const userCompanies = await this.getUserCompanies(user)
     const userCompanyIDs = userCompanies.map((company) => company.id)
-    const userCompaniesTeams = await this.getUserCompaniesTeams(userCompanyIDs)
+    const userCompaniesTeams = await this.getDescendantsByIds(userCompanyIDs)
     const userTeams = await this.userProvider.getUserTeams(user)
 
     const query = {
@@ -264,10 +228,6 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
 
   public async removeUserFromTeam(userID: string, teamID: string): Promise<void> {
     await this.repository.removeUserFromTeam(userID, teamID)
-  }
-
-  public async getUserCompaniesTeams(companyIDs: string[]) {
-    return this.getDescendantsTeams(companyIDs)
   }
 
   public async getAllCompanies() {

@@ -12,7 +12,7 @@ import { BaseStatusCommand } from './base-status.command'
 export class GetTeamFlagsCommand extends BaseStatusCommand {
   public async execute(teamId: TeamInterface['id']): Promise<any> {
     const keyResultsFromTeam = await this.core.keyResult.getKeyResults([teamId])
-    const teams = await this.core.team.getDescendantsTeams([teamId])
+    const teams = await this.core.team.getDescendantsByIds([teamId])
 
     const teamUsersPromises = teams.map(async (team) => team.users)
     const teamsUsers = await Promise.all(teamUsersPromises)
