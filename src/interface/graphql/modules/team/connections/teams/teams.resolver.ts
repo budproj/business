@@ -15,6 +15,7 @@ import { TeamLevelGraphQLEnum } from '../../enums/team-level.enum'
 import { TeamFiltersRequest } from '../../requests/team-filters.request'
 
 import { TeamsGraphQLConnection } from './teams.connection'
+import { Stopwatch } from "@lib/logger/pino.decorator";
 
 @GuardedResolver(TeamsGraphQLConnection)
 export class TeamsConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
@@ -27,6 +28,7 @@ export class TeamsConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
     super(Resource.TEAM, core, core.team)
   }
 
+  @Stopwatch()
   @GuardedQuery(TeamsGraphQLConnection, 'team:read', { name: 'teams' })
   protected async getTeamsForRequestAndAuthorizedRequestTeam(
     @Args() request: TeamFiltersRequest,

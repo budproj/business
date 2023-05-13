@@ -70,6 +70,7 @@ import { UserUpdateRoleRequest } from './requests/user-update-role.request'
 import { UserUpdateRequest } from './requests/user-update.request'
 import { UserTasksRequest } from './task/requests/user-tasks.request'
 import { UserGraphQLNode } from './user.node'
+import { Stopwatch } from "@lib/logger/pino.decorator";
 
 @GuardedResolver(UserGraphQLNode)
 export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserInterface> {
@@ -87,6 +88,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     this.uploadProvider = new UploadGraphQLProvider(awsS3)
   }
 
+  @Stopwatch()
   @GuardedQuery(UserGraphQLNode, 'user:read', { name: 'user' })
   protected async getUserForRequestAndRequestUserWithContext(
     @Args() request: NodeIndexesRequest,
@@ -103,6 +105,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return user
   }
 
+  @Stopwatch()
   @GuardedQuery(UserGraphQLNode, 'user:read', { name: 'me' })
   protected async getMyUserForRequestUserWithContext(
     @RequestUserWithContext() userWithContext: UserWithContext,
@@ -263,6 +266,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   }
 
   // Precisamos por esse nome para este resolvefield por causa da existência do campo "role", da tabela de usuário
+  @Stopwatch()
   @ResolveField('authzRole', () => UserRoleObject)
   protected async getRoleForUser(@Parent() user: UserGraphQLNode) {
     this.logger.log({
@@ -283,6 +287,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return this.core.user.buildUserFullName(user)
   }
 
+  @Stopwatch()
   @ResolveField('companies', () => UserTeamsGraphQLConnection, { nullable: true })
   protected async getCompaniesForRequestAndUser(
     @Args() request: TeamFiltersRequest,
@@ -303,6 +308,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return this.relay.marshalResponse<Team>(userCompanies, connection, user)
   }
 
+  @Stopwatch()
   @ResolveField('teams', () => UserTeamsGraphQLConnection, { nullable: true })
   protected async getTeamsForRequestAndUser(
     @Args() request: TeamFiltersRequest,
@@ -324,6 +330,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return this.relay.marshalResponse<TeamInterface>(queryResult, connection, user)
   }
 
+  @Stopwatch()
   @ResolveField('ownedTeams', () => UserTeamsGraphQLConnection, { nullable: true })
   protected async getOwnedTeamsForRequestAndUser(
     @Args() request: TeamFiltersRequest,
@@ -345,6 +352,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return this.relay.marshalResponse<TeamInterface>(queryResult, connection, user)
   }
 
+  @Stopwatch()
   @ResolveField('isTeamLeader', () => Boolean, { nullable: true })
   protected async getIsTeamLeaderForRequestAndUser(
     @RequestUserWithContext() userWithContext: UserWithContext,
@@ -358,6 +366,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return isTeamLeader
   }
 
+  @Stopwatch()
   @ResolveField('objectives', () => UserObjectivesGraphQLConnection, { nullable: true })
   protected async getObjectivesForRequestAndUser(
     @Args() request: ObjectiveFiltersRequest,
@@ -379,6 +388,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return this.relay.marshalResponse<ObjectiveInterface>(queryResult, connection, user)
   }
 
+  @Stopwatch()
   @ResolveField('keyResults', () => UserKeyResultsGraphQLConnection, { nullable: true })
   protected async getKeyResultsForRequestAndUser(
     @Args() request: UserKeyResultsRequest,
@@ -434,6 +444,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return queryResult
   }
 
+  @Stopwatch()
   @ResolveField('keyResultComments', () => UserKeyResultCommentsGraphQLConnection, {
     nullable: true,
   })
@@ -461,6 +472,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return this.relay.marshalResponse<KeyResultCommentInterface>(queryResult, connection, user)
   }
 
+  @Stopwatch()
   @ResolveField('keyResultCheckIns', () => UserKeyResultCheckInsGraphQLConnection, {
     nullable: true,
   })
@@ -488,6 +500,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return this.relay.marshalResponse<KeyResultCheckInInterface>(queryResult, connection, user)
   }
 
+  @Stopwatch()
   @ResolveField('tasks', () => UserTasksGraphQLConnection, { nullable: true })
   protected async getTasksForRequestAndUser(
     @Args() request: UserTasksRequest,
@@ -513,6 +526,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return this.relay.marshalResponse<TaskInterface>(queryResult, connection, user)
   }
 
+  @Stopwatch()
   @ResolveField('quarterlyProgress', () => UserReportProgressObject, { nullable: true })
   protected async getKeyResultsQuarterlyProgress(
     @RequestUserWithContext() userWithContext: UserWithContext,
@@ -528,6 +542,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return progress
   }
 
+  @Stopwatch()
   @ResolveField('yearlyProgress', () => UserReportProgressObject, { nullable: true })
   protected async getKeyResultsYearlyProgress(
     @RequestUserWithContext() userWithContext: UserWithContext,
@@ -543,6 +558,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return progress
   }
 
+  @Stopwatch()
   @ResolveField('amplitude', () => UserProfileAmplitudeDataObject, { nullable: true })
   protected async getUserAmplitudeData(
     @RequestUserWithContext() userWithContext: UserWithContext,
@@ -563,6 +579,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return amplitudeData
   }
 
+  @Stopwatch()
   @ResolveField('settings', () => UserSettingsGraphQLConnection, {
     nullable: true,
   })

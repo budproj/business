@@ -37,6 +37,7 @@ import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
 import { KeyResultRelationFilterProperties, KeyResultRepository } from './key-result.repository'
 import { KeyResultTimelineProvider } from './timeline.provider'
 import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
+import { Stopwatch } from "@lib/logger/pino.decorator";
 
 @Injectable()
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
@@ -389,6 +390,24 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
     keyResult ??= await this.getOne({ id: keyResultCheckIn.keyResultId })
     return this.keyResultCheckInProvider.getProgressFromValue(keyResult, keyResultCheckIn?.value)
+  }
+
+  @Stopwatch()
+  public async getCheckInProgressBatch(keyResults: KeyResult[]): Promise<number[]> {
+
+    const checkIns = await this.keyResultCheckInProvider.getMany({
+      id: In(keyResults.map(keyResult => keyResult.id))
+    });
+
+    const checkInsMap = checkIns.reduce((acc, keyResultCheckIn) => {
+      acc[keyResultCheckIn.keyResultId] = keyResultCheckIn;
+      return acc;
+    }, {});
+
+    return keyResults.map(keyResult => {
+      const keyResultCheckIn = checkInsMap[keyResult.id];
+      return keyResultCheckIn ? this.keyResultCheckInProvider.getProgressFromValue(keyResult, keyResultCheckIn?.value) : DEFAULT_PROGRESS;
+    });
   }
 
   public async getLatestCheckInForKeyResultAtDate(

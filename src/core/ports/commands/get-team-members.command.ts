@@ -1,4 +1,4 @@
-import { flatten, omit } from 'lodash'
+import { flatten, isEqual, isEqualWith, omit } from "lodash";
 import { Any } from 'typeorm'
 
 import { GetOptions } from '@core/interfaces/get-options'
@@ -26,24 +26,6 @@ export class GetTeamMembersCommand extends Command<User[]> {
       ? await this.core.team.getDescendantsByIds([teamID])
       : [await this.core.team.getOne({ id: teamID })]
 
-    return this.getUsers(teams, filteredEntiityFilters, options)
-  }
-
-  @Stopwatch()
-  private async getUsers(
-    teams: Team[],
-    filters?: Partial<UserInterface>,
-    options?: GetOptions<User>,
-  ): Promise<User[]> {
-    const teamUsersPromises = teams.map(async (team) => team.users)
-    const teamUsers = await Promise.all(teamUsersPromises)
-
-    const userIDs = flatten(teamUsers).map((u) => u.id)
-    const selector = {
-      ...filters,
-      id: Any(userIDs),
-    }
-
-    return this.core.user.getMany(selector, undefined, options)
+    return this.core.user.getUsersByTeams(teams.map(({ id }) => id), filteredEntiityFilters, options);
   }
 }
