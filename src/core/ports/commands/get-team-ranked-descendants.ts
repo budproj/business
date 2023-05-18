@@ -34,7 +34,7 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
     filters?: FindConditions<TeamInterface>,
     queryOptions?: GetOptions<TeamInterface>,
   ): Promise<Team[]> {
-    const teamDescendants = await this.core.team.getDescendantsByIds([teamID], true, filters, queryOptions)
+    const teamDescendants = await this.core.team.getDescendantsByIds([teamID], false, filters, queryOptions)
     const teamDescendantsStatus = await this.getTeamsStatus(teamDescendants)
 
     return GetTeamRankedDescendantsCommand.rankTeamsByStatus(teamDescendants, teamDescendantsStatus)

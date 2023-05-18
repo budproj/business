@@ -48,8 +48,9 @@ export abstract class BaseStatusCommand extends Command<Status> {
 
   protected async getKeyResultProgressesFromKeyResultList(
     keyResults: KeyResult[],
+    latestCheckIns: KeyResultCheckInInterface[],
   ): Promise<number[]> {
-    return await this.core.keyResult.getCheckInProgressBatch(keyResults);
+    return await this.core.keyResult.getCheckInProgressBatch(keyResults, latestCheckIns);
   }
 
   protected async unzipKeyResultGroup(
@@ -62,7 +63,7 @@ export abstract class BaseStatusCommand extends Command<Status> {
     const latestCheckIns = keyResults.map((keyResult) => keyResult.checkIns[0])
 
     const groupedKeyResultsProgressPromise = keyResultsByObjective.map(async (keyResultList) =>
-      this.getKeyResultProgressesFromKeyResultList(keyResultList),
+      this.getKeyResultProgressesFromKeyResultList(keyResultList, latestCheckIns),
     )
     const groupedKeyResultsProgress = await Promise.all(groupedKeyResultsProgressPromise)
 

@@ -56,6 +56,7 @@ import { TeamUpdateRequest } from './requests/team-update.request'
 import { TeamAccessControl } from './team.access-control'
 import { TeamGraphQLNode } from './team.node'
 import { Stopwatch } from '@lib/logger/pino.decorator'
+import { GetTeamMembersCommandResult } from '@core/ports/commands/get-team-members.command';
 
 @GuardedResolver(TeamGraphQLNode)
 export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamInterface> {
@@ -282,14 +283,14 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     delete filters.withIndicators
     delete filters.allUsers
 
-    const queryResult = await this.corePorts.dispatchCommand<User[]>(
+    const { users } = await this.corePorts.dispatchCommand<GetTeamMembersCommandResult>(
       'get-team-members',
       team.id,
       filters,
       getOptions,
     )
 
-    return this.relay.marshalResponse<UserInterface>(queryResult, connection, team)
+    return this.relay.marshalResponse<UserInterface>(users, connection, team)
   }
 
   @ResolveField('isCompany', () => Boolean)

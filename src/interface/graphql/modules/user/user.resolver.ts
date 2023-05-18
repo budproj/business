@@ -271,7 +271,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   protected async getRoleForUser(@Parent() user: UserGraphQLNode) {
     this.logger.log({
       user,
-      message: 'Fetching user full name',
+      message: 'Fetching user role',
     })
 
     return this.corePorts.dispatchCommand<Role>('get-user-role', user.id)

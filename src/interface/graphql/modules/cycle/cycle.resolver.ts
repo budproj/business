@@ -83,7 +83,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       Cycle
     >(request)
 
-    const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(userWithContext.teams)
+    const userTeamsTree = await this.core.team.getAscendantsByIds(userWithContext.teams.map(({ id }) => id), {})
     const queryResult = await this.core.cycle.getCyclesInSamePeriodFromTeamsAndParentIDsWithFilters(
       userTeamsTree,
       fromCycles,

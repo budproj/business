@@ -59,14 +59,14 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     return uniqBy(flatten(queryResult.map((user) => user.teams)), 'id')
   }
 
+  // TODO: implement sorting at query level
   public async getUsersByTeams(
     teamIds: string[],
     filters?: Partial<UserInterface>,
-    options?: GetOptions<User>,
+    options?: Omit<GetOptions<User>, 'orderBy'>,
   ): Promise<User[]> {
     const orderBy = this.repository.marshalOrderBy({
-      id: Sorting.ASC,
-      ...options?.orderBy
+      id: Sorting.ASC
     })
 
     const alias = this.repository.entityName;

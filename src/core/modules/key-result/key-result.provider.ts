@@ -392,17 +392,22 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return this.keyResultCheckInProvider.getProgressFromValue(keyResult, keyResultCheckIn?.value)
   }
 
-  @Stopwatch()
-  public async getCheckInProgressBatch(keyResults: KeyResult[]): Promise<number[]> {
+  /**
+   * @deprecated do not use this method yet (see comment below)
+   */
+  @Stopwatch({ includeReturn: true })
+  public async getCheckInProgressBatch(keyResults: KeyResult[], latestCheckIns?: KeyResultCheckInInterface[]): Promise<number[]> {
 
-    const checkIns = await this.keyResultCheckInProvider.getMany({
+    // FIXME: this query will only return the earliest check-in for each key result instead of the latest (see getKeyResultsFromTeam)
+    const checkIns = latestCheckIns ?? await this.keyResultCheckInProvider.getMany({
       id: In(keyResults.map(keyResult => keyResult.id))
     });
 
-    const checkInsMap = checkIns.reduce((acc, keyResultCheckIn) => {
-      acc[keyResultCheckIn.keyResultId] = keyResultCheckIn;
-      return acc;
-    }, {});
+    const checkInsMap = checkIns.filter(checkIn => checkIn)
+      .reduce((map, checkIn) => {
+        map[checkIn.keyResultId] = checkIn;
+        return map;
+      }, {});
 
     return keyResults.map(keyResult => {
       const keyResultCheckIn = checkInsMap[keyResult.id];
