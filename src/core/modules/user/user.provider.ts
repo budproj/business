@@ -65,7 +65,7 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     filters?: Partial<UserInterface>,
     options?: GetOptions<User>,
   ): Promise<User[]> {
-    const orderBy = this.repository.marshalOrderBy(options.orderBy ?? {
+    const orderBy = this.repository.marshalOrderBy(options?.orderBy ?? {
       firstName: Sorting.ASC,
       lastName: Sorting.ASC,
     })
