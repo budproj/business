@@ -3,7 +3,10 @@ import { uniqBy, pickBy, omitBy, identity, isEmpty, maxBy, flatten, keyBy, uniq 
 import { Any, Brackets, DeleteResult, FindConditions, In } from 'typeorm'
 
 import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
-import { CONFIDENCE_TAG_THRESHOLDS } from '@adapters/confidence-tag/confidence-tag.constants'
+import {
+  DEFAULT_CONFIDENCE,
+  CONFIDENCE_TAG_THRESHOLDS,
+} from '@adapters/confidence-tag/confidence-tag.constants'
 import { ConfidenceTag } from '@adapters/confidence-tag/confidence-tag.enum'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
@@ -61,98 +64,48 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
   public async getKeyResults(
     teamsIds: Array<TeamInterface['id']>,
-    filters?: FindConditions<KeyResult> | any,
+    filters?: FindConditions<KeyResult>,
     options?: GetOptions<KeyResult>,
     active = true,
     confidence?: ConfidenceTag,
   ): Promise<KeyResult[]> {
     const queryOptions = this.repository.marshalGetOptions(options)
-
-    const { offset, limit, ...filtersRest } = filters
-
-    const confidenceNumber = this.confidenceTagAdapter.getConfidenceFromTag(confidence)
-
-    // Const whereSelector = {
-    //   ...filtersRest,
-    //   teamId: In(teamsIds),
-    //   objective: {
-    //     cycle: {
-    //       active: active ? true : undefined,
-    //     },
-    //   },
-    // }
-
-    // const relations = [
-    //   ...(active ? ['objective', 'objective.cycle'] : []),
-    //   ...(confidence ? ['checkIns'] : []),
-    // ]
-
-    // Const keyResults = await this.repository.find({
-    //   ...queryOptions,
-    //   where: whereSelector,
-    //   relations,
-    // })
-
-    const keyResultsQueryBuilder = this.repository.createQueryBuilder('key_result')
-    if (active) {
-      keyResultsQueryBuilder
-        .leftJoinAndSelect('key_result.objective', 'objective')
-        .leftJoinAndSelect('objective.cycle', 'cycle')
+    const whereSelector = {
+      ...filters,
+      teamId: In(teamsIds),
+      objective: {
+        cycle: {
+          active: active ? true : undefined,
+        },
+      },
     }
 
-    keyResultsQueryBuilder.leftJoinAndSelect('key_result.checkIns', 'check_in')
+    const relations = [
+      ...(active ? ['objective', 'objective.cycle'] : []),
+      ...(confidence ? ['checkIns'] : []),
+    ]
 
-    // If (confidenceNumber === 100) {
-    //   keyResultsQueryBuilder.where(
-    //     new Brackets((qb) => {
-    //       qb.where('check_in.confidence = :confidence', { confidence: confidenceNumber })
-    //       qb.where('check_in.confidence IS NULL')
-    //     }),
-    //   )
-    // } else {
-    //   keyResultsQueryBuilder.where('check_in.confidence = :confidence', {
-    //     confidence: confidenceNumber,
-    //   })
-    // }
+    const keyResults = await this.repository.find({
+      ...queryOptions,
+      where: whereSelector,
+      relations,
+    })
 
     if (confidence) {
-      keyResultsQueryBuilder.where('COALESCE(check_in.confidence, 100) = :confidence', {
-        confidence: confidenceNumber,
+      const confidenceNumber = this.confidenceTagAdapter.getConfidenceFromTag(confidence)
+      const keyResultsWithConfidence = keyResults.filter((keyResult) => {
+        const latestCheckin = this.getLatestCheckInFromList(keyResult.checkIns)
+        if (!latestCheckin) {
+          return confidenceNumber === DEFAULT_CONFIDENCE
+        }
+
+        return latestCheckin.confidence === confidenceNumber
       })
 
-      keyResultsQueryBuilder.andWhere((subQuery) => {
-        const subQueryString = subQuery
-          .subQuery()
-          .select('MAX(check_in2.createdAt)', 'maxCreatedAt')
-          .from(KeyResultCheckIn, 'check_in2')
-          .where('check_in2.keyResultId = key_result.id')
-          .getQuery()
-        return '(check_in.createdAt is null or check_in.createdAt >= ' + subQueryString + ')'
-      })
+      return keyResultsWithConfidence
     }
 
-    keyResultsQueryBuilder
-      .andWhere('key_result.teamId IN (:...teamsIds)', { teamsIds })
-      .andWhere('cycle.active = :active', { active })
-      // .andWhere({ ...filtersRest })
-      .take(limit)
-      .skip(offset)
-
-    // If (confidence) {
-    //   const confidenceNumber = this.confidenceTagAdapter.getConfidenceFromTag(confidence)
-    //   const keyResultsWithConfidence = keyResults.filter((keyResult) => {
-    //     const latestCheckin = this.getLatestCheckInFromList(keyResult.checkIns)
-    //     if (!latestCheckin) {
-    //       return confidenceNumber === DEFAULT_CONFIDENCE
-    //     }
-
-    //     return latestCheckin.confidence === confidenceNumber
-    //   })
-
-    //   return keyResultsWithConfidence
-    // }
-
-    return keyResultsQueryBuilder.getMany()
+    return keyResults
   }
 
   public async getFromOwner(
@@ -161,7 +114,6 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     options?: GetOptions<KeyResult>,
   ): Promise<KeyResult[]> {
     const queryOptions = this.repository.marshalGetOptions(options)
-
     const whereSelector = {
       ...filters,
       ownerId: user.id,
