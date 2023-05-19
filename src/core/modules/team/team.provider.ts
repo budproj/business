@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import { filter, flatten, uniqBy } from 'lodash'
 import { FindConditions, In } from 'typeorm'
 
 import { Scope } from '@adapters/policy/enums/scope.enum'
@@ -17,6 +16,13 @@ import { TeamRepository } from './team.repository'
 import { TeamSpecification } from './team.specification'
 import { TeamEntityKey } from './types/team-entity-key.type'
 import { TeamEntityRelation } from './types/team-entity-relation.type'
+
+interface GetAscendantsByIdsArgs {
+  includeChildTeams?: boolean
+  rootsOnly?: boolean
+  filters?: FindConditions<TeamInterface>
+  queryOptions?: GetOptions<TeamInterface>
+}
 
 @Injectable()
 export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
@@ -60,95 +66,174 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     options?: GetOptions<Team>,
   ): Promise<Team[]> {
     const teams = await this.userProvider.getUserTeams(user)
-    const companyPromises = teams.map(async (team) =>
-      this.getRootTeamForTeam(team, filters, options),
+
+    return await this.getRootTeamsForTeams(
+      teams.map(({ id }) => id),
+      filters,
+      options,
     )
-
-    // TODO: rewrite using a single query instead of many queries (low priority, since almost all users belong to a single company)
-    const rootCompanies = await Promise.all(companyPromises)
-    const unrepeatedRootCompanies = uniqBy(rootCompanies, 'id')
-    return unrepeatedRootCompanies
   }
 
-  @Stopwatch({ includeReturn: true })
-  public async getDescendantsTeams(
-    parentTeamIds: string[],
-    // TODO: implement additional parameters
-    // filters?: FindConditions<TeamInterface>,
-    // queryOptions?: GetOptions<TeamInterface>,
-    // selectors?: TeamEntityKey[],
-    // relations?: TeamEntityRelation[],
-  ): Promise<Team[]> {
-
-    // const teams = await this.getMany({
-    //   id: In(parentTeamIds)
-    // });
-    //
-    // const descendants = await Promise.all(
-    //   teams.map((team) =>
-    //     this.treeRepository.findDescendants(team)
-    //   )
-    // );
-    //
-    // return [...teams, ...descendants.flat()];
-
-    const teams = await this.repository.query(
-      `WITH RECURSIVE team_tree
-        AS (SELECT *
-            FROM team
-            WHERE id = ANY($1)
-
-            UNION ALL
-
-            SELECT tn.*
-            FROM team tn,
-                 team_tree tt
-            WHERE tn.parent_id = tt.id)
-       SELECT DISTINCT id
-       FROM team_tree
-       ORDER BY id`,
-      [parentTeamIds]
-    );
-
-    return await this.getMany({
-      id: In(teams.map(({ id }) => id))
-    });
-  }
-
-  /**
-   * @deprecated use getDescendantsTeams instead
-   */
   @Stopwatch()
-  public async getTeamNodesTreeAfterTeam(
-    teamIDs: string | string[],
+  public async getTeamRelationsByUsers(userIds: string[]): Promise<Record<string, string[]>> {
+    const relations = await this.repository.manager
+      .query(`SELECT * FROM team_users_user WHERE user_id = ANY($1)`, [userIds]);
+
+    // Build a Record<user_id, team_id[]> map
+    return relations.reduce(
+      (map, { team_id, user_id }) => ({
+        ...map,
+        [user_id]: [...map[user_id], team_id],
+      }),
+      userIds.reduce((initial, userId) => ({
+        ...initial,
+        [userId]: []
+      }), {}),
+    );
+  }
+
+  @Stopwatch()
+  public async getDescendantsByIds(
+    parentTeamIds: string[],
+    includeParentTeams = true,
     filters?: FindConditions<TeamInterface>,
     queryOptions?: GetOptions<TeamInterface>,
-    selectors?: TeamEntityKey[],
-    relations?: TeamEntityRelation[],
   ): Promise<Team[]> {
-    const teamIDList = Array.isArray(teamIDs) ? teamIDs : [teamIDs]
-    const initialNodes: Team[] = await this.getMany({ id: In(teamIDList) })
 
-    return this.getNodesFromTeams(
-      initialNodes,
-      'below',
-      filters,
-      queryOptions,
-      selectors,
-      relations,
-    )
+//     const teams = await this.repository.query(
+//       `WITH RECURSIVE team_tree
+//         (id, name, level, is_root, parent_id, source_id)
+//         AS (
+//           SELECT id, name, 0, TRUE, parent_id, id
+//           FROM team
+//           WHERE id = ANY ($1)
+//
+//           UNION ALL
+//
+//           SELECT tn.id, tn.name, tt.level + 1, FALSE, tt.id, tt.source_id
+//           FROM team tn
+//           INNER JOIN team_tree tt ON tn.parent_id = tt.id
+//         )
+//        SELECT DISTINCT ON (id) id
+//        FROM team_tree
+//        WHERE ($2 IS TRUE OR NOT (id = ANY($1)))
+//        -- WHERE ($2 IS TRUE OR level > 0)
+// --        WHERE is_root IS FALSE
+//        ORDER BY id, level DESC`,
+//       [parentTeamIds, !!includeParentTeams]
+//     );
+//
+//     return await this.getMany({
+//       ...filters,
+//       id: In(teams.map(({ id }) => id))
+//     }, undefined, queryOptions);
+
+    const orderBy = this.repository.marshalOrderBy(queryOptions?.orderBy)
+
+    return await this.repository
+      .createQueryBuilder()
+      .where(qb => {
+        return `id IN (WITH RECURSIVE team_tree
+          (id, name, level, is_root, parent_id, source_id)
+          AS (
+            SELECT id, name, 0, TRUE, parent_id, id
+            FROM team
+            WHERE id = ANY (:parentTeamIds)
+  
+            UNION ALL
+  
+            SELECT tn.id, tn.name, tt.level + 1, FALSE, tt.id, tt.source_id
+            FROM team tn
+            INNER JOIN team_tree tt ON tn.parent_id = tt.id
+          )
+         SELECT DISTINCT ON (id) id
+         FROM team_tree
+         WHERE (:includeParentTeams IS TRUE OR NOT (id = ANY(:parentTeamIds)))
+         ORDER BY id, level DESC)`;
+      }, {
+        parentTeamIds,
+        includeParentTeams: Boolean(includeParentTeams)
+      })
+      .andWhere({ ...filters })
+      .take(queryOptions?.limit ?? 0)
+      .offset(queryOptions?.offset ?? 0)
+      .orderBy(orderBy)
+      .getMany();
   }
 
   @Stopwatch()
-  public async getTeamNodesTreeBeforeTeam(
-    teams: Partial<TeamInterface> | Array<Partial<TeamInterface>>,
-    selectors?: TeamEntityKey[],
-    relations?: TeamEntityRelation[],
+  public async getAscendantsByIds(
+    childTeamIds: string[],
+    {
+      includeChildTeams = true,
+      rootsOnly = false,
+      filters,
+      queryOptions,
+    }: GetAscendantsByIdsArgs,
   ): Promise<Team[]> {
-    const teamsAsArray = Array.isArray(teams) ? teams : [teams]
-    const initialNodes: Team[] = await this.getMany({ id: In(teamsAsArray.map(team => team.id)) })
 
-    return this.getNodesFromTeams(initialNodes, 'above', undefined, undefined, selectors, relations)
+    // const teams = await this.repository.query(
+    //   `WITH RECURSIVE team_tree
+    //     (id, name, level, is_leaf, parent_id, source_id)
+    //     AS (
+    //       SELECT id, name, 0, TRUE, parent_id, id
+    //       FROM team
+    //       WHERE id = ANY($1)
+    //
+    //       UNION ALL
+    //
+    //       SELECT pn.id, pn.name, cn.level - 1, FALSE, pn.parent_id, cn.source_id
+    //       FROM team_tree cn
+    //       INNER JOIN team pn ON pn.id = cn.parent_id AND cn.id <> pn.id
+    //     )
+    //     SELECT DISTINCT ON (id) *
+    //     FROM team_tree
+    //     WHERE ($2 IS TRUE OR NOT (id = ANY($1)))
+    //     -- WHERE (FALSE IS TRUE OR level < 0)
+    //     -- WHERE (FALSE IS TRUE OR is_leaf IS FALSE)
+    //     ORDER BY id, level DESC`,
+    //   [childTeamIds, !!includeChildTeams]
+    // );
+    //
+    // return await this.getMany({
+    //   ...filters,
+    //   id: In(teams.map(({ id }) => id))
+    // }, undefined, queryOptions);
+
+    const orderBy = this.repository.marshalOrderBy(queryOptions?.orderBy)
+
+    return await this.repository
+      .createQueryBuilder()
+      .where(qb => {
+        return `id IN (WITH RECURSIVE team_tree
+        (id, name, level, is_leaf, parent_id, source_id)
+        AS (
+          SELECT id, name, 0, TRUE, parent_id, id
+          FROM team
+          WHERE id = ANY(:childTeamIds)
+
+          UNION ALL
+
+          SELECT pn.id, pn.name, cn.level - 1, FALSE, pn.parent_id, cn.source_id
+          FROM team_tree cn
+          INNER JOIN team pn ON pn.id = cn.parent_id AND cn.id <> pn.id
+        )
+        SELECT DISTINCT ON (id) id
+        FROM team_tree
+        WHERE (:includeChildTeams IS TRUE OR NOT (id = ANY(:childTeamIds)))
+          AND (:rootsOnly IS FALSE OR parent_id IS NULL OR id = parent_id)
+        ORDER BY id, level DESC)`;
+      }, {
+        childTeamIds,
+        // Force includeChildTeams if rootsOnly is true to avoid root nodes from being exclude if childTeamIds are root nodes already
+        includeChildTeams: Boolean(includeChildTeams) || Boolean(rootsOnly),
+        rootsOnly: Boolean(rootsOnly),
+      })
+      .andWhere({ ...filters })
+      .take(queryOptions?.limit ?? 0)
+      .offset(queryOptions?.offset ?? 0)
+      .orderBy(orderBy)
+      .getMany();
   }
 
   @Stopwatch()
@@ -193,7 +278,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     // TODO: rewrite using a single query
     const userCompanies = await this.getUserCompanies(user)
     const userCompanyIDs = userCompanies.map((company) => company.id)
-    const userCompaniesTeams = await this.getUserCompaniesTeams(userCompanyIDs)
+    const userCompaniesTeams = await this.getDescendantsByIds(userCompanyIDs)
     const userTeams = await this.userProvider.getUserTeams(user)
 
     const query = {
@@ -236,22 +321,16 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
   }
 
   @Stopwatch()
-  public async getRootTeamForTeam(
-    team: Partial<TeamInterface>,
+  public async getRootTeamsForTeams(
+    teamIds: string[],
     filters?: FindConditions<Team>,
-    options?: GetOptions<Team>,
-  ): Promise<Team> {
-    let rootTeam = await this.getOne({ id: team.id })
-
-    // TODO: rewrite this method using a recursive query
-    while (rootTeam.parentId && rootTeam.parentId !== rootTeam.id) {
-      // Since we're dealing with a linked list, where we need to evaluate each step before trying
-      // the next one, we can disable the following eslint rule
-      // eslint-disable-next-line no-await-in-loop
-      rootTeam = await this.getOne({ ...filters, id: rootTeam.parentId }, undefined, options)
-    }
-
-    return rootTeam
+    queryOptions?: GetOptions<Team>,
+  ): Promise<Team[]> {
+    return await this.getAscendantsByIds(teamIds, {
+      rootsOnly: true,
+      filters,
+      queryOptions,
+    });
   }
 
   public async getFromID(id: string): Promise<Team | undefined> {
@@ -264,10 +343,6 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
 
   public async removeUserFromTeam(userID: string, teamID: string): Promise<void> {
     await this.repository.removeUserFromTeam(userID, teamID)
-  }
-
-  public async getUserCompaniesTeams(companyIDs: string[]) {
-    return this.getDescendantsTeams(companyIDs)
   }
 
   public async getAllCompanies() {
@@ -293,55 +368,8 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     filters?: FindConditions<Team>,
     options?: GetOptions<Team>,
   ) {
-    // TODO: rewrite using a single query
     const companyIDs = companies.map((company) => company.id)
 
     return this.getChildren(companyIDs, filters, options)
-  }
-
-  /**
-   * @deprecated this method is way too slow and should be replaced with a single query
-   */
-  @Stopwatch()
-  private async getNodesFromTeams(
-    nodes: Team[],
-    direction: 'above' | 'below',
-    filters?: FindConditions<Team>,
-    options?: GetOptions<Team>,
-    selectors?: TeamEntityKey[],
-    relations?: TeamEntityRelation[],
-  ) {
-    let nextIterationNodes = nodes
-
-    const directionHandlers = {
-      below: async (
-        team: TeamInterface,
-        selectors?: TeamEntityKey[],
-        relations?: TeamEntityRelation[],
-      ) => this.getChildren(team.id, filters, options, selectors, relations),
-      above: async (
-        team: TeamInterface,
-        selectors?: TeamEntityKey[],
-        relations?: TeamEntityRelation[],
-      ) => this.getParentTeam(team, selectors, relations, filters, options),
-    }
-    const directionHandler = directionHandlers[direction]
-
-    while (nextIterationNodes.length > 0) {
-      // Since we're dealing with a linked list, where we need to evaluate each step before
-      // trying the next one, we can disable the following eslint rule
-      // eslint-disable-next-line no-await-in-loop
-      const selectedNodes = await Promise.all(
-        nextIterationNodes.map(async (node) => directionHandler(node, selectors, relations)),
-      )
-      const currentIterationNodes = flatten(selectedNodes)
-
-      nodes = [...nodes, ...currentIterationNodes]
-      nextIterationNodes = filter(currentIterationNodes)
-    }
-
-    const clearedNodes = filter(nodes)
-
-    return uniqBy(clearedNodes, 'id')
   }
 }

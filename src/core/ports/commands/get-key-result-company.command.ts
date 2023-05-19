@@ -6,7 +6,7 @@ import { Command } from './base.command'
 export class GetKeyResultCompanyCommand extends Command<Team> {
   public async execute(keyResult: KeyResult): Promise<Team> {
     if (keyResult.teamId) {
-      const company = await this.core.team.getRootTeamForTeam({ id: keyResult.teamId })
+      const [company] = await this.core.team.getRootTeamsForTeams([keyResult.teamId])
       return company
     }
 

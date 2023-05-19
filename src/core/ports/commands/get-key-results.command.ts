@@ -15,7 +15,7 @@ export class GetKeyResults extends Command<KeyResult[]> {
     active = true,
     confidence?: ConfidenceTag,
   ): Promise<KeyResult[]> {
-    const userReachableTeams = await this.core.team.getUserCompaniesTeams([team.id])
+    const userReachableTeams = await this.core.team.getDescendantsByIds([team.id])
     const userReachableTeamsIds = userReachableTeams.map((team) => team.id)
 
     const keyResults = await this.core.keyResult.getKeyResults(

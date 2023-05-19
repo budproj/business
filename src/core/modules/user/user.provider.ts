@@ -1,25 +1,26 @@
-import { Injectable } from '@nestjs/common'
-import { flatten, uniqBy } from 'lodash'
-import { FindConditions, In } from 'typeorm'
+import { Injectable } from "@nestjs/common";
+import { flatten, uniqBy } from "lodash";
+import { FindConditions, In } from "typeorm";
 
-import { CredentialsAdapter } from '@adapters/credentials/credentials.adapter'
-import { Credential, NewCredentialData } from '@adapters/credentials/credentials.interface'
-import { CoreEntityProvider } from '@core/entity.provider'
-import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
-import { GetOptions } from '@core/interfaces/get-options'
-import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
-import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
-import { UserSettingProvider } from '@core/modules/user/setting/user-setting.provider'
-import { CreationQuery } from '@core/types/creation-query.type'
-import { UserProfileAdapter } from '@infrastructure/amplitude/adapters/user-profil.adapter'
-import { UserProfileProvider } from '@infrastructure/amplitude/providers/user-profile.provider'
-import { AuthzCredentialsProvider } from '@infrastructure/authz/providers/credentials.provider'
+import { CredentialsAdapter } from "@adapters/credentials/credentials.adapter";
+import { Credential, NewCredentialData } from "@adapters/credentials/credentials.interface";
+import { CoreEntityProvider } from "@core/entity.provider";
+import { CoreQueryContext } from "@core/interfaces/core-query-context.interface";
+import { GetOptions } from "@core/interfaces/get-options";
+import { Cycle } from "@core/modules/cycle/cycle.orm-entity";
+import { TeamInterface } from "@core/modules/team/interfaces/team.interface";
+import { UserSettingProvider } from "@core/modules/user/setting/user-setting.provider";
+import { CreationQuery } from "@core/types/creation-query.type";
+import { UserProfileAdapter } from "@infrastructure/amplitude/adapters/user-profil.adapter";
+import { UserProfileProvider } from "@infrastructure/amplitude/providers/user-profile.provider";
+import { AuthzCredentialsProvider } from "@infrastructure/authz/providers/credentials.provider";
 import { Stopwatch } from "@lib/logger/pino.decorator";
 
-import { UserStatus } from './enums/user-status.enum'
-import { UserCredentialsAdditionalData, UserInterface } from './user.interface'
-import { User } from './user.orm-entity'
-import { UserRepository } from './user.repository'
+import { UserStatus } from "./enums/user-status.enum";
+import { UserCredentialsAdditionalData, UserInterface } from "./user.interface";
+import { User } from "./user.orm-entity";
+import { UserRepository } from "./user.repository";
+import { Sorting } from "@core/enums/sorting";
 
 @Injectable()
 export class UserProvider extends CoreEntityProvider<User, UserInterface> {
@@ -56,6 +57,29 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
       ...queryOptions,
     })
     return uniqBy(flatten(queryResult.map((user) => user.teams)), 'id')
+  }
+
+  // TODO: implement sorting at query level
+  public async getUsersByTeams(
+    teamIds: string[],
+    filters?: Partial<UserInterface>,
+    options?: Omit<GetOptions<User>, 'orderBy'>,
+  ): Promise<User[]> {
+    const orderBy = this.repository.marshalOrderBy({
+      id: Sorting.ASC
+    })
+
+    const alias = this.repository.entityName;
+    const query = this.repository
+      .createQueryBuilder(alias)
+      .innerJoin(`${alias}.teams`, 'userTeam', 'userTeam.id IN (:...teamIds)', { teamIds })
+      .distinctOn([`${alias}.id`])
+      .where(filters)
+      .take(options?.limit ?? 0)
+      .offset(options?.offset ?? 0)
+      .orderBy(orderBy)
+
+    return query.getMany()
   }
 
   public buildUserFullName(user: UserInterface) {

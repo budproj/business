@@ -37,6 +37,7 @@ import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
 import { KeyResultRelationFilterProperties, KeyResultRepository } from './key-result.repository'
 import { KeyResultTimelineProvider } from './timeline.provider'
 import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
+import { Stopwatch } from "@lib/logger/pino.decorator";
 
 @Injectable()
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
@@ -389,6 +390,29 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
     keyResult ??= await this.getOne({ id: keyResultCheckIn.keyResultId })
     return this.keyResultCheckInProvider.getProgressFromValue(keyResult, keyResultCheckIn?.value)
+  }
+
+  /**
+   * @deprecated do not use this method yet (see comment below)
+   */
+  @Stopwatch({ includeReturn: true })
+  public async getCheckInProgressBatch(keyResults: KeyResult[], latestCheckIns?: KeyResultCheckInInterface[]): Promise<number[]> {
+
+    // FIXME: this query will only return the earliest check-in for each key result instead of the latest (see getKeyResultsFromTeam)
+    const checkIns = latestCheckIns ?? await this.keyResultCheckInProvider.getMany({
+      id: In(keyResults.map(keyResult => keyResult.id))
+    });
+
+    const checkInsMap = checkIns.filter(checkIn => checkIn)
+      .reduce((map, checkIn) => {
+        map[checkIn.keyResultId] = checkIn;
+        return map;
+      }, {});
+
+    return keyResults.map(keyResult => {
+      const keyResultCheckIn = checkInsMap[keyResult.id];
+      return keyResultCheckIn ? this.keyResultCheckInProvider.getProgressFromValue(keyResult, keyResultCheckIn?.value) : DEFAULT_PROGRESS;
+    });
   }
 
   public async getLatestCheckInForKeyResultAtDate(
