@@ -96,6 +96,7 @@ import { GetUserYearlyProgressCommand } from './get-user-yearly-progress.command
 import { GetUsersByIdsCommand } from './get-users-by-ids.command'
 import { GetUsersFromTeam } from './get-users-from-team.command'
 import { GetUsersWithIndividualOkr } from './get-users-with-individual-okr.command'
+import { PublishObjectiveAndKeyResultsCommand } from './publish-objective-and-key-results.command'
 import { ReactivateUserCommand } from './reactivate-user.command'
 import { RemoveTeamFromUserCommand } from './remove-team-from-user.command'
 import { RemoveUserToKeyResultSupportTeamCommand } from './remove-user-to-key-result-support-team.command'
@@ -189,6 +190,7 @@ const commandTypes = [
   'update-check-mark-description',
   'update-key-result',
   'update-objective',
+  'publish-objective-and-key-results',
   'update-cycle',
   'delete-cycle',
   'update-team',
@@ -307,6 +309,7 @@ export class CommandFactory {
     'update-check-mark-description': UpdateCheckMarkDescriptionCommand,
     'update-key-result': UpdateKeyResultCommand,
     'update-objective': UpdateObjectiveCommand,
+    'publish-objective-and-key-results': PublishObjectiveAndKeyResultsCommand,
     'update-team': UpdateTeamCommand,
     'update-user': UpdateUserCommand,
     'update-user-setting': UpdateUserSettingCommand,
