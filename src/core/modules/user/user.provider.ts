@@ -8,6 +8,7 @@ import { CoreEntityProvider } from "@core/entity.provider";
 import { CoreQueryContext } from "@core/interfaces/core-query-context.interface";
 import { GetOptions } from "@core/interfaces/get-options";
 import { Cycle } from "@core/modules/cycle/cycle.orm-entity";
+import { Team } from "@core/modules/team/team.orm-entity";
 import { TeamInterface } from "@core/modules/team/interfaces/team.interface";
 import { UserSettingProvider } from "@core/modules/user/setting/user-setting.provider";
 import { CreationQuery } from "@core/types/creation-query.type";
@@ -59,27 +60,47 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     return uniqBy(flatten(queryResult.map((user) => user.teams)), 'id')
   }
 
-  // TODO: implement sorting at query level
   public async getUsersByTeams(
     teamIds: string[],
     filters?: Partial<UserInterface>,
-    options?: Omit<GetOptions<User>, 'orderBy'>,
+    options?: GetOptions<User>,
   ): Promise<User[]> {
-    const orderBy = this.repository.marshalOrderBy({
-      id: Sorting.ASC
+    const orderBy = this.repository.marshalOrderBy(options.orderBy ?? {
+      firstName: Sorting.ASC,
+      lastName: Sorting.ASC,
     })
 
     const alias = this.repository.entityName;
-    const query = this.repository
+
+    // const query = this.repository
+    //   .createQueryBuilder(alias)
+    //   .innerJoin(`${alias}.teams`, 'userTeam', 'userTeam.id IN (:...teamIds)', { teamIds })
+    //   .distinctOn([`${alias}.id`])
+    //   .where(filters)
+    //   .take(options?.limit ?? 0)
+    //   .offset(options?.offset ?? 0)
+    //   .orderBy(orderBy)
+    //
+    // return query.getMany()
+
+    return await this.repository
       .createQueryBuilder(alias)
-      .innerJoin(`${alias}.teams`, 'userTeam', 'userTeam.id IN (:...teamIds)', { teamIds })
-      .distinctOn([`${alias}.id`])
-      .where(filters)
+      .where((qb) => {
+        const subQuery = qb.subQuery()
+          .select('tu.user_id')
+          .from('team_users_user', 'tu')
+          .where('tu.team_id IN (:...teamIds)', { teamIds })
+          .distinctOn(['tu.user_id'])
+          .orderBy({ 'tu.user_id': Sorting.ASC })
+          .getQuery()
+
+        return `${alias}.id IN ${subQuery}`
+      })
+      .andWhere(filters)
       .take(options?.limit ?? 0)
       .offset(options?.offset ?? 0)
       .orderBy(orderBy)
-
-    return query.getMany()
+      .getMany()
   }
 
   public buildUserFullName(user: UserInterface) {
