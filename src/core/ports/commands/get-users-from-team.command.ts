@@ -30,17 +30,11 @@ export class GetUsersFromTeam extends Command<User[]> {
     const getTeamMembersCommand = this.factory.buildCommand<GetTeamMembersCommandResult>('get-team-members')
     const { users } = await getTeamMembersCommand.execute(teamID, queryFilters)
 
-    const unsortedUsers = withTeams ? await this.getWithTeams(teamID, users) : users
+    if (withTeams) {
+      return await this.getWithTeams(teamID, users)
+    }
 
-    // Sort by name ascending, as the query does not support this feature yet
-    return unsortedUsers.sort((left, right) => {
-      const comparison = left.firstName.localeCompare(right.firstName)
-      if (comparison === 0) {
-        return left.lastName.localeCompare(right.lastName)
-      }
-
-      return comparison
-    })
+    return users
   }
 
   private async getWithTeams(teamID: string, users: User[]): Promise<User[]> {

@@ -9,6 +9,7 @@ import { User } from '@core/modules/user/user.orm-entity'
 import { EntityOrderAttributes, Order, OrderAttribute } from '@core/types/order-attribute.type'
 
 import { Command } from './base.command'
+import { Stopwatch } from '@lib/logger/pino.decorator';
 
 export abstract class BaseStatusCommand extends Command<Status> {
   protected readonly defaultOptions: GetStatusOptions = {}
@@ -53,6 +54,7 @@ export abstract class BaseStatusCommand extends Command<Status> {
     return await this.core.keyResult.getCheckInProgressBatch(keyResults, latestCheckIns);
   }
 
+  @Stopwatch()
   protected async unzipKeyResultGroup(
     keyResults: KeyResult[],
     isUnzipingObjective = true,

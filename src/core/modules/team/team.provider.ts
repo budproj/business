@@ -132,7 +132,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
 
     return await this.repository
       .createQueryBuilder()
-      .where(qb => {
+      .where(() => {
         return `id IN (WITH RECURSIVE team_tree
           (id, name, level, is_root, parent_id, source_id)
           AS (
