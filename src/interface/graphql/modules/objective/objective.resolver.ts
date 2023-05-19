@@ -37,6 +37,7 @@ import { KeyResultFiltersRequest } from '../key-result/requests/key-result-filte
 
 import { ObjectiveKeyResultsGraphQLConnection } from './connections/objective-key-results/objective-key-results.connection'
 import { ObjectiveGraphQLNode } from './objective.node'
+import { ObjectivePublishRequest } from './requests/objective-publish.request'
 
 @GuardedResolver(ObjectiveGraphQLNode)
 export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
@@ -260,5 +261,29 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
       )
 
     return result
+  }
+
+  @GuardedMutation(ObjectiveGraphQLNode, 'objective:update', { name: 'publishOkr' })
+  protected async publishObjectiveAndKeyResultsForRequest(
+    @Args() request: ObjectivePublishRequest,
+    @RequestUserWithContext() userWithContext: UserWithContext,
+  ) {
+    const canPublish = await this.accessControl.canUpdate(userWithContext, request.id)
+    if (!canPublish) throw new UnauthorizedException()
+
+    this.logger.log({
+      userWithContext,
+      request,
+      message: 'Received publish objective and key-results request',
+    })
+
+    const objective = await this.corePorts.dispatchCommand<Objective>(
+      'publish-objective-and-key-results',
+      request.id,
+    )
+    if (!objective)
+      throw new UserInputError(`We could not found an objective with ID ${request.id}`)
+
+    return objective
   }
 }
