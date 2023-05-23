@@ -1,6 +1,7 @@
 import { Field, Float, ID, InputType } from '@nestjs/graphql'
 
 import { KeyResultFormat } from '@core/modules/key-result/enums/key-result-format.enum'
+import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.enum'
 import { KeyResultType } from '@core/modules/key-result/enums/key-result-type.enum'
 import { KeyResultFormatGraphQLEnum } from '@interface/graphql/modules/key-result/enums/key-result-format.enum'
 import { KeyResultTypeGraphQLEnum } from '@interface/graphql/modules/key-result/enums/key-result-type.enum'
@@ -41,4 +42,10 @@ export class KeyResultInput {
     nullable: true,
   })
   public readonly description?: string
+
+  @Field({
+    description: 'The mode of the key result',
+    nullable: true,
+  })
+  public readonly mode?: KeyResultMode
 }
