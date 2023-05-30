@@ -26,7 +26,7 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
 
     const [sortedTeams] = unzip(descendingSortedPairs) as [Team[]]
 
-    return sortedTeams
+    return sortedTeams ?? []
   }
 
   public async execute(
