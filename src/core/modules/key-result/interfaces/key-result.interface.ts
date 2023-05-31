@@ -19,4 +19,5 @@ export interface KeyResultInterface extends CoreEntityInterface {
   description?: string
   lastUpdatedBy?: Author
   mode: KeyResultMode
+  commentCount?: JSON
 }

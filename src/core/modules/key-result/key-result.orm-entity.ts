@@ -87,4 +87,7 @@ export class KeyResult extends CoreEntity implements KeyResultInterface {
 
   @OneToMany('KeyResultUpdate', 'keyResult', { nullable: true })
   public updates?: KeyResultUpdateInterface[]
+
+  @Column({ type: 'json', nullable: true })
+  public commentCount?: JSON
 }

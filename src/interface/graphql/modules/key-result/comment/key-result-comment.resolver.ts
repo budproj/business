@@ -161,4 +161,14 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
 
     return this.core.keyResult.getOne({ id: keyResultComment.keyResultId })
   }
+
+  @ResolveField('extra', () => String, { nullable: true })
+  protected async stringfyExtra(@Parent() keyResultComment: KeyResultCommentGraphQLNode) {
+    this.logger.log({
+      keyResultComment,
+      message: 'Fetching extra and stringfying it',
+    })
+
+    return JSON.stringify(keyResultComment.extra)
+  }
 }
