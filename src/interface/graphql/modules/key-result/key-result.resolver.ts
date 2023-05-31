@@ -375,4 +375,14 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
 
     return this.relay.marshalResponse(queryResult, connection, keyResult)
   }
+
+  @ResolveField('commentCount', () => String, { nullable: true })
+  protected async stringfyExtra(@Parent() keyResult: KeyResultGraphQLNode) {
+    this.logger.log({
+      keyResult,
+      message: 'Fetching key result comment count and stringfying it',
+    })
+
+    return JSON.stringify(keyResult.commentCount)
+  }
 }

@@ -9,7 +9,7 @@ import { GetOptions } from '@core/interfaces/get-options'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { UserProvider } from '@core/modules/user/user.provider'
 import { CreationQuery } from '@core/types/creation-query.type'
-import { Stopwatch } from "@lib/logger/pino.decorator";
+import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { TeamInterface } from './interfaces/team.interface'
 import { Team } from './team.orm-entity'
@@ -27,12 +27,6 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     private readonly userProvider: UserProvider,
   ) {
     super(TeamProvider.name, repository)
-  }
-
-  public async createTeam(data: TeamInterface): Promise<Team> {
-    const createdData = await this.create(data)
-
-    return createdData[0]
   }
 
   @Stopwatch()
@@ -79,8 +73,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     // selectors?: TeamEntityKey[],
     // relations?: TeamEntityRelation[],
   ): Promise<Team[]> {
-
-    // const teams = await this.getMany({
+    // Const teams = await this.getMany({
     //   id: In(parentTeamIds)
     // });
     //
@@ -107,12 +100,12 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
        SELECT DISTINCT id
        FROM team_tree
        ORDER BY id`,
-      [parentTeamIds]
-    );
+      [parentTeamIds],
+    )
 
-    return await this.getMany({
-      id: In(teams.map(({ id }) => id))
-    });
+    return this.getMany({
+      id: In(teams.map(({ id }) => id)),
+    })
   }
 
   /**
@@ -146,7 +139,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     relations?: TeamEntityRelation[],
   ): Promise<Team[]> {
     const teamsAsArray = Array.isArray(teams) ? teams : [teams]
-    const initialNodes: Team[] = await this.getMany({ id: In(teamsAsArray.map(team => team.id)) })
+    const initialNodes: Team[] = await this.getMany({ id: In(teamsAsArray.map((team) => team.id)) })
 
     return this.getNodesFromTeams(initialNodes, 'above', undefined, undefined, selectors, relations)
   }
@@ -231,10 +224,6 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     })
   }
 
-  public async getFromIndexes(indexes: Partial<TeamInterface>): Promise<Team> {
-    return this.repository.findOne(indexes)
-  }
-
   @Stopwatch()
   public async getRootTeamForTeam(
     team: Partial<TeamInterface>,
@@ -252,39 +241,6 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     }
 
     return rootTeam
-  }
-
-  public async getFromID(id: string): Promise<Team | undefined> {
-    return this.repository.findOne({ id })
-  }
-
-  public async addUserToTeam(userID: string, teamID: string): Promise<void> {
-    await this.repository.addUserToTeam(userID, teamID)
-  }
-
-  public async removeUserFromTeam(userID: string, teamID: string): Promise<void> {
-    await this.repository.removeUserFromTeam(userID, teamID)
-  }
-
-  public async getUserCompaniesTeams(companyIDs: string[]) {
-    return this.getDescendantsTeams(companyIDs)
-  }
-
-  public async getAllCompanies() {
-    return this.repository.find({
-      where: {
-        // eslint-disable-next-line unicorn/no-null
-        parentId: null,
-      },
-    })
-  }
-
-  protected async protectCreationQuery(
-    _query: CreationQuery<Team>,
-    _data: Partial<TeamInterface>,
-    _queryContext: CoreQueryContext,
-  ) {
-    return []
   }
 
   @Stopwatch()
@@ -343,5 +299,48 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     const clearedNodes = filter(nodes)
 
     return uniqBy(clearedNodes, 'id')
+  }
+
+  public async getFromIndexes(indexes: Partial<TeamInterface>): Promise<Team> {
+    return this.repository.findOne(indexes)
+  }
+
+  public async createTeam(data: TeamInterface): Promise<Team> {
+    const createdData = await this.create(data)
+
+    return createdData[0]
+  }
+
+  public async getFromID(id: string): Promise<Team | undefined> {
+    return this.repository.findOne({ id })
+  }
+
+  public async addUserToTeam(userID: string, teamID: string): Promise<void> {
+    await this.repository.addUserToTeam(userID, teamID)
+  }
+
+  public async removeUserFromTeam(userID: string, teamID: string): Promise<void> {
+    await this.repository.removeUserFromTeam(userID, teamID)
+  }
+
+  public async getUserCompaniesTeams(companyIDs: string[]) {
+    return this.getDescendantsTeams(companyIDs)
+  }
+
+  public async getAllCompanies() {
+    return this.repository.find({
+      where: {
+        // eslint-disable-next-line unicorn/no-null
+        parentId: null,
+      },
+    })
+  }
+
+  protected async protectCreationQuery(
+    _query: CreationQuery<Team>,
+    _data: Partial<TeamInterface>,
+    _queryContext: CoreQueryContext,
+  ) {
+    return []
   }
 }

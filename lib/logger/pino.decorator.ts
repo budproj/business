@@ -1,96 +1,97 @@
-import pino from 'pino';
-import pinoPretty from 'pino-pretty';
-import { getLoggerToken, PinoLogger } from 'nestjs-pino';
-// import { Inject } from '@nestjs/common';
-import * as uuid from 'uuid';
-import { omit } from 'lodash';
+/* eslint-disable @typescript-eslint/no-implicit-any-catch */
+/* eslint-disable unicorn/prevent-abbreviations */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+import { omit } from 'lodash'
+import { getLoggerToken, PinoLogger } from 'nestjs-pino'
+import pino from 'pino'
+import pinoPretty from 'pino-pretty'
+// Import { Inject } from '@nestjs/common';
+import * as uuid from 'uuid'
 
-interface Args {
-  omitArgs?: boolean | Parameters<typeof omit>['1'];
-  includeReturn?: boolean;
+interface Arguments {
+  omitArgs?: boolean | Parameters<typeof omit>['1']
+  includeReturn?: boolean
 }
 
-export const Stopwatch = ({
-  omitArgs,
-  includeReturn,
-}: Args = {}): MethodDecorator => {
-  // const injectLogger = Inject(PinoLogger);
+export const Stopwatch = ({ omitArgs, includeReturn }: Arguments = {}): MethodDecorator => {
+  // Const injectLogger = Inject(PinoLogger);
 
-  return <T extends object>(target, propertyKey, descriptor) => {
-    const contextName = `${target.constructor.name}.${String(propertyKey)}`;
-    const token = getLoggerToken(contextName);
+  return <T extends Record<string, unknown>>(target, propertyKey, descriptor) => {
+    const contextName = `${target.constructor.name}.${String(propertyKey)}`
+    const token = getLoggerToken(contextName)
 
-    // injectLogger(target, token);
-    target[token] = pino(pinoPretty({
-      colorize: true
-    }));
+    // InjectLogger(target, token);
+    target[token] = pino(
+      pinoPretty({
+        colorize: true,
+      }),
+    )
 
-    const original = descriptor.value;
+    const original = descriptor.value
 
     descriptor.value = new Proxy(original, {
-      apply: (target, thisArg, args) => {
-        const traceId = uuid.v4();
-        const traceTag = `[${traceId}] ${contextName}`;
+      apply: (target, thisArgument, arguments_) => {
+        const traceId = uuid.v4()
+        const traceTag = `[${traceId}] ${contextName}`
 
-        const logger: PinoLogger = thisArg[token];
+        const logger: PinoLogger = thisArgument[token]
 
-        const logCall = (argsList) => {
+        const logCall = (argumentsList) => {
           logger.info(
-            `${traceTag}(${argsList.map(() => '%o').join(', ')})`,
-            ...argsList.map((arg) => (arg !== undefined ? arg : 'undefined')),
-          );
-        };
+            `${traceTag}(${argumentsList.map(() => '%o').join(', ')})`,
+            // eslint-disable-next-line no-negated-condition
+            ...argumentsList.map((argument) => (argument !== undefined ? argument : 'undefined')),
+          )
+        }
 
         // TODO: reduce level to `debug`
         if (Array.isArray(omitArgs)) {
-          logCall(Object.values(omit(args, omitArgs)));
+          logCall(Object.values(omit(arguments_, omitArgs)))
         } else if (omitArgs) {
-          logger.info(`${traceTag}()`);
+          logger.info(`${traceTag}()`)
         } else {
-          logCall([...args]);
+          logCall([...arguments_])
         }
 
-        const start = Date.now();
+        const start = Date.now()
 
         const handleResult = (res) => {
-          logger.info(`${traceTag} took ${Date.now() - start}ms`);
+          logger.info(`${traceTag} took ${Date.now() - start}ms`)
 
           if (includeReturn && res !== undefined) {
-            logger.info(`${traceTag} -> %o`, res);
+            logger.info(`${traceTag} -> %o`, res)
           }
-          return res;
-        };
 
-        const handleError = (err) => {
-          logger.error(
-            `${traceTag} failed after ${Date.now() - start}ms -> %s`,
-            err.message,
-          );
-          throw err;
-        };
+          return res
+        }
+
+        const handleError = (error) => {
+          logger.error(`${traceTag} failed after ${Date.now() - start}ms -> %s`, error.message)
+          throw error
+        }
 
         try {
-          const result = target.apply(thisArg, args);
+          const result = target.apply(thisArgument, arguments_)
 
           if (result instanceof Promise) {
-            return result.then(handleResult).catch(handleError);
+            return result.then(handleResult).catch(handleError)
           }
 
-          handleResult(result);
-          return result;
-        } catch (err) {
-          handleError(err);
-          throw err;
+          handleResult(result)
+          return result
+        } catch (error) {
+          handleError(error)
+          throw error
         }
       },
-    });
+    })
 
     // Copy all metadata from original descriptor.value to ensure the proper functioning of other decorators (like @Get, @Post, etc)
-    Reflect.getMetadataKeys(original).forEach((key) => {
-      const metadata = Reflect.getMetadata(key, original);
-      Reflect.defineMetadata(key, metadata, descriptor.value);
-    });
+    for (const key of Reflect.getMetadataKeys(original)) {
+      const metadata = Reflect.getMetadata(key, original)
+      Reflect.defineMetadata(key, metadata, descriptor.value)
+    }
 
-    return descriptor;
-  };
-};
+    return descriptor
+  }
+}

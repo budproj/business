@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql'
 
+import { KeyResultCommentType } from '@core/modules/key-result/enums/key-result-comment-type.enum'
 import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authorization/interfaces/guarded-node.interface'
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
@@ -16,6 +17,19 @@ export class KeyResultCommentGraphQLNode implements GuardedNodeGraphQLInterface 
 
   @Field({ complexity: 0, description: 'The last update date of the comment' })
   public readonly updatedAt!: Date
+
+  @Field(() => String, {
+    complexity: 0,
+    description: 'The type of the key-result commment',
+    defaultValue: KeyResultCommentType.comment,
+  })
+  public readonly type!: KeyResultCommentType
+
+  @Field(() => String, {
+    description: 'The extra values that returns dependant on the key-result type',
+    nullable: true,
+  })
+  public readonly extra?: any
 
   @Field(() => ID, {
     complexity: 0,

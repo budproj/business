@@ -3,6 +3,7 @@ import { Column, Entity, ManyToOne, RelationId, UpdateDateColumn } from 'typeorm
 import { CoreEntity } from '@core/core.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 
+import { KeyResultCommentType } from '../enums/key-result-comment-type.enum'
 import { KeyResultInterface } from '../interfaces/key-result.interface'
 
 import { KeyResultCommentInterface } from './key-result-comment.interface'
@@ -14,6 +15,12 @@ export class KeyResultComment extends CoreEntity implements KeyResultCommentInte
 
   @UpdateDateColumn()
   public updatedAt: Date
+
+  @Column({ default: KeyResultCommentType.comment })
+  public type: KeyResultCommentType
+
+  @Column({ type: 'json', nullable: true })
+  public extra?: JSON
 
   @Column()
   @RelationId((keyResultComment: KeyResultComment) => keyResultComment.keyResult)

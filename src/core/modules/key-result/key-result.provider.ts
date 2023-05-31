@@ -34,6 +34,7 @@ import { KeyResultCheckMarkProvider } from './check-mark/key-result-check-mark.p
 import { KeyResultCommentInterface } from './comment/key-result-comment.interface'
 import { KeyResultComment } from './comment/key-result-comment.orm-entity'
 import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
+import { KeyResultCommentType } from './enums/key-result-comment-type.enum'
 import { KeyResultRelationFilterProperties, KeyResultRepository } from './key-result.repository'
 import { KeyResultTimelineProvider } from './timeline.provider'
 import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
@@ -335,10 +336,14 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     user: UserInterface,
     data: Partial<KeyResultCommentInterface>,
   ): Partial<KeyResultCommentInterface> {
+    const extraData = data.type === KeyResultCommentType.question ? { solved: false } : undefined
+
     return {
       text: data.text,
       userId: user.id,
       keyResultId: data.keyResultId,
+      type: data.type,
+      extra: extraData,
     }
   }
 
@@ -426,6 +431,24 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     comment: Partial<KeyResultCommentInterface>,
   ): Promise<KeyResultComment> {
     const queryResult = await this.keyResultCommentProvider.createComment(comment)
+
+    // Const { keyResultId } = queryResult[0]
+    // const commentType = queryResult[0].type
+
+    // const queryBuilder = getConnection()
+    //   .createQueryBuilder()
+    //   .update(KeyResult)
+    //   .set({
+    //     commentCount: () => `jsonb_set(
+    //     "comment_count",
+    //     '{${commentType}}',
+    //     ((COALESCE("comment_count"->>'${commentType}','0')::int + 1)::text)::jsonb
+    //   )`,
+    //   })
+    //   .where('id = :keyResultId', { keyResultId })
+
+    // await queryBuilder.execute()
+
     return queryResult[0]
   }
 

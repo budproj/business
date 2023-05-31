@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common'
 
+import { Stopwatch } from '@lib/logger/pino.decorator'
+
 import { CommandFactory, CommandType } from './commands/command.factory'
-import { Stopwatch } from "@lib/logger/pino.decorator";
 
 @Injectable()
 export class CorePortsProvider {

@@ -14,7 +14,7 @@ import { CreationQuery } from '@core/types/creation-query.type'
 import { UserProfileAdapter } from '@infrastructure/amplitude/adapters/user-profil.adapter'
 import { UserProfileProvider } from '@infrastructure/amplitude/providers/user-profile.provider'
 import { AuthzCredentialsProvider } from '@infrastructure/authz/providers/credentials.provider'
-import { Stopwatch } from "@lib/logger/pino.decorator";
+import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { UserStatus } from './enums/user-status.enum'
 import { UserCredentialsAdditionalData, UserInterface } from './user.interface'
@@ -58,6 +58,22 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     return uniqBy(flatten(queryResult.map((user) => user.teams)), 'id')
   }
 
+  @Stopwatch()
+  public async getUsersWithActiveObjectives(teamsIds: Array<TeamInterface['id']>): Promise<User[]> {
+    const users = await this.repository
+      .createQueryBuilder()
+      .innerJoin(`${User.name}.objectives`, 'objective')
+      .innerJoinAndSelect(`${User.name}.teams`, 'team')
+      .innerJoin(Cycle, 'cycle', 'cycle.id = objective.cycle_id')
+      .where('objective.teamId IS NULL')
+      .andWhere('team.id IN(:...teamsIds)', { teamsIds })
+      .andWhere('cycle.active IS TRUE')
+      .orderBy(`${User.name}.firstName`, 'ASC')
+      .getMany()
+
+    return users
+  }
+
   public buildUserFullName(user: UserInterface) {
     return `${user.firstName} ${user.lastName}`
   }
@@ -76,22 +92,6 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
 
   public async getByIds(ids: string[]): Promise<User[]> {
     return this.repository.find({ where: { id: In(ids) } })
-  }
-
-  @Stopwatch()
-  public async getUsersWithActiveObjectives(teamsIds: Array<TeamInterface['id']>): Promise<User[]> {
-    const users = await this.repository
-      .createQueryBuilder()
-      .innerJoin(`${User.name}.objectives`, 'objective')
-      .innerJoinAndSelect(`${User.name}.teams`, 'team')
-      .innerJoin(Cycle, 'cycle', 'cycle.id = objective.cycle_id')
-      .where('objective.teamId IS NULL')
-      .andWhere('team.id IN(:...teamsIds)', { teamsIds })
-      .andWhere('cycle.active IS TRUE')
-      .orderBy(`${User.name}.firstName`, 'ASC')
-      .getMany()
-
-    return users
   }
 
   public async deactivate(userID: string): Promise<void> {

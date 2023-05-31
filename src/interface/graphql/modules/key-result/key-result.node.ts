@@ -102,6 +102,12 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
   })
   public delta!: DeltaGraphQLObject
 
+  @Field(() => String, {
+    description: 'The comment count of the key result, with a JSON value',
+    nullable: true,
+  })
+  public readonly commentCount?: any
+
   // **********************************************************************************************
   // CONNECTION FIELDS
   // **********************************************************************************************

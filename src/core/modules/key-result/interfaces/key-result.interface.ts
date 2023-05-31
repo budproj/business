@@ -14,4 +14,5 @@ export interface KeyResultInterface extends CoreEntityInterface {
   objectiveId: string
   teamId?: string
   description?: string
+  commentCount?: JSON
 }

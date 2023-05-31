@@ -5,7 +5,7 @@ import * as jwt from 'jsonwebtoken'
 import * as jwksClient from 'jwks-rsa'
 
 import { AuthzConfigProvider } from '@config/authz/authz.provider'
-import { Stopwatch } from "@lib/logger/pino.decorator";
+import { Stopwatch } from '@lib/logger/pino.decorator'
 
 @Injectable()
 export class AuthJwtProvider {
@@ -15,6 +15,15 @@ export class AuthJwtProvider {
     this.client = jwksClient({
       jwksUri: `${config.issuer}.well-known/jwks.json`,
     })
+  }
+
+  @Stopwatch()
+  public async verifyToken(token: string): Promise<jwt.JwtPayload> {
+    const decodedToken = await this.promisifiedVerify(token, this.getKey, {
+      algorithms: ['RS256'],
+    })
+
+    return decodedToken
   }
 
   // eslint-disable-next-line @typescript-eslint/member-ordering
@@ -34,14 +43,5 @@ export class AuthJwtProvider {
       // eslint-disable-next-line unicorn/no-null
       callback(null, signingKey)
     })
-  }
-
-  @Stopwatch()
-  public async verifyToken(token: string): Promise<jwt.JwtPayload> {
-    const decodedToken = await this.promisifiedVerify(token, this.getKey, {
-      algorithms: ['RS256'],
-    })
-
-    return decodedToken
   }
 }

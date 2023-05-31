@@ -73,4 +73,7 @@ export class KeyResult extends CoreEntity implements KeyResultInterface {
 
   @OneToMany('KeyResultCheckIn', 'keyResult', { nullable: true })
   public checkIns?: KeyResultCheckInInterface[]
+
+  @Column({ type: 'json', nullable: true })
+  public commentCount?: JSON
 }

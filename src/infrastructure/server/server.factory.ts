@@ -39,7 +39,7 @@ export class ServerFactory {
 
   private async launch(application: NestFastifyApplication): Promise<void> {
     const config = application.get<ServerConfigProvider>(ServerConfigProvider)
-    const logger = application.get(Logger);
+    const logger = application.get(Logger)
 
     application.setGlobalPrefix(config.prefix ?? '')
     application.useLogger(logger)
