@@ -280,6 +280,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     const objective = await this.corePorts.dispatchCommand<Objective>(
       'publish-objective-and-key-results',
       request.id,
+      userWithContext,
     )
     if (!objective)
       throw new UserInputError(`We could not found an objective with ID ${request.id}`)

@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinTable,
   ManyToMany,
   ManyToOne,
@@ -19,9 +20,12 @@ import { KeyResultCheckInInterface } from './check-in/key-result-check-in.interf
 import { KeyResultCommentInterface } from './comment/key-result-comment.interface'
 import { KeyResultFormat } from './enums/key-result-format.enum'
 import { KeyResultMode } from './enums/key-result-mode.enum'
+import { Author } from './interfaces/key-result-author.interface'
 import { KeyResultInterface } from './interfaces/key-result.interface'
+import { KeyResultUpdateInterface } from './update/key-result-update.interface'
 
 @Entity()
+@Index(['mode', 'teamId', 'updatedAt'])
 export class KeyResult extends CoreEntity implements KeyResultInterface {
   @Column()
   public title: string
@@ -69,12 +73,18 @@ export class KeyResult extends CoreEntity implements KeyResultInterface {
   @Column({ type: 'text', nullable: true })
   public description?: string
 
+  @Column({ type: 'simple-enum', enum: KeyResultMode, default: KeyResultMode.PUBLISHED })
+  public mode: KeyResultMode
+
+  @Column({ type: 'jsonb', nullable: true })
+  public lastUpdatedBy?: Author
+
   @OneToMany('KeyResultComment', 'keyResult', { nullable: true })
   public comments?: KeyResultCommentInterface[]
 
   @OneToMany('KeyResultCheckIn', 'keyResult', { nullable: true })
   public checkIns?: KeyResultCheckInInterface[]
 
-  @Column({ type: 'simple-enum', enum: KeyResultMode, default: KeyResultMode.PUBLISHED })
-  public mode: KeyResultMode
+  @OneToMany('KeyResultUpdate', 'keyResult', { nullable: true })
+  public updates?: KeyResultUpdateInterface[]
 }
