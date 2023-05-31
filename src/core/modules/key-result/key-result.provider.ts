@@ -363,6 +363,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       keyResultId: data.keyResultId,
       type: data.type,
       extra: extraData,
+      parentId: data.parentId,
     }
   }
 

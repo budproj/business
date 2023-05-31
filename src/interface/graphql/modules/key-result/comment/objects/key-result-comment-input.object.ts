@@ -12,4 +12,7 @@ export class KeyResultCommentInputObject {
 
   @Field(() => String, { description: 'The key result comment type' })
   public type?: KeyResultCommentType
+
+  @Field(() => ID, { complexity: 0, description: 'The ID of the parent comment', nullable: true })
+  public readonly parentId?: string | null
 }
