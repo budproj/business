@@ -9,4 +9,5 @@ export interface KeyResultCommentInterface extends CoreEntityInterface {
   userId: string
   type: KeyResultCommentType
   extra?: any
+  parentId?: string
 }
