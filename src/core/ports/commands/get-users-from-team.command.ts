@@ -1,7 +1,7 @@
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 import { User } from '@core/modules/user/user.orm-entity'
-import { Stopwatch } from "@lib/logger/pino.decorator";
+import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { Command } from './base.command'
 import { Filters } from './get-team-members.command'
