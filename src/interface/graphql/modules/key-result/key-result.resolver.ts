@@ -115,6 +115,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     const keyResult = await this.corePorts.dispatchCommand<KeyResult>(
       'update-key-result',
       request.id,
+      userWithContext,
       { ...request.data },
     )
     if (!keyResult)
