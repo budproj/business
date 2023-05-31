@@ -40,6 +40,9 @@ export class KeyResultCommentGraphQLNode implements GuardedNodeGraphQLInterface 
   @Field(() => ID, { complexity: 0, description: 'The user ID that owns this comment' })
   public readonly userId!: string
 
+  @Field(() => ID, { complexity: 0, description: 'The ID of the parent comment', nullable: true })
+  public readonly parentId!: string | null
+
   // **********************************************************************************************
   // RESOLVED FIELDS
   // **********************************************************************************************

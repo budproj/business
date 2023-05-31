@@ -35,4 +35,11 @@ export class KeyResultComment extends CoreEntity implements KeyResultCommentInte
 
   @ManyToOne('User', 'keyResultComments')
   public user: UserInterface
+
+  @Column({ nullable: true })
+  @RelationId((keyResultComment: KeyResultComment) => keyResultComment.parent)
+  public parentId?: KeyResultCommentInterface['id']
+
+  @ManyToOne('KeyResultComment', 'keyResultComment', { nullable: true })
+  public parent?: KeyResultCommentInterface
 }
