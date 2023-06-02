@@ -9,5 +9,5 @@ export interface KeyResultCheckInInterface extends CoreEntityInterface {
   userId: string
   comment?: string
   parentId?: string
-  keyResultStateBeforeCheckin?: KeyResultStateInterface
+  previousState?: KeyResultStateInterface
 }

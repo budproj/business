@@ -35,7 +35,6 @@ import { KeyResultCheckMarkProvider } from './check-mark/key-result-check-mark.p
 import { KeyResultCommentInterface } from './comment/key-result-comment.interface'
 import { KeyResultComment } from './comment/key-result-comment.orm-entity'
 import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
-import { AuthorType } from './enums/key-result-author-type'
 import { KeyResultStateInterface } from './interfaces/key-result-state.interface'
 import { KeyResultRelationFilterProperties, KeyResultRepository } from './key-result.repository'
 import { KeyResultTimelineProvider } from './timeline.provider'
@@ -378,8 +377,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const keyResult = await this.getOne({ id: checkInData.keyResultId })
     const previousCheckIn = await this.keyResultCheckInProvider.getLatestFromKeyResult(keyResult)
 
-    const keyResultStateBeforeCheckin: KeyResultStateInterface = {
-      author: { type: AuthorType.USER, identifier: keyResult.owner.email },
+    const previousState: KeyResultStateInterface = {
       description: keyResult.description,
       format: keyResult.format,
       goal: keyResult.goal,
@@ -396,7 +394,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       confidence: checkInData.confidence,
       comment: checkInData.comment,
       parentId: previousCheckIn?.id,
-      keyResultStateBeforeCheckin,
+      previousState,
     }
   }
 
@@ -466,6 +464,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     queryOptions?: GetOptions<KeyResultComment | KeyResultCheckIn>,
   ): Promise<KeyResultTimelineEntry[]> {
     const timelineQueryResult = await this.timeline.buildUnionQuery(keyResult, queryOptions)
+
     return this.timeline.getEntriesForTimelineOrder(timelineQueryResult)
   }
 

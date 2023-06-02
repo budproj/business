@@ -42,5 +42,5 @@ export class KeyResultCheckIn extends CoreEntity implements KeyResultCheckInInte
   public parent?: KeyResultCheckInInterface
 
   @Column({ type: 'jsonb', nullable: true })
-  public keyResultStateBeforeCheckin?: KeyResultStateInterface
+  public previousState?: KeyResultStateInterface
 }

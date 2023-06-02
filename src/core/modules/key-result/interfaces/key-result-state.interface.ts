@@ -13,5 +13,5 @@ export interface KeyResultStateInterface {
   type: KeyResultType
   ownerId: string
   description: string
-  author: Author
+  author?: Author
 }
