@@ -33,9 +33,16 @@ export class PublishObjectiveAndKeyResultsCommand extends Command<Objective> {
       })
 
       for (const keyResult of keyResults) {
+        const { id, mode, title, goal, format, type, ownerId, description } = keyResult
+
         const oldStateKeyResult: KeyResultStateInterface = {
-          ...keyResult,
-          description: keyResult.description ?? '',
+          mode,
+          title,
+          goal,
+          format,
+          type,
+          ownerId,
+          description: description ?? '',
           author: { type: AuthorType.USER, identifier: userWithContext.email },
         }
         const newStateKeyResult: KeyResultStateInterface = {
@@ -52,7 +59,7 @@ export class PublishObjectiveAndKeyResultsCommand extends Command<Objective> {
 
         const keyResultUpdateInstance: Partial<KeyResultUpdateInterface> = {
           createdAt: new Date(),
-          keyResultId: keyResult.id,
+          keyResultId: id,
           oldState: oldStateKeyResult,
           patches: keyResultUpdatePatches,
           newState: newStateKeyResult,
