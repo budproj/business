@@ -16,6 +16,7 @@ import { TeamFiltersRequest } from '../../requests/team-filters.request'
 
 import { TeamsGraphQLConnection } from './teams.connection'
 import { Stopwatch } from "@lib/logger/pino.decorator";
+import { Cacheable } from "@lib/cache/cacheable.decorator";
 
 @GuardedResolver(TeamsGraphQLConnection)
 export class TeamsConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
@@ -28,6 +29,7 @@ export class TeamsConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
     super(Resource.TEAM, core, core.team)
   }
 
+  @Cacheable((request, user) => [user.id, request], 1 * 60)
   @Stopwatch()
   @GuardedQuery(TeamsGraphQLConnection, 'team:read', { name: 'teams' })
   protected async getTeamsForRequestAndAuthorizedRequestTeam(

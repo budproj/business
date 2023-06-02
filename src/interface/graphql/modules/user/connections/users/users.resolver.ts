@@ -12,6 +12,7 @@ import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorato
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
+import { Cacheable } from "@lib/cache/cacheable.decorator";
 
 import { UserFiltersRequest } from '../../requests/user-filters.request'
 
@@ -31,6 +32,7 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
     super(Resource.USER, core, core.user)
   }
 
+  @Cacheable((request, user) => [user.id, request], 5 * 60)
   @GuardedQuery(UsersGraphQLConnection, 'user:read', { name: 'users' })
   protected async getUsersForRequestAndRequestUserWithContext(
     @Args() request: UserFiltersRequest,
