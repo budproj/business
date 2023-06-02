@@ -8,6 +8,7 @@ import { PolicyAdapter } from '@adapters/policy/policy.adapter'
 import { CommandStatement } from '@adapters/policy/types/command-statement.type'
 import { ResourceStatement } from '@adapters/policy/types/resource-statement.type copy'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
+import { Cacheable } from "@lib/cache/cacheable.decorator";
 
 import { RequestUserWithContext } from '../../context/decorators/request-user-with-context.decorator'
 import { GuardedQuery } from '../decorators/guarded-query.decorator'
@@ -20,6 +21,7 @@ export class PermissionsGraphQLResolver {
   private readonly logger = new Logger(PermissionsGraphQLResolver.name)
   private readonly authz = new PolicyAdapter()
 
+  @Cacheable((scope, user) => [user.id, scope], 15 * 60)
   @GuardedQuery(PermissionsGraphQLObject, 'permission:read', { name: 'permissions' })
   protected getUserPermissionsForScope(
     @Args('scope', { type: () => ScopeGraphQLEnum, defaultValue: Scope.COMPANY })
