@@ -7,6 +7,7 @@ import { Sorting } from '@core/enums/sorting'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 
+import { KeyResultTimelineQueryResult } from '../interfaces/key-result-timeline-query-result.interface'
 import { KeyResultProvider } from '../key-result.provider'
 
 import { KeyResultUpdateInterface } from './key-result-update.interface'
@@ -25,6 +26,15 @@ export class KeyResultUpdateProvider extends CoreEntityProvider<
     private readonly moduleReference: ModuleRef,
   ) {
     super(KeyResultUpdateProvider.name, repository)
+  }
+
+  public async getForTimelineEntries(
+    entries: KeyResultTimelineQueryResult[],
+  ): Promise<KeyResultUpdate[]> {
+    const updateIDs = entries.map((entry) => entry.id)
+    const result = await this.repository.findByIds(updateIDs)
+
+    return result
   }
 
   public async createUpdate(update: Partial<KeyResultUpdateInterface>): Promise<KeyResultUpdate[]> {

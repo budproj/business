@@ -17,6 +17,7 @@ import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-r
 import { KeyResultKeyResultCheckMarkGraphQLConnection } from './connections/key-result-key-result-check-mark/key-result-key-result-check-marks.connection'
 import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-result-key-result-comments/key-result-key-result-comments.connection'
 import { KeyResultKeyResultSupportTeamGraphQLConnection } from './connections/key-result-key-result-support-team/key-result-key-result-support-team.connection'
+import { KeyResultKeyResultUpdatesGraphQLConnection } from './connections/key-result-key-result-updates/key-result-key-result-update.connection'
 import { KeyResultProgressHistoryGraphQLConnection } from './connections/key-result-progress-history/key-result-progress-history.connection'
 import { KeyResultTimelineGraphQLConnection } from './connections/key-result-timeline/key-result-key-result-timeline.connection'
 import { KeyResultFormatGraphQLEnum } from './enums/key-result-format.enum'
@@ -126,6 +127,12 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
   })
   public readonly keyResultComments?: KeyResultKeyResultCommentsGraphQLConnection
 
+  @Field(() => KeyResultKeyResultUpdatesGraphQLConnection, {
+    description: 'A created date ordered list of key result updates for this key result',
+    nullable: true,
+  })
+  public readonly keyResultUpdates?: KeyResultKeyResultUpdatesGraphQLConnection
+
   @Field(() => KeyResultKeyResultCheckInsGraphQLConnection, {
     description: 'A created date ordered list of key result check-ins for this key result',
     nullable: true,
@@ -134,7 +141,7 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
 
   @Field(() => KeyResultTimelineGraphQLConnection, {
     description:
-      'The timeline for this key result. It is ordered by creation date and is composed by both check-ins and comments',
+      'The timeline for this key result. It is ordered by creation date and is composed by updates, feedbacks, check-ins and comments',
   })
   public timeline?: KeyResultTimelineGraphQLConnection
 
