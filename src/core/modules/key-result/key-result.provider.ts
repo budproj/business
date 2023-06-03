@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { uniqBy, pickBy, omitBy, identity, isEmpty, maxBy, flatten, keyBy, uniq } from 'lodash'
+import { uniqBy, pickBy, omitBy, identity, isEmpty, maxBy, flatten, keyBy, uniq, groupBy } from 'lodash';
 import { Any, Brackets, DeleteResult, FindConditions, In } from 'typeorm'
 
 import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
@@ -37,7 +37,8 @@ import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
 import { KeyResultRelationFilterProperties, KeyResultRepository } from './key-result.repository'
 import { KeyResultTimelineProvider } from './timeline.provider'
 import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
-import { Stopwatch } from "@lib/logger/pino.decorator";
+import { Stopwatch } from '@lib/logger/pino.decorator';
+import { Cacheable } from '@lib/cache/cacheable.decorator';
 
 @Injectable()
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
@@ -356,6 +357,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     user: UserInterface,
     checkInData: Partial<KeyResultCheckInInterface>,
   ): Promise<Partial<KeyResultCheckInInterface>> {
+
     const keyResult = await this.getOne({ id: checkInData.keyResultId })
     const previousCheckIn = await this.keyResultCheckInProvider.getLatestFromKeyResult(keyResult)
 
@@ -545,12 +547,13 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     userID: string,
     filters?: KeyResultInterface,
   ): Promise<KeyResult[]> {
-    const selector: Partial<KeyResultInterface> = {
-      ...filters,
-      ownerId: userID,
-    }
-
-    return this.getMany(selector)
+    // const selector: Partial<KeyResultInterface> = {
+    //   ...filters,
+    //   ownerId: userID,
+    // }
+    //
+    // return this.getMany(selector)
+    return (await this.loadAll(filters)).byOwnerId(userID);
   }
 
   public async getAllWithUserIDInSupportTeam(
@@ -623,5 +626,29 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     _queryContext: CoreQueryContext,
   ) {
     return []
+  }
+
+  /**
+   * EXPERIMENTAL: this method is truly a bad practice, but might be the fastest and easiest way to handle the N+1 problem while performing a single query
+   * @param filters?
+   * @private
+   */
+  @Stopwatch()
+  @Cacheable(filters => filters ?? {}, 1 * 60)
+  private async loadAll(filters: Partial<KeyResultInterface>) {
+    const keyResults = await this.getMany(filters);
+
+    const byId = keyBy(keyResults, 'id');
+    const byOwnerId = groupBy(keyResults, 'ownerId');
+
+    return {
+      list: keyResults,
+      byId(id: string) {
+        return byId[id] ?? null;
+      },
+      byOwnerId(ownerId: string) {
+        return byOwnerId[ownerId] ?? [];
+      }
+    };
   }
 }
