@@ -236,8 +236,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.core.team.getOne({ id: team.parentId })
   }
 
-  @Cacheable((request, team, info) => [team.id, request, info], 1 * 60)
-  @Stopwatch()
+  @Cacheable((request, team, info) => [team.id, request, GetResolvedFieldsInEdgesAndNodes(info)], 1 * 60)
+  @Stopwatch({ omitArgs: '2' })
   @ResolveField('users', () => TeamUsersGraphQLConnection, { nullable: true })
   protected async getUsersForTeam(
     @Args() request: TeamMembersFiltersRequest,
