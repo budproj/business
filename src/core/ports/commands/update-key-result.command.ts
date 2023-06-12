@@ -31,10 +31,6 @@ export class UpdateKeyResultCommand extends Command<KeyResult> {
         type,
         ownerId,
         description,
-        author: {
-          type: AuthorType.USER,
-          identifier: userWithContext.email,
-        },
       }
 
       const newKeyResultState: KeyResultStateInterface = {
@@ -45,10 +41,6 @@ export class UpdateKeyResultCommand extends Command<KeyResult> {
         type: keyResult.type ?? type,
         ownerId: keyResult.ownerId ?? ownerId,
         description: keyResult.description ?? description,
-        author: {
-          type: AuthorType.USER,
-          identifier: userWithContext.email,
-        },
       }
 
       const updatePatches: KeyResultPatchInterface[] = Object.keys(keyResult).map((key) => ({
@@ -61,6 +53,10 @@ export class UpdateKeyResultCommand extends Command<KeyResult> {
       const keyResultUpdate: Partial<KeyResultUpdateInterface> = {
         createdAt: new Date(),
         keyResultId: id,
+        author: {
+          type: AuthorType.USER,
+          identifier: userWithContext.id,
+        },
         oldState: oldKeyResultState,
         patches: updatePatches,
         newState: newKeyResultState,

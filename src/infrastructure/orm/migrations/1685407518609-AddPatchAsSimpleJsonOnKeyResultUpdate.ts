@@ -6,6 +6,7 @@ export class AddPatchAsSimpleJsonOnKeyResultUpdate1685407518609 implements Migra
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`ALTER TABLE "key_result_update" DROP COLUMN "patches"`)
     await queryRunner.query(`ALTER TABLE "key_result_update" ADD "patches" json NOT NULL`)
+    await queryRunner.query(`ALTER TABLE "key_result_update" ADD "author" jsonb NOT NULL`)
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
