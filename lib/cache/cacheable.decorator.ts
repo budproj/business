@@ -22,9 +22,14 @@ export const Cacheable = (
   /**
    * Optional NodeCache options object
    */
-  options: NodeCache.Options = {},
+  options: {
+    cache?: NodeCache.Options,
+  } = {},
 ): MethodDecorator => {
-  const cache = new NodeCache(options)
+  const cache = new NodeCache({
+    useClones: false,
+    ...options.cache,
+  })
 
   const ttlGetter = typeof ttlOrGetter === 'function' ? ttlOrGetter : () => ttlOrGetter
 
@@ -54,7 +59,7 @@ export const Cacheable = (
 
           if (safeKey === undefined) {
             console.warn(
-              `@Cacheable at ${contextName} receved undefined key, which is probably a mistake. Falling back to original method for safety reasons.`,
+              `@Cacheable at ${contextName} received undefined key, which is probably a mistake. Falling back to original method for safety reasons.`,
             )
             return callOriginal()
           }
@@ -67,21 +72,18 @@ export const Cacheable = (
         }
 
         if (cache.has(safeKey)) {
-          return cache.get(safeKey)
+          return cache.get<Promise<unknown>>(safeKey)
         }
 
         const result = callOriginal()
 
-        const updateCache = (value) => {
-          cache.set(safeKey, value, ttlGetter(value))
-          return value
-        }
-
         if (result instanceof Promise) {
-          return result.then(updateCache)
+          cache.set(safeKey, result, ttlGetter(result))
+          return result
         }
 
-        return updateCache(result)
+        // Only promises are cached
+        return result
       },
     })
 
