@@ -1,14 +1,9 @@
-import { getManager } from 'typeorm'
+import { getConnection } from 'typeorm'
 
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { AuthorType } from '@core/modules/key-result/enums/key-result-author-type'
 import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.enum'
-import { KeyResultPatchsKeys } from '@core/modules/key-result/enums/key-result-patch.enum'
-import { KeyResultPatchInterface } from '@core/modules/key-result/interfaces/key-result-patch.interface'
-import { KeyResultStateInterface } from '@core/modules/key-result/interfaces/key-result-state.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
-import { KeyResultUpdateInterface } from '@core/modules/key-result/update/key-result-update.interface'
-import { KeyResultUpdate } from '@core/modules/key-result/update/key-result-update.orm-entity'
 import { ObjectiveMode } from '@core/modules/objective/enums/objective-mode.enum'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 
@@ -16,70 +11,38 @@ import { Command } from './base.command'
 
 export class PublishObjectiveAndKeyResultsCommand extends Command<Objective> {
   public async execute(id: string, userWithContext: UserWithContext): Promise<Objective> {
-    const entityManager = getManager()
+    const connection = getConnection()
+    const queryRunner = connection.createQueryRunner()
 
-    return entityManager.transaction(async (transactionEntityManager) => {
-      const publishedKeyResults: KeyResultUpdate[] = []
+    await queryRunner.startTransaction()
 
-      const objective = await transactionEntityManager.findOne(Objective, id, {
-        where: { mode: ObjectiveMode.DRAFT },
-      })
-      objective.mode = ObjectiveMode.PUBLISHED
+    try {
+      const updatedObjective = await queryRunner.manager
+        .createQueryBuilder()
+        .update(Objective)
+        .set({ mode: ObjectiveMode.PUBLISHED })
+        .where({ id, mode: ObjectiveMode.DRAFT })
+        .returning('*')
+        .execute()
 
-      await transactionEntityManager.save(objective)
-
-      const keyResults = await transactionEntityManager.find(KeyResult, {
-        where: { objectiveId: id, mode: KeyResultMode.DRAFT },
-      })
-
-      for (const keyResult of keyResults) {
-        const { id, mode, title, goal, format, type, ownerId, description } = keyResult
-
-        const oldStateKeyResult: KeyResultStateInterface = {
-          mode,
-          title,
-          goal,
-          format,
-          type,
-          ownerId,
-          description: description ?? '',
-          author: { type: AuthorType.USER, identifier: userWithContext.email },
-        }
-        const newStateKeyResult: KeyResultStateInterface = {
-          ...oldStateKeyResult,
+      await queryRunner.manager
+        .createQueryBuilder()
+        .update(KeyResult)
+        .set({
           mode: KeyResultMode.PUBLISHED,
-        }
+          lastUpdatedBy: { type: AuthorType.USER, identifier: userWithContext.id },
+        })
+        .where({ objectiveId: id, mode: KeyResultMode.DRAFT })
+        .execute()
 
-        const keyResultUpdatePatches: KeyResultPatchInterface[] = [
-          {
-            key: KeyResultPatchsKeys.MODE,
-            value: KeyResultMode.PUBLISHED,
-          },
-        ]
+      await queryRunner.commitTransaction()
 
-        const keyResultUpdateInstance: Partial<KeyResultUpdateInterface> = {
-          createdAt: new Date(),
-          keyResultId: id,
-          oldState: oldStateKeyResult,
-          patches: keyResultUpdatePatches,
-          newState: newStateKeyResult,
-        }
-
-        const marshalKeyResultUpdate = transactionEntityManager.create(
-          KeyResultUpdate,
-          keyResultUpdateInstance,
-        )
-
-        publishedKeyResults.push(marshalKeyResultUpdate)
-
-        keyResult.mode = KeyResultMode.PUBLISHED
-        keyResult.lastUpdatedBy = { type: AuthorType.USER, identifier: userWithContext.email }
-      }
-
-      await transactionEntityManager.save(publishedKeyResults)
-      await transactionEntityManager.save(keyResults)
-
-      return objective
-    })
+      return updatedObjective.raw[0]
+    } catch {
+      await queryRunner.rollbackTransaction()
+      throw new Error('Publish OKR transaction error')
+    } finally {
+      await queryRunner.release()
+    }
   }
 }

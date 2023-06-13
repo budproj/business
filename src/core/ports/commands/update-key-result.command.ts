@@ -1,4 +1,4 @@
-import { getManager } from 'typeorm'
+import { getConnection } from 'typeorm'
 
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { AuthorType } from '@core/modules/key-result/enums/key-result-author-type'
@@ -7,7 +7,6 @@ import { KeyResultPatchInterface } from '@core/modules/key-result/interfaces/key
 import { KeyResultStateInterface } from '@core/modules/key-result/interfaces/key-result-state.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
-import { KeyResultUpdateInterface } from '@core/modules/key-result/update/key-result-update.interface'
 import { KeyResultUpdate } from '@core/modules/key-result/update/key-result-update.orm-entity'
 
 import { Command } from './base.command'
@@ -18,10 +17,15 @@ export class UpdateKeyResultCommand extends Command<KeyResult> {
     userWithContext: UserWithContext,
     keyResult: Partial<KeyResultInterface>,
   ): Promise<KeyResult> {
-    const entityManager = getManager()
-    return entityManager.transaction(async (transactionEntityManager) => {
-      const { title, description, format, mode, goal, type, ownerId } =
-        await transactionEntityManager.findOne(KeyResult, id)
+    const connection = getConnection()
+    const queryRunner = connection.createQueryRunner()
+
+    await queryRunner.startTransaction()
+
+    try {
+      const oldKeyResult = await queryRunner.manager.findOne(KeyResult, id)
+
+      const { title, description, format, mode, goal, type, ownerId } = oldKeyResult
 
       const oldKeyResultState: KeyResultStateInterface = {
         mode,
@@ -48,9 +52,14 @@ export class UpdateKeyResultCommand extends Command<KeyResult> {
         value: keyResult[key],
       }))
 
-      await transactionEntityManager.update<KeyResult>(KeyResult, id, keyResult)
+      await queryRunner.manager
+        .createQueryBuilder()
+        .update(KeyResult)
+        .set(keyResult)
+        .where({ id })
+        .execute()
 
-      const keyResultUpdate: Partial<KeyResultUpdateInterface> = {
+      const keyResultUpdate = {
         createdAt: new Date(),
         keyResultId: id,
         author: {
@@ -62,13 +71,20 @@ export class UpdateKeyResultCommand extends Command<KeyResult> {
         newState: newKeyResultState,
       }
 
-      const marshalKeyResultUpdate = transactionEntityManager.create(
-        KeyResultUpdate,
-        keyResultUpdate,
-      )
-      await transactionEntityManager.save(KeyResultUpdate, marshalKeyResultUpdate)
+      const keyResultUpdateInstance = queryRunner.manager.create(KeyResultUpdate, keyResultUpdate)
 
-      return transactionEntityManager.findOne(KeyResult, id)
-    })
+      await queryRunner.manager.save(KeyResultUpdate, keyResultUpdateInstance)
+
+      await queryRunner.commitTransaction()
+
+      const updatedKeyResult = { ...oldKeyResult, ...keyResult }
+
+      return updatedKeyResult
+    } catch {
+      await queryRunner.rollbackTransaction()
+      throw new Error('Update key result transaction error')
+    } finally {
+      await queryRunner.release()
+    }
   }
 }

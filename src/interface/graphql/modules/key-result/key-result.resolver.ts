@@ -122,6 +122,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       userWithContext,
       { ...request.data },
     )
+
     if (!keyResult)
       throw new UserInputError(`We could not found an key-result with ID ${request.id}`)
 
