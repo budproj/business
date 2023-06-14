@@ -1,10 +1,34 @@
 import { get } from 'lodash'
+import * as zlib from 'zlib'
 import * as NodeCache from 'node-cache'
 import * as objectHash from 'object-hash'
 
 type KeyGetter =
   | Parameters<typeof get>[1]
   | ((...arguments_: any[]) => string | Parameters<typeof objectHash.sha1>[0])
+
+const JSON_DATE_KEY = '__@Cacheable_Date';
+
+const compress = (object) => {
+  const json = JSON.stringify(object, function (key, value) {
+    if (this[key] instanceof Date) {
+      return { [JSON_DATE_KEY]: this[key].toISOString() };
+    }
+    return value;
+  })
+
+  return json ? zlib.brotliCompressSync(json) : undefined
+}
+
+const decompress = (compressedValue) => {
+  const json = zlib.brotliDecompressSync(compressedValue).toString()
+  return JSON.parse(json, function (key, value) {
+    if (value && value[JSON_DATE_KEY]) {
+      return new Date(value[JSON_DATE_KEY]);
+    }
+    return value;
+  })
+}
 
 /**
  * @deprecated this is probably one of the worst ways to implement a cache, but still acceptable due to our limited resources and current backend overload
@@ -22,9 +46,20 @@ export const Cacheable = (
   /**
    * Optional NodeCache options object
    */
-  options: NodeCache.Options = {},
+  options: {
+    uncompressed?: boolean,
+    cache?: NodeCache.Options,
+  } = {},
 ): MethodDecorator => {
-  const cache = new NodeCache(options)
+  const cache = new NodeCache({
+    useClones: false,
+    ...options.cache,
+  })
+
+  const compressedCache = new NodeCache({
+    useClones: false,
+    ...options.cache,
+  })
 
   const ttlGetter = typeof ttlOrGetter === 'function' ? ttlOrGetter : () => ttlOrGetter
 
@@ -54,7 +89,7 @@ export const Cacheable = (
 
           if (safeKey === undefined) {
             console.warn(
-              `@Cacheable at ${contextName} receved undefined key, which is probably a mistake. Falling back to original method for safety reasons.`,
+              `@Cacheable at ${contextName} received undefined key, which is probably a mistake. Falling back to original method for safety reasons.`,
             )
             return callOriginal()
           }
@@ -66,22 +101,39 @@ export const Cacheable = (
           return callOriginal()
         }
 
+        if (compressedCache.has(safeKey)) {
+          return compressedCache.get<Promise<Buffer | undefined>>(safeKey).then((compressedValue) => {
+            return compressedValue ? decompress(compressedValue) : undefined
+          })
+        }
+
         if (cache.has(safeKey)) {
-          return cache.get(safeKey)
+          return cache.get<Promise<unknown>>(safeKey)
         }
 
         const result = callOriginal()
 
-        const updateCache = (value) => {
-          cache.set(safeKey, value, ttlGetter(value))
-          return value
-        }
-
         if (result instanceof Promise) {
-          return result.then(updateCache)
+          cache.set(safeKey, result, ttlGetter(result))
+
+          if (!options.uncompressed) {
+            return result.then(value => {
+              const compressedValue = compress(value)
+              const compressedPromise = Promise.resolve(compressedValue)
+
+              // Replace cached promise with compressed value
+              cache.del(safeKey)
+              compressedCache.set<Promise<Buffer | undefined>>(safeKey, compressedPromise, ttlGetter(value))
+
+              return value
+            })
+          }
+
+          return result
         }
 
-        return updateCache(result)
+        // Only promises are cached
+        return result
       },
     })
 
