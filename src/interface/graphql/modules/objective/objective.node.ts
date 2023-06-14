@@ -26,7 +26,7 @@ export class ObjectiveGraphQLNode implements GuardedNodeGraphQLInterface {
   public readonly description!: string
 
   @Field({ complexity: 0, description: 'The mode of the objective' })
-  public readonly mode?: ObjectiveMode
+  public readonly mode!: ObjectiveMode
 
   @Field({ complexity: 0, description: 'The last update date of the objective' })
   public readonly updatedAt!: Date

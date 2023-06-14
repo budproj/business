@@ -12,22 +12,25 @@ export class PublishObjectiveAndKeyResultsCommand extends Command<Objective> {
     const entityManager = getManager()
 
     return entityManager.transaction(async (transactionEntityManager) => {
-      const objective = await transactionEntityManager.findOne(Objective, id, {
-        where: { mode: ObjectiveMode.DRAFT },
-      })
-      objective.mode = ObjectiveMode.PUBLISHED
+      const updatedObjectiveResult = await transactionEntityManager
+        .createQueryBuilder()
+        .update(Objective)
+        .set({ mode: ObjectiveMode.PUBLISHED })
+        .where('id = :id AND mode = :mode', { id, mode: ObjectiveMode.DRAFT })
+        .returning('*')
+        .execute()
 
-      await transactionEntityManager.save(objective)
+      await transactionEntityManager
+        .createQueryBuilder()
+        .update(KeyResult)
+        .set({ mode: KeyResultMode.PUBLISHED })
+        .where('objective_id = :objective_id AND mode = :mode', {
+          objective_id: id,
+          mode: KeyResultMode.DRAFT,
+        })
+        .execute()
 
-      const keyResults = await transactionEntityManager.find(KeyResult, {
-        where: { objectiveId: id, mode: KeyResultMode.DRAFT },
-      })
-
-      for (const keyResult of keyResults) {
-        keyResult.mode = KeyResultMode.PUBLISHED
-      }
-
-      await transactionEntityManager.save(keyResults)
+      const objective = updatedObjectiveResult.raw[0]
 
       return objective
     })

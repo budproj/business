@@ -7,6 +7,6 @@ export interface ObjectiveInterface extends CoreEntityInterface {
   cycleId: string
   ownerId: string
   teamId?: string
-  objective?: string
+  description?: string
   cycle: CycleInterface
 }

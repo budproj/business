@@ -42,7 +42,6 @@ export class RelayGraphQLAdapter {
     parentNode?: NodeRelayGraphQLInterface,
   ): Connection<N> {
     const connection = connectionFromArray(nodes, {})
-    console.log({ nodes, connectionRequest, connection })
 
     return {
       ...connection,
