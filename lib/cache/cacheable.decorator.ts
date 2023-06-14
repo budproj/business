@@ -1,5 +1,4 @@
 import { get } from 'lodash'
-import * as zlib from 'zlib'
 import * as NodeCache from 'node-cache'
 import * as objectHash from 'object-hash'
 
@@ -23,20 +22,9 @@ export const Cacheable = (
   /**
    * Optional NodeCache options object
    */
-  options: {
-    uncompressed?: boolean,
-    cache?: NodeCache.Options,
-  } = {},
+  options: NodeCache.Options = {},
 ): MethodDecorator => {
-  const cache = new NodeCache({
-    useClones: false,
-    ...options.cache,
-  })
-
-  const compressedCache = new NodeCache({
-    useClones: false,
-    ...options.cache,
-  })
+  const cache = new NodeCache(options)
 
   const ttlGetter = typeof ttlOrGetter === 'function' ? ttlOrGetter : () => ttlOrGetter
 
@@ -66,7 +54,7 @@ export const Cacheable = (
 
           if (safeKey === undefined) {
             console.warn(
-              `@Cacheable at ${contextName} received undefined key, which is probably a mistake. Falling back to original method for safety reasons.`,
+              `@Cacheable at ${contextName} receved undefined key, which is probably a mistake. Falling back to original method for safety reasons.`,
             )
             return callOriginal()
           }
@@ -78,40 +66,22 @@ export const Cacheable = (
           return callOriginal()
         }
 
-        if (compressedCache.has(safeKey)) {
-          return compressedCache.get<Promise<Buffer>>(safeKey).then((compressedValue) => {
-            const uncompressedValue = zlib.brotliDecompressSync(compressedValue).toString()
-            return JSON.parse(uncompressedValue)
-          })
-        }
-
         if (cache.has(safeKey)) {
-          return cache.get<Promise<unknown>>(safeKey)
+          return cache.get(safeKey)
         }
 
         const result = callOriginal()
 
-        if (result instanceof Promise) {
-          cache.set(safeKey, result, ttlGetter(result))
-
-          if (!options.uncompressed) {
-            return result.then(value => {
-              const compressedValue = zlib.brotliCompressSync(JSON.stringify(value))
-              const compressedPromise = Promise.resolve(compressedValue)
-
-              // Replace cached promise with compressed value
-              cache.del(safeKey)
-              compressedCache.set<Promise<Buffer>>(safeKey, compressedPromise, ttlGetter(value))
-
-              return value
-            })
-          }
-
-          return result
+        const updateCache = (value) => {
+          cache.set(safeKey, value, ttlGetter(value))
+          return value
         }
 
-        // Only promises are cached
-        return result
+        if (result instanceof Promise) {
+          return result.then(updateCache)
+        }
+
+        return updateCache(result)
       },
     })
 
