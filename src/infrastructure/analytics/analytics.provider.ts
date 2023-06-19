@@ -4,6 +4,7 @@ import { ClientGrpc } from '@nestjs/microservices'
 import { AnalyticsAdapter } from '@adapters/analytics/adapter.interface'
 import { ProgressRecord } from '@adapters/analytics/progress-record.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
+import { Stopwatch } from '@lib/logger/pino.decorator';
 
 import { AnalyticsDateWindow } from './analytics.enums'
 import {
@@ -46,6 +47,7 @@ export class AnalyticsProvider implements OnModuleInit, AnalyticsAdapter {
     return data.map((progressRecord) => AnalyticsProvider.marshalProgressRecord(progressRecord))
   }
 
+  @Stopwatch({ includeReturn: true })
   private async getWeeklyProgressWithStaticHead(
     keyResultId: string,
     headKeyResultCheckInData?: KeyResultCheckIn,
@@ -61,6 +63,7 @@ export class AnalyticsProvider implements OnModuleInit, AnalyticsAdapter {
     return this.keyResultGRPCService.getProgressHistoryWithStaticHead(options).toPromise()
   }
 
+  @Stopwatch({ includeReturn: true })
   private async getHistoricWeeklyProgress(
     keyResultId: string,
     startDate?: Date,
