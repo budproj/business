@@ -9,6 +9,7 @@ import { User } from '@core/modules/user/user.orm-entity'
 import { EntityOrderAttributes, Order, OrderAttribute } from '@core/types/order-attribute.type'
 
 import { Command } from './base.command'
+import { Stopwatch } from '@lib/logger/pino.decorator';
 
 export abstract class BaseStatusCommand extends Command<Status> {
   protected readonly defaultOptions: GetStatusOptions = {}
@@ -48,14 +49,12 @@ export abstract class BaseStatusCommand extends Command<Status> {
 
   protected async getKeyResultProgressesFromKeyResultList(
     keyResults: KeyResult[],
+    latestCheckIns: KeyResultCheckInInterface[],
   ): Promise<number[]> {
-    const progressPromises = keyResults.map(async (keyResult) =>
-      this.core.keyResult.getCheckInProgress(keyResult.checkIns[0], keyResult),
-    )
-
-    return Promise.all(progressPromises)
+    return await this.core.keyResult.getCheckInProgressBatch(keyResults, latestCheckIns);
   }
 
+  @Stopwatch()
   protected async unzipKeyResultGroup(
     keyResults: KeyResult[],
     isUnzipingObjective = true,
@@ -66,7 +65,7 @@ export abstract class BaseStatusCommand extends Command<Status> {
     const latestCheckIns = keyResults.map((keyResult) => keyResult.checkIns[0])
 
     const groupedKeyResultsProgressPromise = keyResultsByObjective.map(async (keyResultList) =>
-      this.getKeyResultProgressesFromKeyResultList(keyResultList),
+      this.getKeyResultProgressesFromKeyResultList(keyResultList, latestCheckIns),
     )
     const groupedKeyResultsProgress = await Promise.all(groupedKeyResultsProgressPromise)
 
@@ -99,6 +98,9 @@ export abstract class BaseStatusCommand extends Command<Status> {
     return zip(entities, orderAttributes)
   }
 
+  /**
+   * @deprecated TODO: implement date filter at query level
+   */
   protected removeKeyResultCheckInsBeforeDate(
     rawKeyResults: KeyResult[],
     date?: Date,

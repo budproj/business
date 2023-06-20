@@ -26,7 +26,7 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
 
     const [sortedTeams] = unzip(descendingSortedPairs) as [Team[]]
 
-    return sortedTeams
+    return sortedTeams ?? []
   }
 
   public async execute(
@@ -34,24 +34,10 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
     filters?: FindConditions<TeamInterface>,
     queryOptions?: GetOptions<TeamInterface>,
   ): Promise<Team[]> {
-    const teamDescendants = await this.getDescendants(teamID, filters, queryOptions)
+    const teamDescendants = await this.core.team.getDescendantsByIds([teamID], false, filters, queryOptions)
     const teamDescendantsStatus = await this.getTeamsStatus(teamDescendants)
 
     return GetTeamRankedDescendantsCommand.rankTeamsByStatus(teamDescendants, teamDescendantsStatus)
-  }
-
-  private async getDescendants(
-    teamID: string,
-    filters?: FindConditions<TeamInterface>,
-    queryOptions?: GetOptions<TeamInterface>,
-  ): Promise<Team[]> {
-    const teamNodeTree = await this.core.team.getTeamNodesTreeAfterTeam(
-      teamID,
-      filters,
-      queryOptions,
-    )
-
-    return teamNodeTree.slice(1)
   }
 
   private async getTeamsStatus(teams: Team[]): Promise<Status[]> {
@@ -60,6 +46,7 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
         active: true,
       },
     }
+    // TODO: use a single command to get all statuses at once
     const teamStatusPromises = teams.map(async (team) =>
       this.getTeamStatus.execute(team.id, statusOptions),
     )

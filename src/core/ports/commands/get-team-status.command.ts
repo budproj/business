@@ -2,6 +2,7 @@ import { GetStatusOptions, Status } from '@core/interfaces/status.interface'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { BaseStatusCommand } from '@core/ports/commands/base-status.command'
+import { Stopwatch } from "@lib/logger/pino.decorator";
 
 export interface GetTeamStatusOptions extends GetStatusOptions {
   cycleFilters?: Partial<CycleInterface>
@@ -12,6 +13,7 @@ export class GetTeamStatusCommand extends BaseStatusCommand {
     return keyResults.some((keyResult) => keyResult?.objective?.cycle?.active)
   }
 
+  @Stopwatch()
   public async execute(
     teamID: string,
     options: GetTeamStatusOptions = this.defaultOptions,

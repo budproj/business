@@ -197,6 +197,7 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
       .createQueryBuilder()
       .where(selector)
       .take(options?.limit ?? 0)
+      .offset(options?.offset ?? 0)
       .orderBy(orderBy)
 
     return constrainQuery ? constrainQuery(query) : query

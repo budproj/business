@@ -39,6 +39,8 @@ import { CycleCreateRequest } from './requests/cycle-create-request'
 import { CycleFiltersRequest } from './requests/cycle-filters.request'
 import { CycleUpdateRequest } from './requests/cycle-update.request'
 import { CyclesInSamePeriodRequest } from './requests/cycles-in-same-period.request'
+import { Cacheable } from '@lib/cache/cacheable.decorator';
+import { Stopwatch } from '@lib/logger/pino.decorator';
 
 @GuardedResolver(CycleGraphQLNode)
 export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, CycleInterface> {
@@ -83,7 +85,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       Cycle
     >(request)
 
-    const userTeamsTree = await this.core.team.getTeamNodesTreeBeforeTeam(userWithContext.teams)
+    const userTeamsTree = await this.core.team.getAscendantsByIds(userWithContext.teams.map(({ id }) => id), {})
     const queryResult = await this.core.cycle.getCyclesInSamePeriodFromTeamsAndParentIDsWithFilters(
       userTeamsTree,
       fromCycles,
@@ -116,6 +118,8 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     return result
   }
 
+  @Cacheable('0.teamId', 60 * 60)
+  @Stopwatch({ omitArgs: true })
   @ResolveField('team', () => TeamGraphQLNode)
   protected async getTeamForCycle(@Parent() cycle: CycleGraphQLNode) {
     this.logger.log({
@@ -126,6 +130,8 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     return this.core.team.getOne({ id: cycle.teamId })
   }
 
+  @Cacheable((request, cycle) => [cycle.id, request], 5 * 60)
+  @Stopwatch({ omitArgs: true })
   @ResolveField('objectives', () => ObjectivesGraphQLConnection, { nullable: true })
   protected async getObjectivesForCycle(
     @Args() request: ObjectiveFiltersRequest,
@@ -147,6 +153,8 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     return this.relay.marshalResponse<ObjectiveInterface>(queryResult, connection, cycle)
   }
 
+  @Cacheable('0.parentId', 60 * 60)
+  @Stopwatch({ omitArgs: true })
   @ResolveField('parent', () => CycleGraphQLNode, { nullable: true })
   protected async getParentCycleForCycle(@Parent() cycle: CycleGraphQLNode) {
     this.logger.log({
@@ -179,6 +187,8 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     return this.relay.marshalResponse<CycleInterface>(sortedByCadenceChildCycles, connection, cycle)
   }
 
+  @Cacheable((request, cycle) => [cycle.id, request], 5 * 60)
+  @Stopwatch({ omitArgs: true })
   @ResolveField('keyResults', () => CycleKeyResultsGraphQLConnection, { nullable: true })
   protected async getKeyResultsForRequestAndCycle(
     @Args() request: KeyResultFiltersRequest,

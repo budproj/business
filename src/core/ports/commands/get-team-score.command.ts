@@ -7,6 +7,7 @@ import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 import { User } from '@core/modules/user/user.orm-entity'
 
 import { Command } from './base.command'
+import { GetTeamMembersCommandResult } from "@core/ports/commands/get-team-members.command";
 
 interface UserWithLastCheckInAndRoutines extends User {
   latestCheckIn: KeyResultCheckInInterface
@@ -32,11 +33,11 @@ export class GetTeamScore extends Command<any> {
     teamID: Team['id'],
     allUsers = false,
   ): Promise<UserWithLastCheckInAndRoutines[]> {
-    const getTeamMembersCommand = this.factory.buildCommand<User[]>('get-team-members')
+    const getTeamMembersCommand = this.factory.buildCommand<GetTeamMembersCommandResult>('get-team-members')
     const getUserKeyResultsStatus = this.factory.buildCommand<Status>('get-user-key-results-status')
     const getUserCompaines = this.factory.buildCommand<Team[]>('get-user-companies')
 
-    const users = await getTeamMembersCommand.execute(teamID, { status: UserStatus.ACTIVE })
+    const { users } = await getTeamMembersCommand.execute(teamID, { status: UserStatus.ACTIVE })
 
     const usersWithLastCheckInAndRoutines = await Promise.all(
       users.map(async (user) => {

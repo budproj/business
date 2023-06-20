@@ -55,6 +55,9 @@ import { TeamMembersFiltersRequest } from './requests/team-members-filters.reque
 import { TeamUpdateRequest } from './requests/team-update.request'
 import { TeamAccessControl } from './team.access-control'
 import { TeamGraphQLNode } from './team.node'
+import { Stopwatch } from '@lib/logger/pino.decorator'
+import { Cacheable } from "@lib/cache/cacheable.decorator";
+import { GetTeamMembersCommandResult } from '@core/ports/commands/get-team-members.command';
 
 @GuardedResolver(TeamGraphQLNode)
 export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamInterface> {
@@ -68,6 +71,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     super(Resource.TEAM, core, core.team, accessControl)
   }
 
+  @Stopwatch()
   @GuardedQuery(TeamGraphQLNode, 'team:read', { name: 'team' })
   protected async getTeamForRequestAndRequestUserWithContext(
     @Args() request: NodeIndexesRequest,
@@ -137,6 +141,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return updatedTeam
   }
 
+  @Cacheable((team, request) => [team.id, request], 5 * 60)
+  @Stopwatch()
   @ResolveField('status', () => StatusGraphQLObject)
   protected async getStatusForCycle(
     @Parent() team: TeamGraphQLNode,
@@ -155,6 +161,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return result
   }
 
+  @Cacheable('0.ownerId', 60 * 60)
+  @Stopwatch()
   @ResolveField('owner', () => UserGraphQLNode)
   protected async getOwnerForTeam(@Parent() team: TeamGraphQLNode) {
     this.logger.log({
@@ -165,6 +173,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.core.user.getOne({ id: team.ownerId })
   }
 
+  @Cacheable((request, team) => [team.id, request], 1 * 60)
+  @Stopwatch()
   @ResolveField('teams', () => TeamTeamsGraphQLConnection, { nullable: true })
   protected async getChildTeamsForTeam(
     @Args() request: TeamFiltersRequest,
@@ -186,6 +196,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.relay.marshalResponse<TeamInterface>(queryResult, connection, team)
   }
 
+  @Cacheable((request, team) => [team.id, request], 15 * 60)
+  @Stopwatch()
   @ResolveField('rankedDescendants', () => TeamTeamsGraphQLConnection, { nullable: true })
   protected async getRankedDescendantsForTeam(
     @Args() request: TeamFiltersRequest,
@@ -212,6 +224,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.relay.marshalResponse<TeamInterface>(result, connection, team)
   }
 
+  @Cacheable('0.parentId', 60 * 60)
+  @Stopwatch()
   @ResolveField('parent', () => TeamGraphQLNode, { nullable: true })
   protected async getParentForTeam(@Parent() team: TeamGraphQLNode) {
     this.logger.log({
@@ -222,6 +236,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.core.team.getOne({ id: team.parentId })
   }
 
+  @Cacheable((request, team, info) => [team.id, request, GetResolvedFieldsInEdgesAndNodes(info)], 1 * 60)
+  @Stopwatch({ omitArgs: '2' })
   @ResolveField('users', () => TeamUsersGraphQLConnection, { nullable: true })
   protected async getUsersForTeam(
     @Args() request: TeamMembersFiltersRequest,
@@ -274,14 +290,14 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     delete filters.withIndicators
     delete filters.allUsers
 
-    const queryResult = await this.corePorts.dispatchCommand<User[]>(
+    const { users } = await this.corePorts.dispatchCommand<GetTeamMembersCommandResult>(
       'get-team-members',
       team.id,
       filters,
       getOptions,
     )
 
-    return this.relay.marshalResponse<UserInterface>(queryResult, connection, team)
+    return this.relay.marshalResponse<UserInterface>(users, connection, team)
   }
 
   @ResolveField('isCompany', () => Boolean)
@@ -294,6 +310,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.core.team.specification.isACompany.isSatisfiedBy(team)
   }
 
+  @Cacheable((request, team) => [team.id, request], 5 * 60)
+  @Stopwatch()
   @ResolveField('cycles', () => TeamCyclesGraphQLConnection, { nullable: true })
   protected async getCyclesForTeam(
     @Args() request: CycleFiltersRequest,
@@ -315,6 +333,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.relay.marshalResponse<CycleInterface>(queryResult, connection, team)
   }
 
+  @Stopwatch()
   @ResolveField('objectives', () => TeamObjectivesGraphQLConnection, { nullable: true })
   protected async getObjectivesForRequestAndUser(
     @Args() request: ObjectiveFiltersRequest,
@@ -344,6 +363,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.relay.marshalResponse<ObjectiveInterface>(objectives, connection, team)
   }
 
+  @Stopwatch()
   @ResolveField('supportObjectives', () => TeamObjectivesGraphQLConnection, { nullable: true })
   protected async getSupportObjectivesForRequestAndUser(
     @Args() request: ObjectiveFiltersRequest,
@@ -373,6 +393,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.relay.marshalResponse<ObjectiveInterface>(objectives, connection, team)
   }
 
+  @Stopwatch()
   @ResolveField('allObjectives', () => TeamObjectivesGraphQLConnection, { nullable: true })
   protected async getAllObjectivesForRequestAndUser(
     @Args() request: ObjectiveFiltersRequest,
@@ -410,6 +431,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.relay.marshalResponse<ObjectiveInterface>(allObjectives, connection, team)
   }
 
+  @Stopwatch()
   @ResolveField('keyResults', () => TeamKeyResultsGraphQLConnection, { nullable: true })
   protected async getKeyResultsForTeam(
     @Args() request: UserKeyResultsRequest,
@@ -443,6 +465,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.relay.marshalResponse<KeyResultInterface>(keyResults, connection, team)
   }
 
+  @Cacheable((team, request) => [team.id, request], 15 * 60)
+  @Stopwatch()
   @ResolveField('delta', () => DeltaGraphQLObject)
   protected async getDeltaForTeam(
     @Parent() team: TeamGraphQLNode,
@@ -461,6 +485,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return result
   }
 
+  @Cacheable('0.id', 5 * 60)
+  @Stopwatch()
   @ResolveField('tacticalCycle', () => CycleGraphQLNode, { nullable: true })
   protected async getTacticalCycleForTeam(@Parent() team: TeamGraphQLNode) {
     this.logger.log({

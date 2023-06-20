@@ -6,8 +6,8 @@ import {
   ManyToOne,
   OneToMany,
   RelationId,
-  UpdateDateColumn,
-} from 'typeorm'
+  UpdateDateColumn
+} from "typeorm";
 
 import { CoreEntity } from '@core/core.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'

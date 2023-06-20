@@ -24,6 +24,7 @@ import { NotificationMetadata } from '../types/notification-metadata.type'
 
 import { BaseNotification } from './base.notification'
 import { NotificationChannelHashMap } from './notification.factory'
+import { GetTeamMembersCommandResult } from "@core/ports/commands/get-team-members.command";
 
 type CreatedCheckInData = RelatedData & ResolvedData
 
@@ -134,9 +135,9 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
       id: keyResult.teamId,
     })
 
-    const keyResultTeamMembers = keyResult.teamId
-      ? await this.core.dispatchCommand<UserInterface[]>('get-team-members', keyResult.teamId)
-      : []
+    const { users: keyResultTeamMembers, teams } = keyResult.teamId
+      ? await this.core.dispatchCommand<GetTeamMembersCommandResult>('get-team-members', keyResult.teamId)
+      : { users: [], teams: [] }
 
     const keyResultSupportTeamMembers = await this.core.dispatchCommand<UserInterface[]>(
       'get-key-result-support-team',

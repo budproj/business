@@ -5,6 +5,7 @@ import * as jwt from 'jsonwebtoken'
 import * as jwksClient from 'jwks-rsa'
 
 import { AuthzConfigProvider } from '@config/authz/authz.provider'
+import { Stopwatch } from "@lib/logger/pino.decorator";
 
 @Injectable()
 export class AuthJwtProvider {
@@ -35,6 +36,7 @@ export class AuthJwtProvider {
     })
   }
 
+  @Stopwatch()
   public async verifyToken(token: string): Promise<jwt.JwtPayload> {
     const decodedToken = await this.promisifiedVerify(token, this.getKey, {
       algorithms: ['RS256'],

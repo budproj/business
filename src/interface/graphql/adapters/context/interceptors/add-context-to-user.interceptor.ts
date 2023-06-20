@@ -7,6 +7,7 @@ import { PolicyAdapter } from '@adapters/policy/policy.adapter'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 import { CoreProvider } from '@core/core.provider'
+import { Cacheable } from "@lib/cache/cacheable.decorator";
 
 import { GraphQLRequest } from '../interfaces/request.interface'
 
@@ -39,6 +40,7 @@ export class AddContextToUserInterceptor implements NestInterceptor {
     return next.handle()
   }
 
+  @Cacheable(({ user }) => [user.id, user.token.sub, user.token.permissions], 15 * 60)
   private async getRequestUser(request: GraphQLRequest): Promise<UserWithContext> {
     const { teams, ...user } = await this.core.user.getUserFromSubjectWithTeamRelation(
       request.user.token.sub,

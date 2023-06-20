@@ -12,6 +12,7 @@ import { GuardedMutation } from '@interface/graphql/adapters/authorization/decor
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
+import { Cacheable } from "@lib/cache/cacheable.decorator";
 
 import { UserAccessControl } from '../../user.access-control'
 import { UserGraphQLNode } from '../../user.node'
@@ -100,6 +101,7 @@ export class UserTeamsConnectionGraphQLResolver extends GuardedConnectionGraphQL
     return this.corePorts.dispatchCommand<User>('remove-team-from-user', request)
   }
 
+  @Cacheable('0.id', 5 * 60)
   @ResolveField('quantities', () => QuantityNode)
   protected async quantities(@RequestUserWithContext() userWithContext: UserWithContext) {
     this.logger.log({

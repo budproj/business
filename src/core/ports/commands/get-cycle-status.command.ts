@@ -1,8 +1,13 @@
 import { GetStatusOptions, Status } from '@core/interfaces/status.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { BaseStatusCommand } from '@core/ports/commands/base-status.command'
+import { Cacheable } from '@lib/cache/cacheable.decorator';
+import { Stopwatch } from '@lib/logger/pino.decorator';
 
 export class GetCycleStatusCommand extends BaseStatusCommand {
+
+  @Cacheable((cycleID, options) => [cycleID, Math.floor(options?.date?.getTime() / (1000 * 60 * 60))], 60 * 60)
+  @Stopwatch({ omitArgs: true })
   public async execute(
     cycleID: string,
     options: GetStatusOptions = this.defaultOptions,

@@ -9,11 +9,6 @@ export class GetKeyResultTeamTreeCommand extends Command<Team[]> {
       return []
     }
 
-    const keyResultTeamIndexes = { id: keyResult.teamId }
-    const keyResultTeam = await this.core.team.getFromIndexes(keyResultTeamIndexes)
-
-    const teamTree = await this.core.team.getTeamNodesTreeBeforeTeam(keyResultTeam)
-
-    return teamTree
+    return this.core.team.getAscendantsByIds([keyResult.teamId], {});
   }
 }
