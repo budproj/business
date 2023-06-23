@@ -65,12 +65,12 @@ export class PendingTasksNotification extends BaseNotification<
     const usersWithPendingKeyResultsPromises = relatedData.companyUsers.map<
       Promise<User | undefined>
     >(async (user) => {
-      const pendingKeyResults = await this.core.dispatchCommand<number>(
+      const hasPendingKeyResults = await this.core.dispatchCommand<number>(
         'check-if-user-has-pending-key-results',
         user.id,
       )
 
-      if (pendingKeyResults > 0) return user
+      if (hasPendingKeyResults) return user
     })
 
     const usersWithPendingKeyResults = await Promise.all(usersWithPendingKeyResultsPromises)

@@ -1,14 +1,17 @@
 import { GetStatusOptions, Status } from '@core/interfaces/status.interface'
 import { BaseStatusCommand } from '@core/ports/commands/base-status.command'
+import { Stopwatch } from '@lib/logger/pino.decorator';
+import { KeyResult } from '@core/modules/key-result/key-result.orm-entity';
 
 export class GetKeyResultStatusCommand extends BaseStatusCommand {
+  @Stopwatch()
   public async execute(
-    keyResultID: string,
+    keyResultOrID: string | KeyResult,
     options: GetStatusOptions = this.defaultOptions,
   ): Promise<Status> {
-    const keyResult = await this.core.keyResult.getFromID(keyResultID)
+    const keyResult = typeof keyResultOrID === 'string' ? await this.core.keyResult.getFromID(keyResultOrID) : keyResultOrID
     const latestCheckIn = await this.core.keyResult.getLatestCheckInForKeyResultAtDate(
-      keyResultID,
+      keyResult.id,
       options.date,
     )
 

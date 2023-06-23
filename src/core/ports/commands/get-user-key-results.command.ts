@@ -18,7 +18,7 @@ export class GetUserKeyResultsCommand extends Command<KeyResult[]> {
   ): Promise<KeyResult[]> {
     const ownedKeyResults = await this.core.keyResult.getOwnedByUserID(userID, filters)
 
-    if (options.onlyOwnerKeyResults) {
+    if (options?.onlyOwnerKeyResults) {
       const keyResults = await this.applyOptions(ownedKeyResults, options)
 
       return keyResults
