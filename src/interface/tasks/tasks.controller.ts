@@ -27,11 +27,16 @@ export class TasksController {
     private readonly notification: NotificationProvider,
   ) {}
 
+  @Stopwatch()
   @RabbitRPC({
     exchange: 'bud',
     queue: 'business.notification-ports',
     routingKey: 'business.notification-ports.#',
-    errorHandler: defaultNackErrorHandler,
+    errorHandler: (channel, msg, error) => {
+      // TODO: inject logger and use it instead
+      console.log('@RabbitRPC on channel', channel, 'and with message', msg, 'failed due to', error);
+      return defaultNackErrorHandler(channel, msg, error);
+    },
     queueOptions: {
       deadLetterExchange: 'dead',
     },
