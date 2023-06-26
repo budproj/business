@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 
 import { AuthzModule } from '@infrastructure/authz/authz.module'
 import { NatsModule } from '@interface/nats/nats.module'
+import { LLMsDomainModule } from 'src/llm/llms-domain.module'
 
 import { CoreProvider } from './core.provider'
 import { CycleModule } from './modules/cycle/cycle.module'
@@ -20,6 +21,7 @@ import { CorePortsProvider } from './ports/ports.provider'
     CycleModule,
     ObjectiveModule,
     KeyResultModule,
+    LLMsDomainModule,
     TaskModule,
     AuthzModule,
     NatsModule,
