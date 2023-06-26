@@ -5,7 +5,8 @@
   "extends": ["@budproj/eslint-config-base-ts", "@budproj/eslint-config-prettier-ts"],
   "rules": {
     "new-cap": "off",
-    "max-params": "off"
+    "max-params": "off",
+    "unicorn/no-null": "off"
   },
   "settings": {
     "import/resolver": {
