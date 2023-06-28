@@ -38,7 +38,8 @@
     "waypoint:build": "waypoint build -var=\"GITHUB_TOKEN=$GITHUB_TOKEN\"",
     "waypoint:deploy": "waypoint deploy",
     "waypoint:up": "waypoint up -var=\"GITHUB_TOKEN=$GITHUB_TOKEN\"",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "migrate:dev": "npx prisma migrate dev"
   },
   "author": "delucca <delucca@pm.me>",
   "license": "Apache-2.0",
