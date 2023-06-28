@@ -2,6 +2,8 @@ version: '3.7'
 
 volumes:
   postgres:
+  postgres-llms:
+
 
 services:
   db-postgres:
@@ -19,6 +21,22 @@ services:
     networks:
       - bud-business
 
+  db-postgres-llms:
+    image: postgres
+    container_name: llms-postgres
+    restart: always
+    tty: true
+    ports:
+      - 5462:5432
+    volumes:
+      - type: volume
+        source: postgres-llms
+        target: /data/postgres-llms
+    environment:
+      - POSTGRES_USER=llmsdomain
+      - POSTGRES_PASSWORD=changeme
+      - POSTGRES_DB=llms
+
   rabbitmq:
     image: rabbitmq:management
     networks:
@@ -26,7 +44,6 @@ services:
     ports:
       - 5672:5672
       - 8081:15672
-
   # business:
   #   build:
   #       context: .
