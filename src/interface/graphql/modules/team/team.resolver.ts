@@ -413,6 +413,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     const objectiveOrderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
     const orderAttributes = [['objective', objectiveOrderAttributes]]
 
+    // TODO: merge both queries into one with filter
+    // TODO: { $or: [{ keyResult: { teamId } }, { objective: { teamId } }] }
     const objectives = await this.corePorts.dispatchCommand<Objective[]>(
       'get-team-objectives',
       team.id,
@@ -427,6 +429,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     )
 
     const allObjectives = uniqBy([...objectives, ...supportObjectives], 'id')
+
+    this.logger.log('Got unique objectives %', allObjectives)
 
     return this.relay.marshalResponse<ObjectiveInterface>(allObjectives, connection, team)
   }

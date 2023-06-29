@@ -5,6 +5,7 @@ import { ObjectiveRelationFilterProperties } from '@core/modules/objective/objec
 import { EntityOrderAttributes, OrderAttribute } from '@core/types/order-attribute.type'
 
 import { Command } from './base.command'
+import { Stopwatch } from '@lib/logger/pino.decorator';
 
 interface GetTeamObjectivesProperties {
   active: boolean
@@ -34,6 +35,7 @@ export class GetTeamObjectivesCommand extends Command<Objective[]> {
     ])
   }
 
+  @Stopwatch({ includeReturn: true })
   public async execute(
     teamID: string,
     properties: Partial<GetTeamObjectivesProperties>,
