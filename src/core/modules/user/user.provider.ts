@@ -5,6 +5,7 @@ import { FindConditions, In } from 'typeorm'
 import { CredentialsAdapter } from '@adapters/credentials/credentials.adapter'
 import { Credential, NewCredentialData } from '@adapters/credentials/credentials.interface'
 import { CoreEntityProvider } from '@core/entity.provider'
+import { Sorting } from '@core/enums/sorting'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
@@ -58,20 +59,50 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     return uniqBy(flatten(queryResult.map((user) => user.teams)), 'id')
   }
 
-  @Stopwatch()
-  public async getUsersWithActiveObjectives(teamsIds: Array<TeamInterface['id']>): Promise<User[]> {
-    const users = await this.repository
-      .createQueryBuilder()
-      .innerJoin(`${User.name}.objectives`, 'objective')
-      .innerJoinAndSelect(`${User.name}.teams`, 'team')
-      .innerJoin(Cycle, 'cycle', 'cycle.id = objective.cycle_id')
-      .where('objective.teamId IS NULL')
-      .andWhere('team.id IN(:...teamsIds)', { teamsIds })
-      .andWhere('cycle.active IS TRUE')
-      .orderBy(`${User.name}.firstName`, 'ASC')
-      .getMany()
+  public async getUsersByTeams(
+    teamIds: string[],
+    filters?: Partial<UserInterface>,
+    options?: GetOptions<User>,
+  ): Promise<User[]> {
+    const orderBy = this.repository.marshalOrderBy(
+      options?.orderBy ?? {
+        firstName: Sorting.ASC,
+        lastName: Sorting.ASC,
+      },
+    )
 
-    return users
+    const alias = this.repository.entityName
+
+    // Const query = this.repository
+    //   .createQueryBuilder(alias)
+    //   .innerJoin(`${alias}.teams`, 'userTeam', 'userTeam.id IN (:...teamIds)', { teamIds })
+    //   .distinctOn([`${alias}.id`])
+    //   .where(filters)
+    //   .take(options?.limit ?? 0)
+    //   .offset(options?.offset ?? 0)
+    //   .orderBy(orderBy)
+    //
+    // return query.getMany()
+
+    return this.repository
+      .createQueryBuilder(alias)
+      .where((qb) => {
+        const subQuery = qb
+          .subQuery()
+          .select('tu.user_id')
+          .from('team_users_user', 'tu')
+          .where('tu.team_id IN (:...teamIds)', { teamIds })
+          .distinctOn(['tu.user_id'])
+          .orderBy({ 'tu.user_id': Sorting.ASC })
+          .getQuery()
+
+        return `${alias}.id IN ${subQuery}`
+      })
+      .andWhere(filters)
+      .take(options?.limit ?? 0)
+      .offset(options?.offset ?? 0)
+      .orderBy(orderBy)
+      .getMany()
   }
 
   public buildUserFullName(user: UserInterface) {
@@ -92,6 +123,22 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
 
   public async getByIds(ids: string[]): Promise<User[]> {
     return this.repository.find({ where: { id: In(ids) } })
+  }
+
+  @Stopwatch()
+  public async getUsersWithActiveObjectives(teamsIds: Array<TeamInterface['id']>): Promise<User[]> {
+    const users = await this.repository
+      .createQueryBuilder()
+      .innerJoin(`${User.name}.objectives`, 'objective')
+      .innerJoinAndSelect(`${User.name}.teams`, 'team')
+      .innerJoin(Cycle, 'cycle', 'cycle.id = objective.cycle_id')
+      .where('objective.teamId IS NULL')
+      .andWhere('team.id IN(:...teamsIds)', { teamsIds })
+      .andWhere('cycle.active IS TRUE')
+      .orderBy(`${User.name}.firstName`, 'ASC')
+      .getMany()
+
+    return users
   }
 
   public async deactivate(userID: string): Promise<void> {
