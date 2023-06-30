@@ -40,6 +40,11 @@ export class KeyResultComment extends CoreEntity implements KeyResultCommentInte
   @RelationId((keyResultComment: KeyResultComment) => keyResultComment.parent)
   public parentId?: KeyResultCommentInterface['id']
 
-  @ManyToOne('KeyResultComment', 'keyResultComment', { nullable: true })
+  @ManyToOne('KeyResultComment', 'keyResultComment', {
+    lazy: true,
+    nullable: true,
+    onDelete: 'CASCADE',
+    onUpdate: 'NO ACTION',
+  })
   public parent?: KeyResultCommentInterface
 }

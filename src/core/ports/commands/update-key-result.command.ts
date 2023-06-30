@@ -48,7 +48,7 @@ export class UpdateKeyResultCommand extends Command<KeyResult> {
       }
 
       const updatePatches: KeyResultPatchInterface[] = Object.keys(keyResult).map((key) => ({
-        key: KeyResultPatchsKeys[key.toUpperCase()],
+        key: KeyResultPatchsKeys[key],
         value: keyResult[key],
       }))
 
@@ -60,7 +60,6 @@ export class UpdateKeyResultCommand extends Command<KeyResult> {
         .execute()
 
       const keyResultUpdate = {
-        createdAt: new Date(),
         keyResultId: id,
         author: {
           type: AuthorType.USER,

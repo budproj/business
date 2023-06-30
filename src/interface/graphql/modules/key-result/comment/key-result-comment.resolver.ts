@@ -96,6 +96,7 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
       userWithContext,
       request.data,
     )
+
     const createdComment = await this.corePorts.dispatchCommand<KeyResultComment>(
       'create-key-result-comment',
       keyResultComment,
