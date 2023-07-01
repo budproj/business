@@ -8,6 +8,4 @@ export const GraphQLEnvironmentSchema = Joi.object({
   GRAPHQL_GODMOD_ENABLED: Joi.boolean().default(false),
   GRAPHQL_GODMOD_ROLE: Joi.string().default('god'),
   GRAPHQL_GLOBAL_PREFIX_ENABLED: Joi.boolean().default(true),
-  GRAPHQL_CORS_CREDENTIALS_ENABLED: Joi.boolean().default(true),
-  GRAPHQL_CORS_ALLOWED_ORIGINS: Joi.string(),
 })

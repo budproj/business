@@ -19,5 +19,10 @@ export const serverConfig = registerAs(
     },
 
     rabbitmq: process.env.RABBITMQ_SERVER,
+
+    cors: {
+      credentialsEnabled: process.env.SERVER_CORS_CREDENTIALS_ENABLED === 'true',
+      allowedOrigins: process.env.SERVER_CORS_ALLOWED_ORIGINS?.split(','),
+    },
   }),
 )

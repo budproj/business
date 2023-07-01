@@ -8,9 +8,15 @@ export interface ServerConfigInterface {
   logging: ServerLoggingConfigInterface
   prefix?: string
   rabbitmq: string
+  cors: ServerCORSConfigInterface
 }
 
 export interface ServerLoggingConfigInterface {
   level: LogLevel
   serviceName: string
+}
+
+export interface ServerCORSConfigInterface {
+  credentialsEnabled: boolean
+  allowedOrigins: string[]
 }

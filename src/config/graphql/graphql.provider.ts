@@ -4,7 +4,6 @@ import { ConfigService } from '@nestjs/config'
 import { GodmodePropertiesInterface } from '@adapters/authorization/godmode/interfaces/godmode-properties.interface'
 
 import {
-  GraphQLCORSConfigInterface,
   GraphQLDebugConfigInterface,
   GraphQLIntrospectionConfigInterface,
   GraphQLPlaygroundConfigInterface,
@@ -37,9 +36,5 @@ export class GraphQLConfigProvider {
 
   get globalPrefixEnabled(): boolean {
     return this.configService.get<boolean>('graphql.globalPrefixEnabled')
-  }
-
-  get cors(): GraphQLCORSConfigInterface {
-    return this.configService.get<GraphQLCORSConfigInterface>('graphql.cors')
   }
 }

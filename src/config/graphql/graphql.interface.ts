@@ -7,7 +7,6 @@ export interface GraphQLConfigInterface {
   introspection: GraphQLIntrospectionConfigInterface
   godmode: GodmodePropertiesInterface
   schema: GraphQLSchemaConfigInterface
-  cors: GraphQLCORSConfigInterface
 }
 
 export interface GraphQLDebugConfigInterface {
@@ -24,9 +23,4 @@ export interface GraphQLIntrospectionConfigInterface {
 
 export interface GraphQLSchemaConfigInterface {
   filePath: string
-}
-
-export interface GraphQLCORSConfigInterface {
-  credentialsEnabled: boolean
-  allowedOrigins: string[]
 }

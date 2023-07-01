@@ -34,6 +34,8 @@ export class ServerFactory {
   private async createApplication(adapter: FastifyAdapter): Promise<NestFastifyApplication> {
     const application = await NestFactory.create<NestFastifyApplication>(ServerModule, adapter)
 
+    application.enableCors()
+
     return application
   }
 
