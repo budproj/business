@@ -1,7 +1,6 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Logger } from '@nestjs/common'
 import { Observable } from 'rxjs'
 
-import { GodmodeProvider } from '@adapters/authorization/godmode/godmode.provider'
 import { PolicyAdapter } from '@adapters/policy/policy.adapter'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
@@ -11,7 +10,6 @@ import { HTTPRequest } from '../types'
 
 @Injectable()
 export class AddHTTPContextToUserInterceptor implements NestInterceptor {
-  protected readonly godmode: GodmodeProvider
   private readonly logger = new Logger(AddHTTPContextToUserInterceptor.name)
   private readonly authz = new PolicyAdapter()
 

@@ -58,26 +58,32 @@ export function wrapInput({
     }
   }
 
-  const formattedComments = comments.map(
-    ({ author, createdAt, text }) =>
-      `<comment>${author} em ${formatDate(createdAt)}: "${text}"</comment>`,
-  )
+  const formattedComments = comments
+    ? comments?.map(
+        ({ author, createdAt, text }) =>
+          `<comment>${author} em ${formatDate(createdAt)}: "${text}"</comment>`,
+      )
+    : []
 
   const formattedCheckIns = checkIns
-    .map((checkIn) => ({ ...checkIn, createdAt: new Date(checkIn.createdAt) }))
-    .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
-    .slice(0, 2)
-    .map(
-      ({ author, createdAt, value, comment }) =>
-        `<checkin>${author} reportou ${formatValue(value)} em ${formatDate(
-          createdAt,
-        )}: "${comment}"</checkin>`,
-    )
+    ? checkIns
+        ?.map((checkIn) => ({ ...checkIn, createdAt: new Date(checkIn.createdAt) }))
+        .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
+        .slice(0, 2)
+        ?.map(
+          ({ author, createdAt, value, comment }) =>
+            `<checkin>${author} reportou ${formatValue(value)} em ${formatDate(
+              createdAt,
+            )}: "${comment}"</checkin>`,
+        )
+    : []
 
-  const formattedChecklist = checklist.map(
-    ({ owner, description, done }) =>
-      `<task>(${done ? 'concluído' : 'pendente'}) ${owner}: ${description}</task>`,
-  )
+  const formattedChecklist = checklist
+    ? checklist?.map(
+        ({ owner, description, done }) =>
+          `<task>(${done ? 'concluído' : 'pendente'}) ${owner}: ${description}</task>`,
+      )
+    : []
 
   return [
     `O Key-Result "${title}" é parte do objetivo "${

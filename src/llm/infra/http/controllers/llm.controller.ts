@@ -13,6 +13,11 @@ import { CreateCompletionDTO } from '../DTOs/create-completion-body'
 import { HTTPRequestUserWithContext } from '../context/decorators/http-request-user-with-context.decorator'
 import { AddHTTPContextToUserInterceptor } from '../context/interceptors/add-http-context-to-user.interceptor'
 
+interface CreateCompletionResponse {
+  summary: string
+  model: string
+}
+
 @Controller('llms')
 export class LLMsController {
   constructor(
@@ -27,7 +32,7 @@ export class LLMsController {
   async create(
     @Body() body: CreateCompletionDTO,
     @HTTPRequestUserWithContext() userWithContext: UserWithContext,
-  ) {
+  ): Promise<CreateCompletionResponse> {
     const { input, referenceId } = body
 
     const keyResult = await this.core.keyResult.getFromID(referenceId)
@@ -61,6 +66,6 @@ export class LLMsController {
       author,
     })
 
-    return output
+    return { summary: output, model }
   }
 }
