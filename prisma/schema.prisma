@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("LLMS_DATABASE_URL")
+  url      = env("LLM_DATABASE_URL")
 }
 
 model OpenAiCompletion {
@@ -25,7 +25,6 @@ model OpenAiCompletion {
   request            Json
   status             OpenAiCompletionStatus
   requestedAt        DateTime?
-  duration           Int?
   respondedAt        DateTime?
   consumedTokens     Int?
   producedTokens     Int?
@@ -33,7 +32,7 @@ model OpenAiCompletion {
   output             String?
   response           Json?
 
-  @@index([action, entity, requesterUserId])
+  @@index([action, entity, referenceId, respondedAt(sort: Desc)])
 }
 
 enum ActionType {

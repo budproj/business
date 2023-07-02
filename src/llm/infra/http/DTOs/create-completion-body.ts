@@ -1,6 +1,12 @@
-import { SummarizeKeyResultInput } from 'src/llm/shared/utilities/types'
+export interface AuthorDTO {
+  id: string
+  companyId: string
+  teamId: string
+}
 
-export interface CreateCompletionDTO {
-  input: SummarizeKeyResultInput
+export interface CreateCompletionDTO<T> {
+  input: T
   referenceId: string
+  author: AuthorDTO
+  locale: string
 }

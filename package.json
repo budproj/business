@@ -39,7 +39,8 @@
     "waypoint:deploy": "waypoint deploy",
     "waypoint:up": "waypoint up -var=\"GITHUB_TOKEN=$GITHUB_TOKEN\"",
     "prepare": "husky install",
-    "migrate:dev": "npx prisma migrate dev"
+    "migrate:dev": "npx prisma migrate dev",
+    "k8s:migrate": "npx typeorm --config dist/src/config/typeorm/typeorm-cli.config.js migration:run && npx prisma migrate deploy"
   },
   "author": "delucca <delucca@pm.me>",
   "license": "Apache-2.0",

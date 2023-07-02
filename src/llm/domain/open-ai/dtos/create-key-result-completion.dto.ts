@@ -10,8 +10,7 @@ export interface GenerateOpenAiCompletionDTO {
   entity: TargetEntity
   model: string
   messages: Prisma.OpenAiCompletionCreatemessagesInput | Prisma.Enumerable<Prisma.InputJsonValue>
-  input: Prisma.JsonNullValueInput | Prisma.InputJsonValue
-  request: Prisma.JsonNullValueInput | Prisma.InputJsonValue
+  input: Prisma.InputJsonValue
+  request: Prisma.InputJsonValue
   status: OpenAiCompletionStatus
-  requestedAt: Date | null
 }
