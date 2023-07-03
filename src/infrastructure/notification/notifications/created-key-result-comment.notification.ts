@@ -9,6 +9,8 @@ import {
 } from '@adapters/activity/activities/created-key-result-comment.activity'
 import { Cadence } from '@core/modules/cycle/enums/cadence.enum'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
+import { KeyResultCommentType } from '@core/modules/key-result/enums/key-result-comment-type.enum'
+import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.enum'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { TeamGender } from '@core/modules/team/enums/team-gender.enum'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
@@ -56,11 +58,13 @@ type KeyResultNotificationData = {
   id: string
   title: string
   confidenceColor: string
+  mode: KeyResultMode
 }
 
 type CommentNotificationData = {
   id: string
   content: string
+  type: KeyResultCommentType
 }
 
 type CycleNotificationData = {
@@ -271,6 +275,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     return {
       id: this.activity.data.id,
       content: this.activity.data.text,
+      type: this.activity.data.type,
     }
   }
 
@@ -302,6 +307,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       confidenceColor,
       id: keyResult.id,
       title: keyResult.title,
+      mode: keyResult.mode,
     }
   }
 
@@ -386,7 +392,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
 
     const messages = recipientUsers.map((recipient) => ({
       messageId: randomUUID(),
-      type: 'commentOnKR',
+      type: data.comment.type === KeyResultCommentType.comment ? 'commentOnKR' : 'krFeedback',
       timestamp: new Date(metadata.timestamp).toISOString(),
       recipientId: recipient.authzSub,
       properties: {
@@ -398,10 +404,12 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
         keyResult: {
           id: data.keyResult.id,
           name: data.keyResult.title,
+          mode: data.keyResult.mode,
         },
         comment: {
           id: data.comment.id,
           content: data.comment.content,
+          type: data.comment.type,
         },
       },
     }))

@@ -20,6 +20,7 @@ import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 import { EntityOrderAttributes } from '@core/types/order-attribute.type'
 import { AnalyticsProvider } from '@infrastructure/analytics/analytics.provider'
+import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { ProgressRecord } from '../../../adapters/analytics/progress-record.interface'
 import { Cycle } from '../cycle/cycle.orm-entity'
@@ -34,10 +35,14 @@ import { KeyResultCheckMarkProvider } from './check-mark/key-result-check-mark.p
 import { KeyResultCommentInterface } from './comment/key-result-comment.interface'
 import { KeyResultComment } from './comment/key-result-comment.orm-entity'
 import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
+import { KeyResultCommentType } from './enums/key-result-comment-type.enum'
+import { KeyResultStateInterface } from './interfaces/key-result-state.interface'
 import { KeyResultRelationFilterProperties, KeyResultRepository } from './key-result.repository'
 import { KeyResultTimelineProvider } from './timeline.provider'
 import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
-import { Stopwatch } from "@lib/logger/pino.decorator";
+import { KeyResultUpdateInterface } from './update/key-result-update.interface'
+import { KeyResultUpdate } from './update/key-result-update.orm-entity'
+import { KeyResultUpdateProvider } from './update/key-result-update.provider'
 
 @Injectable()
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
@@ -45,6 +50,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
   constructor(
     public readonly keyResultCommentProvider: KeyResultCommentProvider,
+    public readonly keyResultUpdateProvider: KeyResultUpdateProvider,
     public readonly keyResultCheckMarkProvider: KeyResultCheckMarkProvider,
     public readonly keyResultCheckInProvider: KeyResultCheckInProvider,
     protected readonly objectiveProvider: ObjectiveProvider,
@@ -293,6 +299,19 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return this.keyResultCommentProvider.getMany(selector, undefined, options)
   }
 
+  public async getUpdates(
+    keyResult: Partial<KeyResultInterface>,
+    filters?: FindConditions<KeyResultUpdateInterface>,
+    options?: GetOptions<KeyResultUpdateInterface>,
+  ): Promise<KeyResultUpdate[]> {
+    const selector = {
+      ...filters,
+      keyResultId: keyResult.id,
+    }
+
+    return this.keyResultUpdateProvider.getMany(selector, undefined, options)
+  }
+
   public async getCheckIns(
     keyResult: Partial<KeyResultInterface>,
     filters?: FindConditions<KeyResultCheckInInterface>,
@@ -336,10 +355,15 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     user: UserInterface,
     data: Partial<KeyResultCommentInterface>,
   ): Partial<KeyResultCommentInterface> {
+    const extraData = data.type === KeyResultCommentType.question ? { solved: false } : undefined
+
     return {
       text: data.text,
       userId: user.id,
       keyResultId: data.keyResultId,
+      type: data.type,
+      extra: extraData,
+      parentId: data.parentId,
     }
   }
 
@@ -359,6 +383,16 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const keyResult = await this.getOne({ id: checkInData.keyResultId })
     const previousCheckIn = await this.keyResultCheckInProvider.getLatestFromKeyResult(keyResult)
 
+    const previousState: KeyResultStateInterface = {
+      description: keyResult.description,
+      format: keyResult.format,
+      goal: keyResult.goal,
+      mode: keyResult.mode,
+      ownerId: keyResult.ownerId,
+      title: keyResult.title,
+      type: keyResult.type,
+    }
+
     return {
       userId: user.id,
       keyResultId: checkInData.keyResultId,
@@ -366,6 +400,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       confidence: checkInData.confidence,
       comment: checkInData.comment,
       parentId: previousCheckIn?.id,
+      previousState,
     }
   }
 
@@ -396,23 +431,30 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
    * @deprecated do not use this method yet (see comment below)
    */
   @Stopwatch({ includeReturn: true })
-  public async getCheckInProgressBatch(keyResults: KeyResult[], latestCheckIns?: KeyResultCheckInInterface[]): Promise<number[]> {
-
+  public async getCheckInProgressBatch(
+    keyResults: KeyResult[],
+    latestCheckIns?: KeyResultCheckInInterface[],
+  ): Promise<number[]> {
     // FIXME: this query will only return the earliest check-in for each key result instead of the latest (see getKeyResultsFromTeam)
-    const checkIns = latestCheckIns ?? await this.keyResultCheckInProvider.getMany({
-      id: In(keyResults.map(keyResult => keyResult.id))
-    });
+    const checkIns =
+      latestCheckIns ??
+      (await this.keyResultCheckInProvider.getMany({
+        id: In(keyResults.map((keyResult) => keyResult.id)),
+      }))
 
-    const checkInsMap = checkIns.filter(checkIn => checkIn)
+    const checkInsMap = checkIns
+      .filter((checkIn) => checkIn)
       .reduce((map, checkIn) => {
-        map[checkIn.keyResultId] = checkIn;
-        return map;
-      }, {});
+        map[checkIn.keyResultId] = checkIn
+        return map
+      }, {})
 
-    return keyResults.map(keyResult => {
-      const keyResultCheckIn = checkInsMap[keyResult.id];
-      return keyResultCheckIn ? this.keyResultCheckInProvider.getProgressFromValue(keyResult, keyResultCheckIn?.value) : DEFAULT_PROGRESS;
-    });
+    return keyResults.map((keyResult) => {
+      const keyResultCheckIn = checkInsMap[keyResult.id]
+      return keyResultCheckIn
+        ? this.keyResultCheckInProvider.getProgressFromValue(keyResult, keyResultCheckIn?.value)
+        : DEFAULT_PROGRESS
+    })
   }
 
   public async getLatestCheckInForKeyResultAtDate(
@@ -428,6 +470,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     queryOptions?: GetOptions<KeyResultComment | KeyResultCheckIn>,
   ): Promise<KeyResultTimelineEntry[]> {
     const timelineQueryResult = await this.timeline.buildUnionQuery(keyResult, queryOptions)
+
     return this.timeline.getEntriesForTimelineOrder(timelineQueryResult)
   }
 
@@ -450,6 +493,29 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     comment: Partial<KeyResultCommentInterface>,
   ): Promise<KeyResultComment> {
     const queryResult = await this.keyResultCommentProvider.createComment(comment)
+
+    // Const { keyResultId } = queryResult[0]
+    // const commentType = queryResult[0].type
+
+    // const queryBuilder = getConnection()
+    //   .createQueryBuilder()
+    //   .update(KeyResult)
+    //   .set({
+    //     commentCount: () => `jsonb_set(
+    //     "comment_count",
+    //     '{${commentType}}',
+    //     ((COALESCE("comment_count"->>'${commentType}','0')::int + 1)::text)::jsonb
+    //   )`,
+    //   })
+    //   .where('id = :keyResultId', { keyResultId })
+
+    // await queryBuilder.execute()
+
+    return queryResult[0]
+  }
+
+  public async createUpdate(update: Partial<KeyResultUpdateInterface>): Promise<KeyResultUpdate> {
+    const queryResult = await this.keyResultUpdateProvider.createUpdate(update)
     return queryResult[0]
   }
 
@@ -465,12 +531,20 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return this.keyResultCommentProvider.getOne(indexes)
   }
 
+  public async getKeyResultUpdate(
+    indexes: Partial<KeyResultUpdateInterface>,
+  ): Promise<KeyResultUpdate> {
+    return this.keyResultUpdateProvider.getOne(indexes)
+  }
+
   public async createKeyResult(data: KeyResultInterface): Promise<KeyResult> {
     const queryResult = await this.create(data)
     return queryResult[0]
   }
 
   public async deleteFromID(id: string): Promise<DeleteResult> {
+    // eslint-disable-next-line no-warning-comments
+    // TODO: when the 'DELETED' mode is implemented for the keyResult, this structure requires revision.
     const comments = await this.keyResultCommentProvider.delete({
       keyResultId: id,
     })
@@ -480,11 +554,17 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const checkMarks = await this.keyResultCheckMarkProvider.delete({
       keyResultId: id,
     })
+    const updates = await this.keyResultUpdateProvider.delete({ keyResultId: id })
     const keyResult = await this.delete({ id })
 
     return {
-      raw: [...comments.raw, ...checkIns.raw, ...checkMarks.raw, ...keyResult.raw],
-      affected: comments.affected + checkIns.affected + checkMarks.affected + keyResult.affected,
+      raw: [...comments.raw, ...checkIns.raw, ...checkMarks.raw, ...updates.raw, ...keyResult.raw],
+      affected:
+        comments.affected +
+        checkIns.affected +
+        checkMarks.affected +
+        updates.affected +
+        keyResult.affected,
     }
   }
 
@@ -492,13 +572,20 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const comments = await this.keyResultCommentProvider.deleteFromObjective(objectiveId)
     const checkIns = await this.keyResultCheckInProvider.deleteFromObjective(objectiveId)
     const checkMarks = await this.keyResultCheckMarkProvider.deleteFromObjective(objectiveId)
+    const updates = await this.keyResultUpdateProvider.deleteFromObjective(objectiveId)
+
     const keyResults = await this.delete({
       objectiveId,
     })
 
     return {
-      raw: [...comments.raw, ...checkIns.raw, ...checkMarks.raw, ...keyResults.raw],
-      affected: comments.affected + checkIns.affected + checkMarks.affected + keyResults.affected,
+      raw: [...comments.raw, ...checkIns.raw, ...checkMarks.raw, ...updates.raw, ...keyResults.raw],
+      affected:
+        comments.affected +
+        checkIns.affected +
+        checkMarks.affected +
+        updates.affected +
+        keyResults.affected,
     }
   }
 

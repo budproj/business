@@ -1,8 +1,8 @@
 import { ArgsType, Field, Int } from '@nestjs/graphql'
-import { ConnectionArguments, ConnectionCursor } from 'graphql-relay'
+import { ConnectionCursor } from 'graphql-relay'
 
 @ArgsType()
-export class ConnectionRelayRequest implements ConnectionArguments {
+export class ConnectionRelayRequest {
   @Field(() => Int, { defaultValue: 20, description: 'Paginate first' })
   public readonly first: number
 
@@ -13,11 +13,23 @@ export class ConnectionRelayRequest implements ConnectionArguments {
     nullable: true,
     description: 'Paginate after opaque cursor',
   })
-  public readonly after?: ConnectionCursor
+  public readonly after?: number
 
   @Field({
     nullable: true,
     description: 'Paginate before opaque cursor',
   })
   public readonly before?: ConnectionCursor
+
+  @Field({
+    nullable: true,
+    description: 'Paginate before opaque cursor',
+  })
+  public readonly limit?: number
+
+  @Field({
+    nullable: true,
+    description: 'Paginate before opaque cursor',
+  })
+  public readonly offset?: number
 }

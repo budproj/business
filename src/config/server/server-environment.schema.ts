@@ -12,4 +12,6 @@ export const ServerEnvironmentSchema = Joi.object({
     .default('ERROR'),
   SERVER_LOGGING_SERVICE_NAME: Joi.string().default('business@unknown'),
   RABBITMQ_SERVER: Joi.string().required(),
+  SERVER_CORS_CREDENTIALS_ENABLED: Joi.boolean().default(true),
+  SERVER_CORS_ALLOWED_ORIGINS: Joi.string(),
 })

@@ -17,23 +17,29 @@ import { KeyResultKeyResultCheckInsConnectionGraphQLResolver } from './connectio
 import { KeyResultKeyResultCheckMarksConnectionGraphQLResolver } from './connections/key-result-key-result-check-mark/key-result-key-result-check-marks.resolver'
 import { KeyResultKeyResultCommentsConnectionGraphQLResolver } from './connections/key-result-key-result-comments/key-result-key-result-comments.resolver'
 import { KeyResultKeyResultSupportTeamConnectionGraphQLResolver } from './connections/key-result-key-result-support-team/key-result-key-result-support-team.resolver'
+import { KeyResultKeyResultUpdatesConnectionGraphQLResolver } from './connections/key-result-key-result-updates/key-result-key-result-update.resolver'
 import { KeyResultProgressHistoryConnectionGraphQLResolver } from './connections/key-result-progress-history/key-result-progress-history.resolver'
 import { KeyResultTimelineConnectionGraphQLResolver } from './connections/key-result-timeline/key-result-key-result-timeline.resolver'
 import { KeyResultsConnectionGraphQLResolver } from './connections/key-results/key-results.resolver'
 import { KeyResultGraphQLResolver } from './key-result.resolver'
 import { KeyResultProgressRecordGraphQLResolver } from './progress-record/key-result-progress-record.resolver'
+import { KeyResultUpdatesConnectionGraphQLResolver } from './update/connections/key-result-updates/key-result-updates.resolver'
+import { KeyResultUpdateGraphQLResolver } from './update/key-result-update.resolver'
 
 @Module({
   imports: [CoreModule, GraphQLConfigModule, NotificationModule],
   providers: [
     KeyResultGraphQLResolver,
     KeyResultCommentGraphQLResolver,
+    KeyResultUpdateGraphQLResolver,
     KeyResultCheckMarkGraphQLResolver,
     KeyResultCheckInGraphQLResolver,
     KeyResultCheckInsConnectionGraphQLResolver,
     KeyResultsConnectionGraphQLResolver,
     KeyResultCommentsConnectionGraphQLResolver,
+    KeyResultUpdatesConnectionGraphQLResolver,
     KeyResultKeyResultCommentsConnectionGraphQLResolver,
+    KeyResultKeyResultUpdatesConnectionGraphQLResolver,
     KeyResultKeyResultCheckInsConnectionGraphQLResolver,
     KeyResultTimelineConnectionGraphQLResolver,
     KeyResultKeyResultCheckMarksConnectionGraphQLResolver,

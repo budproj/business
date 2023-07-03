@@ -451,6 +451,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       UserKeyResultsRequest,
       KeyResult
     >(request)
+
     const { confidence, active, ...filters } = options
 
     const keyResults = await this.corePorts.dispatchCommand<KeyResult[]>(

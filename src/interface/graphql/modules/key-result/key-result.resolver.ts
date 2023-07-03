@@ -17,6 +17,8 @@ import { KeyResultCommentInterface } from '@core/modules/key-result/comment/key-
 import { KeyResultComment } from '@core/modules/key-result/comment/key-result-comment.orm-entity'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { KeyResultUpdateInterface } from '@core/modules/key-result/update/key-result-update.interface'
+import { KeyResultUpdate } from '@core/modules/key-result/update/key-result-update.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
@@ -47,11 +49,13 @@ import { KeyResultKeyResultCheckInsGraphQLConnection } from './connections/key-r
 import { KeyResultKeyResultCheckMarkGraphQLConnection } from './connections/key-result-key-result-check-mark/key-result-key-result-check-marks.connection'
 import { KeyResultKeyResultCommentsGraphQLConnection } from './connections/key-result-key-result-comments/key-result-key-result-comments.connection'
 import { KeyResultKeyResultSupportTeamGraphQLConnection } from './connections/key-result-key-result-support-team/key-result-key-result-support-team.connection'
+import { KeyResultKeyResultUpdatesGraphQLConnection } from './connections/key-result-key-result-updates/key-result-key-result-update.connection'
 import { KeyResultProgressHistoryGraphQLConnection } from './connections/key-result-progress-history/key-result-progress-history.connection'
 import { KeyResultTimelineGraphQLConnection } from './connections/key-result-timeline/key-result-key-result-timeline.connection'
 import { KeyResultGraphQLNode } from './key-result.node'
 import { KeyResultSupportTeamMembersFiltersRequest } from './requests/key-result-support-team-members-filters.request'
 import { KeyResultUpdateRequest } from './requests/key-result-update.request'
+import { KeyResultUpdateFiltersRequest } from './update/requests/key-result-update-filters.request'
 
 @GuardedResolver(KeyResultGraphQLNode)
 export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
@@ -115,8 +119,10 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     const keyResult = await this.corePorts.dispatchCommand<KeyResult>(
       'update-key-result',
       request.id,
+      userWithContext,
       { ...request.data },
     )
+
     if (!keyResult)
       throw new UserInputError(`We could not found an key-result with ID ${request.id}`)
 
@@ -240,6 +246,27 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     return this.relay.marshalResponse<KeyResultCommentInterface>(queryResult, connection, keyResult)
   }
 
+  @ResolveField('keyResultUpdates', () => KeyResultKeyResultUpdatesGraphQLConnection)
+  protected async getKeyResultUpdatesForKeyResult(
+    @Args() request: KeyResultUpdateFiltersRequest,
+    @Parent() keyResult: KeyResult,
+  ) {
+    this.logger.log({
+      keyResult,
+      request,
+      message: 'Fetching key-result updates',
+    })
+
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      KeyResultUpdateFiltersRequest,
+      KeyResultUpdate
+    >(request)
+
+    const queryResult = await this.core.keyResult.getUpdates(keyResult, filters, queryOptions)
+
+    return this.relay.marshalResponse<KeyResultUpdateInterface>(queryResult, connection, keyResult)
+  }
+
   @ResolveField('checkList', () => KeyResultKeyResultCheckMarkGraphQLConnection)
   protected async getKeyResultChecklistForKeyResult(
     @Args() request: KeyResultCheckMarkFiltersRequest,
@@ -305,7 +332,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
 
     const connection = this.relay.unmarshalRequest<
       ConnectionFiltersRequest,
-      KeyResultCheckIn | KeyResultComment
+      KeyResultCheckIn | KeyResultComment | KeyResultUpdate
     >(request)[2]
 
     const queryResult = await this.core.keyResult.getTimeline(keyResult)
@@ -374,5 +401,15 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     )
 
     return this.relay.marshalResponse(queryResult, connection, keyResult)
+  }
+
+  @ResolveField('commentCount', () => String, { nullable: true })
+  protected async stringfyExtra(@Parent() keyResult: KeyResultGraphQLNode) {
+    this.logger.log({
+      keyResult,
+      message: 'Fetching key result comment count and stringfying it',
+    })
+
+    return JSON.stringify(keyResult.commentCount)
   }
 }

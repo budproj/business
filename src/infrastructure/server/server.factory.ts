@@ -34,12 +34,14 @@ export class ServerFactory {
   private async createApplication(adapter: FastifyAdapter): Promise<NestFastifyApplication> {
     const application = await NestFactory.create<NestFastifyApplication>(ServerModule, adapter)
 
+    application.enableCors()
+
     return application
   }
 
   private async launch(application: NestFastifyApplication): Promise<void> {
     const config = application.get<ServerConfigProvider>(ServerConfigProvider)
-    const logger = application.get(Logger);
+    const logger = application.get(Logger)
 
     application.setGlobalPrefix(config.prefix ?? '')
     application.useLogger(logger)

@@ -96,6 +96,7 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
       userWithContext,
       request.data,
     )
+
     const createdComment = await this.corePorts.dispatchCommand<KeyResultComment>(
       'create-key-result-comment',
       keyResultComment,
@@ -160,5 +161,15 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     })
 
     return this.core.keyResult.getOne({ id: keyResultComment.keyResultId })
+  }
+
+  @ResolveField('extra', () => String, { nullable: true })
+  protected async stringfyExtra(@Parent() keyResultComment: KeyResultCommentGraphQLNode) {
+    this.logger.log({
+      keyResultComment,
+      message: 'Fetching extra and stringfying it',
+    })
+
+    return JSON.stringify(keyResultComment.extra)
   }
 }

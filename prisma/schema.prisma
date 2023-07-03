@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("LLM_DATABASE_URL")
+}
+
+model OpenAiCompletion {
+  id                 String                 @id
+  referenceId        String
+  createdAt          DateTime               @default(now())
+  requesterUserId    String
+  requesterTeamId    String
+  requesterCompanyId String
+  action             ActionType
+  entity             TargetEntity
+  model              String
+  messages           Json[]
+  input              Json
+  request            Json
+  status             OpenAiCompletionStatus
+  requestedAt        DateTime?
+  respondedAt        DateTime?
+  consumedTokens     Int?
+  producedTokens     Int?
+  totalTokens        Int?
+  output             String?
+  response           Json?
+
+  @@index([action, entity, referenceId, respondedAt(sort: Desc)])
+}
+
+enum ActionType {
+  Summarize
+}
+
+enum TargetEntity {
+  KeyResult
+}
+
+enum OpenAiCompletionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}

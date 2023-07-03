@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 
-import { ServerLoggingConfigInterface } from './server.interface'
+import { ServerCORSConfigInterface, ServerLoggingConfigInterface } from './server.interface'
 
 @Injectable()
 export class ServerConfigProvider {
@@ -33,5 +33,9 @@ export class ServerConfigProvider {
 
   get rabbitMQServer(): string {
     return this.configService.get<string>('server.rabbitmq')
+  }
+
+  get cors(): ServerCORSConfigInterface {
+    return this.configService.get<ServerCORSConfigInterface>('server.cors')
   }
 }

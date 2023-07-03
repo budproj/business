@@ -14,10 +14,7 @@ export class GraphQLOptionsFactory implements GqlOptionsFactory {
       introspection: this.config.introspection.enabled,
       autoSchemaFile: this.config.schema.filePath,
       useGlobalPrefix: this.config.globalPrefixEnabled,
-      cors: {
-        credentials: this.config.cors.credentialsEnabled,
-        origin: this.config.cors.allowedOrigins,
-      },
+      cors: false,
     }
   }
 }

@@ -18,6 +18,8 @@ import { KeyResultCommentRepository } from './comment/key-result-comment.reposit
 import { KeyResultProvider } from './key-result.provider'
 import { KeyResultRepository } from './key-result.repository'
 import { KeyResultTimelineProvider } from './timeline.provider'
+import { KeyResultUpdateProvider } from './update/key-result-update.provider'
+import { KeyResultUpdateRepository } from './update/key-result-update.repository'
 
 @Module({
   imports: [
@@ -25,6 +27,7 @@ import { KeyResultTimelineProvider } from './timeline.provider'
       KeyResultRepository,
       KeyResultCommentRepository,
       KeyResultCheckInRepository,
+      KeyResultUpdateRepository,
       KeyResultCheckMarkRepository,
       CycleRepository,
       ObjectiveRepository,
@@ -36,6 +39,7 @@ import { KeyResultTimelineProvider } from './timeline.provider'
     KeyResultProvider,
     KeyResultCommentProvider,
     KeyResultCheckInProvider,
+    KeyResultUpdateProvider,
     KeyResultTimelineProvider,
     KeyResultCheckMarkProvider,
     CycleProvider,
