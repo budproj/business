@@ -1,15 +1,12 @@
 import { GetStatusOptions, Status } from '@core/interfaces/status.interface'
-import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.enum'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { BaseStatusCommand } from '@core/ports/commands/base-status.command'
-import { Cacheable } from '@lib/cache/cacheable.decorator'
-import { Stopwatch } from '@lib/logger/pino.decorator'
+import { Cacheable } from '@lib/cache/cacheable.decorator';
+import { Stopwatch } from '@lib/logger/pino.decorator';
 
 export class GetCycleStatusCommand extends BaseStatusCommand {
-  @Cacheable(
-    (cycleID, options) => [cycleID, Math.floor(options?.date?.getTime() / (1000 * 60 * 60))],
-    60 * 60,
-  )
+
+  @Cacheable((cycleID, options) => [cycleID, Math.floor(options?.date?.getTime() / (1000 * 60 * 60))], 60 * 60)
   @Stopwatch({ omitArgs: true })
   public async execute(
     cycleID: string,
@@ -44,7 +41,6 @@ export class GetCycleStatusCommand extends BaseStatusCommand {
     const filters = {
       keyResult: {
         createdAt: options.date,
-        mode: KeyResultMode.PUBLISHED,
       },
       cycle: {
         id: cycleID,

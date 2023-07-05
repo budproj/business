@@ -10,7 +10,6 @@ export class GetUserYearlyProgressCommand extends Command<KeyResult[]> {
       userID,
       Cadence.YEARLY,
       true,
-      true,
     )
 
     if (keyResults.length > 0) {
