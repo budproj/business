@@ -262,6 +262,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     userID: UserInterface['id'],
     cadence: Cadence,
     isKeyResultsFromCompany?: boolean,
+    isKeyResultsPublished = false,
   ) {
     let query = this.repository
       .createQueryBuilder()
@@ -281,6 +282,10 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
     if (isKeyResultsFromCompany) {
       query = query.andWhere(`${KeyResult.name}.teamId IS NOT NULL`)
+    }
+
+    if (isKeyResultsPublished) {
+      query = query.andWhere(`${KeyResult.name}.mode = 'PUBLISHED'`)
     }
 
     return query.getMany()

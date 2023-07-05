@@ -1,8 +1,9 @@
 import { GetStatusOptions, Status } from '@core/interfaces/status.interface'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
+import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.enum'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { BaseStatusCommand } from '@core/ports/commands/base-status.command'
-import { Stopwatch } from "@lib/logger/pino.decorator";
+import { Stopwatch } from '@lib/logger/pino.decorator'
 
 export interface GetTeamStatusOptions extends GetStatusOptions {
   cycleFilters?: Partial<CycleInterface>
@@ -47,6 +48,7 @@ export class GetTeamStatusCommand extends BaseStatusCommand {
     const filters = {
       keyResult: {
         createdAt: options.date,
+        mode: KeyResultMode.PUBLISHED,
       },
       team: {
         id: teamID,

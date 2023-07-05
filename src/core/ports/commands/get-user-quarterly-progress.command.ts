@@ -10,6 +10,7 @@ export class GetUserQuarterlyProgressCommand extends Command<KeyResult[]> {
       userID,
       Cadence.QUARTERLY,
       true,
+      true,
     )
 
     if (keyResults.length > 0) {
