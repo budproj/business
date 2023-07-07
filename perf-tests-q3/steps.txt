@@ -1,0 +1,20 @@
+*Canary*
+
+Browsing:
+- Home (after login)
+- Medium confidence KRs (6)
+- Low confidence KRs (3)
+- Blocked KRs (1)
+- Explore
+    - Company + 5 Teams
+- Company
+    - 5 Objectives
+- "Create long-term relevance in our customers"
+    - 5 KRs
+- "Reduce yearly logo churn rate from 16% to 5%"
+    - Comments (15)
+    - Check-Ins (12)
+    - Tasks (2)
+
+Home-only:
+- Home (after login)

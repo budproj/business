@@ -1,0 +1,10 @@
+P1:
+get-objectives-and-key-results-quantities
+get-team-ranked-descendants
+get-cycle-status
+get-team-status
+
+P2:
+get-cycle-delta
+get-team-delta
+get-team-score
