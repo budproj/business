@@ -11,26 +11,28 @@ datasource db {
 }
 
 model OpenAiCompletion {
-  id                 String                 @id
-  referenceId        String
-  createdAt          DateTime               @default(now())
-  requesterUserId    String
-  requesterTeamId    String
-  requesterCompanyId String
-  action             ActionType
-  entity             TargetEntity
-  model              String
-  messages           Json[]
-  input              Json
-  request            Json
-  status             OpenAiCompletionStatus
-  requestedAt        DateTime?
-  respondedAt        DateTime?
-  consumedTokens     Int?
-  producedTokens     Int?
-  totalTokens        Int?
-  output             String?
-  response           Json?
+  id                        String                 @id
+  referenceId               String
+  createdAt                 DateTime               @default(now())
+  requesterUserId           String
+  requesterTeamId           String
+  requesterCompanyId        String
+  action                    ActionType
+  entity                    TargetEntity
+  model                     String
+  messages                  Json
+  input                     Json
+  request                   Json
+  status                    OpenAiCompletionStatus
+  requestedAt               DateTime?
+  respondedAt               DateTime?
+  completionTokens          Int?
+  promptTokens              Int?
+  totalTokens               Int?
+  estimatedCompletionTokens Int?
+  estimatedPromptTokens     Int?
+  output                    String?
+  response                  Json?
 
   @@index([action, entity, referenceId, respondedAt(sort: Desc)])
 }
