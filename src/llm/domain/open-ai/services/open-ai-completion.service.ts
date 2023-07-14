@@ -1,7 +1,7 @@
 import * as assert from 'assert'
 import { setTimeout } from 'timers/promises'
 
-import tiktoken, { TiktokenModel } from '@dqbd/tiktoken'
+import { TiktokenModel, encoding_for_model } from '@dqbd/tiktoken'
 import { Injectable, Logger } from '@nestjs/common'
 import { ActionType, OpenAiCompletion, OpenAiCompletionStatus, TargetEntity } from '@prisma/client'
 import { differenceInSeconds } from 'date-fns'
@@ -57,7 +57,7 @@ class OpenAICompletionService {
 
   public estimatePromptTokens({ model, messages }: CreateChatCompletionRequest): TokenEstimate {
     try {
-      const encoding = tiktoken.encoding_for_model(model as TiktokenModel)
+      const encoding = encoding_for_model(model as TiktokenModel)
 
       const count = messages.reduce((sum, { content }) => sum + encoding.encode(content).length, 0)
 
@@ -65,7 +65,10 @@ class OpenAICompletionService {
 
       return { count }
     } catch (error) {
-      this.logger.error(`Could not estimate prompt tokens for model ${model}`, error)
+      this.logger.error(
+        `Could not estimate prompt tokens for model ${model} due to "${error.message}": %o`,
+        error,
+      )
       return { error: error.message }
     }
   }
