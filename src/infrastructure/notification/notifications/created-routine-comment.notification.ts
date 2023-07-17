@@ -111,6 +111,23 @@ export class CreatedRoutineCommentInRoutineNotification extends BaseNotification
   private async dispatchCommentInRoutineNotificationEmail(): Promise<void> {
     const { data, metadata } = this.marshal()
 
+    const isCommentTagged = isTagged(data.comment.content)
+
+    // If (isCommentTagged) {
+    //   const mentionedIds = getMentionedUserIdsFromComments(data.comment.content)
+    //   const mentionedUsers = await Promise.all(
+    //     mentionedIds.map(async (userId) =>
+    //       this.core.dispatchCommand<User>('get-user', {
+    //         id: userId,
+    //       }),
+    //     ),
+    //   )
+
+    //   const customDatas = mentionedUsers.map((user) => {
+    //     return { userId: user.id, recipientFirstName: user.firstName }
+    //   })
+    // }
+
     const customData = {
       userId: data.userThatAnsweredTheRoutine.id,
       recipientFirstName: data.userThatAnsweredTheRoutine.firstName,
@@ -121,8 +138,6 @@ export class CreatedRoutineCommentInRoutineNotification extends BaseNotification
       this.channels.email,
       [customData],
     )) as EmailRecipient[]
-
-    const isCommentTagged = isTagged(data.comment.content)
 
     const emailMetadata: EmailNotificationChannelMetadata = {
       ...metadata,

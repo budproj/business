@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -33,6 +30,16 @@ model OpenAiCompletion {
   response           Json?
 
   @@index([action, entity, referenceId, respondedAt(sort: Desc)])
+}
+
+model UserFeedback {
+  userId       String
+  completionId String
+  value        String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@id([userId, completionId])
 }
 
 enum ActionType {
