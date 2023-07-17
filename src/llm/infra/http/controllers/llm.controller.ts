@@ -28,7 +28,7 @@ export class LLMsController {
   async summarizeKeyResult(
     @Body() body: CreateCompletionDTO<SummarizeKeyResultInput>,
   ): Promise<CreateCompletionResponse> {
-    const { input, referenceId, locale } = body
+    const { input, referenceId, locale = 'pt-br', suggestions = false } = body
 
     const author: Author = {
       companyId: body.author.companyId,
@@ -39,6 +39,7 @@ export class LLMsController {
     // TODO: evaluate whether we should set wrap=true for gpt-3.5-turbo
     const { promptVersion, messages } = summarizeKeyResultPrompt(input, {
       locale,
+      suggestions,
       activityThresholdInWeeks: 2,
     })
 
