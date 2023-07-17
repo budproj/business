@@ -235,6 +235,38 @@ export const PromptBuilder = (
       )
     }
 
+    /**
+     * Language Identification Prompt:
+     * ===============================
+     *
+     * 1. Conditionals and a single variable:
+     * --------------------------------------
+     *
+     * From now on, always assume $LANG as a symbolic variable that holds the name of the predominant language in all texts within <prompt> and </prompt>. From now on, you should always read the next instructions in English but always respond using $LANG language.
+     *
+     * Tell the value of $LANG.
+     *
+     * Evaluate if the pending tasks are sufficient to meet the goal and if the deadline is sufficient to complete the pending tasks. Write your completion using $LANG.
+     *
+     * If $LANG is not English, then translate the following instruction to $LANG and write its output: "Summarize the comments in a single paragraph, excluding irrelevant ones. Compare check-ins and task fulfillment with team performance and goal achievement."
+     *
+     * 2. Turn into a high-level programming language:
+     * -----------------------------------------------
+     *
+     * From now on, you should behave as a high-level, human-spoken programming language, called SUMBUD. Consider the following syntax for SUMBUD:
+     * - Words suffixed with $ are considered a variable that holds a value. You should print the value the variable, but not its name.
+     * - Texts suffixed with ! and placed between quotes are considered a plain text. You should only print the value between the quotes, but not the question mark and the quotes themselves.
+     *
+     * Consider the following variables and their respective logical values:
+     * $PROMPT = every text previously included between <prompt> and </prompt>
+     * $CONTENT = remove from $PROMPT every tag in the format <*> and </*>
+     * $LANG = the name of the predominant language used in $PROMPT
+     * $ORIGINAL = everything you've written so far
+     * $TRANSLATION = a translation of $ORIGINAL to $LANG
+     *
+     * From now on, you should strictly act as an interpreter of SUMBUD. You should parse and evaluate my following messages as instructions of SUMBUD. Do not write anything and wait for my first prompt.
+     */
+
     return toMessage('user', [
       // 'Identifique o idioma predominante em todas as informações que enviei acima e escreva suas respostas no mesmo idioma',
       // 'Identify the predominant language in all the information I sent above and write your answers in the same language',
@@ -258,7 +290,7 @@ export const PromptBuilder = (
 
     const pendingTasks = checklist?.filter(({ done }) => !done)?.length ?? 0
 
-    if (latestCheckIn.value >= goal) {
+    if (latestCheckIn && latestCheckIn.value >= goal) {
       if (latestCheckIn.createdAt <= new Date(cycle.dateEnd)) {
         recommendations.push(
           // 'Parabenize a equipe pelo cumprimento da meta antes do final do ciclo',
@@ -304,6 +336,7 @@ export const PromptBuilder = (
     return toMessage('user', recommendations)
   }
 
+  // TODO: wrap all instruction builders in a safe function that catches errors and returns a default message
   const assistActivity = (): ChatCompletionRequestMessage => {
     const recommendations: string[] = []
 
