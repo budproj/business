@@ -52,7 +52,7 @@ export class LLMsController {
     // Check this document for an explanation of the formula:
     // https://www.notion.so/budops/Spotlight-P-s-release-d57d9e57f42a49e18633018186e9d023?pvs=4#f5b30c2249bb4135af3fd257b648e28f
     const promptTokens = this.openAiCompletionService.estimatePromptTokens(draftPrompt).count
-    const completionTokens = promptTokens ? 74.8 * promptTokens ** 0.006 : null
+    const completionTokens = promptTokens ? -191 + 59.6 * Math.log(promptTokens) : null
     const exceedsContextWindowSize = promptTokens && promptTokens + completionTokens > 4096
 
     // Try to estimate the total number of tokens that will be used by the completion
