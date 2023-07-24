@@ -440,7 +440,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   /**
    * @deprecated do not use this method yet (see comment below)
    */
-  @Stopwatch({ includeReturn: true })
+  @Stopwatch()
   public async getCheckInProgressBatch(
     keyResults: KeyResult[],
     latestCheckIns?: KeyResultCheckInInterface[],

@@ -11,6 +11,7 @@ import { CreationQuery } from '@core/types/creation-query.type'
 import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { TeamInterface } from './interfaces/team.interface'
+import { TeamTreeQueries } from './team-tree-queries.provider'
 import { Team } from './team.orm-entity'
 import { TeamRepository } from './team.repository'
 import { TeamSpecification } from './team.specification'
@@ -30,6 +31,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
 
   constructor(
     protected readonly repository: TeamRepository,
+    private readonly teamTreeQueries: TeamTreeQueries,
     private readonly userProvider: UserProvider,
   ) {
     super(TeamProvider.name, repository)
@@ -104,62 +106,19 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     filters?: FindConditions<TeamInterface>,
     queryOptions?: GetOptions<TeamInterface>,
   ): Promise<Team[]> {
-    //     Const teams = await this.repository.query(
-    //       `WITH RECURSIVE team_tree
-    //         (id, name, level, is_root, parent_id, source_id)
-    //         AS (
-    //           SELECT id, name, 0, TRUE, parent_id, id
-    //           FROM team
-    //           WHERE id = ANY ($1)
-    //
-    //           UNION ALL
-    //
-    //           SELECT tn.id, tn.name, tt.level + 1, FALSE, tt.id, tt.source_id
-    //           FROM team tn
-    //           INNER JOIN team_tree tt ON tn.parent_id = tt.id
-    //         )
-    //        SELECT DISTINCT ON (id) id
-    //        FROM team_tree
-    //        WHERE ($2 IS TRUE OR NOT (id = ANY($1)))
-    //        -- WHERE ($2 IS TRUE OR level > 0)
-    // --        WHERE is_root IS FALSE
-    //        ORDER BY id, level DESC`,
-    //       [parentTeamIds, !!includeParentTeams]
-    //     );
-    //
-    //     return await this.getMany({
-    //       ...filters,
-    //       id: In(teams.map(({ id }) => id))
-    //     }, undefined, queryOptions);
-
     const orderBy = this.repository.marshalOrderBy(queryOptions?.orderBy)
+
+    const [descendingTable, descendingCte, descendingQueryOptions] =
+      this.teamTreeQueries.descendingDistinct({
+        parentTeamIds,
+        includeParentTeams,
+      })
 
     return this.repository
       .createQueryBuilder()
       .where(
-        () => {
-          return `id IN (WITH RECURSIVE team_tree
-          (id, name, level, is_root, parent_id, source_id)
-          AS (
-            SELECT id, name, 0, TRUE, parent_id, id
-            FROM team
-            WHERE id = ANY (:parentTeamIds)
-  
-            UNION ALL
-  
-            SELECT tn.id, tn.name, tt.level + 1, FALSE, tt.id, tt.source_id
-            FROM team tn
-            INNER JOIN team_tree tt ON tn.parent_id = tt.id
-          )
-         SELECT DISTINCT ON (id) id
-         FROM team_tree
-         WHERE (:includeParentTeams IS TRUE OR NOT (id = ANY(:parentTeamIds)))
-         ORDER BY id, level DESC)`
-        },
-        {
-          parentTeamIds,
-          includeParentTeams: Boolean(includeParentTeams),
-        },
+        () => `id IN (WITH RECURSIVE ${descendingCte} SELECT id FROM ${descendingTable})`,
+        descendingQueryOptions,
       )
       .andWhere({ ...filters })
       .take(queryOptions?.limit ?? 0)
@@ -178,65 +137,20 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
       queryOptions,
     }: GetAscendantsByIdsArguments,
   ): Promise<Team[]> {
-    // Const teams = await this.repository.query(
-    //   `WITH RECURSIVE team_tree
-    //     (id, name, level, is_leaf, parent_id, source_id)
-    //     AS (
-    //       SELECT id, name, 0, TRUE, parent_id, id
-    //       FROM team
-    //       WHERE id = ANY($1)
-    //
-    //       UNION ALL
-    //
-    //       SELECT pn.id, pn.name, cn.level - 1, FALSE, pn.parent_id, cn.source_id
-    //       FROM team_tree cn
-    //       INNER JOIN team pn ON pn.id = cn.parent_id AND cn.id <> pn.id
-    //     )
-    //     SELECT DISTINCT ON (id) *
-    //     FROM team_tree
-    //     WHERE ($2 IS TRUE OR NOT (id = ANY($1)))
-    //     -- WHERE (FALSE IS TRUE OR level < 0)
-    //     -- WHERE (FALSE IS TRUE OR is_leaf IS FALSE)
-    //     ORDER BY id, level DESC`,
-    //   [childTeamIds, !!includeChildTeams]
-    // );
-    //
-    // return await this.getMany({
-    //   ...filters,
-    //   id: In(teams.map(({ id }) => id))
-    // }, undefined, queryOptions);
-
     const orderBy = this.repository.marshalOrderBy(queryOptions?.orderBy)
+
+    const [ascendingTable, ascendingCte, ascendingQueryOptions] =
+      this.teamTreeQueries.ascendingDistinct({
+        childTeamIds,
+        includeChildTeams,
+        rootsOnly,
+      })
 
     return this.repository
       .createQueryBuilder()
       .where(
-        (qb) => {
-          return `id IN (WITH RECURSIVE team_tree
-        (id, name, level, is_leaf, parent_id, source_id)
-        AS (
-          SELECT id, name, 0, TRUE, parent_id, id
-          FROM team
-          WHERE id = ANY(:childTeamIds)
-
-          UNION ALL
-
-          SELECT pn.id, pn.name, cn.level - 1, FALSE, pn.parent_id, cn.source_id
-          FROM team_tree cn
-          INNER JOIN team pn ON pn.id = cn.parent_id AND cn.id <> pn.id
-        )
-        SELECT DISTINCT ON (id) id
-        FROM team_tree
-        WHERE (:includeChildTeams IS TRUE OR NOT (id = ANY(:childTeamIds)))
-          AND (:rootsOnly IS FALSE OR parent_id IS NULL OR id = parent_id)
-        ORDER BY id, level DESC)`
-        },
-        {
-          childTeamIds,
-          // Force includeChildTeams if rootsOnly is true to avoid root nodes from being exclude if childTeamIds are root nodes already
-          includeChildTeams: Boolean(includeChildTeams) || Boolean(rootsOnly),
-          rootsOnly: Boolean(rootsOnly),
-        },
+        () => `id IN (WITH RECURSIVE ${ascendingCte} SELECT id FROM ${ascendingTable})`,
+        ascendingQueryOptions,
       )
       .andWhere({ ...filters })
       .take(queryOptions?.limit ?? 0)

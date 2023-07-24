@@ -6,7 +6,16 @@
   "rules": {
     "new-cap": "off",
     "max-params": "off",
-    "unicorn/no-null": "off"
+    "unicorn/no-null": "off",
+    "unicorn/prevent-abbreviations": [
+      "warn",
+      {
+        "replacements": {
+          "params": false,
+          "args": false
+        }
+      }
+    ]
   },
   "settings": {
     "import/resolver": {

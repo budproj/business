@@ -2,6 +2,9 @@ import { UserInterface } from '@core/modules/user/user.interface'
 
 import { Command } from './base.command'
 
+/**
+ * @deprecated prefer using the `OverviewProvider` instead
+ */
 export class GetObjectivesAndKeyResultQuantities extends Command<any> {
   public async execute(user: UserInterface): Promise<any> {
     const userCompanies = await this.core.team.getUserCompanies(user)
