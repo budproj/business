@@ -1,8 +1,5 @@
 import { Injectable } from '@nestjs/common/decorators/core/injectable.decorator'
 
-import { Team } from '@core/modules/team/team.orm-entity'
-import { TeamRepository } from '@core/modules/team/team.repository'
-
 export type DescendingQueryOptions = {
   parentTeamIds: string[]
   includeParentTeams: boolean
@@ -33,13 +30,10 @@ export type BidirectionalQueryOptions = {
 export type BidirectionalQuery = [string, string, AscendingQueryOptions]
 
 @Injectable()
-export class TeamTreeQueries {
-
-  private readonly tableName: string
-
-  constructor({ metadata }: TeamRepository) {
-    this.tableName = metadata.tableName
-  }
+export class TeamScopeFactory {
+  // TODO: parameterize
+  // eslint-disable-next-line @typescript-eslint/class-literal-property-style
+  private readonly tableName = 'team'
 
   descendingRecursive(name: string, filter: string): string {
     return `
@@ -134,7 +128,7 @@ export class TeamTreeQueries {
     ]
   }
 
-  bidirectionalQuery({ originTeamIds }: Partial<BidirectionalQueryOptions> = {}): BidirectionalQuery {
+  bidirectional({ originTeamIds }: Partial<BidirectionalQueryOptions> = {}): BidirectionalQuery {
     const [rootsTable, rootsQuery, rootsQueryOptions] = this.ascendingDistinct({
       childTeamIds: originTeamIds,
       includeChildTeams: true,

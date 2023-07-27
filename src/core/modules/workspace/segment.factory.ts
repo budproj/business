@@ -1,28 +1,23 @@
 import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.enum'
 
-export type OverviewCte = {
-  name: string
-  cte: string
-  params: Record<string, unknown>
-  require: OverviewCte[]
-}
+import { Segment } from './workspace.interface'
 
-export type OverviewObjectiveQueryParams = {
+export type ObjectiveSegmentParams = {
   cycleIsActive?: boolean
   // TODO: filter by mode
 }
 
-export type OverviewKeyResultQueryParams = {
+export type KeyResultSegmentParams = {
   cycleIsActive?: boolean
   mode?: KeyResultMode[]
 }
 
-export type OverviewKeyResultLatestCheckInQueryParams = {
+export type KeyResultLatestCheckInSegmentParams = {
   cycleIsActive?: boolean
   mode?: KeyResultMode[]
 }
 
-export class OverviewCteFactory {
+export class SegmentFactory {
   private readonly tables = {
     cycle: 'cycle',
     objective: 'objective',
@@ -30,11 +25,11 @@ export class OverviewCteFactory {
     keyResultCheckIn: 'key_result_check_in',
   }
 
-  constructor(private readonly source: OverviewCte) {}
+  constructor(private readonly source: Segment) {}
 
   // TODO: user teams
 
-  objectives({ cycleIsActive }: OverviewObjectiveQueryParams): OverviewCte {
+  objectives({ cycleIsActive }: ObjectiveSegmentParams): Segment {
     const name = 'cte_objective'
 
     // TODO: add date filters
@@ -56,7 +51,7 @@ export class OverviewCteFactory {
     }
   }
 
-  keyResults({ cycleIsActive, mode }: OverviewKeyResultQueryParams): OverviewCte {
+  keyResults({ cycleIsActive, mode }: KeyResultSegmentParams): Segment {
     const objectivesQuery = this.objectives({ cycleIsActive })
 
     const name = 'cte_key_result'
@@ -79,7 +74,7 @@ export class OverviewCteFactory {
     }
   }
 
-  keyResultLatestCheckIns({ cycleIsActive, mode }: OverviewKeyResultLatestCheckInQueryParams): OverviewCte {
+  keyResultLatestCheckIns({ cycleIsActive, mode }: KeyResultLatestCheckInSegmentParams): Segment {
     const keyResultsQuery = this.keyResults({ cycleIsActive, mode })
 
     const name = 'cte_key_result_latest_check_in'

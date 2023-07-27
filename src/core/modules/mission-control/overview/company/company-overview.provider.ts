@@ -3,6 +3,8 @@ import { InjectConnection } from '@nestjs/typeorm'
 import { Connection } from 'typeorm'
 
 import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
+import { OverviewAggregator } from '@core/modules/mission-control/overview/overview.aggregator'
+import { TeamScopeFactory } from '@core/modules/workspace/team-scope.factory'
 
 import {
   CompanyOverview,
@@ -14,7 +16,6 @@ import {
   CompanyOverviewWithMode,
   CompanyOverviewWithObjectives,
 } from './company-overview.aggregate'
-import { OverviewAggregatorFactory } from './overview-aggregator-factory'
 import {
   Filters,
   FiltersIncludeAccountability,
@@ -24,8 +25,8 @@ import {
   FiltersIncludeKeyResults,
   FiltersIncludeMode,
   FiltersIncludeObjectives,
-} from './overview.aggregate'
-import { OverviewProvider } from './overview.provider'
+} from '../overview.aggregate'
+import { OverviewProvider } from '../overview.provider'
 
 type RootFilter = { companyId: string }
 type TeamsFilter = { teamIds: string[] }
@@ -36,8 +37,8 @@ export class CompanyOverviewProvider {
 
   constructor(
     @InjectConnection() private readonly connection: Connection,
-    private readonly queryAggregatorFactory: OverviewAggregatorFactory,
     private readonly overviewProvider: OverviewProvider,
+    private readonly teamScopeFactory: TeamScopeFactory,
   ) {}
 
   async fromRoot(filters: RootFilter & FiltersIncludeAllSubteams): Promise<CompanyOverviewWithAllSubteams>
@@ -49,7 +50,17 @@ export class CompanyOverviewProvider {
   async fromRoot(filters: RootFilter & FiltersIncludeAccountability): Promise<CompanyOverviewWithAccountability>
 
   async fromRoot(filters: RootFilter & Filters): Promise<CompanyOverview> {
-    const aggregator = this.queryAggregatorFactory.withinCompany(filters.companyId)
+    const [teamIdsSource, teamIdsQuery, teamIdsParams] = this.teamScopeFactory.descendingDistinct({
+      parentTeamIds: [filters.companyId],
+      includeParentTeams: true,
+    })
+
+    const aggregator = new OverviewAggregator({
+      name: teamIdsSource,
+      cte: teamIdsQuery,
+      params: teamIdsParams,
+      require: [],
+    })
 
     return this.overviewProvider.aggregate({ ...filters, aggregator })
   }
@@ -63,8 +74,24 @@ export class CompanyOverviewProvider {
   async fromTeams(filters: TeamsFilter & FiltersIncludeAccountability): Promise<CompanyOverviewWithAccountability>
 
   async fromTeams(filters: TeamsFilter & Filters): Promise<CompanyOverview> {
-    const aggregator = this.queryAggregatorFactory.withinCompanyFromTeams(filters.teamIds)
+    const [teamIdsSource, teamIdsQuery, teamIdsParams] = this.teamScopeFactory.bidirectional({
+      originTeamIds: filters.teamIds,
+    })
+
+    const aggregator = new OverviewAggregator({
+      name: teamIdsSource,
+      cte: teamIdsQuery,
+      params: teamIdsParams,
+      require: [],
+    })
 
     return this.overviewProvider.aggregate({ ...filters, aggregator })
   }
+
+  // TODO: withinCompanyFromUser
+  // TODO: withinTeam
+  // TODO: withinTeamFromUser
+  // TODO: withinCycle
+  // TODO: withinUser
+  // TODO: withinObjective
 }

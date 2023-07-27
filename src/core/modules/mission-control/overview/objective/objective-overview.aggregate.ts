@@ -7,7 +7,7 @@ import {
   OverviewWithKeyResults,
   OverviewWithMode,
   OverviewWithObjectives,
-} from './overview.aggregate'
+} from '../overview.aggregate'
 
 export type ObjectiveOverview = Pick<Overview, 'keyResults' | 'mode' | 'confidence' | 'accountability'> & {
   subjectEntity: 'objective'

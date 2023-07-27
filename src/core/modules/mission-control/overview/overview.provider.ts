@@ -1,19 +1,15 @@
 import { Logger } from '@nestjs/common'
 import { Injectable } from '@nestjs/common/decorators/core/injectable.decorator'
-import { Connection } from 'typeorm'
 
 import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
 import { ConfidenceTag } from '@adapters/confidence-tag/confidence-tag.enum'
 import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.enum'
+import { AggregateExecutorFactory } from '@core/modules/workspace/aggregate-executor.factory'
 import { Stopwatch } from '@lib/logger/pino.decorator'
 
-import { CompanyOverview } from './company-overview.aggregate'
+import { CompanyOverview } from './company/company-overview.aggregate'
 import { Filters, Overview } from './overview.aggregate'
 import { OverviewAggregator } from './overview.aggregator'
-
-type OverviewAggregateResults = { results: Record<string, unknown> }
-
-type OverviewResultExtractor = (results: Record<string, unknown>) => Partial<CompanyOverview>
 
 type FromAggregator = { aggregator: OverviewAggregator }
 
@@ -23,7 +19,7 @@ export class OverviewProvider {
 
   private readonly confidenceTagAdapter = new ConfidenceTagAdapter()
 
-  constructor(private readonly connection: Connection) {}
+  constructor(private readonly executorFactory: AggregateExecutorFactory) {}
 
   // prettier-ignore
   // async aggregate(filters: FromAggregator & FiltersIncludeAllSubteams): Promise<CompanyOverviewWithAllSubteams>
@@ -44,7 +40,7 @@ export class OverviewProvider {
     cycleIsActive,
     include,
   }: FromAggregator & Filters): Promise<Overview> {
-    const extractors: OverviewResultExtractor[] = []
+    const executor = this.executorFactory.newInstance<CompanyOverview>()
 
     // TODO: filter by createdAfter
     // TODO: filter by createdBefore
@@ -56,10 +52,10 @@ export class OverviewProvider {
     if (include?.objectives) {
       const objectiveCountKey = aggregator.countObjectives({ cycleIsActive })
 
-      extractors.push((results) => {
-        this.logger.log(`Extracting key ${objectiveCountKey} from results %o`, results)
+      executor.addExtractor<number>(objectiveCountKey, (objectiveCount) => {
+        this.logger.log(`Extracting key ${objectiveCountKey} =`, objectiveCount)
         return {
-          objectives: Number(results[objectiveCountKey]),
+          objectives: objectiveCount,
         }
       })
     }
@@ -67,10 +63,10 @@ export class OverviewProvider {
     if (include?.keyResults) {
       const keyResultCountKey = aggregator.countKeyResults({ cycleIsActive, mode })
 
-      extractors.push((results) => {
-        this.logger.log(`Extracting key ${keyResultCountKey} from results %o`, results)
+      executor.addExtractor<number>(keyResultCountKey, (keyResultCount) => {
+        this.logger.log(`Extracted key ${keyResultCountKey} =`, keyResultCount)
         return {
-          keyResults: Number(results[keyResultCountKey]),
+          keyResults: keyResultCount,
         }
       })
     }
@@ -78,9 +74,7 @@ export class OverviewProvider {
     if (include?.mode) {
       const modeCountKey = aggregator.countKeyResultsByMode({ cycleIsActive, mode })
 
-      extractors.push((results) => {
-        const modes = results[modeCountKey] as Partial<Record<KeyResultMode, number>>
-
+      executor.addExtractor<Record<KeyResultMode, number>>(modeCountKey,modes => {
         this.logger.log(`Extracted modes from results using key ${modeCountKey} = %o`, modes)
 
         return {
@@ -97,22 +91,24 @@ export class OverviewProvider {
     if (include?.confidence) {
       const confidenceCountKey = aggregator.countKeyResultsByConfidence({ cycleIsActive, mode })
 
-      extractors.push((results) => {
-        const confidences = results[confidenceCountKey] as Partial<Record<number, number>>
-
+      executor.addExtractor<Partial<Record<number, number>>>(confidenceCountKey, (confidences) => {
         this.logger.log(`Extracted confidences from results using key ${confidenceCountKey} = %o`, confidences)
 
+        // TODO: ACHIEVED
         const highKey = this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.HIGH)
         const mediumKey = this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.MEDIUM)
         const lowKey = this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.LOW)
         const barrierKey = this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.BARRIER)
+        // TODO: DEPRIORITIZED
 
         return {
           confidence: {
+            // TODO: ACHIEVED
             [ConfidenceTag.HIGH]: confidences?.[highKey] ?? 0,
             [ConfidenceTag.MEDIUM]: confidences?.[mediumKey] ?? 0,
             [ConfidenceTag.LOW]: confidences?.[lowKey] ?? 0,
             [ConfidenceTag.BARRIER]: confidences?.[barrierKey] ?? 0,
+            // TODO: DEPRIORITIZED
           },
         }
       })
@@ -120,20 +116,6 @@ export class OverviewProvider {
 
     // TODO: if (include?.accountability)
 
-    const [query, params] = aggregator.getRawQuery()
-
-    // TODO: find a proper way to type these results
-    const [{ results }]: [OverviewAggregateResults] = await this.connection.query(query, params)
-
-    this.logger.log('Overview query results %o', results)
-
-    // TODO: move this logic to a generic class
-    return extractors.reduce(
-      (overview, extractor) => ({
-        ...overview,
-        ...extractor(results),
-      }),
-      {},
-    )
+    return executor.execute(aggregator.getQuery())
   }
 }

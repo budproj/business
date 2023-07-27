@@ -35,7 +35,7 @@ export class GetTeamObjectivesCommand extends Command<Objective[]> {
     ])
   }
 
-  @Stopwatch({ includeReturn: true })
+  @Stopwatch()
   public async execute(
     teamID: string,
     properties: Partial<GetTeamObjectivesProperties>,

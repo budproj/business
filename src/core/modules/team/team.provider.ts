@@ -10,8 +10,9 @@ import { UserProvider } from '@core/modules/user/user.provider'
 import { CreationQuery } from '@core/types/creation-query.type'
 import { Stopwatch } from '@lib/logger/pino.decorator'
 
+import { TeamScopeFactory } from '../workspace/team-scope.factory'
+
 import { TeamInterface } from './interfaces/team.interface'
-import { TeamTreeQueries } from './team-tree-queries.provider'
 import { Team } from './team.orm-entity'
 import { TeamRepository } from './team.repository'
 import { TeamSpecification } from './team.specification'
@@ -31,7 +32,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
 
   constructor(
     protected readonly repository: TeamRepository,
-    private readonly teamTreeQueries: TeamTreeQueries,
+    private readonly teamScopeFactory: TeamScopeFactory,
     private readonly userProvider: UserProvider,
   ) {
     super(TeamProvider.name, repository)
@@ -78,10 +79,9 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
 
   @Stopwatch()
   public async getTeamRelationsByUsers(userIds: string[]): Promise<Record<string, string[]>> {
-    const relations = await this.repository.manager.query(
-      `SELECT * FROM team_users_user WHERE user_id = ANY($1)`,
-      [userIds],
-    )
+    const relations = await this.repository.manager.query(`SELECT * FROM team_users_user WHERE user_id = ANY($1)`, [
+      userIds,
+    ])
 
     // Build a Record<user_id, team_id[]> map
     return relations.reduce(
@@ -108,18 +108,14 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
   ): Promise<Team[]> {
     const orderBy = this.repository.marshalOrderBy(queryOptions?.orderBy)
 
-    const [descendingTable, descendingCte, descendingQueryOptions] =
-      this.teamTreeQueries.descendingDistinct({
-        parentTeamIds,
-        includeParentTeams,
-      })
+    const [descendingTable, descendingCte, descendingQueryOptions] = this.teamScopeFactory.descendingDistinct({
+      parentTeamIds,
+      includeParentTeams,
+    })
 
     return this.repository
       .createQueryBuilder()
-      .where(
-        () => `id IN (WITH RECURSIVE ${descendingCte} SELECT id FROM ${descendingTable})`,
-        descendingQueryOptions,
-      )
+      .where(() => `id IN (WITH RECURSIVE ${descendingCte} SELECT id FROM ${descendingTable})`, descendingQueryOptions)
       .andWhere({ ...filters })
       .take(queryOptions?.limit ?? 0)
       .offset(queryOptions?.offset ?? 0)
@@ -130,28 +126,19 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
   @Stopwatch()
   public async getAscendantsByIds(
     childTeamIds: string[],
-    {
-      includeChildTeams = true,
-      rootsOnly = false,
-      filters,
-      queryOptions,
-    }: GetAscendantsByIdsArguments,
+    { includeChildTeams = true, rootsOnly = false, filters, queryOptions }: GetAscendantsByIdsArguments,
   ): Promise<Team[]> {
     const orderBy = this.repository.marshalOrderBy(queryOptions?.orderBy)
 
-    const [ascendingTable, ascendingCte, ascendingQueryOptions] =
-      this.teamTreeQueries.ascendingDistinct({
-        childTeamIds,
-        includeChildTeams,
-        rootsOnly,
-      })
+    const [ascendingTable, ascendingCte, ascendingQueryOptions] = this.teamScopeFactory.ascendingDistinct({
+      childTeamIds,
+      includeChildTeams,
+      rootsOnly,
+    })
 
     return this.repository
       .createQueryBuilder()
-      .where(
-        () => `id IN (WITH RECURSIVE ${ascendingCte} SELECT id FROM ${ascendingTable})`,
-        ascendingQueryOptions,
-      )
+      .where(() => `id IN (WITH RECURSIVE ${ascendingCte} SELECT id FROM ${ascendingTable})`, ascendingQueryOptions)
       .andWhere({ ...filters })
       .take(queryOptions?.limit ?? 0)
       .offset(queryOptions?.offset ?? 0)
@@ -192,10 +179,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
   }
 
   @Stopwatch()
-  public async buildTeamQueryContext(
-    user: UserInterface,
-    constraint: Scope = Scope.OWNS,
-  ): Promise<CoreQueryContext> {
+  public async buildTeamQueryContext(user: UserInterface, constraint: Scope = Scope.OWNS): Promise<CoreQueryContext> {
     const context = this.buildContext(user, constraint)
 
     // TODO: rewrite using a single query
@@ -286,11 +270,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
   }
 
   @Stopwatch()
-  private async getCompaniesDepartments(
-    companies: Team[],
-    filters?: FindConditions<Team>,
-    options?: GetOptions<Team>,
-  ) {
+  private async getCompaniesDepartments(companies: Team[], filters?: FindConditions<Team>, options?: GetOptions<Team>) {
     const companyIDs = companies.map((company) => company.id)
 
     return this.getChildren(companyIDs, filters, options)
