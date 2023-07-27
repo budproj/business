@@ -7,9 +7,9 @@ import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { User } from '@core/modules/user/user.orm-entity'
 import { EntityOrderAttributes, Order, OrderAttribute } from '@core/types/order-attribute.type'
+import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { Command } from './base.command'
-import { Stopwatch } from '@lib/logger/pino.decorator';
 
 export abstract class BaseStatusCommand extends Command<Status> {
   protected readonly defaultOptions: GetStatusOptions = {}
@@ -51,7 +51,7 @@ export abstract class BaseStatusCommand extends Command<Status> {
     keyResults: KeyResult[],
     latestCheckIns: KeyResultCheckInInterface[],
   ): Promise<number[]> {
-    return await this.core.keyResult.getCheckInProgressBatch(keyResults, latestCheckIns);
+    return this.core.keyResult.getCheckInProgressBatch(keyResults, latestCheckIns)
   }
 
   @Stopwatch()
@@ -72,7 +72,11 @@ export abstract class BaseStatusCommand extends Command<Status> {
     const progresses = groupedKeyResultsProgress.map((progressList) =>
       this.getAverage(progressList),
     )
-    const confidences = latestCheckIns.map((checkIn) => checkIn?.confidence)
+    const confidencesWithoutDeprioritized = latestCheckIns.filter(
+      (checkIn) => checkIn?.confidence !== -100,
+    )
+
+    const confidences = confidencesWithoutDeprioritized.map((checkIn) => checkIn?.confidence)
 
     return [latestCheckIns, progresses, confidences]
   }
