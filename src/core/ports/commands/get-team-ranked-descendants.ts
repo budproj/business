@@ -10,6 +10,9 @@ import { Command } from '@core/ports/commands/base.command'
 import { CommandFactory } from '@core/ports/commands/command.factory'
 import { GetTeamStatusOptions } from '@core/ports/commands/get-team-status.command'
 
+/**
+ * @deprecated prefer using the `StatusProvider` instead
+ */
 export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
   private readonly getTeamStatus: Command<Status>
 

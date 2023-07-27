@@ -5,13 +5,10 @@ import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.ad
 import { ConfidenceTag } from '@adapters/confidence-tag/confidence-tag.enum'
 import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.enum'
 import { AggregateExecutorFactory } from '@core/modules/workspace/aggregate-executor.factory'
-import { Stopwatch } from '@lib/logger/pino.decorator'
+import { KeyResultLatestCheckInSegmentParams } from '@core/modules/workspace/segment.factory'
 
-import { CompanyOverview } from './company/company-overview.aggregate'
-import { Filters, Overview } from './overview.aggregate'
+import { Filters, Overview, OverviewWithOnly } from './overview.aggregate'
 import { OverviewAggregator } from './overview.aggregator'
-
-type FromAggregator = { aggregator: OverviewAggregator }
 
 @Injectable()
 export class OverviewProvider {
@@ -21,60 +18,56 @@ export class OverviewProvider {
 
   constructor(private readonly executorFactory: AggregateExecutorFactory) {}
 
-  // prettier-ignore
-  // async aggregate(filters: FromAggregator & FiltersIncludeAllSubteams): Promise<CompanyOverviewWithAllSubteams>
-  // async aggregate(filters: FromAggregator & FiltersIncludeDirectSubteams): Promise<CompanyOverviewWithDirectSubteams>
-  // async aggregate(filters: FromAggregator & FiltersIncludeObjectives): Promise<CompanyOverviewWithObjectives>
-  // async aggregate(filters: FromAggregator & FiltersIncludeKeyResults): Promise<CompanyOverviewWithKeyResults>
-  // async aggregate(filters: FromAggregator & FiltersIncludeMode): Promise<CompanyOverviewWithMode>
-  // async aggregate(filters: FromAggregator & FiltersIncludeConfidence): Promise<CompanyOverviewWithConfidence>
-  // async aggregate(filters: FromAggregator & FiltersIncludeAccountability): Promise<CompanyOverviewWithAccountability>
-
-  // TODO: refactor method into smaller ones
-  @Stopwatch()
-  async aggregate({
+  async aggregate<T extends Overview, K extends keyof T>({
     aggregator,
-    createdAfter,
-    createdBefore,
     mode,
     cycleIsActive,
     include,
-  }: FromAggregator & Filters): Promise<Overview> {
-    const executor = this.executorFactory.newInstance<CompanyOverview>()
+  }: Filters<T, K> & { aggregator: OverviewAggregator }): Promise<OverviewWithOnly<K, T>> {
+    const executor = this.executorFactory.newInstance<Overview>()
 
-    // TODO: filter by createdAfter
-    // TODO: filter by createdBefore
-    // TODO: filter by mode
+    const params: KeyResultLatestCheckInSegmentParams = {
+      keyResult: {
+        mode,
+        objective: {
+          cycle: {
+            isActive: cycleIsActive,
+          },
+        },
+      },
+    }
+
+    const included = (key: keyof T) => (include as Array<keyof T>)?.includes(key)
 
     // TODO: if (include?.allSubteams)
     // TODO: if (include?.directSubteams)
 
-    if (include?.objectives) {
-      const objectiveCountKey = aggregator.countObjectives({ cycleIsActive })
+    if (included('objectives')) {
+      const objectiveCountKey = aggregator.countObjectives(params.keyResult.objective)
 
-      executor.addExtractor<number>(objectiveCountKey, (objectiveCount) => {
-        this.logger.log(`Extracting key ${objectiveCountKey} =`, objectiveCount)
+      executor.number(objectiveCountKey, (objectiveCount) => {
+        this.logger.log(`Extracted key ${objectiveCountKey} = %o`, objectiveCount)
         return {
           objectives: objectiveCount,
         }
       })
     }
 
-    if (include?.keyResults) {
-      const keyResultCountKey = aggregator.countKeyResults({ cycleIsActive, mode })
+    if (included('keyResults')) {
+      const keyResultCountKey = aggregator.countKeyResults(params.keyResult)
 
-      executor.addExtractor<number>(keyResultCountKey, (keyResultCount) => {
-        this.logger.log(`Extracted key ${keyResultCountKey} =`, keyResultCount)
+      executor.number(keyResultCountKey, (keyResultCount) => {
+        this.logger.log(`Extracted key ${keyResultCountKey} = %o`, keyResultCount)
         return {
           keyResults: keyResultCount,
         }
       })
     }
 
-    if (include?.mode) {
-      const modeCountKey = aggregator.countKeyResultsByMode({ cycleIsActive, mode })
+    if (included('mode')) {
+      const modeCountKey = aggregator.countKeyResultsByMode(params.keyResult)
 
-      executor.addExtractor<Record<KeyResultMode, number>>(modeCountKey,modes => {
+      executor.addExtractor<Record<KeyResultMode, number>>(modeCountKey, (modes) => {
         this.logger.log(`Extracted modes from results using key ${modeCountKey} = %o`, modes)
 
         return {
@@ -88,33 +81,33 @@ export class OverviewProvider {
       })
     }
 
-    if (include?.confidence) {
-      const confidenceCountKey = aggregator.countKeyResultsByConfidence({ cycleIsActive, mode })
+    if (included('confidence')) {
+      const confidenceCountKey = aggregator.countKeyResultsByConfidence(params)
 
       executor.addExtractor<Partial<Record<number, number>>>(confidenceCountKey, (confidences) => {
         this.logger.log(`Extracted confidences from results using key ${confidenceCountKey} = %o`, confidences)
 
-        // TODO: ACHIEVED
+        const achievedKey = this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.ACHIEVED)
         const highKey = this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.HIGH)
         const mediumKey = this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.MEDIUM)
         const lowKey = this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.LOW)
         const barrierKey = this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.BARRIER)
-        // TODO: DEPRIORITIZED
+        const deprioritizedKey = this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.DEPRIORITIZED)
 
         return {
           confidence: {
-            // TODO: ACHIEVED
+            [ConfidenceTag.ACHIEVED]: confidences?.[achievedKey] ?? 0,
             [ConfidenceTag.HIGH]: confidences?.[highKey] ?? 0,
             [ConfidenceTag.MEDIUM]: confidences?.[mediumKey] ?? 0,
             [ConfidenceTag.LOW]: confidences?.[lowKey] ?? 0,
             [ConfidenceTag.BARRIER]: confidences?.[barrierKey] ?? 0,
-            // TODO: DEPRIORITIZED
+            [ConfidenceTag.DEPRIORITIZED]: confidences?.[deprioritizedKey] ?? 0,
           },
         }
       })
     }
 
-    // TODO: if (include?.accountability)
+    // TODO: if (included(accountability))
 
     return executor.execute(aggregator.getQuery())
   }

@@ -9,6 +9,9 @@ export interface GetTeamStatusOptions extends GetStatusOptions {
   cycleFilters?: Partial<CycleInterface>
 }
 
+/**
+ * @deprecated prefer using the `StatusProvider` instead
+ */
 export class GetTeamStatusCommand extends BaseStatusCommand {
   static isActive(keyResults: any[]): boolean {
     return keyResults.some((keyResult) => keyResult?.objective?.cycle?.active)

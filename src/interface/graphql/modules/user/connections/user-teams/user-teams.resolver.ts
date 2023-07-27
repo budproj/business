@@ -113,20 +113,18 @@ export class UserTeamsConnectionGraphQLResolver extends GuardedConnectionGraphQL
       teamIds,
       mode: [KeyResultMode.PUBLISHED, KeyResultMode.COMPLETED],
       cycleIsActive: true,
-      include: {
-        objectives: true,
-        keyResults: true,
-        confidence: true,
-      },
+      include: ['objectives', 'keyResults', 'confidence'],
     })
 
     return {
       objectivesQuantity: overview.objectives,
       keyResultsQuantity: overview.keyResults,
+      achieved: overview.confidence.achieved,
       high: overview.confidence.high,
       medium: overview.confidence.medium,
       low: overview.confidence.low,
       barrier: overview.confidence.barrier,
+      deprioritized: overview.confidence.deprioritized,
     }
   }
 }

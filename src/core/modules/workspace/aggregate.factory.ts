@@ -28,10 +28,10 @@ export class AggregateFactory {
     }
   }
 
-  count(segment: Segment): string {
-    const name = `count_${segment.name}`
+  fn(segment: Segment, fn: string, column: string): string {
+    const name = `${fn}_${segment.name}_${column === '*' ? '' : column}`
 
-    const dataColumn = 'cast(cast(count(*) AS TEXT) AS JSON)'
+    const dataColumn = `to_json(${fn}(${column === '*' ? column : `"${column}"`}))`
 
     const source = `"${segment.name}"`
 
@@ -46,18 +46,38 @@ export class AggregateFactory {
     return name
   }
 
-  countGroupBy(segment: Segment, groupBy: string): string {
-    const name = `count_${segment.name}_group_by_${groupBy}`
+  count(segment: Segment): string {
+    return this.fn(segment, 'count', '*')
+  }
+
+  min(segment: Segment, column: string): string {
+    return this.fn(segment, 'min', column)
+  }
+
+  max(segment: Segment, column: string): string {
+    return this.fn(segment, 'max', column)
+  }
+
+  average(segment: Segment, column: string): string {
+    return this.fn(segment, 'avg', column)
+  }
+
+  sum(segment: Segment, column: string): string {
+    return this.fn(segment, 'sum', column)
+  }
+
+  fnGroupBy(segment: Segment, groupBy: string, fn: string, column: string): string {
+    const name = `${fn}_${segment.name}_group_by_${groupBy}_${column === '*' ? '' : column}`
 
     const dataColumn = 'json_object_agg(subkey, count)'
 
     const source = `
       (
         SELECT "${groupBy}",
-               count(*)
+               ${fn}("${column}")
         FROM "${segment.name}" kr
         GROUP BY 1
-      ) AS confidence_count(subkey, count)
+      ) AS result_tuple(subkey, count)
     `
 
     this.addAggregate({
@@ -71,6 +91,26 @@ export class AggregateFactory {
     return name
   }
 
+  countGroupBy(segment: Segment, groupBy: string): string {
+    return this.fnGroupBy(segment, groupBy, 'count', '*')
+  }
+
+  minGroupBy(segment: Segment, groupBy: string, column: string): string {
+    return this.fnGroupBy(segment, groupBy, 'min', column)
+  }
+
+  maxGroupBy(segment: Segment, groupBy: string, column: string): string {
+    return this.fnGroupBy(segment, groupBy, 'max', column)
+  }
+
+  averageGroupBy(segment: Segment, groupBy: string, column: string): string {
+    return this.fnGroupBy(segment, groupBy, 'avg', column)
+  }
+
+  sumGroupBy(segment: Segment, groupBy: string, column: string): string {
+    return this.fnGroupBy(segment, groupBy, 'sum', column)
+  }
+
   getQuery(): AggregationQuery {
     const segments = this.mapSegments(this.aggregates)
 
@@ -78,14 +118,14 @@ export class AggregateFactory {
 
     const cteParams = Object.values(segments).reduce((map, { params }) => ({ ...map, ...params }), {})
 
-    const aggregateQueries = Object.values(this.aggregates).reduce((list, { query }) => [...list, query], [])
+    const aggregateQueries = Object.values(this.aggregates).reduce<string[]>((list, { query }) => [...list, query], [])
 
     const aggregateParams = Object.values(this.aggregates).reduce((map, { params }) => ({ ...map, ...params }), {})
 
     const fullQuery = `
       WITH RECURSIVE ${[this.source.cte, ...cteQueries].join(', ')}
       SELECT json_object_agg(key, data) AS results
-      FROM (${aggregateQueries.join('\nUNION ALL\n')}) AS results(key, data)
+      FROM (${aggregateQueries.map((sql) => `(${sql})`).join('\nUNION ALL\n')}) AS results(key, data)
     `
 
     // TODO: would be nice to suffix each query parameter to prevent collisions

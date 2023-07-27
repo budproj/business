@@ -37,22 +37,20 @@ export class OverviewAggregator {
   }
 
   countKeyResultsByConfidence(...params: Parameters<SegmentFactory['keyResultLatestCheckIns']>): string {
-    const keyResultSegment = this.segmentFactory.keyResults(...params)
-    const latestCheckInSegment = this.segmentFactory.keyResultLatestCheckIns(...params)
+    const latestStatusSegment = this.segmentFactory.keyResultLatestStatus(...params)
 
     const groupBy = 'confidence'
 
-    const name = `count_${keyResultSegment.name}_group_by_${groupBy}`
+    const name = `count_${latestStatusSegment.name}_group_by_${groupBy}`
 
     const dataColumn = 'json_object_agg(subkey, count)'
 
     const source = `
       (
-        SELECT coalesce(krck.confidence, 100),
-               count(*)
-        FROM "${keyResultSegment.name}" kr
-            LEFT JOIN "${latestCheckInSegment.name}" krck ON krck.key_result_id = kr.id
-        GROUP BY 1
+          SELECT krs.confidence,
+                 count(*)
+          FROM "${latestStatusSegment.name}" krs
+          GROUP BY 1
       ) AS confidence_count(subkey, count)
     `
 
@@ -61,7 +59,7 @@ export class OverviewAggregator {
       dataColumn,
       source,
       params: {},
-      require: [keyResultSegment, latestCheckInSegment],
+      require: [latestStatusSegment],
     })
 
     return name
