@@ -32,6 +32,7 @@ import GetResolvedFieldsInEdgesAndNodes, {
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
 import { CycleFiltersRequest } from '@interface/graphql/modules/cycle/requests/cycle-filters.request'
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
+import { TeamMembersGraphQLObject } from '@interface/graphql/modules/team/objects/team-members.object'
 import { TeamStatusRequest } from '@interface/graphql/modules/team/requests/team-status.request'
 import { UserFiltersRequest } from '@interface/graphql/modules/user/requests/user-filters.request'
 import { UserKeyResultsRequest } from '@interface/graphql/modules/user/requests/user-key-results.request'
@@ -135,6 +136,12 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     if (!updatedTeam) throw new InternalServerErrorException('We were not able to update your team')
 
     return updatedTeam
+  }
+
+  @Stopwatch()
+  @ResolveField('teamsMembers', () => [TeamMembersGraphQLObject])
+  protected async getTeamMembers(@Parent() team: TeamGraphQLNode) {
+    return this.core.team.getTeamsUsersIds(team.id)
   }
 
   @Stopwatch()

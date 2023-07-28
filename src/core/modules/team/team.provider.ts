@@ -261,6 +261,27 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     })
   }
 
+  public async getTeamsUsersIds(rootTeamId: string): Promise<Array<{ teamId: string; userIds: string[] }>> {
+    const [descendingTable, descendingCte, descendingQueryOptions] = this.teamScopeFactory.descendingDistinct({
+      parentTeamIds: [rootTeamId],
+      includeParentTeams: true,
+    })
+
+    const memberships = await this.repository.manager
+      .createQueryBuilder()
+      .select(['tu.team_id as team_id', 'json_agg(tu.user_id) as user_ids'])
+      .from('team_users_user', 'tu')
+      .where(
+        () => `tu.team_id IN (WITH RECURSIVE ${descendingCte} SELECT id FROM ${descendingTable})`,
+        descendingQueryOptions,
+      )
+      .groupBy('tu.team_id')
+      .getRawMany()
+
+    return memberships
+      .map(([teamId, userIds]) => ({ teamId, userIds }))
+  }
+
   protected async protectCreationQuery(
     _query: CreationQuery<Team>,
     _data: Partial<TeamInterface>,
