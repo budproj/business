@@ -32,10 +32,11 @@ model OpenAiCompletion {
   @@index([action, entity, referenceId, respondedAt(sort: Desc)])
 }
 
-model UserFeedback {
+model UserCompletionFeedback {
   userId       String
   completionId String
-  value        String
+  value        Int
+  vendor       String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

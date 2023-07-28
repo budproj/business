@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common'
+import { Body, Controller, Post, UseGuards, HttpException, HttpStatus } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { ActionType, TargetEntity } from '@prisma/client'
 import { CreateChatCompletionRequest } from 'openai'
@@ -67,13 +67,18 @@ export class LLMsController {
   @Stopwatch()
   @UseGuards(AuthGuard('jwt'))
   @Post('feedback')
-  async createOrInsertUserFeedback(@Body() body: CreateUserFeedback): Promise<CreateUserFeedback> {
+  async saveFeedback(@Body() body: CreateUserFeedback): Promise<CreateUserFeedback> {
     const { completionId, userId, value } = body
+
+    if (value > 1 || value < -1) {
+      throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST)
+    }
 
     const userFeedback: CreateUserFeedback = {
       completionId,
       userId,
       value,
+      vendor: 'OpenAI',
     }
 
     return this.userFeedbackService.upsert(userFeedback)

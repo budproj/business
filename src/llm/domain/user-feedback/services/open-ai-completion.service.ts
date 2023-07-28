@@ -7,10 +7,8 @@ import { UserFeedbackRepository } from '../repositories/user-feedback-repository
 class UserFeedbackService {
   constructor(private readonly repository: UserFeedbackRepository) {}
 
-  public async upsert<T extends Record<string, unknown>>(
-    request: CreateUserFeedbackDTO,
-  ): Promise<CreateUserFeedbackDTO> {
-    return this.repository.upsertFeedback(request)
+  public async upsert(request: CreateUserFeedbackDTO): Promise<CreateUserFeedbackDTO> {
+    return this.repository.upsert(request)
   }
 }
 

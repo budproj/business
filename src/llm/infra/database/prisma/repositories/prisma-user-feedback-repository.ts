@@ -8,8 +8,8 @@ import { PrismaService } from '../../prisma.service'
 @Injectable()
 export class PrismaUserFeedbackRepository implements UserFeedbackRepository {
   constructor(private readonly prisma: PrismaService) {}
-  async upsertFeedback(data: CreateUserFeedbackDTO): Promise<CreateUserFeedbackDTO> {
-    return this.prisma.userFeedback.upsert({
+  async upsert(data: CreateUserFeedbackDTO): Promise<CreateUserFeedbackDTO> {
+    return this.prisma.userCompletionFeedback.upsert({
       where: {
         userId_completionId: {
           completionId: data.completionId,
@@ -23,6 +23,7 @@ export class PrismaUserFeedbackRepository implements UserFeedbackRepository {
         userId: data.userId,
         completionId: data.completionId,
         value: data.value,
+        vendor: data.vendor,
       },
     })
   }
