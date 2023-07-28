@@ -3,4 +3,6 @@ export enum ConfidenceTag {
   MEDIUM = 'medium',
   LOW = 'low',
   BARRIER = 'barrier',
+  ACHIEVED = 'achieved',
+  DEPRIORITIZED = 'deprioritized',
 }

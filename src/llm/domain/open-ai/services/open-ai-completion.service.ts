@@ -1,14 +1,15 @@
-import * as assert from 'assert';
-import { setTimeout } from 'timers/promises';
-import { Injectable, Logger } from '@nestjs/common';
-import { ActionType, OpenAiCompletion, OpenAiCompletionStatus, TargetEntity } from '@prisma/client';
-import { Configuration, CreateChatCompletionRequest, OpenAIApi } from 'openai'
-import { differenceInSeconds } from 'date-fns';
+import * as assert from 'assert'
+import { setTimeout } from 'timers/promises'
 
-import { Author } from 'src/llm/shared/utilities/types';
+import { TiktokenModel, encoding_for_model } from '@dqbd/tiktoken'
+import { Injectable, Logger } from '@nestjs/common'
+import { ActionType, OpenAiCompletion, OpenAiCompletionStatus, TargetEntity } from '@prisma/client'
+import { differenceInSeconds } from 'date-fns'
+import { Configuration, CreateChatCompletionRequest, OpenAIApi } from 'openai'
 
 import { HashProvider } from '../../../shared/hash-provider/models/hash-provider'
 import generateId from '../../../shared/utilities/generate-id'
+import { Author, ModelName, TokenEstimate } from '../../../shared/utilities/types'
 import { GenerateOpenAiCompletionDTO } from '../dtos/create-key-result-completion.dto'
 import { OpenAICompletionRepository } from '../repositories/open-ai-completion-repositorie'
 
@@ -16,20 +17,28 @@ import { OpenAICompletionRepository } from '../repositories/open-ai-completion-r
  * @deprecated TODO: move this to a config file to avoid depending on global variables
  */
 const { LLM_OPENAI_API_KEY } = process.env
-assert(LLM_OPENAI_API_KEY, 'LLM_OPENAI_API_KEY is required');
+assert(LLM_OPENAI_API_KEY, 'LLM_OPENAI_API_KEY is required')
 
-interface OpenAICompletionRequest<T extends {}> {
+export type CompletionRequestPrompt = Exclude<CreateChatCompletionRequest, 'model'> & {
+  model: ModelName
+}
+
+export interface CompletionRequest<T> {
   referenceId: string
   action: ActionType
   entity: TargetEntity
-  prompt: CreateChatCompletionRequest
+  prompt: CompletionRequestPrompt
+  promptVersion: string
   input: T
   author: Author
+  estimates?: {
+    promptTokens: number
+    completionTokens: number
+  }
 }
 
 @Injectable()
 class OpenAICompletionService {
-
   private readonly logger = new Logger(OpenAICompletionService.name)
 
   private readonly openai: OpenAIApi
@@ -46,23 +55,37 @@ class OpenAICompletionService {
     )
   }
 
-  public async complete<T extends {}>(request: OpenAICompletionRequest<T>, remainingAttempts = 1): Promise<OpenAiCompletion> {
+  public estimatePromptTokens({ model, messages }: CreateChatCompletionRequest): TokenEstimate {
+    try {
+      const encoding = encoding_for_model(model as TiktokenModel)
 
+      const count = messages.reduce((sum, { content }) => sum + encoding.encode(content).length, 0)
+
+      encoding.free()
+
+      return { count }
+    } catch (error) {
+      this.logger.error(
+        `Could not estimate prompt tokens for model ${model} due to "${error.message}": %o`,
+        error,
+      )
+      return { error: error.message }
+    }
+  }
+
+  public async complete<T>(
+    request: CompletionRequest<T>,
+    remainingAttempts = 1,
+  ): Promise<OpenAiCompletion> {
     if (remainingAttempts <= 0) {
       throw new Error('Could not complete request, maximum attempts reached')
     }
 
-    const {
-      referenceId,
-      action,
-      entity,
-      prompt,
-      input,
-      author,
-    } = request
+    const { referenceId, action, entity, prompt, promptVersion, input, author, estimates } = request
 
-    const hashedInput = await this.hashProvider.generateHash(input)
-    const id = generateId(action, entity, hashedInput)
+    // As of 2023-07-14, the hash is calculated from the prompt instead of the input
+    const hashedInput = await this.hashProvider.generateHash(prompt)
+    const id = generateId({ action, entity, hashedInput, promptVersion })
 
     const completion = await this.repository.findCompletionById(id)
 
@@ -71,22 +94,25 @@ class OpenAICompletionService {
         return completion
       }
 
-      if (completion.status === OpenAiCompletionStatus.PENDING) {
-        if (differenceInSeconds(new Date(), completion.createdAt) < 60) {
-          // Completion is pending and was created less than 60 seconds ago; wait until it completes
+      if (
+        completion.status === OpenAiCompletionStatus.PENDING &&
+        differenceInSeconds(new Date(), completion.createdAt) < 60
+      ) {
+        // Completion is pending and was created less than 60 seconds ago; wait until it completes
 
-          if (remainingAttempts <= 1) {
-            this.logger.error(`Completion for ${id} is still pending, but maximum attempts reached. Returning pending completion`)
-            return completion
-          }
-
-          // TODO: handle sleeping in a better way that does not hang the request for 15 seconds
-          await setTimeout(15 * 1000);
-          return await this.complete(request, remainingAttempts - 1)
+        if (remainingAttempts <= 1) {
+          this.logger.error(
+            `Completion for ${id} is still pending, but maximum attempts reached. Returning pending completion`,
+          )
+          return completion
         }
+
+        // TODO: handle sleeping in a better way that does not hang the request for 15 seconds
+        await setTimeout(15 * 1000)
+        return this.complete(request, remainingAttempts - 1)
       }
 
-      // completion.status === FAILED -> no need to insert, only retry
+      // Completion.status === FAILED -> no need to insert, only retry
     } else {
       // Completion not found, create a new one
       await this.repository.createCompletion({
@@ -102,6 +128,8 @@ class OpenAICompletionService {
         model: prompt.model,
         messages: prompt.messages as unknown as GenerateOpenAiCompletionDTO['messages'],
         request: prompt as unknown as GenerateOpenAiCompletionDTO['request'],
+        estimatedPromptTokens: estimates?.promptTokens ?? null,
+        estimatedCompletionTokens: estimates?.completionTokens ?? null,
       })
     }
 
@@ -115,36 +143,41 @@ class OpenAICompletionService {
         usage: { completion_tokens, prompt_tokens, total_tokens },
         choices,
       } = response
-      const [{
-        message: { content },
-      }] = choices
+      const [
+        {
+          message: { content },
+        },
+      ] = choices
 
       return await this.repository.updateCompletion(id, {
         status: OpenAiCompletionStatus.COMPLETED,
-        consumedTokens: completion_tokens,
-        producedTokens: prompt_tokens,
+        completionTokens: completion_tokens,
+        promptTokens: prompt_tokens,
         totalTokens: total_tokens,
         requestedAt,
         respondedAt,
         output: content,
         response: response as unknown as OpenAiCompletion['response'],
       })
-    } catch (err) {
-      const response = err.response ?? null;
+    } catch (error) {
+      const response = error.response ?? null
 
       if (response) {
-        this.logger.error(`Failed to generate completion for ${id} due to "${err.message}": %o`, response)
+        this.logger.error(
+          `Failed to generate completion for ${id} due to "${error.message}": %o`,
+          response,
+        )
 
-        return await this.repository.updateCompletion(id, {
+        return this.repository.updateCompletion(id, {
           status: OpenAiCompletionStatus.FAILED,
           requestedAt,
-          response: response,
+          response,
         })
       }
 
-      this.logger.error(`Failed to generate completion for ${id} due to %o`, err)
+      this.logger.error(`Failed to generate completion for ${id} due to %o`, error)
 
-      return await this.repository.updateCompletion(id, {
+      return this.repository.updateCompletion(id, {
         status: OpenAiCompletionStatus.FAILED,
         requestedAt,
       })

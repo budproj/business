@@ -1,7 +1,15 @@
 import { ActionType, TargetEntity } from '@prisma/client'
 
-function genarateId(action: ActionType, entity: TargetEntity, hashedInput: string) {
-  return `${action}.${entity}.${hashedInput}`
+// eslint-disable-next-line unicorn/prevent-abbreviations
+interface Args {
+  action: ActionType
+  entity: TargetEntity
+  hashedInput: string
+  promptVersion: string
 }
 
-export default genarateId
+function generateId({ action, entity, hashedInput, promptVersion }: Args) {
+  return `${action}.${entity}.${hashedInput}@${promptVersion}`
+}
+
+export default generateId

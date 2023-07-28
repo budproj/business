@@ -1,8 +1,8 @@
 export interface SummarizeKeyResultInput {
-  objective: Objective
+  objective?: Objective
   cycle: Cycle
   title: string
-  description: string
+  description?: string
   goal: number
   format: Format
   owner: Owner
@@ -12,7 +12,7 @@ export interface SummarizeKeyResultInput {
 }
 
 export interface Objective {
-  title: string
+  title?: string
 }
 
 export interface Cycle {
