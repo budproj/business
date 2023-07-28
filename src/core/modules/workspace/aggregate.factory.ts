@@ -1,5 +1,5 @@
 import { SegmentFactory } from './segment.factory'
-import { Aggregate, AggregationQuery, Segment } from './workspace.interface'
+import { Aggregate, AggregationQuery, Segment, SourceSegment } from './workspace.interface'
 
 type AddAggregateArgs = Pick<Aggregate, 'params' | 'require'> & {
   name: string
@@ -12,7 +12,7 @@ export class AggregateFactory {
 
   private readonly aggregates: Record<string, Aggregate> = {}
 
-  constructor(private readonly source: Segment) {
+  constructor(private readonly source: SourceSegment) {
     this.segmentFactory = new SegmentFactory(source)
   }
 
@@ -122,8 +122,10 @@ export class AggregateFactory {
 
     const aggregateParams = Object.values(this.aggregates).reduce((map, { params }) => ({ ...map, ...params }), {})
 
+    const ctes = [this.source.cte, ...cteQueries]
+
     const fullQuery = `
-      WITH RECURSIVE ${[this.source.cte, ...cteQueries].join(', ')}
+      WITH RECURSIVE ${ctes.join(', ')}
       SELECT json_object_agg(key, data) AS results
       FROM (${aggregateQueries.map((sql) => `(${sql})`).join('\nUNION ALL\n')}) AS results(key, data)
     `
@@ -141,7 +143,6 @@ export class AggregateFactory {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-types
   private deduplicateSegments(segments: Segment[]): Record<string, Omit<Segment, 'require'>> {
     return segments.reduce(
       (map, cte) => ({
@@ -157,10 +158,7 @@ export class AggregateFactory {
     )
   }
 
-  private mapSegments(
-    aggregates: typeof this.aggregates,
-    // eslint-disable-next-line @typescript-eslint/ban-types
-  ): Record<string, Omit<Segment, 'require'>> {
+  private mapSegments(aggregates: typeof this.aggregates): Record<string, Omit<Segment, 'require'>> {
     const segments = Object.values(aggregates).flatMap(({ require }) => require)
 
     return this.deduplicateSegments(segments)

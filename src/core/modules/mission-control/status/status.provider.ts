@@ -5,7 +5,7 @@ import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.en
 import { KeyResultStateInterface } from '@core/modules/key-result/interfaces/key-result-state.interface'
 import { DEFAULT_CONFIDENCE, DEFAULT_PROGRESS } from '@core/modules/team/team.constants'
 import { AggregateExecutorFactory } from '@core/modules/workspace/aggregate-executor.factory'
-import { KeyResultLatestCheckInSegmentParams } from '@core/modules/workspace/segment.factory'
+import { KeyResultLatestCheckInSegmentParams, OkrMode } from '@core/modules/workspace/segment.factory'
 import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { Filters, Status, StatusWithOnly } from './status.aggregate'
@@ -37,16 +37,23 @@ export class StatusProvider {
   async aggregate<T extends Status, K extends keyof T>({
     aggregator,
     since,
+    okrType,
     cycleIsActive,
     include,
   }: Filters<T, K> & { aggregator: StatusAggregator }): Promise<StatusWithOnly<K, T>> {
     const executor = this.executorFactory.newInstance<Status>()
 
+    const mode: OkrMode[] = ['published', 'completed']
+
     const params: KeyResultLatestCheckInSegmentParams = {
+      createdAfter: since,
       keyResult: {
-        mode: [KeyResultMode.PUBLISHED, KeyResultMode.COMPLETED],
-        createdAfter: since,
+        mode,
+        type: okrType,
+        createdBefore: since,
         objective: {
+          mode,
+          type: okrType,
           cycle: {
             isActive: cycleIsActive,
             startBefore: new Date(),

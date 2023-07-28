@@ -1,16 +1,16 @@
 import { Logger, UnauthorizedException } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
+import { startOfWeek } from 'date-fns'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
-import { Delta } from '@core/interfaces/delta.interface'
-import { Status } from '@core/interfaces/status.interface'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { CycleStatusProvider } from '@core/modules/mission-control/status/cycle/cycle-status.provider'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
@@ -29,6 +29,8 @@ import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 import { NodeDeleteRequest } from '@interface/graphql/requests/node-delete.request'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 import { StatusRequest } from '@interface/graphql/requests/status.request'
+import { Cacheable } from '@lib/cache/cacheable.decorator'
+import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { CycleAccessControl } from './access-control/cycle.access-control'
 import { CycleCyclesGraphQLConnection } from './connections/cycle-cycles/cycle-cycles.connection'
@@ -39,8 +41,6 @@ import { CycleCreateRequest } from './requests/cycle-create-request'
 import { CycleFiltersRequest } from './requests/cycle-filters.request'
 import { CycleUpdateRequest } from './requests/cycle-update.request'
 import { CyclesInSamePeriodRequest } from './requests/cycles-in-same-period.request'
-import { Cacheable } from '@lib/cache/cacheable.decorator';
-import { Stopwatch } from '@lib/logger/pino.decorator';
 
 @GuardedResolver(CycleGraphQLNode)
 export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, CycleInterface> {
@@ -50,6 +50,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     protected readonly core: CoreProvider,
     protected readonly corePorts: CorePortsProvider,
     protected readonly accessControl: CycleAccessControl,
+    private readonly cycleStatusProvider: CycleStatusProvider,
   ) {
     super(Resource.CYCLE, core, core.cycle)
   }
@@ -85,7 +86,10 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       Cycle
     >(request)
 
-    const userTeamsTree = await this.core.team.getAscendantsByIds(userWithContext.teams.map(({ id }) => id), {})
+    const userTeamsTree = await this.core.team.getAscendantsByIds(
+      userWithContext.teams.map(({ id }) => id),
+      {},
+    )
     const queryResult = await this.core.cycle.getCyclesInSamePeriodFromTeamsAndParentIDsWithFilters(
       userTeamsTree,
       fromCycles,
@@ -97,25 +101,27 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   }
 
   @ResolveField('status', () => StatusGraphQLObject)
-  protected async getStatusForCycle(
-    @Parent() cycle: CycleGraphQLNode,
-    @Args() request: StatusRequest,
-  ) {
+  protected async getStatusForCycle(@Parent() cycle: CycleGraphQLNode, @Args() request: StatusRequest) {
     this.logger.log({
       cycle,
       request,
       message: 'Fetching current status for this cycle',
     })
 
-    const result = await this.corePorts.dispatchCommand<Status>(
-      'get-cycle-status',
-      cycle.id,
-      request,
-    )
-    if (!result)
-      throw new UserInputError(`We could not find status for the cycle with ID ${cycle.id}`)
+    const status = await this.cycleStatusProvider.fromRoot({
+      cycleId: cycle.id,
+      since: request.date,
+      include: ['progress', 'confidence', 'latestCheckIn', 'isActive', 'isOutdated'],
+    })
 
-    return result
+    return {
+      progress: status.progress,
+      confidence: status.confidence,
+      isActive: status.isActive,
+      isOutdated: status.isOutdated,
+      reportDate: status.latestCheckIn?.createdAt,
+      latestCheckIn: status.latestCheckIn ?? undefined,
+    }
   }
 
   @Cacheable('0.teamId', 60 * 60)
@@ -133,20 +139,14 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   @Cacheable((request, cycle) => [cycle.id, request], 5 * 60)
   @Stopwatch({ omitArgs: true })
   @ResolveField('objectives', () => ObjectivesGraphQLConnection, { nullable: true })
-  protected async getObjectivesForCycle(
-    @Args() request: ObjectiveFiltersRequest,
-    @Parent() cycle: CycleGraphQLNode,
-  ) {
+  protected async getObjectivesForCycle(@Args() request: ObjectiveFiltersRequest, @Parent() cycle: CycleGraphQLNode) {
     this.logger.log({
       cycle,
       request,
       message: 'Fetching objectives for cycle',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      ObjectiveFiltersRequest,
-      Objective
-    >(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<ObjectiveFiltersRequest, Objective>(request)
 
     const queryResult = await this.core.objective.getFromCycle(cycle, filters, queryOptions)
 
@@ -176,10 +176,7 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       message: 'Fetching child cycles for cycle',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      CycleFiltersRequest,
-      Cycle
-    >(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<CycleFiltersRequest, Cycle>(request)
 
     const childCycles = await this.core.cycle.getChildCycles(cycle, filters, queryOptions)
     const sortedByCadenceChildCycles = this.core.cycle.sortCyclesByCadence(childCycles)
@@ -200,17 +197,10 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       message: 'Fetching key results for cycle',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      KeyResultFiltersRequest,
-      KeyResult
-    >(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<KeyResultFiltersRequest, KeyResult>(request)
 
     const objectives = await this.core.objective.getFromCycle(cycle)
-    const keyResults = await this.core.keyResult.getFromObjectives(
-      objectives,
-      filters,
-      queryOptions,
-    )
+    const keyResults = await this.core.keyResult.getFromObjectives(objectives, filters, queryOptions)
 
     return this.relay.marshalResponse<KeyResultInterface>(keyResults, connection, cycle)
   }
@@ -222,11 +212,27 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       message: 'Fetching delta for this cycle',
     })
 
-    const result = await this.corePorts.dispatchCommand<Delta>('get-cycle-delta', cycle.id)
-    if (!result)
-      throw new UserInputError(`We could not find a delta for the cyle with ID ${cycle.id}`)
+    const baseDate = new Date()
 
-    return result
+    const [currentStatus, previousStatus] = await Promise.all([
+      this.cycleStatusProvider.fromRoot({
+        cycleId: cycle.id,
+        since: baseDate,
+        include: ['progress', 'confidence', 'latestCheckIn', 'isActive', 'isOutdated'],
+      }),
+      this.cycleStatusProvider.fromRoot({
+        cycleId: cycle.id,
+        since: startOfWeek(baseDate),
+        include: ['progress', 'confidence', 'latestCheckIn', 'isActive', 'isOutdated'],
+      }),
+    ])
+
+    this.logger.log('Cycle %s current status is %o', cycle.id, currentStatus)
+
+    return {
+      progress: currentStatus.progress - previousStatus.progress,
+      confidence: currentStatus.confidence - previousStatus.confidence,
+    }
   }
 
   @GuardedMutation(CycleGraphQLNode, 'cycle:create', { name: 'createCycle' })

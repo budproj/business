@@ -152,6 +152,8 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
     nullable: true,
     description:
       'Any objective related to this team, no matter if the relation is because that team owns the objective, or if that team just supports it',
+    deprecationReason:
+      'Either optimize this method to perform a single command call or query objectives and supportObjectives separately',
   })
   public readonly allObjectives?: TeamObjectivesGraphQLConnection
 

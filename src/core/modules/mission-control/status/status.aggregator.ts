@@ -1,13 +1,13 @@
 import { AggregateFactory } from '@core/modules/workspace/aggregate.factory'
 import { SegmentFactory } from '@core/modules/workspace/segment.factory'
-import { AggregationQuery, Segment } from '@core/modules/workspace/workspace.interface'
+import { AggregationQuery, SourceSegment } from '@core/modules/workspace/workspace.interface'
 
 export class StatusAggregator {
   private readonly segmentFactory: SegmentFactory
 
   private readonly aggregateFactory: AggregateFactory
 
-  constructor(source: Segment) {
+  constructor(source: SourceSegment) {
     this.segmentFactory = new SegmentFactory(source)
     this.aggregateFactory = new AggregateFactory(source)
   }

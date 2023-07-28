@@ -1,5 +1,6 @@
 import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key-result-check-in.interface'
 import { WithOnly } from '@core/modules/workspace/aggregate-executor'
+import { OkrType } from '@core/modules/workspace/segment.factory'
 
 export type StatusLatestCheckIn = KeyResultCheckInInterface & {
   user: {
@@ -23,6 +24,7 @@ export type Status = {
  * TODO: add indexes
  */
 export type Filters<T extends Status = Status, K extends keyof T = keyof T> = {
+  okrType?: OkrType
   cycleIsActive?: boolean
   since?: Date
   include: K[]

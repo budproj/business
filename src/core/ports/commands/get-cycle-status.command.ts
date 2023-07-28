@@ -5,6 +5,9 @@ import { BaseStatusCommand } from '@core/ports/commands/base-status.command'
 import { Cacheable } from '@lib/cache/cacheable.decorator'
 import { Stopwatch } from '@lib/logger/pino.decorator'
 
+/**
+ * @deprecated prefer using the `CycleStatusProvider` instead
+ */
 export class GetCycleStatusCommand extends BaseStatusCommand {
   @Cacheable(
     (cycleID, options) => [cycleID, Math.floor(options?.date?.getTime() / (1000 * 60 * 60))],

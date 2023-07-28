@@ -12,7 +12,17 @@
       {
         "replacements": {
           "params": false,
-          "args": false
+          "param": false,
+          "args": false,
+          "arg": false
+        }
+      }
+    ],
+    "@typescript-eslint/ban-types": [
+      "error",
+      {
+        "types": {
+          "Omit": false
         }
       }
     ]

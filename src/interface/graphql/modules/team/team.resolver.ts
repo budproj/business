@@ -368,6 +368,9 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.relay.marshalResponse<ObjectiveInterface>(objectives, connection, team)
   }
 
+  /**
+   * @deprecated Either optimize this method to perform a single command call or query objectives and supportObjectives separately
+   */
   @Stopwatch()
   @ResolveField('allObjectives', () => TeamObjectivesGraphQLConnection, { nullable: true })
   protected async getAllObjectivesForRequestAndUser(
@@ -441,15 +444,20 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching delta for this team',
     })
 
+    if (team.status) {
+      this.logger.log('Team %s resolved status will be used to calculate. Status = %o', team.id, request)
+    }
+
     const baseDate = request.date ?? new Date()
 
     const [currentStatus, previousStatus] = await Promise.all([
-      this.teamStatusProvider.fromRoot({
-        teamId: team.id,
-        cycleIsActive: request.cycleFilters?.active,
-        since: baseDate,
-        include: ['progress', 'confidence', 'latestCheckIn', 'isActive', 'isOutdated'],
-      }),
+      team.status ??
+        this.teamStatusProvider.fromRoot({
+          teamId: team.id,
+          cycleIsActive: request.cycleFilters?.active,
+          since: baseDate,
+          include: ['progress', 'confidence', 'latestCheckIn', 'isActive', 'isOutdated'],
+        }),
       this.teamStatusProvider.fromRoot({
         teamId: team.id,
         cycleIsActive: request.cycleFilters?.active,
@@ -458,7 +466,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       }),
     ])
 
-    this.logger.log('Team %s currentStatus status is %o', team.id, currentStatus)
+    this.logger.log('Team %s current status is %o', team.id, currentStatus)
 
     return {
       progress: currentStatus.progress - previousStatus.progress,

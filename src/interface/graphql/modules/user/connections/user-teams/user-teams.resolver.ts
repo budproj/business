@@ -111,7 +111,8 @@ export class UserTeamsConnectionGraphQLResolver extends GuardedConnectionGraphQL
 
     const overview = await this.companyOverviewProvider.fromTeams({
       teamIds,
-      mode: [KeyResultMode.PUBLISHED, KeyResultMode.COMPLETED],
+      okrMode: ['published', 'completed'],
+      okrType: 'shared',
       cycleIsActive: true,
       include: ['objectives', 'keyResults', 'confidence'],
     })

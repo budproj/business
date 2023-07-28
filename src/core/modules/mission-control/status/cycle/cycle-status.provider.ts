@@ -3,35 +3,30 @@ import { InjectConnection } from '@nestjs/typeorm'
 import { Connection } from 'typeorm'
 
 import { SourceSegmentFactory } from '@core/modules/workspace/source-segment.factory'
-import { TeamScopeFactory } from '@core/modules/workspace/team-scope.factory'
+import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { Filters } from '../status.aggregate'
 import { StatusAggregator } from '../status.aggregator'
 import { StatusProvider } from '../status.provider'
 
-import { TeamStatus, TeamStatusWithOnly } from './team-status.aggregate'
+import { CycleStatus, CycleStatusWithOnly } from './cycle-status.aggregate'
 
-type RootFilter = { teamId: string }
+type RootFilter = { cycleId: string }
 
 @Injectable()
-export class TeamStatusProvider {
-  private readonly teamScopeFactory = new TeamScopeFactory()
-
+export class CycleStatusProvider {
   constructor(
     @InjectConnection() private readonly connection: Connection,
-    private readonly statusProvider: StatusProvider,
     private readonly sourceSegmentFactory: SourceSegmentFactory,
+    private readonly statusProvider: StatusProvider,
   ) {}
 
-  async fromRoot<K extends keyof TeamStatus>(
-    filters: RootFilter & Omit<Filters<TeamStatus, K>, 'okrType'>,
-  ): Promise<TeamStatusWithOnly<K>> {
-    const teamScope = this.teamScopeFactory.descendingDistinct({
-      parentTeamIds: [filters.teamId],
-      includeParentTeams: true,
-    })
-
-    const source = this.sourceSegmentFactory.fromTeamScope(teamScope)
+  @Stopwatch()
+  async fromRoot<K extends keyof CycleStatus>({
+    cycleId,
+    ...filters
+  }: RootFilter & Omit<Filters<CycleStatus, K>, 'okrType'>): Promise<CycleStatusWithOnly<K>> {
+    const source = this.sourceSegmentFactory.fromCycles([cycleId])
 
     const aggregator = new StatusAggregator(source)
 

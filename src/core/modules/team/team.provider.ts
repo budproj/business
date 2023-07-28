@@ -30,11 +30,9 @@ interface GetAscendantsByIdsArguments {
 export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
   public readonly specification = new TeamSpecification()
 
-  constructor(
-    protected readonly repository: TeamRepository,
-    private readonly teamScopeFactory: TeamScopeFactory,
-    private readonly userProvider: UserProvider,
-  ) {
+  private readonly teamScopeFactory = new TeamScopeFactory()
+
+  constructor(protected readonly repository: TeamRepository, private readonly userProvider: UserProvider) {
     super(TeamProvider.name, repository)
   }
 
@@ -278,8 +276,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
       .groupBy('tu.team_id')
       .getRawMany()
 
-    return memberships
-      .map(([teamId, userIds]) => ({ teamId, userIds }))
+    return memberships.map(([teamId, userIds]) => ({ teamId, userIds }))
   }
 
   protected async protectCreationQuery(

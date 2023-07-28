@@ -6,6 +6,7 @@ import { ConfidenceTag } from '@adapters/confidence-tag/confidence-tag.enum'
 import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.enum'
 import { AggregateExecutorFactory } from '@core/modules/workspace/aggregate-executor.factory'
 import { KeyResultLatestCheckInSegmentParams } from '@core/modules/workspace/segment.factory'
+import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { Filters, Overview, OverviewWithOnly } from './overview.aggregate'
 import { OverviewAggregator } from './overview.aggregator'
@@ -18,9 +19,11 @@ export class OverviewProvider {
 
   constructor(private readonly executorFactory: AggregateExecutorFactory) {}
 
+  @Stopwatch()
   async aggregate<T extends Overview, K extends keyof T>({
     aggregator,
-    mode,
+    okrMode,
+    okrType,
     cycleIsActive,
     include,
   }: Filters<T, K> & { aggregator: OverviewAggregator }): Promise<OverviewWithOnly<K, T>> {
@@ -28,8 +31,11 @@ export class OverviewProvider {
 
     const params: KeyResultLatestCheckInSegmentParams = {
       keyResult: {
-        mode,
+        mode: okrMode,
+        type: okrType,
         objective: {
+          mode: okrMode,
+          type: okrType,
           cycle: {
             isActive: cycleIsActive,
           },

@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common/decorators/core/injectable.decorator'
 import { InjectConnection } from '@nestjs/typeorm'
 import { Connection } from 'typeorm'
 
-import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
+import { SourceSegmentFactory } from '@core/modules/workspace/source-segment.factory'
 import { TeamScopeFactory } from '@core/modules/workspace/team-scope.factory'
+import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { Filters } from '../overview.aggregate'
 import { OverviewAggregator } from '../overview.aggregator'
@@ -16,53 +17,42 @@ type TeamsFilter = { teamIds: string[] }
 
 @Injectable()
 export class CompanyOverviewProvider {
-  private readonly confidenceTagAdapter = new ConfidenceTagAdapter()
+  private readonly teamScopeFactory = new TeamScopeFactory()
 
   constructor(
     @InjectConnection() private readonly connection: Connection,
     private readonly overviewProvider: OverviewProvider,
-    private readonly teamScopeFactory: TeamScopeFactory,
+    private readonly sourceSegmentFactory: SourceSegmentFactory,
   ) {}
 
+  @Stopwatch()
   async fromRoot<K extends keyof CompanyOverview>(
     filters: RootFilter & Filters<CompanyOverview, K>,
   ): Promise<CompanyOverviewWithOnly<K>> {
-    const [teamIdsSource, teamIdsQuery, teamIdsParams] = this.teamScopeFactory.descendingDistinct({
+    const teamScope = this.teamScopeFactory.descendingDistinct({
       parentTeamIds: [filters.companyId],
       includeParentTeams: true,
     })
 
-    const aggregator = new OverviewAggregator({
-      name: teamIdsSource,
-      cte: teamIdsQuery,
-      params: teamIdsParams,
-      require: [],
-    })
+    const source = this.sourceSegmentFactory.fromTeamScope(teamScope)
+
+    const aggregator = new OverviewAggregator(source)
 
     return this.overviewProvider.aggregate({ ...filters, aggregator })
   }
 
+  @Stopwatch()
   async fromTeams<K extends keyof CompanyOverview>(
     filters: TeamsFilter & Filters<CompanyOverview, K>,
   ): Promise<CompanyOverviewWithOnly<K>> {
-    const [teamIdsSource, teamIdsQuery, teamIdsParams] = this.teamScopeFactory.bidirectional({
+    const teamScope = this.teamScopeFactory.bidirectional({
       originTeamIds: filters.teamIds,
     })
 
-    const aggregator = new OverviewAggregator({
-      name: teamIdsSource,
-      cte: teamIdsQuery,
-      params: teamIdsParams,
-      require: [],
-    })
+    const source = this.sourceSegmentFactory.fromTeamScope(teamScope)
+
+    const aggregator = new OverviewAggregator(source)
 
     return this.overviewProvider.aggregate<CompanyOverview, K>({ ...filters, aggregator })
   }
-
-  // TODO: withinCompanyFromUser
-  // TODO: withinTeam
-  // TODO: withinTeamFromUser
-  // TODO: withinCycle
-  // TODO: withinUser
-  // TODO: withinObjective
 }

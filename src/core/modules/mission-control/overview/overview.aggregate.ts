@@ -1,6 +1,7 @@
 import { ConfidenceTag } from '@adapters/confidence-tag/confidence-tag.enum'
 import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.enum'
 import { WithOnly } from '@core/modules/workspace/aggregate-executor'
+import { OkrMode, OkrType } from '@core/modules/workspace/segment.factory'
 
 export type ModeOverview = Record<KeyResultMode, number>
 
@@ -28,7 +29,8 @@ export type OverviewWithOnly<K extends keyof T, T extends Overview = Overview> =
  */
 export type Filters<T extends Overview = Overview, K extends keyof T = keyof T> = {
   // TODO: add support for date filters
-  mode?: KeyResultMode[]
+  okrMode?: OkrMode[]
+  okrType?: OkrType
   // TODO: add support for ObjectiveMode as well
   cycleIsActive?: boolean
   include: K[]

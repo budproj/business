@@ -1,16 +1,21 @@
 import { Injectable } from '@nestjs/common/decorators/core/injectable.decorator'
 
-export type DescendingQueryOptions = {
+import { TABLE_NAMES } from './constants'
+
+export type TeamScope<T extends Record<string, unknown> = Record<string, unknown>> = [
+  name: string,
+  cte: string,
+  params: T,
+]
+
+export type DescendingScopeOptions = {
   parentTeamIds: string[]
   includeParentTeams: boolean
 }
 
-/**
- * @type {[string, string, DescendingQueryOptions]]} [table, cte, options]
- */
-export type DescendingQuery = [string, string, DescendingQueryOptions]
+export type DescendingScope = TeamScope<DescendingScopeOptions>
 
-export type AscendingQueryOptions = {
+export type AscendingScopeParams = {
   childTeamIds: string[]
   includeChildTeams: boolean
   rootsOnly: boolean
@@ -19,34 +24,29 @@ export type AscendingQueryOptions = {
 /**
  * @type {[string, string, AscendingQueryOptions]]} [table, cte, options]
  */
-export type AscendingQuery = [string, string, AscendingQueryOptions]
+export type AscendingScope = TeamScope<AscendingScopeParams>
 
 // TODO: implement method
-export type BidirectionalQueryOptions = {
+export type BidirectionalScopeParams = {
   originTeamIds: string[]
 }
 
 // TODO: implement method
-export type BidirectionalQuery = [string, string, AscendingQueryOptions]
+export type BidirectionalScope = TeamScope<AscendingScopeParams>
 
-@Injectable()
 export class TeamScopeFactory {
-  // TODO: parameterize
-  // eslint-disable-next-line @typescript-eslint/class-literal-property-style
-  private readonly tableName = 'team'
-
   descendingRecursive(name: string, filter: string): string {
     return `
       "${name}" (id, name, level, is_root, parent_id, source_id)
       AS (
-        SELECT "${this.tableName}".id, "${this.tableName}".name, 0, TRUE, "${this.tableName}".parent_id, "${this.tableName}".id
-        FROM "${this.tableName}"
+        SELECT "${TABLE_NAMES.team}".id, "${TABLE_NAMES.team}".name, 0, TRUE, "${TABLE_NAMES.team}".parent_id, "${TABLE_NAMES.team}".id
+        FROM "${TABLE_NAMES.team}"
         ${filter}
 
         UNION ALL
 
         SELECT tn.id, tn.name, tt.level + 1, FALSE, tt.id, tt.source_id
-        FROM "${this.tableName}" tn
+        FROM "${TABLE_NAMES.team}" tn
         INNER JOIN "${name}" tt ON tn.parent_id = tt.id
       )
     `
@@ -55,9 +55,9 @@ export class TeamScopeFactory {
   descendingDistinct({
     parentTeamIds,
     includeParentTeams = true,
-  }: Partial<DescendingQueryOptions> = {}): DescendingQuery {
+  }: Partial<DescendingScopeOptions> = {}): DescendingScope {
     const recursiveName = 'recursive_team_tree'
-    const recursiveCte = this.descendingRecursive(recursiveName, `WHERE "${this.tableName}".id = ANY (:parentTeamIds)`)
+    const recursiveCte = this.descendingRecursive(recursiveName, `WHERE "${TABLE_NAMES.team}".id = ANY (:parentTeamIds)`)
 
     const distinctName = 'team_tree'
 
@@ -83,15 +83,15 @@ export class TeamScopeFactory {
     return `
       "${name}" (id, name, level, is_leaf, parent_id, source_id)
       AS (
-        SELECT "${this.tableName}".id, "${this.tableName}".name, 0, TRUE, "${this.tableName}".parent_id, "${this.tableName}".id
-        FROM "${this.tableName}"
+        SELECT "${TABLE_NAMES.team}".id, "${TABLE_NAMES.team}".name, 0, TRUE, "${TABLE_NAMES.team}".parent_id, "${TABLE_NAMES.team}".id
+        FROM "${TABLE_NAMES.team}"
         ${filter}
 
         UNION ALL
 
         SELECT pn.id, pn.name, cn.level - 1, FALSE, pn.parent_id, cn.source_id
         FROM "${name}" cn
-        INNER JOIN "${this.tableName}" pn ON pn.id = cn.parent_id AND cn.id <> pn.id
+        INNER JOIN "${TABLE_NAMES.team}" pn ON pn.id = cn.parent_id AND cn.id <> pn.id
       )
     `
   }
@@ -100,10 +100,10 @@ export class TeamScopeFactory {
     childTeamIds,
     includeChildTeams = true,
     rootsOnly,
-  }: Partial<AscendingQueryOptions> = {}): AscendingQuery {
+  }: Partial<AscendingScopeParams> = {}): AscendingScope {
     const recursiveName = 'recursive_team_path'
 
-    const recursiveCte = this.ascendingRecursive(recursiveName, `WHERE "${this.tableName}".id = ANY(:childTeamIds)`)
+    const recursiveCte = this.ascendingRecursive(recursiveName, `WHERE "${TABLE_NAMES.team}".id = ANY(:childTeamIds)`)
 
     const distinctName = 'team_path'
 
@@ -128,7 +128,7 @@ export class TeamScopeFactory {
     ]
   }
 
-  bidirectional({ originTeamIds }: Partial<BidirectionalQueryOptions> = {}): BidirectionalQuery {
+  bidirectional({ originTeamIds }: Partial<BidirectionalScopeParams> = {}): BidirectionalScope {
     const [rootsTable, rootsQuery, rootsQueryOptions] = this.ascendingDistinct({
       childTeamIds: originTeamIds,
       includeChildTeams: true,
@@ -139,7 +139,7 @@ export class TeamScopeFactory {
 
     const descendingRecursiveCte = this.descendingRecursive(
       descendingRecursiveName,
-      `INNER JOIN "${rootsTable}" ON "${rootsTable}".id = "${this.tableName}".id`,
+      `INNER JOIN "${rootsTable}" ON "${rootsTable}".id = "${TABLE_NAMES.team}".id`,
     )
 
     const descendingDistinctName = 'team_tree'
