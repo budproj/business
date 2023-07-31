@@ -3,6 +3,9 @@ import { Team } from '@core/modules/team/team.orm-entity'
 
 import { Command } from './base.command'
 
+/**
+ * @deprecated
+ */
 export class GetKeyResultTeamTreeCommand extends Command<Team[]> {
   public async execute(keyResult: Partial<KeyResultInterface>): Promise<Team[]> {
     if (!keyResult.teamId) {

@@ -309,7 +309,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       Team
     >(request)
 
-    const userCompanies = await this.core.team.getUserCompanies(user, filters, queryOptions)
+    const userCompanies = await this.core.team.getUserCompanies(user.id, filters, queryOptions)
     return this.relay.marshalResponse<Team>(userCompanies, connection, user)
   }
 
@@ -369,9 +369,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       userWithContext,
       message: 'Fetching if is team leader for user',
     })
-    const isTeamLeader = await this.accessControl.isUserTeamLeader(userWithContext)
-
-    return isTeamLeader
+    return this.accessControl.isUserTeamLeader(userWithContext)
   }
 
   @Stopwatch()

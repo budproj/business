@@ -29,7 +29,7 @@ export class CompanyOverviewProvider {
   async fromRoot<K extends keyof CompanyOverview>(
     filters: RootFilter & Filters<CompanyOverview, K>,
   ): Promise<CompanyOverviewWithOnly<K>> {
-    const teamScope = this.teamScopeFactory.descendingDistinct({
+    const teamScope = this.teamScopeFactory.descendingFromTeams({
       parentTeamIds: [filters.companyId],
       includeParentTeams: true,
     })
@@ -45,9 +45,7 @@ export class CompanyOverviewProvider {
   async fromTeams<K extends keyof CompanyOverview>(
     filters: TeamsFilter & Filters<CompanyOverview, K>,
   ): Promise<CompanyOverviewWithOnly<K>> {
-    const teamScope = this.teamScopeFactory.bidirectional({
-      originTeamIds: filters.teamIds,
-    })
+    const teamScope = this.teamScopeFactory.bidirectionalFromTeams(filters.teamIds)
 
     const source = this.sourceSegmentFactory.fromTeamScope(teamScope)
 

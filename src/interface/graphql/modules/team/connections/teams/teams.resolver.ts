@@ -51,9 +51,9 @@ export class TeamsConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
       default: async () =>
         this.queryGuard.getManyWithActionScopeConstraint(filters, userWithContext, queryOptions),
       [TeamLevelGraphQLEnum.COMPANY]: async () =>
-        this.core.team.getUserCompanies(userWithContext, filters, queryOptions),
+        this.core.team.getUserCompanies(userWithContext.id, filters, queryOptions),
       [TeamLevelGraphQLEnum.COMPANY_OR_DEPARTMENT]: async () =>
-        this.core.team.getUserCompaniesAndDepartments(userWithContext, filters, queryOptions),
+        this.core.team.getUserCompaniesAndDepartments(userWithContext.id, filters, queryOptions),
     }
 
     const queryHandler = queryLeveledHandlers[level ?? 'default']

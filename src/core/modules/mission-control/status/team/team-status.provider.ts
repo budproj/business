@@ -26,7 +26,7 @@ export class TeamStatusProvider {
   async fromRoot<K extends keyof TeamStatus>(
     filters: RootFilter & Omit<Filters<TeamStatus, K>, 'okrType'>,
   ): Promise<TeamStatusWithOnly<K>> {
-    const teamScope = this.teamScopeFactory.descendingDistinct({
+    const teamScope = this.teamScopeFactory.descendingFromTeams({
       parentTeamIds: [filters.teamId],
       includeParentTeams: true,
     })

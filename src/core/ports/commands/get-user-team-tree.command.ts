@@ -4,6 +4,9 @@ import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { Command } from './base.command'
 
+/**
+ * @deprecated
+ */
 export class GetUserTeamTreeCommand extends Command<Team[]> {
   @Stopwatch()
   public async execute(user: Partial<User>): Promise<Team[]> {

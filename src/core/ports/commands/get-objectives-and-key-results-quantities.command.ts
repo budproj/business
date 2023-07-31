@@ -7,7 +7,7 @@ import { Command } from './base.command'
  */
 export class GetObjectivesAndKeyResultQuantities extends Command<any> {
   public async execute(user: UserInterface): Promise<any> {
-    const userCompanies = await this.core.team.getUserCompanies(user)
+    const userCompanies = await this.core.team.getUserCompanies(user.id)
     const userCompanyIDs = userCompanies.map((company) => company.id)
     const userReachableTeams = await this.core.team.getDescendantsByIds(userCompanyIDs)
 
