@@ -7,6 +7,7 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 import { Scope } from '@adapters/policy/enums/scope.enum'
 import { SCOPE_PRIORITY } from '@adapters/policy/policy.constants'
 import { Cacheable } from '@lib/cache/cacheable.decorator'
+import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { CoreEntity } from './core.orm-entity'
 import { CoreEntityRepository } from './core.repository'
@@ -42,6 +43,7 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
   }
 
   @Cacheable((selector, queryContext) => [selector, queryContext], 15)
+  @Stopwatch({ includeReturn: true })
   public async getOneWithConstraint(selector: FindConditions<E>, queryContext: CoreQueryContext): Promise<E> {
     const query = await this.getWithConstraint(selector, queryContext)
     const data = this.getOneInQuery(query, queryContext)
@@ -50,6 +52,7 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
   }
 
   @Cacheable((selector, queryContext, options) => [selector, queryContext, options], 15)
+  @Stopwatch({ includeReturn: true })
   public async getManyWithConstraint(
     selector: FindConditions<E>,
     queryContext: CoreQueryContext,

@@ -1,5 +1,5 @@
 import { Logger, UnauthorizedException } from '@nestjs/common'
-import { Args, Float, Parent, ResolveField } from '@nestjs/graphql'
+import { Args, Context, Float, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { CreatedCheckInActivity } from '@adapters/activity/activities/created-check-in-activity'
@@ -17,6 +17,7 @@ import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorato
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
+import { IDataloaders } from '@interface/graphql/dataloader/dataloader.service'
 import { KeyResultCheckInDeltaGraphQLObject } from '@interface/graphql/modules/key-result/check-in/objects/key-result-check-in-delta.object'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
@@ -50,16 +51,20 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   protected async resolveCheckInForRequestAndRequestUserWithContext(
     @Args() request: NodeIndexesRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
+    @Context() { loaders }: { loaders: IDataloaders },
   ) {
     this.logger.log({
       request,
       message: 'Fetching key result check-in with provided indexes',
     })
 
-    const keyResultCheckIn = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
-    if (!keyResultCheckIn) throw new UserInputError(`We could not found a check-in with the provided arguments`)
+    // eslint-disable-next-line capitalized-comments
+    // const keyResultCheckIn = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
+    // if (!keyResultCheckIn) throw new UserInputError(`We could not found a check-in with the provided arguments`)
+    //
+    // return keyResultCheckIn
 
-    return keyResultCheckIn
+    return loaders.keyResultCheckIn.load(request.id)
   }
 
   @AttachActivity(CreatedCheckInActivity)
@@ -138,33 +143,43 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('user', () => UserGraphQLNode)
-  protected async resolveUserForKeyResultCheckIn(@Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode) {
+  protected async resolveUserForKeyResultCheckIn(
+    @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
+    @Context() { loaders }: { loaders: IDataloaders },
+  ) {
     this.logger.log({
       keyResultCheckIn,
       message: 'Fetching user for key result check-in',
     })
 
-    return this.core.user.getOne({ id: keyResultCheckIn.userId })
+    return loaders.user.load(keyResultCheckIn.userId)
   }
 
   @ResolveField('keyResult', () => KeyResultGraphQLNode)
-  protected async resolveKeyResultForKeyResultCheckIn(@Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode) {
+  protected async resolveKeyResultForKeyResultCheckIn(
+    @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
+    @Context() { loaders }: { loaders: IDataloaders },
+  ) {
     this.logger.log({
       keyResultCheckIn,
       message: 'Fetching key result for key result check-in',
     })
 
-    return this.core.keyResult.getOne({ id: keyResultCheckIn.keyResultId })
+    return loaders.keyResult.load(keyResultCheckIn.keyResultId)
   }
 
   @ResolveField('parent', () => KeyResultCheckInGraphQLNode, { nullable: true })
-  protected async resolveParentForKeyResultCheckIn(@Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode) {
+  protected async resolveParentForKeyResultCheckIn(
+    @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
+    @Context() { loaders }: { loaders: IDataloaders },
+  ) {
     this.logger.log({
       keyResultCheckIn,
       message: 'Fetching parent for key result check-in',
     })
 
-    return this.core.keyResult.getParentCheckInFromCheckIn(keyResultCheckIn)
+    const checkInInterface: KeyResultCheckInInterface = keyResultCheckIn
+    return checkInInterface.parentId ? loaders.keyResultCheckIn.load(checkInInterface.parentId) : null
   }
 
   @ResolveField('delta', () => KeyResultCheckInDeltaGraphQLObject)

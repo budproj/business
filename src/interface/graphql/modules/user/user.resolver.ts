@@ -1,5 +1,5 @@
 import { ForbiddenException, InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common'
-import { Args, Parent, ResolveField } from '@nestjs/graphql'
+import { Args, Context, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 import { Role } from 'auth0'
 import { FileUpload } from 'graphql-upload'
@@ -36,6 +36,7 @@ import { GuardedResolver } from '@interface/graphql/adapters/authorization/decor
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { UploadGraphQLProvider } from '@interface/graphql/adapters/upload/upload.provider'
+import { IDataloaders } from '@interface/graphql/dataloader/dataloader.service'
 import { KeyResultCheckInFiltersRequest } from '@interface/graphql/modules/key-result/check-in/requests/key-result-check-in-filters.request'
 import { KeyResultCommentFiltersRequest } from '@interface/graphql/modules/key-result/comment/requests/key-result-comment-filters.request'
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
@@ -89,29 +90,39 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   protected async getUserForRequestAndRequestUserWithContext(
     @Args() request: NodeIndexesRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
+    @Context() { loaders }: { loaders: IDataloaders },
   ) {
     this.logger.log({
       request,
       message: 'Fetching user with provided indexes',
     })
 
-    const user = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
-    if (!user) throw new UserInputError(`We could not found an user with the provided arguments`)
+    // eslint-disable-next-line capitalized-comments
+    // const user = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
+    // if (!user) throw new UserInputError(`We could not found an user with the provided arguments`)
+    //
+    // return user
 
-    return user
+    return loaders.user.load(request.id)
   }
 
   @Stopwatch()
   @GuardedQuery(UserGraphQLNode, 'user:read', { name: 'me' })
-  protected async getMyUserForRequestUserWithContext(@RequestUserWithContext() userWithContext: UserWithContext) {
+  protected async getMyUserForRequestUserWithContext(
+    @RequestUserWithContext() userWithContext: UserWithContext,
+    @Context() { loaders }: { loaders: IDataloaders },
+  ) {
     this.logger.log(
       `Fetching data about the user that is executing the request. Provided user ID: ${userWithContext.id}`,
     )
 
-    const user = await this.queryGuard.getOneWithActionScopeConstraint({ id: userWithContext.id }, userWithContext)
-    if (!user) throw new UserInputError(`We could not found an user with ID ${userWithContext.id}`)
+    // eslint-disable-next-line capitalized-comments
+    // const user = await this.queryGuard.getOneWithActionScopeConstraint({ id: userWithContext.id }, userWithContext)
+    // if (!user) throw new UserInputError(`We could not found an user with ID ${userWithContext.id}`)
+    //
+    // return user
 
-    return user
+    return loaders.user.load(userWithContext.id)
   }
 
   @GuardedMutation(UserGraphQLNode, 'user:update', { name: 'updateUser' })

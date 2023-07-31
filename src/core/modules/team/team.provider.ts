@@ -245,16 +245,15 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     })
   }
 
-  @Stopwatch()
+  @Stopwatch({ includeReturn: true })
   public async buildTeamQueryContext(user: UserInterface, constraint: Scope = Scope.OWNS): Promise<CoreQueryContext> {
     const context = this.buildContext(user, constraint)
 
     const userTeams = await this.userProvider.getUserTeams(user)
 
-    const tree = await this.getUserCompaniesAndDepartments(user.id)
+    const teams = await this.getUserCompaniesAndDepartments(user.id)
 
-    const companies = tree.filter((team) => !team.parentId || team.parentId === team.id)
-    const teams = tree.filter((team) => team.parentId && team.parentId !== team.id)
+    const companies = teams.filter((team) => !team.parentId || team.parentId === team.id)
 
     const query = {
       companies,

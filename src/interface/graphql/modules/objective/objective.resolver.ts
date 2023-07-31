@@ -1,5 +1,5 @@
 import { Logger, UnauthorizedException } from '@nestjs/common'
-import { Args, Parent, ResolveField } from '@nestjs/graphql'
+import { Args, Context, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
@@ -18,6 +18,7 @@ import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorato
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
+import { IDataloaders } from '@interface/graphql/dataloader/dataloader.service'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
 import { ObjectiveBaseAccessControl } from '@interface/graphql/modules/objective/access-control/base.access-control'
 import { ObjectiveTeamsGraphQLConnection } from '@interface/graphql/modules/objective/connections/objective-teams/objective-teams.connection'
@@ -55,16 +56,20 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<Objecti
   protected async getObjectiveForRequestAndRequestUserWithContext(
     @Args() request: NodeIndexesRequest,
     @RequestUserWithContext() authorizationUser: UserWithContext,
+    @Context() { loaders }: { loaders: IDataloaders },
   ) {
     this.logger.log({
       request,
       message: 'Fetching objective with provided indexes',
     })
 
-    const objective = await this.queryGuard.getOneWithActionScopeConstraint(request, authorizationUser)
-    if (!objective) throw new UserInputError(`We could not found an objective with the provided arguments`)
+    // eslint-disable-next-line capitalized-comments
+    // const objective = await this.queryGuard.getOneWithActionScopeConstraint(request, authorizationUser)
+    // if (!objective) throw new UserInputError(`We could not found an objective with the provided arguments`)
+    //
+    // return objective
 
-    return objective
+    return loaders.objective.load(request.id)
   }
 
   @GuardedMutation(ObjectiveGraphQLNode, 'objective:update', { name: 'updateObjective' })
@@ -132,33 +137,42 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<Objecti
   }
 
   @ResolveField('owner', () => UserGraphQLNode)
-  protected async getOwnerForObjective(@Parent() objective: ObjectiveGraphQLNode) {
+  protected async getOwnerForObjective(
+    @Parent() objective: ObjectiveGraphQLNode,
+    @Context() { loaders }: { loaders: IDataloaders },
+  ) {
     this.logger.log({
       objective,
       message: 'Fetching owner for objective',
     })
 
-    return this.core.user.getOne({ id: objective.ownerId })
+    return loaders.user.load(objective.ownerId)
   }
 
   @ResolveField('cycle', () => CycleGraphQLNode)
-  protected async getCycleForObjective(@Parent() objective: ObjectiveGraphQLNode) {
+  protected async getCycleForObjective(
+    @Parent() objective: ObjectiveGraphQLNode,
+    @Context() { loaders }: { loaders: IDataloaders },
+  ) {
     this.logger.log({
       objective,
       message: 'Fetching cycle for objective',
     })
 
-    return this.core.cycle.getFromObjective(objective)
+    return loaders.cycle.load(objective.cycleId)
   }
 
   @ResolveField('team', () => TeamGraphQLNode, { nullable: true })
-  protected async getTeamForObjective(@Parent() objective: ObjectiveGraphQLNode) {
+  protected async getTeamForObjective(
+    @Parent() objective: ObjectiveGraphQLNode,
+    @Context() { loaders }: { loaders: IDataloaders },
+  ) {
     this.logger.log({
       objective,
       message: 'Fetching team for objective',
     })
 
-    return this.corePorts.dispatchCommand<Team>('get-team', objective.teamId)
+    return loaders.team.load(objective.teamId)
   }
 
   @ResolveField('supportTeams', () => ObjectiveTeamsGraphQLConnection, { nullable: true })

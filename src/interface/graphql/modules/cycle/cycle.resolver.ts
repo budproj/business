@@ -1,5 +1,5 @@
 import { Logger, UnauthorizedException } from '@nestjs/common'
-import { Args, Parent, ResolveField } from '@nestjs/graphql'
+import { Args, Context, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 import { startOfWeek } from 'date-fns'
 
@@ -19,6 +19,7 @@ import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorato
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
+import { IDataloaders } from '@interface/graphql/dataloader/dataloader.service'
 import { KeyResultFiltersRequest } from '@interface/graphql/modules/key-result/requests/key-result-filters.request'
 import { ObjectivesGraphQLConnection } from '@interface/graphql/modules/objective/connections/objectives/objectives.connection'
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
@@ -59,16 +60,20 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   protected async getCycleForRequestAndRequestUserWithContext(
     @Args() request: NodeIndexesRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
+    @Context() { loaders }: { loaders: IDataloaders },
   ) {
     this.logger.log({
       request,
       message: 'Fetching cycle with provided indexes',
     })
 
-    const cycle = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
-    if (!cycle) throw new UserInputError(`We could not found a cycle with the provided arguments`)
+    // eslint-disable-next-line capitalized-comments
+    // const cycle = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
+    // if (!cycle) throw new UserInputError(`We could not found a cycle with the provided arguments`)
+    //
+    // return cycle
 
-    return cycle
+    return loaders.cycle.load(request.id)
   }
 
   @GuardedQuery(CyclesGraphQLConnection, 'cycle:read', { name: 'cyclesInSamePeriod' })
@@ -126,13 +131,16 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
 
   @Stopwatch({ omitArgs: true })
   @ResolveField('team', () => TeamGraphQLNode)
-  protected async getTeamForCycle(@Parent() cycle: CycleGraphQLNode) {
+  protected async getTeamForCycle(
+    @Parent() cycle: CycleGraphQLNode,
+    @Context() { loaders }: { loaders: IDataloaders },
+  ) {
     this.logger.log({
       cycle,
       message: 'Fetching team for cycle',
     })
 
-    return this.core.team.getOne({ id: cycle.teamId })
+    return loaders.team.load(cycle.teamId)
   }
 
   @Cacheable((request, cycle) => [cycle.id, request], 5 * 60)
@@ -154,13 +162,16 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
 
   @Stopwatch({ omitArgs: true })
   @ResolveField('parent', () => CycleGraphQLNode, { nullable: true })
-  protected async getParentCycleForCycle(@Parent() cycle: CycleGraphQLNode) {
+  protected async getParentCycleForCycle(
+    @Parent() cycle: CycleGraphQLNode,
+    @Context() { loaders }: { loaders: IDataloaders },
+  ) {
     this.logger.log({
       cycle,
       message: 'Fetching parent cycle for cycle',
     })
 
-    return this.core.cycle.getOne({ id: cycle.parentId })
+    return cycle.parentId ? loaders.cycle.load(cycle.parentId) : null
   }
 
   @ResolveField('cycles', () => CycleCyclesGraphQLConnection, { nullable: true })

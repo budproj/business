@@ -1,5 +1,5 @@
 import { Logger, UnauthorizedException } from '@nestjs/common'
-import { Args, Parent, ResolveField } from '@nestjs/graphql'
+import { Args, Context, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { UpdatedKeyResultActivity } from '@adapters/activity/activities/updated-key-result-activity'
@@ -56,6 +56,7 @@ import { KeyResultGraphQLNode } from './key-result.node'
 import { KeyResultSupportTeamMembersFiltersRequest } from './requests/key-result-support-team-members-filters.request'
 import { KeyResultUpdateRequest } from './requests/key-result-update.request'
 import { KeyResultUpdateFiltersRequest } from './update/requests/key-result-update-filters.request'
+import { IDataloaders } from '@interface/graphql/dataloader/dataloader.service'
 
 @GuardedResolver(KeyResultGraphQLNode)
 export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<KeyResult, KeyResultInterface> {
@@ -167,13 +168,16 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<KeyResu
   }
 
   @ResolveField('owner', () => UserGraphQLNode)
-  protected async getOwnerForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
+  protected async getOwnerForKeyResult(
+    @Parent() keyResult: KeyResultGraphQLNode,
+    @Context() { loaders }: { loaders: IDataloaders },
+  ) {
     this.logger.log({
       keyResult,
       message: 'Fetching owner for key result',
     })
 
-    return this.core.user.getOne({ id: keyResult.ownerId })
+    return loaders.user.load(keyResult.ownerId)
   }
 
   @ResolveField('supportTeamMembers', () => KeyResultKeyResultSupportTeamGraphQLConnection)
@@ -194,23 +198,29 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<KeyResu
   }
 
   @ResolveField('team', () => TeamGraphQLNode)
-  protected async getTeamForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
+  protected async getTeamForKeyResult(
+    @Parent() keyResult: KeyResultGraphQLNode,
+    @Context() { loaders }: { loaders: IDataloaders },
+  ) {
     this.logger.log({
       keyResult,
       message: 'Fetching team for key result',
     })
 
-    return this.core.team.getOne({ id: keyResult.teamId })
+    return loaders.team.load(keyResult.teamId)
   }
 
   @ResolveField('objective', () => ObjectiveGraphQLNode)
-  protected async getObjectiveForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
+  protected async getObjectiveForKeyResult(
+    @Parent() keyResult: KeyResultGraphQLNode,
+    @Context() { loaders }: { loaders: IDataloaders },
+  ) {
     this.logger.log({
       keyResult,
       message: 'Fetching objective for key result',
     })
 
-    return this.core.objective.getFromKeyResult(keyResult)
+    return loaders.objective.load(keyResult.objectiveId)
   }
 
   @ResolveField('keyResultComments', () => KeyResultKeyResultCommentsGraphQLConnection)

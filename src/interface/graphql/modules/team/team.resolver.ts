@@ -1,6 +1,5 @@
 import { InternalServerErrorException, Logger, NotImplementedException, UnauthorizedException } from '@nestjs/common'
-import { Args, Parent, ResolveField, Info } from '@nestjs/graphql'
-import { UserInputError } from 'apollo-server-fastify'
+import { Args, Parent, ResolveField, Info, Context } from '@nestjs/graphql'
 import { startOfWeek } from 'date-fns'
 import { uniqBy } from 'lodash'
 
@@ -26,6 +25,7 @@ import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorato
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
+import { IDataloaders } from '@interface/graphql/dataloader/dataloader.service'
 import GetResolvedFieldsInEdgesAndNodes, {
   ResolvedFieldInfo,
 } from '@interface/graphql/helpers/get-resolved-fields-in-edges-and-nodes.helper'
@@ -73,16 +73,20 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   protected async getTeamForRequestAndRequestUserWithContext(
     @Args() request: NodeIndexesRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
+    @Context() { loaders }: { loaders: IDataloaders },
   ) {
     this.logger.log({
       request,
       message: 'Fetching team with provided indexes',
     })
 
-    const team = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
-    if (!team) throw new UserInputError(`We could not found a team with the provided arguments`)
+    // eslint-disable-next-line capitalized-comments
+    // const team = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
+    // if (!team) throw new UserInputError(`We could not found a team with the provided arguments`)
+    //
+    // return team
 
-    return team
+    return loaders.team.load(request.id)
   }
 
   @GuardedMutation(TeamGraphQLNode, 'team:create', { name: 'createTeam' })
@@ -174,13 +178,13 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
 
   @Stopwatch()
   @ResolveField('owner', () => UserGraphQLNode)
-  protected async getOwnerForTeam(@Parent() team: TeamGraphQLNode) {
+  protected async getOwnerForTeam(@Parent() team: TeamGraphQLNode, @Context() { loaders }: { loaders: IDataloaders }) {
     this.logger.log({
       team,
       message: 'Fetching owner for team',
     })
 
-    return this.core.user.getOne({ id: team.ownerId })
+    return loaders.user.load(team.ownerId)
   }
 
   @Stopwatch()
@@ -222,13 +226,13 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
 
   @Stopwatch()
   @ResolveField('parent', () => TeamGraphQLNode, { nullable: true })
-  protected async getParentForTeam(@Parent() team: TeamGraphQLNode) {
+  protected async getParentForTeam(@Parent() team: TeamGraphQLNode, @Context() { loaders }: { loaders: IDataloaders }) {
     this.logger.log({
       team,
       message: 'Fetching parent team for team',
     })
 
-    return this.core.team.getOne({ id: team.parentId })
+    return team.parentId ? loaders.team.load(team.parentId) : null
   }
 
   @Cacheable((request, team, info) => [team.id, request, GetResolvedFieldsInEdgesAndNodes(info)], 1 * 60)

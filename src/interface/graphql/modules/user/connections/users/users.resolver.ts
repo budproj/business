@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common'
-import { Args } from '@nestjs/graphql'
+import { Args, Context } from '@nestjs/graphql'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
@@ -12,6 +12,7 @@ import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorato
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
+import { IDataloaders } from '@interface/graphql/dataloader/dataloader.service'
 import { Cacheable } from '@lib/cache/cacheable.decorator'
 
 import { UserFiltersRequest } from '../../requests/user-filters.request'
@@ -31,6 +32,7 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
   protected async getUsersForRequestAndRequestUserWithContext(
     @Args() request: UserFiltersRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
+    @Context() { loaders }: { loaders: IDataloaders },
   ) {
     this.logger.log({
       request,
