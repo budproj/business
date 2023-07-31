@@ -20,9 +20,7 @@ export class RelayGraphQLAdapter {
     return omit(request, ['before', 'after', 'first', 'last', 'order']) as any
   }
 
-  public getConnectionRelayRequest<R extends ConnectionRelayRequest>(
-    request: R,
-  ): ConnectionRelayRequest {
+  public getConnectionRelayRequest<R extends ConnectionRelayRequest>(request: R): ConnectionRelayRequest {
     return pick(request, ['before', 'after', 'first', 'last'])
   }
 

@@ -27,35 +27,31 @@ export class PublishObjectiveAndKeyResultsCommand extends Command<Objective> {
         .returning('*')
         .execute()
 
-      const keyResults = await queryRunner.manager
-        .getRepository(KeyResult)
-        .find({ where: { objectiveId: id } })
+      const keyResults = await queryRunner.manager.getRepository(KeyResult).find({ where: { objectiveId: id } })
 
-      const keyResultUpdates = keyResults.map(
-        ({ id, mode, title, goal, format, type, ownerId, description }) => {
-          const state = {
-            mode,
-            title,
-            goal,
-            format,
-            type,
-            ownerId,
-            description,
-            author: { type: AuthorType.USER, identifier: userWithContext.id },
-          }
+      const keyResultUpdates = keyResults.map(({ id, mode, title, goal, format, type, ownerId, description }) => {
+        const state = {
+          mode,
+          title,
+          goal,
+          format,
+          type,
+          ownerId,
+          description,
+          author: { type: AuthorType.USER, identifier: userWithContext.id },
+        }
 
-          return {
-            keyResultId: id,
-            author: {
-              type: AuthorType.USER,
-              identifier: userWithContext.id,
-            },
-            oldState: state,
-            patches: [{ key: KeyResultPatchsKeys.mode, value: KeyResultMode.PUBLISHED }],
-            newState: { ...state, mode: KeyResultMode.PUBLISHED },
-          }
-        },
-      )
+        return {
+          keyResultId: id,
+          author: {
+            type: AuthorType.USER,
+            identifier: userWithContext.id,
+          },
+          oldState: state,
+          patches: [{ key: KeyResultPatchsKeys.mode, value: KeyResultMode.PUBLISHED }],
+          newState: { ...state, mode: KeyResultMode.PUBLISHED },
+        }
+      })
 
       await queryRunner.manager
         .getRepository(KeyResultUpdate)

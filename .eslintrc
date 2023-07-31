@@ -4,6 +4,7 @@
   },
   "extends": ["@budproj/eslint-config-base-ts", "@budproj/eslint-config-prettier-ts"],
   "rules": {
+    "no-warning-comments": "off",
     "new-cap": "off",
     "max-params": "off",
     "unicorn/no-null": "off",

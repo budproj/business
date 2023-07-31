@@ -16,6 +16,7 @@ import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-resu
 import { TeamGender } from '@core/modules/team/enums/team-gender.enum'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
+import { GetTeamMembersCommandResult } from '@core/ports/commands/get-team-members.command'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
 import { EmailNotificationChannelMetadata } from '../channels/email/metadata.type'
@@ -24,7 +25,6 @@ import { NotificationMetadata } from '../types/notification-metadata.type'
 
 import { BaseNotification } from './base.notification'
 import { NotificationChannelHashMap } from './notification.factory'
-import { GetTeamMembersCommandResult } from "@core/ports/commands/get-team-members.command";
 
 type CreatedCheckInData = RelatedData & ResolvedData
 
@@ -61,18 +61,12 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
   static notificationType = 'CreatedKeyResultCheckIn'
   private readonly confidenceTagAdapter = new ConfidenceTagAdapter()
 
-  constructor(
-    activity: CreatedCheckInActivity,
-    channels: NotificationChannelHashMap,
-    core: CorePortsProvider,
-  ) {
+  constructor(activity: CreatedCheckInActivity, channels: NotificationChannelHashMap, core: CorePortsProvider) {
     super(activity, channels, core, CreatedKeyResultCheckInNotification.notificationType)
   }
 
   public async prepare(): Promise<void> {
-    const { parentCheckIn, teamMembers, ...relatedData } = await this.getRelatedData(
-      this.activity.data,
-    )
+    const { parentCheckIn, teamMembers, ...relatedData } = await this.getRelatedData(this.activity.data)
     const resolvedData = await this.getResolvedData(parentCheckIn)
 
     const data = {
@@ -115,17 +109,11 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
       id: checkIn.keyResultId,
     })
     const cycle = await this.core.dispatchCommand<CycleInterface>('get-key-result-cycle', keyResult)
-    const parentCheckIn = await this.core.dispatchCommand<KeyResultCheckInInterface>(
-      'get-key-result-check-in',
-      {
-        id: checkIn.parentId,
-      },
-    )
+    const parentCheckIn = await this.core.dispatchCommand<KeyResultCheckInInterface>('get-key-result-check-in', {
+      id: checkIn.parentId,
+    })
 
-    const keyResultOwner = await this.core.dispatchCommand<UserInterface>(
-      'get-key-result-owner',
-      keyResult,
-    )
+    const keyResultOwner = await this.core.dispatchCommand<UserInterface>('get-key-result-owner', keyResult)
 
     const author = await this.core.dispatchCommand<UserInterface>('get-user', {
       id: checkIn.userId,
@@ -144,10 +132,7 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
       keyResult.id,
     )
 
-    const keyResultMembers = uniqBy(
-      [keyResultOwner, ...keyResultTeamMembers, ...keyResultSupportTeamMembers],
-      'id',
-    )
+    const keyResultMembers = uniqBy([keyResultOwner, ...keyResultTeamMembers, ...keyResultSupportTeamMembers], 'id')
 
     const teamMembers = keyResultMembers.filter((member) => member.id !== author.id)
 
@@ -170,8 +155,9 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
     const previousCheckInConfidenceColor = this.confidenceTagAdapter.getPrimaryColorFromConfidence(
       parentCheckIn?.confidence,
     )
-    const previousCheckInConfidenceBackgroundColor =
-      this.confidenceTagAdapter.getBackgroundColorFromConfidence(parentCheckIn?.confidence)
+    const previousCheckInConfidenceBackgroundColor = this.confidenceTagAdapter.getBackgroundColorFromConfidence(
+      parentCheckIn?.confidence,
+    )
 
     const authorInitials = await this.core.dispatchCommand<string>(
       'get-user-initials',
@@ -282,10 +268,7 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
   private async dispatchBarrierOrLowConfidenceMessaging(): Promise<void> {
     const { data, metadata } = this.marshal()
 
-    const notificationRecipients = await this.buildRecipients(
-      metadata.teamMembers,
-      this.channels.messageBroker,
-    )
+    const notificationRecipients = await this.buildRecipients(metadata.teamMembers, this.channels.messageBroker)
 
     const messages = notificationRecipients.map((recipient) => ({
       messageId: randomUUID(),
@@ -307,9 +290,6 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
       },
     }))
 
-    await this.channels.messageBroker.dispatchMultiple(
-      'notifications-microservice.notification',
-      messages,
-    )
+    await this.channels.messageBroker.dispatchMultiple('notifications-microservice.notification', messages)
   }
 }

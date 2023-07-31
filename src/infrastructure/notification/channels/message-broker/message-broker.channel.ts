@@ -10,9 +10,7 @@ import { Recipient } from '@infrastructure/notification/types/recipient.type'
 import { NotificationChannel } from '../channel.interface'
 
 @Injectable()
-export class MessageBrokerNotificationChannel
-  implements NotificationChannel<MessageBrokerChannelMetadata>
-{
+export class MessageBrokerNotificationChannel implements NotificationChannel<MessageBrokerChannelMetadata> {
   constructor(private readonly messageBrokerAdapter: AmqpConnection) {}
 
   public buildRecipientsFromUsers(users: UserInterface[]): Recipient[] {

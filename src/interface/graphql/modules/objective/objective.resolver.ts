@@ -40,10 +40,7 @@ import { ObjectiveGraphQLNode } from './objective.node'
 import { ObjectivePublishRequest } from './requests/objective-publish.request'
 
 @GuardedResolver(ObjectiveGraphQLNode)
-export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
-  Objective,
-  ObjectiveInterface
-> {
+export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<Objective, ObjectiveInterface> {
   private readonly logger = new Logger(ObjectiveGraphQLResolver.name)
 
   constructor(
@@ -64,12 +61,8 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching objective with provided indexes',
     })
 
-    const objective = await this.queryGuard.getOneWithActionScopeConstraint(
-      request,
-      authorizationUser,
-    )
-    if (!objective)
-      throw new UserInputError(`We could not found an objective with the provided arguments`)
+    const objective = await this.queryGuard.getOneWithActionScopeConstraint(request, authorizationUser)
+    if (!objective) throw new UserInputError(`We could not found an objective with the provided arguments`)
 
     return objective
   }
@@ -88,13 +81,10 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Received update objective request',
     })
 
-    const objective = await this.corePorts.dispatchCommand<KeyResult>(
-      'update-objective',
-      request.id,
-      { ...request.data },
-    )
-    if (!objective)
-      throw new UserInputError(`We could not found an objective with ID ${request.id}`)
+    const objective = await this.corePorts.dispatchCommand<KeyResult>('update-objective', request.id, {
+      ...request.data,
+    })
+    if (!objective) throw new UserInputError(`We could not found an objective with ID ${request.id}`)
 
     return objective
   }
@@ -124,11 +114,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: ObjectiveCreateRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    const canCreate = await this.accessControl.canCreate(
-      userWithContext,
-      request.data.teamId,
-      request.data.ownerId,
-    )
+    const canCreate = await this.accessControl.canCreate(userWithContext, request.data.teamId, request.data.ownerId)
     if (!canCreate) throw new UnauthorizedException()
 
     this.logger.log({
@@ -188,10 +174,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
 
     const [_, __, connection] = this.relay.unmarshalRequest<TeamFiltersRequest, Team>(request)
 
-    const queryResult = await this.corePorts.dispatchCommand<Team[]>(
-      'get-objective-support-teams',
-      objective.id,
-    )
+    const queryResult = await this.corePorts.dispatchCommand<Team[]>('get-objective-support-teams', objective.id)
 
     return this.relay.marshalResponse<Team>(queryResult, connection, objective)
   }
@@ -207,10 +190,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching key-results for objective',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      KeyResultFiltersRequest,
-      KeyResult
-    >(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<KeyResultFiltersRequest, KeyResult>(request)
 
     const keyResultOrderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
     const orderAttributes = [['keyResult', keyResultOrderAttributes]]
@@ -226,23 +206,15 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('status', () => StatusGraphQLObject)
-  protected async getStatusForObjective(
-    @Parent() objective: ObjectiveGraphQLNode,
-    @Args() request: StatusRequest,
-  ) {
+  protected async getStatusForObjective(@Parent() objective: ObjectiveGraphQLNode, @Args() request: StatusRequest) {
     this.logger.log({
       objective,
       request,
       message: 'Fetching current status for this objective',
     })
 
-    const result = await this.corePorts.dispatchCommand<Status>(
-      'get-objective-status',
-      objective.id,
-      request,
-    )
-    if (!result)
-      throw new UserInputError(`We could not find status for the objective with ID ${objective.id}`)
+    const result = await this.corePorts.dispatchCommand<Status>('get-objective-status', objective.id, request)
+    if (!result) throw new UserInputError(`We could not find status for the objective with ID ${objective.id}`)
 
     return result
   }
@@ -255,10 +227,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     })
 
     const result = await this.corePorts.dispatchCommand<Delta>('get-objective-delta', objective.id)
-    if (!result)
-      throw new UserInputError(
-        `We could not find a delta for the objective with ID ${objective.id}`,
-      )
+    if (!result) throw new UserInputError(`We could not find a delta for the objective with ID ${objective.id}`)
 
     return result
   }
@@ -282,8 +251,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
       request.id,
       userWithContext,
     )
-    if (!objective)
-      throw new UserInputError(`We could not found an objective with ID ${request.id}`)
+    if (!objective) throw new UserInputError(`We could not found an objective with ID ${request.id}`)
 
     return objective
   }

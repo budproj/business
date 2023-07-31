@@ -1,9 +1,4 @@
-import {
-  defaultNackErrorHandler,
-  RabbitPayload,
-  RabbitRequest,
-  RabbitRPC,
-} from '@golevelup/nestjs-rabbitmq'
+import { defaultNackErrorHandler, RabbitPayload, RabbitRequest, RabbitRPC } from '@golevelup/nestjs-rabbitmq'
 import { Controller, Logger } from '@nestjs/common'
 import { GraphQLRequest } from 'apollo-server-core'
 
@@ -22,29 +17,23 @@ interface RabbitMQRequestStructure {
 export class TasksController {
   private readonly logger = new Logger(TasksController.name)
 
-  constructor(
-    private readonly corePorts: CorePortsProvider,
-    private readonly notification: NotificationProvider,
-  ) {}
+  constructor(private readonly corePorts: CorePortsProvider, private readonly notification: NotificationProvider) {}
 
   @Stopwatch()
   @RabbitRPC({
     exchange: 'bud',
     queue: 'business.notification-ports',
     routingKey: 'business.notification-ports.#',
-    errorHandler: (channel, msg, error) => {
+    errorHandler: (channel, message, error) => {
       // TODO: inject logger and use it instead
-      console.log('@RabbitRPC on channel', channel, 'and with message', msg, 'failed due to', error);
-      return defaultNackErrorHandler(channel, msg, error);
+      console.log('@RabbitRPC on channel', channel, 'and with message', message, 'failed due to', error)
+      return defaultNackErrorHandler(channel, message, error)
     },
     queueOptions: {
       deadLetterExchange: 'dead',
     },
   })
-  async useNotification(
-    @RabbitPayload() payload: any,
-    @RabbitRequest() request: RabbitMQRequestStructure,
-  ) {
+  async useNotification(@RabbitPayload() payload: any, @RabbitRequest() request: RabbitMQRequestStructure) {
     const { routingKey } = request.fields
     const commandName = routingKey.split('.')[2]
 

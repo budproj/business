@@ -1,5 +1,3 @@
-import { Injectable } from '@nestjs/common/decorators/core/injectable.decorator'
-
 import { TABLE_NAMES } from './constants'
 
 export type TeamScope<T extends Record<string, unknown> = Record<string, unknown>> = [

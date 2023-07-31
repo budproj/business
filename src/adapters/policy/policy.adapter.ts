@@ -57,11 +57,7 @@ export class PolicyAdapter {
     return zipObject<Resource, CommandPolicy>(resources, commandPolicies)
   }
 
-  public getResourceCommandScopeForUser(
-    resource: Resource,
-    command: Command,
-    user: AuthorizationUser,
-  ): Scope {
+  public getResourceCommandScopeForUser(resource: Resource, command: Command, user: AuthorizationUser): Scope {
     const action = PolicyAdapter.buildAction(resource, command)
 
     return this.getHighestScopeForActionFromUser(action, user)
@@ -71,9 +67,7 @@ export class PolicyAdapter {
     policy: ResourcePolicy,
     scope: Scope,
   ): ResourceStatement<CommandStatement> {
-    return mapValues(policy, (commandPolicy) =>
-      this.getCommandStatementsForScopeFromPolicy(commandPolicy, scope),
-    )
+    return mapValues(policy, (commandPolicy) => this.getCommandStatementsForScopeFromPolicy(commandPolicy, scope))
   }
 
   public denyCommandStatement(statement: CommandStatement): CommandStatement {
@@ -87,9 +81,7 @@ export class PolicyAdapter {
   }
 
   public getActionsFromPermissions(permissions: Permission[]): Action[] {
-    const actions: Action[] = permissions.map((permission) =>
-      PolicyAdapter.drillUp<Action>(permission),
-    )
+    const actions: Action[] = permissions.map((permission) => PolicyAdapter.drillUp<Action>(permission))
 
     return uniq(actions)
   }
@@ -102,10 +94,7 @@ export class PolicyAdapter {
     return bool ? Effect.ALLOW : Effect.DENY
   }
 
-  private getCommandPoliciesForResourceFromPermissions(
-    resource: Resource,
-    permissions: Permission[],
-  ): CommandPolicy {
+  private getCommandPoliciesForResourceFromPermissions(resource: Resource, permissions: Permission[]): CommandPolicy {
     const commands = [Command.CREATE, Command.READ, Command.UPDATE, Command.DELETE]
     const scopePolicies = commands.map((command) =>
       this.getScopePoliciesForResourceCommandFromPermissions(resource, command, permissions),
@@ -144,10 +133,7 @@ export class PolicyAdapter {
     return permissions.filter((permission) => permission.includes(action))
   }
 
-  private getHighestScopeForActionFromUser(
-    action: Action,
-    user: AuthorizationUser,
-  ): Scope | undefined {
+  private getHighestScopeForActionFromUser(action: Action, user: AuthorizationUser): Scope | undefined {
     return SCOPE_PRIORITY.find((scope) => {
       const permission = PolicyAdapter.buildPermissionFromAction(action, scope)
 
@@ -155,10 +141,7 @@ export class PolicyAdapter {
     })
   }
 
-  private getCommandStatementsForScopeFromPolicy(
-    policy: CommandPolicy,
-    scope: Scope,
-  ): CommandStatement {
+  private getCommandStatementsForScopeFromPolicy(policy: CommandPolicy, scope: Scope): CommandStatement {
     return mapValues(policy, (effectPolicy) => effectPolicy[scope])
   }
 }

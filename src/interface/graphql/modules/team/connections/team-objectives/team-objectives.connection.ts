@@ -10,12 +10,9 @@ import { TeamObjectiveEdgeGraphQLObject } from './team-objective.edge'
 
 @ObjectType('TeamObjectives', {
   implements: () => [ConnectionRelayGraphQLInterface, GuardedConnectionGraphQLInterface],
-  description:
-    'A list containing a given user key-results based on the provided filters and arguments',
+  description: 'A list containing a given user key-results based on the provided filters and arguments',
 })
-export class TeamObjectivesGraphQLConnection
-  implements GuardedConnectionGraphQLInterface<ObjectiveGraphQLNode>
-{
+export class TeamObjectivesGraphQLConnection implements GuardedConnectionGraphQLInterface<ObjectiveGraphQLNode> {
   @Field(() => [TeamObjectiveEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: TeamObjectiveEdgeGraphQLObject[]
 

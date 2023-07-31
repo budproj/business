@@ -36,10 +36,7 @@ export class TaskProvider extends CoreEntityProvider<Task, TaskInterface> {
     return this.delete({ id })
   }
 
-  public async getAllUncheckedTasks(
-    assignedUserId: string,
-    getOptions: GetOptions<Task>,
-  ): Promise<Task[]> {
+  public async getAllUncheckedTasks(assignedUserId: string, getOptions: GetOptions<Task>): Promise<Task[]> {
     return this.getMany({ assignedUserId, state: TaskStates.UNCHECKED }, undefined, getOptions)
   }
 

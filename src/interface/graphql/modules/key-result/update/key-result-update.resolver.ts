@@ -46,22 +46,15 @@ export class KeyResultUpdateGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching key-result update with provided indexes',
     })
 
-    const keyResultUpdate = await this.queryGuard.getOneWithActionScopeConstraint(
-      request,
-      userWithContext,
-    )
+    const keyResultUpdate = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
     if (!keyResultUpdate)
-      throw new UserInputError(
-        `We could not found an key-result update with the provided arguments`,
-      )
+      throw new UserInputError(`We could not found an key-result update with the provided arguments`)
 
     return keyResultUpdate
   }
 
   @ResolveField('keyResult', () => KeyResultGraphQLNode)
-  protected async getKeyResultForKeyResultUpdate(
-    @Parent() keyResultUpdate: KeyResultUpdateGraphQLNode,
-  ) {
+  protected async getKeyResultForKeyResultUpdate(@Parent() keyResultUpdate: KeyResultUpdateGraphQLNode) {
     this.logger.log({
       keyResultUpdate,
       message: 'Fetching key result for key result update',

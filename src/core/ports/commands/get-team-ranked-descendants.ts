@@ -50,9 +50,7 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
       },
     }
     // TODO: use a single command to get all statuses at once
-    const teamStatusPromises = teams.map(async (team) =>
-      this.getTeamStatus.execute(team.id, statusOptions),
-    )
+    const teamStatusPromises = teams.map(async (team) => this.getTeamStatus.execute(team.id, statusOptions))
 
     return Promise.all(teamStatusPromises)
   }

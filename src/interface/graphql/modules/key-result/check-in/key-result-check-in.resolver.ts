@@ -41,12 +41,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
     private readonly corePorts: CorePortsProvider,
     accessControl: KeyResultCheckInAccessControl,
   ) {
-    super(
-      Resource.KEY_RESULT_CHECK_IN,
-      core,
-      core.keyResult.keyResultCheckInProvider,
-      accessControl,
-    )
+    super(Resource.KEY_RESULT_CHECK_IN, core, core.keyResult.keyResultCheckInProvider, accessControl)
   }
 
   @GuardedQuery(KeyResultCheckInGraphQLNode, 'key-result-check-in:read', {
@@ -61,12 +56,8 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching key result check-in with provided indexes',
     })
 
-    const keyResultCheckIn = await this.queryGuard.getOneWithActionScopeConstraint(
-      request,
-      userWithContext,
-    )
-    if (!keyResultCheckIn)
-      throw new UserInputError(`We could not found a check-in with the provided arguments`)
+    const keyResultCheckIn = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
+    if (!keyResultCheckIn) throw new UserInputError(`We could not found a check-in with the provided arguments`)
 
     return keyResultCheckIn
   }
@@ -93,18 +84,10 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
       request.data.keyResultId,
     )
     if (!keyResultStatus.isActive)
-      throw new UserInputError(
-        'You cannot create this check-in, because that key-result is not active anymore',
-      )
+      throw new UserInputError('You cannot create this check-in, because that key-result is not active anymore')
 
-    const keyResultCheckIn = await this.core.keyResult.buildCheckInForUser(
-      userWithContext,
-      request.data,
-    )
-    const createdCheckIn = await this.corePorts.dispatchCommand<KeyResultCheckIn>(
-      'create-check-in',
-      keyResultCheckIn,
-    )
+    const keyResultCheckIn = await this.core.keyResult.buildCheckInForUser(userWithContext, request.data)
+    const createdCheckIn = await this.corePorts.dispatchCommand<KeyResultCheckIn>('create-check-in', keyResultCheckIn)
 
     if (!createdCheckIn) throw new UserInputError('We were not able to create your check-in')
 
@@ -133,29 +116,19 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
     const keyResult = await this.core.keyResult.getFromKeyResultCheckInID(request.id)
     if (!keyResult) throw new UserInputError('We were not able to find your key-result check-in')
 
-    const keyResultStatus = await this.corePorts.dispatchCommand<Status>(
-      'get-key-result-status',
-      keyResult.id,
-    )
+    const keyResultStatus = await this.corePorts.dispatchCommand<Status>('get-key-result-status', keyResult.id)
     if (!keyResultStatus.isActive)
-      throw new UserInputError(
-        'You cannot delete this check-in, because that key-result is not active anymore',
-      )
+      throw new UserInputError('You cannot delete this check-in, because that key-result is not active anymore')
 
     const selector = { id: request.id }
     const result = await this.queryGuard.deleteWithActionScopeConstraint(selector, userWithContext)
-    if (!result)
-      throw new UserInputError(
-        `We could not find any key result check-in with ${request.id} to delete`,
-      )
+    if (!result) throw new UserInputError(`We could not find any key result check-in with ${request.id} to delete`)
 
     return result
   }
 
   @ResolveField('progress', () => Float)
-  protected async resolveProgressForKeyResultCheckIn(
-    @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
-  ) {
+  protected async resolveProgressForKeyResultCheckIn(@Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode) {
     this.logger.log({
       keyResultCheckIn,
       message: 'Fetching relative percentage progress for key result check-in',
@@ -165,9 +138,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('user', () => UserGraphQLNode)
-  protected async resolveUserForKeyResultCheckIn(
-    @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
-  ) {
+  protected async resolveUserForKeyResultCheckIn(@Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode) {
     this.logger.log({
       keyResultCheckIn,
       message: 'Fetching user for key result check-in',
@@ -177,9 +148,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('keyResult', () => KeyResultGraphQLNode)
-  protected async resolveKeyResultForKeyResultCheckIn(
-    @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
-  ) {
+  protected async resolveKeyResultForKeyResultCheckIn(@Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode) {
     this.logger.log({
       keyResultCheckIn,
       message: 'Fetching key result for key result check-in',
@@ -189,9 +158,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('parent', () => KeyResultCheckInGraphQLNode, { nullable: true })
-  protected async resolveParentForKeyResultCheckIn(
-    @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
-  ) {
+  protected async resolveParentForKeyResultCheckIn(@Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode) {
     this.logger.log({
       keyResultCheckIn,
       message: 'Fetching parent for key result check-in',
@@ -212,9 +179,7 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
       keyResultCheckIn.id,
     )
     if (!result)
-      throw new UserInputError(
-        `We could not find a delta for the key-result check-in with ID ${keyResultCheckIn.id}`,
-      )
+      throw new UserInputError(`We could not find a delta for the key-result check-in with ID ${keyResultCheckIn.id}`)
 
     return result
   }

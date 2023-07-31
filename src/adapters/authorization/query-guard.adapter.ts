@@ -6,6 +6,7 @@ import { CoreEntity } from '@core/core.orm-entity'
 import { CoreProvider } from '@core/core.provider'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { GetOptions } from '@core/interfaces/get-options'
+import { Cacheable } from '@lib/cache/cacheable.decorator'
 
 import { Command } from '../policy/enums/command.enum'
 import { Resource } from '../policy/enums/resource.enum'
@@ -31,6 +32,7 @@ export class QueryGuardAdapter<E extends CoreEntity, I> {
     return this.entity.createWithConstraint(data, queryContext)
   }
 
+  @Cacheable((selector, user, command) => [user.id, selector, command], 15)
   public async getOneWithActionScopeConstraint(
     selector: FindConditions<E>,
     user: UserWithContext,
@@ -42,6 +44,7 @@ export class QueryGuardAdapter<E extends CoreEntity, I> {
     return this.entity.getOneWithConstraint(selector, queryContext)
   }
 
+  @Cacheable((selector, user, options, command) => [user.id, selector, options, command], 15)
   public async getManyWithActionScopeConstraint(
     selector: FindConditions<E>,
     user: UserWithContext,

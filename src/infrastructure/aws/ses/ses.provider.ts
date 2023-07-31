@@ -46,10 +46,7 @@ export class AWSSESProvider implements EmailProviderInterface {
     })
   }
 
-  private buildTemplateEmailParams(
-    data: EmailData,
-    metadata: EmailMetadata,
-  ): SendBulkTemplatedEmailRequest {
+  private buildTemplateEmailParams(data: EmailData, metadata: EmailMetadata): SendBulkTemplatedEmailRequest {
     return {
       Source: this.getNamedSource(),
       Destinations: AWSSESProvider.buildBulkEmailDestinationList(metadata),

@@ -6,6 +6,5 @@ export const ScopeGraphQLEnum = Scope
 
 registerEnumType(ScopeGraphQLEnum, {
   name: 'Scope',
-  description:
-    'An authorization scope for your resource. It defines the level of permission that the resource needs',
+  description: 'An authorization scope for your resource. It defines the level of permission that the resource needs',
 })

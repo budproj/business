@@ -10,12 +10,9 @@ import { KeyResultTimelineEdgeGraphQLObject } from './key-result-timeline.edge'
 
 @ObjectType('KeyResultTimeline', {
   implements: () => [ConnectionRelayGraphQLInterface, GuardedConnectionGraphQLInterface],
-  description:
-    'A list with a given key-result timeline based on the provided filters and arguments',
+  description: 'A list with a given key-result timeline based on the provided filters and arguments',
 })
-export class KeyResultTimelineGraphQLConnection
-  implements GuardedConnectionGraphQLInterface<KeyResultTimelineEntry>
-{
+export class KeyResultTimelineGraphQLConnection implements GuardedConnectionGraphQLInterface<KeyResultTimelineEntry> {
   @Field(() => [KeyResultTimelineEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: KeyResultTimelineEdgeGraphQLObject[]
 

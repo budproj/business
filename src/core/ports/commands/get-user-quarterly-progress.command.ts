@@ -6,12 +6,7 @@ import { Command } from './base.command'
 
 export class GetUserQuarterlyProgressCommand extends Command<KeyResult[]> {
   public async execute(userID: UserInterface['id']): Promise<any> {
-    const keyResults = await this.core.keyResult.getKeyResultsFromUserByCadence(
-      userID,
-      Cadence.QUARTERLY,
-      true,
-      true,
-    )
+    const keyResults = await this.core.keyResult.getKeyResultsFromUserByCadence(userID, Cadence.QUARTERLY, true, true)
 
     if (keyResults.length > 0) {
       const progress = await this.core.keyResult.getProgressSum(keyResults)

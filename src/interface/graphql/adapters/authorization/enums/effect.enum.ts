@@ -6,6 +6,5 @@ export const EffectGraphQLEnum = Effect
 
 registerEnumType(EffectGraphQLEnum, {
   name: 'Effect',
-  description:
-    'Defines if the current user has the permission for a given action regarding the resource',
+  description: 'Defines if the current user has the permission for a given action regarding the resource',
 })

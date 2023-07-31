@@ -11,9 +11,7 @@ export class AddOwnerToObjective1607110154758 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE "objective" DROP CONSTRAINT "FK_3e9e716f8dbeb75b4b8532d2145"`,
-    )
+    await queryRunner.query(`ALTER TABLE "objective" DROP CONSTRAINT "FK_3e9e716f8dbeb75b4b8532d2145"`)
     await queryRunner.query(`ALTER TABLE "objective" DROP COLUMN "owner_id"`)
   }
 }

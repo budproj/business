@@ -1,7 +1,6 @@
 import { Logger } from '@nestjs/common'
 import { Injectable } from '@nestjs/common/decorators/core/injectable.decorator'
 
-import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.enum'
 import { KeyResultStateInterface } from '@core/modules/key-result/interfaces/key-result-state.interface'
 import { DEFAULT_CONFIDENCE, DEFAULT_PROGRESS } from '@core/modules/team/team.constants'
 import { AggregateExecutorFactory } from '@core/modules/workspace/aggregate-executor.factory'

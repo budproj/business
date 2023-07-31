@@ -1,13 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
-  OneToMany,
-  RelationId,
-  UpdateDateColumn,
-} from 'typeorm'
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, RelationId, UpdateDateColumn } from 'typeorm'
 
 import { CoreEntity } from '@core/core.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'

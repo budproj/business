@@ -54,14 +54,9 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching key-result comment with provided indexes',
     })
 
-    const keyResultComment = await this.queryGuard.getOneWithActionScopeConstraint(
-      request,
-      userWithContext,
-    )
+    const keyResultComment = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
     if (!keyResultComment)
-      throw new UserInputError(
-        `We could not found an key-result comment with the provided arguments`,
-      )
+      throw new UserInputError(`We could not found an key-result comment with the provided arguments`)
 
     return keyResultComment
   }
@@ -88,14 +83,9 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
       request.data.keyResultId,
     )
     if (!keyResultStatus.isActive)
-      throw new UserInputError(
-        'You cannot create this keyResultComment, because that key-result is not active anymore',
-      )
+      throw new UserInputError('You cannot create this keyResultComment, because that key-result is not active anymore')
 
-    const keyResultComment = this.core.keyResult.createUserCommentData(
-      userWithContext,
-      request.data,
-    )
+    const keyResultComment = this.core.keyResult.createUserCommentData(userWithContext, request.data)
 
     const createdComment = await this.corePorts.dispatchCommand<KeyResultComment>(
       'create-key-result-comment',
@@ -123,14 +113,9 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     const keyResult = await this.core.keyResult.getFromKeyResultCommentID(request.id)
     if (!keyResult) throw new UserInputError('We were not able to find your key-result comment')
 
-    const keyResultStatus = await this.corePorts.dispatchCommand<Status>(
-      'get-key-result-status',
-      keyResult.id,
-    )
+    const keyResultStatus = await this.corePorts.dispatchCommand<Status>('get-key-result-status', keyResult.id)
     if (!keyResultStatus.isActive)
-      throw new UserInputError(
-        'You cannot delete this keyResultComment, because that key-result is not active anymore',
-      )
+      throw new UserInputError('You cannot delete this keyResultComment, because that key-result is not active anymore')
 
     const selector = { id: request.id }
     const result = await this.queryGuard.deleteWithActionScopeConstraint(selector, userWithContext)
@@ -140,9 +125,7 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('user', () => UserGraphQLNode)
-  protected async getUserForKeyResultComment(
-    @Parent() keyResultComment: KeyResultCommentGraphQLNode,
-  ) {
+  protected async getUserForKeyResultComment(@Parent() keyResultComment: KeyResultCommentGraphQLNode) {
     this.logger.log({
       keyResultComment,
       message: 'Fetching user for key result comment',
@@ -152,9 +135,7 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('keyResult', () => KeyResultGraphQLNode)
-  protected async getKeyResultForKeyResultComment(
-    @Parent() keyResultComment: KeyResultCommentGraphQLNode,
-  ) {
+  protected async getKeyResultForKeyResultComment(@Parent() keyResultComment: KeyResultCommentGraphQLNode) {
     this.logger.log({
       keyResultComment,
       message: 'Fetching key result for key result comment',

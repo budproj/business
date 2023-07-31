@@ -52,12 +52,7 @@ export class UpdateKeyResultCommand extends Command<KeyResult> {
         value: keyResult[key],
       }))
 
-      await queryRunner.manager
-        .createQueryBuilder()
-        .update(KeyResult)
-        .set(keyResult)
-        .where({ id })
-        .execute()
+      await queryRunner.manager.createQueryBuilder().update(KeyResult).set(keyResult).where({ id }).execute()
 
       const keyResultUpdate = {
         keyResultId: id,

@@ -44,11 +44,7 @@ export class KeyResultCommentsConnectionGraphQLResolver extends GuardedConnectio
       KeyResultComment
     >(request)
 
-    const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
-      filters,
-      userWithContext,
-      queryOptions,
-    )
+    const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(filters, userWithContext, queryOptions)
 
     return this.relay.marshalResponse<KeyResultComment>(queryResult, connection)
   }

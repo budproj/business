@@ -14,31 +14,21 @@ import { KeyResultComment } from './key-result-comment.orm-entity'
 import { KeyResultCommentRepository } from './key-result-comment.repository'
 
 @Injectable()
-export class KeyResultCommentProvider extends CoreEntityProvider<
-  KeyResultComment,
-  KeyResultCommentInterface
-> {
+export class KeyResultCommentProvider extends CoreEntityProvider<KeyResultComment, KeyResultCommentInterface> {
   private keyResultProvider: KeyResultProvider
 
-  constructor(
-    protected readonly repository: KeyResultCommentRepository,
-    private readonly moduleReference: ModuleRef,
-  ) {
+  constructor(protected readonly repository: KeyResultCommentRepository, private readonly moduleReference: ModuleRef) {
     super(KeyResultCommentProvider.name, repository)
   }
 
-  public async getForTimelineEntries(
-    entries: KeyResultTimelineQueryResult[],
-  ): Promise<KeyResultComment[]> {
+  public async getForTimelineEntries(entries: KeyResultTimelineQueryResult[]): Promise<KeyResultComment[]> {
     const commentIDs = entries.map((entry) => entry.id)
     const result = await this.repository.findByIds(commentIDs)
 
     return result
   }
 
-  public async createComment(
-    comment: Partial<KeyResultCommentInterface>,
-  ): Promise<KeyResultComment[]> {
+  public async createComment(comment: Partial<KeyResultCommentInterface>): Promise<KeyResultComment[]> {
     return this.create(comment)
   }
 

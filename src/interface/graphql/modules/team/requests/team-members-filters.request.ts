@@ -10,8 +10,7 @@ export class TeamMembersFiltersRequest extends UserFiltersRequest {
   @Field({
     nullable: true,
     defaultValue: true,
-    description:
-      'Define if we should resolve the entire team tree, showing all users below that team and subteams',
+    description: 'Define if we should resolve the entire team tree, showing all users below that team and subteams',
   })
   public resolveTree?: boolean
 

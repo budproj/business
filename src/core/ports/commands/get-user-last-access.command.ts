@@ -4,9 +4,7 @@ import { UserAmplitudeDataProperties } from '@infrastructure/amplitude/types/use
 import { Command } from './base.command'
 
 export class GetUserAmplitudeData extends Command<any> {
-  public async execute(
-    userID: UserInterface['id'],
-  ): Promise<UserAmplitudeDataProperties['userData']['amp_props']> {
+  public async execute(userID: UserInterface['id']): Promise<UserAmplitudeDataProperties['userData']['amp_props']> {
     const userData = await this.core.user.amplitude.getUserProfileAmplitudeData(userID)
     return userData.userData.amp_props
   }

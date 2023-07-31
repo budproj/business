@@ -12,6 +12,6 @@ export class GetKeyResultTeamTreeCommand extends Command<Team[]> {
       return []
     }
 
-    return this.core.team.getAscendantsByIds([keyResult.teamId], {});
+    return this.core.team.getAscendantsByIds([keyResult.teamId], {})
   }
 }

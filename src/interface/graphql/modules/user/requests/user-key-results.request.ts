@@ -15,8 +15,7 @@ export class UserKeyResultsRequest extends KeyResultFiltersRequest {
 
   @Field(() => Boolean, {
     nullable: true,
-    description:
-      'A flag that defines if we should fetch only key-results that contains checkmarks of this user',
+    description: 'A flag that defines if we should fetch only key-results that contains checkmarks of this user',
   })
   public hasUserCheckMarks?: boolean
 
@@ -33,8 +32,7 @@ export class UserKeyResultsRequest extends KeyResultFiltersRequest {
   public onlyKeyResultsFromCompany?: boolean
 
   @Field(() => Boolean, {
-    description:
-      'A flag that defines if we should fetch only key-results that the user is owner or not',
+    description: 'A flag that defines if we should fetch only key-results that the user is owner or not',
     nullable: true,
   })
   public onlyOwnerKeyResults?: boolean

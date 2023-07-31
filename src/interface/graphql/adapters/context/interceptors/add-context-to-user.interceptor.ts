@@ -7,7 +7,7 @@ import { PolicyAdapter } from '@adapters/policy/policy.adapter'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 import { CoreProvider } from '@core/core.provider'
-import { Cacheable } from "@lib/cache/cacheable.decorator";
+import { Cacheable } from '@lib/cache/cacheable.decorator'
 
 import { GraphQLRequest } from '../interfaces/request.interface'
 
@@ -21,10 +21,7 @@ export class AddContextToUserInterceptor implements NestInterceptor {
     this.godmode = new GodmodeProvider(this.config.godmode)
   }
 
-  public async intercept(
-    executionContext: ExecutionContext,
-    next: CallHandler,
-  ): Promise<Observable<any>> {
+  public async intercept(executionContext: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
     const graphqlContext = GqlExecutionContext.create(executionContext)
     const request: GraphQLRequest = graphqlContext.getContext().req
 
@@ -42,12 +39,8 @@ export class AddContextToUserInterceptor implements NestInterceptor {
 
   @Cacheable(({ user }) => [user.id, user.token.sub, user.token.permissions], 15 * 60)
   private async getRequestUser(request: GraphQLRequest): Promise<UserWithContext> {
-    const { teams, ...user } = await this.core.user.getUserFromSubjectWithTeamRelation(
-      request.user.token.sub,
-    )
-    const resourcePolicy = this.authz.getResourcePolicyFromPermissions(
-      request.user.token.permissions,
-    )
+    const { teams, ...user } = await this.core.user.getUserFromSubjectWithTeamRelation(request.user.token.sub)
+    const resourcePolicy = this.authz.getResourcePolicyFromPermissions(request.user.token.permissions)
 
     return {
       ...request.user,

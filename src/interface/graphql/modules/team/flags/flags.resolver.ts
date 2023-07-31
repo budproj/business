@@ -24,11 +24,7 @@ import { TeamFlagsRequest } from './requests/team-flags.request'
 export class FlagsGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamInterface> {
   private readonly logger = new Logger(FlagsGraphQLResolver.name)
 
-  constructor(
-    protected corePorts: CorePortsProvider,
-    protected accessControl: FlagsAccessControl,
-    core: CoreProvider,
-  ) {
+  constructor(protected corePorts: CorePortsProvider, protected accessControl: FlagsAccessControl, core: CoreProvider) {
     super(Resource.FLAGS, core, core.team, accessControl)
   }
 

@@ -172,7 +172,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     }
   }
 
-  @Cacheable('0.ownerId', 60 * 60)
   @Stopwatch()
   @ResolveField('owner', () => UserGraphQLNode)
   protected async getOwnerForTeam(@Parent() team: TeamGraphQLNode) {
@@ -184,7 +183,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.core.user.getOne({ id: team.ownerId })
   }
 
-  @Cacheable((request, team) => [team.id, request], 1 * 60)
   @Stopwatch()
   @ResolveField('teams', () => TeamTeamsGraphQLConnection, { nullable: true })
   protected async getChildTeamsForTeam(@Args() request: TeamFiltersRequest, @Parent() team: TeamGraphQLNode) {
@@ -201,7 +199,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.relay.marshalResponse<TeamInterface>(queryResult, connection, team)
   }
 
-  // @Cacheable((request, team) => [team.id, request], 15 * 60)
   @Stopwatch()
   @ResolveField('rankedDescendants', () => TeamTeamsGraphQLConnection, { nullable: true })
   protected async getRankedDescendantsForTeam(@Args() request: TeamFiltersRequest, @Parent() team: TeamGraphQLNode) {
@@ -223,7 +220,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.relay.marshalResponse<TeamInterface>(result, connection, team)
   }
 
-  @Cacheable('0.parentId', 60 * 60)
   @Stopwatch()
   @ResolveField('parent', () => TeamGraphQLNode, { nullable: true })
   protected async getParentForTeam(@Parent() team: TeamGraphQLNode) {

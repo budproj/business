@@ -8,7 +8,7 @@ import { PolicyAdapter } from '@adapters/policy/policy.adapter'
 import { CommandStatement } from '@adapters/policy/types/command-statement.type'
 import { ResourceStatement } from '@adapters/policy/types/resource-statement.type copy'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
-import { Cacheable } from "@lib/cache/cacheable.decorator";
+import { Cacheable } from '@lib/cache/cacheable.decorator'
 
 import { RequestUserWithContext } from '../../context/decorators/request-user-with-context.decorator'
 import { GuardedQuery } from '../decorators/guarded-query.decorator'
@@ -30,22 +30,13 @@ export class PermissionsGraphQLResolver {
   ) {
     this.logger.log(`Fetching user permissions for user with ID ${userWithContext.id}`)
 
-    const resourcePolicy = this.authz.getResourcePolicyFromPermissions(
-      userWithContext.token.permissions,
-    )
-    const resourcesCommandStatement = this.authz.getResourcesCommandStatementsForScopeFromPolicy(
-      resourcePolicy,
-      scope,
-    )
+    const resourcePolicy = this.authz.getResourcePolicyFromPermissions(userWithContext.token.permissions)
+    const resourcesCommandStatement = this.authz.getResourcesCommandStatementsForScopeFromPolicy(resourcePolicy, scope)
 
     return this.normalizeResourceStatementKeys<CommandStatement>(resourcesCommandStatement)
   }
 
-  private normalizeResourceStatementKeys<E = Effect>(
-    statement: ResourceStatement<E>,
-  ): PermissionsGraphQLObject {
-    return mapKeys<ResourceStatement<E>, PermissionsGraphQLObject>(statement, (_, key) =>
-      camelCase(key),
-    )
+  private normalizeResourceStatementKeys<E = Effect>(statement: ResourceStatement<E>): PermissionsGraphQLObject {
+    return mapKeys<ResourceStatement<E>, PermissionsGraphQLObject>(statement, (_, key) => camelCase(key))
   }
 }

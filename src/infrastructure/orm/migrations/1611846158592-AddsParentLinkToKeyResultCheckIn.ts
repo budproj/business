@@ -14,12 +14,8 @@ export class AddsParentLinkToKeyResultCheckIn1611846158592 implements MigrationI
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE "key_result_check_in" DROP CONSTRAINT "FK_984108e53a65231866cc0750ffd"`,
-    )
-    await queryRunner.query(
-      `ALTER TABLE "key_result_check_in" DROP CONSTRAINT "UQ_984108e53a65231866cc0750ffd"`,
-    )
+    await queryRunner.query(`ALTER TABLE "key_result_check_in" DROP CONSTRAINT "FK_984108e53a65231866cc0750ffd"`)
+    await queryRunner.query(`ALTER TABLE "key_result_check_in" DROP CONSTRAINT "UQ_984108e53a65231866cc0750ffd"`)
     await queryRunner.query(`ALTER TABLE "key_result_check_in" DROP COLUMN "parent_id"`)
   }
 }

@@ -115,12 +115,11 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
   }
 
   public async prepare(): Promise<void> {
-    const { owner, keyResult, cycle, team, supportTeam, assignedUser, checkMarkCreator } =
-      await this.getRelatedData(
-        this.activity.data.keyResultId,
-        this.activity.data.assignedUserId,
-        this.activity.data.userId,
-      )
+    const { owner, keyResult, cycle, team, supportTeam, assignedUser, checkMarkCreator } = await this.getRelatedData(
+      this.activity.data.keyResultId,
+      this.activity.data.assignedUserId,
+      this.activity.data.userId,
+    )
 
     const data: CreatedKeyResultCheckMarkNotificationData = {
       owner: CreatedKeyResultCheckMarkNotification.getOwnerData(owner),
@@ -143,10 +142,7 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
   }
 
   public async dispatch(): Promise<void> {
-    await Promise.allSettled([
-      this.dispatchAssignedCheckMarkEmail(),
-      this.dispatchAssignedCheckMarkMessaging(),
-    ])
+    await Promise.allSettled([this.dispatchAssignedCheckMarkEmail(), this.dispatchAssignedCheckMarkMessaging()])
   }
 
   private async dispatchAssignedCheckMarkEmail(): Promise<void> {
@@ -160,11 +156,7 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
       ownerFirstName: user.firstName,
     }))
 
-    const recipients = (await this.buildRecipients(
-      recipientUsers,
-      this.channels.email,
-      customData,
-    )) as EmailRecipient[]
+    const recipients = (await this.buildRecipients(recipientUsers, this.channels.email, customData)) as EmailRecipient[]
 
     if (recipients.length === 0) return
 
@@ -174,10 +166,7 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
       template: 'AssignedUserCheckmark',
     }
 
-    const assignedUserFullName = await this.core.dispatchCommand<string>(
-      'get-user-full-name',
-      data.assignedUser,
-    )
+    const assignedUserFullName = await this.core.dispatchCommand<string>('get-user-full-name', data.assignedUser)
 
     const emailData = {
       assignedUserFullName,
@@ -204,11 +193,7 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
     await this.channels.email.dispatch(emailData, emailMetadata)
   }
 
-  private async getRelatedData(
-    keyResultID: string,
-    assignedUserID: string,
-    creatorId: string,
-  ): Promise<RelatedData> {
+  private async getRelatedData(keyResultID: string, assignedUserID: string, creatorId: string): Promise<RelatedData> {
     const keyResult = await this.core.dispatchCommand<KeyResultInterface>('get-key-result', {
       id: keyResultID,
     })
@@ -238,10 +223,7 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
       this.activity.context.userWithContext,
     )
 
-    const initials = await this.core.dispatchCommand<string>(
-      'get-user-initials',
-      this.activity.context.userWithContext,
-    )
+    const initials = await this.core.dispatchCommand<string>('get-user-initials', this.activity.context.userWithContext)
 
     return {
       fullName,
@@ -281,13 +263,8 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
       : fallbackTeamData
   }
 
-  private async getKeyResultData(
-    keyResult: KeyResultInterface,
-  ): Promise<KeyResultNotificationData> {
-    const confidenceColor = await this.core.dispatchCommand<string>(
-      'get-key-result-confidence-color',
-      keyResult,
-    )
+  private async getKeyResultData(keyResult: KeyResultInterface): Promise<KeyResultNotificationData> {
+    const confidenceColor = await this.core.dispatchCommand<string>('get-key-result-confidence-color', keyResult)
 
     return {
       confidenceColor,
@@ -343,9 +320,6 @@ export class CreatedKeyResultCheckMarkNotification extends BaseNotification<
       },
     }))
 
-    await this.channels.messageBroker.dispatchMultiple(
-      'notifications-microservice.notification',
-      messages,
-    )
+    await this.channels.messageBroker.dispatchMultiple('notifications-microservice.notification', messages)
   }
 }

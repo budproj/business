@@ -6,7 +6,6 @@ import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
 import { CorePortsProvider } from '@core/ports/ports.provider'
-import { Cacheable } from '@lib/cache/cacheable.decorator'
 
 @Injectable()
 export class UserAccessControl extends AccessControl {
@@ -20,7 +19,6 @@ export class UserAccessControl extends AccessControl {
     return userId === requestUserId
   }
 
-  @Cacheable((user, userIdFromRequest) => [user.id, userIdFromRequest.id], 15 * 60)
   public async isInTheSameCompany(user: UserWithContext, userIdFromRequest: string): Promise<boolean> {
     if (UserAccessControl.isSameUser(user?.id, userIdFromRequest)) {
       return true

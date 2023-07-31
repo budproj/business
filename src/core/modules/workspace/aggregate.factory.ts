@@ -28,10 +28,10 @@ export class AggregateFactory {
     }
   }
 
-  fn(segment: Segment, fn: string, column: string): string {
-    const name = `${fn}_${segment.name}_${column === '*' ? '' : column}`
+  fn(segment: Segment, function_: string, column: string): string {
+    const name = `${function_}_${segment.name}_${column === '*' ? '' : column}`
 
-    const dataColumn = `to_json(${fn}(${column === '*' ? column : `"${column}"`}))`
+    const dataColumn = `to_json(${function_}(${column === '*' ? column : `"${column}"`}))`
 
     const source = `"${segment.name}"`
 
@@ -66,15 +66,15 @@ export class AggregateFactory {
     return this.fn(segment, 'sum', column)
   }
 
-  fnGroupBy(segment: Segment, groupBy: string, fn: string, column: string): string {
-    const name = `${fn}_${segment.name}_group_by_${groupBy}_${column === '*' ? '' : column}`
+  fnGroupBy(segment: Segment, groupBy: string, function_: string, column: string): string {
+    const name = `${function_}_${segment.name}_group_by_${groupBy}_${column === '*' ? '' : column}`
 
     const dataColumn = 'json_object_agg(subkey, count)'
 
     const source = `
       (
         SELECT "${groupBy}",
-               ${fn}("${column}")
+               ${function_}("${column}")
         FROM "${segment.name}" kr
         GROUP BY 1
       ) AS result_tuple(subkey, count)

@@ -43,16 +43,9 @@ export class KeyResultsConnectionGraphQLResolver extends GuardedConnectionGraphQ
       message: 'Fetching key-results with filters',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      KeyResultFiltersRequest,
-      KeyResult
-    >(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<KeyResultFiltersRequest, KeyResult>(request)
 
-    const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
-      filters,
-      userWithContext,
-      queryOptions,
-    )
+    const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(filters, userWithContext, queryOptions)
 
     return this.relay.marshalResponse<KeyResult>(queryResult, connection)
   }

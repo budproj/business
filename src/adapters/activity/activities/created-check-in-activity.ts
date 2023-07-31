@@ -8,10 +8,7 @@ export const CREATED_CHECK_IN_ACTIVITY_TYPE = 'ACTIVITY::KEY-RESULT::CHECK-IN::C
 export class CreatedCheckInActivity extends Activity<KeyResultCheckIn> {
   public type = CREATED_CHECK_IN_ACTIVITY_TYPE
 
-  constructor(
-    public readonly data: KeyResultCheckIn,
-    public readonly context: Partial<GraphQLRequest>,
-  ) {
+  constructor(public readonly data: KeyResultCheckIn, public readonly context: Partial<GraphQLRequest>) {
     super(data, context)
   }
 }

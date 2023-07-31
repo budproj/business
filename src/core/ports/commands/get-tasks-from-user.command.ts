@@ -9,11 +9,7 @@ export interface Options {
 }
 
 export class GetTasksFromUserCommand extends Command<Task[]> {
-  public async execute(
-    userId: User['id'],
-    options?: Options,
-    getOptions?: GetOptions<Task>,
-  ): Promise<Task[]> {
+  public async execute(userId: User['id'], options?: Options, getOptions?: GetOptions<Task>): Promise<Task[]> {
     const shouldGetOnlyUnchecked = options?.onlyUnchecked ?? false
 
     return shouldGetOnlyUnchecked

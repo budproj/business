@@ -40,12 +40,7 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
     private readonly corePorts: CorePortsProvider,
     accessControl: KeyResultCheckMarkAccessControl,
   ) {
-    super(
-      Resource.KEY_RESULT_CHECK_MARK,
-      core,
-      core.keyResult.keyResultCheckMarkProvider,
-      accessControl,
-    )
+    super(Resource.KEY_RESULT_CHECK_MARK, core, core.keyResult.keyResultCheckMarkProvider, accessControl)
   }
 
   @GuardedMutation(KeyResultCheckMarkGraphQLNode, 'key-result-check-mark:create', {
@@ -73,10 +68,10 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
         'You cannot create this keyResultCheckMark, because that key-result is not active anymore',
       )
 
-    const createdCheckMark = await this.corePorts.dispatchCommand<KeyResultCheckMark>(
-      'create-check-mark',
-      { checkMark: request.data, user: userWithContext },
-    )
+    const createdCheckMark = await this.corePorts.dispatchCommand<KeyResultCheckMark>('create-check-mark', {
+      checkMark: request.data,
+      user: userWithContext,
+    })
 
     if (!createdCheckMark) throw new UserInputError('We were not able to create your comment')
 
@@ -96,10 +91,7 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
       message: 'Received toggle check mark request',
     })
 
-    const toggledCheckMark = await this.corePorts.dispatchCommand<KeyResultCheckMark>(
-      'toggle-check-mark',
-      request.data,
-    )
+    const toggledCheckMark = await this.corePorts.dispatchCommand<KeyResultCheckMark>('toggle-check-mark', request.data)
 
     if (!toggledCheckMark) throw new UserInputError('We were not able to toggle this check mark')
 
@@ -119,13 +111,12 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
       message: 'Received update check mark description request',
     })
 
-    const updatedCheckMark = await this.corePorts.dispatchCommand<KeyResultCheckMark>(
-      'update-check-mark-description',
-      { id: request.id, ...request.data },
-    )
+    const updatedCheckMark = await this.corePorts.dispatchCommand<KeyResultCheckMark>('update-check-mark-description', {
+      id: request.id,
+      ...request.data,
+    })
 
-    if (!updatedCheckMark)
-      throw new UserInputError('We were not able to update this check mark description')
+    if (!updatedCheckMark) throw new UserInputError('We were not able to update this check mark description')
 
     return updatedCheckMark
   }
@@ -144,13 +135,12 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
       message: 'Received update check mark assignee request',
     })
 
-    const updatedCheckMark = await this.corePorts.dispatchCommand<KeyResultCheckMark>(
-      'update-check-mark-assignee',
-      { id: request.id, ...request.data },
-    )
+    const updatedCheckMark = await this.corePorts.dispatchCommand<KeyResultCheckMark>('update-check-mark-assignee', {
+      id: request.id,
+      ...request.data,
+    })
 
-    if (!updatedCheckMark)
-      throw new UserInputError('We were not able to update this check mark assignee')
+    if (!updatedCheckMark) throw new UserInputError('We were not able to update this check mark assignee')
 
     return updatedCheckMark
   }
@@ -168,10 +158,7 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
       message: 'Received delete check mark request',
     })
 
-    const deletedResponse = await this.corePorts.dispatchCommand<KeyResultCheckMark>(
-      'delete-check-mark',
-      request,
-    )
+    const deletedResponse = await this.corePorts.dispatchCommand<KeyResultCheckMark>('delete-check-mark', request)
 
     if (!deletedResponse) throw new UserInputError('We were not able to delete this check mark')
 

@@ -5,9 +5,7 @@ export class AddKeyResultType1621272081440 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`CREATE TYPE "key_result_type_enum" AS ENUM('ASCENDING', 'DESCENDING')`)
-    await queryRunner.query(
-      `ALTER TABLE "key_result" ADD "type" "key_result_type_enum" NOT NULL DEFAULT 'ASCENDING'`,
-    )
+    await queryRunner.query(`ALTER TABLE "key_result" ADD "type" "key_result_type_enum" NOT NULL DEFAULT 'ASCENDING'`)
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

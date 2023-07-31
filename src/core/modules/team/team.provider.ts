@@ -8,6 +8,7 @@ import { GetOptions } from '@core/interfaces/get-options'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { UserProvider } from '@core/modules/user/user.provider'
 import { CreationQuery } from '@core/types/creation-query.type'
+import { Cacheable } from '@lib/cache/cacheable.decorator'
 import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { TeamScope, TeamScopeFactory } from '../workspace/team-scope.factory'
@@ -42,6 +43,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return createdData[0]
   }
 
+  @Cacheable((user, filters, options) => [user, filters, options], 15)
   @Stopwatch()
   public async getFromOwner(
     user: UserInterface,
@@ -95,6 +97,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     )
   }
 
+  @Cacheable((originTeamIds, filters, queryOptions) => [originTeamIds, filters, queryOptions], 15)
   @Stopwatch()
   public async getBidirectionalByIds(
     originTeamIds: string[],
@@ -119,6 +122,15 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
       .getMany()
   }
 
+  @Cacheable(
+    (parentTeamIds, includeParentTeams, filters, queryOptions) => [
+      parentTeamIds,
+      includeParentTeams,
+      filters,
+      queryOptions,
+    ],
+    15,
+  )
   @Stopwatch()
   public async getDescendantsByIds(
     parentTeamIds: string[],
@@ -170,6 +182,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return this.getAscendantsFromScope(ascendingScope, filters, queryOptions)
   }
 
+  @Cacheable((scope, filters, queryOptions) => [scope, filters, queryOptions], 15)
   @Stopwatch()
   public async getAscendantsFromScope(
     [name, cte, options]: TeamScope,
@@ -188,6 +201,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
       .getMany()
   }
 
+  @Cacheable((userId, filters, options) => [userId, filters, options], 15)
   @Stopwatch()
   public async getUserCompaniesAndDepartments(
     userId: string,
@@ -254,6 +268,10 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     }
   }
 
+  @Cacheable(
+    (teamIDs, filters, queryOptions, selector, relations) => [teamIDs, filters, queryOptions, selector, relations],
+    15,
+  )
   @Stopwatch()
   public async getChildren(
     teamIDs: string | string[],
@@ -277,6 +295,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     })
   }
 
+  @Cacheable('0', 15)
   public async getFromIndexes(indexes: Partial<TeamInterface>): Promise<Team> {
     return this.repository.findOne(indexes)
   }
@@ -295,7 +314,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
   }
 
   public async getFromID(id: string): Promise<Team | undefined> {
-    return this.repository.findOne({ id })
+    return this.getFromIndexes({ id })
   }
 
   public async addUserToTeam(userID: string, teamID: string): Promise<void> {

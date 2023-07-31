@@ -32,8 +32,7 @@ export class UserUpdateInputObject {
   public readonly nickname?: string
 
   @Field(() => String, {
-    description:
-      'A description for that user. A more detailed information where the user tells about her/himself',
+    description: 'A description for that user. A more detailed information where the user tells about her/himself',
     nullable: true,
   })
   public readonly about?: string

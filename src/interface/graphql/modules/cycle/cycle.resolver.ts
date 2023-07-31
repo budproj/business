@@ -124,7 +124,6 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     }
   }
 
-  @Cacheable('0.teamId', 60 * 60)
   @Stopwatch({ omitArgs: true })
   @ResolveField('team', () => TeamGraphQLNode)
   protected async getTeamForCycle(@Parent() cycle: CycleGraphQLNode) {
@@ -153,7 +152,6 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     return this.relay.marshalResponse<ObjectiveInterface>(queryResult, connection, cycle)
   }
 
-  @Cacheable('0.parentId', 60 * 60)
   @Stopwatch({ omitArgs: true })
   @ResolveField('parent', () => CycleGraphQLNode, { nullable: true })
   protected async getParentCycleForCycle(@Parent() cycle: CycleGraphQLNode) {

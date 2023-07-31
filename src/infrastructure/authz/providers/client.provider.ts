@@ -87,10 +87,7 @@ export class AuthzClientProvider {
       return
     }
 
-    await this.mgmtClient.removeRolesFromUser(
-      { id: authzSubUserId },
-      { roles: userRoles.map((r) => r.id) },
-    )
+    await this.mgmtClient.removeRolesFromUser({ id: authzSubUserId }, { roles: userRoles.map((r) => r.id) })
     await this.mgmtClient.assignRolestoUser({ id: authzSubUserId }, { roles: [roleWithId.id] })
   }
 
