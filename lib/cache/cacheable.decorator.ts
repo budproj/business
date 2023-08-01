@@ -1,20 +1,20 @@
-import { get } from 'lodash'
 import * as zlib from 'zlib'
+
+import { get } from 'lodash'
 import * as NodeCache from 'node-cache'
 import * as objectHash from 'object-hash'
 
-type KeyGetter =
-  | Parameters<typeof get>[1]
-  | ((...arguments_: any[]) => string | Parameters<typeof objectHash.sha1>[0])
+type KeyGetter = Parameters<typeof get>[1] | ((...arguments_: any[]) => string | Parameters<typeof objectHash.sha1>[0])
 
-const JSON_DATE_KEY = '__@Cacheable_Date';
+const JSON_DATE_KEY = '__@Cacheable_Date'
 
 const compress = (object) => {
   const json = JSON.stringify(object, function (key, value) {
     if (this[key] instanceof Date) {
-      return { [JSON_DATE_KEY]: this[key].toISOString() };
+      return { [JSON_DATE_KEY]: this[key].toISOString() }
     }
-    return value;
+
+    return value
   })
 
   return json ? zlib.brotliCompressSync(json) : undefined
@@ -24,9 +24,10 @@ const decompress = (compressedValue) => {
   const json = zlib.brotliDecompressSync(compressedValue).toString()
   return JSON.parse(json, function (key, value) {
     if (value && value[JSON_DATE_KEY]) {
-      return new Date(value[JSON_DATE_KEY]);
+      return new Date(value[JSON_DATE_KEY])
     }
-    return value;
+
+    return value
   })
 }
 
@@ -47,8 +48,8 @@ export const Cacheable = (
    * Optional NodeCache options object
    */
   options: {
-    uncompressed?: boolean,
-    cache?: NodeCache.Options,
+    uncompressed?: boolean
+    cache?: NodeCache.Options
   } = {},
 ): MethodDecorator => {
   const cache = new NodeCache({
@@ -67,8 +68,7 @@ export const Cacheable = (
     const contextName = `${target.constructor.name}.${String(propertyKey)}`
     const original = descriptor.value
 
-    const getKey =
-      typeof keyGetter === 'function' ? keyGetter : (...arguments_) => get(arguments_, keyGetter)
+    const getKey = typeof keyGetter === 'function' ? keyGetter : (...arguments_) => get(arguments_, keyGetter)
 
     descriptor.value = new Proxy(original, {
       apply: (target, thisArgument, arguments_) => {
@@ -94,10 +94,7 @@ export const Cacheable = (
             return callOriginal()
           }
         } catch (error: unknown) {
-          console.warn(
-            `@Cacheable at ${contextName} failed. Falling back to original method:`,
-            error,
-          )
+          console.warn(`@Cacheable at ${contextName} failed. Falling back to original method:`, error)
           return callOriginal()
         }
 
@@ -117,7 +114,7 @@ export const Cacheable = (
           cache.set(safeKey, result, ttlGetter(result))
 
           if (!options.uncompressed) {
-            return result.then(value => {
+            return result.then((value) => {
               const compressedValue = compress(value)
               const compressedPromise = Promise.resolve(compressedValue)
 

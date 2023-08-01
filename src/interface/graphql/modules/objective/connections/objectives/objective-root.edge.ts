@@ -9,9 +9,7 @@ import { ObjectiveGraphQLNode } from '../../objective.node'
   implements: () => EdgeRelayGraphQLInterface,
   description: 'The edge for our objective query interface',
 })
-export class ObjectiveRootEdgeGraphQLObject
-  implements EdgeRelayGraphQLInterface<ObjectiveGraphQLNode>
-{
+export class ObjectiveRootEdgeGraphQLObject implements EdgeRelayGraphQLInterface<ObjectiveGraphQLNode> {
   @Field(() => ObjectiveGraphQLNode, { complexity: 1 })
   public readonly node!: ObjectiveGraphQLNode
 

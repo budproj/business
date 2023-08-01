@@ -44,11 +44,7 @@ export class KeyResultUpdatesConnectionGraphQLResolver extends GuardedConnection
       KeyResultUpdate
     >(request)
 
-    const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(
-      filters,
-      userWithContext,
-      queryOptions,
-    )
+    const queryResult = await this.queryGuard.getManyWithActionScopeConstraint(filters, userWithContext, queryOptions)
 
     return this.relay.marshalResponse<KeyResultUpdate>(queryResult, connection)
   }

@@ -13,10 +13,7 @@ export class ObjectiveKeyResultsConnectionGraphQLResolver extends GuardedConnect
   KeyResult,
   KeyResultInterface
 > {
-  constructor(
-    protected readonly core: CoreProvider,
-    accessControl: ObjectiveKeyResultAccessControl,
-  ) {
+  constructor(protected readonly core: CoreProvider, accessControl: ObjectiveKeyResultAccessControl) {
     super(Resource.KEY_RESULT, core, core.keyResult, accessControl)
   }
 }

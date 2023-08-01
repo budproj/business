@@ -16,8 +16,7 @@ import { CadenceGraphQLEnum } from './enums/cadence.enum'
 
 @ObjectType('Cycle', {
   implements: () => [NodeRelayGraphQLInterface, GuardedNodeGraphQLInterface],
-  description:
-    'A collection of users. It can be either inside another team, or a root team (a.k.a. company)',
+  description: 'A collection of users. It can be either inside another team, or a root team (a.k.a. company)',
 })
 export class CycleGraphQLNode implements GuardedNodeGraphQLInterface {
   @Field({ complexity: 0, description: 'The period of the cycle' })

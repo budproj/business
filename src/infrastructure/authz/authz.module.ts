@@ -10,12 +10,7 @@ import { AuthzStrategyProvider } from './providers/strategy.provider'
 
 @Module({
   imports: [AuthzConfigModule, PassportModule.register({ defaultStrategy: 'jwt' })],
-  providers: [
-    AuthzClientProvider,
-    AuthzStrategyProvider,
-    AuthJwtProvider,
-    AuthzCredentialsProvider,
-  ],
+  providers: [AuthzClientProvider, AuthzStrategyProvider, AuthJwtProvider, AuthzCredentialsProvider],
   exports: [AuthzCredentialsProvider, AuthJwtProvider],
 })
 export class AuthzModule {}

@@ -13,9 +13,7 @@ export class AuthorizationAdapter {
     const userAllowedActions = this.policyAdapter.getActionsFromPermissions(user.token.permissions)
     if (userAllowedActions.length === 0) return false
 
-    const canExecuteAllRequiredActions = actions.every((action) =>
-      userAllowedActions.includes(action),
-    )
+    const canExecuteAllRequiredActions = actions.every((action) => userAllowedActions.includes(action))
 
     return canExecuteAllRequiredActions
   }
@@ -23,9 +21,7 @@ export class AuthorizationAdapter {
   public canUserExecutePermissions(user: AuthorizationUser, permissions?: Permission[]): boolean {
     if (!permissions || permissions.length === 0) return true
 
-    const userHasAllPermissions = permissions.every((permission) =>
-      user.token.permissions.includes(permission),
-    )
+    const userHasAllPermissions = permissions.every((permission) => user.token.permissions.includes(permission))
 
     return userHasAllPermissions
   }

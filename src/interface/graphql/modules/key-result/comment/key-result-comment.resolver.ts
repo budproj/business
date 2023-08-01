@@ -1,5 +1,5 @@
 import { Logger, UnauthorizedException } from '@nestjs/common'
-import { Args, Parent, ResolveField } from '@nestjs/graphql'
+import { Args, Context, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { CreatedKeyResultCommentActivity } from '@adapters/activity/activities/created-key-result-comment.activity'
@@ -16,6 +16,7 @@ import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorato
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
+import { IDataloaders } from '@interface/graphql/dataloader/dataloader.service'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeleteResultGraphQLObject } from '@interface/graphql/objects/delete-result.object'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
@@ -48,22 +49,21 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   protected async getKeyResultCommentForRequestAndRequestUserWithContext(
     @Args() request: NodeIndexesRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
+    @Context() { loaders }: { loaders: IDataloaders },
   ) {
     this.logger.log({
       request,
       message: 'Fetching key-result comment with provided indexes',
     })
 
-    const keyResultComment = await this.queryGuard.getOneWithActionScopeConstraint(
-      request,
-      userWithContext,
-    )
-    if (!keyResultComment)
-      throw new UserInputError(
-        `We could not found an key-result comment with the provided arguments`,
-      )
+    // eslint-disable-next-line capitalized-comments
+    // const keyResultComment = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
+    // if (!keyResultComment)
+    //   throw new UserInputError(`We could not found an key-result comment with the provided arguments`)
+    //
+    // return keyResultComment
 
-    return keyResultComment
+    return loaders.keyResultComment.load(request.id)
   }
 
   @AttachActivity(CreatedKeyResultCommentActivity)
@@ -88,14 +88,9 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
       request.data.keyResultId,
     )
     if (!keyResultStatus.isActive)
-      throw new UserInputError(
-        'You cannot create this keyResultComment, because that key-result is not active anymore',
-      )
+      throw new UserInputError('You cannot create this keyResultComment, because that key-result is not active anymore')
 
-    const keyResultComment = this.core.keyResult.createUserCommentData(
-      userWithContext,
-      request.data,
-    )
+    const keyResultComment = this.core.keyResult.createUserCommentData(userWithContext, request.data)
 
     const createdComment = await this.corePorts.dispatchCommand<KeyResultComment>(
       'create-key-result-comment',
@@ -123,14 +118,9 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     const keyResult = await this.core.keyResult.getFromKeyResultCommentID(request.id)
     if (!keyResult) throw new UserInputError('We were not able to find your key-result comment')
 
-    const keyResultStatus = await this.corePorts.dispatchCommand<Status>(
-      'get-key-result-status',
-      keyResult.id,
-    )
+    const keyResultStatus = await this.corePorts.dispatchCommand<Status>('get-key-result-status', keyResult.id)
     if (!keyResultStatus.isActive)
-      throw new UserInputError(
-        'You cannot delete this keyResultComment, because that key-result is not active anymore',
-      )
+      throw new UserInputError('You cannot delete this keyResultComment, because that key-result is not active anymore')
 
     const selector = { id: request.id }
     const result = await this.queryGuard.deleteWithActionScopeConstraint(selector, userWithContext)
@@ -142,25 +132,27 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   @ResolveField('user', () => UserGraphQLNode)
   protected async getUserForKeyResultComment(
     @Parent() keyResultComment: KeyResultCommentGraphQLNode,
+    @Context() { loaders }: { loaders: IDataloaders },
   ) {
     this.logger.log({
       keyResultComment,
       message: 'Fetching user for key result comment',
     })
 
-    return this.core.user.getOne({ id: keyResultComment.userId })
+    return loaders.user.load(keyResultComment.userId)
   }
 
   @ResolveField('keyResult', () => KeyResultGraphQLNode)
   protected async getKeyResultForKeyResultComment(
     @Parent() keyResultComment: KeyResultCommentGraphQLNode,
+    @Context() { loaders }: { loaders: IDataloaders },
   ) {
     this.logger.log({
       keyResultComment,
       message: 'Fetching key result for key result comment',
     })
 
-    return this.core.keyResult.getOne({ id: keyResultComment.keyResultId })
+    return loaders.keyResult.load(keyResultComment.keyResultId)
   }
 
   @ResolveField('extra', () => String, { nullable: true })

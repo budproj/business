@@ -6,6 +6,5 @@ export const KeyResultAuthorTypeGraphQLEnum = AuthorType
 
 registerEnumType(KeyResultAuthorTypeGraphQLEnum, {
   name: 'KeyResultAuthorType',
-  description:
-    'Each author type represents an entity that might be involved in some key result update.',
+  description: 'Each author type represents an entity that might be involved in some key result update.',
 })

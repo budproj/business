@@ -10,12 +10,9 @@ import { UserObjectiveEdgeGraphQLObject } from './user-objective.edge'
 
 @ObjectType('UserObjectives', {
   implements: () => [ConnectionRelayGraphQLInterface, GuardedConnectionGraphQLInterface],
-  description:
-    'A list containing a given user objectives based on the provided filters and arguments',
+  description: 'A list containing a given user objectives based on the provided filters and arguments',
 })
-export class UserObjectivesGraphQLConnection
-  implements GuardedConnectionGraphQLInterface<ObjectiveGraphQLNode>
-{
+export class UserObjectivesGraphQLConnection implements GuardedConnectionGraphQLInterface<ObjectiveGraphQLNode> {
   @Field(() => [UserObjectiveEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: UserObjectiveEdgeGraphQLObject[]
 

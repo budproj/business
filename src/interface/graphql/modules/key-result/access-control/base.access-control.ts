@@ -7,22 +7,17 @@ import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { Team } from '@core/modules/team/team.orm-entity'
 
 export abstract class KeyResultBaseAccessControl extends AccessControl {
-  protected async resolveKeyResultContext(
-    user: UserWithContext,
-    keyResultID: string,
-  ): Promise<AccessControlScopes> {
+  protected async resolveKeyResultContext(user: UserWithContext, keyResultID: string): Promise<AccessControlScopes> {
     const keyResult = await this.core.dispatchCommand<KeyResult>('get-key-result', {
       id: keyResultID,
     })
     if (!keyResult) throw new UserInputError('We could not find a key-result for your request')
 
-    const teams = keyResult.teamId
-      ? await this.core.dispatchCommand<Team[]>('get-key-result-team-tree', keyResult)
-      : await this.core.dispatchCommand<Team[]>('get-user-team-tree', { id: keyResult.ownerId })
+    const teams = await this.getKeyResultTeamTree(keyResult)
 
     const isKeyResultOwner = await this.isKeyResultOwner(keyResult, user)
-    const isTeamLeader = await this.isTeamLeader(teams, user)
-    const isCompanyMember = await this.isKeyResultCompanyMember(keyResult, user)
+    const isTeamLeader = this.isTeamLeader(teams, user)
+    const isCompanyMember = this.isTeamsMember(teams, user)
 
     return {
       isTeamLeader,
@@ -31,14 +26,14 @@ export abstract class KeyResultBaseAccessControl extends AccessControl {
     }
   }
 
-  protected async resolveTeamContext(
-    user: UserWithContext,
-    teamID: string,
-  ): Promise<AccessControlScopes> {
-    const teams = await this.core.dispatchCommand<Team[]>('get-team-tree', { id: teamID })
+  protected async resolveTeamContext(user: UserWithContext, teamID: string): Promise<AccessControlScopes> {
+    const teams = await this.teamProvider.getAscendantsByIds([teamID], {
+      includeOriginTeams: true,
+      rootsOnly: false,
+    })
 
-    const isTeamLeader = await this.isTeamLeader(teams, user)
-    const isCompanyMember = await this.isCompanyMember(teams, user)
+    const isTeamLeader = this.isTeamLeader(teams, user)
+    const isCompanyMember = this.isTeamsMember(teams, user)
 
     return {
       isTeamLeader,
@@ -48,7 +43,14 @@ export abstract class KeyResultBaseAccessControl extends AccessControl {
   }
 
   protected async getKeyResultTeamTree(keyResult: KeyResult): Promise<Team[]> {
-    return this.core.dispatchCommand<Team[]>('get-key-result-team-tree', keyResult)
+    return keyResult.teamId
+      ? this.teamProvider.getAscendantsByIds([keyResult.teamId], {
+          includeOriginTeams: true,
+          rootsOnly: false,
+        })
+      : this.teamProvider.getAscendantsFromUser(keyResult.ownerId, {
+          rootsOnly: false,
+        })
   }
 
   protected async isKeyResultOwner(keyResult: KeyResult, user: UserWithContext): Promise<boolean> {
@@ -63,15 +65,9 @@ export abstract class KeyResultBaseAccessControl extends AccessControl {
     return owners.includes(user.id)
   }
 
-  protected async isKeyResultCompanyMember(
-    keyResult: KeyResult,
-    user: UserWithContext,
-  ): Promise<boolean> {
-    const keyResultCompany = await this.core.dispatchCommand<Team>(
-      'get-key-result-company',
-      keyResult,
-    )
+  protected async isKeyResultCompanyMember(keyResult: KeyResult, user: UserWithContext): Promise<boolean> {
+    const teams = await this.getKeyResultTeamTree(keyResult)
 
-    return this.isCompanyMember([keyResultCompany], user)
+    return this.isTeamsMember(teams, user)
   }
 }

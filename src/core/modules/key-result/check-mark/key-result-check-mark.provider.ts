@@ -10,17 +10,12 @@ import { KeyResultCheckMark } from './key-result-check-mark.orm-entity'
 import { KeyResultCheckMarkRepository } from './key-result-check-mark.repository'
 
 @Injectable()
-export class KeyResultCheckMarkProvider extends CoreEntityProvider<
-  KeyResultCheckMark,
-  KeyResultCheckMarkInterface
-> {
+export class KeyResultCheckMarkProvider extends CoreEntityProvider<KeyResultCheckMark, KeyResultCheckMarkInterface> {
   constructor(protected readonly repository: KeyResultCheckMarkRepository) {
     super(KeyResultCheckMarkProvider.name, repository)
   }
 
-  public async createCheckMark(
-    checkMark: Partial<KeyResultCheckMarkInterface>,
-  ): Promise<KeyResultCheckMark[]> {
+  public async createCheckMark(checkMark: Partial<KeyResultCheckMarkInterface>): Promise<KeyResultCheckMark[]> {
     return this.create(checkMark)
   }
 
@@ -44,10 +39,7 @@ export class KeyResultCheckMarkProvider extends CoreEntityProvider<
     return this.delete({ keyResultId })
   }
 
-  public async getFromKeyResult(
-    keyResultId: string,
-    assignedUserId?: string,
-  ): Promise<KeyResultCheckMark[]> {
+  public async getFromKeyResult(keyResultId: string, assignedUserId?: string): Promise<KeyResultCheckMark[]> {
     const options = { orderBy: { createdAt: Sorting.ASC } }
 
     const searchObject = assignedUserId ? { keyResultId, assignedUserId } : { keyResultId }
@@ -55,10 +47,7 @@ export class KeyResultCheckMarkProvider extends CoreEntityProvider<
     return this.getMany(searchObject, undefined, options)
   }
 
-  public async getFromAssignedUser(
-    userId: string,
-    fromActiveCycles = false,
-  ): Promise<KeyResultCheckMark[]> {
+  public async getFromAssignedUser(userId: string, fromActiveCycles = false): Promise<KeyResultCheckMark[]> {
     if (fromActiveCycles) {
       return this.repository.find({
         where: { assignedUserId: userId, keyResult: { objective: { cycle: { active: true } } } },
@@ -70,9 +59,7 @@ export class KeyResultCheckMarkProvider extends CoreEntityProvider<
   }
 
   // TODO: tests
-  public async getFromIndexes(
-    indexes: Partial<KeyResultCheckMarkInterface>,
-  ): Promise<KeyResultCheckMark> {
+  public async getFromIndexes(indexes: Partial<KeyResultCheckMarkInterface>): Promise<KeyResultCheckMark> {
     return this.getOne(indexes)
   }
 
@@ -85,9 +72,7 @@ export class KeyResultCheckMarkProvider extends CoreEntityProvider<
     })
   }
 
-  protected async protectCreationQuery(
-    query: CreationQuery<KeyResultCheckMark>,
-  ): Promise<KeyResultCheckMark[]> {
+  protected async protectCreationQuery(query: CreationQuery<KeyResultCheckMark>): Promise<KeyResultCheckMark[]> {
     return query()
   }
 }

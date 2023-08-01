@@ -116,11 +116,9 @@ export class CreatedRoutineCommentInRoutineNotification extends BaseNotification
       recipientFirstName: data.userThatAnsweredTheRoutine.firstName,
     }
 
-    const recipients = (await this.buildRecipients(
-      [data.userThatAnsweredTheRoutine],
-      this.channels.email,
-      [customData],
-    )) as EmailRecipient[]
+    const recipients = (await this.buildRecipients([data.userThatAnsweredTheRoutine], this.channels.email, [
+      customData,
+    ])) as EmailRecipient[]
 
     const isCommentTagged = isTagged(data.comment.content)
 
@@ -172,9 +170,6 @@ export class CreatedRoutineCommentInRoutineNotification extends BaseNotification
       },
     }))
 
-    await this.channels.messageBroker.dispatchMultiple(
-      'notifications-microservice.notification',
-      messages,
-    )
+    await this.channels.messageBroker.dispatchMultiple('notifications-microservice.notification', messages)
   }
 }

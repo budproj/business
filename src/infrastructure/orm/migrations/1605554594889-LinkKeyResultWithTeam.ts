@@ -11,9 +11,7 @@ export class LinkKeyResultWithTeam1605554594889 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE "key_result" DROP CONSTRAINT "FK_8f841800119dceb55171f1ed710"`,
-    )
+    await queryRunner.query(`ALTER TABLE "key_result" DROP CONSTRAINT "FK_8f841800119dceb55171f1ed710"`)
     await queryRunner.query(`ALTER TABLE "key_result" DROP COLUMN "teamId"`)
   }
 }

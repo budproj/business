@@ -61,10 +61,7 @@ export class TaskGraphQLResolver extends GuardedNodeGraphQLResolver<Task, TaskIn
     @Args() request: TaskToggleRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    const oldTask = await this.corePorts.dispatchCommand<Task | undefined>(
-      'get-task-by-id',
-      request.id,
-    )
+    const oldTask = await this.corePorts.dispatchCommand<Task | undefined>('get-task-by-id', request.id)
     if (!oldTask) throw new NotFoundException('We were not able to find this task')
 
     const canUpdate = await this.accessControl.canUpdate(userWithContext, oldTask?.assignedUserId)
@@ -76,11 +73,7 @@ export class TaskGraphQLResolver extends GuardedNodeGraphQLResolver<Task, TaskIn
       message: 'Received toggle user task request',
     })
 
-    const task = await this.corePorts.dispatchCommand<Task>(
-      'toggle-task',
-      request,
-      userWithContext.id,
-    )
+    const task = await this.corePorts.dispatchCommand<Task>('toggle-task', request, userWithContext.id)
 
     return task
   }
@@ -90,10 +83,7 @@ export class TaskGraphQLResolver extends GuardedNodeGraphQLResolver<Task, TaskIn
     @Args() request: TaskDeleteRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    const oldTask = await this.corePorts.dispatchCommand<Task | undefined>(
-      'get-task-by-id',
-      request.id,
-    )
+    const oldTask = await this.corePorts.dispatchCommand<Task | undefined>('get-task-by-id', request.id)
     if (!oldTask) throw new NotFoundException('We were not able to find this task')
 
     const canUpdate = await this.accessControl.canUpdate(userWithContext, oldTask?.assignedUserId)
@@ -117,10 +107,7 @@ export class TaskGraphQLResolver extends GuardedNodeGraphQLResolver<Task, TaskIn
     @Args() request: TaskUpdateDescriptionRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    const oldTask = await this.corePorts.dispatchCommand<Task | undefined>(
-      'get-task-by-id',
-      request.id,
-    )
+    const oldTask = await this.corePorts.dispatchCommand<Task | undefined>('get-task-by-id', request.id)
     if (!oldTask) throw new NotFoundException('We were not able to find this task')
 
     const canUpdate = await this.accessControl.canUpdate(userWithContext, oldTask?.assignedUserId)
@@ -133,11 +120,7 @@ export class TaskGraphQLResolver extends GuardedNodeGraphQLResolver<Task, TaskIn
       message: 'Received update user task description request',
     })
 
-    const task = await this.corePorts.dispatchCommand<Task>(
-      'update-task-description',
-      request,
-      userWithContext.id,
-    )
+    const task = await this.corePorts.dispatchCommand<Task>('update-task-description', request, userWithContext.id)
 
     return task
   }

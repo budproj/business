@@ -10,11 +10,7 @@ import { UserProvider } from './user.provider'
 import { UserRepository } from './user.repository'
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([UserRepository, UserSettingRepository]),
-    AuthzModule,
-    AmplitudeModule,
-  ],
+  imports: [TypeOrmModule.forFeature([UserRepository, UserSettingRepository]), AuthzModule, AmplitudeModule],
   providers: [UserProvider, UserSettingProvider],
   exports: [UserProvider],
 })

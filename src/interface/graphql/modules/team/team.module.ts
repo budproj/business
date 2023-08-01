@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 
 import { GraphQLConfigModule } from '@config/graphql/graphql.module'
 import { CoreModule } from '@core/core.module'
+import { MissionControlModule } from '@core/modules/mission-control/mission-control.module'
 import { KeyResultGraphQLModule } from '@interface/graphql/modules/key-result/key-result.module'
 import { ObjectiveGraphQLModule } from '@interface/graphql/modules/objective/objective.module'
 
@@ -25,6 +26,7 @@ import { TeamGraphQLResolver } from './team.resolver'
     KeyResultGraphQLModule,
     ObjectiveGraphQLModule,
     UserGraphQLModule,
+    MissionControlModule,
   ],
   providers: [
     TeamAccessControl,

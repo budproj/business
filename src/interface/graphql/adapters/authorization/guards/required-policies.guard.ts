@@ -8,10 +8,7 @@ import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 import { BaseAuthorizationGraphQLReflector } from '../reflectors/base.reflector'
 
 @Injectable()
-export class GraphQLRequiredPoliciesGraphQLGuard
-  extends BaseAuthorizationGraphQLReflector
-  implements CanActivate
-{
+export class GraphQLRequiredPoliciesGraphQLGuard extends BaseAuthorizationGraphQLReflector implements CanActivate {
   protected readonly godmode: GodmodeProvider
   private readonly logger = new Logger(GraphQLRequiredPoliciesGraphQLGuard.name)
 
@@ -33,16 +30,12 @@ export class GraphQLRequiredPoliciesGraphQLGuard
       message: 'Checking if user is allowed in given route',
     })
 
-    const hasRequiredPolicies = this.authorization.canUserExecuteActions(
-      request.user,
-      resolverRequiredActions,
-    )
+    const hasRequiredPolicies = this.authorization.canUserExecuteActions(request.user, resolverRequiredActions)
     if (!hasRequiredPolicies)
       this.logger.error({
         resolverRequiredActions,
         token: request.user.token,
-        message:
-          'User is not allowed to use this resolver, since the user does not have all required policies',
+        message: 'User is not allowed to use this resolver, since the user does not have all required policies',
       })
 
     return hasRequiredPolicies

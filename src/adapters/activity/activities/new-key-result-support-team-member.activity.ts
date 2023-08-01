@@ -3,8 +3,7 @@ import { GraphQLRequest } from '@interface/graphql/adapters/context/interfaces/r
 
 import { Activity } from './base.activity'
 
-export const NEW_KEY_RESULT_SUPPORT_TEAM_MEMBER_ACTIVITY_TYPE =
-  'ACTIVITY::KEY-RESULT::SUPPORT_TEAM::NEW_MEMBER'
+export const NEW_KEY_RESULT_SUPPORT_TEAM_MEMBER_ACTIVITY_TYPE = 'ACTIVITY::KEY-RESULT::SUPPORT_TEAM::NEW_MEMBER'
 
 type Request = {
   keyResultId: string

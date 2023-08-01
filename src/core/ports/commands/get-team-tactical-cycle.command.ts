@@ -32,9 +32,7 @@ export class GetTeamTacticalCycleCommand extends Command<Cycle | undefined> {
       { cadence: Cadence.QUARTERLY },
     )
 
-    const teamValidCycles = teamCycles
-      .filter((cycle) => cycle.active)
-      .filter((cycle) => cycle.dateStart <= anchorDate)
+    const teamValidCycles = teamCycles.filter((cycle) => cycle.active).filter((cycle) => cycle.dateStart <= anchorDate)
 
     const teamHasCycles = teamValidCycles.length > 0
 
@@ -43,10 +41,7 @@ export class GetTeamTacticalCycleCommand extends Command<Cycle | undefined> {
       : this.handleMissingCycles(teamID, options)
   }
 
-  private async handleMissingCycles(
-    teamID: string,
-    options: GetTeamTacticalCycleOptions,
-  ): Promise<Cycle | undefined> {
+  private async handleMissingCycles(teamID: string, options: GetTeamTacticalCycleOptions): Promise<Cycle | undefined> {
     if (!options.searchAncestors) return
 
     const team = await this.core.team.getFromID(teamID)

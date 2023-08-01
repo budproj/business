@@ -10,6 +10,9 @@ import { Command } from '@core/ports/commands/base.command'
 import { CommandFactory } from '@core/ports/commands/command.factory'
 import { GetTeamStatusOptions } from '@core/ports/commands/get-team-status.command'
 
+/**
+ * @deprecated prefer using the `StatusProvider` instead
+ */
 export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
   private readonly getTeamStatus: Command<Status>
 
@@ -47,9 +50,7 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
       },
     }
     // TODO: use a single command to get all statuses at once
-    const teamStatusPromises = teams.map(async (team) =>
-      this.getTeamStatus.execute(team.id, statusOptions),
-    )
+    const teamStatusPromises = teams.map(async (team) => this.getTeamStatus.execute(team.id, statusOptions))
 
     return Promise.all(teamStatusPromises)
   }

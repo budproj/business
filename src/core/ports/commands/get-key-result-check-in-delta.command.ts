@@ -18,16 +18,12 @@ export class GetKeyResultCheckInDeltaCommand extends BaseDeltaCommand<KeyResultC
   constructor(protected core: CoreProvider, protected factory: CommandFactory) {
     super(core, factory)
 
-    this.getKeyResultCheckInStatus = this.factory.buildCommand<Status>(
-      'get-key-result-check-in-status',
-    )
+    this.getKeyResultCheckInStatus = this.factory.buildCommand<Status>('get-key-result-check-in-status')
   }
 
   public async execute(keyResultCheckInID: string): Promise<KeyResultCheckInDelta> {
     const currentStatus = await this.getKeyResultCheckInStatus.execute(keyResultCheckInID)
-    const previousStatus = await this.getKeyResultCheckInStatus.execute(
-      currentStatus.latestCheckIn?.parentId,
-    )
+    const previousStatus = await this.getKeyResultCheckInStatus.execute(currentStatus.latestCheckIn?.parentId)
 
     if (!previousStatus.latestCheckIn) {
       const keyResultCheckIn = await this.core.keyResult.keyResultCheckInProvider.getOne({

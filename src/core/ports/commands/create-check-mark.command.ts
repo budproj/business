@@ -19,9 +19,7 @@ export class CreateCheckMarkCommand extends Command<KeyResultCheckMark> {
       userId: user.id,
     }
 
-    const newCheckMark = await this.core.keyResult.keyResultCheckMarkProvider.createCheckMark(
-      builtCheckMark,
-    )
+    const newCheckMark = await this.core.keyResult.keyResultCheckMarkProvider.createCheckMark(builtCheckMark)
 
     return newCheckMark[0]
   }

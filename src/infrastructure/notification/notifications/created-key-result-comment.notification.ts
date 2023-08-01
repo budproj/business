@@ -110,9 +110,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
   }
 
   public async prepare(): Promise<void> {
-    const { owner, keyResult, cycle, team, supportTeam } = await this.getRelatedData(
-      this.activity.data.keyResultId,
-    )
+    const { owner, keyResult, cycle, team, supportTeam } = await this.getRelatedData(this.activity.data.keyResultId)
 
     const data = {
       owner: CreatedKeyResultCommentNotification.getOwnerData(owner),
@@ -143,10 +141,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
     const commentContent = genericData.comment.content
     const cleanCommentContent = cleanComment(commentContent)
     const mentionedIds = getMentionedUserIdsFromComments(commentContent)
-    const ownerAndSupportTeamIds = uniqBy(
-      [genericMetadata.keyResultOwner, ...genericMetadata.supportTeam],
-      'id',
-    )
+    const ownerAndSupportTeamIds = uniqBy([genericMetadata.keyResultOwner, ...genericMetadata.supportTeam], 'id')
 
     const recipientIds = mentionedIds.filter(
       (userId) => !ownerAndSupportTeamIds.map((user) => user.id).includes(userId),
@@ -159,11 +154,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       mentionedFirstName: user.firstName,
     }))
 
-    const recipients = (await this.buildRecipients(
-      users,
-      this.channels.email,
-      customData,
-    )) as EmailRecipient[]
+    const recipients = (await this.buildRecipients(users, this.channels.email, customData)) as EmailRecipient[]
 
     const metadata: EmailNotificationChannelMetadata = {
       ...genericMetadata,
@@ -202,11 +193,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       userId: user.id,
       ownerFirstName: user.firstName,
     }))
-    const recipients = (await this.buildRecipients(
-      recipientUsers,
-      this.channels.email,
-      customData,
-    )) as EmailRecipient[]
+    const recipients = (await this.buildRecipients(recipientUsers, this.channels.email, customData)) as EmailRecipient[]
 
     if (recipients.length === 0) return
 
@@ -256,10 +243,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       this.activity.context.userWithContext,
     )
 
-    const initials = await this.core.dispatchCommand<string>(
-      'get-user-initials',
-      this.activity.context.userWithContext,
-    )
+    const initials = await this.core.dispatchCommand<string>('get-user-initials', this.activity.context.userWithContext)
 
     return {
       fullName,
@@ -295,13 +279,8 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       : fallbackTeamData
   }
 
-  private async getKeyResultData(
-    keyResult: KeyResultInterface,
-  ): Promise<KeyResultNotificationData> {
-    const confidenceColor = await this.core.dispatchCommand<string>(
-      'get-key-result-confidence-color',
-      keyResult,
-    )
+  private async getKeyResultData(keyResult: KeyResultInterface): Promise<KeyResultNotificationData> {
+    const confidenceColor = await this.core.dispatchCommand<string>('get-key-result-confidence-color', keyResult)
 
     return {
       confidenceColor,
@@ -333,10 +312,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
   }
 
   private async dispatchOwnerAndSupportTeam(): Promise<void> {
-    await Promise.all([
-      this.dispatchOwnerAndSupportTeamEmail(),
-      this.dispatchOwnerAndSupportTeamMessaging(),
-    ])
+    await Promise.all([this.dispatchOwnerAndSupportTeamEmail(), this.dispatchOwnerAndSupportTeamMessaging()])
   }
 
   private async dispatchMentionsMessaging(): Promise<void> {
@@ -350,10 +326,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       (userId) => !ownerAndSupportTeamIds.map((user) => user.id).includes(userId),
     )
 
-    const recipients = await this.core.dispatchCommand<UserInterface[]>(
-      'get-users-by-ids',
-      recipientIds,
-    )
+    const recipients = await this.core.dispatchCommand<UserInterface[]>('get-users-by-ids', recipientIds)
 
     const messages = recipients.map((recipient) => ({
       messageId: randomUUID(),
@@ -377,10 +350,7 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       },
     }))
 
-    await this.channels.messageBroker.dispatchMultiple(
-      'notifications-microservice.notification',
-      messages,
-    )
+    await this.channels.messageBroker.dispatchMultiple('notifications-microservice.notification', messages)
   }
 
   private async dispatchOwnerAndSupportTeamMessaging(): Promise<void> {
@@ -414,9 +384,6 @@ export class CreatedKeyResultCommentNotification extends BaseNotification<
       },
     }))
 
-    await this.channels.messageBroker.dispatchMultiple(
-      'notifications-microservice.notification',
-      messages,
-    )
+    await this.channels.messageBroker.dispatchMultiple('notifications-microservice.notification', messages)
   }
 }

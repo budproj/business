@@ -11,9 +11,7 @@ export class LinkProgressReportWithKeyResult1605555411813 implements MigrationIn
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `ALTER TABLE "progress_report" DROP CONSTRAINT "FK_4b99dc1ce620819715fc4624dc6"`,
-    )
+    await queryRunner.query(`ALTER TABLE "progress_report" DROP CONSTRAINT "FK_4b99dc1ce620819715fc4624dc6"`)
     await queryRunner.query(`ALTER TABLE "progress_report" DROP COLUMN "keyResultId"`)
   }
 }

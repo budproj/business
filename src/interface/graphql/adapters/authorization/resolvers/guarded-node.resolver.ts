@@ -49,10 +49,7 @@ export abstract class GuardedNodeGraphQLResolver<
     return this.getNodePolicyForUserWithArgs(userWithContext, node.id)
   }
 
-  protected async getNodePolicyForUserWithArgs(
-    userWithContext: UserWithContext,
-    ...indexArguments: string[]
-  ) {
+  protected async getNodePolicyForUserWithArgs(userWithContext: UserWithContext, ...indexArguments: string[]) {
     const canRead = await this.accessControl.canRead(userWithContext, ...indexArguments)
     const canUpdate = await this.accessControl.canUpdate(userWithContext, ...indexArguments)
     const canDelete = await this.accessControl.canDelete(userWithContext, ...indexArguments)

@@ -15,6 +15,7 @@ import { CreationQuery } from '@core/types/creation-query.type'
 import { UserProfileAdapter } from '@infrastructure/amplitude/adapters/user-profil.adapter'
 import { UserProfileProvider } from '@infrastructure/amplitude/providers/user-profile.provider'
 import { AuthzCredentialsProvider } from '@infrastructure/authz/providers/credentials.provider'
+import { Cacheable } from '@lib/cache/cacheable.decorator'
 import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { UserStatus } from './enums/user-status.enum'
@@ -39,6 +40,7 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     this.amplitude = amplitude
   }
 
+  @Cacheable((user, filters, options) => [user, filters, options], 15)
   @Stopwatch()
   public async getUserTeams(
     user: Partial<UserInterface>,
@@ -114,13 +116,15 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
   }
 
   public async getFromID(id: string): Promise<User> {
-    return this.repository.findOne({ id })
+    return this.getFromIndexes({ id })
   }
 
+  @Cacheable('0', 15)
   public async getFromIndexes(indexes: Partial<UserInterface>): Promise<User> {
     return this.repository.findOne(indexes)
   }
 
+  @Cacheable('0', 15)
   public async getByIds(ids: string[]): Promise<User[]> {
     return this.repository.find({ where: { id: In(ids) } })
   }
@@ -161,10 +165,7 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     await this.credentials.updateEmail(user.authzSub, email)
   }
 
-  public async generateCredentials(
-    email: string,
-    additionalData?: UserCredentialsAdditionalData,
-  ): Promise<Credential> {
+  public async generateCredentials(email: string, additionalData?: UserCredentialsAdditionalData): Promise<Credential> {
     const credentialData: NewCredentialData = {
       name: '',
       email,

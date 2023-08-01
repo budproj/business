@@ -10,21 +10,14 @@ export class GetObjectivesCommand extends Command<any> {
   static marshalFilters(filters: ObjectiveInterface, aditionalFilters: AditionalFiltersProperties) {
     return {
       objective: filters,
-      ...(typeof aditionalFilters.active === 'boolean'
-        ? { cycle: { active: aditionalFilters.active } }
-        : {}),
+      ...(typeof aditionalFilters.active === 'boolean' ? { cycle: { active: aditionalFilters.active } } : {}),
     }
   }
 
-  public async execute(
-    filters?: ObjectiveInterface,
-    aditionalFilters?: AditionalFiltersProperties,
-  ): Promise<any> {
+  public async execute(filters?: ObjectiveInterface, aditionalFilters?: AditionalFiltersProperties): Promise<any> {
     const filtersToQuery = GetObjectivesCommand.marshalFilters(filters, aditionalFilters)
 
-    const objectivesQuantityPromise = await this.core.objective.getWithRelationFilters(
-      filtersToQuery,
-    )
+    const objectivesQuantityPromise = await this.core.objective.getWithRelationFilters(filtersToQuery)
 
     return objectivesQuantityPromise
   }

@@ -8,10 +8,7 @@ import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/au
 import { CycleCyclesGraphQLConnection } from './cycle-cycles.connection'
 
 @GuardedResolver(CycleCyclesGraphQLConnection)
-export class CycleCyclesConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
-  Cycle,
-  CycleInterface
-> {
+export class CycleCyclesConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<Cycle, CycleInterface> {
   constructor(protected readonly core: CoreProvider) {
     super(Resource.CYCLE, core, core.cycle)
   }

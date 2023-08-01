@@ -15,10 +15,7 @@ export class AddHTTPContextToUserInterceptor implements NestInterceptor {
 
   constructor(private readonly core: CoreProvider) {}
 
-  public async intercept(
-    executionContext: ExecutionContext,
-    next: CallHandler,
-  ): Promise<Observable<any>> {
+  public async intercept(executionContext: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
     const request = executionContext.switchToHttp().getRequest<HTTPRequest>()
 
     request.userWithContext = await this.getRequestUser(request)
@@ -34,12 +31,8 @@ export class AddHTTPContextToUserInterceptor implements NestInterceptor {
   // eslint-disable-next-line @typescript-eslint/member-ordering
   @Cacheable(({ user }) => [user.id, user.token.sub, user.token.permissions], 15 * 60)
   private async getRequestUser(request: HTTPRequest): Promise<UserWithContext> {
-    const { teams, ...user } = await this.core.user.getUserFromSubjectWithTeamRelation(
-      request.user.token.sub,
-    )
-    const resourcePolicy = this.authz.getResourcePolicyFromPermissions(
-      request.user.token.permissions,
-    )
+    const { teams, ...user } = await this.core.user.getUserFromSubjectWithTeamRelation(request.user.token.sub)
+    const resourcePolicy = this.authz.getResourcePolicyFromPermissions(request.user.token.permissions)
 
     return {
       ...request.user,

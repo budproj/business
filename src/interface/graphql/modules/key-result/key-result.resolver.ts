@@ -1,5 +1,5 @@
 import { Logger, UnauthorizedException } from '@nestjs/common'
-import { Args, Parent, ResolveField } from '@nestjs/graphql'
+import { Args, Context, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 
 import { UpdatedKeyResultActivity } from '@adapters/activity/activities/updated-key-result-activity'
@@ -56,12 +56,10 @@ import { KeyResultGraphQLNode } from './key-result.node'
 import { KeyResultSupportTeamMembersFiltersRequest } from './requests/key-result-support-team-members-filters.request'
 import { KeyResultUpdateRequest } from './requests/key-result-update.request'
 import { KeyResultUpdateFiltersRequest } from './update/requests/key-result-update-filters.request'
+import { IDataloaders } from '@interface/graphql/dataloader/dataloader.service'
 
 @GuardedResolver(KeyResultGraphQLNode)
-export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
-  KeyResult,
-  KeyResultInterface
-> {
+export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<KeyResult, KeyResultInterface> {
   private readonly logger = new Logger(KeyResultGraphQLResolver.name)
 
   constructor(
@@ -87,8 +85,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
 
     const keyResult = await this.corePorts.dispatchCommand<KeyResult>('get-key-result', request)
 
-    if (!keyResult)
-      throw new UserInputError(`We could not found an key-result with the provided arguments`)
+    if (!keyResult) throw new UserInputError(`We could not found an key-result with the provided arguments`)
 
     return keyResult
   }
@@ -123,8 +120,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       { ...request.data },
     )
 
-    if (!keyResult)
-      throw new UserInputError(`We could not found an key-result with ID ${request.id}`)
+    if (!keyResult) throw new UserInputError(`We could not found an key-result with ID ${request.id}`)
 
     return keyResult
   }
@@ -134,11 +130,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: KeyResultCreateRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    const canCreate = await this.accessControl.canCreate(
-      userWithContext,
-      request.data.teamId,
-      request.data.ownerId,
-    )
+    const canCreate = await this.accessControl.canCreate(userWithContext, request.data.teamId, request.data.ownerId)
     if (!canCreate) throw new UnauthorizedException()
 
     this.logger.log({
@@ -176,13 +168,16 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('owner', () => UserGraphQLNode)
-  protected async getOwnerForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
+  protected async getOwnerForKeyResult(
+    @Parent() keyResult: KeyResultGraphQLNode,
+    @Context() { loaders }: { loaders: IDataloaders },
+  ) {
     this.logger.log({
       keyResult,
       message: 'Fetching owner for key result',
     })
 
-    return this.core.user.getOne({ id: keyResult.ownerId })
+    return loaders.user.load(keyResult.ownerId)
   }
 
   @ResolveField('supportTeamMembers', () => KeyResultKeyResultSupportTeamGraphQLConnection)
@@ -197,32 +192,35 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
 
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest(request)
 
-    const queryResult = await this.corePorts.dispatchCommand<User[]>(
-      'get-key-result-support-team',
-      keyResult.id,
-    )
+    const queryResult = await this.corePorts.dispatchCommand<User[]>('get-key-result-support-team', keyResult.id)
 
     return this.relay.marshalResponse<UserInterface>(queryResult, connection, keyResult)
   }
 
   @ResolveField('team', () => TeamGraphQLNode)
-  protected async getTeamForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
+  protected async getTeamForKeyResult(
+    @Parent() keyResult: KeyResultGraphQLNode,
+    @Context() { loaders }: { loaders: IDataloaders },
+  ) {
     this.logger.log({
       keyResult,
       message: 'Fetching team for key result',
     })
 
-    return this.core.team.getOne({ id: keyResult.teamId })
+    return loaders.team.load(keyResult.teamId)
   }
 
   @ResolveField('objective', () => ObjectiveGraphQLNode)
-  protected async getObjectiveForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
+  protected async getObjectiveForKeyResult(
+    @Parent() keyResult: KeyResultGraphQLNode,
+    @Context() { loaders }: { loaders: IDataloaders },
+  ) {
     this.logger.log({
       keyResult,
       message: 'Fetching objective for key result',
     })
 
-    return this.core.objective.getFromKeyResult(keyResult)
+    return loaders.objective.load(keyResult.objectiveId)
   }
 
   @ResolveField('keyResultComments', () => KeyResultKeyResultCommentsGraphQLConnection)
@@ -280,10 +278,9 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching key-result checklist',
     })
 
-    const [filters, _, connection] = this.relay.unmarshalRequest<
-      KeyResultCheckMarkFiltersRequest,
-      KeyResultCheckMark
-    >(request)
+    const [filters, _, connection] = this.relay.unmarshalRequest<KeyResultCheckMarkFiltersRequest, KeyResultCheckMark>(
+      request,
+    )
 
     const queryResult = await this.corePorts.dispatchCommand<KeyResultCheckMark[]>(
       'get-check-list-for-key-result',
@@ -291,11 +288,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       filters.onlyAssignedToMe ? userWithContext.id : filters?.userId,
     )
 
-    return this.relay.marshalResponse<KeyResultCheckMarkInterface>(
-      queryResult,
-      connection,
-      keyResult,
-    )
+    return this.relay.marshalResponse<KeyResultCheckMarkInterface>(queryResult, connection, keyResult)
   }
 
   @ResolveField('keyResultCheckIns', () => KeyResultKeyResultCheckInsGraphQLConnection)
@@ -341,25 +334,15 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('status', () => StatusGraphQLObject)
-  protected async getStatusForKeyResult(
-    @Parent() keyResult: KeyResultGraphQLNode,
-    @Args() request: StatusRequest,
-  ) {
+  protected async getStatusForKeyResult(@Parent() keyResult: KeyResultGraphQLNode, @Args() request: StatusRequest) {
     this.logger.log({
       keyResult,
       request,
       message: 'Fetching current status for this key-result',
     })
 
-    const result = await this.corePorts.dispatchCommand<Status>(
-      'get-key-result-status',
-      keyResult.id,
-      request,
-    )
-    if (!result)
-      throw new UserInputError(
-        `We could not find status for the key-result with ID ${keyResult.id}`,
-      )
+    const result = await this.corePorts.dispatchCommand<Status>('get-key-result-status', keyResult.id, request)
+    if (!result) throw new UserInputError(`We could not find status for the key-result with ID ${keyResult.id}`)
 
     return result
   }
@@ -372,10 +355,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     })
 
     const result = await this.corePorts.dispatchCommand<Delta>('get-key-result-delta', keyResult.id)
-    if (!result)
-      throw new UserInputError(
-        `We could not find a delta for the key-result with ID ${keyResult.id}`,
-      )
+    if (!result) throw new UserInputError(`We could not find a delta for the key-result with ID ${keyResult.id}`)
 
     return result
   }
@@ -391,9 +371,7 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching progress history for key result',
     })
 
-    const connection = this.relay.unmarshalRequest<ConnectionFiltersRequest, ProgressRecord>(
-      request,
-    )[2]
+    const connection = this.relay.unmarshalRequest<ConnectionFiltersRequest, ProgressRecord>(request)[2]
 
     const queryResult = await this.corePorts.dispatchCommand<ProgressRecord[]>(
       'get-key-result-progress-history',

@@ -11,8 +11,8 @@ export class GetObjectiveTeamTreeCommand extends Command<Team[]> {
     const teamIndexes = keyResults.map((keyResult) => ({
       id: keyResult.teamId,
     }))
-    const uniqueTeamIndexes = uniq(teamIndexes).map(({ id }) => id);
+    const uniqueTeamIndexes = uniq(teamIndexes).map(({ id }) => id)
 
-    return this.core.team.getAscendantsByIds(uniqueTeamIndexes, {});
+    return this.core.team.getAscendantsByIds(uniqueTeamIndexes, {})
   }
 }

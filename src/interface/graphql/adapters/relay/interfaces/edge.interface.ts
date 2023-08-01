@@ -6,9 +6,7 @@ import { NodeRelayGraphQLInterface } from './node.interface'
 @InterfaceType('EdgeInterface', {
   description: 'An edge is used for proper pagination in nodes',
 })
-export abstract class EdgeRelayGraphQLInterface<N extends NodeRelayGraphQLInterface>
-  implements Edge<N>
-{
+export abstract class EdgeRelayGraphQLInterface<N extends NodeRelayGraphQLInterface> implements Edge<N> {
   @Field(() => String, {
     complexity: 0,
     nullable: true,

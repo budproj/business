@@ -12,8 +12,7 @@ import { KeyResultTypeGraphQLEnum } from '../../enums/key-result-type.enum'
 import { KeyResultUpdateAuthorGraphQLObject } from './key-result-author.object'
 
 @ObjectType('KeyResultState', {
-  description:
-    'A list containing key-result updates history based on the provided filters and arguments',
+  description: 'A list containing key-result updates history based on the provided filters and arguments',
 })
 export class KeyResultStateGraphQLObject {
   @Field(() => KeyResultModeGraphQLEnum, {

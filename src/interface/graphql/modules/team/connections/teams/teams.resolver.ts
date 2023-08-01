@@ -10,19 +10,16 @@ import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorato
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
+import { Cacheable } from '@lib/cache/cacheable.decorator'
+import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { TeamLevelGraphQLEnum } from '../../enums/team-level.enum'
 import { TeamFiltersRequest } from '../../requests/team-filters.request'
 
 import { TeamsGraphQLConnection } from './teams.connection'
-import { Stopwatch } from "@lib/logger/pino.decorator";
-import { Cacheable } from "@lib/cache/cacheable.decorator";
 
 @GuardedResolver(TeamsGraphQLConnection)
-export class TeamsConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
-  Team,
-  TeamInterface
-> {
+export class TeamsConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<Team, TeamInterface> {
   private readonly logger = new Logger(TeamsConnectionGraphQLResolver.name)
 
   constructor(protected readonly core: CoreProvider) {
@@ -42,18 +39,16 @@ export class TeamsConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
       message: 'Fetching teams with filters',
     })
 
-    const [{ level, ...filters }, queryOptions, connection] = this.relay.unmarshalRequest<
-      TeamFiltersRequest,
-      Team
-    >(request)
+    const [{ level, ...filters }, queryOptions, connection] = this.relay.unmarshalRequest<TeamFiltersRequest, Team>(
+      request,
+    )
 
     const queryLeveledHandlers = {
-      default: async () =>
-        this.queryGuard.getManyWithActionScopeConstraint(filters, userWithContext, queryOptions),
+      default: async () => this.queryGuard.getManyWithActionScopeConstraint(filters, userWithContext, queryOptions),
       [TeamLevelGraphQLEnum.COMPANY]: async () =>
-        this.core.team.getUserCompanies(userWithContext, filters, queryOptions),
+        this.core.team.getUserCompanies(userWithContext.id, filters, queryOptions),
       [TeamLevelGraphQLEnum.COMPANY_OR_DEPARTMENT]: async () =>
-        this.core.team.getUserCompaniesAndDepartments(userWithContext, filters, queryOptions),
+        this.core.team.getUserCompaniesAndDepartments(userWithContext.id, filters, queryOptions),
     }
 
     const queryHandler = queryLeveledHandlers[level ?? 'default']

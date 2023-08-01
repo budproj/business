@@ -66,8 +66,7 @@ export class UserGraphQLNode implements GuardedNodeGraphQLInterface {
   @Field(() => String, {
     complexity: 0,
     nullable: true,
-    description:
-      'A description for that user. A more detailed information where the user tells about her/himself',
+    description: 'A description for that user. A more detailed information where the user tells about her/himself',
   })
   public readonly about?: string
 

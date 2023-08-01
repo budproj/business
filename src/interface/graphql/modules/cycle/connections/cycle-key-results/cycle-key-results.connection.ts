@@ -10,12 +10,9 @@ import { CycleKeyResultEdgeGraphQLObject } from './cycle-key-result.edge'
 
 @ObjectType('CycleKeyResults', {
   implements: () => [ConnectionRelayGraphQLInterface, GuardedConnectionGraphQLInterface],
-  description:
-    'A list containing a given user key-results based on the provided filters and arguments',
+  description: 'A list containing a given user key-results based on the provided filters and arguments',
 })
-export class CycleKeyResultsGraphQLConnection
-  implements GuardedConnectionGraphQLInterface<KeyResultGraphQLNode>
-{
+export class CycleKeyResultsGraphQLConnection implements GuardedConnectionGraphQLInterface<KeyResultGraphQLNode> {
   @Field(() => [CycleKeyResultEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: CycleKeyResultEdgeGraphQLObject[]
 

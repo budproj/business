@@ -4,9 +4,29 @@
   },
   "extends": ["@budproj/eslint-config-base-ts", "@budproj/eslint-config-prettier-ts"],
   "rules": {
+    "no-warning-comments": "off",
     "new-cap": "off",
     "max-params": "off",
-    "unicorn/no-null": "off"
+    "unicorn/no-null": "off",
+    "unicorn/prevent-abbreviations": [
+      "warn",
+      {
+        "replacements": {
+          "params": false,
+          "param": false,
+          "args": false,
+          "arg": false
+        }
+      }
+    ],
+    "@typescript-eslint/ban-types": [
+      "error",
+      {
+        "types": {
+          "Omit": false
+        }
+      }
+    ]
   },
   "settings": {
     "import/resolver": {

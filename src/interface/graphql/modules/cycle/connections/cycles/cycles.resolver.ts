@@ -16,10 +16,7 @@ import { CycleFiltersRequest } from '../../requests/cycle-filters.request'
 import { CyclesGraphQLConnection } from './cycles.connection'
 
 @GuardedResolver(CyclesGraphQLConnection)
-export class CyclesConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
-  Cycle,
-  CycleInterface
-> {
+export class CyclesConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<Cycle, CycleInterface> {
   private readonly logger = new Logger(CyclesConnectionGraphQLResolver.name)
 
   constructor(protected readonly core: CoreProvider) {
@@ -37,17 +34,13 @@ export class CyclesConnectionGraphQLResolver extends GuardedConnectionGraphQLRes
       message: 'Fetching teams with filters',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
-      CycleFiltersRequest,
-      Cycle
-    >(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<CycleFiltersRequest, Cycle>(request)
 
-    const userTeamsTree = await this.core.team.getAscendantsByIds(userWithContext.teams.map(({ id }) => id), {})
-    const queryResult = await this.core.cycle.getFromTeamsWithFilters(
-      userTeamsTree,
-      filters,
-      queryOptions,
+    const userTeamsTree = await this.core.team.getAscendantsByIds(
+      userWithContext.teams.map(({ id }) => id),
+      {},
     )
+    const queryResult = await this.core.cycle.getFromTeamsWithFilters(userTeamsTree, filters, queryOptions)
 
     return this.relay.marshalResponse<Cycle>(queryResult, connection)
   }

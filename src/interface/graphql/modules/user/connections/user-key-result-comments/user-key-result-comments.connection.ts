@@ -10,8 +10,7 @@ import { UserKeyResultCommentEdgeGraphQLObject } from './user-key-result-comment
 
 @ObjectType('UserKeyResultComments', {
   implements: () => [ConnectionRelayGraphQLInterface, GuardedConnectionGraphQLInterface],
-  description:
-    'A list containing a given user key-results based on the provided filters and arguments',
+  description: 'A list containing a given user key-results based on the provided filters and arguments',
 })
 export class UserKeyResultCommentsGraphQLConnection
   implements GuardedConnectionGraphQLInterface<KeyResultCommentGraphQLNode>

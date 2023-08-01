@@ -4,6 +4,7 @@ import { Args, ResolveField } from '@nestjs/graphql'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { CompanyOverviewProvider } from '@core/modules/mission-control/overview//company/company-overview.provider'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { User } from '@core/modules/user/user.orm-entity'
@@ -12,7 +13,6 @@ import { GuardedMutation } from '@interface/graphql/adapters/authorization/decor
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
-import { Cacheable } from '@lib/cache/cacheable.decorator'
 
 import { UserAccessControl } from '../../user.access-control'
 import { UserGraphQLNode } from '../../user.node'
@@ -24,16 +24,14 @@ import { TeamAndUsersRequest } from './requests/team-and-users.request'
 import { UserTeamsGraphQLConnection } from './user-teams.connection'
 
 @GuardedResolver(UserTeamsGraphQLConnection)
-export class UserTeamsConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
-  Team,
-  TeamInterface
-> {
+export class UserTeamsConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<Team, TeamInterface> {
   private readonly logger = new Logger(UserTeamsConnectionGraphQLResolver.name)
 
   constructor(
     protected readonly core: CoreProvider,
     private readonly corePorts: CorePortsProvider,
     accessControl: UserAccessControl,
+    private readonly companyOverviewProvider: CompanyOverviewProvider,
   ) {
     super(Resource.TEAM, core, core.team, accessControl)
   }
@@ -101,7 +99,6 @@ export class UserTeamsConnectionGraphQLResolver extends GuardedConnectionGraphQL
     return this.corePorts.dispatchCommand<User>('remove-team-from-user', request)
   }
 
-  @Cacheable('0.id', 5 * 60)
   @ResolveField('quantities', () => QuantityNode)
   protected async quantities(@RequestUserWithContext() userWithContext: UserWithContext) {
     this.logger.log({
@@ -109,11 +106,25 @@ export class UserTeamsConnectionGraphQLResolver extends GuardedConnectionGraphQL
       message: 'Quantities of the company',
     })
 
-    const data = await this.corePorts.dispatchCommand(
-      'get-objectives-and-key-results-quantities',
-      userWithContext,
-    )
+    const teamIds = userWithContext.teams.map((team) => team.id)
 
-    return data
+    const overview = await this.companyOverviewProvider.fromTeams({
+      teamIds,
+      okrMode: ['published', 'completed'],
+      okrType: 'shared',
+      cycleIsActive: true,
+      include: ['objectives', 'keyResults', 'confidence'],
+    })
+
+    return {
+      objectivesQuantity: overview.objectives,
+      keyResultsQuantity: overview.keyResults,
+      achieved: overview.confidence.achieved,
+      high: overview.confidence.high,
+      medium: overview.confidence.medium,
+      low: overview.confidence.low,
+      barrier: overview.confidence.barrier,
+      deprioritized: overview.confidence.deprioritized,
+    }
   }
 }

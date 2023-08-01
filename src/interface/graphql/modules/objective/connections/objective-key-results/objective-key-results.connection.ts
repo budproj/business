@@ -10,12 +10,9 @@ import { ObjectiveKeyResultEdgeGraphQLObject } from './objective-key-result.edge
 
 @ObjectType('ObjectiveKeyResults', {
   implements: () => [ConnectionRelayGraphQLInterface, GuardedConnectionGraphQLInterface],
-  description:
-    'A list containing a given user key-results based on the provided filters and arguments',
+  description: 'A list containing a given user key-results based on the provided filters and arguments',
 })
-export class ObjectiveKeyResultsGraphQLConnection
-  implements GuardedConnectionGraphQLInterface<KeyResultGraphQLNode>
-{
+export class ObjectiveKeyResultsGraphQLConnection implements GuardedConnectionGraphQLInterface<KeyResultGraphQLNode> {
   @Field(() => [ObjectiveKeyResultEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: ObjectiveKeyResultEdgeGraphQLObject[]
 

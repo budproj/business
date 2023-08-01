@@ -43,10 +43,7 @@ class OpenAICompletionService {
 
   private readonly openai: OpenAIApi
 
-  constructor(
-    private readonly repository: OpenAICompletionRepository,
-    private readonly hashProvider: HashProvider,
-  ) {
+  constructor(private readonly repository: OpenAICompletionRepository, private readonly hashProvider: HashProvider) {
     this.openai = new OpenAIApi(
       new Configuration({
         // TODO: get from a config provider to avoid depending on global variables
@@ -65,18 +62,12 @@ class OpenAICompletionService {
 
       return { count }
     } catch (error) {
-      this.logger.error(
-        `Could not estimate prompt tokens for model ${model} due to "${error.message}": %o`,
-        error,
-      )
+      this.logger.error(`Could not estimate prompt tokens for model ${model} due to "${error.message}": %o`, error)
       return { error: error.message }
     }
   }
 
-  public async complete<T>(
-    request: CompletionRequest<T>,
-    remainingAttempts = 1,
-  ): Promise<OpenAiCompletion> {
+  public async complete<T>(request: CompletionRequest<T>, remainingAttempts = 1): Promise<OpenAiCompletion> {
     if (remainingAttempts <= 0) {
       throw new Error('Could not complete request, maximum attempts reached')
     }
@@ -163,10 +154,7 @@ class OpenAICompletionService {
       const response = error.response ?? null
 
       if (response) {
-        this.logger.error(
-          `Failed to generate completion for ${id} due to "${error.message}": %o`,
-          response,
-        )
+        this.logger.error(`Failed to generate completion for ${id} due to "${error.message}": %o`, response)
 
         return this.repository.updateCompletion(id, {
           status: OpenAiCompletionStatus.FAILED,
