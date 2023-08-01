@@ -119,6 +119,8 @@ export class CreatedRoutineCommentInRoutineNotification extends BaseNotification
   private async dispatchCommentInRoutineNotificationEmail(): Promise<void> {
     const { data, metadata } = this.marshal()
 
+    if (data.userThatAnsweredTheRoutine.id === data.userThatCommented.id) return
+
     const isCommentTagged = isTagged(data.comment.content)
 
     if (isCommentTagged) {
@@ -126,10 +128,7 @@ export class CreatedRoutineCommentInRoutineNotification extends BaseNotification
 
       // Caso usuário x tenha recebido comentário de usuário y marcando um usuário z,
       // o usuário x e usuário z precisam ser notificados
-      if (
-        !mentionedIds.includes(data.userThatAnsweredTheRoutine.id) ||
-        data.userThatAnsweredTheRoutine.id !== data.userThatCommented.id
-      ) {
+      if (!mentionedIds.includes(data.userThatAnsweredTheRoutine.id)) {
         const customData = {
           userId: data.userThatAnsweredTheRoutine.id,
           recipientFirstName: data.userThatAnsweredTheRoutine.firstName,
@@ -224,15 +223,14 @@ export class CreatedRoutineCommentInRoutineNotification extends BaseNotification
   private async dispatchCommentInRoutineNotificationMessage(): Promise<void> {
     const { data, metadata } = this.marshal()
 
+    if (data.userThatAnsweredTheRoutine.id === data.userThatCommented.id) return
+
     const isCommentTagged = isTagged(data.comment.content)
 
     if (isCommentTagged) {
       const mentionedIds = getMentionedUserIdsFromComments(data.comment.content)
 
-      if (
-        !mentionedIds.includes(data.userThatAnsweredTheRoutine.id) ||
-        data.userThatAnsweredTheRoutine.id !== data.userThatCommented.id
-      ) {
+      if (!mentionedIds.includes(data.userThatAnsweredTheRoutine.id)) {
         const recipientUsers = [data.userThatAnsweredTheRoutine]
 
         const messages = recipientUsers.map((recipient) => ({
