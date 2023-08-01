@@ -28,7 +28,7 @@ export class GetTeamMembersCommand extends Command<GetTeamMembersCommandResult> 
     const filteredEntityFilters = omit(entityFilters, 'withTeams')
 
     const teams = resolveTree
-      ? await this.core.team.getDescendantsByIds([teamID])
+      ? await this.core.team.getDescendantsByIds([teamID], true)
       : [await this.core.team.getOne({ id: teamID })]
 
     const users = await this.core.user.getUsersByTeams(

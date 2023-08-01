@@ -37,8 +37,8 @@ export class GetUsersFromTeam extends Command<User[]> {
 
   private async getWithTeams(teamID: string, users: User[]): Promise<User[]> {
     // From the teamID, find the root team and load all descendants in memory (aka get all teams from the company)
-    const [rootTeam] = await this.core.team.getRootTeamsForTeams([teamID])
-    const teams = await this.core.team.getDescendantsByIds([rootTeam.id])
+
+    const teams = await this.core.team.getBidirectionalByIds([teamID])
 
     // Create a map of teams to easily find them by id
     const teamsMap = new Map(teams.map((team) => [team.id, team]))

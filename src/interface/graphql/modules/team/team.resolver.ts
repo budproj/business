@@ -80,6 +80,11 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching team with provided indexes',
     })
 
+    if (!request.id) {
+      this.logger.warn('Got a request without an ID, returning null. Request = %o', request)
+      return null
+    }
+
     // eslint-disable-next-line capitalized-comments
     // const team = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
     // if (!team) throw new UserInputError(`We could not found a team with the provided arguments`)

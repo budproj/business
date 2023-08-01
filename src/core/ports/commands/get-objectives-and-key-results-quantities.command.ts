@@ -9,7 +9,7 @@ export class GetObjectivesAndKeyResultQuantities extends Command<any> {
   public async execute(user: UserInterface): Promise<any> {
     const userCompanies = await this.core.team.getUserCompanies(user.id)
     const userCompanyIDs = userCompanies.map((company) => company.id)
-    const userReachableTeams = await this.core.team.getDescendantsByIds(userCompanyIDs)
+    const userReachableTeams = await this.core.team.getDescendantsByIds(userCompanyIDs, true)
 
     const userReachableTeamsIds = userReachableTeams.map((team) => team.id)
 

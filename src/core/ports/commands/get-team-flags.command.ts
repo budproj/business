@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common'
 import { differenceInDays } from 'date-fns'
 import { flatten } from 'lodash'
 import { Any } from 'typeorm'
@@ -10,12 +11,18 @@ import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 import { BaseStatusCommand } from './base-status.command'
 
 export class GetTeamFlagsCommand extends BaseStatusCommand {
+  private readonly logger = new Logger(GetTeamFlagsCommand.name)
   public async execute(teamId: TeamInterface['id']): Promise<any> {
     const keyResultsFromTeam = await this.core.keyResult.getKeyResults([teamId])
-    const teams = await this.core.team.getDescendantsByIds([teamId])
+
+    this.logger.log('Key results from team %s are %o', teamId, keyResultsFromTeam)
+
+    const teams = await this.core.team.getDescendantsByIds([teamId], true)
 
     const teamUsersPromises = teams.map(async (team) => team.users)
     const teamsUsers = await Promise.all(teamUsersPromises)
+
+    this.logger.log('Team %s has users %o', teamId, teamsUsers)
 
     const userIDs = flatten(teamsUsers).map((u) => u.id)
     const selector = {

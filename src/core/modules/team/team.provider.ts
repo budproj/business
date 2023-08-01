@@ -112,7 +112,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return this.repository
       .createQueryBuilder()
       .where(
-        () => `id IN (WITH RECURSIVE ${bidirectionalCte} SELECT id FROM ${bidirectionalName})`,
+        () => `${Team.name}.id IN (WITH RECURSIVE ${bidirectionalCte} SELECT id FROM ${bidirectionalName})`,
         bidirectionalQueryOptions,
       )
       .andWhere({ ...filters })
@@ -123,20 +123,22 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
   }
 
   @Cacheable(
-    (parentTeamIds, includeParentTeams, filters, queryOptions) => [
+    (parentTeamIds, includeParentTeams, filters, queryOptions, cacheDedup) => [
       parentTeamIds,
       includeParentTeams,
-      filters,
-      queryOptions,
+      filters ?? {},
+      queryOptions ?? {},
+      cacheDedup ?? null,
     ],
     15,
   )
   @Stopwatch()
   public async getDescendantsByIds(
     parentTeamIds: string[],
-    includeParentTeams = true,
+    includeParentTeams,
     filters?: FindConditions<TeamInterface>,
     queryOptions?: GetOptions<TeamInterface>,
+    cacheDedup?: number,
   ): Promise<Team[]> {
     const orderBy = this.repository.marshalOrderBy(queryOptions?.orderBy)
 
@@ -147,7 +149,8 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
 
     return this.repository
       .createQueryBuilder()
-      .where(() => `id IN (WITH RECURSIVE ${descendingCte} SELECT id FROM ${descendingTable})`, descendingQueryOptions)
+      .innerJoinAndSelect(`${Team.name}.users`, 'user')
+      .where(() => `${Team.name}.id IN (WITH RECURSIVE ${descendingCte} SELECT id FROM ${descendingTable})`, descendingQueryOptions)
       .andWhere({ ...filters })
       .take(queryOptions?.limit ?? 0)
       .offset(queryOptions?.offset ?? 0)
@@ -193,7 +196,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
 
     return this.repository
       .createQueryBuilder()
-      .where(() => `id IN (WITH RECURSIVE ${cte} SELECT id FROM ${name})`, options)
+      .where(() => `${Team.name}.id IN (WITH RECURSIVE ${cte} SELECT id FROM ${name})`, options)
       .andWhere({ ...filters })
       .take(queryOptions?.limit ?? 0)
       .offset(queryOptions?.offset ?? 0)
@@ -216,7 +219,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
     return this.repository
       .createQueryBuilder()
       .where(
-        () => `id IN (WITH RECURSIVE ${bidirectionalCte} SELECT id FROM ${bidirectionalName})`,
+        () => `${Team.name}.id IN (WITH RECURSIVE ${bidirectionalCte} SELECT id FROM ${bidirectionalName})`,
         bidirectionalQueryOptions,
       )
       .andWhere({ ...filters })
