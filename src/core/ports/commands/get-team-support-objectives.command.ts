@@ -1,9 +1,9 @@
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { ObjectiveRelationFilterProperties } from '@core/modules/objective/objective.repository'
 import { EntityOrderAttributes } from '@core/types/order-attribute.type'
-import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { Command } from './base.command'
+import { Stopwatch } from '@lib/logger/pino.decorator';
 
 interface GetTeamSupportObjectivesProperties {
   active: boolean

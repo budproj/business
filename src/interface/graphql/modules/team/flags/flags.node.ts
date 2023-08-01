@@ -11,7 +11,8 @@ import { UsersGraphQLConnection } from '../../user/connections/users/users.conne
 
 @ObjectType('Flags', {
   implements: () => [NodeRelayGraphQLInterface, GuardedNodeGraphQLInterface],
-  description: 'Task is an entity inside a given user. It is used by the user to organize his/her day.',
+  description:
+    'Task is an entity inside a given user. It is used by the user to organize his/her day.',
 })
 export class FlagsGraphQLNode implements GuardedNodeGraphQLInterface {
   @Field(() => KeyResultsGraphQLConnection, {

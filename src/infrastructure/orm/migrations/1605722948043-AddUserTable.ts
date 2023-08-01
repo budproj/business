@@ -28,15 +28,25 @@ export class AddUserTable1605722948043 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "key_result" DROP CONSTRAINT "FK_467fb7f46035c6aa81790e6c9f2"`)
-    await queryRunner.query(`ALTER TABLE "progress_report" DROP CONSTRAINT "FK_171639bc8c15479933be60eefec"`)
-    await queryRunner.query(`ALTER TABLE "confidence_report" DROP CONSTRAINT "FK_253a46d45187cc3e3eda9efa3de"`)
+    await queryRunner.query(
+      `ALTER TABLE "key_result" DROP CONSTRAINT "FK_467fb7f46035c6aa81790e6c9f2"`,
+    )
+    await queryRunner.query(
+      `ALTER TABLE "progress_report" DROP CONSTRAINT "FK_171639bc8c15479933be60eefec"`,
+    )
+    await queryRunner.query(
+      `ALTER TABLE "confidence_report" DROP CONSTRAINT "FK_253a46d45187cc3e3eda9efa3de"`,
+    )
     await queryRunner.query(`ALTER TABLE "key_result" DROP COLUMN "owner_id"`)
     await queryRunner.query(`ALTER TABLE "key_result" ADD "owner_id" character varying NOT NULL`)
     await queryRunner.query(`ALTER TABLE "progress_report" DROP COLUMN "user_id"`)
-    await queryRunner.query(`ALTER TABLE "progress_report" ADD "user_id" character varying NOT NULL`)
+    await queryRunner.query(
+      `ALTER TABLE "progress_report" ADD "user_id" character varying NOT NULL`,
+    )
     await queryRunner.query(`ALTER TABLE "confidence_report" DROP COLUMN "user_id"`)
-    await queryRunner.query(`ALTER TABLE "confidence_report" ADD "user_id" character varying NOT NULL`)
+    await queryRunner.query(
+      `ALTER TABLE "confidence_report" ADD "user_id" character varying NOT NULL`,
+    )
     await queryRunner.query(`DROP TABLE "user"`)
     await queryRunner.query(`ALTER TABLE "key_result" RENAME COLUMN "owner_id" TO "owner"`)
     await queryRunner.query(`ALTER TABLE "progress_report" RENAME COLUMN "user_id" TO "user"`)

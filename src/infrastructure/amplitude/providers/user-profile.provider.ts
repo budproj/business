@@ -11,7 +11,9 @@ import { UserAmplitudeDataProperties } from '../types/user-profile.data'
 export class UserProfileProvider implements UserProfileAdapter {
   constructor(private readonly configService: AmplitudeConfigProvider) {}
 
-  public async getUserProfileAmplitudeData(userId: UserInterface['id']): Promise<UserAmplitudeDataProperties> {
+  public async getUserProfileAmplitudeData(
+    userId: UserInterface['id'],
+  ): Promise<UserAmplitudeDataProperties> {
     const url = this.configService.userProfileUrl
     const { amplitudeSecretKey } = this.configService
 

@@ -14,7 +14,9 @@ export class AddUserSetting1638297492226 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "user_setting" DROP CONSTRAINT "FK_94922c04577bc2bc75f2faba53d"`)
+    await queryRunner.query(
+      `ALTER TABLE "user_setting" DROP CONSTRAINT "FK_94922c04577bc2bc75f2faba53d"`,
+    )
     await queryRunner.query(`DROP TABLE "user_setting"`)
     await queryRunner.query(`DROP TYPE "user_setting_key_enum"`)
   }

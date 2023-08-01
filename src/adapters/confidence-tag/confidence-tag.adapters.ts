@@ -8,7 +8,10 @@ import {
 import { ConfidenceTag } from './confidence-tag.enum'
 
 export class ConfidenceTagAdapter {
-  public differenceInConfidenceTagIndexes(previousConfidence: number, nextConfidence: number): number {
+  public differenceInConfidenceTagIndexes(
+    previousConfidence: number,
+    nextConfidence: number,
+  ): number {
     const previousConfidenceIndex = this.getConfidenceTagIndexFromConfidence(previousConfidence)
     const nextConfidenceIndex = this.getConfidenceTagIndexFromConfidence(nextConfidence)
 
@@ -38,6 +41,8 @@ export class ConfidenceTagAdapter {
   }
 
   private getTagForConfidence(confidence: number): ConfidenceTag {
-    return CONFIDENCE_TAG_ASC_ORDER.find((confidenceTag) => CONFIDENCE_TAG_THRESHOLDS[confidenceTag] >= confidence)
+    return CONFIDENCE_TAG_ASC_ORDER.find(
+      (confidenceTag) => CONFIDENCE_TAG_THRESHOLDS[confidenceTag] >= confidence,
+    )
   }
 }

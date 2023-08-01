@@ -20,7 +20,9 @@ export class TokenGraphQLGuard extends AuthGuard('jwt') {
   }
 
   @GodBypass(true)
-  public canActivate(executionContext: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+  public canActivate(
+    executionContext: ExecutionContext,
+  ): boolean | Promise<boolean> | Observable<boolean> {
     const graphqlExecutionContext = GqlExecutionContext.create(executionContext)
     const request = graphqlExecutionContext.getContext().req
     const guardRequest = () => super.canActivate(new ExecutionContextHost([request]))

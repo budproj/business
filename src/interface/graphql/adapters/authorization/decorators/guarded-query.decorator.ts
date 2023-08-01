@@ -6,7 +6,11 @@ import { Action } from '@adapters/policy/types/action.type'
 
 import { GuardedGraphQLRequest } from './guarded-graphql-request.decorator'
 
-export function GuardedQuery(GraphQLObject: Class<any>, actions: Action[] | Action, queryOptions: QueryOptions) {
+export function GuardedQuery(
+  GraphQLObject: Class<any>,
+  actions: Action[] | Action,
+  queryOptions: QueryOptions,
+) {
   return applyDecorators(
     GuardedGraphQLRequest(actions),
     Query(() => GraphQLObject, queryOptions),

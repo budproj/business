@@ -3,7 +3,10 @@ import { uniqBy, pickBy, omitBy, identity, isEmpty, maxBy, flatten, keyBy, uniq 
 import { Any, Brackets, DeleteResult, FindConditions, In } from 'typeorm'
 
 import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
-import { DEFAULT_CONFIDENCE, CONFIDENCE_TAG_THRESHOLDS } from '@adapters/confidence-tag/confidence-tag.constants'
+import {
+  DEFAULT_CONFIDENCE,
+  CONFIDENCE_TAG_THRESHOLDS,
+} from '@adapters/confidence-tag/confidence-tag.constants'
 import { ConfidenceTag } from '@adapters/confidence-tag/confidence-tag.enum'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
@@ -17,7 +20,6 @@ import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 import { EntityOrderAttributes } from '@core/types/order-attribute.type'
 import { AnalyticsProvider } from '@infrastructure/analytics/analytics.provider'
-import { Cacheable } from '@lib/cache/cacheable.decorator'
 import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { ProgressRecord } from '../../../adapters/analytics/progress-record.interface'
@@ -60,7 +62,9 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     super(KeyResultProvider.name, repository)
   }
 
-  public getLatestCheckInFromList(checkInList: KeyResultCheckInInterface[]): KeyResultCheckInInterface | undefined {
+  public getLatestCheckInFromList(
+    checkInList: KeyResultCheckInInterface[],
+  ): KeyResultCheckInInterface | undefined {
     return maxBy(checkInList, 'createdAt')
   }
 
@@ -82,7 +86,10 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       },
     }
 
-    const relations = [...(active ? ['objective', 'objective.cycle'] : []), ...(confidence ? ['checkIns'] : [])]
+    const relations = [
+      ...(active ? ['objective', 'objective.cycle'] : []),
+      ...(confidence ? ['checkIns'] : []),
+    ]
 
     const keyResults = await this.repository.find({
       ...queryOptions,
@@ -184,12 +191,16 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     })
 
     return {
-      achieved: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.achieved).length,
+      achieved: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.achieved)
+        .length,
       high: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.high).length,
       medium: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.medium).length,
       low: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.low).length,
-      barrier: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.barrier).length,
-      deprioritized: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.deprioritized).length,
+      barrier: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.barrier)
+        .length,
+      deprioritized: confidences.filter(
+        (element) => element === CONFIDENCE_TAG_THRESHOLDS.deprioritized,
+      ).length,
     }
   }
 
@@ -265,9 +276,10 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       .leftJoin(`${KeyResult.name}.supportTeamMembers`, 'supportTeamMembers')
       .where(
         new Brackets((qb) => {
-          qb.where('KeyResult.ownerId = :userID', { userID }).orWhere('supportTeamMembers.id = :userId', {
-            userId: userID,
-          })
+          qb.where('KeyResult.ownerId = :userID', { userID }).orWhere(
+            'supportTeamMembers.id = :userId',
+            { userId: userID },
+          )
         }),
       )
       .andWhere('cycle.cadence = :cadence', { cadence })
@@ -365,7 +377,9 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     }
   }
 
-  public async getFromKeyResultCommentID(keyResultCommentID: string): Promise<KeyResult | undefined> {
+  public async getFromKeyResultCommentID(
+    keyResultCommentID: string,
+  ): Promise<KeyResult | undefined> {
     const keyResultComment = await this.keyResultCommentProvider.getOne({ id: keyResultCommentID })
     if (!keyResultComment) return
 
@@ -426,7 +440,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   /**
    * @deprecated do not use this method yet (see comment below)
    */
-  @Stopwatch()
+  @Stopwatch({ includeReturn: true })
   public async getCheckInProgressBatch(
     keyResults: KeyResult[],
     latestCheckIns?: KeyResultCheckInInterface[],
@@ -453,7 +467,10 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     })
   }
 
-  public async getLatestCheckInForKeyResultAtDate(keyResultID: string, date?: Date): Promise<KeyResultCheckIn> {
+  public async getLatestCheckInForKeyResultAtDate(
+    keyResultID: string,
+    date?: Date,
+  ): Promise<KeyResultCheckIn> {
     date ??= new Date()
     return this.keyResultCheckInProvider.getLatestFromKeyResultAtDate(keyResultID, date)
   }
@@ -468,20 +485,23 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   }
 
   public async getFromID(id: string): Promise<KeyResult> {
-    return this.getFromIndexes({ id })
+    return this.repository.findOne({ id })
   }
 
-  @Cacheable('0', 15)
   public async getFromIndexes(indexes: Partial<KeyResultInterface>): Promise<KeyResult> {
     return this.repository.findOne(indexes)
   }
 
-  public async createCheckIn(checkIn: Partial<KeyResultCheckInInterface>): Promise<KeyResultCheckIn> {
+  public async createCheckIn(
+    checkIn: Partial<KeyResultCheckInInterface>,
+  ): Promise<KeyResultCheckIn> {
     const queryResult = await this.keyResultCheckInProvider.createCheckIn(checkIn)
     return queryResult[0]
   }
 
-  public async createComment(comment: Partial<KeyResultCommentInterface>): Promise<KeyResultComment> {
+  public async createComment(
+    comment: Partial<KeyResultCommentInterface>,
+  ): Promise<KeyResultComment> {
     const queryResult = await this.keyResultCommentProvider.createComment(comment)
 
     // Const { keyResultId } = queryResult[0]
@@ -509,15 +529,21 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return queryResult[0]
   }
 
-  public async getKeyResultCheckIn(indexes: Partial<KeyResultCheckInInterface>): Promise<KeyResultCheckIn> {
+  public async getKeyResultCheckIn(
+    indexes: Partial<KeyResultCheckInInterface>,
+  ): Promise<KeyResultCheckIn> {
     return this.keyResultCheckInProvider.getOne(indexes)
   }
 
-  public async getKeyResultComment(indexes: Partial<KeyResultCommentInterface>): Promise<KeyResultComment> {
+  public async getKeyResultComment(
+    indexes: Partial<KeyResultCommentInterface>,
+  ): Promise<KeyResultComment> {
     return this.keyResultCommentProvider.getOne(indexes)
   }
 
-  public async getKeyResultUpdate(indexes: Partial<KeyResultUpdateInterface>): Promise<KeyResultUpdate> {
+  public async getKeyResultUpdate(
+    indexes: Partial<KeyResultUpdateInterface>,
+  ): Promise<KeyResultUpdate> {
     return this.keyResultUpdateProvider.getOne(indexes)
   }
 
@@ -543,7 +569,12 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
     return {
       raw: [...comments.raw, ...checkIns.raw, ...checkMarks.raw, ...updates.raw, ...keyResult.raw],
-      affected: comments.affected + checkIns.affected + checkMarks.affected + updates.affected + keyResult.affected,
+      affected:
+        comments.affected +
+        checkIns.affected +
+        checkMarks.affected +
+        updates.affected +
+        keyResult.affected,
     }
   }
 
@@ -559,7 +590,12 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
     return {
       raw: [...comments.raw, ...checkIns.raw, ...checkMarks.raw, ...updates.raw, ...keyResults.raw],
-      affected: comments.affected + checkIns.affected + checkMarks.affected + updates.affected + keyResults.affected,
+      affected:
+        comments.affected +
+        checkIns.affected +
+        checkMarks.affected +
+        updates.affected +
+        keyResults.affected,
     }
   }
 
@@ -582,7 +618,11 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       keyResultCheckIn: ['createdAt'],
     }
 
-    return this.repository.findWithRelationFilters(cleanedRelationFilters, nullableFilters, orderAttributes)
+    return this.repository.findWithRelationFilters(
+      cleanedRelationFilters,
+      nullableFilters,
+      orderAttributes,
+    )
   }
 
   public async getProgressHistoryForKeyResultID(id: string): Promise<ProgressRecord[]> {
@@ -598,7 +638,10 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return history
   }
 
-  public async getOwnedByUserID(userID: string, filters?: KeyResultInterface): Promise<KeyResult[]> {
+  public async getOwnedByUserID(
+    userID: string,
+    filters?: KeyResultInterface,
+  ): Promise<KeyResult[]> {
     const selector: Partial<KeyResultInterface> = {
       ...filters,
       ownerId: userID,
@@ -607,7 +650,10 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return this.getMany(selector)
   }
 
-  public async getAllWithUserIDInSupportTeam(userID: string, filters?: KeyResultInterface): Promise<KeyResult[]> {
+  public async getAllWithUserIDInSupportTeam(
+    userID: string,
+    filters?: KeyResultInterface,
+  ): Promise<KeyResult[]> {
     return this.repository.getWithUserInSupportTeamWithFilters(userID, filters)
   }
 
@@ -638,16 +684,23 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   }
 
   public async getProgressSum(keyResults: KeyResult[]): Promise<number> {
-    const keyResultProgresses = await Promise.all(keyResults.map(async (keyResult) => this.getProgress(keyResult)))
+    const keyResultProgresses = await Promise.all(
+      keyResults.map(async (keyResult) => this.getProgress(keyResult)),
+    )
 
-    const progressSum = keyResultProgresses.reduce((progressSum, currentProgress) => progressSum + currentProgress, 0)
+    const progressSum = keyResultProgresses.reduce(
+      (progressSum, currentProgress) => progressSum + currentProgress,
+      0,
+    )
 
     return progressSum
   }
 
   public async filterActiveKeyResultsFromList(keyResults: KeyResult[]): Promise<KeyResult[]> {
     const objectiveIDs = uniq(keyResults.map((keyResult) => keyResult.objectiveId))
-    const objectivePromises = objectiveIDs.map(async (objectiveID) => this.objectiveProvider.getFromID(objectiveID))
+    const objectivePromises = objectiveIDs.map(async (objectiveID) =>
+      this.objectiveProvider.getFromID(objectiveID),
+    )
     const objectives = await Promise.all(objectivePromises)
     const objectivesHashmap = keyBy(objectives, 'id')
 
@@ -656,7 +709,9 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const cycles = await Promise.all(cyclePromises)
     const cyclesHashmap = keyBy(cycles, 'id')
 
-    return keyResults.filter((keyResult) => cyclesHashmap[objectivesHashmap[keyResult.objectiveId].cycleId].active)
+    return keyResults.filter(
+      (keyResult) => cyclesHashmap[objectivesHashmap[keyResult.objectiveId].cycleId].active,
+    )
   }
 
   protected async protectCreationQuery(

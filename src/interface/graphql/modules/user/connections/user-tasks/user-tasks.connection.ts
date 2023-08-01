@@ -12,7 +12,9 @@ import { UserTasksEdgeGraphQLObject } from './user-tasks.edge'
   implements: () => [ConnectionRelayGraphQLInterface, GuardedConnectionGraphQLInterface],
   description: 'A list containing a given user tasks based on the provided filters and arguments',
 })
-export class UserTasksGraphQLConnection implements GuardedConnectionGraphQLInterface<TaskGraphQLNode> {
+export class UserTasksGraphQLConnection
+  implements GuardedConnectionGraphQLInterface<TaskGraphQLNode>
+{
   @Field(() => [UserTasksEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: UserTasksEdgeGraphQLObject[]
 

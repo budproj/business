@@ -11,7 +11,9 @@ export class LinkConfidenceReportWithKeyResult1605555560406 implements Migration
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "confidence_report" DROP CONSTRAINT "FK_77abd95d6700ac3b4bb291fd0da"`)
+    await queryRunner.query(
+      `ALTER TABLE "confidence_report" DROP CONSTRAINT "FK_77abd95d6700ac3b4bb291fd0da"`,
+    )
     await queryRunner.query(`ALTER TABLE "confidence_report" DROP COLUMN "keyResultId"`)
   }
 }

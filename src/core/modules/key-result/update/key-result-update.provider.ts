@@ -15,14 +15,22 @@ import { KeyResultUpdate } from './key-result-update.orm-entity'
 import { KeyResultUpdateRepository } from './key-result-update.repository'
 
 @Injectable()
-export class KeyResultUpdateProvider extends CoreEntityProvider<KeyResultUpdate, KeyResultUpdateInterface> {
+export class KeyResultUpdateProvider extends CoreEntityProvider<
+  KeyResultUpdate,
+  KeyResultUpdateInterface
+> {
   private keyResultProvider: KeyResultProvider
 
-  constructor(protected readonly repository: KeyResultUpdateRepository, private readonly moduleReference: ModuleRef) {
+  constructor(
+    protected readonly repository: KeyResultUpdateRepository,
+    private readonly moduleReference: ModuleRef,
+  ) {
     super(KeyResultUpdateProvider.name, repository)
   }
 
-  public async getForTimelineEntries(entries: KeyResultTimelineQueryResult[]): Promise<KeyResultUpdate[]> {
+  public async getForTimelineEntries(
+    entries: KeyResultTimelineQueryResult[],
+  ): Promise<KeyResultUpdate[]> {
     const updateIDs = entries.map((entry) => entry.id)
     const result = await this.repository.findByIds(updateIDs)
 
@@ -50,7 +58,9 @@ export class KeyResultUpdateProvider extends CoreEntityProvider<KeyResultUpdate,
     })
   }
 
-  public async getFromIndexes(indexes: Partial<KeyResultUpdateInterface>): Promise<KeyResultUpdate> {
+  public async getFromIndexes(
+    indexes: Partial<KeyResultUpdateInterface>,
+  ): Promise<KeyResultUpdate> {
     return this.getOne(indexes)
   }
 

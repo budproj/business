@@ -16,7 +16,9 @@ export class CreateKeyResultUpdateEntity1685020795940 implements MigrationInterf
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "key_result_update" DROP CONSTRAINT "FK_79e196d6feb35798ca22aaf932f"`)
+    await queryRunner.query(
+      `ALTER TABLE "key_result_update" DROP CONSTRAINT "FK_79e196d6feb35798ca22aaf932f"`,
+    )
     await queryRunner.query(`DROP INDEX "public"."IDX_3da987eb78c41fc8cdee9a7bd0"`)
     await queryRunner.query(`DROP TABLE "key_result_update"`)
   }

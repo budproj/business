@@ -72,15 +72,27 @@ export class KeyResultTimelineProvider {
   public async getEntriesForTimelineOrder(
     timelineQueryResult: KeyResultTimelineQueryResult[],
   ): Promise<KeyResultTimelineEntry[]> {
-    const keyResultCheckInEntries = timelineQueryResult.filter((entry) => entry.entity === KeyResultCheckIn.name)
-    const keyResultCommentEntries = timelineQueryResult.filter((entry) => entry.entity === KeyResultComment.name)
+    const keyResultCheckInEntries = timelineQueryResult.filter(
+      (entry) => entry.entity === KeyResultCheckIn.name,
+    )
+    const keyResultCommentEntries = timelineQueryResult.filter(
+      (entry) => entry.entity === KeyResultComment.name,
+    )
 
-    const keyResultUpdateEntries = timelineQueryResult.filter((entry) => entry.entity === KeyResultUpdate.name)
+    const keyResultUpdateEntries = timelineQueryResult.filter(
+      (entry) => entry.entity === KeyResultUpdate.name,
+    )
 
-    const keyResultCheckIns = await this.keyResultCheckIn.getForTimelineEntries(keyResultCheckInEntries)
-    const keyResultComments = await this.keyResultComment.getForTimelineEntries(keyResultCommentEntries)
+    const keyResultCheckIns = await this.keyResultCheckIn.getForTimelineEntries(
+      keyResultCheckInEntries,
+    )
+    const keyResultComments = await this.keyResultComment.getForTimelineEntries(
+      keyResultCommentEntries,
+    )
 
-    const keyResultUpdates = await this.keyResultUpdate.getForTimelineEntries(keyResultUpdateEntries)
+    const keyResultUpdates = await this.keyResultUpdate.getForTimelineEntries(
+      keyResultUpdateEntries,
+    )
 
     const entriesHashmap = {
       [KeyResultCheckIn.name]: keyBy(keyResultCheckIns, 'id'),

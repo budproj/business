@@ -6,7 +6,11 @@ import { KeyResultUpdateGraphQLNode } from '../../update/key-result-update.node'
 
 export const KeyResultTimelineEntryGraphQLUnion = createUnionType({
   name: 'KeyResultTimelineEntryUnion',
-  types: () => [KeyResultCheckInGraphQLNode, KeyResultCommentGraphQLNode, KeyResultUpdateGraphQLNode],
+  types: () => [
+    KeyResultCheckInGraphQLNode,
+    KeyResultCommentGraphQLNode,
+    KeyResultUpdateGraphQLNode,
+  ],
   resolveType(value) {
     if ('value' in value) {
       return KeyResultCheckInGraphQLNode

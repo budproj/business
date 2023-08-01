@@ -14,7 +14,9 @@ export class AddTeamToObjective1624996496494 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "objective" DROP CONSTRAINT "FK_dd69c7763388baabca1306dd089"`)
+    await queryRunner.query(
+      `ALTER TABLE "objective" DROP CONSTRAINT "FK_dd69c7763388baabca1306dd089"`,
+    )
     await queryRunner.query(`ALTER TABLE "objective" DROP COLUMN "team_id"`)
   }
 }

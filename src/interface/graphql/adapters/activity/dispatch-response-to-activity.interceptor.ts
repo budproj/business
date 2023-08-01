@@ -27,7 +27,9 @@ export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor
   }
 
   static getContext(executionContext: ExecutionContext): GraphQLContext {
-    return DispatchResponseToActivityInterceptor.graphqlExecutionContext(executionContext).getContext()
+    return DispatchResponseToActivityInterceptor.graphqlExecutionContext(
+      executionContext,
+    ).getContext()
   }
 
   static getRequestUserData(executionContext: ExecutionContext): Partial<GraphQLRequest> {
@@ -41,7 +43,8 @@ export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor
   }
 
   static getRequest(executionContext: ExecutionContext): Record<string, any> {
-    return DispatchResponseToActivityInterceptor.graphqlExecutionContext(executionContext).getArgs().data
+    return DispatchResponseToActivityInterceptor.graphqlExecutionContext(executionContext).getArgs()
+      .data
   }
 
   public intercept(executionContext: ExecutionContext, next: CallHandler): Observable<Promise<T>> {
@@ -55,7 +58,10 @@ export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor
   private buildActivity(data: T, executionContext: ExecutionContext): Activity<T> {
     const userData = DispatchResponseToActivityInterceptor.getRequestUserData(executionContext)
     const request = DispatchResponseToActivityInterceptor.getRequest(executionContext)
-    const Activity = this.reflector.get<ActivityConstructor<T>>('activity', executionContext.getHandler())
+    const Activity = this.reflector.get<ActivityConstructor<T>>(
+      'activity',
+      executionContext.getHandler(),
+    )
 
     return new Activity(data, userData, request)
   }

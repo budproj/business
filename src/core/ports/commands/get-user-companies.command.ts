@@ -5,7 +5,7 @@ import { Command } from './base.command'
 
 export class GetUserCompaniesCommand extends Command<Team[]> {
   public async execute(user: User): Promise<Team[]> {
-    const companies = await this.core.team.getUserCompanies(user.id)
+    const companies = await this.core.team.getUserCompanies(user)
 
     return companies
   }

@@ -10,7 +10,9 @@ import { KeyResultTimelineEntryGraphQLUnion } from './key-result-timeline-entry.
   implements: () => EdgeRelayGraphQLInterface,
   description: 'The edge for our key-result timeline query interface',
 })
-export class KeyResultTimelineEdgeGraphQLObject implements EdgeRelayGraphQLInterface<KeyResultTimelineEntry> {
+export class KeyResultTimelineEdgeGraphQLObject
+  implements EdgeRelayGraphQLInterface<KeyResultTimelineEntry>
+{
   @Field(() => KeyResultTimelineEntryGraphQLUnion, { complexity: 1 })
   public readonly node!: KeyResultTimelineEntry
 

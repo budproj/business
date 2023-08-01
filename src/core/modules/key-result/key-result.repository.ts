@@ -43,7 +43,9 @@ export class KeyResultRepository extends CoreEntityRepository<KeyResult> {
       .leftJoinAndSelect(`${Objective.name}.cycle`, Cycle.name)
 
     orderAttributes.map(([attribute, direction], index) => {
-      return index === 0 ? query.orderBy(attribute, direction) : query.addOrderBy(attribute, direction)
+      return index === 0
+        ? query.orderBy(attribute, direction)
+        : query.addOrderBy(attribute, direction)
     })
 
     return query.getMany()
@@ -69,7 +71,10 @@ export class KeyResultRepository extends CoreEntityRepository<KeyResult> {
     return query.relation(KeyResult, 'supportTeamMembers').of(keyResultId).remove(userId)
   }
 
-  public async getWithUserInSupportTeamWithFilters(userID: string, filters: KeyResultInterface): Promise<KeyResult[]> {
+  public async getWithUserInSupportTeamWithFilters(
+    userID: string,
+    filters: KeyResultInterface,
+  ): Promise<KeyResult[]> {
     return this.createQueryBuilder()
       .where(filters)
       .leftJoin(`${KeyResult.name}.supportTeamMembers`, 'supportTeamMembers')

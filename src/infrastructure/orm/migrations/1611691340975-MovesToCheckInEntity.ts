@@ -18,12 +18,20 @@ export class MovesToCheckInEntity1611691340975 implements MigrationInterface {
       `INSERT INTO "key_result_check_in"(progress, confidence, created_at, key_result_id, user_id, comment) SELECT pr.value_new AS progress, COALESCE(cr.value_new, 100) AS confidence, pr.created_at, pr.key_result_id, pr.user_id, COALESCE(pr.comment, cr.comment) AS comment FROM progress_report as pr FULL OUTER JOIN confidence_report as cr ON pr.key_result_id=cr.key_result_id AND (pr.comment = cr.comment OR date_trunc('minute', pr.created_at) = date_trunc('minute', cr.created_at))`,
     )
 
-    await queryRunner.query(`ALTER TABLE "progress_report" DROP CONSTRAINT "FK_171639bc8c15479933be60eefec"`)
-    await queryRunner.query(`ALTER TABLE "progress_report" DROP CONSTRAINT "FK_2af2ca4de80e1b489b55a1e713b"`)
+    await queryRunner.query(
+      `ALTER TABLE "progress_report" DROP CONSTRAINT "FK_171639bc8c15479933be60eefec"`,
+    )
+    await queryRunner.query(
+      `ALTER TABLE "progress_report" DROP CONSTRAINT "FK_2af2ca4de80e1b489b55a1e713b"`,
+    )
     await queryRunner.query(`DROP TABLE "progress_report"`)
 
-    await queryRunner.query(`ALTER TABLE "confidence_report" DROP CONSTRAINT "FK_253a46d45187cc3e3eda9efa3de"`)
-    await queryRunner.query(`ALTER TABLE "confidence_report" DROP CONSTRAINT "FK_91d4c5e94a9a8c4aff1e001b03d"`)
+    await queryRunner.query(
+      `ALTER TABLE "confidence_report" DROP CONSTRAINT "FK_253a46d45187cc3e3eda9efa3de"`,
+    )
+    await queryRunner.query(
+      `ALTER TABLE "confidence_report" DROP CONSTRAINT "FK_91d4c5e94a9a8c4aff1e001b03d"`,
+    )
     await queryRunner.query(`DROP TABLE "confidence_report"`)
   }
 
@@ -54,8 +62,12 @@ export class MovesToCheckInEntity1611691340975 implements MigrationInterface {
       `INSERT INTO "confidence_report"(value_new, created_at, key_result_id, user_id, comment) SELECT confidence, created_at, key_result_id, user_id, comment FROM key_result_check_in`,
     )
 
-    await queryRunner.query(`ALTER TABLE "key_result_check_in" DROP CONSTRAINT "FK_a566969fc314f93d678c30566b4"`)
-    await queryRunner.query(`ALTER TABLE "key_result_check_in" DROP CONSTRAINT "FK_e3828c8587b64a30f69401290e3"`)
+    await queryRunner.query(
+      `ALTER TABLE "key_result_check_in" DROP CONSTRAINT "FK_a566969fc314f93d678c30566b4"`,
+    )
+    await queryRunner.query(
+      `ALTER TABLE "key_result_check_in" DROP CONSTRAINT "FK_e3828c8587b64a30f69401290e3"`,
+    )
     await queryRunner.query(`DROP TABLE "key_result_check_in"`)
   }
 }

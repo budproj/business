@@ -9,7 +9,9 @@ import { UserGraphQLNode } from '../../../user/user.node'
   implements: () => EdgeRelayGraphQLInterface,
   description: 'The edge for our users support team query interface',
 })
-export class KeyResultKeyResultSupportTeamEdgeGraphQLObject implements EdgeRelayGraphQLInterface<UserGraphQLNode> {
+export class KeyResultKeyResultSupportTeamEdgeGraphQLObject
+  implements EdgeRelayGraphQLInterface<UserGraphQLNode>
+{
   @Field(() => UserGraphQLNode, { complexity: 1 })
   public readonly node!: UserGraphQLNode
 

@@ -52,7 +52,10 @@ export class GodmodeProvider implements GodmodePropertiesInterface {
     return this.getGodUserWithContextBasedOnUserAndTeams(user, teams)
   }
 
-  private getGodUserWithContextBasedOnUserAndTeams(user: UserInterface, teams: TeamInterface[]): UserWithContext {
+  private getGodUserWithContextBasedOnUserAndTeams(
+    user: UserInterface,
+    teams: TeamInterface[],
+  ): UserWithContext {
     const resourcePolicy = this.authz.getResourcePolicyFromPermissions(this.token.permissions)
 
     return {

@@ -10,7 +10,8 @@ import { NodePolicyGraphQLObject } from '../objects/node-policy.object'
 export abstract class GuardedNodeGraphQLInterface extends NodeRelayGraphQLInterface {
   @Field(() => NodePolicyGraphQLObject, {
     complexity: 1,
-    description: 'The policy for this node. It decribes actions that your user can perform with that given resource',
+    description:
+      'The policy for this node. It decribes actions that your user can perform with that given resource',
   })
   public readonly policy?: NodePolicyGraphQLObject
 

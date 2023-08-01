@@ -20,11 +20,16 @@ export class EmailNotificationChannel
     this.emailAdapter = new EmailAdapterProvider(awsSESProvider)
   }
 
-  static marshalMetadata(metadata: EmailNotificationChannelMetadata): EmailNotificationChannelMetadata {
+  static marshalMetadata(
+    metadata: EmailNotificationChannelMetadata,
+  ): EmailNotificationChannelMetadata {
     return metadata
   }
 
-  static buildSingleRecipientFromUser(user: UserInterface, customTemplateData?: Record<string, any>): EmailRecipient {
+  static buildSingleRecipientFromUser(
+    user: UserInterface,
+    customTemplateData?: Record<string, any>,
+  ): EmailRecipient {
     return {
       id: user.id,
       name: user.firstName,
@@ -33,13 +38,18 @@ export class EmailNotificationChannel
     }
   }
 
-  static localizeMetadata(metadata: EmailNotificationChannelMetadata): EmailNotificationChannelMetadata[] {
+  static localizeMetadata(
+    metadata: EmailNotificationChannelMetadata,
+  ): EmailNotificationChannelMetadata[] {
     const recipientLocales = EmailNotificationChannel.getLocalesFromMetadata(metadata)
 
     return EmailNotificationChannel.groupMetadataByRecipientLocale(metadata, recipientLocales)
   }
 
-  static getLocalesFromMetadata(metadata: EmailNotificationChannelMetadata, defaultLocale = 'pt-BR'): string[] {
+  static getLocalesFromMetadata(
+    metadata: EmailNotificationChannelMetadata,
+    defaultLocale = 'pt-BR',
+  ): string[] {
     const rawLocales: string[] = [
       defaultLocale,
       ...metadata.recipients.map((recipient) => recipient.customTemplateData?.locale),
@@ -73,7 +83,10 @@ export class EmailNotificationChannel
     return localizedMetadata.filter((metadata) => metadata.recipients.length > 0)
   }
 
-  public async dispatch(data: NotificationData, rawMetadata: EmailNotificationChannelMetadata): Promise<void> {
+  public async dispatch(
+    data: NotificationData,
+    rawMetadata: EmailNotificationChannelMetadata,
+  ): Promise<void> {
     const localizedMetadata = EmailNotificationChannel.localizeMetadata(rawMetadata)
     const dispatchPromises = localizedMetadata.map(async (metadata) => {
       const marshaledMetadata = EmailNotificationChannel.marshalMetadata(metadata)

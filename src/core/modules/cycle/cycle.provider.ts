@@ -10,7 +10,6 @@ import { GetOptions } from '@core/interfaces/get-options'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
-import { Cacheable } from '@lib/cache/cacheable.decorator'
 
 import { CADENCE_RANK } from './cycle.constants'
 import { Cycle } from './cycle.orm-entity'
@@ -97,7 +96,9 @@ export class CycleProvider extends CoreEntityProvider<Cycle, CycleInterface> {
     const groupedByPeriodCycles = groupBy(selectedCycles, 'period')
     const commonCyclesGroupedByPeriod = filter(
       mapValues(groupedByPeriodCycles, (cycles) => {
-        const hasCyclesInAllParents = parentIDs.every((parentID) => cycles.some((cycle) => cycle.parentId === parentID))
+        const hasCyclesInAllParents = parentIDs.every((parentID) =>
+          cycles.some((cycle) => cycle.parentId === parentID),
+        )
 
         return hasCyclesInAllParents ? cycles : undefined
       }),
@@ -116,13 +117,12 @@ export class CycleProvider extends CoreEntityProvider<Cycle, CycleInterface> {
     return this.specification.isActive.isSatisfiedBy(cycle)
   }
 
-  @Cacheable('0', 15)
   public async getFromIndexes(indexes: Partial<CycleInterface>): Promise<Cycle> {
     return this.repository.findOne(indexes)
   }
 
   public async getFromID(id: string): Promise<Cycle> {
-    return this.getFromIndexes({ id })
+    return this.repository.findOne({ id })
   }
 
   public async createCycle(data: CycleInterface): Promise<Cycle> {

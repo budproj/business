@@ -10,7 +10,8 @@ import { UserKeyResultCheckInEdgeGraphQLObject } from './user-key-result-check-i
 
 @ObjectType('UserKeyResultCheckIns', {
   implements: () => [ConnectionRelayGraphQLInterface, GuardedConnectionGraphQLInterface],
-  description: 'A list containing a given user key-results based on the provided filters and arguments',
+  description:
+    'A list containing a given user key-results based on the provided filters and arguments',
 })
 export class UserKeyResultCheckInsGraphQLConnection
   implements GuardedConnectionGraphQLInterface<KeyResultCheckInGraphQLNode>

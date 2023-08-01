@@ -14,6 +14,11 @@ export class KeyResultKeyResultCheckInsConnectionGraphQLResolver extends Guarded
   KeyResultCheckInInterface
 > {
   constructor(protected readonly core: CoreProvider, accessControl: KeyResultCheckInAccessControl) {
-    super(Resource.KEY_RESULT_CHECK_IN, core, core.keyResult.keyResultCheckInProvider, accessControl)
+    super(
+      Resource.KEY_RESULT_CHECK_IN,
+      core,
+      core.keyResult.keyResultCheckInProvider,
+      accessControl,
+    )
   }
 }

@@ -1,6 +1,6 @@
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { User } from '@core/modules/user/user.orm-entity'
-import { BaseStatusCommand } from '@core/ports/commands/base-status.command'
+import { BaseStatusCommand } from '@core/ports/commands/base-status.command';
 
 import { Command } from './base.command'
 
@@ -9,7 +9,7 @@ import { Command } from './base.command'
  */
 class CheckIfKeyResultIsOutdated extends BaseStatusCommand {
   // Ignoring, as we have no other way to deal with this (WARNING: extremely hacky way)
-  // @ts-expect-error
+  // @ts-ignore
   async execute(keyResult: KeyResult): Promise<boolean> {
     const latestCheckIn = await this.core.keyResult.getLatestCheckInForKeyResultAtDate(keyResult.id)
 

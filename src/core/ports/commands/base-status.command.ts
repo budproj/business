@@ -20,14 +20,19 @@ export abstract class BaseStatusCommand extends Command<Status> {
     isActive: true,
   }
 
-  protected getAverage(numberList: number[], defaultValue: number = this.defaultStatus.progress): number {
+  protected getAverage(
+    numberList: number[],
+    defaultValue: number = this.defaultStatus.progress,
+  ): number {
     const onlyDefinedNumbers = filter(numberList)
     if (onlyDefinedNumbers.length === 0) return defaultValue
 
     return sum(numberList) / numberList.length
   }
 
-  protected getLatestCheckInFromList(checkInList: KeyResultCheckInInterface[]): KeyResultCheckInInterface | undefined {
+  protected getLatestCheckInFromList(
+    checkInList: KeyResultCheckInInterface[],
+  ): KeyResultCheckInInterface | undefined {
     return maxBy(checkInList, 'createdAt')
   }
 
@@ -64,15 +69,22 @@ export abstract class BaseStatusCommand extends Command<Status> {
     )
     const groupedKeyResultsProgress = await Promise.all(groupedKeyResultsProgressPromise)
 
-    const progresses = groupedKeyResultsProgress.map((progressList) => this.getAverage(progressList))
-    const confidencesWithoutDeprioritized = latestCheckIns.filter((checkIn) => checkIn?.confidence !== -100)
+    const progresses = groupedKeyResultsProgress.map((progressList) =>
+      this.getAverage(progressList),
+    )
+    const confidencesWithoutDeprioritized = latestCheckIns.filter(
+      (checkIn) => checkIn?.confidence !== -100,
+    )
 
     const confidences = confidencesWithoutDeprioritized.map((checkIn) => checkIn?.confidence)
 
     return [latestCheckIns, progresses, confidences]
   }
 
-  protected getMin(numberList: number[], defaultValue: number = this.defaultStatus.confidence): number {
+  protected getMin(
+    numberList: number[],
+    defaultValue: number = this.defaultStatus.confidence,
+  ): number {
     const onlyDefinedNumbers = filter(numberList)
     if (onlyDefinedNumbers.length === 0) return defaultValue
 
@@ -93,7 +105,10 @@ export abstract class BaseStatusCommand extends Command<Status> {
   /**
    * @deprecated TODO: implement date filter at query level
    */
-  protected removeKeyResultCheckInsBeforeDate(rawKeyResults: KeyResult[], date?: Date): KeyResult[] {
+  protected removeKeyResultCheckInsBeforeDate(
+    rawKeyResults: KeyResult[],
+    date?: Date,
+  ): KeyResult[] {
     return rawKeyResults.map((keyResult) => ({
       ...keyResult,
       checkIns: keyResult.checkIns.filter((checkIn) => (date ? checkIn.createdAt < date : checkIn)),
@@ -107,7 +122,9 @@ export abstract class BaseStatusCommand extends Command<Status> {
   ): Promise<Status> {
     if (isObjective) {
       const keyResults = await this.getKeyResultsFromObjective(id, options)
-      const [allObjectiveLatestCheckIns, progresses, confidences] = await this.unzipKeyResultGroup(keyResults)
+      const [allObjectiveLatestCheckIns, progresses, confidences] = await this.unzipKeyResultGroup(
+        keyResults,
+      )
       const latestCheckIn = this.getLatestCheckInFromList(allObjectiveLatestCheckIns)
       const isOutdated = this.isOutdated(latestCheckIn)
       const isActive = await this.core.objective.isActive(id)
@@ -125,7 +142,10 @@ export abstract class BaseStatusCommand extends Command<Status> {
 
     const keyResults = await this.getActiveKeyResultsFromUser(id, options)
     const filteredKeyResults = keyResults.filter((keyResult) => keyResult.teamId !== null)
-    const [allUserLatestCheckIns, progresses, confidences] = await this.unzipKeyResultGroup(filteredKeyResults, false)
+    const [allUserLatestCheckIns, progresses, confidences] = await this.unzipKeyResultGroup(
+      filteredKeyResults,
+      false,
+    )
 
     const latestCheckIn = this.getLatestCheckInFromList(allUserLatestCheckIns)
     const isOutdated = this.isOutdated(latestCheckIn)
@@ -135,7 +155,10 @@ export abstract class BaseStatusCommand extends Command<Status> {
       return !this.isOutdated(checkIn, new Date())
     })
 
-    const checkmarks = await this.core.keyResult.keyResultCheckMarkProvider.getFromAssignedUser(id, true)
+    const checkmarks = await this.core.keyResult.keyResultCheckMarkProvider.getFromAssignedUser(
+      id,
+      true,
+    )
 
     return {
       isOutdated,
@@ -149,7 +172,10 @@ export abstract class BaseStatusCommand extends Command<Status> {
     }
   }
 
-  private async getKeyResultsFromObjective(objectiveID: string, options: GetStatusOptions): Promise<KeyResult[]> {
+  private async getKeyResultsFromObjective(
+    objectiveID: string,
+    options: GetStatusOptions,
+  ): Promise<KeyResult[]> {
     const filters = {
       keyResult: {
         createdAt: options.date,
@@ -158,14 +184,21 @@ export abstract class BaseStatusCommand extends Command<Status> {
         id: objectiveID,
       },
     }
-    const orderAttributes = this.zipEntityOrderAttributes(['keyResultCheckIn'], [['createdAt']], [['DESC']])
+    const orderAttributes = this.zipEntityOrderAttributes(
+      ['keyResultCheckIn'],
+      [['createdAt']],
+      [['DESC']],
+    )
 
     const keyResults = await this.core.keyResult.getWithRelationFilters(filters, orderAttributes)
 
     return this.removeKeyResultCheckInsBeforeDate(keyResults, options.date)
   }
 
-  private async getActiveKeyResultsFromUser(userId: string, options: GetStatusOptions): Promise<KeyResult[]> {
+  private async getActiveKeyResultsFromUser(
+    userId: string,
+    options: GetStatusOptions,
+  ): Promise<KeyResult[]> {
     const filters = {
       keyResult: {
         createdAt: options.date,
@@ -173,13 +206,19 @@ export abstract class BaseStatusCommand extends Command<Status> {
       },
     }
 
-    const orderAttributes = this.zipEntityOrderAttributes(['keyResultCheckIn'], [['createdAt']], [['DESC']])
+    const orderAttributes = this.zipEntityOrderAttributes(
+      ['keyResultCheckIn'],
+      [['createdAt']],
+      [['DESC']],
+    )
 
     const keyResults = await this.core.keyResult.getWithRelationFilters(filters, orderAttributes)
 
     const filteredKeyResults = keyResults.filter((keyResult) => keyResult.teamId !== null)
 
-    const activeKeyResults = await this.core.keyResult.filterActiveKeyResultsFromList(filteredKeyResults)
+    const activeKeyResults = await this.core.keyResult.filterActiveKeyResultsFromList(
+      filteredKeyResults,
+    )
 
     return this.removeKeyResultCheckInsBeforeDate(activeKeyResults, options.date)
   }

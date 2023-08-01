@@ -22,10 +22,13 @@ export class GetUsersFromTeam extends Command<User[]> {
   @Stopwatch()
   public async execute({ teamID, filters }: GetUsersFromTeamProperties): Promise<User[]> {
     const { withInactives, withTeams, ...otherFilters } = filters
-    const queryFilters = withInactives ? otherFilters : { ...otherFilters, status: UserStatus.ACTIVE }
+    const queryFilters = withInactives
+      ? otherFilters
+      : { ...otherFilters, status: UserStatus.ACTIVE }
 
     // Get team members (users) that belong to teamID
-    const getTeamMembersCommand = this.factory.buildCommand<GetTeamMembersCommandResult>('get-team-members')
+    const getTeamMembersCommand =
+      this.factory.buildCommand<GetTeamMembersCommandResult>('get-team-members')
     const { users } = await getTeamMembersCommand.execute(teamID, queryFilters)
 
     if (withTeams) {

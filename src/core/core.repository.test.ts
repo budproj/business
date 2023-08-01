@@ -98,7 +98,9 @@ describe('CoreRepository', () => {
       const result = dummyService.buildQueryFromFilters(filters, nullableFilters)
 
       // Assert
-      expect(result).toBe('(Objective.ownerId = :objective_ownerId ) AND (Objective.teamId = :objective_teamId )')
+      expect(result).toBe(
+        '(Objective.ownerId = :objective_ownerId ) AND (Objective.teamId = :objective_teamId )',
+      )
     })
 
     it('should build a query with two entity and two columns filter', () => {

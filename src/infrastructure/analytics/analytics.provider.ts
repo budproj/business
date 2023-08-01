@@ -4,10 +4,14 @@ import { ClientGrpc } from '@nestjs/microservices'
 import { AnalyticsAdapter } from '@adapters/analytics/adapter.interface'
 import { ProgressRecord } from '@adapters/analytics/progress-record.interface'
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
-import { Stopwatch } from '@lib/logger/pino.decorator'
+import { Stopwatch } from '@lib/logger/pino.decorator';
 
 import { AnalyticsDateWindow } from './analytics.enums'
-import { AnalyticsGRPCResponse, KeyResultGRPCService, PrimitiveProgressRecord } from './analytics.interfaces'
+import {
+  AnalyticsGRPCResponse,
+  KeyResultGRPCService,
+  PrimitiveProgressRecord,
+} from './analytics.interfaces'
 
 export class AnalyticsProvider implements OnModuleInit, AnalyticsAdapter {
   private keyResultGRPCService: KeyResultGRPCService

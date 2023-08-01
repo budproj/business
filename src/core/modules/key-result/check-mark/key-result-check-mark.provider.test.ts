@@ -1,5 +1,10 @@
 import { TaskStates as CheckMarkStates } from '@core/modules/task/task.interface'
-import { closeConnection, repository, startInMemoryDatabase, testProvider } from '@tests/helpers/orm-connection'
+import {
+  closeConnection,
+  repository,
+  startInMemoryDatabase,
+  testProvider,
+} from '@tests/helpers/orm-connection'
 
 import { User, KeyResult } from './__tests-helpers__/external-entities'
 import { KeyResultCheckMark } from './key-result-check-mark.orm-entity'
@@ -205,7 +210,9 @@ describe('check-mark - provider', () => {
         provider().createCheckMark(checkMark3),
         provider().createCheckMark(checkMark4),
       ])
-      const [checkMark1Id, checkMark2Id, checkMark3Id, checkMark4Id] = creationResults.map(([{ id }]) => id)
+      const [checkMark1Id, checkMark2Id, checkMark3Id, checkMark4Id] = creationResults.map(
+        ([{ id }]) => id,
+      )
       const result = await provider().getFromAssignedUser(mockUser.id)
 
       // Assert

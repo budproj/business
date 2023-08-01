@@ -8,7 +8,9 @@ import { UserSettingGraphQLNode } from '@interface/graphql/modules/user/setting/
   implements: () => EdgeRelayGraphQLInterface,
   description: 'This edge represents the relation between users and their settings',
 })
-export class UserSettingEdgeGraphQLObject implements EdgeRelayGraphQLInterface<UserSettingGraphQLNode> {
+export class UserSettingEdgeGraphQLObject
+  implements EdgeRelayGraphQLInterface<UserSettingGraphQLNode>
+{
   @Field(() => UserSettingGraphQLNode, { complexity: 1 })
   public readonly node!: UserSettingGraphQLNode
 

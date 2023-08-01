@@ -24,7 +24,9 @@ export class GetUserIndicators extends BaseDeltaCommand {
       },
       keyResultsCheckListProgress: {
         total: currentStatus.checkmarks.length,
-        checked: currentStatus.checkmarks.filter((checkmark) => checkmark.state === TaskStates.CHECKED).length,
+        checked: currentStatus.checkmarks.filter(
+          (checkmark) => checkmark.state === TaskStates.CHECKED,
+        ).length,
       },
       keyResultsCheckInProgress: {
         total: currentStatus.total,

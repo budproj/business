@@ -18,10 +18,16 @@ import { KeyResultCheckIn } from './key-result-check-in.orm-entity'
 import { KeyResultCheckInRepository } from './key-result-check-in.repository'
 
 @Injectable()
-export class KeyResultCheckInProvider extends CoreEntityProvider<KeyResultCheckIn, KeyResultCheckInInterface> {
+export class KeyResultCheckInProvider extends CoreEntityProvider<
+  KeyResultCheckIn,
+  KeyResultCheckInInterface
+> {
   private keyResultProvider: KeyResultProvider
 
-  constructor(protected readonly repository: KeyResultCheckInRepository, private readonly moduleReference: ModuleRef) {
+  constructor(
+    protected readonly repository: KeyResultCheckInRepository,
+    private readonly moduleReference: ModuleRef,
+  ) {
     super(KeyResultCheckInProvider.name, repository)
   }
 
@@ -59,7 +65,10 @@ export class KeyResultCheckInProvider extends CoreEntityProvider<KeyResultCheckI
     return this.getLatestFromKeyResultAtDate(keyResult.id, date)
   }
 
-  public async getLatestFromKeyResultAtDate(keyResultID: string, snapshot: Date): Promise<KeyResultCheckIn> {
+  public async getLatestFromKeyResultAtDate(
+    keyResultID: string,
+    snapshot: Date,
+  ): Promise<KeyResultCheckIn> {
     return this.repository.getLatestFromDateForKeyResult(snapshot, keyResultID)
   }
 
@@ -72,15 +81,23 @@ export class KeyResultCheckInProvider extends CoreEntityProvider<KeyResultCheckI
   }
 
   public limitProgress(progress: number): number {
-    return KeyResultCheckInProvider.minmax(progress, MIN_PERCENTAGE_PROGRESS, MAX_PERCENTAGE_PROGRESS)
+    return KeyResultCheckInProvider.minmax(
+      progress,
+      MIN_PERCENTAGE_PROGRESS,
+      MAX_PERCENTAGE_PROGRESS,
+    )
   }
 
-  public async getForTimelineEntries(entries: KeyResultTimelineQueryResult[]): Promise<KeyResultCheckIn[]> {
+  public async getForTimelineEntries(
+    entries: KeyResultTimelineQueryResult[],
+  ): Promise<KeyResultCheckIn[]> {
     const checkInIDs = entries.map((entry) => entry.id)
     return this.repository.findByIds(checkInIDs)
   }
 
-  public async createCheckIn(checkIn: Partial<KeyResultCheckInInterface>): Promise<KeyResultCheckIn[]> {
+  public async createCheckIn(
+    checkIn: Partial<KeyResultCheckInInterface>,
+  ): Promise<KeyResultCheckIn[]> {
     return this.create(checkIn)
   }
 

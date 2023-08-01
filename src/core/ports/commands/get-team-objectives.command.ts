@@ -3,9 +3,9 @@ import { snakeCase } from 'lodash'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { ObjectiveRelationFilterProperties } from '@core/modules/objective/objective.repository'
 import { EntityOrderAttributes, OrderAttribute } from '@core/types/order-attribute.type'
-import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { Command } from './base.command'
+import { Stopwatch } from '@lib/logger/pino.decorator';
 
 interface GetTeamObjectivesProperties {
   active: boolean
@@ -29,10 +29,13 @@ export class GetTeamObjectivesCommand extends Command<Objective[]> {
   }
 
   static marshalOrderAttributes(orderAttributes: OrderAttribute[] = []): OrderAttribute[] {
-    return orderAttributes.map(([attribute, direction]) => [`${Objective.name}.${snakeCase(attribute)}`, direction])
+    return orderAttributes.map(([attribute, direction]) => [
+      `${Objective.name}.${snakeCase(attribute)}`,
+      direction,
+    ])
   }
 
-  @Stopwatch()
+  @Stopwatch({ includeReturn: true })
   public async execute(
     teamID: string,
     properties: Partial<GetTeamObjectivesProperties>,

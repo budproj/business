@@ -67,7 +67,10 @@ export class NewKeyResultSupportTeamMemberNotification extends BaseNotification<
   }
 
   public async dispatch(): Promise<void> {
-    await Promise.allSettled([this.dispatchSupportTeamMemberEmail(), this.dispatchSupportTeamMemberMessaging()])
+    await Promise.allSettled([
+      this.dispatchSupportTeamMemberEmail(),
+      this.dispatchSupportTeamMemberMessaging(),
+    ])
   }
 
   private async getRelatedData(): Promise<RelatedData> {
@@ -91,7 +94,10 @@ export class NewKeyResultSupportTeamMemberNotification extends BaseNotification<
   }
 
   private async getResolvedData(relatedData: RelatedData): Promise<ResolvedData> {
-    const authorFullName = await this.core.dispatchCommand<string>('get-user-full-name', relatedData.author)
+    const authorFullName = await this.core.dispatchCommand<string>(
+      'get-user-full-name',
+      relatedData.author,
+    )
 
     const keyResultConfidenceColor = await this.core.dispatchCommand<string>(
       'get-key-result-confidence-color',
@@ -145,7 +151,10 @@ export class NewKeyResultSupportTeamMemberNotification extends BaseNotification<
   private async dispatchSupportTeamMemberMessaging(): Promise<void> {
     const { data, metadata } = this.marshal()
 
-    const recipients = await this.buildRecipients([data.newSupportTeamMember], this.channels.messageBroker)
+    const recipients = await this.buildRecipients(
+      [data.newSupportTeamMember],
+      this.channels.messageBroker,
+    )
 
     const messages = recipients.map((recipient) => ({
       messageId: randomUUID(),
@@ -165,6 +174,9 @@ export class NewKeyResultSupportTeamMemberNotification extends BaseNotification<
       },
     }))
 
-    await this.channels.messageBroker.dispatchMultiple('notifications-microservice.notification', messages)
+    await this.channels.messageBroker.dispatchMultiple(
+      'notifications-microservice.notification',
+      messages,
+    )
   }
 }

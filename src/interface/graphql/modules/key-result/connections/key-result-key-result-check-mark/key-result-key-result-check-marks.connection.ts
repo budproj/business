@@ -11,7 +11,8 @@ import { KeyResultCheckMarkGraphQLNode } from '../../check-mark/key-result-check
 import { KeyResultKeyResultCheckMarkEdgeGraphQLObject } from './key-result-key-result-check-mark.edge'
 
 @ObjectType('CheckMarkProgress', {
-  description: 'An object containing information about how many check items are checked in a checklist',
+  description:
+    'An object containing information about how many check items are checked in a checklist',
 })
 export class CheckMarkProgress {
   @Field(() => Number, { complexity: 0 })
@@ -26,7 +27,8 @@ export class CheckMarkProgress {
 
 @ObjectType('KeyResultKeyResultCheckList', {
   implements: () => [ConnectionRelayGraphQLInterface, GuardedConnectionGraphQLInterface],
-  description: 'A list containing key-results check marks based on the provided filters and arguments',
+  description:
+    'A list containing key-results check marks based on the provided filters and arguments',
 })
 export class KeyResultKeyResultCheckMarkGraphQLConnection
   implements GuardedConnectionGraphQLInterface<KeyResultCheckMarkGraphQLNode>

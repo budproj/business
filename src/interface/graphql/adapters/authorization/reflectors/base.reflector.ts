@@ -16,7 +16,9 @@ export abstract class BaseAuthorizationGraphQLReflector {
     return GqlExecutionContext.create(executionContext)
   }
 
-  protected getGraphQLRequestFromContext(graphqlExecutionContext: GqlExecutionContext): RequestWithUserToken {
+  protected getGraphQLRequestFromContext(
+    graphqlExecutionContext: GqlExecutionContext,
+  ): RequestWithUserToken {
     return graphqlExecutionContext.getContext().req
   }
 

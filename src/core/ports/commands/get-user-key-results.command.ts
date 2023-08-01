@@ -11,7 +11,11 @@ type Options = {
 }
 
 export class GetUserKeyResultsCommand extends Command<KeyResult[]> {
-  public async execute(userID: string, filters?: KeyResultInterface, options?: Options): Promise<KeyResult[]> {
+  public async execute(
+    userID: string,
+    filters?: KeyResultInterface,
+    options?: Options,
+  ): Promise<KeyResult[]> {
     const ownedKeyResults = await this.core.keyResult.getOwnedByUserID(userID, filters)
 
     if (options?.onlyOwnerKeyResults) {
@@ -20,9 +24,15 @@ export class GetUserKeyResultsCommand extends Command<KeyResult[]> {
       return keyResults
     }
 
-    const supportTeamKeyResults = await this.core.keyResult.getAllWithUserIDInSupportTeam(userID, filters)
+    const supportTeamKeyResults = await this.core.keyResult.getAllWithUserIDInSupportTeam(
+      userID,
+      filters,
+    )
 
-    const allKeyResults = this.core.keyResult.getUniqueKeyResults(ownedKeyResults, supportTeamKeyResults)
+    const allKeyResults = this.core.keyResult.getUniqueKeyResults(
+      ownedKeyResults,
+      supportTeamKeyResults,
+    )
     const keyResults = await this.applyOptions(allKeyResults, options)
 
     return keyResults

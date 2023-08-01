@@ -6,8 +6,6 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 
 import { Scope } from '@adapters/policy/enums/scope.enum'
 import { SCOPE_PRIORITY } from '@adapters/policy/policy.constants'
-import { Cacheable } from '@lib/cache/cacheable.decorator'
-import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { CoreEntity } from './core.orm-entity'
 import { CoreEntityRepository } from './core.repository'
@@ -23,7 +21,10 @@ import { SelectionQueryConstrain } from './types/selection-query-constrain.type'
 export abstract class CoreEntityProvider<E extends CoreEntity, I> {
   protected readonly logger: Logger
 
-  constructor(protected readonly loggerName: string, protected readonly repository: CoreEntityRepository<E>) {
+  constructor(
+    protected readonly loggerName: string,
+    protected readonly repository: CoreEntityRepository<E>,
+  ) {
     this.logger = new Logger(loggerName ?? CoreEntityProvider.name)
   }
 
@@ -36,23 +37,27 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
     return context
   }
 
-  public async createWithConstraint(data: Partial<I>, queryContext: CoreQueryContext): Promise<E[]> {
+  public async createWithConstraint(
+    data: Partial<I>,
+    queryContext: CoreQueryContext,
+  ): Promise<E[]> {
     const shouldConstrainCreation = queryContext.constraint !== Scope.ANY
 
-    return shouldConstrainCreation ? this.createIfWithinConstraint(data, queryContext) : this.create(data, queryContext)
+    return shouldConstrainCreation
+      ? this.createIfWithinConstraint(data, queryContext)
+      : this.create(data, queryContext)
   }
 
-  @Cacheable((selector, queryContext) => [selector, queryContext], 15)
-  @Stopwatch({ includeReturn: true })
-  public async getOneWithConstraint(selector: FindConditions<E>, queryContext: CoreQueryContext): Promise<E> {
+  public async getOneWithConstraint(
+    selector: FindConditions<E>,
+    queryContext: CoreQueryContext,
+  ): Promise<E> {
     const query = await this.getWithConstraint(selector, queryContext)
     const data = this.getOneInQuery(query, queryContext)
 
     return data
   }
 
-  @Cacheable((selector, queryContext, options) => [selector, queryContext, options], 15)
-  @Stopwatch({ includeReturn: true })
   public async getManyWithConstraint(
     selector: FindConditions<E>,
     queryContext: CoreQueryContext,
@@ -84,7 +89,6 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
       : this.delete(selector, queryContext)
   }
 
-  @Cacheable((selector, queryContext, options) => [selector, queryContext, options], 15)
   public async getOne(
     selector: FindConditions<E>,
     queryContext?: CoreQueryContext,
@@ -95,7 +99,6 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
     return query.getOne()
   }
 
-  @Cacheable((selector, queryContext, options) => [selector, queryContext, options], 15)
   public async getMany(
     selector: FindConditions<E>,
     queryContext?: CoreQueryContext,
@@ -122,7 +125,9 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
     const foundData = await this.getOneWithConstraint(selector, queryContext)
     if (!foundData) return currentScope
 
-    return isLastIndex ? nextScope : this.defineResourceHighestScope(entity, queryContext, nextScope)
+    return isLastIndex
+      ? nextScope
+      : this.defineResourceHighestScope(entity, queryContext, nextScope)
   }
 
   public async update(
@@ -132,14 +137,20 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
   ): Promise<E> {
     await this.repository.update(selector, newData)
 
-    return (await this.get(selector, queryContext)).getOne()
+    return this.getOne(selector, queryContext)
   }
 
-  public async delete(selector: FindConditions<E>, _queryContext?: CoreQueryContext): Promise<DeleteResult> {
+  public async delete(
+    selector: FindConditions<E>,
+    _queryContext?: CoreQueryContext,
+  ): Promise<DeleteResult> {
     return this.repository.delete(selector)
   }
 
-  protected async create(data: Partial<I> | Array<Partial<I>>, _queryContext?: CoreQueryContext): Promise<E[]> {
+  protected async create(
+    data: Partial<I> | Array<Partial<I>>,
+    _queryContext?: CoreQueryContext,
+  ): Promise<E[]> {
     const result = await this.repository.insert(data as QueryDeepPartialEntity<E>)
     const createdIDs = result.identifiers.map((data) => data.id)
 
@@ -148,7 +159,10 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
     return createdData
   }
 
-  protected async createIfWithinConstraint(data: Partial<I>, queryContext: CoreQueryContext): Promise<E[]> {
+  protected async createIfWithinConstraint(
+    data: Partial<I>,
+    queryContext: CoreQueryContext,
+  ): Promise<E[]> {
     const creationQuery = async () => this.create(data, queryContext)
 
     return this.protectCreationQuery(creationQuery, data, queryContext)
@@ -222,7 +236,10 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
     return this.get(selector, queryContext, constrainQuery, options)
   }
 
-  protected async getOneInQuery(query: SelectQueryBuilder<E>, queryContext?: CoreQueryContext): Promise<E> {
+  protected async getOneInQuery(
+    query: SelectQueryBuilder<E>,
+    queryContext?: CoreQueryContext,
+  ): Promise<E> {
     this.logger.debug({
       queryContext,
       message: `Getting one for request`,
@@ -231,7 +248,10 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
     return query.getOne()
   }
 
-  protected async getManyInQuery(query: SelectQueryBuilder<E>, queryContext?: CoreQueryContext): Promise<E[]> {
+  protected async getManyInQuery(
+    query: SelectQueryBuilder<E>,
+    queryContext?: CoreQueryContext,
+  ): Promise<E[]> {
     this.logger.debug({
       queryContext,
       message: `Getting many for request`,
@@ -247,7 +267,12 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
   ): Promise<E> {
     const updateQuery = async () => this.update(selector, newData, queryContext)
 
-    return this.protectMutationQuery<E>(updateQuery, selector, queryContext, MutationQueryType.UPDATE)
+    return this.protectMutationQuery<E>(
+      updateQuery,
+      selector,
+      queryContext,
+      MutationQueryType.UPDATE,
+    )
   }
 
   protected async deleteIfWithinConstraint(
@@ -256,7 +281,12 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
   ): Promise<DeleteResult> {
     const deleteQuery = async () => this.delete(selector, queryContext)
 
-    return this.protectMutationQuery<DeleteResult>(deleteQuery, selector, queryContext, MutationQueryType.DELETE)
+    return this.protectMutationQuery<DeleteResult>(
+      deleteQuery,
+      selector,
+      queryContext,
+      MutationQueryType.DELETE,
+    )
   }
 
   protected async protectMutationQuery<T>(
@@ -266,10 +296,14 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
     queryType: MutationQueryType,
   ): Promise<T> {
     const availableSetups = {
-      [MutationQueryType.UPDATE]: async (query: SelectQueryBuilder<E>, queryContext: CoreQueryContext) =>
-        this.setupUpdateMutationQuery(query, queryContext),
-      [MutationQueryType.DELETE]: async (query: SelectQueryBuilder<E>, queryContext: CoreQueryContext) =>
-        this.setupDeleteMutationQuery(query, queryContext),
+      [MutationQueryType.UPDATE]: async (
+        query: SelectQueryBuilder<E>,
+        queryContext: CoreQueryContext,
+      ) => this.setupUpdateMutationQuery(query, queryContext),
+      [MutationQueryType.DELETE]: async (
+        query: SelectQueryBuilder<E>,
+        queryContext: CoreQueryContext,
+      ) => this.setupDeleteMutationQuery(query, queryContext),
     }
     const setup = availableSetups[queryType]
 
@@ -314,7 +348,9 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
     return firstDayAfterLastWeek
   }
 
-  protected marshalEntityOrderAttributes(entityOrderAttributes?: EntityOrderAttributes[]): OrderAttribute[] {
+  protected marshalEntityOrderAttributes(
+    entityOrderAttributes?: EntityOrderAttributes[],
+  ): OrderAttribute[] {
     if (!entityOrderAttributes) return []
 
     const marshalledOrderAttributes = entityOrderAttributes.map(([entity, orderAttributes]) =>

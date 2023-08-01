@@ -13,7 +13,9 @@ import { KeyResultRootEdgeGraphQLObject } from './key-result-root.edge'
   implements: () => [ConnectionRelayGraphQLInterface, GuardedConnectionGraphQLInterface],
   description: 'A list containing key-results based on the provided filters and arguments',
 })
-export class KeyResultsGraphQLConnection implements GuardedConnectionGraphQLInterface<KeyResultGraphQLNode> {
+export class KeyResultsGraphQLConnection
+  implements GuardedConnectionGraphQLInterface<KeyResultGraphQLNode>
+{
   @Field(() => [KeyResultRootEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: KeyResultRootEdgeGraphQLObject[]
 

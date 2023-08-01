@@ -4,7 +4,9 @@ export class RemovesProgressReportUniqueConstraint1608765362618 implements Migra
   name = 'RemovesProgressReportUniqueConstraint1608765362618'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "progress_report" DROP CONSTRAINT "UQ_f36324cc2bdcc2bb1b22f421e98"`)
+    await queryRunner.query(
+      `ALTER TABLE "progress_report" DROP CONSTRAINT "UQ_f36324cc2bdcc2bb1b22f421e98"`,
+    )
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

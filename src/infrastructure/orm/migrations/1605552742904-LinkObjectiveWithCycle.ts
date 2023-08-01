@@ -11,7 +11,9 @@ export class LinkObjectiveWithCycle1605552742904 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "objective" DROP CONSTRAINT "FK_bd6054d696adbee34dbb5bc7687"`)
+    await queryRunner.query(
+      `ALTER TABLE "objective" DROP CONSTRAINT "FK_bd6054d696adbee34dbb5bc7687"`,
+    )
     await queryRunner.query(`ALTER TABLE "objective" DROP COLUMN "cycleId"`)
   }
 }

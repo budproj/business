@@ -3,7 +3,6 @@ import { Injectable } from '@nestjs/common'
 import { AccessControlScopes } from '@adapters/authorization/interfaces/access-control-scopes.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
-import { CoreProvider } from '@core/core.provider'
 import { KeyResultCheckMark } from '@core/modules/key-result/check-mark/key-result-check-mark.orm-entity'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { Team } from '@core/modules/team/team.orm-entity'
@@ -20,11 +19,14 @@ type RelatedEntities = {
 export class KeyResultCheckMarkAccessControl extends KeyResultBaseAccessControl {
   protected readonly resource = Resource.KEY_RESULT_CHECK_MARK
 
-  constructor(protected core: CorePortsProvider, coreProvider: CoreProvider) {
-    super(core, coreProvider.team)
+  constructor(protected core: CorePortsProvider) {
+    super(core)
   }
 
-  protected async resolveContextScopes(user: UserWithContext, keyResultID: string): Promise<AccessControlScopes> {
+  protected async resolveContextScopes(
+    user: UserWithContext,
+    keyResultID: string,
+  ): Promise<AccessControlScopes> {
     return this.resolveKeyResultContext(user, keyResultID)
   }
 
@@ -35,8 +37,10 @@ export class KeyResultCheckMarkAccessControl extends KeyResultBaseAccessControl 
     const { keyResult, teams } = await this.getRelatedEntities(keyResultCheckMarkID)
 
     const isOwner = await this.isKeyResultOwner(keyResult, user)
-    const isTeamLeader = this.isTeamLeader(teams, user)
-    const isCompanyMember = keyResult.teamId ? await this.isKeyResultCompanyMember(keyResult, user) : false
+    const isTeamLeader = await this.isTeamLeader(teams, user)
+    const isCompanyMember = keyResult.teamId
+      ? await this.isKeyResultCompanyMember(keyResult, user)
+      : false
 
     return {
       isTeamLeader,
@@ -46,9 +50,10 @@ export class KeyResultCheckMarkAccessControl extends KeyResultBaseAccessControl 
   }
 
   private async getRelatedEntities(keyResultCheckMarkID: string): Promise<RelatedEntities> {
-    const keyResultCheckMark = await this.core.dispatchCommand<KeyResultCheckMark>('get-key-result-check-mark', {
-      id: keyResultCheckMarkID,
-    })
+    const keyResultCheckMark = await this.core.dispatchCommand<KeyResultCheckMark>(
+      'get-key-result-check-mark',
+      { id: keyResultCheckMarkID },
+    )
     const keyResult = await this.core.dispatchCommand<KeyResult>('get-key-result', {
       id: keyResultCheckMark.keyResultId,
     })

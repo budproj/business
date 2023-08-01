@@ -7,7 +7,9 @@ import { Command } from './base.command'
 
 export class GetKeyResultsContainingUserChecklistCommand extends Command<KeyResult[]> {
   public async execute(userId: User['id']) {
-    const checkmarks = await this.core.keyResult.keyResultCheckMarkProvider.getFromAssignedUser(userId)
+    const checkmarks = await this.core.keyResult.keyResultCheckMarkProvider.getFromAssignedUser(
+      userId,
+    )
 
     const keyResultsIds = uniq(checkmarks.map((checkmark) => checkmark.keyResultId))
 

@@ -23,7 +23,10 @@ export class ObjectivesConnectionGraphQLResolver extends GuardedConnectionGraphQ
 > {
   private readonly logger = new Logger(ObjectivesConnectionGraphQLResolver.name)
 
-  constructor(protected readonly core: CoreProvider, private readonly corePorts: CorePortsProvider) {
+  constructor(
+    protected readonly core: CoreProvider,
+    private readonly corePorts: CorePortsProvider,
+  ) {
     super(Resource.OBJECTIVE, core, core.objective)
   }
 
@@ -38,7 +41,10 @@ export class ObjectivesConnectionGraphQLResolver extends GuardedConnectionGraphQ
       message: 'Fetching objectives with filters',
     })
 
-    const [options, _, connection] = this.relay.unmarshalRequest<ObjectiveFiltersRequest, Objective>(request)
+    const [options, _, connection] = this.relay.unmarshalRequest<
+      ObjectiveFiltersRequest,
+      Objective
+    >(request)
     const { active, ...filters } = options
     const command = 'get-objectives'
 

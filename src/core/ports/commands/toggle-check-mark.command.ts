@@ -10,8 +10,10 @@ export class ToggleCheckMarkCommand extends Command<KeyResultCheckMark> {
     })
 
     const possibleActions = {
-      [CheckMarkStates.UNCHECKED]: async (id) => this.core.keyResult.keyResultCheckMarkProvider.checkCheckMark(id),
-      [CheckMarkStates.CHECKED]: async (id) => this.core.keyResult.keyResultCheckMarkProvider.uncheckCheckMark(id),
+      [CheckMarkStates.UNCHECKED]: async (id) =>
+        this.core.keyResult.keyResultCheckMarkProvider.checkCheckMark(id),
+      [CheckMarkStates.CHECKED]: async (id) =>
+        this.core.keyResult.keyResultCheckMarkProvider.uncheckCheckMark(id),
     }
     const action = possibleActions[previousCheckMark.state]
 

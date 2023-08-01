@@ -19,7 +19,9 @@ export class ImageUploadValidationPipe implements PipeTransform {
     const isValid = this.validMimetypes.includes(file.mimetype)
 
     if (!isValid) {
-      throw new UserInputError(`Invalid image format. Valid mimetypes are: ${this.validMimetypes.join(', ')}`)
+      throw new UserInputError(
+        `Invalid image format. Valid mimetypes are: ${this.validMimetypes.join(', ')}`,
+      )
     }
   }
 }

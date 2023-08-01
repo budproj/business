@@ -4,7 +4,9 @@ export class AddTask1648146279087 implements MigrationInterface {
   name = 'AddTask1648146279087'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`CREATE TYPE "public"."task_state_enum" AS ENUM('checked', 'unchecked')`)
+    await queryRunner.query(
+      `CREATE TYPE "public"."task_state_enum" AS ENUM('checked', 'unchecked')`,
+    )
     await queryRunner.query(
       `CREATE TABLE "task" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updated_at" TIMESTAMP NOT NULL DEFAULT now(), "user_id" uuid NOT NULL, "assigned_user_id" uuid, "description" text NOT NULL, "state" "public"."task_state_enum" NOT NULL DEFAULT 'unchecked', CONSTRAINT "PK_fb213f79ee45060ba925ecd576e" PRIMARY KEY ("id"))`,
     )

@@ -8,7 +8,9 @@ import { ObjectiveGraphQLNode } from '@interface/graphql/modules/objective/objec
   implements: () => EdgeRelayGraphQLInterface,
   description: 'This edge represents the relation between cycles and their objectives',
 })
-export class CycleObjectiveEdgeGraphQLObject implements EdgeRelayGraphQLInterface<ObjectiveGraphQLNode> {
+export class CycleObjectiveEdgeGraphQLObject
+  implements EdgeRelayGraphQLInterface<ObjectiveGraphQLNode>
+{
   @Field(() => ObjectiveGraphQLNode, { complexity: 1 })
   public readonly node!: ObjectiveGraphQLNode
 

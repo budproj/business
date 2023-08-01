@@ -12,7 +12,10 @@ export class GetKeyResultCheckInWindowForCheckInCommand extends Command<number> 
     minutes: differenceInMinutes,
   }
 
-  public async execute(checkIn: Partial<KeyResultCheckIn>, timeUnit: WindowUnit = 'minutes'): Promise<number> {
+  public async execute(
+    checkIn: Partial<KeyResultCheckIn>,
+    timeUnit: WindowUnit = 'minutes',
+  ): Promise<number> {
     const previousCheckIn = await this.core.keyResult.getFromKeyResultCheckInID(checkIn.parentId)
     const keyResult = await this.core.keyResult.getFromIndexes({ id: checkIn.keyResultId })
 

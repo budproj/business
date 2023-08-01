@@ -1,5 +1,10 @@
-import { ForbiddenException, InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common'
-import { Args, Context, Parent, ResolveField } from '@nestjs/graphql'
+import {
+  ForbiddenException,
+  InternalServerErrorException,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common'
+import { Args, Parent, ResolveField } from '@nestjs/graphql'
 import { UserInputError } from 'apollo-server-fastify'
 import { Role } from 'auth0'
 import { FileUpload } from 'graphql-upload'
@@ -36,7 +41,6 @@ import { GuardedResolver } from '@interface/graphql/adapters/authorization/decor
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
 import { UploadGraphQLProvider } from '@interface/graphql/adapters/upload/upload.provider'
-import { IDataloaders } from '@interface/graphql/dataloader/dataloader.service'
 import { KeyResultCheckInFiltersRequest } from '@interface/graphql/modules/key-result/check-in/requests/key-result-check-in-filters.request'
 import { KeyResultCommentFiltersRequest } from '@interface/graphql/modules/key-result/comment/requests/key-result-comment-filters.request'
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
@@ -45,8 +49,6 @@ import { UserSettingsGraphQLConnection } from '@interface/graphql/modules/user/c
 import { UserSettingFiltersRequest } from '@interface/graphql/modules/user/setting/requests/user-setting-filters.request'
 import { UserAccessControl } from '@interface/graphql/modules/user/user.access-control'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
-import { Cacheable } from '@lib/cache/cacheable.decorator'
-import { Stopwatch } from '@lib/logger/pino.decorator'
 import { Permission as UserPermission } from 'src/adapters/policy/types/permission.type'
 
 import { UserKeyResultCheckInsGraphQLConnection } from './connections/user-key-result-check-ins/user-key-result-check-ins.connection'
@@ -68,6 +70,8 @@ import { UserUpdateRoleRequest } from './requests/user-update-role.request'
 import { UserUpdateRequest } from './requests/user-update.request'
 import { UserTasksRequest } from './task/requests/user-tasks.request'
 import { UserGraphQLNode } from './user.node'
+import { Stopwatch } from "@lib/logger/pino.decorator";
+import {Cacheable} from "@lib/cache/cacheable.decorator";
 
 @GuardedResolver(UserGraphQLNode)
 export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserInterface> {
@@ -85,44 +89,41 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     this.uploadProvider = new UploadGraphQLProvider(awsS3)
   }
 
+  @Cacheable((request, user) => [user.id, request], 1 * 60)
   @Stopwatch()
   @GuardedQuery(UserGraphQLNode, 'user:read', { name: 'user' })
   protected async getUserForRequestAndRequestUserWithContext(
     @Args() request: NodeIndexesRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
-    @Context() { loaders }: { loaders: IDataloaders },
   ) {
     this.logger.log({
       request,
       message: 'Fetching user with provided indexes',
     })
 
-    // eslint-disable-next-line capitalized-comments
-    // const user = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
-    // if (!user) throw new UserInputError(`We could not found an user with the provided arguments`)
-    //
-    // return user
+    const user = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
+    if (!user) throw new UserInputError(`We could not found an user with the provided arguments`)
 
-    return loaders.user.load(request.id)
+    return user
   }
 
+  @Cacheable('0.id', 1 * 60)
   @Stopwatch()
   @GuardedQuery(UserGraphQLNode, 'user:read', { name: 'me' })
   protected async getMyUserForRequestUserWithContext(
     @RequestUserWithContext() userWithContext: UserWithContext,
-    @Context() { loaders }: { loaders: IDataloaders },
   ) {
     this.logger.log(
       `Fetching data about the user that is executing the request. Provided user ID: ${userWithContext.id}`,
     )
 
-    // eslint-disable-next-line capitalized-comments
-    // const user = await this.queryGuard.getOneWithActionScopeConstraint({ id: userWithContext.id }, userWithContext)
-    // if (!user) throw new UserInputError(`We could not found an user with ID ${userWithContext.id}`)
-    //
-    // return user
+    const user = await this.queryGuard.getOneWithActionScopeConstraint(
+      { id: userWithContext.id },
+      userWithContext,
+    )
+    if (!user) throw new UserInputError(`We could not found an user with ID ${userWithContext.id}`)
 
-    return loaders.user.load(userWithContext.id)
+    return user
   }
 
   @GuardedMutation(UserGraphQLNode, 'user:update', { name: 'updateUser' })
@@ -220,7 +221,12 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     await this.corePorts.dispatchCommand('add-team-to-user', { teamID, userID: createdUser.id })
 
     if (locale) {
-      await this.corePorts.dispatchCommand<UserSetting>('update-user-setting', createdUser.id, Key.LOCALE, locale)
+      await this.corePorts.dispatchCommand<UserSetting>(
+        'update-user-setting',
+        createdUser.id,
+        Key.LOCALE,
+        locale,
+      )
 
       await this.corePorts.dispatchCommand('invite-user', createdUser.id, createdUser.email)
     }
@@ -251,7 +257,9 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     name: 'requestChangeUserPasswordEmail',
     nullable: true,
   })
-  protected async requestChangeUserPasswordEmailForRequestAndRequestUserWithContext(@Args() request: UserRquest) {
+  protected async requestChangeUserPasswordEmailForRequestAndRequestUserWithContext(
+    @Args() request: UserRquest,
+  ) {
     this.logger.log({
       request,
       message: 'Received update user role request',
@@ -283,61 +291,87 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return this.core.user.buildUserFullName(user)
   }
 
+  @Cacheable((request, user) => [user.id, request], 1 * 60)
   @Stopwatch()
   @ResolveField('companies', () => UserTeamsGraphQLConnection, { nullable: true })
-  protected async getCompaniesForRequestAndUser(@Args() request: TeamFiltersRequest, @Parent() user: UserGraphQLNode) {
+  protected async getCompaniesForRequestAndUser(
+    @Args() request: TeamFiltersRequest,
+    @Parent() user: UserGraphQLNode,
+  ) {
     this.logger.log({
       user,
       request,
       message: 'Fetching companies for user',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<TeamFiltersRequest, Team>(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      TeamFiltersRequest,
+      Team
+    >(request)
 
-    const userCompanies = await this.core.team.getUserCompanies(user.id, filters, queryOptions)
+    const userCompanies = await this.core.team.getUserCompanies(user, filters, queryOptions)
     return this.relay.marshalResponse<Team>(userCompanies, connection, user)
   }
 
+  @Cacheable((request, user) => [user.id, request], 1 * 60)
   @Stopwatch()
   @ResolveField('teams', () => UserTeamsGraphQLConnection, { nullable: true })
-  protected async getTeamsForRequestAndUser(@Args() request: TeamFiltersRequest, @Parent() user: UserGraphQLNode) {
+  protected async getTeamsForRequestAndUser(
+    @Args() request: TeamFiltersRequest,
+    @Parent() user: UserGraphQLNode,
+  ) {
     this.logger.log({
       user,
       request,
       message: 'Fetching teams for user',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<TeamFiltersRequest, Team>(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      TeamFiltersRequest,
+      Team
+    >(request)
 
     const queryResult = await this.core.user.getUserTeams(user, filters, queryOptions)
 
     return this.relay.marshalResponse<TeamInterface>(queryResult, connection, user)
   }
 
+  @Cacheable((request, user) => [user.id, request], 1 * 60)
   @Stopwatch()
   @ResolveField('ownedTeams', () => UserTeamsGraphQLConnection, { nullable: true })
-  protected async getOwnedTeamsForRequestAndUser(@Args() request: TeamFiltersRequest, @Parent() user: UserGraphQLNode) {
+  protected async getOwnedTeamsForRequestAndUser(
+    @Args() request: TeamFiltersRequest,
+    @Parent() user: UserGraphQLNode,
+  ) {
     this.logger.log({
       user,
       request,
       message: 'Fetching owned teams for user',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<TeamFiltersRequest, Team>(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      TeamFiltersRequest,
+      Team
+    >(request)
 
     const queryResult = await this.core.team.getFromOwner(user, filters, queryOptions)
 
     return this.relay.marshalResponse<TeamInterface>(queryResult, connection, user)
   }
 
+  @Cacheable('0.id', 15 * 60)
   @Stopwatch()
   @ResolveField('isTeamLeader', () => Boolean, { nullable: true })
-  protected async getIsTeamLeaderForRequestAndUser(@RequestUserWithContext() userWithContext: UserWithContext) {
+  protected async getIsTeamLeaderForRequestAndUser(
+    @RequestUserWithContext() userWithContext: UserWithContext,
+  ) {
     this.logger.log({
       userWithContext,
       message: 'Fetching if is team leader for user',
     })
-    return this.accessControl.isUserTeamLeader(userWithContext)
+    const isTeamLeader = await this.accessControl.isUserTeamLeader(userWithContext)
+
+    return isTeamLeader
   }
 
   @Stopwatch()
@@ -352,7 +386,10 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching objectives for user',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<ObjectiveFiltersRequest, Objective>(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      ObjectiveFiltersRequest,
+      Objective
+    >(request)
 
     const queryResult = await this.core.objective.getFromOwner(user, filters, queryOptions)
 
@@ -371,17 +408,28 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching key results for user',
     })
 
-    const [options, _, connection] = this.relay.unmarshalRequest<UserKeyResultsRequest, KeyResult>(request)
+    const [options, _, connection] = this.relay.unmarshalRequest<UserKeyResultsRequest, KeyResult>(
+      request,
+    )
 
-    const { active, hasUserCheckMarks, confidence, onlyKeyResultsFromCompany, onlyOwnerKeyResults, ...filters } =
-      options
-    const command = hasUserCheckMarks ? 'get-key-results-containing-user-checklist' : 'get-user-key-results'
-
-    const queryResult = await this.corePorts.dispatchCommand<KeyResult[]>(command, user.id, filters, {
+    const {
       active,
+      hasUserCheckMarks,
       confidence,
+      onlyKeyResultsFromCompany,
       onlyOwnerKeyResults,
-    })
+      ...filters
+    } = options
+    const command = hasUserCheckMarks
+      ? 'get-key-results-containing-user-checklist'
+      : 'get-user-key-results'
+
+    const queryResult = await this.corePorts.dispatchCommand<KeyResult[]>(
+      command,
+      user.id,
+      filters,
+      { active, confidence, onlyOwnerKeyResults },
+    )
     // eslint-disable-next-line no-warning-comments
     // TODO: Esse filtro deve ser removido quando o backend for refatorado. O filtro pode ser feito dentro dos comandos, mas como a feature precisava ser entregue, foi feito dessa forma.
     const filteredResults = onlyKeyResultsFromCompany
@@ -424,7 +472,11 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       KeyResultComment
     >(request)
 
-    const queryResult = await this.core.keyResult.getCommentsCreatedByUser(user, filters, queryOptions)
+    const queryResult = await this.core.keyResult.getCommentsCreatedByUser(
+      user,
+      filters,
+      queryOptions,
+    )
 
     return this.relay.marshalResponse<KeyResultCommentInterface>(queryResult, connection, user)
   }
@@ -448,21 +500,30 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       KeyResultCheckIn
     >(request)
 
-    const queryResult = await this.core.keyResult.getCheckInsCreatedByUser(user, filters, queryOptions)
+    const queryResult = await this.core.keyResult.getCheckInsCreatedByUser(
+      user,
+      filters,
+      queryOptions,
+    )
 
     return this.relay.marshalResponse<KeyResultCheckInInterface>(queryResult, connection, user)
   }
 
   @Stopwatch()
   @ResolveField('tasks', () => UserTasksGraphQLConnection, { nullable: true })
-  protected async getTasksForRequestAndUser(@Args() request: UserTasksRequest, @Parent() user: UserGraphQLNode) {
+  protected async getTasksForRequestAndUser(
+    @Args() request: UserTasksRequest,
+    @Parent() user: UserGraphQLNode,
+  ) {
     this.logger.log({
       user,
       request,
       message: 'Fetching tasks for user',
     })
 
-    const [options, getOptions, connection] = this.relay.unmarshalRequest<UserTasksRequest, Task>(request)
+    const [options, getOptions, connection] = this.relay.unmarshalRequest<UserTasksRequest, Task>(
+      request,
+    )
 
     const queryResult = await this.corePorts.dispatchCommand<Task[]>(
       'get-tasks-from-user',
@@ -483,7 +544,10 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   ) {
     const isInTheSameCompany = await this.accessControl.isInTheSameCompany(userWithContext, user.id)
     if (!isInTheSameCompany) throw new ForbiddenException()
-    const progress = await this.corePorts.dispatchCommand<UserReportProgress>('get-user-quarterly-progress', user.id)
+    const progress = await this.corePorts.dispatchCommand<UserReportProgress>(
+      'get-user-quarterly-progress',
+      user.id,
+    )
 
     return progress
   }
@@ -497,7 +561,10 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   ) {
     const isInTheSameCompany = await this.accessControl.isInTheSameCompany(userWithContext, user.id)
     if (!isInTheSameCompany) throw new ForbiddenException()
-    const progress = await this.corePorts.dispatchCommand<UserReportProgress>('get-user-yearly-progress', user.id)
+    const progress = await this.corePorts.dispatchCommand<UserReportProgress>(
+      'get-user-yearly-progress',
+      user.id,
+    )
 
     return progress
   }
@@ -517,10 +584,9 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     const isInTheSameCompany = await this.accessControl.isInTheSameCompany(userWithContext, user.id)
     if (!isInTheSameCompany) throw new ForbiddenException()
 
-    const amplitudeData = await this.corePorts.dispatchCommand<UserAmplitudeDataProperties['userData']['amp_props']>(
-      'get-user-profile-amplitude',
-      user.id,
-    )
+    const amplitudeData = await this.corePorts.dispatchCommand<
+      UserAmplitudeDataProperties['userData']['amp_props']
+    >('get-user-profile-amplitude', user.id)
 
     return amplitudeData
   }
@@ -540,14 +606,23 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       message: 'Fetching settings for user',
     })
 
-    const [filters, _, connection] = this.relay.unmarshalRequest<UserSettingFiltersRequest, UserSetting>(request)
+    const [filters, _, connection] = this.relay.unmarshalRequest<
+      UserSettingFiltersRequest,
+      UserSetting
+    >(request)
 
-    const settings = await this.corePorts.dispatchCommand<UserSetting[]>('get-user-settings', user.id, filters.keys)
+    const settings = await this.corePorts.dispatchCommand<UserSetting[]>(
+      'get-user-settings',
+      user.id,
+      filters.keys,
+    )
 
     return this.relay.marshalResponse<UserSettingInterface>(settings, connection, user)
   }
 
-  private async parseUserPictureFileToRemoteURL(picturePromise?: Promise<FileUpload>): Promise<string | undefined> {
+  private async parseUserPictureFileToRemoteURL(
+    picturePromise?: Promise<FileUpload>,
+  ): Promise<string | undefined> {
     if (typeof picturePromise === 'undefined') return
 
     const pictureFile = await picturePromise

@@ -18,10 +18,17 @@ import { UserAccessControl } from '@interface/graphql/modules/user/user.access-c
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
 @GuardedResolver(UserSettingGraphQLNode)
-export class UserSettingGraphQLResolver extends GuardedNodeGraphQLResolver<UserSetting, UserSettingInterface> {
+export class UserSettingGraphQLResolver extends GuardedNodeGraphQLResolver<
+  UserSetting,
+  UserSettingInterface
+> {
   private readonly logger = new Logger(UserSettingGraphQLResolver.name)
 
-  constructor(protected corePorts: CorePortsProvider, protected accessControl: UserAccessControl, core: CoreProvider) {
+  constructor(
+    protected corePorts: CorePortsProvider,
+    protected accessControl: UserAccessControl,
+    core: CoreProvider,
+  ) {
     super(Resource.USER_SETTING, core, core.user as any, accessControl)
   }
 

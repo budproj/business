@@ -8,7 +8,8 @@ import { UserGraphQLNode } from '../user.node'
 
 @ObjectType('Task', {
   implements: () => [NodeRelayGraphQLInterface, GuardedNodeGraphQLInterface],
-  description: 'Task is an entity inside a given user. It is used by the user to organize his/her day.',
+  description:
+    'Task is an entity inside a given user. It is used by the user to organize his/her day.',
 })
 export class TaskGraphQLNode implements GuardedNodeGraphQLInterface {
   @Field({ complexity: 0, description: 'The state of the task' })

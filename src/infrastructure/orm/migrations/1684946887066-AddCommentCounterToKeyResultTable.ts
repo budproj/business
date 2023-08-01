@@ -40,6 +40,8 @@ export class AddCommentCounterToKeyResultTable1684946887066 implements Migration
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`ALTER TABLE "key_result" DROP COLUMN "comment_count"`)
-    await queryRunner.query('DROP TRIGGER IF EXISTS increment_comment_count ON "key_result_comment"')
+    await queryRunner.query(
+      'DROP TRIGGER IF EXISTS increment_comment_count ON "key_result_comment"',
+    )
   }
 }

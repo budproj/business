@@ -8,7 +8,10 @@ export const CREATED_KEY_RESULT_CHECKMARK_ACTIVITY_TYPE = 'ACTIVITY::KEY-RESULT:
 export class CreatedKeyResultCheckMarkActivity extends Activity<KeyResultCheckMark> {
   public type = CREATED_KEY_RESULT_CHECKMARK_ACTIVITY_TYPE
 
-  constructor(public readonly data: KeyResultCheckMark, public readonly context: Partial<GraphQLRequest>) {
+  constructor(
+    public readonly data: KeyResultCheckMark,
+    public readonly context: Partial<GraphQLRequest>,
+  ) {
     super(data, context)
   }
 }

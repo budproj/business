@@ -16,7 +16,7 @@ class NodeHashProvider implements HashProvider {
         }
 
         return value
-      },
+      }
       // TODO: maybe we should also add `unorderedArrays: true`?
     })
   }

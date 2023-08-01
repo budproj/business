@@ -5,9 +5,6 @@ import { BaseDeltaCommand } from '@core/ports/commands/base-delta.command'
 import { Command } from '@core/ports/commands/base.command'
 import { CommandFactory } from '@core/ports/commands/command.factory'
 
-/**
- * @deprecated prefer using the `CycleStatusProvider` instead
- */
 export class GetCycleDeltaCommand extends BaseDeltaCommand {
   private readonly getCycleStatus: Command<Status>
 

@@ -9,7 +9,11 @@ export class TracingProvider {
   public data: TracingInterface
   private readonly marshal: MarshalFunction
 
-  constructor(origin: Origin, properties?: Properties, marshalers?: Record<Origin, MarshalFunction>) {
+  constructor(
+    origin: Origin,
+    properties?: Properties,
+    marshalers?: Record<Origin, MarshalFunction>,
+  ) {
     marshalers ??= {
       'http-request': this.marshalFromHTTPRequest,
     }

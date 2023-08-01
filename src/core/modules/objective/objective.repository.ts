@@ -38,7 +38,9 @@ export class ObjectiveRepository extends CoreEntityRepository<Objective> {
       .leftJoinAndSelect(`${Objective.name}.keyResults`, KeyResult.name)
 
     orderAttributes.map(([attribute, direction], index) => {
-      return index === 0 ? query.orderBy(attribute, direction) : query.addOrderBy(attribute, direction)
+      return index === 0
+        ? query.orderBy(attribute, direction)
+        : query.addOrderBy(attribute, direction)
     })
 
     return query.getMany()

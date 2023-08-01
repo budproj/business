@@ -28,7 +28,11 @@ interface ActivityData {
 }
 
 @Injectable()
-export class PendingTasksNotification extends BaseNotification<Data, Metadata, GenericActivity<ActivityData, never>> {
+export class PendingTasksNotification extends BaseNotification<
+  Data,
+  Metadata,
+  GenericActivity<ActivityData, never>
+> {
   static activityType = GenericActivityTypes.PendenciesNotification
   static notificationType = 'PendenciesNotification'
 
@@ -58,7 +62,9 @@ export class PendingTasksNotification extends BaseNotification<Data, Metadata, G
   }
 
   private async getResolvedData(relatedData: RelatedData): Promise<User[]> {
-    const usersWithPendingKeyResultsPromises = relatedData.companyUsers.map<Promise<User | undefined>>(async (user) => {
+    const usersWithPendingKeyResultsPromises = relatedData.companyUsers.map<
+      Promise<User | undefined>
+    >(async (user) => {
       const hasPendingKeyResults = await this.core.dispatchCommand<number>(
         'check-if-user-has-pending-key-results',
         user.id,
@@ -69,7 +75,10 @@ export class PendingTasksNotification extends BaseNotification<Data, Metadata, G
 
     const usersWithPendingKeyResults = await Promise.all(usersWithPendingKeyResultsPromises)
 
-    const usersWithPendencies = [...usersWithPendingKeyResults.filter(Boolean), ...relatedData.usersWithPendingRoutines]
+    const usersWithPendencies = [
+      ...usersWithPendingKeyResults.filter(Boolean),
+      ...relatedData.usersWithPendingRoutines,
+    ]
 
     const uniqueArrayOfUsers = uniqBy<User>(usersWithPendencies, 'id')
 
@@ -84,7 +93,11 @@ export class PendingTasksNotification extends BaseNotification<Data, Metadata, G
       recipientFirstName: user.firstName,
     }))
 
-    const recipients = (await this.buildRecipients(data, this.channels.email, customData)) as EmailRecipient[]
+    const recipients = (await this.buildRecipients(
+      data,
+      this.channels.email,
+      customData,
+    )) as EmailRecipient[]
 
     const emailMetadata: EmailNotificationChannelMetadata = {
       ...metadata,

@@ -14,7 +14,9 @@ export class AddKeyResultView1605815979323 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "key_result_view" DROP CONSTRAINT "FK_d7f88f19b2d4d892aea802f4e19"`)
+    await queryRunner.query(
+      `ALTER TABLE "key_result_view" DROP CONSTRAINT "FK_d7f88f19b2d4d892aea802f4e19"`,
+    )
     await queryRunner.query(`DROP TABLE "key_result_view"`)
     await queryRunner.query(`DROP TYPE "key_result_view_binding_enum"`)
   }

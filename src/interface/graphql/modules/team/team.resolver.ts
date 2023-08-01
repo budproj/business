@@ -1,16 +1,22 @@
-import { InternalServerErrorException, Logger, NotImplementedException, UnauthorizedException } from '@nestjs/common'
-import { Args, Parent, ResolveField, Info, Context } from '@nestjs/graphql'
-import { startOfWeek } from 'date-fns'
+import {
+  InternalServerErrorException,
+  Logger,
+  NotImplementedException,
+  UnauthorizedException,
+} from '@nestjs/common'
+import { Args, Parent, ResolveField, Info } from '@nestjs/graphql'
+import { UserInputError } from 'apollo-server-fastify'
 import { uniqBy } from 'lodash'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { Delta } from '@core/interfaces/delta.interface'
+import { Status } from '@core/interfaces/status.interface'
 import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
-import { TeamStatusProvider } from '@core/modules/mission-control/status/team/team-status.provider'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
@@ -18,21 +24,18 @@ import { Team } from '@core/modules/team/team.orm-entity'
 import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
-import { GetTeamMembersCommandResult } from '@core/ports/commands/get-team-members.command'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedNodeGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-node.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
-import { IDataloaders } from '@interface/graphql/dataloader/dataloader.service'
 import GetResolvedFieldsInEdgesAndNodes, {
   ResolvedFieldInfo,
 } from '@interface/graphql/helpers/get-resolved-fields-in-edges-and-nodes.helper'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
 import { CycleFiltersRequest } from '@interface/graphql/modules/cycle/requests/cycle-filters.request'
 import { ObjectiveFiltersRequest } from '@interface/graphql/modules/objective/requests/objective-filters.request'
-import { TeamMembersGraphQLObject } from '@interface/graphql/modules/team/objects/team-members.object'
 import { TeamStatusRequest } from '@interface/graphql/modules/team/requests/team-status.request'
 import { UserFiltersRequest } from '@interface/graphql/modules/user/requests/user-filters.request'
 import { UserKeyResultsRequest } from '@interface/graphql/modules/user/requests/user-key-results.request'
@@ -40,8 +43,6 @@ import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
 import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
-import { Cacheable } from '@lib/cache/cacheable.decorator'
-import { Stopwatch } from '@lib/logger/pino.decorator'
 
 import { TeamCyclesGraphQLConnection } from './connections/team-cycles/team-cycles.connection'
 import { TeamKeyResultsGraphQLConnection } from './connections/team-key-results/team-key-results.connection'
@@ -54,6 +55,9 @@ import { TeamMembersFiltersRequest } from './requests/team-members-filters.reque
 import { TeamUpdateRequest } from './requests/team-update.request'
 import { TeamAccessControl } from './team.access-control'
 import { TeamGraphQLNode } from './team.node'
+import { Stopwatch } from '@lib/logger/pino.decorator'
+import { Cacheable } from "@lib/cache/cacheable.decorator";
+import { GetTeamMembersCommandResult } from '@core/ports/commands/get-team-members.command';
 
 @GuardedResolver(TeamGraphQLNode)
 export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamInterface> {
@@ -63,7 +67,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     protected readonly core: CoreProvider,
     protected readonly corePorts: CorePortsProvider,
     protected readonly accessControl: TeamAccessControl,
-    private readonly teamStatusProvider: TeamStatusProvider,
   ) {
     super(Resource.TEAM, core, core.team, accessControl)
   }
@@ -73,20 +76,16 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   protected async getTeamForRequestAndRequestUserWithContext(
     @Args() request: NodeIndexesRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
-    @Context() { loaders }: { loaders: IDataloaders },
   ) {
     this.logger.log({
       request,
       message: 'Fetching team with provided indexes',
     })
 
-    // eslint-disable-next-line capitalized-comments
-    // const team = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
-    // if (!team) throw new UserInputError(`We could not found a team with the provided arguments`)
-    //
-    // return team
+    const team = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
+    if (!team) throw new UserInputError(`We could not found a team with the provided arguments`)
 
-    return loaders.team.load(request.id)
+    return team
   }
 
   @GuardedMutation(TeamGraphQLNode, 'team:create', { name: 'createTeam' })
@@ -142,77 +141,78 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return updatedTeam
   }
 
-  @Stopwatch()
-  @ResolveField('teamsMembers', () => [TeamMembersGraphQLObject])
-  protected async getTeamMembers(@Parent() team: TeamGraphQLNode) {
-    return this.core.team.getTeamsUsersIds(team.id)
-  }
-
+  @Cacheable((team, request) => [team.id, request], 5 * 60)
   @Stopwatch()
   @ResolveField('status', () => StatusGraphQLObject)
-  protected async getStatusForCycle(@Parent() team: TeamGraphQLNode, @Args() request: TeamStatusRequest) {
+  protected async getStatusForCycle(
+    @Parent() team: TeamGraphQLNode,
+    @Args() request: TeamStatusRequest,
+  ) {
     this.logger.log({
       team,
       request,
       message: 'Fetching current status for this team',
     })
 
-    const status = await this.teamStatusProvider.fromRoot({
-      teamId: team.id,
-      cycleIsActive: request.cycleFilters?.active,
-      until: request.date,
-      include: ['progress', 'confidence', 'latestCheckIn', 'isActive', 'isOutdated'],
-    })
+    const result = await this.corePorts.dispatchCommand<Status>('get-team-status', team.id, request)
+    if (!result)
+      throw new UserInputError(`We could not find status for the team with ID ${team.id}`)
 
-    this.logger.log('Team %s status is %o', team.id, status)
-
-    return {
-      progress: status.progress,
-      confidence: status.confidence,
-      isActive: status.isActive,
-      isOutdated: status.isOutdated,
-      reportDate: status.latestCheckIn?.createdAt,
-      latestCheckIn: status.latestCheckIn ?? undefined,
-    }
+    return result
   }
 
+  @Cacheable('0.ownerId', 60 * 60)
   @Stopwatch()
   @ResolveField('owner', () => UserGraphQLNode)
-  protected async getOwnerForTeam(@Parent() team: TeamGraphQLNode, @Context() { loaders }: { loaders: IDataloaders }) {
+  protected async getOwnerForTeam(@Parent() team: TeamGraphQLNode) {
     this.logger.log({
       team,
       message: 'Fetching owner for team',
     })
 
-    return loaders.user.load(team.ownerId)
+    return this.core.user.getOne({ id: team.ownerId })
   }
 
+  @Cacheable((request, team) => [team.id, request], 1 * 60)
   @Stopwatch()
   @ResolveField('teams', () => TeamTeamsGraphQLConnection, { nullable: true })
-  protected async getChildTeamsForTeam(@Args() request: TeamFiltersRequest, @Parent() team: TeamGraphQLNode) {
+  protected async getChildTeamsForTeam(
+    @Args() request: TeamFiltersRequest,
+    @Parent() team: TeamGraphQLNode,
+  ) {
     this.logger.log({
       team,
       request,
       message: 'Fetching child teams for team',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<TeamFiltersRequest, Team>(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      TeamFiltersRequest,
+      Team
+    >(request)
 
     const queryResult = await this.core.team.getChildren(team.id, filters, queryOptions)
 
     return this.relay.marshalResponse<TeamInterface>(queryResult, connection, team)
   }
 
+  @Cacheable((request, team) => [team.id, request], 15 * 60)
   @Stopwatch()
   @ResolveField('rankedDescendants', () => TeamTeamsGraphQLConnection, { nullable: true })
-  protected async getRankedDescendantsForTeam(@Args() request: TeamFiltersRequest, @Parent() team: TeamGraphQLNode) {
+  protected async getRankedDescendantsForTeam(
+    @Args() request: TeamFiltersRequest,
+    @Parent() team: TeamGraphQLNode,
+  ) {
     this.logger.log({
       team,
       request,
       message: 'Fetching ranked descendants for team',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<TeamFiltersRequest, Team>(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      TeamFiltersRequest,
+      Team
+    >(request)
 
     const result = await this.corePorts.dispatchCommand<Team[]>(
       'get-team-ranked-descendants',
@@ -224,15 +224,16 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.relay.marshalResponse<TeamInterface>(result, connection, team)
   }
 
+  @Cacheable('0.parentId', 60 * 60)
   @Stopwatch()
   @ResolveField('parent', () => TeamGraphQLNode, { nullable: true })
-  protected async getParentForTeam(@Parent() team: TeamGraphQLNode, @Context() { loaders }: { loaders: IDataloaders }) {
+  protected async getParentForTeam(@Parent() team: TeamGraphQLNode) {
     this.logger.log({
       team,
       message: 'Fetching parent team for team',
     })
 
-    return team.parentId ? loaders.team.load(team.parentId) : null
+    return this.core.team.getOne({ id: team.parentId })
   }
 
   @Cacheable((request, team, info) => [team.id, request, GetResolvedFieldsInEdgesAndNodes(info)], 1 * 60)
@@ -249,11 +250,17 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching users for team',
     })
 
-    const [rawFilters, getOptions, connection] = this.relay.unmarshalRequest<UserFiltersRequest, User>(request)
+    const [rawFilters, getOptions, connection] = this.relay.unmarshalRequest<
+      UserFiltersRequest,
+      User
+    >(request)
 
     const requestedFields = GetResolvedFieldsInEdgesAndNodes(info)
 
-    if ((requestedFields.has('lastRoutine') || requestedFields.has('latestCheckIn')) && !rawFilters.withIndicators) {
+    if (
+      (requestedFields.has('lastRoutine') || requestedFields.has('latestCheckIn')) &&
+      !rawFilters.withIndicators
+    ) {
       throw new NotImplementedException(
         'You are trying to fetch lastRoutine or latestCheckIn without the withIndicators filter.',
       )
@@ -266,12 +273,18 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     }
 
     if (rawFilters.withIndicators) {
-      const queryResult = await this.corePorts.dispatchCommand<User[]>('get-team-score', team.id, rawFilters.allUsers)
+      const queryResult = await this.corePorts.dispatchCommand<User[]>(
+        'get-team-score',
+        team.id,
+        rawFilters.allUsers,
+      )
 
       return this.relay.marshalResponse(queryResult, connection, team)
     }
 
-    const filters = rawFilters.withInactives ? { ...rawFilters } : { ...rawFilters, status: UserStatus.ACTIVE }
+    const filters = rawFilters.withInactives
+      ? { ...rawFilters }
+      : { ...rawFilters, status: UserStatus.ACTIVE }
 
     delete filters.withInactives
     delete filters.withIndicators
@@ -300,14 +313,20 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   @Cacheable((request, team) => [team.id, request], 5 * 60)
   @Stopwatch()
   @ResolveField('cycles', () => TeamCyclesGraphQLConnection, { nullable: true })
-  protected async getCyclesForTeam(@Args() request: CycleFiltersRequest, @Parent() team: TeamGraphQLNode) {
+  protected async getCyclesForTeam(
+    @Args() request: CycleFiltersRequest,
+    @Parent() team: TeamGraphQLNode,
+  ) {
     this.logger.log({
       team,
       request,
       message: 'Fetching cycles for team',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<CycleFiltersRequest, Cycle>(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      CycleFiltersRequest,
+      Cycle
+    >(request)
 
     const queryResult = await this.core.cycle.getFromTeamsWithFilters([team], filters, queryOptions)
 
@@ -326,7 +345,10 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching objectives for team',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<ObjectiveFiltersRequest, Objective>(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      ObjectiveFiltersRequest,
+      Objective
+    >(request)
 
     const objectiveOrderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
     const orderAttributes = [['objective', objectiveOrderAttributes]]
@@ -353,7 +375,10 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching support objectives for team',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<ObjectiveFiltersRequest, Objective>(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      ObjectiveFiltersRequest,
+      Objective
+    >(request)
 
     const objectiveOrderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
     const orderAttributes = [['objective', objectiveOrderAttributes]]
@@ -368,9 +393,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.relay.marshalResponse<ObjectiveInterface>(objectives, connection, team)
   }
 
-  /**
-   * @deprecated Either optimize this method to perform a single command call or query objectives and supportObjectives separately
-   */
   @Stopwatch()
   @ResolveField('allObjectives', () => TeamObjectivesGraphQLConnection, { nullable: true })
   protected async getAllObjectivesForRequestAndUser(
@@ -383,7 +405,10 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching all objectives for team',
     })
 
-    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<ObjectiveFiltersRequest, Objective>(request)
+    const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
+      ObjectiveFiltersRequest,
+      Objective
+    >(request)
 
     const objectiveOrderAttributes = this.marshalOrderAttributes(queryOptions, ['createdAt'])
     const orderAttributes = [['objective', objectiveOrderAttributes]]
@@ -412,14 +437,20 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
 
   @Stopwatch()
   @ResolveField('keyResults', () => TeamKeyResultsGraphQLConnection, { nullable: true })
-  protected async getKeyResultsForTeam(@Args() request: UserKeyResultsRequest, @Parent() team: TeamGraphQLNode) {
+  protected async getKeyResultsForTeam(
+    @Args() request: UserKeyResultsRequest,
+    @Parent() team: TeamGraphQLNode,
+  ) {
     this.logger.log({
       team,
       request,
       message: 'Fetching key-results for team',
     })
 
-    const [options, queryOptions, connection] = this.relay.unmarshalRequest<UserKeyResultsRequest, KeyResult>(request)
+    const [options, queryOptions, connection] = this.relay.unmarshalRequest<
+      UserKeyResultsRequest,
+      KeyResult
+    >(request)
 
     const { confidence, active, ...filters } = options
 
@@ -435,43 +466,24 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.relay.marshalResponse<KeyResultInterface>(keyResults, connection, team)
   }
 
+  @Cacheable((team, request) => [team.id, request], 15 * 60)
   @Stopwatch()
   @ResolveField('delta', () => DeltaGraphQLObject)
-  protected async getDeltaForTeam(@Parent() team: TeamGraphQLNode, @Args() request: TeamStatusRequest) {
+  protected async getDeltaForTeam(
+    @Parent() team: TeamGraphQLNode,
+    @Args() request: TeamStatusRequest,
+  ) {
     this.logger.log({
       team,
       request,
       message: 'Fetching delta for this team',
     })
 
-    if (team.status) {
-      this.logger.log('Team %s resolved status will be used to calculate. Status = %o', team.id, request)
-    }
+    const result = await this.corePorts.dispatchCommand<Delta>('get-team-delta', team.id, request)
+    if (!result)
+      throw new UserInputError(`We could not find a delta for the team with ID ${team.id}`)
 
-    const baseDate = request.date ?? new Date()
-
-    const [currentStatus, previousStatus] = await Promise.all([
-      team.status ??
-        this.teamStatusProvider.fromRoot({
-          teamId: team.id,
-          cycleIsActive: request.cycleFilters?.active,
-          include: ['progress', 'confidence', 'latestCheckIn', 'isActive', 'isOutdated'],
-        }),
-      this.teamStatusProvider.fromRoot({
-        teamId: team.id,
-        cycleIsActive: request.cycleFilters?.active,
-        until: startOfWeek(baseDate),
-        include: ['progress', 'confidence', 'latestCheckIn', 'isActive', 'isOutdated'],
-      }),
-    ])
-
-    this.logger.log('Team %s current status is %o', team.id, currentStatus)
-    this.logger.log('Team %s previous status is %o', team.id, previousStatus)
-
-    return {
-      progress: currentStatus.progress - previousStatus.progress,
-      confidence: currentStatus.confidence - previousStatus.confidence,
-    }
+    return result
   }
 
   @Cacheable('0.id', 5 * 60)

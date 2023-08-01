@@ -16,7 +16,9 @@ export interface GetCheckListProgressCommandResult {
 
 export class GetCheckListProgressCommand extends Command<GetCheckListProgressCommandResult> {
   public async execute(keyResultId: KeyResult['id']): Promise<GetCheckListProgressCommandResult> {
-    const checkList = await this.core.keyResult.keyResultCheckMarkProvider.getFromKeyResult(keyResultId)
+    const checkList = await this.core.keyResult.keyResultCheckMarkProvider.getFromKeyResult(
+      keyResultId,
+    )
 
     const numberOfChecked = checkList.filter(stateFilter(CheckMarkStates.CHECKED)).length
     const total = checkList.length

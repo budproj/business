@@ -20,7 +20,10 @@ export abstract class GuardedGraphQLResolver<P> extends BaseGraphQLResolver {
   protected async getPolicyForUserInScope(user: UserWithContext, scope: Scope, parent?: P) {
     const resourcePolicy = this.policy.getResourcePolicyFromPermissions(user.token.permissions)
 
-    const resourcesCommandStatement = this.policy.getResourcesCommandStatementsForScopeFromPolicy(resourcePolicy, scope)
+    const resourcesCommandStatement = this.policy.getResourcesCommandStatementsForScopeFromPolicy(
+      resourcePolicy,
+      scope,
+    )
 
     const commandStatement = resourcesCommandStatement[this.resource]
     return this.customizePolicy(commandStatement, parent)

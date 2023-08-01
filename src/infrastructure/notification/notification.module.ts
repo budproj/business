@@ -10,7 +10,12 @@ import { RabbitMQClient } from '@interface/nats/client'
 
 @Module({
   imports: [CoreModule, AWSModule, RabbitMQClient],
-  providers: [NotificationProvider, NotificationFactory, EmailNotificationChannel, MessageBrokerNotificationChannel],
+  providers: [
+    NotificationProvider,
+    NotificationFactory,
+    EmailNotificationChannel,
+    MessageBrokerNotificationChannel,
+  ],
   exports: [NotificationProvider],
 })
 export class NotificationModule {}

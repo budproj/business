@@ -11,7 +11,8 @@ import { KeyResultProgressHistoryEdgeGraphQLObject } from './key-result-progress
 
 @ObjectType('KeyResultProgressHistoryConnection', {
   implements: () => [ConnectionRelayGraphQLInterface, GuardedConnectionGraphQLInterface],
-  description: 'A list containing key-result progress records based on the provided filters and arguments',
+  description:
+    'A list containing key-result progress records based on the provided filters and arguments',
 })
 export class KeyResultProgressHistoryGraphQLConnection
   implements GuardedConnectionGraphQLInterface<KeyResultProgressRecordGraphQLNode>

@@ -28,7 +28,9 @@ export class GetTeamFlagsCommand extends BaseStatusCommand {
       return supportTeam
     })
 
-    const keyResultSupportTeamIDs = (await Promise.all(keyResultsSupportTeam)).flat().map(({ id }) => id)
+    const keyResultSupportTeamIDs = (await Promise.all(keyResultsSupportTeam))
+      .flat()
+      .map(({ id }) => id)
 
     const keyResultsFromTeamWithLowConfidence = await this.core.keyResult.getKeyResults(
       [teamId],
@@ -52,15 +54,20 @@ export class GetTeamFlagsCommand extends BaseStatusCommand {
       return array.filter((_v, index) => results[index])
     }
 
-    const isOutdatedKeyResults = await asyncFilter(keyResultsFromTeam, async (keyResult: KeyResult) => {
-      const latestCheckIn = await this.core.keyResult.getLatestCheckInForKeyResultAtDate(keyResult.id)
+    const isOutdatedKeyResults = await asyncFilter(
+      keyResultsFromTeam,
+      async (keyResult: KeyResult) => {
+        const latestCheckIn = await this.core.keyResult.getLatestCheckInForKeyResultAtDate(
+          keyResult.id,
+        )
 
-      const isOutdated = latestCheckIn
-        ? this.isOutdated(latestCheckIn, new Date())
-        : differenceInDays(Date.now(), keyResult.createdAt) > 6
+        const isOutdated = latestCheckIn
+          ? this.isOutdated(latestCheckIn, new Date())
+          : differenceInDays(Date.now(), keyResult.createdAt) > 6
 
-      return isOutdated
-    })
+        return isOutdated
+      },
+    )
 
     const teamUsers = await this.core.user.getMany(selector)
     const teamOwnerId = (await this.core.team.getOne({ id: teamId })).ownerId
@@ -68,7 +75,9 @@ export class GetTeamFlagsCommand extends BaseStatusCommand {
 
     const uniqueUsers = teamUsers.filter((user) => teamOwner?.id !== user.id)
 
-    const allUsersFromTeam = [...uniqueUsers, teamOwner].filter((user) => user.status === UserStatus.ACTIVE)
+    const allUsersFromTeam = [...uniqueUsers, teamOwner].filter(
+      (user) => user.status === UserStatus.ACTIVE,
+    )
 
     const noRelatedToOkr = allUsersFromTeam.filter(
       ({ id }) => ![...keyResultOwnersIds, ...keyResultSupportTeamIDs].includes(id),

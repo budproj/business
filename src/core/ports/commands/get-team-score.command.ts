@@ -5,9 +5,9 @@ import { KeyResultCheckInInterface } from '@core/modules/key-result/check-in/key
 import { Team } from '@core/modules/team/team.orm-entity'
 import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 import { User } from '@core/modules/user/user.orm-entity'
-import { GetTeamMembersCommandResult } from '@core/ports/commands/get-team-members.command'
 
 import { Command } from './base.command'
+import { GetTeamMembersCommandResult } from "@core/ports/commands/get-team-members.command";
 
 interface UserWithLastCheckInAndRoutines extends User {
   latestCheckIn: KeyResultCheckInInterface
@@ -29,7 +29,10 @@ interface Routine {
 }
 
 export class GetTeamScore extends Command<any> {
-  public async execute(teamID: Team['id'], allUsers = false): Promise<UserWithLastCheckInAndRoutines[]> {
+  public async execute(
+    teamID: Team['id'],
+    allUsers = false,
+  ): Promise<UserWithLastCheckInAndRoutines[]> {
     const getTeamMembersCommand = this.factory.buildCommand<GetTeamMembersCommandResult>('get-team-members')
     const getUserKeyResultsStatus = this.factory.buildCommand<Status>('get-user-key-results-status')
     const getUserCompaines = this.factory.buildCommand<Team[]>('get-user-companies')
@@ -42,9 +45,10 @@ export class GetTeamScore extends Command<any> {
 
         const userWithCompanies = { ...user, companies }
 
-        const lastRoutine = await this.core.nats.sendMessage<Routine[]>('routines-microservice.user-last-routine', {
-          user: userWithCompanies,
-        })
+        const lastRoutine = await this.core.nats.sendMessage<Routine[]>(
+          'routines-microservice.user-last-routine',
+          { user: userWithCompanies },
+        )
 
         const { latestCheckIn, total } = await getUserKeyResultsStatus.execute(user.id)
 

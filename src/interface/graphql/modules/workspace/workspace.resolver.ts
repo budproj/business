@@ -34,7 +34,9 @@ export class WorkspaceGraphQLResolver extends GuardedNodeGraphQLResolver<Team, T
   }
 
   @GuardedQuery(WorkspaceGraphQLNode, 'workspace:read', { name: 'workspace' })
-  protected async getWorkspaceForRequestAndRequestUserWithContext(@Args() request: NodeIndexesRequest) {
+  protected async getWorkspaceForRequestAndRequestUserWithContext(
+    @Args() request: NodeIndexesRequest,
+  ) {
     this.logger.log({
       request,
       message: 'Fetching workspace with provided indexes',
@@ -47,7 +49,8 @@ export class WorkspaceGraphQLResolver extends GuardedNodeGraphQLResolver<Team, T
     }
 
     const team = await this.corePorts.dispatchCommand<Team>('get-team', indexes)
-    if (!team) throw new UserInputError(`We could not found a workspace with the provided arguments`)
+    if (!team)
+      throw new UserInputError(`We could not found a workspace with the provided arguments`)
 
     return team
   }

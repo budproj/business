@@ -25,11 +25,21 @@ export class KeyResultKeyResultCheckMarksConnectionGraphQLResolver extends Guard
     protected readonly core: CoreProvider,
     accessControl: KeyResultCheckMarkAccessControl,
   ) {
-    super(Resource.KEY_RESULT_CHECK_MARK, core, core.keyResult.keyResultCheckMarkProvider, accessControl)
+    super(
+      Resource.KEY_RESULT_CHECK_MARK,
+      core,
+      core.keyResult.keyResultCheckMarkProvider,
+      accessControl,
+    )
   }
 
   @ResolveField('progress', () => CheckMarkProgress)
-  protected async getProgress(@Parent() keyResultConnection: KeyResultKeyResultCheckMarkGraphQLConnection) {
-    return this.corePorts.dispatchCommand('get-check-list-progress', keyResultConnection.parentNodeId)
+  protected async getProgress(
+    @Parent() keyResultConnection: KeyResultKeyResultCheckMarkGraphQLConnection,
+  ) {
+    return this.corePorts.dispatchCommand(
+      'get-check-list-progress',
+      keyResultConnection.parentNodeId,
+    )
   }
 }

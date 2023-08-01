@@ -10,9 +10,12 @@ import { CycleObjectiveEdgeGraphQLObject } from './cycle-objective.edge'
 
 @ObjectType('CycleObjectives', {
   implements: () => [ConnectionRelayGraphQLInterface, GuardedConnectionGraphQLInterface],
-  description: 'A list containing a given user key-results based on the provided filters and arguments',
+  description:
+    'A list containing a given user key-results based on the provided filters and arguments',
 })
-export class CycleObjectivesGraphQLConnection implements GuardedConnectionGraphQLInterface<ObjectiveGraphQLNode> {
+export class CycleObjectivesGraphQLConnection
+  implements GuardedConnectionGraphQLInterface<ObjectiveGraphQLNode>
+{
   @Field(() => [CycleObjectiveEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: CycleObjectiveEdgeGraphQLObject[]
 

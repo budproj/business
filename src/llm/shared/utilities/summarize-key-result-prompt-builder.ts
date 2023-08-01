@@ -34,7 +34,10 @@ const Segments = {
 }
 
 const messageBuilder = (terminator = '', separator = '') => {
-  return (role: ChatCompletionRequestMessageRoleEnum, lines: string[]): ChatCompletionRequestMessage => {
+  return (
+    role: ChatCompletionRequestMessageRoleEnum,
+    lines: string[],
+  ): ChatCompletionRequestMessage => {
     return {
       role,
       content: lines.map((line) => `${line}${terminator}`).join(separator) + '\n',
@@ -122,7 +125,18 @@ interface PromptBuilderOptions {
 }
 
 export const PromptBuilder = (
-  { objective, cycle, title, description, goal, format, owner, comments, checklist, checkIns }: SummarizeKeyResultInput,
+  {
+    objective,
+    cycle,
+    title,
+    description,
+    goal,
+    format,
+    owner,
+    comments,
+    checklist,
+    checkIns,
+  }: SummarizeKeyResultInput,
   { locale, suggestions, activityThresholdInWeeks }: PromptBuilderOptions,
 ) => {
   const formatDate = (date: Date | string) => new Date(date).toLocaleDateString(locale)
@@ -327,10 +341,12 @@ export const PromptBuilder = (
     const recommendations: string[] = []
 
     const hasRecentCheckIns = checkIns?.some(
-      ({ createdAt }) => differenceInWeeks(new Date(), new Date(createdAt)) <= activityThresholdInWeeks,
+      ({ createdAt }) =>
+        differenceInWeeks(new Date(), new Date(createdAt)) <= activityThresholdInWeeks,
     )
     const hasRecentComments = comments?.some(
-      ({ createdAt }) => differenceInWeeks(new Date(), new Date(createdAt)) <= activityThresholdInWeeks,
+      ({ createdAt }) =>
+        differenceInWeeks(new Date(), new Date(createdAt)) <= activityThresholdInWeeks,
     )
 
     const hasRecentActivity = hasRecentCheckIns || hasRecentComments
@@ -373,7 +389,15 @@ export default (
   const { behaviour, mission, mapping } = InstructionBuilder()
   const { introduce, request, assistChecklist, assistActivity } = PromptBuilder(input, options)
 
-  const messages = [behaviour(), mission(), mapping(), introduce(), request(), assistChecklist(), assistActivity()]
+  const messages = [
+    behaviour(),
+    mission(),
+    mapping(),
+    introduce(),
+    request(),
+    assistChecklist(),
+    assistActivity(),
+  ]
 
   if (!wrap) {
     return {

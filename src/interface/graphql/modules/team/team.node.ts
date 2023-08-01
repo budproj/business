@@ -5,7 +5,6 @@ import { GuardedNodeGraphQLInterface } from '@interface/graphql/adapters/authori
 import { NodePolicyGraphQLObject } from '@interface/graphql/adapters/authorization/objects/node-policy.object'
 import { NodeRelayGraphQLInterface } from '@interface/graphql/adapters/relay/interfaces/node.interface'
 import { CycleGraphQLNode } from '@interface/graphql/modules/cycle/cycle.node'
-import { TeamMembersGraphQLObject } from '@interface/graphql/modules/team/objects/team-members.object'
 import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
 import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
@@ -19,7 +18,8 @@ import { TeamGenderGraphQLEnum } from './enums/team-gender.enum'
 
 @ObjectType('Team', {
   implements: () => [NodeRelayGraphQLInterface, GuardedNodeGraphQLInterface],
-  description: 'A collection of users. It can be either inside another team, or a root team (a.k.a. company)',
+  description:
+    'A collection of users. It can be either inside another team, or a root team (a.k.a. company)',
 })
 export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   @Field({ complexity: 0, description: 'The name of the team' })
@@ -51,12 +51,6 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   // **********************************************************************************************
   // RESOLVED FIELDS
   // **********************************************************************************************
-
-  @Field(() => [TeamMembersGraphQLObject], {
-    description:
-      'The status of the given team. Here you can fetch the current progress, confidence, and others for that team',
-  })
-  public teamsMembers: TeamMembersGraphQLObject
 
   @Field(() => StatusGraphQLObject, {
     description:
@@ -96,7 +90,8 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   @Field(() => CycleGraphQLNode, {
     complexity: 1,
     nullable: true,
-    description: 'Based on the current date, this key defines what is the current active tactical cycle for this team',
+    description:
+      'Based on the current date, this key defines what is the current active tactical cycle for this team',
   })
   public readonly tacticalCycle?: CycleGraphQLNode
 
@@ -121,8 +116,8 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   @Field(() => TeamTeamsGraphQLConnection, {
     complexity: 0,
     nullable: true,
-    deprecationReason: 'Sort `teams` by their status.progress instead',
-    description: "A list with all teams inside this team's descendant tree ordered by their progress",
+    description:
+      "A list with all teams inside this team's descendant tree ordered by their progress",
   })
   public readonly rankedDescendants?: TeamTeamsGraphQLConnection
 
@@ -152,8 +147,6 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
     nullable: true,
     description:
       'Any objective related to this team, no matter if the relation is because that team owns the objective, or if that team just supports it',
-    deprecationReason:
-      'Either optimize this method to perform a single command call or query objectives and supportObjectives separately',
   })
   public readonly allObjectives?: TeamObjectivesGraphQLConnection
 

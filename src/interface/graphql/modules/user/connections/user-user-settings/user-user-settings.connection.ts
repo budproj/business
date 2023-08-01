@@ -10,9 +10,12 @@ import { UserSettingEdgeGraphQLObject } from './user-user-setting.edge'
 
 @ObjectType('UserSettings', {
   implements: () => [ConnectionRelayGraphQLInterface, GuardedConnectionGraphQLInterface],
-  description: 'A list containing a given user settings based on the provided filters and arguments',
+  description:
+    'A list containing a given user settings based on the provided filters and arguments',
 })
-export class UserSettingsGraphQLConnection implements GuardedConnectionGraphQLInterface<UserSettingGraphQLNode> {
+export class UserSettingsGraphQLConnection
+  implements GuardedConnectionGraphQLInterface<UserSettingGraphQLNode>
+{
   @Field(() => [UserSettingEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: UserSettingEdgeGraphQLObject[]
 

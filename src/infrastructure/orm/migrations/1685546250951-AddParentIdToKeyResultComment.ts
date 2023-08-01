@@ -9,7 +9,9 @@ export class AddParentIdToKeyResultComment1685546250951 implements MigrationInte
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "key_result_comment" DROP CONSTRAINT "FK_fedcba0987654321fedcba0987"`)
+    await queryRunner.query(
+      `ALTER TABLE "key_result_comment" DROP CONSTRAINT "FK_fedcba0987654321fedcba0987"`,
+    )
     await queryRunner.query(`DROP COLUMN "parent_id"`)
   }
 }

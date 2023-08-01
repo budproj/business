@@ -9,7 +9,10 @@ import { UserAccessControl } from '@interface/graphql/modules/user/user.access-c
 import { TeamUsersGraphQLConnection } from './team-users.connection'
 
 @GuardedResolver(TeamUsersGraphQLConnection)
-export class TeamUsersConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<User, UserInterface> {
+export class TeamUsersConnectionGraphQLResolver extends GuardedConnectionGraphQLResolver<
+  User,
+  UserInterface
+> {
   constructor(protected readonly core: CoreProvider, accessControl: UserAccessControl) {
     super(Resource.USER, core, core.user, accessControl)
   }

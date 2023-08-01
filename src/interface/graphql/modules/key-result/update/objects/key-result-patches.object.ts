@@ -5,7 +5,8 @@ import { KeyResultPatchsKeys } from '@core/modules/key-result/enums/key-result-p
 import { KeyResultPatchesKeysGraphQLEnum } from '../../enums/key-result-patches-keys.enum'
 
 @ObjectType('KeyResultPatche', {
-  description: 'A list containing key-result updates patches based on the provided filters and arguments',
+  description:
+    'A list containing key-result updates patches based on the provided filters and arguments',
 })
 export class KeyResultPatchesGraphQLObject {
   @Field(() => KeyResultPatchesKeysGraphQLEnum, {

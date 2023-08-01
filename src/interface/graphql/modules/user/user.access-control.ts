@@ -4,46 +4,69 @@ import { AccessControl } from '@adapters/authorization/access-control.adapter'
 import { AccessControlScopes } from '@adapters/authorization/interfaces/access-control-scopes.interface'
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
-import { CoreProvider } from '@core/core.provider'
+import { Team } from '@core/modules/team/team.orm-entity'
+import { User } from '@core/modules/user/user.orm-entity'
 import { CorePortsProvider } from '@core/ports/ports.provider'
+
+type EntityRelatedEntities = {
+  user: User
+  teams: Team[]
+  companies: Team[]
+}
+
+type ContextRelatedEntities = {
+  team: Team
+  teams: Team[]
+  company: Team
+}
 
 @Injectable()
 export class UserAccessControl extends AccessControl {
   protected readonly resource = Resource.USER
 
-  constructor(protected core: CorePortsProvider, coreProvider: CoreProvider) {
-    super(core, coreProvider.team)
+  constructor(protected core: CorePortsProvider) {
+    super(core)
   }
 
-  static isSameUser(userId: string, requestUserId: string): boolean {
-    return userId === requestUserId
+  static isSameUser(user: User, requestUser: UserWithContext): boolean {
+    return user.id === requestUser.id
   }
 
-  public async isInTheSameCompany(user: UserWithContext, userIdFromRequest: string): Promise<boolean> {
-    if (UserAccessControl.isSameUser(user?.id, userIdFromRequest)) {
-      return true
-    }
+  public async isInTheSameCompany(user: UserWithContext, userIdFromRequest: string) {
+    const partialUser: Partial<User> = { id: userIdFromRequest }
 
-    const [baseCompanies, requesterCompanies] = await Promise.all([
-      this.teamProvider.getUserCompanies(user.id),
-      this.teamProvider.getUserCompanies(userIdFromRequest),
-    ])
+    const userCompanies = await this.core.dispatchCommand<Team[]>('get-user-companies', user)
+    const userFromRequestCompanies = await this.core.dispatchCommand<Team[]>(
+      'get-user-companies',
+      partialUser,
+    )
 
-    const baseCompaniesIds = new Set(baseCompanies.map((company) => company.id))
-
-    // Look for all target teams in the base tree
-    return requesterCompanies.every(({ id }) => baseCompaniesIds.has(id))
+    const userFromRequestCompaniesIds = new Set(
+      userFromRequestCompanies.map((company) => company.id),
+    )
+    return userCompanies
+      .map((company) => company.id)
+      .some((company) => {
+        return userFromRequestCompaniesIds.has(company)
+      })
   }
 
-  public isUserTeamLeader(user: UserWithContext): boolean {
-    return this.isTeamLeader(user.teams, user)
+  public async isUserTeamLeader(user: UserWithContext): Promise<boolean> {
+    const { teams } = await this.getEntityRelatedEntities(user.id)
+
+    const isTeamLeader = await this.isTeamLeader(teams, user)
+
+    return isTeamLeader
   }
 
-  protected async resolveContextScopes(user: UserWithContext, teamID: string): Promise<AccessControlScopes> {
-    const { team, teams } = await this.getTeamRelatedEntities(teamID)
+  protected async resolveContextScopes(
+    user: UserWithContext,
+    teamID: string,
+  ): Promise<AccessControlScopes> {
+    const { team, teams, company } = await this.getContextRelatedEntities(teamID)
 
-    const isTeamLeader = this.isTeamLeader(teams, user)
-    const isCompanyMember = this.isTeamsMember(teams, user)
+    const isTeamLeader = await this.isTeamLeader(teams, user)
+    const isCompanyMember = await this.isCompanyMember([company], user)
     const isOwner = team.ownerId === user.id
 
     return {
@@ -53,17 +76,46 @@ export class UserAccessControl extends AccessControl {
     }
   }
 
-  protected async resolveEntityScopes(requestUser: UserWithContext, userID: string): Promise<AccessControlScopes> {
-    const { teams } = await this.getUserRelatedEntities(userID)
+  protected async resolveEntityScopes(
+    requestUser: UserWithContext,
+    userID: string,
+  ): Promise<AccessControlScopes> {
+    const { user, teams, companies } = await this.getEntityRelatedEntities(userID)
 
-    const isSameUser = UserAccessControl.isSameUser(userID, requestUser.id)
-    const isTeamLeader = this.isTeamLeader(teams, requestUser)
-    const isCompanyMember = this.isTeamsMember(teams, requestUser)
+    const isSameUser = UserAccessControl.isSameUser(user, requestUser)
+    const isTeamLeader = await this.isTeamLeader(teams, requestUser)
+    const isCompanyMember = await this.isCompanyMember(companies, requestUser)
 
     return {
       isTeamLeader,
       isCompanyMember,
       isOwner: isSameUser,
+    }
+  }
+
+  private async getEntityRelatedEntities(userID: string): Promise<EntityRelatedEntities> {
+    const user = await this.core.dispatchCommand<User>('get-user', { id: userID })
+    const teams = await this.core.dispatchCommand<Team[]>('get-user-team-tree', user)
+    const companies = await this.core.dispatchCommand<Team[]>('get-user-companies', user)
+
+    return {
+      user,
+      teams,
+      companies,
+    }
+  }
+
+  private async getContextRelatedEntities(teamID: string): Promise<ContextRelatedEntities> {
+    const teamIndexes = { id: teamID }
+
+    const team = await this.core.dispatchCommand<Team>('get-team', teamIndexes)
+    const teams = await this.core.dispatchCommand<Team[]>('get-team-tree', teamIndexes)
+    const company = await this.core.dispatchCommand<Team>('get-team-company', team)
+
+    return {
+      team,
+      teams,
+      company,
     }
   }
 }

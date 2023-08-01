@@ -50,7 +50,10 @@ export class ServerFactory {
     await this.launchServer(application, logger, config)
   }
 
-  private async launchMicroservices(application: NestFastifyApplication, config: ServerConfigProvider): Promise<void> {
+  private async launchMicroservices(
+    application: NestFastifyApplication,
+    config: ServerConfigProvider,
+  ): Promise<void> {
     await application.startAllMicroservices()
   }
 

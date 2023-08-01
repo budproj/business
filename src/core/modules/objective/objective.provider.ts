@@ -11,7 +11,6 @@ import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-resu
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 import { EntityOrderAttributes } from '@core/types/order-attribute.type'
-import { Cacheable } from '@lib/cache/cacheable.decorator'
 
 import { TeamInterface } from '../team/interfaces/team.interface'
 
@@ -26,7 +25,11 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     super(ObjectiveProvider.name, repository)
   }
 
-  static buildDefaultStatus(date?: Date, progress: number = DEFAULT_PROGRESS, confidence: number = DEFAULT_CONFIDENCE) {
+  static buildDefaultStatus(
+    date?: Date,
+    progress: number = DEFAULT_PROGRESS,
+    confidence: number = DEFAULT_CONFIDENCE,
+  ) {
     date ??= new Date()
 
     return {
@@ -82,11 +85,11 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
   }
 
   public async getFromKeyResult(keyResult: KeyResultInterface): Promise<Objective> {
-    return this.getFromID(keyResult.objectiveId)
+    return this.repository.findOne({ id: keyResult.objectiveId })
   }
 
   public async getFromID(id: string): Promise<Objective> {
-    return this.getFromIndexes({ id })
+    return this.repository.findOne({ id })
   }
 
   public async getFromIDList(
@@ -105,7 +108,6 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
     })
   }
 
-  @Cacheable('0', 15)
   public async getFromIndexes(indexes: Partial<ObjectiveInterface>): Promise<Objective> {
     return this.repository.findOne(indexes)
   }
@@ -135,7 +137,11 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
 
     const nullableFilters = {}
 
-    return this.repository.findWithRelationFilters(cleanedRelationFilters, nullableFilters, orderAttributes)
+    return this.repository.findWithRelationFilters(
+      cleanedRelationFilters,
+      nullableFilters,
+      orderAttributes,
+    )
   }
 
   public async createObjective(objectiveData: ObjectiveInterface): Promise<Objective> {

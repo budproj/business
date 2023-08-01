@@ -84,7 +84,6 @@
     "aws-sdk": "^2.1248.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
-    "dataloader": "^2.2.2",
     "date-fns": "^2.28.0",
     "deepmerge": "^4.2.2",
     "fast-csv": "^4.3.6",

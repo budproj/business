@@ -16,8 +16,12 @@ export class AddsCommentEntityToKeyResult1612272860351 implements MigrationInter
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "key_result_comment" DROP CONSTRAINT "FK_bbf5483ca6b4f1b29bf493a4ef2"`)
-    await queryRunner.query(`ALTER TABLE "key_result_comment" DROP CONSTRAINT "FK_d74632d008ba9d845cd4a6a6093"`)
+    await queryRunner.query(
+      `ALTER TABLE "key_result_comment" DROP CONSTRAINT "FK_bbf5483ca6b4f1b29bf493a4ef2"`,
+    )
+    await queryRunner.query(
+      `ALTER TABLE "key_result_comment" DROP CONSTRAINT "FK_d74632d008ba9d845cd4a6a6093"`,
+    )
     await queryRunner.query(`DROP TABLE "key_result_comment"`)
   }
 }

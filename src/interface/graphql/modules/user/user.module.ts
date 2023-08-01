@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common'
 
 import { GraphQLConfigModule } from '@config/graphql/graphql.module'
 import { CoreModule } from '@core/core.module'
-import { MissionControlModule } from '@core/modules/mission-control/mission-control.module'
 import { AWSModule } from '@infrastructure/aws/aws.module'
 import { UserSettingGraphQLResolver } from '@interface/graphql/modules/user/setting/user-setting.resolver'
 import { UserAccessControl } from '@interface/graphql/modules/user/user.access-control'
@@ -16,7 +15,7 @@ import { TaskGraphQLResolver } from './task/task.resolver'
 import { UserGraphQLResolver } from './user.resolver'
 
 @Module({
-  imports: [CoreModule, MissionControlModule, AWSModule, GraphQLConfigModule],
+  imports: [CoreModule, AWSModule, GraphQLConfigModule],
   providers: [
     UserGraphQLResolver,
     TaskGraphQLResolver,

@@ -8,7 +8,9 @@ import { KeyResultCheckInGraphQLNode } from '@interface/graphql/modules/key-resu
   implements: () => EdgeRelayGraphQLInterface,
   description: 'This edge represents the relation between users and their key-results',
 })
-export class UserKeyResultCheckInEdgeGraphQLObject implements EdgeRelayGraphQLInterface<KeyResultCheckInGraphQLNode> {
+export class UserKeyResultCheckInEdgeGraphQLObject
+  implements EdgeRelayGraphQLInterface<KeyResultCheckInGraphQLNode>
+{
   @Field(() => KeyResultCheckInGraphQLNode, { complexity: 1 })
   public readonly node!: KeyResultCheckInGraphQLNode
 

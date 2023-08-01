@@ -10,9 +10,12 @@ import { TeamCycleEdgeGraphQLObject } from './team-cycle.edge'
 
 @ObjectType('TeamCycles', {
   implements: () => [ConnectionRelayGraphQLInterface, GuardedConnectionGraphQLInterface],
-  description: 'A list containing a given user key-results based on the provided filters and arguments',
+  description:
+    'A list containing a given user key-results based on the provided filters and arguments',
 })
-export class TeamCyclesGraphQLConnection implements GuardedConnectionGraphQLInterface<CycleGraphQLNode> {
+export class TeamCyclesGraphQLConnection
+  implements GuardedConnectionGraphQLInterface<CycleGraphQLNode>
+{
   @Field(() => [TeamCycleEdgeGraphQLObject], { complexity: 0 })
   public readonly edges!: TeamCycleEdgeGraphQLObject[]
 
