@@ -26,7 +26,7 @@ export type Status = {
 export type Filters<T extends Status = Status, K extends keyof T = keyof T> = {
   okrType?: OkrType
   cycleIsActive?: boolean
-  since?: Date
+  until?: Date
   include: K[]
 }
 

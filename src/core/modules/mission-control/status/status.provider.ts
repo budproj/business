@@ -35,7 +35,7 @@ export class StatusProvider {
   @Stopwatch()
   async aggregate<T extends Status, K extends keyof T>({
     aggregator,
-    since,
+    until,
     okrType,
     cycleIsActive,
     include,
@@ -45,11 +45,11 @@ export class StatusProvider {
     const mode: OkrMode[] = ['published', 'completed']
 
     const params: KeyResultLatestCheckInSegmentParams = {
-      createdAfter: since,
+      createdBefore: until,
       keyResult: {
         mode,
         type: okrType,
-        createdBefore: since,
+        createdBefore: until,
         objective: {
           mode,
           type: okrType,

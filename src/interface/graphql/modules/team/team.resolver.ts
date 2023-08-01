@@ -160,7 +160,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     const status = await this.teamStatusProvider.fromRoot({
       teamId: team.id,
       cycleIsActive: request.cycleFilters?.active,
-      since: request.date,
+      until: request.date,
       include: ['progress', 'confidence', 'latestCheckIn', 'isActive', 'isOutdated'],
     })
 
@@ -455,18 +455,18 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
         this.teamStatusProvider.fromRoot({
           teamId: team.id,
           cycleIsActive: request.cycleFilters?.active,
-          since: baseDate,
           include: ['progress', 'confidence', 'latestCheckIn', 'isActive', 'isOutdated'],
         }),
       this.teamStatusProvider.fromRoot({
         teamId: team.id,
         cycleIsActive: request.cycleFilters?.active,
-        since: startOfWeek(baseDate),
+        until: startOfWeek(baseDate),
         include: ['progress', 'confidence', 'latestCheckIn', 'isActive', 'isOutdated'],
       }),
     ])
 
     this.logger.log('Team %s current status is %o', team.id, currentStatus)
+    this.logger.log('Team %s previous status is %o', team.id, previousStatus)
 
     return {
       progress: currentStatus.progress - previousStatus.progress,

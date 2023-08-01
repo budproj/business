@@ -115,9 +115,11 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
 
     const status = await this.cycleStatusProvider.fromRoot({
       cycleId: cycle.id,
-      since: request.date,
+      until: request.date,
       include: ['progress', 'confidence', 'latestCheckIn', 'isActive', 'isOutdated'],
     })
+
+    this.logger.log('Cycle %s status is %o', cycle.id, status)
 
     return {
       progress: status.progress,
@@ -221,22 +223,21 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
       message: 'Fetching delta for this cycle',
     })
 
-    const baseDate = new Date()
-
     const [currentStatus, previousStatus] = await Promise.all([
+      cycle.status ??
+        this.cycleStatusProvider.fromRoot({
+          cycleId: cycle.id,
+          include: ['progress', 'confidence', 'latestCheckIn', 'isActive', 'isOutdated'],
+        }),
       this.cycleStatusProvider.fromRoot({
         cycleId: cycle.id,
-        since: baseDate,
-        include: ['progress', 'confidence', 'latestCheckIn', 'isActive', 'isOutdated'],
-      }),
-      this.cycleStatusProvider.fromRoot({
-        cycleId: cycle.id,
-        since: startOfWeek(baseDate),
+        until: startOfWeek(new Date()),
         include: ['progress', 'confidence', 'latestCheckIn', 'isActive', 'isOutdated'],
       }),
     ])
 
     this.logger.log('Cycle %s current status is %o', cycle.id, currentStatus)
+    this.logger.log('Cycle %s previous status is %o', cycle.id, previousStatus)
 
     return {
       progress: currentStatus.progress - previousStatus.progress,
