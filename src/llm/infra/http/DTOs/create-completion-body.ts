@@ -8,5 +8,6 @@ export interface CreateCompletionDTO<T> {
   input: T
   referenceId: string
   author: AuthorDTO
-  locale: string
+  locale?: string
+  suggestions?: boolean
 }

@@ -19,4 +19,10 @@ export class QuantityNode {
 
   @Field(() => Number)
   public readonly barrier: number
+
+  @Field(() => Number)
+  public readonly achieved: number
+
+  @Field(() => Number)
+  public readonly deprioritized: number
 }

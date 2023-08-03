@@ -191,11 +191,16 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     })
 
     return {
+      achieved: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.achieved)
+        .length,
       high: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.high).length,
       medium: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.medium).length,
       low: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.low).length,
       barrier: confidences.filter((element) => element === CONFIDENCE_TAG_THRESHOLDS.barrier)
         .length,
+      deprioritized: confidences.filter(
+        (element) => element === CONFIDENCE_TAG_THRESHOLDS.deprioritized,
+      ).length,
     }
   }
 
