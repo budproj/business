@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 import { Activity } from '@adapters/activity/activities/base.activity'
+import { UserProvider } from '@core/modules/user/user.provider'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { EmailNotificationChannel } from '@infrastructure/notification/channels/email/email.channel'
 import { MessageBrokerNotificationChannel } from '@infrastructure/notification/channels/message-broker/message-broker.channel'
@@ -46,6 +47,7 @@ export class NotificationFactory {
     private readonly core: CorePortsProvider,
     emailChannel: EmailNotificationChannel,
     messageBrokerChannel: MessageBrokerNotificationChannel,
+    private readonly user: UserProvider,
   ) {
     this.channels = {
       email: emailChannel,
@@ -61,6 +63,6 @@ export class NotificationFactory {
     )
     if (!Notification) return
 
-    return new Notification(activity as any, this.channels, this.core) as any
+    return new Notification(activity as any, this.channels, this.core, this.user) as any
   }
 }

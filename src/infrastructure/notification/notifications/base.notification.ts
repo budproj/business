@@ -1,6 +1,7 @@
 import { Activity } from '@adapters/activity/activities/base.activity'
 import { UserSetting } from '@core/modules/user/setting/user-settings.orm-entity'
 import { UserInterface } from '@core/modules/user/user.interface'
+import { UserProvider } from '@core/modules/user/user.provider'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { Notification } from '@infrastructure/notification/interfaces/notification.interface'
 import { NotificationData } from '@infrastructure/notification/types/notification-data.type'
@@ -24,6 +25,7 @@ export abstract class BaseNotification<
     protected readonly channels: NotificationChannelHashMap,
     protected readonly core: CorePortsProvider,
     notificationType: string,
+    protected readonly user?: UserProvider,
   ) {
     this.metadata = this.marshalMetadata(activity, notificationType)
   }
