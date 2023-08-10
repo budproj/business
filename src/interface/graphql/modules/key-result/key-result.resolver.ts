@@ -182,6 +182,8 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       message: 'Fetching owner for key result',
     })
 
+    console.log('')
+
     return this.core.user.getOne({ id: keyResult.ownerId })
   }
 
