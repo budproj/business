@@ -149,7 +149,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
   
             SELECT tn.id, tn.name, tt.level + 1, FALSE, tt.id, tt.source_id
             FROM team tn
-            INNER JOIN team_tree tt ON tn.parent_id = tt.id
+            INNER JOIN team_tree tt ON tn.parent_id = tt.id AND tn.id <> tt.id
           )
          SELECT DISTINCT ON (id) id
          FROM team_tree
