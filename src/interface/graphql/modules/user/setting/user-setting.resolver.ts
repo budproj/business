@@ -1,5 +1,5 @@
 import { Logger, UnauthorizedException } from '@nestjs/common'
-import { Args } from '@nestjs/graphql'
+import { Args, Parent, ResolveField } from '@nestjs/graphql'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
@@ -67,5 +67,15 @@ export class UserSettingGraphQLResolver extends GuardedNodeGraphQLResolver<
       request.key,
       request.value,
     )
+  }
+
+  @ResolveField('preferences', () => String, { nullable: false })
+  protected async stringfyExtra(@Parent() user: UserSettingGraphQLNode) {
+    this.logger.log({
+      user,
+      message: 'Fetching user settings preferences and stringfying it',
+    })
+
+    return JSON.stringify(user.preferences)
   }
 }
