@@ -5,6 +5,6 @@ export class MessageBrokerAdapterProvider {
   constructor(private readonly provider: MessageBrokerInterface) {}
 
   public async publish(topic: string, data: MessageData): Promise<void> {
-    return this.provider.publish(topic, data)
+    return this.provider.send(topic, data)
   }
 }
