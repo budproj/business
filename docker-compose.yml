@@ -53,7 +53,6 @@ services:
     environment:
       - SERVICES=sns,sqs
       - AWS_DEFAULT_REGION=us-east-1
-      - AWS_PROFILE=localstack
       - DEBUG=1
       - DOCKER_HOST=unix:///var/run/docker.sock
     volumes:
