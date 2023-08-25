@@ -77,17 +77,12 @@ export class UserSettingGraphQLResolver extends GuardedNodeGraphQLResolver<
     })
 
     if (!userSettings.preferences.main_team) {
-      // Const companies = await this.core.team.getUserCompanies(userSettings.user)
+      const partialUser = { id: userSettings.userId }
+      const companies = await this.core.team.getUserCompanies(partialUser)
 
-      if (userSettings.user) {
-        const teste1 = JSON.stringify(userSettings.user)
+      const newSettings = { ...userSettings.preferences, main_team: companies[0].id }
 
-        return JSON.stringify(teste1)
-      }
-
-      const teste = JSON.stringify(userSettings)
-
-      return JSON.stringify(teste)
+      return JSON.stringify(newSettings)
     }
 
     return JSON.stringify(userSettings.preferences)
