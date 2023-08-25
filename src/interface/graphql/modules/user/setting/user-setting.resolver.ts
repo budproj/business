@@ -17,6 +17,8 @@ import { UserSettingGraphQLNode } from '@interface/graphql/modules/user/setting/
 import { UserAccessControl } from '@interface/graphql/modules/user/user.access-control'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
 
+import { UserSettingUpdateMainTeamRequest } from './requests/user-setting-update-main-team.request'
+
 @GuardedResolver(UserSettingGraphQLNode)
 export class UserSettingGraphQLResolver extends GuardedNodeGraphQLResolver<
   UserSetting,
@@ -46,6 +48,26 @@ export class UserSettingGraphQLResolver extends GuardedNodeGraphQLResolver<
     if (!canRead) throw new UnauthorizedException()
 
     return {}
+  }
+
+  @GuardedMutation(UserSettingGraphQLNode, 'user-setting:update', { name: 'updateMainTeam' })
+  protected async updateMainTeamInPreferencesForRequestAndRequestUserWithContext(
+    @Args() request: UserSettingUpdateMainTeamRequest,
+    @RequestUserWithContext() userWithContext: UserWithContext,
+  ) {
+    this.logger.log({
+      request,
+      message: 'Received update main team in preferences request',
+    })
+
+    const canUpdate = await this.accessControl.canUpdate(userWithContext, request.userID)
+    if (!canUpdate) throw new UnauthorizedException()
+
+    return this.corePorts.dispatchCommand<UserSetting>(
+      'update-main-team-in-preferences',
+      request.userID,
+      request.main_team_id,
+    )
   }
 
   @GuardedMutation(UserSettingGraphQLNode, 'user-setting:update', { name: 'updateUserSetting' })
