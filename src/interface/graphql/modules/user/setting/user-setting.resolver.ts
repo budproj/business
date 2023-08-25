@@ -99,6 +99,7 @@ export class UserSettingGraphQLResolver extends GuardedNodeGraphQLResolver<
     })
 
     if (!userSettings.preferences.main_team) {
+      // TODO: maybe one day elaborate a trigger in pure SQL to get the company as default
       const partialUser = { id: userSettings.userId }
       const companies = await this.core.team.getUserCompanies(partialUser)
 
