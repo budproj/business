@@ -70,12 +70,19 @@ export class UserSettingGraphQLResolver extends GuardedNodeGraphQLResolver<
   }
 
   @ResolveField('preferences', () => String, { nullable: false })
-  protected async stringfyExtra(@Parent() user: UserSettingGraphQLNode) {
+  protected async stringfyExtra(@Parent() userSettings: UserSettingGraphQLNode) {
     this.logger.log({
-      user,
+      userSettings,
       message: 'Fetching user settings preferences and stringfying it',
     })
 
-    return JSON.stringify(user.preferences)
+    if (!userSettings.preferences.main_team) {
+      const companies = await this.core.team.getUserCompanies(userSettings.user)
+
+      const newSettings = { ...userSettings, main_team: companies[0]?.id }
+      return JSON.stringify(newSettings)
+    }
+
+    return JSON.stringify(userSettings.preferences)
   }
 }
