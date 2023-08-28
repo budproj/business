@@ -45,11 +45,11 @@ export class GetTeamFlagsCommand extends BaseStatusCommand {
             return categories
         }
 
-        const isConfidenceDeprioritizedOrAchieved =
-          latestCheckin.confidence === CONFIDENCE_TAG_THRESHOLDS.deprioritized ||
-          latestCheckin.confidence === CONFIDENCE_TAG_THRESHOLDS.achieved
+        const isKeyResultInOperation =
+          latestCheckin.confidence !== CONFIDENCE_TAG_THRESHOLDS.deprioritized &&
+          latestCheckin.confidence !== CONFIDENCE_TAG_THRESHOLDS.achieved
 
-        const isKeyResultOutdated = isConfidenceDeprioritizedOrAchieved
+        const isKeyResultOutdated = isKeyResultInOperation
           ? this.isOutdated(latestCheckin, new Date())
           : differenceInDays(Date.now(), keyResult.createdAt) > 6
 
