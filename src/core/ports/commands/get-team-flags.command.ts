@@ -11,7 +11,14 @@ import { BaseStatusCommand } from './base-status.command'
 
 export class GetTeamFlagsCommand extends BaseStatusCommand {
   public async execute(teamId: TeamInterface['id']): Promise<any> {
-    const keyResultsFromTeam = await this.core.keyResult.getKeyResults([teamId])
+    const keyResultsFromTeam = await this.core.keyResult.getKeyResults(
+      [teamId],
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      ['checkIns'],
+    )
 
     const categorizedKeyResults: {
       lowConfidence: KeyResult[]
@@ -74,57 +81,6 @@ export class GetTeamFlagsCommand extends BaseStatusCommand {
     const keyResultSupportTeamIDs = (await Promise.all(keyResultsSupportTeam))
       .flat()
       .map(({ id }) => id)
-
-    // Const keyResultsFromTeamWithLowConfidence = await this.core.keyResult.getKeyResults(
-    //   [teamId],
-    //   undefined,
-    //   undefined,
-    //   true,
-    //   ConfidenceTag.LOW,
-    // )
-
-    // If (confidence) {
-    //   const confidenceNumber = this.confidenceTagAdapter.getConfidenceFromTag(confidence)
-    //   const keyResultsWithConfidence = keyResults.filter((keyResult) => {
-    //     const latestCheckin = this.getLatestCheckInFromList(keyResult.checkIns)
-    //     if (!latestCheckin) {
-    //       return confidenceNumber === DEFAULT_CONFIDENCE
-    //     }
-
-    //     return latestCheckin.confidence === confidenceNumber
-    //   })
-
-    //   return keyResultsWithConfidence
-    // }
-
-    // const keyResultsFromTeamWithBarrier = await this.core.keyResult.getKeyResults(
-    //   [teamId],
-    //   undefined,
-    //   undefined,
-    //   true,
-    //   ConfidenceTag.BARRIER,
-    // )
-
-    // const asyncFilter = async (array, predicate) => {
-    //   const results = await Promise.all(array.map((element) => predicate(element)))
-
-    //   return array.filter((_v, index) => results[index])
-    // }
-
-    // Const isOutdatedKeyResults = await asyncFilter(
-    //   activeKeyResultsFromTeam,
-    //   async (keyResult: KeyResult) => {
-    //     const latestCheckIn = await this.core.keyResult.getLatestCheckInForKeyResultAtDate(
-    //       keyResult.id,
-    //     )
-
-    //     const isOutdated = latestCheckIn
-    //       ? this.isOutdated(latestCheckIn, new Date())
-    //       : differenceInDays(Date.now(), keyResult.createdAt) > 6
-
-    //     return isOutdated
-    //   },
-    // )
 
     const teamUsers = await this.core.user.getMany(selector)
     const teamOwnerId = (await this.core.team.getOne({ id: teamId })).ownerId
