@@ -74,7 +74,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     options?: GetOptions<KeyResult>,
     active = true,
     confidence?: ConfidenceTag,
-    queryRelations?: string[],
+    queryRelations: string[] = [],
   ): Promise<KeyResult[]> {
     const queryOptions = this.repository.marshalGetOptions(options)
     const whereSelector = {
