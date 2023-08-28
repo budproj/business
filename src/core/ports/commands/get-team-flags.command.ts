@@ -3,6 +3,7 @@ import { flatten } from 'lodash'
 import { Any } from 'typeorm'
 
 import { ConfidenceTag } from '@adapters/confidence-tag/confidence-tag.enum'
+import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.enum'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserStatus } from '@core/modules/user/enums/user-status.enum'
@@ -12,6 +13,9 @@ import { BaseStatusCommand } from './base-status.command'
 export class GetTeamFlagsCommand extends BaseStatusCommand {
   public async execute(teamId: TeamInterface['id']): Promise<any> {
     const keyResultsFromTeam = await this.core.keyResult.getKeyResults([teamId])
+    const publishedKeyResultsFromTeam = keyResultsFromTeam.filter(
+      (keyResult) => keyResult.mode === KeyResultMode.PUBLISHED,
+    )
     const teams = await this.core.team.getDescendantsByIds([teamId])
 
     const teamUsersPromises = teams.map(async (team) => team.users)
@@ -34,7 +38,7 @@ export class GetTeamFlagsCommand extends BaseStatusCommand {
 
     const keyResultsFromTeamWithLowConfidence = await this.core.keyResult.getKeyResults(
       [teamId],
-      undefined,
+      { mode: KeyResultMode.PUBLISHED },
       undefined,
       true,
       ConfidenceTag.LOW,
@@ -42,7 +46,7 @@ export class GetTeamFlagsCommand extends BaseStatusCommand {
 
     const keyResultsFromTeamWithBarrier = await this.core.keyResult.getKeyResults(
       [teamId],
-      undefined,
+      { mode: KeyResultMode.PUBLISHED },
       undefined,
       true,
       ConfidenceTag.BARRIER,
@@ -55,7 +59,7 @@ export class GetTeamFlagsCommand extends BaseStatusCommand {
     }
 
     const isOutdatedKeyResults = await asyncFilter(
-      keyResultsFromTeam,
+      publishedKeyResultsFromTeam,
       async (keyResult: KeyResult) => {
         const latestCheckIn = await this.core.keyResult.getLatestCheckInForKeyResultAtDate(
           keyResult.id,
