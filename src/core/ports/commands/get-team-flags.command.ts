@@ -28,26 +28,9 @@ export class GetTeamFlagsCommand extends BaseStatusCommand {
       (categories, keyResult) => {
         const latestCheckin = this.getLatestCheckInFromList(keyResult.checkIns)
 
-        switch (latestCheckin.confidence) {
-          case CONFIDENCE_TAG_THRESHOLDS.low:
-            categories.lowConfidence.push(keyResult)
-            break
-
-          case CONFIDENCE_TAG_THRESHOLDS.barrier:
-            categories.barried.push(keyResult)
-            break
-
-          case CONFIDENCE_TAG_THRESHOLDS.achieved:
-          case CONFIDENCE_TAG_THRESHOLDS.deprioritized:
-            break
-
-          default:
-            return categories
-        }
-
         const isKeyResultInOperation =
-          latestCheckin.confidence !== CONFIDENCE_TAG_THRESHOLDS.deprioritized &&
-          latestCheckin.confidence !== CONFIDENCE_TAG_THRESHOLDS.achieved
+          latestCheckin?.confidence !== CONFIDENCE_TAG_THRESHOLDS.deprioritized &&
+          latestCheckin?.confidence !== CONFIDENCE_TAG_THRESHOLDS.achieved
 
         const isOutdated = latestCheckin
           ? this.isOutdated(latestCheckin, new Date())
@@ -55,6 +38,25 @@ export class GetTeamFlagsCommand extends BaseStatusCommand {
 
         if (isKeyResultInOperation && isOutdated) {
           categories.outdated.push(keyResult)
+        }
+
+        if (latestCheckin) {
+          switch (latestCheckin.confidence) {
+            case CONFIDENCE_TAG_THRESHOLDS.low:
+              categories.lowConfidence.push(keyResult)
+              break
+
+            case CONFIDENCE_TAG_THRESHOLDS.barrier:
+              categories.barried.push(keyResult)
+              break
+
+            case CONFIDENCE_TAG_THRESHOLDS.achieved:
+            case CONFIDENCE_TAG_THRESHOLDS.deprioritized:
+              break
+
+            default:
+              return categories
+          }
         }
 
         return categories
