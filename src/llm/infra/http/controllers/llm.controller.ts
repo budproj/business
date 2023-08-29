@@ -1,9 +1,9 @@
 /* eslint-disable no-warning-comments */
 import { Body, Controller, Post, UseGuards, HttpException, HttpStatus } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
-import { ActionType, TargetEntity } from '@prisma/client'
 
 import { Stopwatch } from '@lib/logger/pino.decorator'
+import { ActionType, TargetEntity } from 'prisma/generated/llm'
 import OpenAICompletionService, {
   CompletionRequestPrompt,
 } from 'src/llm/domain/open-ai/services/open-ai-completion.service'

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { Task } from '@prisma/client'
 
-import { TaskRepository } from 'src/mission-control/domain/tasks/repositories/task-repositorie'
+import { TaskRepository } from 'src/mission-control/domain/tasks/repositories/task-repositoriy'
 import { TaskId } from 'src/mission-control/domain/tasks/types'
+import { Task } from 'src/mission-control/prisma/generated/mission-control'
 
 import { PrismaService } from '../../prisma.service'
 

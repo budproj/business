@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { OpenAiCompletion } from '@prisma/client'
 
+import { OpenAiCompletion } from 'prisma/generated/llm'
 import { GenerateOpenAiCompletionDTO } from 'src/llm/domain/open-ai/dtos/create-key-result-completion.dto'
 import { OpenAICompletionRepository } from 'src/llm/domain/open-ai/repositories/open-ai-completion-repositorie'
 

@@ -7,7 +7,7 @@ import {
   RETROSPECTIVE_ANSWER_TASK_TEMPLATE_ID,
 } from '../../constants'
 import { Event } from '../../messaging/events'
-import { TaskRepository } from '../../repositories/task-repositorie'
+import { TaskRepository } from '../../repositories/task-repositoriy'
 import { TaskId } from '../../types'
 
 import { TaskFulfiller } from './base-scenario/task-fulfiller.abstract'

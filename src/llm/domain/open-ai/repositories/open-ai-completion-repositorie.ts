@@ -1,4 +1,4 @@
-import { OpenAiCompletion } from '@prisma/client'
+import { OpenAiCompletion } from 'prisma/generated/llm'
 
 import { GenerateOpenAiCompletionDTO } from '../dtos/create-key-result-completion.dto'
 

@@ -1,4 +1,4 @@
-import { Task } from '@prisma/client'
+import { Task } from 'src/mission-control/prisma/generated/mission-control'
 
 import { TaskScope } from '../../../types'
 
