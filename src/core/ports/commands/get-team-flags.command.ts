@@ -2,7 +2,7 @@ import { differenceInDays } from 'date-fns'
 import { flatten } from 'lodash'
 import { Any } from 'typeorm'
 
-import { ConfidenceTag } from '@adapters/confidence-tag/confidence-tag.enum'
+import { CONFIDENCE_TAG_THRESHOLDS } from '@adapters/confidence-tag/confidence-tag.constants'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserStatus } from '@core/modules/user/enums/user-status.enum'
@@ -11,7 +11,59 @@ import { BaseStatusCommand } from './base-status.command'
 
 export class GetTeamFlagsCommand extends BaseStatusCommand {
   public async execute(teamId: TeamInterface['id']): Promise<any> {
-    const keyResultsFromTeam = await this.core.keyResult.getKeyResults([teamId])
+    const keyResultsFromTeam = await this.core.keyResult.getKeyResults(
+      [teamId],
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      ['checkIns'],
+    )
+
+    const categorizedKeyResults: {
+      lowConfidence: KeyResult[]
+      barried: KeyResult[]
+      outdated: KeyResult[]
+    } = keyResultsFromTeam.reduce(
+      (categories, keyResult) => {
+        const latestCheckin = this.getLatestCheckInFromList(keyResult.checkIns)
+
+        const isKeyResultInOperation =
+          latestCheckin?.confidence !== CONFIDENCE_TAG_THRESHOLDS.deprioritized &&
+          latestCheckin?.confidence !== CONFIDENCE_TAG_THRESHOLDS.achieved
+
+        const isOutdated = latestCheckin
+          ? this.isOutdated(latestCheckin, new Date())
+          : differenceInDays(Date.now(), keyResult.createdAt) > 6
+
+        if (isKeyResultInOperation && isOutdated) {
+          categories.outdated.push(keyResult)
+        }
+
+        if (latestCheckin) {
+          switch (latestCheckin.confidence) {
+            case CONFIDENCE_TAG_THRESHOLDS.low:
+              categories.lowConfidence.push(keyResult)
+              break
+
+            case CONFIDENCE_TAG_THRESHOLDS.barrier:
+              categories.barried.push(keyResult)
+              break
+
+            case CONFIDENCE_TAG_THRESHOLDS.achieved:
+            case CONFIDENCE_TAG_THRESHOLDS.deprioritized:
+              break
+
+            default:
+              return categories
+          }
+        }
+
+        return categories
+      },
+      { lowConfidence: [], barried: [], outdated: [] },
+    )
+
     const teams = await this.core.team.getDescendantsByIds([teamId])
 
     const teamUsersPromises = teams.map(async (team) => team.users)
@@ -32,43 +84,6 @@ export class GetTeamFlagsCommand extends BaseStatusCommand {
       .flat()
       .map(({ id }) => id)
 
-    const keyResultsFromTeamWithLowConfidence = await this.core.keyResult.getKeyResults(
-      [teamId],
-      undefined,
-      undefined,
-      true,
-      ConfidenceTag.LOW,
-    )
-
-    const keyResultsFromTeamWithBarrier = await this.core.keyResult.getKeyResults(
-      [teamId],
-      undefined,
-      undefined,
-      true,
-      ConfidenceTag.BARRIER,
-    )
-
-    const asyncFilter = async (array, predicate) => {
-      const results = await Promise.all(array.map((element) => predicate(element)))
-
-      return array.filter((_v, index) => results[index])
-    }
-
-    const isOutdatedKeyResults = await asyncFilter(
-      keyResultsFromTeam,
-      async (keyResult: KeyResult) => {
-        const latestCheckIn = await this.core.keyResult.getLatestCheckInForKeyResultAtDate(
-          keyResult.id,
-        )
-
-        const isOutdated = latestCheckIn
-          ? this.isOutdated(latestCheckIn, new Date())
-          : differenceInDays(Date.now(), keyResult.createdAt) > 6
-
-        return isOutdated
-      },
-    )
-
     const teamUsers = await this.core.user.getMany(selector)
     const teamOwnerId = (await this.core.team.getOne({ id: teamId })).ownerId
     const teamOwner = await this.core.user.getFromID(teamOwnerId)
@@ -84,9 +99,9 @@ export class GetTeamFlagsCommand extends BaseStatusCommand {
     )
 
     return {
-      outdated: isOutdatedKeyResults,
-      barrier: keyResultsFromTeamWithBarrier,
-      low: keyResultsFromTeamWithLowConfidence,
+      outdated: categorizedKeyResults.outdated,
+      barrier: categorizedKeyResults.barried,
+      low: categorizedKeyResults.lowConfidence,
       noRelated: noRelatedToOkr,
     }
   }

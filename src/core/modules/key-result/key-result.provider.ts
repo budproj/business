@@ -74,6 +74,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     options?: GetOptions<KeyResult>,
     active = true,
     confidence?: ConfidenceTag,
+    queryRelations: string[] = [],
   ): Promise<KeyResult[]> {
     const queryOptions = this.repository.marshalGetOptions(options)
     const whereSelector = {
@@ -88,7 +89,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
     const relations = [
       ...(active ? ['objective', 'objective.cycle'] : []),
-      ...(confidence ? ['checkIns'] : []),
+      ...(confidence ? ['checkIns'] : [...queryRelations]),
     ]
 
     const keyResults = await this.repository.find({
