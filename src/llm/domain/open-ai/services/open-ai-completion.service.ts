@@ -3,9 +3,15 @@ import { setTimeout } from 'timers/promises'
 
 import { TiktokenModel, encoding_for_model } from '@dqbd/tiktoken'
 import { Injectable, Logger } from '@nestjs/common'
-import { ActionType, OpenAiCompletion, OpenAiCompletionStatus, TargetEntity } from '@prisma/client'
 import { differenceInSeconds } from 'date-fns'
 import { Configuration, CreateChatCompletionRequest, OpenAIApi } from 'openai'
+
+import {
+  ActionType,
+  OpenAiCompletion,
+  OpenAiCompletionStatus,
+  TargetEntity,
+} from 'prisma/generated/llm'
 
 import { HashProvider } from '../../../shared/hash-provider/models/hash-provider'
 import generateId from '../../../shared/utilities/generate-id'
