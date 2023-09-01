@@ -1,9 +1,9 @@
 import { INestApplication, Injectable, OnModuleInit } from '@nestjs/common'
 
-import { PrismaClient } from 'src/mission-control/prisma/generated/mission-control'
+import { PrismaClient as MissionControlPrismaClient } from '@prisma/mission-control/generated'
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit {
+export class PrismaService extends MissionControlPrismaClient implements OnModuleInit {
   async onModuleInit() {
     await this.$connect()
   }

@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common'
 
+import { Event } from '@core/common/messaging/base-scenarios/events'
 import { buildWeekId } from 'src/mission-control/helpers/build-week-id'
 
 import {
   RETROSPECTIVE_ANSWER_SINGLE_SUBTASK,
   RETROSPECTIVE_ANSWER_TASK_TEMPLATE_ID,
 } from '../../constants'
-import { Event } from '../../messaging/events'
 import { TaskRepository } from '../../repositories/task-repositoriy'
 import { TaskId } from '../../types'
 

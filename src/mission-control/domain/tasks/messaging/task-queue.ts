@@ -1,5 +1,3 @@
-import { MessageException } from '@adapters/message-broker/types'
-
 import { TaskScope } from '../types'
 
 export abstract class TaskCreationProducer {
@@ -7,8 +5,5 @@ export abstract class TaskCreationProducer {
 }
 
 export abstract class TaskCreationConsumer {
-  abstract consume(
-    queue: string,
-    callback: (excepion: MessageException, scope: TaskScope) => void,
-  ): void
+  abstract consume(callback: (scope: TaskScope) => void): void
 }
