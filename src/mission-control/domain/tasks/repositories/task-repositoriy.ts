@@ -1,4 +1,4 @@
-import { Task } from 'src/mission-control/prisma/generated/mission-control'
+import { Task } from '@prisma/mission-control/generated'
 
 import { TaskId } from '../types'
 

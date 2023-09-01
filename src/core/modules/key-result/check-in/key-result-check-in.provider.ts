@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
 import { Any, DeleteResult, SelectQueryBuilder } from 'typeorm'
 
+import { EventPublisher } from '@core/common/messaging/base-scenarios/abstract'
+import { CheckInEvent } from '@core/common/messaging/base-scenarios/checkin.event'
+import { CHECK_IN_TASK_TEMPLATE_ID } from '@core/common/mission-control/tasks-template/constants'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { Sorting } from '@core/enums/sorting'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
@@ -27,6 +30,7 @@ export class KeyResultCheckInProvider extends CoreEntityProvider<
   constructor(
     protected readonly repository: KeyResultCheckInRepository,
     private readonly moduleReference: ModuleRef,
+    private readonly fulfillerTaskPublisher: EventPublisher,
   ) {
     super(KeyResultCheckInProvider.name, repository)
   }
@@ -98,7 +102,24 @@ export class KeyResultCheckInProvider extends CoreEntityProvider<
   public async createCheckIn(
     checkIn: Partial<KeyResultCheckInInterface>,
   ): Promise<KeyResultCheckIn[]> {
-    return this.create(checkIn)
+    const createdCheckin = await this.create(checkIn)
+
+    // TODO: implementar a query necessária para montar os dados do evento
+    const messageInterface = {
+      userId: createdCheckin[0].userId,
+      companyId: 'xxx-xxx-xx-xx',
+      date: Date.now(),
+      payload: {
+        teamId: 'd6310cc8-cc17-499b-a28c-5c600dd9714a',
+        keyResultId: checkIn.keyResultId,
+      },
+    }
+
+    void this.fulfillerTaskPublisher.publish<CheckInEvent>(CHECK_IN_TASK_TEMPLATE_ID, {
+      ...messageInterface,
+    })
+
+    return createdCheckin
   }
 
   public async deleteFromObjective(objectiveID: string): Promise<DeleteResult> {

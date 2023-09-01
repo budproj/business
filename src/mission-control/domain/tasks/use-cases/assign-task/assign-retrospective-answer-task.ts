@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 
-import { Task } from 'src/mission-control/prisma/generated/mission-control'
+import { Task } from '@prisma/mission-control/generated'
 
 import {
   RETROSPECTIVE_ANSWER_SINGLE_SUBTASK,

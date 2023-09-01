@@ -1,4 +1,4 @@
-import { startOfWeek } from 'date-fns/esm'
+import { startOfWeek } from 'date-fns'
 
 export const buildWeekId = (date: Date = new Date()) => {
   const base = startOfWeek(date)
