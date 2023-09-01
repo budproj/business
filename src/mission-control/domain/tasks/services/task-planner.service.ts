@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { Injectable } from '@nestjs/common'
 
-import { buildWeekId } from '../../../shared/utils.js'
+import { buildWeekId } from '../../../helpers/build-week-id'
+import { UserRepository } from '../../users/repositories/user-repository.js'
 import { TaskCreationProducer } from '../messaging/task-queue.js'
-import { UserRepository } from '../repositories/user-repository.js'
 
 @Injectable()
 export class TaskPlannerService {

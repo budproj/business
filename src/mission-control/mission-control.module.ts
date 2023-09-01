@@ -1,11 +1,9 @@
 import { Module } from '@nestjs/common'
 
-import { UserModule } from '@core/modules/user/user.module'
-import { AWSModule } from '@infrastructure/aws/aws.module'
-
 import { MissionControlDatabaseModule } from './infra/database/database.module'
+import { HttpModule } from './infra/http/http.module'
 
 @Module({
-  imports: [MissionControlDatabaseModule, AWSModule, UserModule],
+  imports: [MissionControlDatabaseModule, HttpModule],
 })
 export class MissionControlModule {}
