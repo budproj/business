@@ -3,7 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "generated/mission-control"
+  output   = "../../../schema/mission-control/generated"
 }
 
 datasource db {
