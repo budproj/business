@@ -11,7 +11,7 @@ import {
   OpenAiCompletion,
   OpenAiCompletionStatus,
   TargetEntity,
-} from 'prisma/generated/llm'
+} from '@prisma/llm/generated'
 
 import { HashProvider } from '../../../shared/hash-provider/models/hash-provider'
 import generateId from '../../../shared/utilities/generate-id'
@@ -70,9 +70,9 @@ class OpenAICompletionService {
       encoding.free()
 
       return { count }
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
-        `Could not estimate prompt tokens for model ${model} due to "${error.message}": %o`,
+        `Could not estimate prompt tokens for model ${model} due to "${error.message ?? ''}": %o`,
         error,
       )
       return { error: error.message }
@@ -165,12 +165,13 @@ class OpenAICompletionService {
         output: content,
         response: response as unknown as OpenAiCompletion['response'],
       })
-    } catch (error) {
+    } catch (error: any) {
       const response = error.response ?? null
 
       if (response) {
         this.logger.error(
-          `Failed to generate completion for ${id} due to "${error.message}": %o`,
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          `Failed to generate completion for ${id} due to "${error.message ?? ''}": %o`,
           response,
         )
 
