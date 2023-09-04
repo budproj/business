@@ -1,4 +1,4 @@
-import { ActionType, TargetEntity } from 'prisma/generated/llm'
+import { ActionType, TargetEntity } from '@prisma/llm/generated'
 
 // eslint-disable-next-line unicorn/prevent-abbreviations
 interface Args {

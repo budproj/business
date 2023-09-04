@@ -18,7 +18,6 @@ export class TaskFulfillerService implements OnModuleInit {
     this.fulfillEventSubscriber.subscribe<CheckInEvent>(
       CHECK_IN_TASK_TEMPLATE_ID,
       async (event) => {
-        console.log('\n\n\n\n PAYLOAD: %s \n\n\n\n\n', event.payload)
         await this.fulfillCheckInTask.ingest(event)
       },
     )
