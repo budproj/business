@@ -15,7 +15,7 @@ export class PrismaTaskRepository implements TaskRepository {
 
   async addSubtask(taskId: TaskId, stepId: string): Promise<void> {
     try {
-      void this.prisma.task.update({
+      await this.prisma.task.update({
         where: {
           companyId_userId_teamId_weekId_templateId: { ...taskId },
         },

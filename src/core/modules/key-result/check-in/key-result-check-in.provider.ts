@@ -8,6 +8,7 @@ import { CHECK_IN_TASK_TEMPLATE_ID } from '@core/common/mission-control/tasks-te
 import { CoreEntityProvider } from '@core/entity.provider'
 import { Sorting } from '@core/enums/sorting'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
+import { TeamProvider } from '@core/modules/team/team.provider'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { CreationQuery } from '@core/types/creation-query.type'
 
@@ -30,6 +31,7 @@ export class KeyResultCheckInProvider extends CoreEntityProvider<
   constructor(
     protected readonly repository: KeyResultCheckInRepository,
     private readonly moduleReference: ModuleRef,
+    private readonly team: TeamProvider,
     private readonly fulfillerTaskPublisher: EventPublisher,
   ) {
     super(KeyResultCheckInProvider.name, repository)
@@ -104,14 +106,23 @@ export class KeyResultCheckInProvider extends CoreEntityProvider<
   ): Promise<KeyResultCheckIn[]> {
     const createdCheckin = await this.create(checkIn)
 
-    // TODO: implementar a query necessária para montar os dados do evento
+    const {
+      keyResult: { id: keyResultId, teamId },
+    } = await this.repository.findOne(createdCheckin[0].id, {
+      relations: ['keyResult', 'user'],
+    })
+
+    const { ownerId } = await this.keyResultProvider.getFromID(createdCheckin[0].keyResultId)
+
+    const [companie] = await this.team.getAscendantsByIds([teamId], {})
+
     const messageInterface = {
-      userId: createdCheckin[0].userId,
-      companyId: 'xxx-xxx-xx-xx',
+      userId: ownerId,
+      companyId: companie.id,
       date: Date.now(),
       payload: {
-        teamId: 'd6310cc8-cc17-499b-a28c-5c600dd9714a',
-        keyResultId: checkIn.keyResultId,
+        teamId,
+        keyResultId,
       },
     }
 
