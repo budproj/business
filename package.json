@@ -40,6 +40,8 @@
     "waypoint:up": "waypoint up -var=\"GITHUB_TOKEN=$GITHUB_TOKEN\"",
     "prepare": "husky install",
     "migrate:dev:llm": "npx prisma migrate dev --schema=\"prisma/schema.prisma\"",
+    "prisma:generate:mission-control": "cd src/mission-control && npx prisma generate && cd ../..",
+    "prisma:generate:llm": "npx prisma generate",
     "migrate:dev:mission-control": "npx prisma migrate dev --schema=\"src/mission-control/prisma/schema.prisma\"",
     "generate:prisma:client": "npx prisma generate",
     "k8s:migrate": "npx typeorm --config dist/src/config/typeorm/typeorm-cli.config.js migration:run && npx prisma migrate deploy"
