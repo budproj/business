@@ -145,6 +145,33 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return response.supportTeamMembers
   }
 
+  public async getManyWithOutdatedCheckin(filters?: FindConditions<KeyResult>) {
+    const sixDaysAgo: Date = new Date()
+    sixDaysAgo.setDate(sixDaysAgo.getDate() - 6)
+
+    const queryResult = await this.repository
+      .createQueryBuilder('KeyResult')
+      .leftJoinAndSelect(
+        'KeyResult.checkIns',
+        'checkIn',
+        'checkIn.created_at = (SELECT MAX(c.created_at) FROM key_result_check_in c WHERE c.key_result_id = KeyResult.id)',
+      )
+      .where((qb) => {
+        qb.andWhere({ ...filters })
+        qb.andHaving(
+          '(checkIn.created_at IS NOT NULL AND checkIn.created_at < :date) OR (checkIn.created_at IS NULL AND KeyResult.created_at < :date)',
+          {
+            date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
+          },
+        )
+      })
+      .groupBy('KeyResult.id')
+      .addGroupBy('checkIn.id')
+      .getMany()
+
+    return queryResult
+  }
+
   public async addUserToSupportTeam(keyResultId: string, userId: string) {
     return this.repository.addUserToSupportTeam(keyResultId, userId)
   }

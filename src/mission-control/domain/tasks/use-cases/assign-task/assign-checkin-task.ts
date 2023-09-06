@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.enum'
+import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResultProvider } from '@core/modules/key-result/key-result.provider'
 import { Task } from '@prisma/mission-control/generated'
 
@@ -13,13 +14,15 @@ import { TaskAssigner } from './base-scenario/task-assigner.abstract'
 export class AssignCheckinTask implements TaskAssigner {
   constructor(private readonly keyResultRepository: KeyResultProvider) {}
 
-  async assign(scope: TaskScope): Promise<Task[]> {
-    const keyResults = await this.keyResultRepository.getMany({
-      ownerId: scope.userId,
-      teamId: scope.teamId,
-      mode: KeyResultMode.PUBLISHED,
-    })
+  async assign(scope: TaskScope): Promise<Task[] | null> {
+    const keyResults: Array<Partial<KeyResultInterface>> =
+      await this.keyResultRepository.getManyWithOutdatedCheckin({
+        ownerId: scope.userId,
+        teamId: scope.teamId,
+        mode: KeyResultMode.PUBLISHED,
+      })
 
+    if (keyResults.length === 0) return
     const keyResultsIds = keyResults.map((keyResult) => keyResult.id)
 
     return [

@@ -24,7 +24,7 @@ export class TaskAssignerService {
       const assignPromises = assigners.map(async (assigner) => {
         try {
           const assignedTasks = await assigner.assign(scope)
-          tasksToInsert.push(...assignedTasks)
+          if (assignedTasks) tasksToInsert.push(...assignedTasks)
         } catch (error: unknown) {
           console.error(
             `Failed to assign tasks for ${scope.userId} in ${scope.teamId} for ${scope.weekId} with ${assigner.constructor.name}:`,
