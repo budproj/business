@@ -23,6 +23,8 @@ export class TasksController {
   @Get()
   async getUserTasks(@Query() queryParameters: GetUserTasksDTO): Promise<Task[]> {
     const { teamId, userId } = queryParameters
+    // Criar uma view para retornar as tasks de um usuário contendo mais propriedades: exemplo -> "isDone"
+    // Criar factory que recebe uma task e retorna o estado da task (será usada em team-score-processor e em task.controller)
 
     const tasks = this.tasks.getUserTasks(userId, teamId)
 
