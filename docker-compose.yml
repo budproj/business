@@ -62,7 +62,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   db-postgres-mission-control:
-    image: postgres
+    image: quay.io/tembo/pgmq-pg:latest
     container_name: mission-control-postgres
     restart: always
     tty: true
@@ -73,10 +73,9 @@ services:
         source: postgres-mission-control
         target: /data/postgres-mission-control
     environment:
-      - POSTGRES_USER=missioncontrol
-      - POSTGRES_PASSWORD=changeme
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=mission-control
-
   # business:
   #   build:
   #       context: .
