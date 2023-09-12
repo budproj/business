@@ -8,6 +8,10 @@ import { TaskFulfillerService } from 'src/mission-control/domain/tasks/services/
 import { TaskPlannerService } from 'src/mission-control/domain/tasks/services/task-planner.service'
 import TasksService from 'src/mission-control/domain/tasks/services/tasks.service'
 import { AssignCheckinTask } from 'src/mission-control/domain/tasks/use-cases/assign-task/assign-checkin-task'
+import { AssignCommentOnBarrierKeyResultTask } from 'src/mission-control/domain/tasks/use-cases/assign-task/assign-comment-on-barrier-kr'
+import { AssignCommentOnKeyResultTask } from 'src/mission-control/domain/tasks/use-cases/assign-task/assign-comment-on-key-result'
+import { AssignEmptyDescriptionTask } from 'src/mission-control/domain/tasks/use-cases/assign-task/assign-empty-description-key-result-task'
+import { AssignCommentOnLowConfidenceKeyResultTask } from 'src/mission-control/domain/tasks/use-cases/assign-task/assingn-comment-on-low-confidence-kr'
 import { FulfillCheckinTask } from 'src/mission-control/domain/tasks/use-cases/fulfill-task/fulfil-checkin-task'
 
 import { MissionControlDatabaseModule } from '../database/database.module'
@@ -25,6 +29,10 @@ import { TasksController } from './controllers/tasks.controller'
     TaskFulfillerService,
     FulfillCheckinTask,
     AssignCheckinTask,
+    AssignEmptyDescriptionTask,
+    AssignCommentOnKeyResultTask,
+    AssignCommentOnLowConfidenceKeyResultTask,
+    AssignCommentOnBarrierKeyResultTask,
     AddHTTPContextToUserInterceptor,
   ],
 })

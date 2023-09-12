@@ -6,6 +6,10 @@ import { TaskCreationConsumer } from '../messaging/task-queue'
 import { TaskRepository } from '../repositories/task-repositoriy'
 import { TaskScope } from '../types'
 import { AssignCheckinTask } from '../use-cases/assign-task/assign-checkin-task'
+import { AssignCommentOnBarrierKeyResultTask } from '../use-cases/assign-task/assign-comment-on-barrier-kr'
+import { AssignCommentOnKeyResultTask } from '../use-cases/assign-task/assign-comment-on-key-result'
+import { AssignEmptyDescriptionTask } from '../use-cases/assign-task/assign-empty-description-key-result-task'
+import { AssignCommentOnLowConfidenceKeyResultTask } from '../use-cases/assign-task/assingn-comment-on-low-confidence-kr'
 
 @Injectable()
 export class TaskAssignerService {
@@ -13,10 +17,20 @@ export class TaskAssignerService {
     private readonly taskRepository: TaskRepository,
     private readonly consumer: TaskCreationConsumer,
     private readonly assignCheckInTask: AssignCheckinTask,
+    private readonly assignEmptyDescriptionTask: AssignEmptyDescriptionTask,
+    private readonly assignCommentOnKeyResultTask: AssignCommentOnKeyResultTask,
+    private readonly assignCommentOnLowConfidenceKeyResultTask: AssignCommentOnLowConfidenceKeyResultTask,
+    private readonly assignCommentOnBarrierKeyResultTask: AssignCommentOnBarrierKeyResultTask,
   ) {}
 
   async execute() {
-    const assigners = [this.assignCheckInTask]
+    const assigners = [
+      this.assignCheckInTask,
+      this.assignEmptyDescriptionTask,
+      this.assignCommentOnKeyResultTask,
+      this.assignCommentOnLowConfidenceKeyResultTask,
+      this.assignCommentOnBarrierKeyResultTask,
+    ]
 
     this.consumer.consume(async (scope: TaskScope) => {
       const tasksToInsert: Task[] = []
