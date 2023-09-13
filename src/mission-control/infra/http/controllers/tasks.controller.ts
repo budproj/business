@@ -1,10 +1,11 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 
-import { Task } from '@prisma/mission-control/generated'
 import { TaskAssignerService } from 'src/mission-control/domain/tasks/services/assigner-task.service'
 import { TaskPlannerService } from 'src/mission-control/domain/tasks/services/task-planner.service'
 import TasksService from 'src/mission-control/domain/tasks/services/tasks.service'
+
+import { TaskViewModel } from '../view/task-view.model'
 
 interface GetUserTasksDTO {
   teamId: string
@@ -21,14 +22,14 @@ export class TasksController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  async getUserTasks(@Query() queryParameters: GetUserTasksDTO): Promise<Task[]> {
+  async getUserTasks(@Query() queryParameters: GetUserTasksDTO) {
     const { teamId, userId } = queryParameters
     // Criar uma view para retornar as tasks de um usuário contendo mais propriedades: exemplo -> "isDone"
     // Criar factory que recebe uma task e retorna o estado da task (será usada em team-score-processor e em task.controller)
 
-    const tasks = this.tasks.getUserTasks(userId, teamId)
+    const tasks = await this.tasks.getUserTasks(userId, teamId)
 
-    return tasks
+    return TaskViewModel.toHTTP(tasks)
   }
 
   @UseGuards(AuthGuard('jwt'))

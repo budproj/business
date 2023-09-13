@@ -15,7 +15,6 @@ export class FulfillCheckinTask implements TaskFulfiller<CheckInEvent> {
 
   async ingest(event: CheckInEvent): Promise<void> {
     const taskId: TaskId = {
-      companyId: event.companyId,
       userId: event.userId,
       teamId: event.payload.teamId,
       weekId: buildWeekId(new Date(event.date)),

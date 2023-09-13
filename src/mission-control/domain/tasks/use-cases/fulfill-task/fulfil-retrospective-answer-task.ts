@@ -27,7 +27,6 @@ export class FulfillRetrospectiveAnswerTask implements TaskFulfiller<Retrospecti
 
     for (const task of tasks) {
       const taskId: TaskId = {
-        companyId: task.companyId,
         userId: task.userId,
         teamId: task.teamId,
         weekId: task.weekId,

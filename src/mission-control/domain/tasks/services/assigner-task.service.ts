@@ -6,6 +6,7 @@ import { TaskCreationConsumer } from '../messaging/task-queue'
 import { TaskRepository } from '../repositories/task-repositoriy'
 import { TaskScope } from '../types'
 import { AssignCheckinTask } from '../use-cases/assign-task/assign-checkin-task'
+import { AssignOutdatedKeyResultCommentTask } from '../use-cases/assign-task/assign-outdated-key-result-comment-task'
 
 @Injectable()
 export class TaskAssignerService {
@@ -13,10 +14,12 @@ export class TaskAssignerService {
     private readonly taskRepository: TaskRepository,
     private readonly consumer: TaskCreationConsumer,
     private readonly assignCheckInTask: AssignCheckinTask,
+    private readonly assignerOutdatedKeyResultCommentTask: AssignOutdatedKeyResultCommentTask,
   ) {}
 
   async execute() {
     const assigners = [this.assignCheckInTask]
+    // Const assigners = [this.assignerOutdatedKeyResultCommentTask]
 
     this.consumer.consume(async (scope: TaskScope) => {
       const tasksToInsert: Task[] = []

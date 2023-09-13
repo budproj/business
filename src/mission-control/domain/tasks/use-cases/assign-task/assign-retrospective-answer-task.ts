@@ -16,7 +16,6 @@ export class AssignRetrospectiveAnswerTask implements TaskAssigner {
   async assign(scope: TaskScope): Promise<Task[]> {
     return [
       {
-        companyId: scope.companyId,
         userId: scope.userId,
         teamId: scope.teamId,
         weekId: scope.weekId,
