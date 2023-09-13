@@ -18,6 +18,8 @@ class TeamScoreProcessorService {
   public async getTeamScore(teamId: string, date = new Date()): Promise<Score> {
     const weekId = buildWeekId(date)
 
+    const teamGoal = await this.taskRepository.processTeamGoal(teamId, weekId)
+
     const tasks = await this.taskRepository.findMany({ teamId, weekId })
 
     return tasks.reduce(
@@ -25,14 +27,13 @@ class TeamScoreProcessorService {
         return {
           ...score,
           progress: score.progress + task.score * task.completedSubtasks.length,
-          available: score.available + task.score * task.availableSubtasks.length,
         }
       },
       {
         teamId,
         weekId,
         progress: 0,
-        available: 0,
+        available: teamGoal,
       },
     )
   }
