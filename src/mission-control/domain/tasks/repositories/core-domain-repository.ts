@@ -1,3 +1,8 @@
+export type userFromMCContext = {
+  userId: string
+  teamIds: string[]
+}
+
 export abstract class CoreDomainRepository {
-  abstract findUserById(userId: string): Promise<string>
+  abstract findAllUsersAndTeams(): Promise<userFromMCContext[]>
 }
