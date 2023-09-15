@@ -49,6 +49,8 @@ import { UserSettingsGraphQLConnection } from '@interface/graphql/modules/user/c
 import { UserSettingFiltersRequest } from '@interface/graphql/modules/user/setting/requests/user-setting-filters.request'
 import { UserAccessControl } from '@interface/graphql/modules/user/user.access-control'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
+import { Cacheable } from '@lib/cache/cacheable.decorator'
+import { Stopwatch } from '@lib/logger/pino.decorator'
 import { Permission as UserPermission } from 'src/adapters/policy/types/permission.type'
 
 import { UserKeyResultCheckInsGraphQLConnection } from './connections/user-key-result-check-ins/user-key-result-check-ins.connection'
@@ -70,8 +72,6 @@ import { UserUpdateRoleRequest } from './requests/user-update-role.request'
 import { UserUpdateRequest } from './requests/user-update.request'
 import { UserTasksRequest } from './task/requests/user-tasks.request'
 import { UserGraphQLNode } from './user.node'
-import { Stopwatch } from "@lib/logger/pino.decorator";
-import {Cacheable} from "@lib/cache/cacheable.decorator";
 
 @GuardedResolver(UserGraphQLNode)
 export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserInterface> {
@@ -591,7 +591,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return amplitudeData
   }
 
-  @Cacheable((request, user) => [user.id, request], 5 * 60)
+  // @Cacheable((request, user) => [user.id, request], 5 * 60)
   @Stopwatch()
   @ResolveField('settings', () => UserSettingsGraphQLConnection, {
     nullable: true,
