@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
+import { OnEvent } from '@nestjs/event-emitter'
 
 import { Task } from '@prisma/mission-control/generated'
+import { TaskSelector } from 'src/mission-control/helpers/task-selector'
 
 import { TaskCreationConsumer } from '../messaging/task-queue'
 import { TaskRepository } from '../repositories/task-repositoriy'
@@ -17,29 +19,31 @@ export class TaskAssignerService {
     private readonly assignerOutdatedKeyResultCommentTask: AssignOutdatedKeyResultCommentTask,
   ) {}
 
+  @OnEvent('task.created')
   async execute() {
     const assigners = [this.assignCheckInTask]
     // Const assigners = [this.assignerOutdatedKeyResultCommentTask]
 
     this.consumer.consume(async (scope: TaskScope) => {
-      const tasksToInsert: Task[] = []
+      const tasks: Task[] = []
 
-      const assignPromises = assigners.map(async (assigner) => {
-        try {
+      try {
+        for (const assigner of assigners) {
+          // eslint-disable-next-line no-await-in-loop
           const assignedTasks = await assigner.assign(scope)
-          if (assignedTasks) tasksToInsert.push(...assignedTasks)
-        } catch (error: unknown) {
-          console.error(
-            `Failed to assign tasks for ${scope.userId} in ${scope.teamId} for ${scope.weekId} with ${assigner.constructor.name}:`,
-            error,
-          )
+          if (assignedTasks) tasks.push(...assignedTasks)
         }
-      })
+      } catch (error: unknown) {
+        console.error(
+          `Failed to assign tasks for ${scope.userId} in ${scope.teamId} for ${scope.weekId}:`,
+          error,
+        )
+      }
 
-      await Promise.all(assignPromises)
+      const selectedTasks = TaskSelector(tasks)
 
-      if (tasksToInsert.length > 0) {
-        await this.taskRepository.createMany(tasksToInsert)
+      if (selectedTasks.length > 0) {
+        await this.taskRepository.createMany(selectedTasks)
       }
     })
   }

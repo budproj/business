@@ -1,8 +1,6 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 
-import { TaskAssignerService } from 'src/mission-control/domain/tasks/services/assigner-task.service'
-import { TaskPlannerService } from 'src/mission-control/domain/tasks/services/task-planner.service'
 import TasksService from 'src/mission-control/domain/tasks/services/tasks.service'
 
 import { TaskViewModel } from '../view/task-view.model'
@@ -14,11 +12,7 @@ interface GetUserTasksDTO {
 
 @Controller('tasks')
 export class TasksController {
-  constructor(
-    private readonly tasks: TasksService,
-    private readonly planner: TaskPlannerService,
-    private readonly assigner: TaskAssignerService,
-  ) {}
+  constructor(private readonly tasks: TasksService) {}
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
@@ -30,12 +24,5 @@ export class TasksController {
     const tasks = await this.tasks.getUserTasks(userId, teamId)
 
     return TaskViewModel.toHTTP(tasks)
-  }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Get('execute')
-  async execute(): Promise<any> {
-    void this.planner.execute()
-    void this.assigner.execute()
   }
 }

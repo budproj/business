@@ -12,7 +12,6 @@ datasource db {
 }
 
 model Task {
-  companyId         String
   userId            String
   teamId            String
   weekId            String
@@ -21,6 +20,6 @@ model Task {
   availableSubtasks String[]
   completedSubtasks String[]
 
-  @@id([companyId, userId, teamId, weekId, templateId])
-  @@index([companyId, userId, teamId, weekId, templateId])
+  @@id([userId, teamId, weekId, templateId])
+  @@index([userId, teamId, weekId, templateId])
 }
