@@ -48,7 +48,6 @@ export class AssignCommentOnLowConfidenceKeyResultTask implements TaskAssigner {
 
     return [
       {
-        companyId: scope.companyId,
         userId: scope.userId,
         teamId: scope.teamId,
         weekId: scope.weekId,

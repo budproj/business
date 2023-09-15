@@ -16,7 +16,6 @@ export class FulfillCommenBarrierKeyResultTask implements TaskFulfiller<CommentO
 
   async ingest(event: CommentOnKREvent): Promise<void> {
     const taskId: TaskId = {
-      companyId: event.companyId,
       userId: event.userId,
       teamId: event.payload.teamId,
       weekId: buildWeekId(new Date(event.date)),
