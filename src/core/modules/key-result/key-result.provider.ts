@@ -8,6 +8,7 @@ import {
   CONFIDENCE_TAG_THRESHOLDS,
 } from '@adapters/confidence-tag/confidence-tag.constants'
 import { ConfidenceTag } from '@adapters/confidence-tag/confidence-tag.enum'
+import { EventPublisher } from '@core/common/messaging/base-scenarios/abstract'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
@@ -58,6 +59,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     public readonly timeline: KeyResultTimelineProvider,
     protected readonly repository: KeyResultRepository,
     private readonly analyticsProvider: AnalyticsProvider,
+    public fulfillerTaskPublisher: EventPublisher,
   ) {
     super(KeyResultProvider.name, repository)
   }
