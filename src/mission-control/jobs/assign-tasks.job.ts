@@ -12,7 +12,7 @@ export class AssignTasksJobScheduler {
   ) {}
 
   // TODO: change to 0 22 * * 0 (every Sunday at 22:00)
-  @Cron('11 13 * * 5')
+  @Cron('37 15 * * 1')
   async assignTasks() {
     await this.plannerService.execute()
   }

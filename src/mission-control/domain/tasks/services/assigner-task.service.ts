@@ -34,7 +34,6 @@ export class TaskAssignerService {
       this.assignCommentOnLowConfidenceKeyResultTask,
       this.assignEmptyDescriptionTask,
     ]
-    // Const assigners = [this.assignerOutdatedKeyResultCommentTask]
 
     this.consumer.consume(async (scope: TaskScope) => {
       const tasks: Task[] = []
