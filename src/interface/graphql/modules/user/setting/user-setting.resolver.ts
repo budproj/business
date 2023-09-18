@@ -1,5 +1,5 @@
 import { Logger, UnauthorizedException } from '@nestjs/common'
-import { Args } from '@nestjs/graphql'
+import { Args, Parent, ResolveField } from '@nestjs/graphql'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
@@ -16,6 +16,8 @@ import { UserSettingUpdateRequest } from '@interface/graphql/modules/user/settin
 import { UserSettingGraphQLNode } from '@interface/graphql/modules/user/setting/user-setting.node'
 import { UserAccessControl } from '@interface/graphql/modules/user/user.access-control'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
+
+import { UserSettingUpdateMainTeamRequest } from './requests/user-setting-update-main-team.request'
 
 @GuardedResolver(UserSettingGraphQLNode)
 export class UserSettingGraphQLResolver extends GuardedNodeGraphQLResolver<
@@ -48,6 +50,26 @@ export class UserSettingGraphQLResolver extends GuardedNodeGraphQLResolver<
     return {}
   }
 
+  @GuardedMutation(UserSettingGraphQLNode, 'user-setting:update', { name: 'updateMainTeam' })
+  protected async updateMainTeamInPreferencesForRequestAndRequestUserWithContext(
+    @Args() request: UserSettingUpdateMainTeamRequest,
+    @RequestUserWithContext() userWithContext: UserWithContext,
+  ) {
+    this.logger.log({
+      request,
+      message: 'Received update main team in preferences request',
+    })
+
+    const canUpdate = await this.accessControl.canUpdate(userWithContext, request.userID)
+    if (!canUpdate) throw new UnauthorizedException()
+
+    return this.corePorts.dispatchCommand<UserSetting>(
+      'update-main-team-in-preferences',
+      request.userID,
+      request.main_team_id,
+    )
+  }
+
   @GuardedMutation(UserSettingGraphQLNode, 'user-setting:update', { name: 'updateUserSetting' })
   protected async updateUserSettingForRequestAndRequestUserWithContext(
     @Args() request: UserSettingUpdateRequest,
@@ -67,5 +89,25 @@ export class UserSettingGraphQLResolver extends GuardedNodeGraphQLResolver<
       request.key,
       request.value,
     )
+  }
+
+  @ResolveField('preferences', () => String, { nullable: false })
+  protected async stringfyExtra(@Parent() userSettings: UserSettingGraphQLNode) {
+    this.logger.log({
+      userSettings,
+      message: 'Fetching user settings preferences and stringfying it',
+    })
+
+    if (!userSettings.preferences.main_team) {
+      // TODO: maybe one day elaborate a trigger in pure SQL to get the company as default
+      const partialUser = { id: userSettings.userId }
+      const companies = await this.core.team.getUserCompanies(partialUser)
+
+      const newSettings = { ...userSettings.preferences, main_team: companies[0].id }
+
+      return JSON.stringify(newSettings)
+    }
+
+    return JSON.stringify(userSettings.preferences)
   }
 }
