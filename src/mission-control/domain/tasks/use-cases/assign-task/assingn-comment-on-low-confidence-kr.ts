@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
+import { CoreProvider } from '@core/core.provider'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
-import { KeyResultProvider } from '@core/modules/key-result/key-result.provider'
-import { TeamProvider } from '@core/modules/team/team.provider'
 import { Task } from '@prisma/mission-control/generated'
 
 import {
@@ -15,19 +14,16 @@ import { TaskAssigner } from './base-scenario/task-assigner.abstract'
 
 @Injectable()
 export class AssignCommentOnLowConfidenceKeyResultTask implements TaskAssigner {
-  constructor(
-    private readonly keyResultRepository: KeyResultProvider,
-    private readonly teamRepository: TeamProvider,
-  ) {}
+  constructor(private readonly core: CoreProvider) {}
 
   async assign(scope: TaskScope): Promise<Task[]> {
-    const team = await this.teamRepository.getFromID(scope.teamId)
+    const team = await this.core.team.getFromID(scope.teamId)
 
     if (scope.userId !== team.ownerId) {
-      return null
+      return []
     }
 
-    const queryBuilder = await this.keyResultRepository.get({
+    const queryBuilder = await this.core.keyResult.get({
       ownerId: scope.userId,
       teamId: scope.teamId,
     })
@@ -41,9 +37,10 @@ export class AssignCommentOnLowConfidenceKeyResultTask implements TaskAssigner {
       .where('KeyResult.ownerId = :ownerId', { ownerId: scope.userId })
       .andWhere('KeyResult.teamId = :teamId', { teamId: scope.teamId })
       .andWhere('checkIn.confidence <= :confidence', { confidence: 32 })
-      .andWhere('checkIn.confidence => :confidence', { confidence: 0 })
+      .andWhere('checkIn.confidence >= :confidence', { confidence: 0 })
       .getMany()
 
+    if (keyResults.length === 0) return []
     const keyResultsIds = keyResults.map((keyResult) => keyResult.id)
 
     return [

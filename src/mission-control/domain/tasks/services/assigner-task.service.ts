@@ -25,14 +25,14 @@ export class TaskAssignerService {
     private readonly assignCommentOnBarrierKeyResultTask: AssignCommentOnBarrierKeyResultTask,
   ) {}
 
-  @OnEvent('task.created')
+  @OnEvent('task.create')
   async execute() {
     const assigners = [
       this.assignCheckInTask,
-      this.assignEmptyDescriptionTask,
+      this.assignCommentOnBarrierKeyResultTask,
       this.assignCommentOnKeyResultTask,
       this.assignCommentOnLowConfidenceKeyResultTask,
-      this.assignCommentOnBarrierKeyResultTask,
+      this.assignEmptyDescriptionTask,
     ]
     // Const assigners = [this.assignerOutdatedKeyResultCommentTask]
 
@@ -43,7 +43,7 @@ export class TaskAssignerService {
         for (const assigner of assigners) {
           // eslint-disable-next-line no-await-in-loop
           const assignedTasks = await assigner.assign(scope)
-          if (assignedTasks) tasks.push(...assignedTasks)
+          if (assignedTasks.length > 0) tasks.push(...assignedTasks)
         }
       } catch (error: unknown) {
         console.error(

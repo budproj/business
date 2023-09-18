@@ -5,8 +5,8 @@ export const TaskViewModel = {
     tasks.map((task) => ({
       userId: task.userId,
       weekId: task.weekId,
-      templateId: task.templateId,
       score: task.score,
-      status: task.completedSubtasks.length === task.availableSubtasks.length,
+      templateId: task.templateId,
+      completed: task.completedSubtasks.length === task.availableSubtasks.length,
     })),
 }

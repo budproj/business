@@ -6,8 +6,8 @@ import TasksService from 'src/mission-control/domain/tasks/services/tasks.servic
 import { TaskViewModel } from '../view/task-view.model'
 
 interface GetUserTasksDTO {
-  teamId: string
-  userId: string
+  teamID: string
+  userID: string
 }
 
 @Controller('tasks')
@@ -17,8 +17,8 @@ export class TasksController {
   @UseGuards(AuthGuard('jwt'))
   @Get()
   async getUserTasks(@Query() queryParameters: GetUserTasksDTO) {
-    const { teamId, userId } = queryParameters
-    const tasks = await this.tasks.getUserTasks(userId, teamId)
+    const { teamID, userID } = queryParameters
+    const tasks = await this.tasks.getUserTasks(userID, teamID)
     return TaskViewModel.toHTTP(tasks)
   }
 }

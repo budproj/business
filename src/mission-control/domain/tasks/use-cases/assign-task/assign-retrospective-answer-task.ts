@@ -13,7 +13,7 @@ import { TaskAssigner } from './base-scenario/task-assigner.abstract'
 
 @Injectable()
 export class AssignRetrospectiveAnswerTask implements TaskAssigner {
-  async assign(scope: TaskScope): Promise<Task[]> {
+  async assign(scope: TaskScope): Promise<Task[]> | null {
     return [
       {
         userId: scope.userId,

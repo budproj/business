@@ -24,15 +24,4 @@ export class PostgresJsCoreDomainRepository implements CoreDomainRepository {
 `
     return CoreDomainDataMapper.usersAndTeamsToDomain(queryOutput)
   }
-
-  // { returned: Result(1) [ { first_name: 'Evil' } ] }
-
-  // async findUserById(userId: string): Promise<string> {
-  //   return this.postgres.getSqlInstance()<User[]>`
-  //     SELECT
-  //       "first_name"
-  //     FROM "user"
-  //     WHERE id = ${userId}
-  //   `.then((result) => result[0].first_name)
-  // }
 }

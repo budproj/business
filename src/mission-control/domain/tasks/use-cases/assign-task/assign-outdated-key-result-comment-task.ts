@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common'
 
+import { CoreProvider } from '@core/core.provider'
 import { Task } from '@prisma/mission-control/generated'
 
 import {
   OUTDATED_KEY_RESULT_COMMENT_TASK_SCORE,
   OUTDATED_KEY_RESULT_COMMENT_TEMPLATE_ID,
 } from '../../constants'
-import { CoreDomainRepository } from '../../repositories/core-domain-repository'
 import { TaskScope } from '../../types'
 
 import { TaskAssigner } from './base-scenario/task-assigner.abstract'
@@ -20,9 +20,9 @@ import { TaskAssigner } from './base-scenario/task-assigner.abstract'
 
 @Injectable()
 export class AssignOutdatedKeyResultCommentTask implements TaskAssigner {
-  constructor(private readonly coreRepository: CoreDomainRepository) {}
+  constructor(private readonly core: CoreProvider) {}
 
-  async assign(scope: TaskScope): Promise<Task[] | null> {
+  async assign(scope: TaskScope): Promise<Task[]> | null {
     // Buscar líder do time
     // A tarefa só é gerada caso scope === líder se não eu já return null
 

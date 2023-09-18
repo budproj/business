@@ -15,7 +15,6 @@ export class FulfillEmptyDescriptionTask implements TaskFulfiller<EmptyDescripti
 
   async ingest(event: EmptyDescriptionEvent): Promise<void> {
     const taskId: TaskId = {
-      companyId: event.companyId,
       userId: event.userId,
       teamId: event.payload.teamId,
       weekId: buildWeekId(new Date(event.date)),

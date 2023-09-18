@@ -4,7 +4,7 @@ import { AuthGuard } from '@nestjs/passport'
 import TeamScoreProcessorService from 'src/mission-control/domain/tasks/services/team-score-processor.service'
 
 interface GetTeamScoresDTO {
-  teamId: string
+  teamID: string
 }
 
 @Controller('score')
@@ -13,10 +13,10 @@ export class TeamScoreController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  async getUserTasks(@Query() queryParameters: GetTeamScoresDTO) {
-    const { teamId } = queryParameters
+  async getTeamScore(@Query() queryParameters: GetTeamScoresDTO) {
+    const { teamID } = queryParameters
 
-    const teamScore = await this.score.getTeamScore(teamId)
+    const teamScore = await this.score.getTeamScore(teamID)
 
     return { teamScore }
   }
