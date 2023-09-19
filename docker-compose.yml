@@ -46,20 +46,20 @@ services:
       - 5672:5672
       - 8081:15672
 
-  localstack:
-    container_name: "localstack"
-    image: localstack/localstack
-    ports:
-      - "127.0.0.1:4566:4566"
-    environment:
-      - SERVICES=sns,sqs
-      - AWS_DEFAULT_REGION=us-east-1
-      - DEBUG=1
-      - DOCKER_HOST=unix:///var/run/docker.sock
-    volumes:
-      - ./localstack_setup:/etc/localstack/init/ready.d
-      - /tmp/localstack:/tmp/localstack
-      - /var/run/docker.sock:/var/run/docker.sock
+  # localstack:
+  #   container_name: "localstack"
+  #   image: localstack/localstack
+  #   ports:
+  #     - "127.0.0.1:4566:4566"
+  #   environment:
+  #     - SERVICES=sns,sqs
+  #     - AWS_DEFAULT_REGION=us-east-1
+  #     - DEBUG=1
+  #     - DOCKER_HOST=unix:///var/run/docker.sock
+  #   volumes:
+  #     - ./localstack_setup:/etc/localstack/init/ready.d
+  #     - /tmp/localstack:/tmp/localstack
+  #     - /var/run/docker.sock:/var/run/docker.sock
 
   db-postgres-mission-control:
     image: quay.io/tembo/pgmq-pg:latest
@@ -97,3 +97,6 @@ networks:
   bud-rabbitmq:
     external: true
   bud-business:
+  bud-db:
+    external: true
+    type: bridge
