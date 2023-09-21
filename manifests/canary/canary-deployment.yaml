@@ -106,6 +106,12 @@ spec:
                 secretKeyRef:
                   name: business-canary
                   key: aws-credentials-secret-access-key
+            - name: AWS_SQS_ENDPOINT
+              value:
+            - name: AWS_SQS_CREATE_TASK_QUEUE_NAME
+              value: 'create-task.fifo'
+            - name: AWS_SQS_CREATE_TASK_QUEUE_URL
+              value:
             - name: ANALYTICS_URL
               value: analytics-canary.bud.svc.cluster.local:50051
             - name: ANALYTICS_PACKAGES
@@ -143,6 +149,11 @@ spec:
                 secretKeyRef:
                   name: business-canary
                   key: llm-openai-api-key
+            - name: MISSION_CONTROL_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: business-canary
+                  key: mission-control-postgres-url
 
       initContainers:
         - name: business-app-canary-execute-migrations
@@ -186,3 +197,9 @@ spec:
                 secretKeyRef:
                   name: business-canary
                   key: llm-postgres-url
+            - name: MISSION_CONTROL_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: business-canary
+                  key: mission-control-postgres-url
+
