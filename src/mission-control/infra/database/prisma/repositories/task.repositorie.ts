@@ -56,19 +56,28 @@ export class PrismaTaskRepository implements TaskRepository {
   }
 
   async addSubtask(taskId: TaskId, stepId: string): Promise<void> {
-    const task = await this.prisma.task.findUnique({
-      where: { userId_teamId_weekId_templateId: { ...taskId } },
-    })
-    const availableSubtasks = task.completedSubtasks.includes(stepId)
-      ? task.completedSubtasks
-      : [...task.completedSubtasks, stepId]
+    const { teamId, templateId, userId, weekId } = taskId
 
-    await this.prisma.task.update({
-      where: {
-        userId_teamId_weekId_templateId: { ...taskId },
-      },
-      data: { completedSubtasks: { push: stepId }, availableSubtasks },
-    })
+    await this.prisma.$queryRaw`
+      WITH item_set AS (
+    SELECT DISTINCT unnest(array_append("completedSubtasks", ${stepId})) AS items
+    FROM "Task"
+    WHERE "userId" = ${userId}
+    AND "teamId" = ${teamId} 
+    AND "weekId" = ${weekId}
+    AND "templateId"  = ${templateId} 
+), item_array AS (
+    SELECT array_agg(item_set.items) AS items
+    FROM item_set
+)
+UPDATE "Task"
+SET "completedSubtasks" = item_array.items
+FROM item_array
+WHERE "userId" = ${userId}
+AND "teamId" = ${teamId} 
+AND "weekId" = ${weekId} 
+AND "templateId"  = ${templateId}
+    `
   }
 
   async createMany(tasks: Task[]): Promise<void> {
