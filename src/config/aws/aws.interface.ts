@@ -4,7 +4,6 @@ export interface AWSConfigInterface {
   s3: AWSS3ConfigInterface
   ses: AWSSESConfigInterface
   sqs: AWSSQSConfigInterface
-  sns: AWSSNSConfigInterface
 }
 
 export interface AWSCredentialsConfigInterface {
@@ -27,9 +26,7 @@ export interface AWSSESSourceConfigInterface {
 }
 
 export interface AWSSQSConfigInterface {
-  queueName: string
-}
-
-export interface AWSSNSConfigInterface {
-  topic: string
+  endpoint: string
+  createTaskQueueName: string
+  createTaskQueueUrl: string
 }

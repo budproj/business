@@ -54,33 +54,22 @@ export class PrismaTaskRepository implements TaskRepository {
   }
 
   async addSubtask(taskId: TaskId, stepId: string): Promise<void> {
-    try {
-      const task = await this.prisma.task.findUnique({
-        where: { userId_teamId_weekId_templateId: { ...taskId } },
-      })
+    const task = await this.prisma.task.findUnique({
+      where: { userId_teamId_weekId_templateId: { ...taskId } },
+    })
+    const availableSubtasks = task.completedSubtasks.includes(stepId)
+      ? task.completedSubtasks
+      : [...task.completedSubtasks, stepId]
 
-      const availableSubtasks = task.completedSubtasks.includes(stepId)
-        ? task.completedSubtasks
-        : [...task.completedSubtasks, stepId]
-
-      await this.prisma.task.update({
-        where: {
-          userId_teamId_weekId_templateId: { ...taskId },
-        },
-        data: { completedSubtasks: { push: stepId }, availableSubtasks },
-      })
-    } catch (error: unknown) {
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string, @typescript-eslint/restrict-template-expressions
-      console.error(`\n\n\n erro ao adicionar subtask: ${error} \n\n\n`)
-    }
+    await this.prisma.task.update({
+      where: {
+        userId_teamId_weekId_templateId: { ...taskId },
+      },
+      data: { completedSubtasks: { push: stepId }, availableSubtasks },
+    })
   }
 
   async createMany(tasks: Task[]): Promise<void> {
-    try {
-      await this.prisma.task.createMany({ data: tasks })
-    } catch (error: unknown) {
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string, @typescript-eslint/restrict-template-expressions
-      console.error(`\n\n\n erro ao criar task: ${error} \n\n\n`)
-    }
+    await this.prisma.task.createMany({ data: tasks })
   }
 }
