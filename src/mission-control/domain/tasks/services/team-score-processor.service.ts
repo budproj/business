@@ -27,13 +27,15 @@ class TeamScoreProcessorService {
         return {
           ...score,
           progress: score.progress + task.score * task.completedSubtasks.length,
+          available: score.progress + task.score * task.availableSubtasks.length,
         }
       },
       {
         teamId,
         weekId,
         progress: 0,
-        available: teamGoal,
+        available: 0,
+        teamGoal,
       },
     )
   }

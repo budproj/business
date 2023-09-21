@@ -25,11 +25,12 @@ export class PrismaTaskRepository implements TaskRepository {
         ${weekId}::timestamp AS current_week,
         ${BASE_GOAL_VALUE}::double precision AS teamGoal,
         (
-          SELECT COALESCE(SUM(score), 0.0)
+          SELECT COALESCE(SUM(score) * array_length("completedSubtasks", 1), 0.0)
           FROM "Task"
           WHERE
             "teamId" = ${teamId}
             AND "weekId"::date = ${weekId}::date - interval '7 days'
+          group by "completedSubtasks"
         ) AS previous_week_total_score
       UNION ALL
       SELECT
@@ -39,11 +40,12 @@ export class PrismaTaskRepository implements TaskRepository {
           ELSE teamGoal
         END AS teamGoal,
         (
-          SELECT COALESCE(SUM(score), 0.0)
+          SELECT COALESCE(SUM(score) * array_length("completedSubtasks", 1), 0.0)
           FROM "Task"
           WHERE
             "teamId" = ${teamId}
             AND "weekId"::date = current_week - interval '7 days'
+          group by "completedSubtasks"
         ) AS previous_week_total_score
       FROM RecursiveTeamGoal
       WHERE current_week > ${weekId}::date - interval '7 days'
