@@ -33,7 +33,8 @@ export class FulfillRetrospectiveAnswerTask implements TaskFulfiller<Retrospecti
         templateId: task.templateId,
       }
 
-      void this.taskRepository.addSubtask(taskId, RETROSPECTIVE_ANSWER_SINGLE_SUBTASK)
+      // eslint-disable-next-line no-await-in-loop
+      await this.taskRepository.addSubtask(taskId, RETROSPECTIVE_ANSWER_SINGLE_SUBTASK)
     }
   }
 }

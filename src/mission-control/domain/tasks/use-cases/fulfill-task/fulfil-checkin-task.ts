@@ -21,6 +21,6 @@ export class FulfillCheckinTask implements TaskFulfiller<CheckInEvent> {
       templateId: CHECK_IN_TASK_TEMPLATE_ID,
     }
 
-    void this.taskRepository.addSubtask(taskId, event.payload.keyResultId)
+    await this.taskRepository.addSubtask(taskId, event.payload.keyResultId)
   }
 }

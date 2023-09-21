@@ -1,7 +1,7 @@
 import { TaskScope } from '../types'
 
 export abstract class TaskCreationProducer {
-  abstract produce(scope: TaskScope): void
+  abstract produce(scope: TaskScope): Promise<void>
 }
 
 export abstract class TaskCreationConsumer {

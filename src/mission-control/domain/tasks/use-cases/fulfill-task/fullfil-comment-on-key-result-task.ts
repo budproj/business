@@ -21,6 +21,6 @@ export class FulfillCommentOnKeyResultTask implements TaskFulfiller<CommentOnKRE
       templateId: COMMENT_KR_TASK_TEMPLATE_ID,
     }
 
-    void this.taskRepository.addSubtask(taskId, event.payload.keyResultId)
+    await this.taskRepository.addSubtask(taskId, event.payload.keyResultId)
   }
 }

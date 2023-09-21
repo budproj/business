@@ -70,6 +70,6 @@ export class PrismaTaskRepository implements TaskRepository {
   }
 
   async createMany(tasks: Task[]): Promise<void> {
-    await this.prisma.task.createMany({ data: tasks })
+    await this.prisma.task.createMany({ data: tasks, skipDuplicates: true })
   }
 }

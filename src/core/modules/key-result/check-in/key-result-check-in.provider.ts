@@ -126,7 +126,7 @@ export class KeyResultCheckInProvider extends CoreEntityProvider<
       },
     }
 
-    void this.fulfillerTaskPublisher.publish<CheckInEvent>(CHECK_IN_TASK_TEMPLATE_ID, {
+    await this.fulfillerTaskPublisher.publish<CheckInEvent>(CHECK_IN_TASK_TEMPLATE_ID, {
       ...messageInterface,
     })
 

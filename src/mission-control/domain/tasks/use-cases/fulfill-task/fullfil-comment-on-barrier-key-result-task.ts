@@ -22,6 +22,6 @@ export class FulfillCommenBarrierKeyResultTask implements TaskFulfiller<CommentO
       templateId: COMMENT_BARRIER_KR_TASK_TEMPLATE_ID,
     }
 
-    void this.taskRepository.addSubtask(taskId, event.payload.keyResultId)
+    await this.taskRepository.addSubtask(taskId, event.payload.keyResultId)
   }
 }

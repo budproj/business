@@ -6,7 +6,7 @@ import { EventSubscriber } from 'src/mission-control/domain/tasks/messaging/even
 
 @Injectable()
 export class NodeFulfillerTaskSubscriber implements EventSubscriber {
-  subscribe<T extends Event>(topic: string, callback: (event: T) => void): void {
+  async subscribe<T extends Event>(topic: string, callback: (event: T) => void): Promise<void> {
     taskCreationLocalQueue.on(`event:${topic}`, callback)
   }
 }

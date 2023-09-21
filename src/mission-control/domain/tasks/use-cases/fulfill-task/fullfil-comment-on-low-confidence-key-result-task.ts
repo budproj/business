@@ -23,7 +23,6 @@ export class FulfillCommentOnLowConfidenceKeyResultTask
       weekId: buildWeekId(new Date(event.date)),
       templateId: COMMENT_LOW_CONFIDENCE_KR_TASK_TEMPLATE_ID,
     }
-
-    void this.taskRepository.addSubtask(taskId, event.payload.keyResultId)
+    await this.taskRepository.addSubtask(taskId, event.payload.keyResultId)
   }
 }

@@ -26,7 +26,8 @@ export class TaskPlannerService {
 
     for (const user of users) {
       for (const teamId of user.teamIds) {
-        void this.producer.produce({
+        // eslint-disable-next-line no-await-in-loop
+        await this.producer.produce({
           userId: user.userId,
           teamId,
           weekId,

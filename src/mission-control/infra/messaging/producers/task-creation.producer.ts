@@ -17,6 +17,7 @@ export class SQSTaskCreationProducer implements TaskCreationProducer {
         id: uuid.v4(),
         body: { scope },
         delaySeconds: 0,
+        groupId: process.env.AWS_SQS_CREATE_TASK_QUEUE_NAME,
       })
     } catch (error: unknown) {
       throw new Error(`Failed to produce message to SQS: ${JSON.stringify(error)}`)

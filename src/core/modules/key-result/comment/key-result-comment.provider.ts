@@ -67,7 +67,7 @@ export class KeyResultCommentProvider extends CoreEntityProvider<
     }
 
     if (latestCheckIn.confidence === -1) {
-      void this.fulfillerTaskPublisher.publish<CommentOnBarrierKREvent>(
+      await this.fulfillerTaskPublisher.publish<CommentOnBarrierKREvent>(
         COMMENT_BARRIER_KR_TASK_TEMPLATE_ID,
         {
           ...messageInterface,
@@ -76,7 +76,7 @@ export class KeyResultCommentProvider extends CoreEntityProvider<
     }
 
     if (latestCheckIn.confidence > 0 || latestCheckIn.confidence <= 32) {
-      void this.fulfillerTaskPublisher.publish<CommentOnLowConfidenceKREvent>(
+      await this.fulfillerTaskPublisher.publish<CommentOnLowConfidenceKREvent>(
         COMMENT_LOW_CONFIDENCE_KR_TASK_TEMPLATE_ID,
         {
           ...messageInterface,
@@ -84,7 +84,7 @@ export class KeyResultCommentProvider extends CoreEntityProvider<
       )
     }
 
-    void this.fulfillerTaskPublisher.publish<CommentOnKREvent>(COMMENT_KR_TASK_TEMPLATE_ID, {
+    await this.fulfillerTaskPublisher.publish<CommentOnKREvent>(COMMENT_KR_TASK_TEMPLATE_ID, {
       ...messageInterface,
     })
 

@@ -21,6 +21,6 @@ export class FulfillEmptyDescriptionTask implements TaskFulfiller<EmptyDescripti
       templateId: EMPTY_DESCRIPTION_TASK_TEMPLATE_ID,
     }
 
-    void this.taskRepository.addSubtask(taskId, event.payload.keyResultId)
+    await this.taskRepository.addSubtask(taskId, event.payload.keyResultId)
   }
 }

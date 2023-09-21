@@ -97,7 +97,7 @@ export class UpdateKeyResultCommand extends Command<KeyResult> {
           },
         }
 
-        void this.core.keyResult.fulfillerTaskPublisher.publish<EmptyDescriptionEvent>(
+        await this.core.keyResult.fulfillerTaskPublisher.publish<EmptyDescriptionEvent>(
           EMPTY_DESCRIPTION_TASK_TEMPLATE_ID,
           { ...messageInterface },
         )
