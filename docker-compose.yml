@@ -52,8 +52,9 @@ services:
     ports:
       - "127.0.0.1:4566:4566"
     environment:
-      - SERVICES=sns,sqs
-      - AWS_DEFAULT_REGION=us-east-1
+      - SERVICES=sqs
+      - AWS_DEFAULT_REGION=sa-east-1
+      - EDGE_PORT=4566
       - DEBUG=1
       - DOCKER_HOST=unix:///var/run/docker.sock
     volumes:
