@@ -153,6 +153,8 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
     const queryResult = await this.repository
       .createQueryBuilder('KeyResult')
+      .innerJoin('KeyResult.objective', 'objective', 'objective.id = KeyResult.objective_id')
+      .innerJoin('objective.cycle', 'cycle', 'cycle.id = objective.cycle_id')
       .leftJoinAndSelect(
         'KeyResult.checkIns',
         'checkIn',
