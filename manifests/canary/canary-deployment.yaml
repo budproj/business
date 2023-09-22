@@ -107,11 +107,11 @@ spec:
                   name: business-canary
                   key: aws-credentials-secret-access-key
             - name: AWS_SQS_ENDPOINT
-              value:
+              value: https://sqs.sa-east-1.amazonaws.com
             - name: AWS_SQS_CREATE_TASK_QUEUE_NAME
               value: 'create-task.fifo'
             - name: AWS_SQS_CREATE_TASK_QUEUE_URL
-              value:
+              value: https://sqs.sa-east-1.amazonaws.com/904333181156/create-task.fifo
             - name: ANALYTICS_URL
               value: analytics-canary.bud.svc.cluster.local:50051
             - name: ANALYTICS_PACKAGES
