@@ -61,7 +61,7 @@ export class TeamProvider extends CoreEntityProvider<Team, TeamInterface> {
 
   @Stopwatch()
   public async getUserCompanies(
-    user: Partial<UserInterface>,
+    user: UserInterface,
     filters?: FindConditions<Team>,
     options?: GetOptions<Team>,
   ): Promise<Team[]> {

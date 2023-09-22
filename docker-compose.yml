@@ -3,7 +3,6 @@ version: '3.7'
 volumes:
   postgres:
   postgres-llms:
-  postgres-mission-control:
 
 
 services:
@@ -45,38 +44,6 @@ services:
     ports:
       - 5672:5672
       - 8081:15672
-
-  localstack:
-    container_name: "localstack"
-    image: localstack/localstack
-    ports:
-      - "127.0.0.1:4566:4566"
-    environment:
-      - SERVICES=sqs
-      - AWS_DEFAULT_REGION=sa-east-1
-      - EDGE_PORT=4566
-      - DEBUG=1
-      - DOCKER_HOST=unix:///var/run/docker.sock
-    volumes:
-      - ./localstack_setup:/etc/localstack/init/ready.d
-      - /tmp/localstack:/tmp/localstack
-      - /var/run/docker.sock:/var/run/docker.sock
-
-  db-postgres-mission-control:
-    image: postgres
-    container_name: mission-control-postgres
-    restart: always
-    tty: true
-    ports:
-      - 5472:5432
-    volumes:
-      - type: volume
-        source: postgres-mission-control
-        target: /data/postgres-mission-control
-    environment:
-      - POSTGRES_USER=mc-root
-      - POSTGRES_PASSWORD=changeme
-      - POSTGRES_DB=mission-control
   # business:
   #   build:
   #       context: .

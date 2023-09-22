@@ -16,8 +16,7 @@ RUN npm i --ignore-scripts
 
 COPY . ./
 
-RUN npm run prisma:generate:llm
-RUN npm run prisma:generate:mission-control
+RUN npx prisma generate
 RUN npm run build
 
 FROM node:16.16.0-alpine3.15 AS final
@@ -31,12 +30,10 @@ COPY --from=build /build/package-lock.json ./
 COPY --from=build /build/dist dist
 COPY --from=build /build/prisma prisma
 
-
 RUN mkdir -p node_modules
+COPY --from=build /build/node_modules/.prisma node_modules/.prisma
 
+RUN npx prisma generate
 RUN npm i --ignore=dev --ignore-scripts
-RUN npm run prisma:generate:llm
-RUN ls -al
-RUN npm run prisma:generate:mission-control
 
 CMD [ "npm", "run", "start:prod" ]
