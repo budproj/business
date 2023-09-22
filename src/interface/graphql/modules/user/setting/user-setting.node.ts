@@ -24,6 +24,12 @@ export class UserSettingGraphQLNode implements GuardedNodeGraphQLInterface {
   @Field(() => ID, { complexity: 0, description: 'The ID of the user attached to this setting' })
   public readonly userId!: string
 
+  @Field(() => String, {
+    description: 'The comment count of the key result, with a JSON value',
+    nullable: false,
+  })
+  public readonly preferences?: any
+
   // **********************************************************************************************
   // RESOLVED FIELDS
   // **********************************************************************************************
