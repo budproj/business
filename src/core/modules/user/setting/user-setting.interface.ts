@@ -7,5 +7,4 @@ export interface UserSettingInterface extends CoreEntityInterface {
   value: string
   userId: string
   updatedAt: Date
-  preferences: any
 }

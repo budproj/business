@@ -107,7 +107,6 @@ import { UpdateCheckMarkAssigneeCommand } from './update-check-mark-assignee.com
 import { UpdateCheckMarkDescriptionCommand } from './update-check-mark-description.command'
 import { UpdateTaskDescriptionCommand } from './update-task-description.command'
 import { UpdateTeamCommand } from './update-team.command'
-import { UpdateUserMainTeamInPreferencesCommand } from './update-user-main-team-in-preferences.command'
 import { UpdateUserRoleCommand } from './update-user-role.command'
 import { UpdateUserCommand } from './update-user.command'
 import { VerifyToken } from './verify-token.command'
@@ -222,7 +221,6 @@ const commandTypes = [
   'get-user-indicators',
   'get-user-profile-amplitude',
   'get-team-score',
-  'update-main-team-in-preferences',
 ] as const
 
 export type CommandType = typeof commandTypes[number]
@@ -341,7 +339,6 @@ export class CommandFactory {
     'get-user-indicators': GetUserIndicators,
     'get-user-profile-amplitude': GetUserAmplitudeData,
     'get-team-score': GetTeamScore,
-    'update-main-team-in-preferences': UpdateUserMainTeamInPreferencesCommand,
   }
 
   constructor(private readonly core: CoreProvider) {}

@@ -13,9 +13,6 @@ export class UserSetting extends CoreEntity implements UserSettingInterface {
   @Column()
   public value: string
 
-  @Column({ type: 'json', nullable: false })
-  public preferences: any
-
   @Column()
   @RelationId((settings: UserSetting) => settings.user)
   public userId: UserInterface['id']

@@ -3,15 +3,9 @@ import { setTimeout } from 'timers/promises'
 
 import { TiktokenModel, encoding_for_model } from '@dqbd/tiktoken'
 import { Injectable, Logger } from '@nestjs/common'
+import { ActionType, OpenAiCompletion, OpenAiCompletionStatus, TargetEntity } from '@prisma/client'
 import { differenceInSeconds } from 'date-fns'
 import { Configuration, CreateChatCompletionRequest, OpenAIApi } from 'openai'
-
-import {
-  ActionType,
-  OpenAiCompletion,
-  OpenAiCompletionStatus,
-  TargetEntity,
-} from '@prisma/llm/generated'
 
 import { HashProvider } from '../../../shared/hash-provider/models/hash-provider'
 import generateId from '../../../shared/utilities/generate-id'
@@ -70,9 +64,9 @@ class OpenAICompletionService {
       encoding.free()
 
       return { count }
-    } catch (error: any) {
+    } catch (error) {
       this.logger.error(
-        `Could not estimate prompt tokens for model ${model} due to "${error.message ?? ''}": %o`,
+        `Could not estimate prompt tokens for model ${model} due to "${error.message}": %o`,
         error,
       )
       return { error: error.message }
@@ -165,13 +159,12 @@ class OpenAICompletionService {
         output: content,
         response: response as unknown as OpenAiCompletion['response'],
       })
-    } catch (error: any) {
+    } catch (error) {
       const response = error.response ?? null
 
       if (response) {
         this.logger.error(
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          `Failed to generate completion for ${id} due to "${error.message ?? ''}": %o`,
+          `Failed to generate completion for ${id} due to "${error.message}": %o`,
           response,
         )
 

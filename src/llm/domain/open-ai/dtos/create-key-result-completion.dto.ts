@@ -1,4 +1,4 @@
-import { OpenAiCompletion } from '@prisma/llm/generated'
+import { OpenAiCompletion } from '.prisma/client'
 
 export type GenerateOpenAiCompletionDTO = Pick<
   OpenAiCompletion,

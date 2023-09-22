@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 
-import { EventPublisher } from '@core/common/messaging/base-scenarios/abstract'
-import { NodeFulfillerTaskPublisher } from '@core/common/messaging/publisher/fulfiller-task.publisher'
 import { TeamModule } from '@core/modules/team/team.module'
 import { AnalyticsModule } from '@infrastructure/analytics/analytics.module'
 
@@ -46,8 +44,7 @@ import { KeyResultUpdateRepository } from './update/key-result-update.repository
     KeyResultCheckMarkProvider,
     CycleProvider,
     ObjectiveProvider,
-    { provide: EventPublisher, useClass: NodeFulfillerTaskPublisher },
   ],
-  exports: [KeyResultProvider, EventPublisher],
+  exports: [KeyResultProvider],
 })
 export class KeyResultModule {}
