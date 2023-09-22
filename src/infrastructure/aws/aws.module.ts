@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { S3, SES } from 'aws-sdk'
+import { S3, SES, SNS } from 'aws-sdk'
 import { AwsSdkModule } from 'nest-aws-sdk'
 
 import { AWSConfigModule } from '@config/aws/aws.module'
@@ -12,7 +12,7 @@ import { AWSS3Provider } from './s3/s3.provider'
 @Module({
   imports: [
     AwsSdkModule.forRootAsync({
-      services: [S3, SES],
+      services: [S3, SES, SNS],
       defaultServiceOptions: {
         useFactory: awsFactory,
         imports: [AWSConfigModule],

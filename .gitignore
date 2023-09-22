@@ -23,6 +23,9 @@ data.db
 log/*
 */**/*.log
 
+# Prisma Client Generated
+schema
+
 # Database
 # -------------------------------------------------------------------------------------------------
 users_to_invite.csv
