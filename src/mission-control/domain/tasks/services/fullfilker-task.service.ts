@@ -28,31 +28,31 @@ export class TaskFulfillerService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    this.fulfillEventSubscriber.subscribe<CheckInEvent>(
+    await this.fulfillEventSubscriber.subscribe<CheckInEvent>(
       CHECK_IN_TASK_TEMPLATE_ID,
       async (event) => {
         await this.fulfillCheckInTask.ingest(event)
       },
     )
-    this.fulfillEventSubscriber.subscribe<CheckInEvent>(
+    await this.fulfillEventSubscriber.subscribe<CheckInEvent>(
       COMMENT_KR_TASK_TEMPLATE_ID,
       async (event) => {
         await this.fulfillCommentOnKeyResultTask.ingest(event)
       },
     )
-    this.fulfillEventSubscriber.subscribe<CheckInEvent>(
+    await this.fulfillEventSubscriber.subscribe<CheckInEvent>(
       COMMENT_BARRIER_KR_TASK_TEMPLATE_ID,
       async (event) => {
         await this.fulfillCommenBarrierKeyResultTask.ingest(event)
       },
     )
-    this.fulfillEventSubscriber.subscribe<CheckInEvent>(
+    await this.fulfillEventSubscriber.subscribe<CheckInEvent>(
       COMMENT_LOW_CONFIDENCE_KR_TASK_TEMPLATE_ID,
       async (event) => {
         await this.fulfillCommentOnLowConfidenceKeyResultTask.ingest(event)
       },
     )
-    this.fulfillEventSubscriber.subscribe<CheckInEvent>(
+    await this.fulfillEventSubscriber.subscribe<CheckInEvent>(
       EMPTY_DESCRIPTION_TASK_TEMPLATE_ID,
       async (event) => {
         await this.fulfillEmptyDescriptionTask.ingest(event)
