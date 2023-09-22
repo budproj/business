@@ -147,24 +147,6 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
     return this.repository.delete(selector)
   }
 
-  public async get(
-    selector: FindConditions<E>,
-    _queryContext?: CoreQueryContext,
-    constrainQuery?: SelectionQueryConstrain<E>,
-    options?: GetOptions<E>,
-  ): Promise<SelectQueryBuilder<E>> {
-    const orderBy = this.repository.marshalOrderBy(options?.orderBy)
-
-    const query = this.repository
-      .createQueryBuilder()
-      .where(selector)
-      .take(options?.limit ?? 0)
-      .offset(options?.offset ?? 0)
-      .orderBy(orderBy)
-
-    return constrainQuery ? constrainQuery(query) : query
-  }
-
   protected async create(
     data: Partial<I> | Array<Partial<I>>,
     _queryContext?: CoreQueryContext,
@@ -201,6 +183,24 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
     if (!constrainedSelector) return
 
     return constrainedSelector()
+  }
+
+  protected async get(
+    selector: FindConditions<E>,
+    _queryContext: CoreQueryContext,
+    constrainQuery?: SelectionQueryConstrain<E>,
+    options?: GetOptions<E>,
+  ): Promise<SelectQueryBuilder<E>> {
+    const orderBy = this.repository.marshalOrderBy(options?.orderBy)
+
+    const query = this.repository
+      .createQueryBuilder()
+      .where(selector)
+      .take(options?.limit ?? 0)
+      .offset(options?.offset ?? 0)
+      .orderBy(orderBy)
+
+    return constrainQuery ? constrainQuery(query) : query
   }
 
   protected async getIfUserIsInCompany(

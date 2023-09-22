@@ -87,12 +87,6 @@ spec:
               value: sa-east-1
             - name: AWS_S3_BUCKET_NAME
               value: business.s3.getbud.co
-            - name: AWS_SQS_ENDPOINT
-              value: https://sqs.sa-east-1.amazonaws.com
-            - name: AWS_SQS_CREATE_TASK_QUEUE_NAME
-              value: 'create-task.fifo'
-            - name: AWS_SQS_CREATE_TASK_QUEUE_URL
-              value: https://sqs.sa-east-1.amazonaws.com/904333181156/create-task.fifo
             - name: AMPLITUDE_API_KEY
               value: 9314f6f12a26e6a5989287b16d030c30
             - name: AWS_CREDENTIALS_ACCESS_KEY_ID
@@ -142,11 +136,6 @@ spec:
                 secretKeyRef:
                   name: business
                   key: llm-openai-api-key
-            - name: MISSION_CONTROL_DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: business
-                  key: mission-control-postgres-url
 
       initContainers:
         - name: business-app-prod-execute-migrations
@@ -190,8 +179,3 @@ spec:
                 secretKeyRef:
                   name: business
                   key: llm-postgres-url
-            - name: MISSION_CONTROL_DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: business
-                  key: mission-control-postgres-url

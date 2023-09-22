@@ -15,7 +15,6 @@
       "@config/*": ["src/config/*"],
       "@core/*": ["src/core/*"],
       "@interface/*": ["src/interface/*"],
-      "@prisma/*": ["schema/*"],
       "@infrastructure/*": ["src/infrastructure/*"],
       "@tests/*": ["tests/*"],
       "@lib/*": ["lib/*"]
@@ -23,5 +22,5 @@
     "incremental": true,
     "skipLibCheck": true
   },
-  "include": ["*.ts", "src/**/*.ts", "lib/**/*.ts", "schema"]
+  "include": ["*.ts", "src/**/*.ts", "lib/**/*.ts"]
 }
