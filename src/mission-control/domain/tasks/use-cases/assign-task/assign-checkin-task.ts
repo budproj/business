@@ -20,6 +20,11 @@ export class AssignCheckinTask implements TaskAssigner {
         ownerId: scope.userId,
         teamId: scope.teamId,
         mode: KeyResultMode.PUBLISHED,
+        objective: {
+          cycle: {
+            active: true,
+          },
+        },
       })
 
     if (keyResults.length === 0) return []
