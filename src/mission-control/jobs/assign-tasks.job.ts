@@ -11,8 +11,8 @@ export class AssignTasksJobScheduler {
     private readonly taskRepository: TaskRepository,
   ) {}
 
-  // TODO: change to 0 22 * * 0 (every Sunday at 22:00)
-  @Cron('0 22 * * 0')
+  // Every Sunday at 00:00
+  @Cron('0 0 * * 0')
   async assignTasks() {
     await this.plannerService.execute()
   }
