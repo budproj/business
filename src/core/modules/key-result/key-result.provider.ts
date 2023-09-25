@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { uniqBy, pickBy, omitBy, identity, isEmpty, maxBy, flatten, keyBy, uniq } from 'lodash'
-import { Any, Brackets, DeleteResult, FindConditions, In } from 'typeorm'
+import { Any, Brackets, DeleteResult, FindConditions, In, Raw } from 'typeorm'
 
 import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
 import {
@@ -37,6 +37,7 @@ import { KeyResultCommentInterface } from './comment/key-result-comment.interfac
 import { KeyResultComment } from './comment/key-result-comment.orm-entity'
 import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
 import { KeyResultCommentType } from './enums/key-result-comment-type.enum'
+import { KeyResultMode } from './enums/key-result-mode.enum'
 import { KeyResultStateInterface } from './interfaces/key-result-state.interface'
 import { KeyResultRelationFilterProperties, KeyResultRepository } from './key-result.repository'
 import { KeyResultTimelineProvider } from './timeline.provider'
@@ -147,7 +148,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     return response.supportTeamMembers
   }
 
-  public async getManyWithOutdatedCheckin(filters?: FindConditions<KeyResult>) {
+  public async getWithOutdatedCheckin(filters?: FindConditions<KeyResult>) {
     const sixDaysAgo: Date = new Date()
     sixDaysAgo.setDate(sixDaysAgo.getDate() - 6)
 
@@ -171,6 +172,27 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       })
       .groupBy('KeyResult.id')
       .addGroupBy('checkIn.id')
+      .getOne()
+
+    return queryResult
+  }
+
+  public async getManyWithoutDescription(filters?: FindConditions<KeyResult>) {
+    const queryResult = await this.repository
+      .createQueryBuilder('KeyResult')
+      .innerJoin('KeyResult.objective', 'objective', 'objective.id = KeyResult.objective_id')
+      .innerJoin('objective.cycle', 'cycle', 'cycle.id = objective.cycle_id')
+      .leftJoinAndSelect(`${KeyResult.name}.comments`, 'comments')
+      .where({ ...filters })
+      .andWhere({
+        mode: KeyResultMode.PUBLISHED,
+        description: Raw((alias) => `${alias} IS NULL OR ${alias} = ''`),
+        objective: {
+          cycle: {
+            active: true,
+          },
+        },
+      })
       .getMany()
 
     return queryResult

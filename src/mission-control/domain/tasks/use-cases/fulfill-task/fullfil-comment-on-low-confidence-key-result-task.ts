@@ -4,7 +4,10 @@ import { CommentOnKREvent } from '@core/common/messaging/base-scenarios/comment-
 import { CommentOnLowConfidenceKREvent } from '@core/common/messaging/base-scenarios/comment-on-low-confidence-kr.event'
 import { buildWeekId } from 'src/mission-control/helpers/build-week-id'
 
-import { COMMENT_LOW_CONFIDENCE_KR_TASK_TEMPLATE_ID } from '../../constants'
+import {
+  COMMENT_LOW_CONFIDENCE_KR_TASK_SINGLE_SUBTASK,
+  COMMENT_LOW_CONFIDENCE_KR_TASK_TEMPLATE_ID,
+} from '../../constants'
 import { TaskRepository } from '../../repositories/task-repositoriy'
 import { TaskId } from '../../types'
 
@@ -23,6 +26,6 @@ export class FulfillCommentOnLowConfidenceKeyResultTask
       weekId: buildWeekId(new Date(event.date)),
       templateId: COMMENT_LOW_CONFIDENCE_KR_TASK_TEMPLATE_ID,
     }
-    await this.taskRepository.addSubtask(taskId, event.payload.keyResultId)
+    await this.taskRepository.addSubtask(taskId, COMMENT_LOW_CONFIDENCE_KR_TASK_SINGLE_SUBTASK)
   }
 }
