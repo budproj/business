@@ -83,8 +83,4 @@ AND "templateId"  = ${templateId}
   async createMany(tasks: Task[]): Promise<void> {
     await this.prisma.task.createMany({ data: tasks, skipDuplicates: true })
   }
-
-  async removeAll(): Promise<void> {
-    await this.prisma.$queryRaw`TRUNCATE TABLE "Task" RESTART IDENTITY CASCADE;`
-  }
 }
