@@ -4,7 +4,10 @@ import { CommentOnBarrierKREvent } from '@core/common/messaging/base-scenarios/c
 import { CommentOnKREvent } from '@core/common/messaging/base-scenarios/comment-on-kr.event'
 import { buildWeekId } from 'src/mission-control/helpers/build-week-id'
 
-import { COMMENT_BARRIER_KR_TASK_TEMPLATE_ID } from '../../constants'
+import {
+  COMMENT_BARRIER_KR_TASK_SINGLE_SUBTASK,
+  COMMENT_BARRIER_KR_TASK_TEMPLATE_ID,
+} from '../../constants'
 import { TaskRepository } from '../../repositories/task-repositoriy'
 import { TaskId } from '../../types'
 
@@ -22,6 +25,6 @@ export class FulfillCommenBarrierKeyResultTask implements TaskFulfiller<CommentO
       templateId: COMMENT_BARRIER_KR_TASK_TEMPLATE_ID,
     }
 
-    await this.taskRepository.addSubtask(taskId, event.payload.keyResultId)
+    await this.taskRepository.addSubtask(taskId, COMMENT_BARRIER_KR_TASK_SINGLE_SUBTASK)
   }
 }

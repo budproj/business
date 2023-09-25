@@ -27,7 +27,7 @@ class TeamScoreProcessorService {
         return {
           ...score,
           progress: score.progress + task.score * task.completedSubtasks.length,
-          available: score.progress + task.score * task.availableSubtasks.length,
+          available: score.available + task.score * task.availableSubtasks.length,
         }
       },
       {

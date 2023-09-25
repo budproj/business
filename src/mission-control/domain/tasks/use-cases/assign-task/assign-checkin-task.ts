@@ -5,7 +5,11 @@ import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.en
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { Task } from '@prisma/mission-control/generated'
 
-import { CHECK_IN_TASK_SCORE, CHECK_IN_TASK_TEMPLATE_ID } from '../../constants'
+import {
+  CHECK_IN_TASK_SCORE,
+  CHECK_IN_TASK_SINGLE_SUBTASK,
+  CHECK_IN_TASK_TEMPLATE_ID,
+} from '../../constants'
 import { TaskScope } from '../../types'
 
 import { TaskAssigner } from './base-scenario/task-assigner.abstract'
@@ -15,8 +19,8 @@ export class AssignCheckinTask implements TaskAssigner {
   constructor(private readonly core: CoreProvider) {}
 
   async assign(scope: TaskScope): Promise<Task[]> {
-    const keyResults: Array<Partial<KeyResultInterface>> =
-      await this.core.keyResult.getManyWithOutdatedCheckin({
+    const keyResult: Partial<KeyResultInterface> = await this.core.keyResult.getWithOutdatedCheckin(
+      {
         ownerId: scope.userId,
         teamId: scope.teamId,
         mode: KeyResultMode.PUBLISHED,
@@ -25,10 +29,10 @@ export class AssignCheckinTask implements TaskAssigner {
             active: true,
           },
         },
-      })
+      },
+    )
 
-    if (keyResults.length === 0) return []
-    const keyResultsIds = keyResults.map((keyResult) => keyResult.id)
+    if (!keyResult) return []
 
     return [
       {
@@ -37,7 +41,7 @@ export class AssignCheckinTask implements TaskAssigner {
         weekId: scope.weekId,
         templateId: CHECK_IN_TASK_TEMPLATE_ID,
         score: CHECK_IN_TASK_SCORE,
-        availableSubtasks: keyResultsIds,
+        availableSubtasks: [CHECK_IN_TASK_SINGLE_SUBTASK],
         completedSubtasks: [],
       },
     ]

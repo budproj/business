@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import { Raw } from 'typeorm'
 
 import { CoreProvider } from '@core/core.provider'
 import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.enum'
@@ -15,11 +14,15 @@ export class AssignEmptyDescriptionTask implements TaskAssigner {
   constructor(private readonly core: CoreProvider) {}
 
   async assign(scope: TaskScope): Promise<Task[]> {
-    const keyResults = await this.core.keyResult.getMany({
+    const keyResults = await this.core.keyResult.getManyWithoutDescription({
       ownerId: scope.userId,
       teamId: scope.teamId,
       mode: KeyResultMode.PUBLISHED,
-      description: Raw((alias) => `${alias} IS NULL OR ${alias} = ''`),
+      objective: {
+        cycle: {
+          active: true,
+        },
+      },
     })
 
     if (keyResults.length === 0) return []

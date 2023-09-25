@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common'
 import { CommentOnKREvent } from '@core/common/messaging/base-scenarios/comment-on-kr.event'
 import { buildWeekId } from 'src/mission-control/helpers/build-week-id'
 
-import { COMMENT_KR_TASK_TEMPLATE_ID } from '../../constants'
+import { COMMENT_KR_TASK_SINGLE_SUBTASK, COMMENT_KR_TASK_TEMPLATE_ID } from '../../constants'
 import { TaskRepository } from '../../repositories/task-repositoriy'
 import { TaskId } from '../../types'
 
@@ -21,6 +21,6 @@ export class FulfillCommentOnKeyResultTask implements TaskFulfiller<CommentOnKRE
       templateId: COMMENT_KR_TASK_TEMPLATE_ID,
     }
 
-    await this.taskRepository.addSubtask(taskId, event.payload.keyResultId)
+    await this.taskRepository.addSubtask(taskId, COMMENT_KR_TASK_SINGLE_SUBTASK)
   }
 }
