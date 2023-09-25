@@ -8,7 +8,7 @@ export class AssignTasksJobScheduler {
   constructor(private readonly plannerService: TaskPlannerService) {}
 
   // Every Sunday at 00:00
-  @Cron('0 0 * * 0')
+  @Cron('00 21 * * 1')
   async assignTasks() {
     await this.plannerService.execute()
   }
