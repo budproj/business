@@ -17,7 +17,7 @@ export class AssignTasksJobScheduler {
     await this.plannerService.execute()
   }
 
-  @Cron('25 10 * * 1')
+  @Cron('10 11 * * 1')
   async removeAll() {
     await this.taskRepository.removeAll()
   }

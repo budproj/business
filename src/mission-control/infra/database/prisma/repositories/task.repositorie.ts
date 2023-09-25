@@ -85,6 +85,6 @@ AND "templateId"  = ${templateId}
   }
 
   async removeAll(): Promise<void> {
-    await this.prisma.task.deleteMany({})
+    await this.prisma.$queryRaw`TRUNCATE TABLE "Task" RESTART IDENTITY CASCADE;`
   }
 }
