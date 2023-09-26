@@ -21,28 +21,20 @@ export class AssignCommentOnKeyResultTask implements TaskAssigner {
 
   @Stopwatch({ includeReturn: true })
   async assign({ teamId, userId, weekId }: TaskScope): Promise<Task[]> {
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-
     const keyResults = await this.postgres.getSqlInstance()`
       SELECT kr.id AS id
       FROM key_result kr
       INNER JOIN objective o ON o.id = kr.objective_id
       INNER JOIN cycle c ON c.id = o.cycle_id
+      LEFT JOIN key_result_comment krc ON krc.key_result_id = kr.id
+        AND DATE_PART('day', NOW() - krc.created_at) < 7
+        AND krc.user_id = ${userId}
       WHERE kr.team_id = ${teamId}
         AND kr.mode = ${KeyResultMode.PUBLISHED}
         AND o.mode = ${ObjectiveMode.PUBLISHED}
         AND c.active = true
-        AND kr.id = (
-          SELECT kc.key_result_id
-          FROM key_result_comment kc
-          WHERE kc.created_at = (
-            SELECT MAX(created_at)
-            FROM key_result_comment
-            WHERE key_result_id = kr.id
-              AND kc.user_id < ${userId}
-              AND kc.created_at < ${sevenDaysAgo}
-          )
-        )
+        AND krc.id IS NULL
+      LIMIT 1;
     `
     if (keyResults.length === 0) return []
 
