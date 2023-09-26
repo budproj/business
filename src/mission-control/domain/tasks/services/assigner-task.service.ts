@@ -46,7 +46,10 @@ export class TaskAssignerService {
   @Stopwatch({ includeReturn: true })
   @SqsConsumerEventHandler(process.env.AWS_SQS_CREATE_TASK_QUEUE_NAME, 'processing_error')
   public onProcessingError(message: Message) {
-    throw new Error(`Failed to process from SQS: ${JSON.stringify(message)}`)
+    this.logger.log({
+      message: `Failed to process from SQS: ${JSON.stringify(message)}`,
+      body: message.Body,
+    })
   }
 
   async assignTasks(scope: TaskScope) {
