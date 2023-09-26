@@ -129,7 +129,7 @@ spec:
                   name: business
                   key: amplitude-secret-key
             - name: TYPEORM_MAX_CONNECTION_POOL
-              value: '70'
+              value: '60'
             - name: TYPEORM_CONNECTION_POOL_TIMEOUT_S
               value: '300'
             - name: LLM_DATABASE_URL
@@ -182,7 +182,7 @@ spec:
             - name: TYPEORM_CONVENTION_NAMING_ENABLED
               value: 'true'
             - name: TYPEORM_MAX_CONNECTION_POOL
-              value: '10'
+              value: '3'
             - name: TYPEORM_CONNECTION_POOL_TIMEOUT_S
               value: '60'
             - name: LLM_DATABASE_URL
