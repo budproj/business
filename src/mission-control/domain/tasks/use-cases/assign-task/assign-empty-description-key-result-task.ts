@@ -1,16 +1,15 @@
 import { Injectable } from '@nestjs/common'
 
-import { CoreProvider } from '@core/core.provider'
 import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.enum'
+import { ObjectiveMode } from '@core/modules/objective/enums/objective-mode.enum'
+import { Stopwatch } from '@lib/logger/pino.decorator'
 import { Task } from '@prisma/mission-control/generated'
 
+import { PostgresJsService } from '../../../../infra/database/postgresjs/postgresjs.service'
 import { EMPTY_DESCRIPTION_TASK_TEMPLATE_ID, EMPTY_DESCRIPTION_TASK_SCORE } from '../../constants'
 import { TaskScope } from '../../types'
 
 import { TaskAssigner } from './base-scenario/task-assigner.abstract'
-import { PostgresJsService } from '../../../../infra/database/postgresjs/postgresjs.service'
-import { ObjectiveMode } from '@core/modules/objective/enums/objective-mode.enum';
-import { Stopwatch } from '@lib/logger/pino.decorator';
 
 @Injectable()
 export class AssignEmptyDescriptionTask implements TaskAssigner {
@@ -36,9 +35,9 @@ export class AssignEmptyDescriptionTask implements TaskAssigner {
 
     return [
       {
-        userId: userId,
-        teamId: teamId,
-        weekId: weekId,
+        userId,
+        teamId,
+        weekId,
         templateId: EMPTY_DESCRIPTION_TASK_TEMPLATE_ID,
         score: EMPTY_DESCRIPTION_TASK_SCORE,
         availableSubtasks: keyResultsIds,

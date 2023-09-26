@@ -1,5 +1,6 @@
+import { Message } from '@aws-sdk/client-sqs'
 import { Injectable, Logger } from '@nestjs/common'
-import { SqsMessageHandler } from '@ssut/nestjs-sqs'
+import { SqsConsumerEventHandler, SqsMessageHandler } from '@ssut/nestjs-sqs'
 
 import { Stopwatch } from '@lib/logger/pino.decorator'
 import { Task } from '@prisma/mission-control/generated'
@@ -40,6 +41,12 @@ export class TaskAssignerService {
     } catch (error: unknown) {
       throw new Error(`Failed to receive and process message from SQS: ${JSON.stringify(error)}`)
     }
+  }
+
+  @Stopwatch({ includeReturn: true })
+  @SqsConsumerEventHandler(process.env.AWS_SQS_CREATE_TASK_QUEUE_NAME, 'processing_error')
+  public onProcessingError(message: Message) {
+    throw new Error(`Failed to process from SQS: ${JSON.stringify(message)}`)
   }
 
   async assignTasks(scope: TaskScope) {

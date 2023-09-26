@@ -1,6 +1,10 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 
 import { CheckInEvent } from '@core/common/messaging/base-scenarios/checkin.event.js'
+import { CommentOnBarrierKREvent } from '@core/common/messaging/base-scenarios/comment-on-barrier-kr.event'
+import { CommentOnKREvent } from '@core/common/messaging/base-scenarios/comment-on-kr.event'
+import { CommentOnLowConfidenceKREvent } from '@core/common/messaging/base-scenarios/comment-on-low-confidence-kr.event'
+import { EmptyDescriptionEvent } from '@core/common/messaging/base-scenarios/empty-description.event'
 import { CHECK_IN_TASK_TEMPLATE_ID } from '@core/common/mission-control/tasks-template/constants'
 
 import {
@@ -15,12 +19,6 @@ import { FulfillCommenBarrierKeyResultTask } from '../use-cases/fulfill-task/ful
 import { FulfillCommentOnKeyResultTask } from '../use-cases/fulfill-task/fullfil-comment-on-key-result-task.js'
 import { FulfillCommentOnLowConfidenceKeyResultTask } from '../use-cases/fulfill-task/fullfil-comment-on-low-confidence-key-result-task.js'
 import { FulfillEmptyDescriptionTask } from '../use-cases/fulfill-task/fullfil-empty-description-task.js'
-import { CommentOnKREvent } from '@core/common/messaging/base-scenarios/comment-on-kr.event';
-import { CommentOnBarrierKREvent } from '@core/common/messaging/base-scenarios/comment-on-barrier-kr.event';
-import {
-  CommentOnLowConfidenceKREvent
-} from '@core/common/messaging/base-scenarios/comment-on-low-confidence-kr.event';
-import { EmptyDescriptionEvent } from '@core/common/messaging/base-scenarios/empty-description.event';
 
 @Injectable()
 export class TaskFulfillerService implements OnModuleInit {

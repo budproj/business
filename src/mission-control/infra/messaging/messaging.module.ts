@@ -14,7 +14,6 @@ import { AssignCheckinTask } from 'src/mission-control/domain/tasks/use-cases/as
 import { AssignCommentOnBarrierKeyResultTask } from 'src/mission-control/domain/tasks/use-cases/assign-task/assign-comment-on-barrier-kr'
 import { AssignCommentOnKeyResultTask } from 'src/mission-control/domain/tasks/use-cases/assign-task/assign-comment-on-key-result'
 import { AssignEmptyDescriptionTask } from 'src/mission-control/domain/tasks/use-cases/assign-task/assign-empty-description-key-result-task'
-import { AssignOutdatedKeyResultCommentTask } from 'src/mission-control/domain/tasks/use-cases/assign-task/assign-outdated-key-result-comment-task'
 import { AssignCommentOnLowConfidenceKeyResultTask } from 'src/mission-control/domain/tasks/use-cases/assign-task/assingn-comment-on-low-confidence-kr'
 import { FulfillCheckinTask } from 'src/mission-control/domain/tasks/use-cases/fulfill-task/fulfil-checkin-task'
 import { FulfillCommenBarrierKeyResultTask } from 'src/mission-control/domain/tasks/use-cases/fulfill-task/fullfil-comment-on-barrier-key-result-task'
@@ -84,7 +83,6 @@ import { NodeFulfillerTaskSubscriber } from '../messaging/subscribers/fulfiller-
     AssignCommentOnKeyResultTask,
     AssignCommentOnLowConfidenceKeyResultTask,
     AssignCommentOnBarrierKeyResultTask,
-    AssignOutdatedKeyResultCommentTask,
     TaskFulfillerService,
     FulfillCheckinTask,
     FulfillEmptyDescriptionTask,
@@ -102,7 +100,6 @@ import { NodeFulfillerTaskSubscriber } from '../messaging/subscribers/fulfiller-
     AssignCommentOnKeyResultTask,
     AssignCommentOnLowConfidenceKeyResultTask,
     AssignCommentOnBarrierKeyResultTask,
-    AssignOutdatedKeyResultCommentTask,
     TaskCreationProducer,
     EventSubscriber,
   ],

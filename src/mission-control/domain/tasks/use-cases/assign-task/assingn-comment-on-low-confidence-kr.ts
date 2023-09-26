@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
-import { CoreProvider } from '@core/core.provider'
-import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { ConfidenceTag } from '@adapters/confidence-tag/confidence-tag.enum'
+import { Stopwatch } from '@lib/logger/pino.decorator'
 import { Task } from '@prisma/mission-control/generated'
 
 import {
@@ -9,46 +9,22 @@ import {
   COMMENT_LOW_CONFIDENCE_KR_TASK_SCORE,
   COMMENT_LOW_CONFIDENCE_KR_TASK_SINGLE_SUBTASK,
 } from '../../constants'
+import { CoreDomainRepository } from '../../repositories/core-domain-repository'
 import { TaskScope } from '../../types'
 
 import { TaskAssigner } from './base-scenario/task-assigner.abstract'
-import { Stopwatch } from '@lib/logger/pino.decorator';
 
 @Injectable()
 export class AssignCommentOnLowConfidenceKeyResultTask implements TaskAssigner {
-  constructor(private readonly core: CoreProvider) {}
+  constructor(private readonly coreDomainRepository: CoreDomainRepository) {}
 
   @Stopwatch({ includeReturn: true })
   async assign(scope: TaskScope): Promise<Task[]> {
-    const team = await this.core.team.getFromID(scope.teamId)
-
-    if (scope.userId !== team.ownerId) {
-      return []
-    }
-
-    const queryBuilder = await this.core.keyResult.get({
+    const keyResult = await this.coreDomainRepository.findOneKeyResultByConfidence({
+      userId: scope.userId,
       teamId: scope.teamId,
+      confidence: ConfidenceTag.LOW,
     })
-
-    const keyResult = await queryBuilder
-      .innerJoin('KeyResult.objective', 'objective', 'objective.id = KeyResult.objective_id')
-      .innerJoin('objective.cycle', 'cycle', 'cycle.id = objective.cycle_id')
-      .leftJoin(
-        `${KeyResult.name}.checkIns`,
-        'checkIn',
-        `checkIn.createdAt = (SELECT MAX(created_at) FROM key_result_check_in WHERE key_result_id = KeyResult.id)`,
-      )
-      .where({
-        objective: {
-          cycle: {
-            active: true,
-          },
-        },
-      })
-      .andWhere('KeyResult.teamId = :teamId', { teamId: scope.teamId })
-      .andWhere('checkIn.confidence <= :confidence', { confidence: 32 })
-      .andWhere('checkIn.confidence >= :confidence', { confidence: 0 })
-      .getOne()
 
     if (!keyResult) return []
 
