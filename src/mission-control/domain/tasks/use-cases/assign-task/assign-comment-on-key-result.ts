@@ -21,8 +21,6 @@ export class AssignCommentOnKeyResultTask implements TaskAssigner {
 
   @Stopwatch({ includeReturn: true })
   async assign({ teamId, userId, weekId }: TaskScope): Promise<Task[]> {
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-
     const keyResults = await this.postgres.getSqlInstance()`
       SELECT kr.id AS id
       FROM key_result kr
