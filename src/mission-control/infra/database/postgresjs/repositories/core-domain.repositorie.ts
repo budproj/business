@@ -23,38 +23,24 @@ export class PostgresJsCoreDomainRepository implements CoreDomainRepository {
 
   async findOneKeyResultWithOutdatedCheckin({ ownerId, teamId }: findOutdatedKeyResultInput) {
     const [queryOutput] = await this.postgres.getSqlInstance()<keyResultFromMCContextOutputTable[]>`
-    WITH latest_checkin AS (
-      SELECT
-          kc.key_result_id,
-          MAX(kc.created_at) AS max_created_at
-      FROM
-          key_result_check_in kc
-      GROUP BY
-          kc.key_result_id)
-  
-    SELECT
-        kr.id AS keyresult_id
-    FROM
-        key_result kr
-    INNER JOIN
-        objective o ON kr.objective_id = o.id
-    INNER JOIN
-        cycle c ON o.cycle_id = c.id
-    LEFT JOIN
-        latest_checkin lc ON kr.id = lc.key_result_id
-    WHERE
-        kr.owner_id = ${ownerId}
-        AND kr.team_id = ${teamId}
-        AND o.mode = ${ObjectiveMode.PUBLISHED}
-        AND kr.mode = ${KeyResultMode.PUBLISHED}
-        AND c.active = true
-        AND (
-            (lc.max_created_at IS NOT NULL AND lc.max_created_at < NOW() - INTERVAL '7 days')
-            OR (lc.max_created_at IS NULL AND kr.created_at < NOW() - INTERVAL '7 days')
-        )
-    ORDER BY
-        lc.max_created_at DESC NULLS LAST
-    LIMIT 1;
+      WITH latest_checkin AS (
+        SELECT DISTINCT ON (krci.key_result_id, krci.created_at) krci.*, kr.created_at AS key_result_created_at
+        FROM key_result kr
+        INNER JOIN objective o ON o.id = kr.objective_id
+        INNER JOIN cycle c ON c.id = o.cycle_id
+        INNER JOIN key_result_check_in krci ON kr.id = krci.key_result_id
+        WHERE kr.team_id = ${teamId}
+          AND kr.owner_id = ${ownerId}
+          AND kr.mode = ${KeyResultMode.PUBLISHED}
+          AND o.mode = ${ObjectiveMode.PUBLISHED}
+          AND c.active = true
+        ORDER BY krci.key_result_id, krci.created_at DESC
+      )
+      SELECT ck.key_result_id AS id
+      FROM latest_checkin ck
+      WHERE ck.created_at < NOW() - INTERVAL '7 days'
+        AND ck.key_result_created_at < NOW() - INTERVAL '7 days'
+      LIMIT 1;
   `
 
     return queryOutput ? CoreDomainDataMapper.keyResultsToDomain(queryOutput) : null
@@ -66,33 +52,30 @@ export class PostgresJsCoreDomainRepository implements CoreDomainRepository {
     confidence,
   }: findKeyResultByConfidenceInput): Promise<any> {
     const sql = this.postgres.getSqlInstance()
-    const barrier =
-      confidence === ConfidenceTag.BARRIER ? sql`= -1` : sql`>= 0 AND confidence <= 32`
+    const [confidenceMin, confidenceMax] = confidence === ConfidenceTag.BARRIER ? [-1, -1] : [0, 32]
 
     const [queryOutput] = await sql<keyResultFromMCContextOutputTable[]>`
-    SELECT kr.id AS keyresult_id
-    FROM key_result kr
-    INNER JOIN team t ON t.id = kr.team_id
-    INNER JOIN objective o ON o.id = kr.objective_id
-    INNER JOIN cycle c ON c.id = o.cycle_id
-    LEFT JOIN (
-        SELECT key_result_id, MAX(created_at) AS max_created_at
-        FROM key_result_check_in
-        GROUP BY key_result_id
-    ) max_ci ON kr.id = max_ci.key_result_id
-    WHERE t.owner_id = ${userId}
-      AND c.active = TRUE
-      AND o.mode = ${ObjectiveMode.PUBLISHED}
-      AND kr.mode = ${KeyResultMode.PUBLISHED}
-      AND kr.team_id = ${teamId}
-      AND EXISTS (
-        SELECT 1
-        FROM key_result_check_in
-        WHERE key_result_id = kr.id
-          AND confidence ${barrier}
+      WITH latest_checkin AS (
+        SELECT DISTINCT ON (krci.key_result_id, krci.created_at) krci.*
+        FROM key_result kr
+        INNER JOIN objective o ON o.id = kr.objective_id
+        INNER JOIN cycle c ON c.id = o.cycle_id
+        INNER JOIN key_result_check_in krci ON kr.id = krci.key_result_id
+        WHERE kr.team_id = ${teamId}
+          AND kr.mode = ${KeyResultMode.PUBLISHED}
+          AND o.mode = ${ObjectiveMode.PUBLISHED}
+          AND c.active = true
+        ORDER BY krci.key_result_id, krci.created_at DESC
       )
-    ORDER BY max_ci.max_created_at DESC NULLS LAST
-    LIMIT 1;`
+      SELECT ck.key_result_id AS id
+      FROM latest_checkin ck
+      LEFT JOIN key_result_comment krc ON krc.key_result_id = ck.key_result_id
+        AND krc.user_id = ${userId}
+        AND krc.created_at > ck.created_at
+      WHERE krc.id IS NULL
+        AND ck.confidence BETWEEN ${confidenceMin} AND ${confidenceMax}
+      LIMIT 1;
+    `
 
     return queryOutput ? CoreDomainDataMapper.keyResultsToDomain(queryOutput) : null
   }
