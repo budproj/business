@@ -26,35 +26,6 @@ export class AssignCommentOnBarrierKeyResultTask implements TaskAssigner {
       confidence: ConfidenceTag.BARRIER,
     })
 
-    // Const team = await this.core.team.getFromID(scope.teamId)
-
-    // if (scope.userId !== team.ownerId) {
-    //   return []
-    // }
-
-    // const queryBuilder = await this.core.keyResult.get({
-    //   teamId: scope.teamId,
-    // })
-
-    // const keyResult = await queryBuilder
-    //   .innerJoin('KeyResult.objective', 'objective', 'objective.id = KeyResult.objective_id')
-    //   .innerJoin('objective.cycle', 'cycle', 'cycle.id = objective.cycle_id')
-    //   .leftJoin(
-    //     `${KeyResult.name}.checkIns`,
-    //     'checkIn',
-    //     `checkIn.createdAt = (SELECT MAX(created_at) FROM key_result_check_in WHERE key_result_id = KeyResult.id)`,
-    //   )
-    //   .where({
-    //     objective: {
-    //       cycle: {
-    //         active: true,
-    //       },
-    //     },
-    //   })
-    //   .andWhere('KeyResult.teamId = :teamId', { teamId: scope.teamId })
-    //   .andWhere('checkIn.confidence = :confidence', { confidence: -1 })
-    //   .getOne()
-
     if (!keyResult) return []
 
     return [
