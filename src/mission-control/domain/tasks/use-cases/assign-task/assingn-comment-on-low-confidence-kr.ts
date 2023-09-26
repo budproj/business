@@ -12,11 +12,13 @@ import {
 import { TaskScope } from '../../types'
 
 import { TaskAssigner } from './base-scenario/task-assigner.abstract'
+import { Stopwatch } from '@lib/logger/pino.decorator';
 
 @Injectable()
 export class AssignCommentOnLowConfidenceKeyResultTask implements TaskAssigner {
   constructor(private readonly core: CoreProvider) {}
 
+  @Stopwatch({ includeReturn: true })
   async assign(scope: TaskScope): Promise<Task[]> {
     const team = await this.core.team.getFromID(scope.teamId)
 

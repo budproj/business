@@ -13,11 +13,13 @@ import {
 import { TaskScope } from '../../types'
 
 import { TaskAssigner } from './base-scenario/task-assigner.abstract'
+import { Stopwatch } from '@lib/logger/pino.decorator';
 
 @Injectable()
 export class AssignCheckinTask implements TaskAssigner {
   constructor(private readonly core: CoreProvider) {}
 
+  @Stopwatch({ includeReturn: true })
   async assign(scope: TaskScope): Promise<Task[]> {
     const keyResult: Partial<KeyResultInterface> = await this.core.keyResult.getWithOutdatedCheckin(
       {

@@ -12,20 +12,19 @@ import {
 import { TaskScope } from '../../types'
 
 import { TaskAssigner } from './base-scenario/task-assigner.abstract'
+import { Stopwatch } from '@lib/logger/pino.decorator';
 
 @Injectable()
 export class AssignCommentOnKeyResultTask implements TaskAssigner {
   constructor(private readonly core: CoreProvider) {}
 
+  @Stopwatch({ includeReturn: true })
   async assign(scope: TaskScope): Promise<Task[]> {
-    const [companie] = await this.core.team.getAscendantsByIds([scope.teamId], {})
-
-    if (!companie.id) {
-      return []
-    }
+    // const [company] = await this.core.team.getAscendantsByIds([scope.teamId], {})
 
     const queryBuilder = await this.core.keyResult.get({
-      teamId: companie.id,
+      // teamId: company.id,
+      teamId: scope.teamId,
     })
 
     const keyResult = await queryBuilder
@@ -60,7 +59,7 @@ export class AssignCommentOnKeyResultTask implements TaskAssigner {
     return [
       {
         userId: scope.userId,
-        teamId: companie.id,
+        teamId: scope.teamId,
         weekId: scope.weekId,
         templateId: COMMENT_KR_TASK_TEMPLATE_ID,
         score: COMMENT_KR_TASK_SCORE,
