@@ -39,7 +39,7 @@ export class AssignCommentOnKeyResultTask implements TaskAssigner {
             SELECT MAX(created_at)
             FROM key_result_comment
             WHERE key_result_id = kr.id
-              AND kc.user_id < ${userId}
+              AND kc.user_id = ${userId}
               AND kc.created_at < ${sevenDaysAgo}
           )
         )
