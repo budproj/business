@@ -21,5 +21,4 @@ model Task {
   completedSubtasks String[]
 
   @@id([userId, teamId, weekId, templateId])
-  @@index([userId, teamId, weekId, templateId])
 }
