@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 
-import { CoreProvider } from '@core/core.provider'
 import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.enum'
 import { ObjectiveMode } from '@core/modules/objective/enums/objective-mode.enum'
 import { Stopwatch } from '@lib/logger/pino.decorator'
@@ -18,7 +17,7 @@ import { TaskAssigner } from './base-scenario/task-assigner.abstract'
 
 @Injectable()
 export class AssignCommentOnKeyResultTask implements TaskAssigner {
-  constructor(private readonly core: CoreProvider, private readonly postgres: PostgresJsService) {}
+  constructor(private readonly postgres: PostgresJsService) {}
 
   @Stopwatch({ includeReturn: true })
   async assign({ teamId, userId, weekId }: TaskScope): Promise<Task[]> {
