@@ -72,28 +72,25 @@ export class PostgresJsCoreDomainRepository implements CoreDomainRepository {
     const [queryOutput] = await sql<keyResultFromMCContextOutputTable[]>`
     SELECT kr.id AS keyresult_id
     FROM key_result kr
+    INNER JOIN team t ON t.id = kr.team_id
     INNER JOIN objective o ON o.id = kr.objective_id
-    INNER JOIN CYCLE c ON c.id = o.cycle_id
+    INNER JOIN cycle c ON c.id = o.cycle_id
     LEFT JOIN (
         SELECT key_result_id, MAX(created_at) AS max_created_at
         FROM key_result_check_in
         GROUP BY key_result_id
     ) max_ci ON kr.id = max_ci.key_result_id
-    WHERE kr.team_id = ${teamId}
+    WHERE t.owner_id = ${userId}
+      AND c.active = TRUE
       AND o.mode = ${ObjectiveMode.PUBLISHED}
       AND kr.mode = ${KeyResultMode.PUBLISHED}
+      AND kr.team_id = ${teamId}
       AND EXISTS (
         SELECT 1
         FROM key_result_check_in
         WHERE key_result_id = kr.id
           AND confidence ${barrier}
       )
-      AND kr.team_id IN (
-        SELECT id
-        FROM team
-        WHERE owner_id = ${userId}
-      )
-      AND c.active = TRUE
     ORDER BY max_ci.max_created_at DESC NULLS LAST
     LIMIT 1;`
 
