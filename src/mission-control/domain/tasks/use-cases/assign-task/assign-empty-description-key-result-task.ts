@@ -8,31 +8,35 @@ import { EMPTY_DESCRIPTION_TASK_TEMPLATE_ID, EMPTY_DESCRIPTION_TASK_SCORE } from
 import { TaskScope } from '../../types'
 
 import { TaskAssigner } from './base-scenario/task-assigner.abstract'
+import { PostgresJsService } from '../../../../infra/database/postgresjs/postgresjs.service'
+import { ObjectiveMode } from '@core/modules/objective/enums/objective-mode.enum';
 
 @Injectable()
 export class AssignEmptyDescriptionTask implements TaskAssigner {
-  constructor(private readonly core: CoreProvider) {}
+  constructor(private readonly postgres: PostgresJsService) {}
 
-  async assign(scope: TaskScope): Promise<Task[]> {
-    const keyResults = await this.core.keyResult.getManyWithoutDescription({
-      ownerId: scope.userId,
-      teamId: scope.teamId,
-      mode: KeyResultMode.PUBLISHED,
-      objective: {
-        cycle: {
-          active: true,
-        },
-      },
-    })
+  async assign({ userId, teamId, weekId }: TaskScope): Promise<Task[]> {
+    const keyResults = await this.postgres.getSqlInstance()`
+      SELECT kr.id AS id
+      FROM key_result kr
+      INNER JOIN objective o ON o.id = kr.objective_id
+      INNER JOIN cycle c ON c.id = o.cycle_id
+      WHERE kr.owner_id = ${userId}
+        AND kr.team_id = ${teamId}
+        AND kr.mode = ${KeyResultMode.PUBLISHED}
+        AND (kr.description IS NULL OR kr.description = '')
+        AND o.mode = ${ObjectiveMode.PUBLISHED}
+        AND c.active = true;
+    `
 
     if (keyResults.length === 0) return []
     const keyResultsIds = keyResults.map((keyResult) => keyResult.id)
 
     return [
       {
-        userId: scope.userId,
-        teamId: scope.teamId,
-        weekId: scope.weekId,
+        userId: userId,
+        teamId: teamId,
+        weekId: weekId,
         templateId: EMPTY_DESCRIPTION_TASK_TEMPLATE_ID,
         score: EMPTY_DESCRIPTION_TASK_SCORE,
         availableSubtasks: keyResultsIds,

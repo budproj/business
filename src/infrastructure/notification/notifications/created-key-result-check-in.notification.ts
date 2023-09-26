@@ -97,16 +97,16 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
       data.checkIn.confidence === CONFIDENCE_TAG_THRESHOLDS.barrier &&
       data.parentCheckIn?.confidence !== CONFIDENCE_TAG_THRESHOLDS.barrier
     ) {
-      void this.dispatchBarrierEmail()
-      void this.dispatchBarrierOrLowConfidenceMessaging()
+      await this.dispatchBarrierEmail()
+      await this.dispatchBarrierOrLowConfidenceMessaging()
     }
 
     if (
       data.checkIn.confidence === CONFIDENCE_TAG_THRESHOLDS.low &&
       data.parentCheckIn?.confidence !== CONFIDENCE_TAG_THRESHOLDS.low
     ) {
-      void this.dispatchLowConfidenceEmail()
-      void this.dispatchBarrierOrLowConfidenceMessaging()
+      await this.dispatchLowConfidenceEmail()
+      await this.dispatchBarrierOrLowConfidenceMessaging()
     }
   }
 

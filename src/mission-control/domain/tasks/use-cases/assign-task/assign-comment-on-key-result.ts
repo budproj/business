@@ -18,14 +18,10 @@ export class AssignCommentOnKeyResultTask implements TaskAssigner {
   constructor(private readonly core: CoreProvider) {}
 
   async assign(scope: TaskScope): Promise<Task[]> {
-    const [companie] = await this.core.team.getAscendantsByIds([scope.teamId], {})
-
-    if (!companie.id) {
-      return []
-    }
+    const [company] = await this.core.team.getAscendantsByIds([scope.teamId], {})
 
     const queryBuilder = await this.core.keyResult.get({
-      teamId: companie.id,
+      teamId: company.id,
     })
 
     const keyResult = await queryBuilder
@@ -60,7 +56,7 @@ export class AssignCommentOnKeyResultTask implements TaskAssigner {
     return [
       {
         userId: scope.userId,
-        teamId: companie.id,
+        teamId: company.id,
         weekId: scope.weekId,
         templateId: COMMENT_KR_TASK_TEMPLATE_ID,
         score: COMMENT_KR_TASK_SCORE,

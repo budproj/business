@@ -22,20 +22,18 @@ export class TaskPlannerService {
 
     const users = await this.coreDomainRepository.findAllUsersAndTeams()
 
-    let count = 0
-
-    for (const user of users) {
-      for (const teamId of user.teamIds) {
-        // eslint-disable-next-line no-await-in-loop
-        await this.producer.produce({
+    const promises = users.flatMap((user) =>
+      user.teamIds.map((teamId) =>
+        this.producer.produce({
           userId: user.userId,
           teamId,
           weekId,
-        })
-        count++
-      }
-    }
+        }),
+      ),
+    )
 
-    return count
+    await Promise.all(promises)
+
+    return promises.length
   }
 }
