@@ -66,22 +66,24 @@ export class KeyResultCommentProvider extends CoreEntityProvider<
       },
     }
 
-    if (latestCheckIn.confidence === -1) {
-      await this.fulfillerTaskPublisher.publish<CommentOnBarrierKREvent>(
-        COMMENT_BARRIER_KR_TASK_TEMPLATE_ID,
-        {
-          ...messageInterface,
-        },
-      )
-    }
+    if (latestCheckIn) {
+      if (latestCheckIn.confidence === -1) {
+        await this.fulfillerTaskPublisher.publish<CommentOnBarrierKREvent>(
+          COMMENT_BARRIER_KR_TASK_TEMPLATE_ID,
+          {
+            ...messageInterface,
+          },
+        )
+      }
 
-    if (latestCheckIn.confidence > 0 || latestCheckIn.confidence <= 32) {
-      await this.fulfillerTaskPublisher.publish<CommentOnLowConfidenceKREvent>(
-        COMMENT_LOW_CONFIDENCE_KR_TASK_TEMPLATE_ID,
-        {
-          ...messageInterface,
-        },
-      )
+      if (latestCheckIn.confidence > 0 || latestCheckIn.confidence <= 32) {
+        await this.fulfillerTaskPublisher.publish<CommentOnLowConfidenceKREvent>(
+          COMMENT_LOW_CONFIDENCE_KR_TASK_TEMPLATE_ID,
+          {
+            ...messageInterface,
+          },
+        )
+      }
     }
 
     await this.fulfillerTaskPublisher.publish<CommentOnKREvent>(COMMENT_KR_TASK_TEMPLATE_ID, {
