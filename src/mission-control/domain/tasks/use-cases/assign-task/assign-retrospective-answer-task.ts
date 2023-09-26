@@ -10,9 +10,11 @@ import {
 import { TaskScope } from '../../types'
 
 import { TaskAssigner } from './base-scenario/task-assigner.abstract'
+import { Stopwatch } from '@lib/logger/pino.decorator';
 
 @Injectable()
 export class AssignRetrospectiveAnswerTask implements TaskAssigner {
+  @Stopwatch({ includeReturn: true })
   async assign(scope: TaskScope): Promise<Task[]> | null {
     return [
       {

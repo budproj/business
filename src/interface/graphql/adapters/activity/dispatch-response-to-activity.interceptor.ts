@@ -70,7 +70,7 @@ export class DispatchResponseToActivityInterceptor<T> implements NestInterceptor
     const activity = DispatchResponseToActivityInterceptor.getContextActivity(executionContext)
     activity.refreshData(data)
 
-    void this.activityAdapter.dispatch(activity).catch()
+    await this.activityAdapter.dispatch(activity).catch()
 
     return data
   }

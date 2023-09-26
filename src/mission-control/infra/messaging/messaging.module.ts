@@ -23,6 +23,7 @@ import { FulfillCommentOnLowConfidenceKeyResultTask } from 'src/mission-control/
 import { FulfillEmptyDescriptionTask } from 'src/mission-control/domain/tasks/use-cases/fulfill-task/fullfil-empty-description-task'
 
 import { MissionControlDatabaseModule } from '../database/database.module'
+import { PostgresJsService } from '../database/postgresjs/postgresjs.service'
 import { HttpModule } from '../http/http.module'
 import { SQSTaskCreationProducer } from '../messaging/producers/task-creation.producer'
 import { NodeFulfillerTaskSubscriber } from '../messaging/subscribers/fulfiller-task.subscriber'
@@ -75,6 +76,7 @@ import { NodeFulfillerTaskSubscriber } from '../messaging/subscribers/fulfiller-
     CoreModule,
   ],
   providers: [
+    PostgresJsService,
     SQSTaskCreationProducer,
     TaskAssignerService,
     AssignCheckinTask,

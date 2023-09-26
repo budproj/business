@@ -14,14 +14,12 @@ export class PostgresJsCoreDomainRepository implements CoreDomainRepository {
   constructor(private readonly postgres: PostgresJsService) {}
   async findAllUsersAndTeams() {
     const queryOutput = await this.postgres.getSqlInstance()<userFromMCContextOutputTable[]>`
-    SELECT
-        USER_ID,
-        JSONB_AGG(TEAM_ID) AS TEAM_IDS
-    FROM
-        TEAM_USERS_USER TUU
-    GROUP BY
-        USER_ID;
-`
+      SELECT tuu.user_id AS user_id,
+             JSONB_AGG(tuu.team_id) AS team_ids
+      FROM "team_users_user" tuu
+      INNER JOIN "user" u ON u.id = tuu.user_id AND u.status = 'ACTIVE'
+      GROUP BY user_id;
+    `
     return CoreDomainDataMapper.usersAndTeamsToDomain(queryOutput)
   }
 }

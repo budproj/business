@@ -31,11 +31,12 @@ export class TaskAssignerService {
   public async handleMessage(message: AWS.SQS.Message) {
     this.logger.log({
       message: 'Received message from SQS',
+      body: message.Body,
     })
 
     try {
       const { scope } = JSON.parse(message.Body)
-      void this.assignTasks(scope)
+      await this.assignTasks(scope)
     } catch (error: unknown) {
       throw new Error(`Failed to receive and process message from SQS: ${JSON.stringify(error)}`)
     }
