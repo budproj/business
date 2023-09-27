@@ -42,8 +42,7 @@ export class PostgresJsCoreDomainRepository implements CoreDomainRepository {
         AND ck.key_result_created_at < NOW() - INTERVAL '7 days'
       LIMIT 1;
   `
-
-    return queryOutput ? CoreDomainDataMapper.keyResultsToDomain(queryOutput) : null
+    return queryOutput
   }
 
   async findOneKeyResultByConfidence({
@@ -60,12 +59,15 @@ export class PostgresJsCoreDomainRepository implements CoreDomainRepository {
         FROM key_result kr
         INNER JOIN objective o ON o.id = kr.objective_id
         INNER JOIN cycle c ON c.id = o.cycle_id
+        INNER JOIN team t ON t.id = kr.team_id
         INNER JOIN key_result_check_in krci ON kr.id = krci.key_result_id
         WHERE kr.team_id = ${teamId}
+          AND t.owner_id = ${userId}
           AND kr.mode = ${KeyResultMode.PUBLISHED}
           AND o.mode = ${ObjectiveMode.PUBLISHED}
           AND c.active = true
         ORDER BY krci.key_result_id, krci.created_at DESC
+        LIMIT 1
       )
       SELECT ck.key_result_id AS id
       FROM latest_checkin ck
@@ -73,11 +75,9 @@ export class PostgresJsCoreDomainRepository implements CoreDomainRepository {
         AND krc.user_id = ${userId}
         AND krc.created_at > ck.created_at
       WHERE krc.id IS NULL
-        AND ck.confidence BETWEEN ${confidenceMin} AND ${confidenceMax}
-      LIMIT 1;
+        AND ck.confidence BETWEEN ${confidenceMin} AND ${confidenceMax};
     `
-
-    return queryOutput ? CoreDomainDataMapper.keyResultsToDomain(queryOutput) : null
+    return queryOutput
   }
 
   async findAllUsersAndTeams() {
