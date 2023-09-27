@@ -10,8 +10,8 @@ class TasksService {
   constructor(private readonly taskRepository: TaskRepository) {}
 
   @Stopwatch()
-  public async getUserTasks(userId: string, teamId: string): Promise<Task[]> {
-    return this.taskRepository.findMany({ userId, teamId })
+  public async getUserTasks(userId: string, teamId: string, weekId: string): Promise<Task[]> {
+    return this.taskRepository.findMany({ userId, teamId, weekId })
   }
 }
 
