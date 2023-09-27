@@ -88,6 +88,9 @@ class OpenAICompletionService {
     }
 
     const { referenceId, action, entity, prompt, promptVersion, input, author, estimates } = request
+    const [completionTokens, promptTokens] = estimates
+      ? [Math.floor(estimates.completionTokens), Math.floor(estimates.promptTokens)]
+      : [null, null]
 
     // As of 2023-07-14, the hash is calculated from the prompt instead of the input
     const hashedInput = await this.hashProvider.generateHash(prompt)
@@ -134,8 +137,8 @@ class OpenAICompletionService {
         model: prompt.model,
         messages: prompt.messages as unknown as GenerateOpenAiCompletionDTO['messages'],
         request: prompt as unknown as GenerateOpenAiCompletionDTO['request'],
-        estimatedPromptTokens: estimates?.promptTokens ?? null,
-        estimatedCompletionTokens: estimates?.completionTokens ?? null,
+        estimatedPromptTokens: promptTokens,
+        estimatedCompletionTokens: completionTokens,
       })
     }
 
