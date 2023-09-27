@@ -80,6 +80,29 @@ AND "templateId"  = ${templateId}
     `
   }
 
+  async addSingleSubtask(taskId: TaskId, stepId: string): Promise<void> {
+    const { templateId, userId, weekId } = taskId
+
+    await this.prisma.$queryRaw`
+      WITH item_set AS (
+    SELECT DISTINCT unnest(array_append("completedSubtasks", ${stepId})) AS items
+    FROM "Task"
+    WHERE "userId" = ${userId}
+    AND "weekId" = ${weekId}
+    AND "templateId"  = ${templateId} 
+    ), item_array AS (
+    SELECT array_agg(item_set.items) AS items
+    FROM item_set
+    )
+    UPDATE "Task"
+    SET "completedSubtasks" = item_array.items
+    FROM item_array
+    WHERE "userId" = ${userId}
+    AND "weekId" = ${weekId} 
+    AND "templateId"  = ${templateId}
+    `
+  }
+
   async createMany(tasks: Task[]): Promise<void> {
     await this.prisma.task.createMany({ data: tasks, skipDuplicates: true })
   }
