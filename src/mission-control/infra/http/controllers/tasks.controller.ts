@@ -23,7 +23,7 @@ export class TasksController {
     const tasks = await this.tasks.getUserTasks(
       userID,
       teamID,
-      buildWeekId(new Date(date).getTime()),
+      buildWeekId(new Date(date)),
     )
     return TaskViewModel.toHTTP(tasks)
   }
