@@ -48,7 +48,7 @@ export class PrismaTaskRepository implements TaskRepository {
           FROM "Task"
           WHERE
             "teamId" = ${teamId}
-            AND "weekId"::date = ${weekId}::date - interval '8 days'
+            AND "weekId"::date = current_week - interval '8 days'
           group by "completedSubtasks") as completedPassTasks
         ) AS previous_week_total_score
       FROM RecursiveTeamGoal
