@@ -24,31 +24,35 @@ export class PrismaTaskRepository implements TaskRepository {
       SELECT
         ${weekId}::timestamp AS current_week,
         ${BASE_GOAL_VALUE}::double precision AS teamGoal,
-        (
-          SELECT COALESCE(SUM(score) * array_length("completedSubtasks", 1), 0.0)
+         (
+          SELECT SUM(completedSubtasksLength)
+          FROM (
+          SELECT COALESCE(SUM(score) * array_length("completedSubtasks", 1), 0.0) AS completedSubtasksLength
           FROM "Task"
           WHERE
             "teamId" = ${teamId}
-            AND "weekId"::date = ${weekId}::date - interval '7 days'
-          group by "completedSubtasks"
+            AND "weekId"::date = ${weekId}::date - interval '8 days'
+          group by "completedSubtasks") as completedPassTasks
         ) AS previous_week_total_score
       UNION ALL
       SELECT
-        current_week - interval '7 days' AS current_week,
+        current_week - interval '8 days' AS current_week,
         CASE
           WHEN previous_week_total_score >= teamGoal THEN previous_week_total_score + ${BASE_GOAL_VALUE}::float8
           ELSE teamGoal
         END AS teamGoal,
         (
-          SELECT COALESCE(SUM(score) * array_length("completedSubtasks", 1), 0.0)
+          SELECT SUM(completedSubtasksLength)
+          FROM (
+          SELECT COALESCE(SUM(score) * array_length("completedSubtasks", 1), 0.0) AS completedSubtasksLength
           FROM "Task"
           WHERE
             "teamId" = ${teamId}
-            AND "weekId"::date = current_week - interval '7 days'
-          group by "completedSubtasks"
+            AND "weekId"::date = current_week - interval '8 days'
+          group by "completedSubtasks") as completedPassTasks
         ) AS previous_week_total_score
       FROM RecursiveTeamGoal
-      WHERE current_week > ${weekId}::date - interval '7 days'
+      WHERE current_week > ${weekId}::date - interval '8 days'
     )
     SELECT MAX(teamGoal) FROM RecursiveTeamGoal;`
 
