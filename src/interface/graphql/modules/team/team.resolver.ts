@@ -24,6 +24,7 @@ import { Team } from '@core/modules/team/team.orm-entity'
 import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 import { UserInterface } from '@core/modules/user/user.interface'
 import { User } from '@core/modules/user/user.orm-entity'
+import { GetTeamMembersCommandResult } from '@core/ports/commands/get-team-members.command'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 import { GuardedMutation } from '@interface/graphql/adapters/authorization/decorators/guarded-mutation.decorator'
 import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorators/guarded-query.decorator'
@@ -43,6 +44,10 @@ import { UserGraphQLNode } from '@interface/graphql/modules/user/user.node'
 import { DeltaGraphQLObject } from '@interface/graphql/objects/delta.object'
 import { StatusGraphQLObject } from '@interface/graphql/objects/status.object'
 import { NodeIndexesRequest } from '@interface/graphql/requests/node-indexes.request'
+import { Cacheable } from '@lib/cache/cacheable.decorator'
+import { Stopwatch } from '@lib/logger/pino.decorator'
+
+import { QuantityNode } from '../user/connections/user-teams/requests/quantity-request'
 
 import { TeamCyclesGraphQLConnection } from './connections/team-cycles/team-cycles.connection'
 import { TeamKeyResultsGraphQLConnection } from './connections/team-key-results/team-key-results.connection'
@@ -55,9 +60,6 @@ import { TeamMembersFiltersRequest } from './requests/team-members-filters.reque
 import { TeamUpdateRequest } from './requests/team-update.request'
 import { TeamAccessControl } from './team.access-control'
 import { TeamGraphQLNode } from './team.node'
-import { Stopwatch } from '@lib/logger/pino.decorator'
-import { Cacheable } from "@lib/cache/cacheable.decorator";
-import { GetTeamMembersCommandResult } from '@core/ports/commands/get-team-members.command';
 
 @GuardedResolver(TeamGraphQLNode)
 export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamInterface> {
@@ -236,7 +238,10 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return this.core.team.getOne({ id: team.parentId })
   }
 
-  @Cacheable((request, team, info) => [team.id, request, GetResolvedFieldsInEdgesAndNodes(info)], 1 * 60)
+  @Cacheable(
+    (request, team, info) => [team.id, request, GetResolvedFieldsInEdgesAndNodes(info)],
+    1 * 60,
+  )
   @Stopwatch({ omitArgs: '2' })
   @ResolveField('users', () => TeamUsersGraphQLConnection, { nullable: true })
   protected async getUsersForTeam(
@@ -496,5 +501,24 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     })
 
     return this.corePorts.dispatchCommand<Cycle | undefined>('get-team-tactical-cycle', team.id)
+  }
+
+  @ResolveField('quantities', () => QuantityNode)
+  protected async quantities(
+    @RequestUserWithContext() userWithContext: UserWithContext,
+    @Parent() team: TeamGraphQLNode,
+  ) {
+    this.logger.log({
+      userWithContext,
+      message: 'Quantities of the company',
+    })
+
+    const data = await this.corePorts.dispatchCommand(
+      'get-objectives-and-key-results-quantities',
+      userWithContext,
+      team.id,
+    )
+
+    return data
   }
 }
