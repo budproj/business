@@ -23,10 +23,11 @@ export class PostgresJsCoreDomainRepository implements CoreDomainRepository {
 
   async findOneKeyResultWithOutdatedCheckin({ ownerId, teamId }: findOutdatedKeyResultInput) {
     const sql = this.postgres.getSqlInstance()
+    const [DEPRIORITIZED, ACHIEVED] = [-100 + 1, 200 - 1]
 
     const [queryOutput] = await sql<keyResultFromMCContextOutputTable[]>`
       WITH latest_checkin AS (
-          SELECT krci.created_at, kr.id, kr.created_at AS key_result_created_at
+          SELECT krci.created_at, krci.confidence, kr.id, kr.created_at AS key_result_created_at
           FROM key_result kr
           INNER JOIN objective o ON o.id = kr.objective_id
           INNER JOIN cycle c ON c.id = o.cycle_id
@@ -40,8 +41,9 @@ export class PostgresJsCoreDomainRepository implements CoreDomainRepository {
                 LIMIT 1)
         SELECT ck.id
         FROM latest_checkin ck
-        WHERE ck.created_at < NOW() - INTERVAL '7 days'
-        OR (ck.created_at IS NULL AND ck.key_result_created_at < NOW() - INTERVAL '7 days');`
+        WHERE (ck.created_at < NOW() - INTERVAL '7 days'
+        OR (ck.created_at IS NULL AND ck.key_result_created_at < NOW() - INTERVAL '7 days'))
+        AND ck.confidence BETWEEN ${DEPRIORITIZED} AND ${ACHIEVED};`
 
     return queryOutput
   }
