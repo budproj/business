@@ -41,9 +41,8 @@ export class PostgresJsCoreDomainRepository implements CoreDomainRepository {
                 LIMIT 1)
         SELECT ck.id
         FROM latest_checkin ck
-        WHERE (ck.created_at < NOW() - INTERVAL '7 days'
-        OR (ck.created_at IS NULL AND ck.key_result_created_at < NOW() - INTERVAL '7 days'))
-        AND ck.confidence BETWEEN ${DEPRIORITIZED} AND ${ACHIEVED};`
+        WHERE (ck.created_at < NOW() - INTERVAL '7 days' AND ck.confidence BETWEEN ${DEPRIORITIZED} AND ${ACHIEVED})
+        OR (ck.created_at IS NULL AND ck.key_result_created_at < NOW() - INTERVAL '7 days');`
 
     return queryOutput
   }
