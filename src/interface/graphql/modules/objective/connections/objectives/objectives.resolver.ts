@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common'
+import { Logger, UnauthorizedException } from '@nestjs/common'
 import { Args } from '@nestjs/graphql'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
@@ -40,6 +40,14 @@ export class ObjectivesConnectionGraphQLResolver extends GuardedConnectionGraphQ
       userWithContext,
       message: 'Fetching objectives with filters',
     })
+
+    const { teamId, ownerId } = request
+    const canGetObjectives =
+      !teamId &&
+      ['Squad Member', 'Team Member'].includes(userWithContext.role) &&
+      userWithContext.id === ownerId
+
+    if (!canGetObjectives) throw new UnauthorizedException()
 
     const [options, _, connection] = this.relay.unmarshalRequest<
       ObjectiveFiltersRequest,
