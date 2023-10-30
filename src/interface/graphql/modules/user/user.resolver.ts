@@ -268,6 +268,8 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     await this.corePorts.dispatchCommand<User>('request-change-user-password-email', request.id)
   }
 
+  // Precisamos por esse nome para este resolvefield por causa da existência do campo "role", da tabela de usuário
+  @Cacheable('0.id', 5 * 60)
   @Stopwatch()
   @ResolveField('authzRole', () => UserRoleObject)
   protected async getRoleForUser(@Parent() user: UserGraphQLNode) {
