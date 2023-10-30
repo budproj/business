@@ -269,7 +269,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   }
 
   // Precisamos por esse nome para este resolvefield por causa da existência do campo "role", da tabela de usuário
-  @Cacheable('0.id', 5 * 60)
+  @Cacheable('0.id', 1 * 5)
   @Stopwatch()
   @ResolveField('authzRole', () => UserRoleObject)
   protected async getRoleForUser(@Parent() user: UserGraphQLNode) {
