@@ -1,6 +1,5 @@
-import { Logger, UnauthorizedException } from '@nestjs/common'
+import { Logger } from '@nestjs/common'
 import { Args } from '@nestjs/graphql'
-import { Role } from 'auth0'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
@@ -13,7 +12,7 @@ import { GuardedQuery } from '@interface/graphql/adapters/authorization/decorato
 import { GuardedResolver } from '@interface/graphql/adapters/authorization/decorators/guarded-resolver.decorator'
 import { GuardedConnectionGraphQLResolver } from '@interface/graphql/adapters/authorization/resolvers/guarded-connection.resolver'
 import { RequestUserWithContext } from '@interface/graphql/adapters/context/decorators/request-user-with-context.decorator'
-import { Cacheable } from '@lib/cache/cacheable.decorator'
+import { Cacheable } from "@lib/cache/cacheable.decorator";
 
 import { UserFiltersRequest } from '../../requests/user-filters.request'
 
@@ -53,16 +52,6 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
     // Caso o filtro de OKR's individuais esteja ativo, os filters e as options não estão disponíveis por dificuldade de implementação na arquitetura atual do projeto. Foi mal futuro dev que vai ler isso!!
 
     if (rawFilters.onlyWithIndividualObjectives) {
-      const requestedUserAuthzRole = await this.corePorts.dispatchCommand<Role>(
-        'get-user-role',
-        userWithContext.id,
-      )
-      const canListUsersWithIndividualOkrs = ['Leader', 'Company Admin'].includes(
-        requestedUserAuthzRole.name,
-      )
-
-      if (!canListUsersWithIndividualOkrs) throw new UnauthorizedException()
-
       const usersWithIndividualOkr = await this.corePorts.dispatchCommand<User[]>(
         'get-users-with-individual-okr',
         userWithContext,
