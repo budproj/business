@@ -4,6 +4,7 @@ import { Observable } from 'rxjs'
 import { PolicyAdapter } from '@adapters/policy/policy.adapter'
 import { UserWithContext } from '@adapters/state/interfaces/user.interface'
 import { CoreProvider } from '@core/core.provider'
+import { Cacheable } from '@lib/cache/cacheable.decorator'
 
 import { HTTPRequest } from '../types'
 
@@ -31,7 +32,7 @@ export class AddHTTPContextToUserInterceptor implements NestInterceptor {
   }
 
   // eslint-disable-next-line @typescript-eslint/member-ordering
-  // @Cacheable(({ user }) => [user.id, user.token.sub, user.token.permissions], 15 * 60)
+  @Cacheable(({ user }) => [user.id, user.token.sub, user.token.permissions], 15 * 60)
   private async getRequestUser(request: HTTPRequest): Promise<UserWithContext> {
     const { teams, ...user } = await this.core.user.getUserFromSubjectWithTeamRelation(
       request.user.token.sub,

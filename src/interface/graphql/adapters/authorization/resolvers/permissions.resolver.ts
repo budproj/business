@@ -20,7 +20,7 @@ import { PermissionsGraphQLObject } from '../objects/permissions.object'
 export class PermissionsGraphQLResolver {
   private readonly logger = new Logger(PermissionsGraphQLResolver.name)
   private readonly authz = new PolicyAdapter()
-  // @Cacheable((scope, user) => [user.id, scope], 1 * 5)
+  @Cacheable((scope, user) => [user.id, scope], 15 * 60)
   @GuardedQuery(PermissionsGraphQLObject, 'permission:read', { name: 'permissions' })
   protected getUserPermissionsForScope(
     @Args('scope', { type: () => ScopeGraphQLEnum, defaultValue: Scope.COMPANY })
