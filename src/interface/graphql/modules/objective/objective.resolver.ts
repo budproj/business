@@ -104,8 +104,8 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: NodeDeleteRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    const canDelete = await this.accessControl.canDelete(userWithContext, request.id)
-    if (!canDelete) throw new UnauthorizedException()
+    // Const canDelete = await this.accessControl.canDelete(userWithContext, request.id)
+    // if (!canDelete) throw new UnauthorizedException()
 
     this.logger.log({
       userWithContext,
