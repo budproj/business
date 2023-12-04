@@ -114,11 +114,11 @@ export class KeyResultCheckInProvider extends CoreEntityProvider<
 
     const { ownerId } = await this.keyResultProvider.getFromID(createdCheckin[0].keyResultId)
 
-    const [companie] = await this.team.getAscendantsByIds([teamId], {})
+    const companies = await this.team.getUserCompanies({ id: ownerId })
 
     const messageInterface = {
       userId: ownerId,
-      companyId: companie.id,
+      companyId: companies[0].id,
       date: Date.now(),
       payload: {
         teamId,
