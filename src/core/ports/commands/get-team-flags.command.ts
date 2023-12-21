@@ -16,7 +16,6 @@ export class GetTeamFlagsCommand extends BaseStatusCommand {
       undefined,
       undefined,
       undefined,
-      undefined,
       ['checkIns'],
     )
 

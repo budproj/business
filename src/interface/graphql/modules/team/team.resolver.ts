@@ -452,12 +452,9 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching key-results for team',
     })
 
-    console.log({ request })
-
-    const [options, queryOptions, connection] = this.relay.unmarshalRequest<
-      UserKeyResultsRequest,
-      KeyResult
-    >(request)
+    const [options, _, connection] = this.relay.unmarshalRequest<UserKeyResultsRequest, KeyResult>(
+      request,
+    )
 
     const { confidence, active, ...filters } = options
 
@@ -465,7 +462,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       'get-key-results',
       team,
       filters,
-      queryOptions,
       active,
       confidence,
     )
