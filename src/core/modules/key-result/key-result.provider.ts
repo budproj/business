@@ -38,6 +38,7 @@ import { KeyResultMode } from './enums/key-result-mode.enum'
 import { KeyResultStateInterface } from './interfaces/key-result-state.interface'
 import { KeyResultRelationFilterProperties, KeyResultRepository } from './key-result.repository'
 import { KeyResultTimelineProvider } from './timeline.provider'
+import { KeyResultFilters } from './types/key-result-relation-filters-type'
 import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
 import { KeyResultUpdateInterface } from './update/key-result-update.interface'
 import { KeyResultUpdate } from './update/key-result-update.orm-entity'
@@ -70,14 +71,11 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
   public async getKeyResults(
     teamsIds: Array<TeamInterface['id']>,
-    filters?: FindConditions<KeyResult> | any,
-    options?: GetOptions<KeyResult>,
+    filters?: KeyResultFilters,
     active = true,
     confidence?: ConfidenceTag,
     queryRelations: string[] = [],
   ): Promise<KeyResult[]> {
-    const queryOptions = this.repository.marshalGetOptions(options)
-
     const { offset, limit, ...filtersRest } = filters
 
     const confidenceNumber = this.confidenceTagAdapter.getConfidenceFromTag(confidence)
@@ -144,7 +142,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     keyResultsQueryBuilder
       .andWhere('key_result.teamId IN (:...teamsIds)', { teamsIds })
       .andWhere('cycle.active = :active', { active })
-      // .andWhere({ ...filtersRest })
+      .andWhere({ ...filtersRest })
       .take(limit)
       .skip(offset)
 
