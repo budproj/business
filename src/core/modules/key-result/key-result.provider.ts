@@ -80,27 +80,6 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
     const confidenceNumber = this.confidenceTagAdapter.getConfidenceFromTag(confidence)
 
-    // Const whereSelector = {
-    //   ...filtersRest,
-    //   teamId: In(teamsIds),
-    //   objective: {
-    //     cycle: {
-    //       active: active ? true : undefined,
-    //     },
-    //   },
-    // }
-
-    // const relations = [
-    //   ...(active ? ['objective', 'objective.cycle'] : []),
-    //   ...(confidence ? ['checkIns'] : []),
-    // ]
-
-    // Const keyResults = await this.repository.find({
-    //   ...queryOptions,
-    //   where: whereSelector,
-    //   relations,
-    // })
-
     const keyResultsQueryBuilder = this.repository.createQueryBuilder('key_result')
     if (active) {
       keyResultsQueryBuilder
@@ -109,19 +88,6 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     }
 
     keyResultsQueryBuilder.leftJoinAndSelect('key_result.checkIns', 'check_in')
-
-    // If (confidenceNumber === 100) {
-    //   keyResultsQueryBuilder.where(
-    //     new Brackets((qb) => {
-    //       qb.where('check_in.confidence = :confidence', { confidence: confidenceNumber })
-    //       qb.where('check_in.confidence IS NULL')
-    //     }),
-    //   )
-    // } else {
-    //   keyResultsQueryBuilder.where('check_in.confidence = :confidence', {
-    //     confidence: confidenceNumber,
-    //   })
-    // }
 
     if (confidence) {
       keyResultsQueryBuilder.where('COALESCE(check_in.confidence, 100) = :confidence', {
@@ -145,20 +111,6 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       .andWhere({ ...filtersRest })
       .take(limit)
       .skip(offset)
-
-    // If (confidence) {
-    //   const confidenceNumber = this.confidenceTagAdapter.getConfidenceFromTag(confidence)
-    //   const keyResultsWithConfidence = keyResults.filter((keyResult) => {
-    //     const latestCheckin = this.getLatestCheckInFromList(keyResult.checkIns)
-    //     if (!latestCheckin) {
-    //       return confidenceNumber === DEFAULT_CONFIDENCE
-    //     }
-
-    //     return latestCheckin.confidence === confidenceNumber
-    //   })
-
-    //   return keyResultsWithConfidence
-    // }
 
     return keyResultsQueryBuilder.getMany()
   }
