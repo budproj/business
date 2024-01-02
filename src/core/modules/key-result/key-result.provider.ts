@@ -74,7 +74,6 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     filters?: KeyResultFilters,
     active = true,
     confidence?: ConfidenceTag,
-    queryRelations: string[] = [],
   ): Promise<KeyResult[]> {
     const { offset, limit, ...filtersRest } = filters
 
