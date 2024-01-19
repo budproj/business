@@ -19,6 +19,7 @@ import { CreationQuery } from '@core/types/creation-query.type'
 import { EntityOrderAttributes } from '@core/types/order-attribute.type'
 import { AnalyticsProvider } from '@infrastructure/analytics/analytics.provider'
 import { Stopwatch } from '@lib/logger/pino.decorator'
+import { PostgresJsService } from 'src/mission-control/infra/database/postgresjs/postgresjs.service'
 
 import { ProgressRecord } from '../../../adapters/analytics/progress-record.interface'
 import { Cycle } from '../cycle/cycle.orm-entity'
@@ -33,6 +34,7 @@ import { KeyResultCheckMarkProvider } from './check-mark/key-result-check-mark.p
 import { KeyResultCommentInterface } from './comment/key-result-comment.interface'
 import { KeyResultComment } from './comment/key-result-comment.orm-entity'
 import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
+import { GetKeyResultsQuery, toApplication } from './data-mappers/get-key-result.data-mapper'
 import { KeyResultCommentType } from './enums/key-result-comment-type.enum'
 import { KeyResultMode } from './enums/key-result-mode.enum'
 import { KeyResultStateInterface } from './interfaces/key-result-state.interface'
@@ -57,6 +59,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     protected readonly cycleProvider: CycleProvider,
     public readonly timeline: KeyResultTimelineProvider,
     protected readonly repository: KeyResultRepository,
+    private readonly postgres: PostgresJsService,
     private readonly analyticsProvider: AnalyticsProvider,
     public fulfillerTaskPublisher: EventPublisher,
   ) {
@@ -79,39 +82,78 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
     const confidenceNumber = this.confidenceTagAdapter.getConfidenceFromTag(confidence)
 
-    const keyResultsQueryBuilder = this.repository.createQueryBuilder('key_result')
-    if (active) {
-      keyResultsQueryBuilder
-        .leftJoinAndSelect('key_result.objective', 'objective')
-        .leftJoinAndSelect('objective.cycle', 'cycle')
-    }
+    const queryResult = await this.postgres.getSqlInstance()<GetKeyResultsQuery[]>`SELECT
+    *
+  FROM
+      (
+        SELECT
+        "key_result"."id" AS "key_result_id",
+        "key_result"."created_at" AS "key_result_created_at",
+        "key_result"."title" AS "key_result_title",
+        "key_result"."initial_value" AS "key_result_initial_value",
+        "key_result"."goal" AS "key_result_goal",
+        "key_result"."format" AS "key_result_format",
+        "key_result"."type" AS "key_result_type",
+        "key_result"."updated_at" AS "key_result_updated_at",
+        "key_result"."owner_id" AS "key_result_owner_id",
+        "key_result"."objective_id" AS "key_result_objective_id",
+        "key_result"."team_id" AS "key_result_team_id",
+        "key_result"."description" AS "key_result_description",
+        "key_result"."mode" AS "key_result_mode",
+        "key_result"."last_updated_by" AS "key_result_last_updated_by",
+        "key_result"."comment_count" AS "key_result_comment_count",
+        "objective"."id" AS "objective_id",
+        "objective"."created_at" AS "objective_created_at",
+        "objective"."title" AS "objective_title",
+        "objective"."description" AS "objective_description",
+        "objective"."updated_at" AS "objective_updated_at",
+        "objective"."cycle_id" AS "objective_cycle_id",
+        "objective"."owner_id" AS "objective_owner_id",
+        "objective"."team_id" AS "objective_team_id",
+        "objective"."mode" AS "objective_mode",
+        "cycle"."id" AS "cycle_id",
+        "cycle"."created_at" AS "cycle_created_at",
+        "cycle"."period" AS "cycle_period",
+        "cycle"."cadence" AS "cycle_cadence",
+        "cycle"."active" AS "cycle_active",
+        "cycle"."date_start" AS "cycle_date_start",
+        "cycle"."date_end" AS "cycle_date_end",
+        "cycle"."updated_at" AS "cycle_updated_at",
+        "cycle"."team_id" AS "cycle_team_id",
+        "cycle"."parent_id" AS "cycle_parent_id",
+        "check_in"."id" AS "check_in_id",
+        "check_in"."created_at" AS "check_in_created_at",
+        "check_in"."value" AS "check_in_value",
+        "check_in"."confidence" AS "check_in_confidence",
+        "check_in"."key_result_id" AS "check_in_key_result_id",
+        "check_in"."user_id" AS "check_in_user_id",
+        "check_in"."comment" AS "check_in_comment",
+        "check_in"."parent_id" AS "check_in_parent_id",
+        "check_in"."previous_state" AS "check_in_previous_state",
+        row_number() over (
+              partition by "key_result"."id"
+              order by
+                  "check_in"."created_at" desc
+          ) as rn
+          from
+              key_result "key_result"
+              LEFT JOIN objective "objective" ON "objective"."id" = "key_result"."objective_id"
+              LEFT JOIN cycle "cycle" ON "cycle"."id" = "objective"."cycle_id"
+              LEFT JOIN key_result_check_in "check_in" ON "check_in"."key_result_id" = "key_result"."id"
+          WHERE
+              "key_result"."team_id" = ANY(${teamsIds}::uuid[]) 
+              AND "cycle"."active" =  ${active}
+              AND "key_result"."mode" =  ${filtersRest.mode as KeyResultMode}
+      ) a
+  where
+      a.rn = 1 and
+      COALESCE(a.check_in_confidence, 100) =  ${confidenceNumber}
+      limit ${limit}
+      offset  ${offset}`
 
-    keyResultsQueryBuilder.leftJoinAndSelect('key_result.checkIns', 'check_in')
+    const parsedResult = toApplication(queryResult)
 
-    if (confidence) {
-      keyResultsQueryBuilder.where('COALESCE(check_in.confidence, 100) = :confidence', {
-        confidence: confidenceNumber,
-      })
-
-      keyResultsQueryBuilder.andWhere((subQuery) => {
-        const subQueryString = subQuery
-          .subQuery()
-          .select('MAX(check_in2.createdAt)', 'maxCreatedAt')
-          .from(KeyResultCheckIn, 'check_in2')
-          .where('check_in2.keyResultId = key_result.id')
-          .getQuery()
-        return '(check_in.createdAt is null or check_in.createdAt >= ' + subQueryString + ')'
-      })
-    }
-
-    keyResultsQueryBuilder
-      .andWhere('key_result.teamId IN (:...teamsIds)', { teamsIds })
-      .andWhere('cycle.active = :active', { active })
-      .andWhere({ ...filtersRest })
-      .take(limit)
-      .skip(offset)
-
-    return keyResultsQueryBuilder.getMany()
+    return parsedResult as unknown as KeyResult[]
   }
 
   public async getFromOwner(
