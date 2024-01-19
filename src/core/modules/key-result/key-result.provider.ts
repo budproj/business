@@ -263,6 +263,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const keyResults = await this.repository.find({
       relations: ['objective', 'objective.cycle', 'checkIns'],
       where: {
+        mode: KeyResultMode.PUBLISHED,
         teamId: In(teamsIds),
         objective: {
           cycle: {
