@@ -3,15 +3,20 @@ import { flatten } from 'lodash'
 import { Any } from 'typeorm'
 
 import { CONFIDENCE_TAG_THRESHOLDS } from '@adapters/confidence-tag/confidence-tag.constants'
+import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.enum'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { KeyResultFilters } from '@core/modules/key-result/types/key-result-relation-filters-type'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 
 import { BaseStatusCommand } from './base-status.command'
 
 export class GetTeamFlagsCommand extends BaseStatusCommand {
-  public async execute(teamId: TeamInterface['id']): Promise<any> {
-    const keyResultsFromTeam = await this.core.keyResult.getKeyResults([teamId])
+  public async execute(teamId: TeamInterface['id'], filters?: KeyResultFilters): Promise<any> {
+    const keyResultsFromTeam = await this.core.keyResult.getKeyResults([teamId], {
+      mode: KeyResultMode.PUBLISHED,
+      ...filters,
+    })
 
     const categorizedKeyResults: {
       lowConfidence: KeyResult[]

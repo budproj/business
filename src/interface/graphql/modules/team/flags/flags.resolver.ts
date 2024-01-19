@@ -78,6 +78,7 @@ export class FlagsGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamI
     const { outdated, barrier, low, noRelated } = await this.corePorts.dispatchCommand<TeamFlag>(
       'get-team-flags',
       request.id,
+      { ...request },
     )
 
     const teamFlagsData = {

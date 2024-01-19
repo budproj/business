@@ -46,6 +46,8 @@ import { KeyResultUpdateInterface } from './update/key-result-update.interface'
 import { KeyResultUpdate } from './update/key-result-update.orm-entity'
 import { KeyResultUpdateProvider } from './update/key-result-update.provider'
 
+// Only used in the getTeamFlagsCommand
+const MAX_KEY_RESULTS_PER_TEAM = 1000
 @Injectable()
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
   private readonly confidenceTagAdapter = new ConfidenceTagAdapter()
@@ -80,7 +82,22 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
   ): Promise<KeyResult[]> {
     const { offset, limit, ...filtersRest } = filters
 
-    const confidenceNumber = this.confidenceTagAdapter.getConfidenceFromTag(confidence)
+    const allConfidences = [
+      this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.ACHIEVED),
+      this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.HIGH),
+      this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.MEDIUM),
+      this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.LOW),
+      this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.BARRIER),
+      this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.DEPRIORITIZED),
+    ]
+
+    const queryLimit = limit ?? MAX_KEY_RESULTS_PER_TEAM
+    const queryOffset = offset ?? 0
+
+    const confidenceNumbers = confidence
+      ? [this.confidenceTagAdapter.getConfidenceFromTag(confidence)]
+      : allConfidences
+    const keyResultMode = filtersRest.mode ?? KeyResultMode.PUBLISHED
 
     const queryResult = await this.postgres.getSqlInstance()<GetKeyResultsQuery[]>`SELECT
     *
@@ -143,13 +160,13 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
           WHERE
               "key_result"."team_id" = ANY(${teamsIds}::uuid[]) 
               AND "cycle"."active" =  ${active}
-              AND "key_result"."mode" =  ${filtersRest.mode as KeyResultMode}
+              AND "key_result"."mode" =  ${keyResultMode as KeyResultMode}
       ) a
   where
       a.rn = 1 and
-      COALESCE(a.check_in_confidence, 100) =  ${confidenceNumber}
-      limit ${limit}
-      offset  ${offset}`
+      COALESCE(a.check_in_confidence, 100) =  ANY(${confidenceNumbers}::int[])
+      limit ${queryLimit}
+      offset  ${queryOffset}`
 
     const parsedResult = toApplication(queryResult)
 
