@@ -14,6 +14,7 @@ import { EntityOrderAttributes } from '@core/types/order-attribute.type'
 
 import { TeamInterface } from '../team/interfaces/team.interface'
 
+import { ObjectiveMode } from './enums/objective-mode.enum'
 import { ObjectiveInterface } from './interfaces/objective.interface'
 import { DEFAULT_CONFIDENCE, DEFAULT_PROGRESS } from './objective.constants'
 import { Objective } from './objective.orm-entity'
@@ -44,6 +45,7 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
       relations: ['cycle'],
       where: {
         teamId: In(teamsIds),
+        mode: ObjectiveMode.PUBLISHED,
         cycle: {
           active: true,
         },

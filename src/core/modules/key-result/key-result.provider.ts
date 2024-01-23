@@ -25,6 +25,7 @@ import { ProgressRecord } from '../../../adapters/analytics/progress-record.inte
 import { Cycle } from '../cycle/cycle.orm-entity'
 import { CycleProvider } from '../cycle/cycle.provider'
 import { Cadence } from '../cycle/enums/cadence.enum'
+import { ObjectiveMode } from '../objective/enums/objective-mode.enum'
 import { ObjectiveProvider } from '../objective/objective.provider'
 
 import { KeyResultCheckInInterface } from './check-in/key-result-check-in.interface'
@@ -267,10 +268,12 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       relations: ['objective', 'objective.cycle'],
       where: {
         teamId: In(teamsIds),
+        mode: KeyResultMode.PUBLISHED,
         objective: {
           cycle: {
             active: true,
           },
+          mode: ObjectiveMode.PUBLISHED,
         },
       },
     })
