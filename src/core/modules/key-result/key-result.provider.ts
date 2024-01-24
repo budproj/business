@@ -3,10 +3,7 @@ import { uniqBy, pickBy, omitBy, identity, isEmpty, maxBy, flatten, keyBy, uniq 
 import { Any, Brackets, DeleteResult, FindConditions, In, Raw } from 'typeorm'
 
 import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
-import {
-  DEFAULT_CONFIDENCE,
-  CONFIDENCE_TAG_THRESHOLDS,
-} from '@adapters/confidence-tag/confidence-tag.constants'
+import { CONFIDENCE_TAG_THRESHOLDS } from '@adapters/confidence-tag/confidence-tag.constants'
 import { ConfidenceTag } from '@adapters/confidence-tag/confidence-tag.enum'
 import { EventPublisher } from '@core/common/messaging/base-scenarios/abstract'
 import { CoreEntityProvider } from '@core/entity.provider'
@@ -22,11 +19,13 @@ import { CreationQuery } from '@core/types/creation-query.type'
 import { EntityOrderAttributes } from '@core/types/order-attribute.type'
 import { AnalyticsProvider } from '@infrastructure/analytics/analytics.provider'
 import { Stopwatch } from '@lib/logger/pino.decorator'
+import { PostgresJsService } from 'src/mission-control/infra/database/postgresjs/postgresjs.service'
 
 import { ProgressRecord } from '../../../adapters/analytics/progress-record.interface'
 import { Cycle } from '../cycle/cycle.orm-entity'
 import { CycleProvider } from '../cycle/cycle.provider'
 import { Cadence } from '../cycle/enums/cadence.enum'
+import { ObjectiveMode } from '../objective/enums/objective-mode.enum'
 import { ObjectiveProvider } from '../objective/objective.provider'
 
 import { KeyResultCheckInInterface } from './check-in/key-result-check-in.interface'
@@ -36,16 +35,24 @@ import { KeyResultCheckMarkProvider } from './check-mark/key-result-check-mark.p
 import { KeyResultCommentInterface } from './comment/key-result-comment.interface'
 import { KeyResultComment } from './comment/key-result-comment.orm-entity'
 import { KeyResultCommentProvider } from './comment/key-result-comment.provider'
+import { GetKeyResultsQuery, toApplication } from './data-mappers/get-key-result.data-mapper'
 import { KeyResultCommentType } from './enums/key-result-comment-type.enum'
 import { KeyResultMode } from './enums/key-result-mode.enum'
 import { KeyResultStateInterface } from './interfaces/key-result-state.interface'
 import { KeyResultRelationFilterProperties, KeyResultRepository } from './key-result.repository'
 import { KeyResultTimelineProvider } from './timeline.provider'
+import { KeyResultFilters } from './types/key-result-relation-filters-type'
 import { KeyResultTimelineEntry } from './types/key-result-timeline-entry.type'
 import { KeyResultUpdateInterface } from './update/key-result-update.interface'
 import { KeyResultUpdate } from './update/key-result-update.orm-entity'
 import { KeyResultUpdateProvider } from './update/key-result-update.provider'
 
+export type GetKeyResultsOutput = {
+  keyResults: KeyResult[]
+  totalCount: number
+}
+// Only used in the getTeamFlagsCommand
+const MAX_KEY_RESULTS_PER_TEAM = 1000
 @Injectable()
 export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultInterface> {
   private readonly confidenceTagAdapter = new ConfidenceTagAdapter()
@@ -59,6 +66,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     protected readonly cycleProvider: CycleProvider,
     public readonly timeline: KeyResultTimelineProvider,
     protected readonly repository: KeyResultRepository,
+    private readonly postgres: PostgresJsService,
     private readonly analyticsProvider: AnalyticsProvider,
     public fulfillerTaskPublisher: EventPublisher,
   ) {
@@ -73,49 +81,109 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
   public async getKeyResults(
     teamsIds: Array<TeamInterface['id']>,
-    filters?: FindConditions<KeyResult>,
-    options?: GetOptions<KeyResult>,
+    filters?: KeyResultFilters,
     active = true,
     confidence?: ConfidenceTag,
-    queryRelations: string[] = [],
-  ): Promise<KeyResult[]> {
-    const queryOptions = this.repository.marshalGetOptions(options)
-    const whereSelector = {
-      ...filters,
-      teamId: In(teamsIds),
-      objective: {
-        cycle: {
-          active: active ? true : undefined,
-        },
-      },
-    }
+  ): Promise<GetKeyResultsOutput> {
+    const { offset, limit, ...filtersRest } = filters
 
-    const relations = [
-      ...(active ? ['objective', 'objective.cycle'] : []),
-      ...(confidence ? ['checkIns'] : [...queryRelations]),
+    const allConfidences = [
+      this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.ACHIEVED),
+      this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.HIGH),
+      this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.MEDIUM),
+      this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.LOW),
+      this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.BARRIER),
+      this.confidenceTagAdapter.getConfidenceFromTag(ConfidenceTag.DEPRIORITIZED),
     ]
 
-    const keyResults = await this.repository.find({
-      ...queryOptions,
-      where: whereSelector,
-      relations,
-    })
+    const queryLimit = limit ?? MAX_KEY_RESULTS_PER_TEAM
+    const queryOffset = offset ?? 0
 
-    if (confidence) {
-      const confidenceNumber = this.confidenceTagAdapter.getConfidenceFromTag(confidence)
-      const keyResultsWithConfidence = keyResults.filter((keyResult) => {
-        const latestCheckin = this.getLatestCheckInFromList(keyResult.checkIns)
-        if (!latestCheckin) {
-          return confidenceNumber === DEFAULT_CONFIDENCE
-        }
+    const confidenceNumbers = confidence
+      ? [this.confidenceTagAdapter.getConfidenceFromTag(confidence)]
+      : allConfidences
+    const keyResultMode = filtersRest.mode ?? KeyResultMode.PUBLISHED
 
-        return latestCheckin.confidence === confidenceNumber
-      })
+    const queryResult = await this.postgres.getSqlInstance()<GetKeyResultsQuery[]>`WITH results AS (
+      SELECT
+        "key_result"."id" AS "key_result_id",
+        "key_result"."created_at" AS "key_result_created_at",
+        "key_result"."title" AS "key_result_title",
+        "key_result"."initial_value" AS "key_result_initial_value",
+        "key_result"."goal" AS "key_result_goal",
+        "key_result"."format" AS "key_result_format",
+        "key_result"."type" AS "key_result_type",
+        "key_result"."updated_at" AS "key_result_updated_at",
+        "key_result"."owner_id" AS "key_result_owner_id",
+        "key_result"."objective_id" AS "key_result_objective_id",
+        "key_result"."team_id" AS "key_result_team_id",
+        "key_result"."description" AS "key_result_description",
+        "key_result"."mode" AS "key_result_mode",
+        "key_result"."last_updated_by" AS "key_result_last_updated_by",
+        "key_result"."comment_count" AS "key_result_comment_count",
+        "objective"."id" AS "objective_id",
+        "objective"."created_at" AS "objective_created_at",
+        "objective"."title" AS "objective_title",
+        "objective"."description" AS "objective_description",
+        "objective"."updated_at" AS "objective_updated_at",
+        "objective"."cycle_id" AS "objective_cycle_id",
+        "objective"."owner_id" AS "objective_owner_id",
+        "objective"."team_id" AS "objective_team_id",
+        "objective"."mode" AS "objective_mode",
+        "cycle"."id" AS "cycle_id",
+        "cycle"."created_at" AS "cycle_created_at",
+        "cycle"."period" AS "cycle_period",
+        "cycle"."cadence" AS "cycle_cadence",
+        "cycle"."active" AS "cycle_active",
+        "cycle"."date_start" AS "cycle_date_start",
+        "cycle"."date_end" AS "cycle_date_end",
+        "cycle"."updated_at" AS "cycle_updated_at",
+        "cycle"."team_id" AS "cycle_team_id",
+        "cycle"."parent_id" AS "cycle_parent_id",
+        "check_in"."id" AS "check_in_id",
+        "check_in"."created_at" AS "check_in_created_at",
+        "check_in"."value" AS "check_in_value",
+        "check_in"."confidence" AS "check_in_confidence",
+        "check_in"."key_result_id" AS "check_in_key_result_id",
+        "check_in"."user_id" AS "check_in_user_id",
+        "check_in"."comment" AS "check_in_comment",
+        "check_in"."parent_id" AS "check_in_parent_id",
+        "check_in"."previous_state" AS "check_in_previous_state",
+        row_number() over (
+          partition by "key_result"."id"
+          order by "check_in"."created_at" desc
+        ) as rn
+          FROM
+              key_result "key_result"
+              LEFT JOIN objective "objective" ON "objective"."id" = "key_result"."objective_id"
+              LEFT JOIN cycle "cycle" ON "cycle"."id" = "objective"."cycle_id"
+              LEFT JOIN key_result_check_in "check_in" ON "check_in"."key_result_id" = "key_result"."id"
+          WHERE
+              "key_result"."team_id" = ANY(${teamsIds}::uuid[]) 
+              AND "cycle"."active" =  ${active}
+              AND "key_result"."mode" =  ${keyResultMode as KeyResultMode}
+      ), total_count AS (
+        SELECT COUNT(*) FROM results WHERE rn = 1 AND COALESCE(check_in_confidence, 100) = ANY(${confidenceNumbers}::int[])
+      )
+      SELECT *, (SELECT * FROM total_count) AS total
+      FROM results a
+      WHERE
+        a.rn = 1 and
+        COALESCE(a.check_in_confidence, 100) =  ANY(${confidenceNumbers}::int[])
+      LIMIT ${queryLimit}
+      OFFSET ${queryOffset};`
 
-      return keyResultsWithConfidence
+    const parsedResult = toApplication(queryResult)
+
+    console.log('\n\n\n\n\n\n')
+
+    console.log({ queryResult })
+    console.log('\n\n\n\n\n\n')
+
+    return {
+      keyResults: parsedResult as unknown as KeyResult[],
+      totalCount: queryResult[0].total || 0,
     }
-
-    return keyResults
   }
 
   public async getFromOwner(
@@ -124,6 +192,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     options?: GetOptions<KeyResult>,
   ): Promise<KeyResult[]> {
     const queryOptions = this.repository.marshalGetOptions(options)
+
     const whereSelector = {
       ...filters,
       ownerId: user.id,
@@ -211,10 +280,12 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       relations: ['objective', 'objective.cycle'],
       where: {
         teamId: In(teamsIds),
+        mode: KeyResultMode.PUBLISHED,
         objective: {
           cycle: {
             active: true,
           },
+          mode: ObjectiveMode.PUBLISHED,
         },
       },
     })
@@ -224,6 +295,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const keyResults = await this.repository.find({
       relations: ['objective', 'objective.cycle', 'checkIns'],
       where: {
+        mode: KeyResultMode.PUBLISHED,
         teamId: In(teamsIds),
         objective: {
           cycle: {
