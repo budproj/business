@@ -17,6 +17,7 @@ import { Cycle } from '@core/modules/cycle/cycle.orm-entity'
 import { CycleInterface } from '@core/modules/cycle/interfaces/cycle.interface'
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { GetKeyResultsOutput } from '@core/modules/key-result/key-result.provider'
 import { ObjectiveInterface } from '@core/modules/objective/interfaces/objective.interface'
 import { Objective } from '@core/modules/objective/objective.orm-entity'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
@@ -458,7 +459,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
 
     const { confidence, active, ...filters } = options
 
-    const keyResults = await this.corePorts.dispatchCommand<KeyResult[]>(
+    const { keyResults, totalCount } = await this.corePorts.dispatchCommand<GetKeyResultsOutput>(
       'get-key-results',
       team,
       filters,
@@ -466,7 +467,20 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       confidence,
     )
 
-    return this.relay.marshalResponse<KeyResultInterface>(keyResults, connection, team)
+    const hasMoreToLoad = filters.limit + filters.offset < totalCount
+
+    const marshalResponde = this.relay.marshalResponse<KeyResultInterface>(
+      keyResults,
+      connection,
+      team,
+      hasMoreToLoad,
+    )
+
+    console.log('\n\n\n\n\n\n\n\n\n\n\n')
+    console.log({ marshalResponde, hasMoreToLoad, totalCount, filters })
+    console.log('\n\n\n\n\n\n\n\n\n\n\n')
+
+    return marshalResponde
   }
 
   @Cacheable((team, request) => [team.id, request], 15 * 60)

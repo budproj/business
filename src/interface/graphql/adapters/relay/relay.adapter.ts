@@ -40,12 +40,19 @@ export class RelayGraphQLAdapter {
     nodes: N[],
     connectionRequest: ConnectionRelayRequest,
     parentNode?: NodeRelayGraphQLInterface,
+    hasNextPage?: boolean,
   ): Connection<N> {
     const connection = connectionFromArray(nodes, {})
     console.log({ nodes, connectionRequest, connection })
 
+    const pageInfo = {
+      ...connection.pageInfo,
+      hasNextPage: hasNextPage ?? connection.pageInfo.hasNextPage,
+    }
+
     return {
-      ...connection,
+      edges: connection.edges,
+      pageInfo,
       parentNodeId: parentNode?.id,
     }
   }

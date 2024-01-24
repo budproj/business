@@ -13,7 +13,7 @@ import { BaseStatusCommand } from './base-status.command'
 
 export class GetTeamFlagsCommand extends BaseStatusCommand {
   public async execute(teamId: TeamInterface['id'], filters?: KeyResultFilters): Promise<any> {
-    const keyResultsFromTeam = await this.core.keyResult.getKeyResults([teamId], {
+    const { keyResults: keyResultsFromTeam } = await this.core.keyResult.getKeyResults([teamId], {
       mode: KeyResultMode.PUBLISHED,
       ...filters,
     })

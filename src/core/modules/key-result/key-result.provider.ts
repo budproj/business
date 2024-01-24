@@ -47,6 +47,10 @@ import { KeyResultUpdateInterface } from './update/key-result-update.interface'
 import { KeyResultUpdate } from './update/key-result-update.orm-entity'
 import { KeyResultUpdateProvider } from './update/key-result-update.provider'
 
+export type GetKeyResultsOutput = {
+  keyResults: KeyResult[]
+  totalCount: number
+}
 // Only used in the getTeamFlagsCommand
 const MAX_KEY_RESULTS_PER_TEAM = 1000
 @Injectable()
@@ -80,7 +84,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     filters?: KeyResultFilters,
     active = true,
     confidence?: ConfidenceTag,
-  ): Promise<KeyResult[]> {
+  ): Promise<GetKeyResultsOutput> {
     const { offset, limit, ...filtersRest } = filters
 
     const allConfidences = [
@@ -100,11 +104,8 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       : allConfidences
     const keyResultMode = filtersRest.mode ?? KeyResultMode.PUBLISHED
 
-    const queryResult = await this.postgres.getSqlInstance()<GetKeyResultsQuery[]>`SELECT
-    *
-  FROM
-      (
-        SELECT
+    const queryResult = await this.postgres.getSqlInstance()<GetKeyResultsQuery[]>`WITH results AS (
+      SELECT
         "key_result"."id" AS "key_result_id",
         "key_result"."created_at" AS "key_result_created_at",
         "key_result"."title" AS "key_result_title",
@@ -149,11 +150,10 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
         "check_in"."parent_id" AS "check_in_parent_id",
         "check_in"."previous_state" AS "check_in_previous_state",
         row_number() over (
-              partition by "key_result"."id"
-              order by
-                  "check_in"."created_at" desc
-          ) as rn
-          from
+          partition by "key_result"."id"
+          order by "check_in"."created_at" desc
+        ) as rn
+          FROM
               key_result "key_result"
               LEFT JOIN objective "objective" ON "objective"."id" = "key_result"."objective_id"
               LEFT JOIN cycle "cycle" ON "cycle"."id" = "objective"."cycle_id"
@@ -162,16 +162,28 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
               "key_result"."team_id" = ANY(${teamsIds}::uuid[]) 
               AND "cycle"."active" =  ${active}
               AND "key_result"."mode" =  ${keyResultMode as KeyResultMode}
-      ) a
-  where
-      a.rn = 1 and
-      COALESCE(a.check_in_confidence, 100) =  ANY(${confidenceNumbers}::int[])
-      limit ${queryLimit}
-      offset  ${queryOffset}`
+      ), total_count AS (
+        SELECT COUNT(*) FROM results WHERE rn = 1 AND COALESCE(check_in_confidence, 100) = ANY(${confidenceNumbers}::int[])
+      )
+      SELECT *, (SELECT * FROM total_count) AS total
+      FROM results a
+      WHERE
+        a.rn = 1 and
+        COALESCE(a.check_in_confidence, 100) =  ANY(${confidenceNumbers}::int[])
+      LIMIT ${queryLimit}
+      OFFSET ${queryOffset};`
 
     const parsedResult = toApplication(queryResult)
 
-    return parsedResult as unknown as KeyResult[]
+    console.log('\n\n\n\n\n\n')
+
+    console.log({ queryResult })
+    console.log('\n\n\n\n\n\n')
+
+    return {
+      keyResults: parsedResult as unknown as KeyResult[],
+      totalCount: queryResult[0].total || 0,
+    }
   }
 
   public async getFromOwner(

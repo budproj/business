@@ -51,6 +51,7 @@ export type GetKeyResultsQuery = {
   check_in_comment?: string
   check_in_parent_id?: string
   check_in_previous_state?: KeyResultStateInterface
+  total?: number
 }
 
 export const toApplication = (entities: GetKeyResultsQuery[]) => {
