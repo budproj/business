@@ -8,7 +8,8 @@ export class GetObjectivesAndKeyResultQuantities extends Command<any> {
     let userReachableTeamsIds: Array<TeamInterface['id']> = []
 
     if (teamId) {
-      userReachableTeamsIds = [teamId]
+      const userReachableTeams = await this.core.team.getDescendantsByIds([teamId])
+      userReachableTeamsIds = userReachableTeams.map((team) => team.id)
     } else {
       const userCompanies = await this.core.team.getUserCompanies(user)
       const userCompanyIDs = userCompanies.map((company) => company.id)
