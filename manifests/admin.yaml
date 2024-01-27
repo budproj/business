@@ -106,4 +106,4 @@ spec:
           port: 80
   tls:
     certResolver: letsencrypt
-    options: {}
+    secretName: ssl-certs-admin
