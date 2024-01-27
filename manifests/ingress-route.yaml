@@ -25,4 +25,5 @@ spec:
   tls:
     certResolver: letsencrypt
     options:
+      namespace: traefik-proxy
       name: tls-options
