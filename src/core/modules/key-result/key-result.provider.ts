@@ -175,14 +175,9 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
     const parsedResult = toApplication(queryResult)
 
-    console.log('\n\n\n\n\n\n')
-
-    console.log({ queryResult })
-    console.log('\n\n\n\n\n\n')
-
     return {
       keyResults: parsedResult as unknown as KeyResult[],
-      totalCount: queryResult[0].total || 0,
+      totalCount: queryResult[0]?.total || 0,
     }
   }
 
