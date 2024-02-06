@@ -1,14 +1,8 @@
 import { GetStatusOptions, Status } from '@core/interfaces/status.interface'
-import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { BaseStatusCommand } from '@core/ports/commands/base-status.command'
-import { Cacheable } from '@lib/cache/cacheable.decorator'
 import { Stopwatch } from '@lib/logger/pino.decorator'
 
 export class GetCycleStatusCommand extends BaseStatusCommand {
-  @Cacheable(
-    (cycleID, options) => [cycleID, Math.floor(options?.date?.getTime() / (1000 * 60 * 60))],
-    60 * 60,
-  )
   @Stopwatch({ omitArgs: true })
   public async execute(
     cycleID: string,
@@ -95,31 +89,18 @@ export class GetCycleStatusCommand extends BaseStatusCommand {
       [cycleID],
     )
 
-    const latestCheckInNew = new KeyResultCheckIn()
-    latestCheckInNew.id = row[0].latest_check_in.id
-    latestCheckInNew.value = row[0].latest_check_in.value
-    latestCheckInNew.confidence = row[0].latest_check_in.confidence
-    latestCheckInNew.comment = row[0].latest_check_in.comment
-    latestCheckInNew.createdAt = row[0].latest_check_in.created_at
-    latestCheckInNew.keyResultId = row[0].latest_check_in.id
-    latestCheckInNew.userId = row[0].latest_check_in.id
-    latestCheckInNew.parentId = row[0].latest_check_in.parent_id
-    latestCheckInNew.previousState = row[0].latest_check_in.previous_state
+    if (Array.isArray(row) && row.length === 0) {
+      return {
+        isOutdated: true,
+        isActive: true,
+        progress: 0,
+        confidence: 100,
+      }
+    }
 
-    console.log('1. blah blah2')
-    console.log({
-      isOutdated: row[0].is_outdated,
-      isActive: row[0].is_active,
-      latestCheckIn: latestCheckInNew,
-      reportDate: row[0].latest_check_in.created_at,
-      progress: row[0].progress,
-      confidence: row[0].confidence,
-    })
     return {
       isOutdated: row[0].is_outdated,
       isActive: row[0].is_active,
-      latestCheckIn: latestCheckInNew,
-      reportDate: row[0].latest_check_in.created_at,
       progress: row[0].progress,
       confidence: row[0].confidence,
     }
