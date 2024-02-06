@@ -23,7 +23,23 @@ export class GetTeamDeltaCommand extends BaseDeltaCommand {
       ...options,
       date: comparisonDate,
     })
-
+    console.log('HEY BRO')
+    console.log('HEY BRO')
+    console.log('HEY BRO')
+    console.log('HEY BRO')
+    console.log('HEY BRO')
+    console.log('HEY BRO')
+    console.log('HEY BRO')
+    console.log('HEY BRO')
+    console.log('HEY BRO')
+    console.log(this.marshal(currentStatus, previousStatus))
+    console.log('HEY BRO')
+    console.log('HEY BRO')
+    console.log('HEY BRO')
+    console.log('HEY BRO')
+    console.log('HEY BRO')
+    console.log('HEY BRO')
+    console.log('HEY BRO')
     return this.marshal(currentStatus, previousStatus)
   }
 }
