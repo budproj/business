@@ -19,11 +19,7 @@ export class GetTeamDeltaCommand extends BaseDeltaCommand {
     const comparisonDate = this.getComparisonDate()
     const row = await this.core.entityManager.query(
       `
-      WITH latest_check_in AS
-        (SELECT DISTINCT ON (krci.key_result_id) *
-        FROM public.key_result_check_in krci
-        ORDER BY krci.key_result_id,
-                  krci.created_at DESC),
+      WITH 
           latest_check_in_week_before AS
         (SELECT DISTINCT ON (krci.key_result_id) *
         FROM public.key_result_check_in krci
@@ -47,7 +43,7 @@ export class GetTeamDeltaCommand extends BaseDeltaCommand {
                 kr.objective_id,
                 kr.team_id
         FROM public.key_result kr
-        LEFT JOIN latest_check_in lci ON kr.id = lci.key_result_id
+        LEFT JOIN key_result_latest_check_in lci ON kr.id = lci.key_result_id
         LEFT JOIN latest_check_in_week_before lciwb ON kr.id = lciwb.key_result_id
         JOIN public.objective o ON kr.objective_id = o.id
         JOIN public.cycle c ON o.cycle_id = c.id),

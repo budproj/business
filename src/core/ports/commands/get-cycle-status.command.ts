@@ -10,12 +10,7 @@ export class GetCycleStatusCommand extends BaseStatusCommand {
   ): Promise<Status> {
     const row = await this.core.entityManager.query(
       `
-      WITH latest_check_in AS
-        (SELECT DISTINCT ON (krci.key_result_id) *
-        FROM public.key_result_check_in krci
-        ORDER BY krci.key_result_id,
-                  krci.created_at DESC),
-      latest_check_in_by_cycle AS
+      WITH latest_check_in_by_cycle AS
         (SELECT DISTINCT ON (o.cycle_id) krci.*, o.cycle_id
         FROM public.key_result_check_in krci
         JOIN public.key_result kr ON krci.key_result_id = kr.id
@@ -46,7 +41,7 @@ export class GetCycleStatusCommand extends BaseStatusCommand {
                 kr.team_id,
                 c.id AS cycle_id
         FROM public.key_result kr
-        LEFT JOIN latest_check_in lci ON kr.id = lci.key_result_id
+        LEFT JOIN key_result_latest_check_in lci ON kr.id = lci.key_result_id
         JOIN public.objective o ON kr.objective_id = o.id
         JOIN public.cycle c ON o.cycle_id = c.id
         WHERE o.mode = 'PUBLISHED'

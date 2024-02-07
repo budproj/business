@@ -24,12 +24,7 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
   ): Promise<Team[]> {
     const rows = await this.core.entityManager.query(
       `
-      WITH latest_check_in AS
-        (SELECT DISTINCT ON (krci.key_result_id) *
-        FROM public.key_result_check_in krci
-        ORDER BY krci.key_result_id,
-                  krci.created_at DESC),
-          key_result_status AS
+      WITH key_result_status AS
         (SELECT kr.id,
                 CASE
                     WHEN lci.created_at < CURRENT_DATE - interval '6' DAY THEN TRUE
@@ -46,7 +41,7 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
                 kr.objective_id,
                 kr.team_id
         FROM public.key_result kr
-        LEFT JOIN latest_check_in lci ON kr.id = lci.key_result_id
+        LEFT JOIN key_result_latest_check_in lci ON kr.id = lci.key_result_id
         JOIN public.objective o ON kr.objective_id = o.id
         JOIN public.cycle c ON o.cycle_id = c.id),
           objective_status AS
