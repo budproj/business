@@ -85,16 +85,16 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
     )
 
     return rows.map((row) => {
-      const team = new Team()
-      team.name = row.name
-      team.updatedAt = row.updated_at
-      team.ownerId = row.owner_id
-      team.createdAt = row.created_at
-      team.id = row.id
-      team.description = row.description
-      team.gender = row.gender
-      team.parentId = row.parent_id
-      return team
+      return Object.assign(new Team(), {
+        name: row.name,
+        updatedAt: row.updated_at,
+        ownerId: row.owner_id,
+        createdAt: row.created_at,
+        id: row.id,
+        description: row.description,
+        gender: row.gender,
+        parentId: row.parent_id,
+      })
     })
   }
 }
