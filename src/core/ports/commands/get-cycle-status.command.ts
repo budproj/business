@@ -21,7 +21,7 @@ export class GetCycleStatusCommand extends BaseStatusCommand {
                   krci.created_at DESC)
       SELECT cs.*,
             to_json(lcibc.*) AS latest_check_in
-      FROM cycle_current_status cs
+      FROM cycle_status cs
       JOIN latest_check_in_by_cycle lcibc ON cs.cycle_id = lcibc.cycle_id
       WHERE cs.cycle_id = $1
       `,
