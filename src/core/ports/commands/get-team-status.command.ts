@@ -22,65 +22,74 @@ export class GetTeamStatusCommand extends BaseStatusCommand {
   ): Promise<Status> {
     const row = await this.core.entityManager.query(
       `
-      with latest_check_in as (
-        select distinct on (krci.key_result_id) * from public.key_result_check_in krci
-        order by krci.key_result_id, krci.created_at desc
-      ),
-      latest_check_in_by_team AS
-        (SELECT DISTINCT ON (o.team_id) krci.*, o.team_id
+      WITH latest_check_in AS
+        (SELECT DISTINCT ON (krci.key_result_id) *
+        FROM public.key_result_check_in krci
+        ORDER BY krci.key_result_id,
+                  krci.created_at DESC),
+          latest_check_in_by_team AS
+        (SELECT DISTINCT ON (o.team_id) krci.*,
+                            o.team_id
         FROM public.key_result_check_in krci
         JOIN public.key_result kr ON krci.key_result_id = kr.id
         JOIN public.objective o ON kr.objective_id = o.id
         WHERE o.mode = 'PUBLISHED'
-          AND o.team_id IS NOT NULL 
+          AND o.team_id IS NOT NULL
         ORDER BY o.team_id,
                   krci.created_at DESC),
-      key_result_status as (
-        select 
-          kr.id, 
-          case when lci.created_at < current_date - interval '6' day then true else false end as is_outdated,  
-          case when lci.id is not null then true else false end as is_active,
-          c.active,
-          case 
-            when lci.value = kr.goal then 100 
-            when kr.goal = kr.initial_value then 0
-          else
-          100 * (coalesce(lci.value,0) - kr.initial_value) / (kr.goal - kr.initial_value) end as progress,
-          case when lci.confidence is null then 100 else lci.confidence end as confidence,
-          kr.objective_id,
-          kr.team_id
-        from public.key_result kr 
-        left join latest_check_in lci on kr.id = lci.key_result_id
-        join public.objective o on kr.objective_id  = o.id
-        join public.cycle c on o.cycle_id = c.id
-        --where lci.confidence <> '-100'
-      ),
-      objective_status as (
-        select 
-          krs.objective_id,
-          krs.team_id,
-          bool_and(is_outdated) as is_outdated,
-          bool_or(is_active) as is_active,
-          avg(progress) as progress,
-          min(confidence) as confidence
-        from key_result_status krs 
-        join objective o on krs.objective_id = o.id
-        join cycle cy on o.cycle_id = cy.id
-        where o.mode = 'PUBLISHED' and cy.active is true
-        group by krs.objective_id, krs.team_id
-      ),
-      team_status as (
-        select 
-          os.team_id,
-          bool_and(is_outdated) as is_outdated,
-          bool_or(is_active) as is_active,
-          avg(progress) as progress,
-          min(confidence) as confidence
-        from objective_status os
-        group by os.team_id
-      )
-      select ts.*, to_json(lcibt.*) as last_check_in from team_status ts join latest_check_in_by_team lcibt on ts.team_id = lcibt.team_id
-        where ts.team_id = $1
+          key_result_status AS
+        (SELECT kr.id,
+                CASE
+                    WHEN lci.created_at < CURRENT_DATE - interval '6' DAY THEN TRUE
+                    ELSE FALSE
+                END AS is_outdated,
+                CASE
+                    WHEN lci.id IS NOT NULL THEN TRUE
+                    ELSE FALSE
+                END AS is_active,
+                c.active,
+                CASE
+                    WHEN lci.value = kr.goal THEN 100
+                    WHEN kr.goal = kr.initial_value THEN 0
+                    ELSE greatest(least((100 * (coalesce(lci.value, 0) - kr.initial_value) / (kr.goal - kr.initial_value)), 100), 0)
+                END AS progress,
+                CASE
+                    WHEN lci.confidence IS NULL THEN 100
+                    ELSE lci.confidence
+                END AS confidence,
+                kr.objective_id,
+                kr.team_id
+        FROM public.key_result kr
+        LEFT JOIN latest_check_in lci ON kr.id = lci.key_result_id
+        JOIN public.objective o ON kr.objective_id = o.id
+        JOIN public.cycle c ON o.cycle_id = c.id),
+          objective_status AS
+        (SELECT krs.objective_id,
+                krs.team_id,
+                bool_and(is_outdated) AS is_outdated,
+                bool_or(is_active) AS is_active,
+                avg(progress) AS progress,
+                min(confidence) AS confidence
+        FROM key_result_status krs
+        JOIN objective o ON krs.objective_id = o.id
+        JOIN CYCLE cy ON o.cycle_id = cy.id
+        WHERE o.mode = 'PUBLISHED'
+          AND cy.active IS TRUE
+        GROUP BY krs.objective_id,
+                  krs.team_id),
+          team_status AS
+        (SELECT os.team_id,
+                bool_and(is_outdated) AS is_outdated,
+                bool_or(is_active) AS is_active,
+                avg(progress) AS progress,
+                min(confidence) AS confidence
+        FROM objective_status os
+        GROUP BY os.team_id)
+      SELECT ts.*,
+            to_json(lcibt.*) AS last_check_in
+      FROM team_status ts
+      JOIN latest_check_in_by_team lcibt ON ts.team_id = lcibt.team_id
+      WHERE ts.team_id = $1
       `,
       [teamID],
     )

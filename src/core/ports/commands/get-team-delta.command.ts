@@ -19,78 +19,70 @@ export class GetTeamDeltaCommand extends BaseDeltaCommand {
     const comparisonDate = this.getComparisonDate()
     const row = await this.core.entityManager.query(
       `
-      with latest_check_in as (
-        select distinct on (krci.key_result_id) * from public.key_result_check_in krci
-        order by krci.key_result_id, krci.created_at desc
-      ),
-      latest_check_in_week_before as (
-        select distinct on (krci.key_result_id) * from public.key_result_check_in krci
-        where krci.created_at < $2
-        order by krci.key_result_id, krci.created_at desc
-      ),
-      key_result_status as (
-        select 
-          kr.id,
-          least(
-            greatest(
-              case 
-                when lci.value = kr.goal then 100 
-                when kr.goal = kr.initial_value then 0
-              else
-                100 * (coalesce(lci.value,0) - kr.initial_value) / (kr.goal - kr.initial_value)
-              end,
-            0),
-          100) as progress,	
-          least(
-            greatest(
-              case 
-                when lciwb.value = kr.goal then 100 
-                when kr.goal = kr.initial_value then 0
-              else
-                100 * (coalesce(lciwb.value,0) - kr.initial_value) / (kr.goal - kr.initial_value)
-              end,
-            0),
-          100) as previous_progress,			
-          lci.confidence,
-          lciwb.confidence as previous_confidence,
-          kr.objective_id,
-          kr.team_id
-        from public.key_result kr 
-        left join latest_check_in lci on kr.id = lci.key_result_id
-        left join latest_check_in_week_before lciwb on kr.id = lciwb.key_result_id
-        join public.objective o on kr.objective_id  = o.id
-        join public.cycle c on o.cycle_id = c.id
-      ),
-      objective_status as (
-        select 
-          krs.objective_id,
-          krs.team_id,
-          cy.id as cycle_id,
-          cy.team_id as company_id,
-          avg(progress) as progress,
-          avg(previous_progress) as previous_progress,
-          min(confidence) as confidence,
-          min(previous_confidence) as previous_confidence
-        from key_result_status krs 
-        join objective o on krs.objective_id = o.id
-        join cycle cy on o.cycle_id = cy.id
-        where o.mode = 'PUBLISHED' and cy.active is true
-        group by krs.objective_id, krs.team_id, cy.id, cy.team_id
-      ),
-      team_status as (
-        select 
-          o.team_id,
-          o.company_id,
-          greatest(avg(progress), 0) as progress,
-          greatest(avg(previous_progress), 0) as previous_progress,
-          min(confidence) as confidence,
-          min(previous_confidence) as previous_confidence
-        from objective_status o
-        where o.team_id is not null
-        group by o.team_id, o.company_id
-      )
-      select * from team_status ts 
-        where ts.team_id = $1
+      WITH latest_check_in AS
+        (SELECT DISTINCT ON (krci.key_result_id) *
+        FROM public.key_result_check_in krci
+        ORDER BY krci.key_result_id,
+                  krci.created_at DESC),
+          latest_check_in_week_before AS
+        (SELECT DISTINCT ON (krci.key_result_id) *
+        FROM public.key_result_check_in krci
+        WHERE krci.created_at < $2
+        ORDER BY krci.key_result_id,
+                  krci.created_at DESC),
+          key_result_status AS
+        (SELECT kr.id,
+                least(greatest(CASE
+                                  WHEN lci.value = kr.goal THEN 100
+                                  WHEN kr.goal = kr.initial_value THEN 0
+                                  ELSE 100 * (coalesce(lci.value, 0) - kr.initial_value) / (kr.goal - kr.initial_value)
+                              END, 0), 100) AS progress,
+                least(greatest(CASE
+                                  WHEN lciwb.value = kr.goal THEN 100
+                                  WHEN kr.goal = kr.initial_value THEN 0
+                                  ELSE 100 * (coalesce(lciwb.value, 0) - kr.initial_value) / (kr.goal - kr.initial_value)
+                              END, 0), 100) AS previous_progress,
+                lci.confidence,
+                lciwb.confidence AS previous_confidence,
+                kr.objective_id,
+                kr.team_id
+        FROM public.key_result kr
+        LEFT JOIN latest_check_in lci ON kr.id = lci.key_result_id
+        LEFT JOIN latest_check_in_week_before lciwb ON kr.id = lciwb.key_result_id
+        JOIN public.objective o ON kr.objective_id = o.id
+        JOIN public.cycle c ON o.cycle_id = c.id),
+          objective_status AS
+        (SELECT krs.objective_id,
+                krs.team_id,
+                cy.id AS cycle_id,
+                cy.team_id AS company_id,
+                avg(progress) AS progress,
+                avg(previous_progress) AS previous_progress,
+                min(confidence) AS confidence,
+                min(previous_confidence) AS previous_confidence
+        FROM key_result_status krs
+        JOIN objective o ON krs.objective_id = o.id
+        JOIN CYCLE cy ON o.cycle_id = cy.id
+        WHERE o.mode = 'PUBLISHED'
+          AND cy.active IS TRUE
+        GROUP BY krs.objective_id,
+                  krs.team_id,
+                  cy.id,
+                  cy.team_id),
+          team_status AS
+        (SELECT o.team_id,
+                o.company_id,
+                greatest(avg(progress), 0) AS progress,
+                greatest(avg(previous_progress), 0) AS previous_progress,
+                min(confidence) AS confidence,
+                min(previous_confidence) AS previous_confidence
+        FROM objective_status o
+        WHERE o.team_id IS NOT NULL
+        GROUP BY o.team_id,
+                  o.company_id)
+      SELECT *
+      FROM team_status ts
+      WHERE ts.team_id = $1
       `,
       [teamID, comparisonDate],
     )
