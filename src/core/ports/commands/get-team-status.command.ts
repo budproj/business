@@ -34,7 +34,7 @@ export class GetTeamStatusCommand extends BaseStatusCommand {
                   krci.created_at DESC)
       SELECT ts.*,
             to_json(lcibt.*) AS last_check_in
-      FROM team_status ts
+      FROM team_current_status ts
       JOIN latest_check_in_by_team lcibt ON ts.team_id = lcibt.team_id
       WHERE ts.team_id = $1
       `,
