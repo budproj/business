@@ -1,4 +1,5 @@
 import { GetStatusOptions, Status } from '@core/interfaces/status.interface'
+import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { BaseStatusCommand } from '@core/ports/commands/base-status.command'
 import { Stopwatch } from '@lib/logger/pino.decorator'
 
@@ -37,11 +38,25 @@ export class GetCycleStatusCommand extends BaseStatusCommand {
       }
     }
 
+
+    const latest_check_in: KeyResultCheckIn = new KeyResultCheckIn()
+    latest_check_in.id = row[0].latest_check_in?.id
+    latest_check_in.value = row[0].latest_check_in?.value
+    latest_check_in.confidence = row[0].latest_check_in?.confidence
+    latest_check_in.createdAt = new Date(row[0].latest_check_in?.created_at)
+    latest_check_in.keyResultId = row[0].latest_check_in?.key_result_id
+    latest_check_in.userId = row[0].latest_check_in?.user_id
+    latest_check_in.comment = row[0].latest_check_in?.comment
+    latest_check_in.parentId = row[0].latest_check_in?.parent_id
+    latest_check_in.previousState = row[0].latest_check_in?.previous_state
+
     return {
       isOutdated: row[0].is_outdated,
       isActive: row[0].is_active,
       progress: row[0].progress,
       confidence: row[0].confidence,
+      latestCheckIn: latest_check_in,
+      reportDate: new Date(row[0].last_check_in?.created_at),
     }
   }
 }
