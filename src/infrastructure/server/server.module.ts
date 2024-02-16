@@ -5,6 +5,7 @@ import { LoggerModule } from 'nestjs-pino'
 import { ServerConfigModule } from '@config/server/server.module'
 import { InfrastructureModule } from '@infrastructure/infrastructure.module'
 import { InterfaceModule } from '@interface/interface.module'
+import { LogLevel } from '@lib/logger/logger.enum'
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { InterfaceModule } from '@interface/interface.module'
     InfrastructureModule,
     LoggerModule.forRoot({
       pinoHttp: {
+        level: LogLevel[process.env.SERVER_LOGGING_LEVEL],
         redact: {
           paths: ['req.headers'],
         },

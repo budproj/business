@@ -1,3 +1,4 @@
+import { KeyResultProvider } from '@core/modules/key-result/key-result.provider'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 

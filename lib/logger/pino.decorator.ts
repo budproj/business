@@ -8,10 +8,13 @@ import pinoPretty from 'pino-pretty'
 // Import { Inject } from '@nestjs/common';
 import * as uuid from 'uuid'
 
+import { LogLevel } from './logger.enum'
+
 interface Arguments {
   omitArgs?: boolean | Parameters<typeof omit>['1']
   includeReturn?: boolean
 }
+const mustShowExtensiveLogs = LogLevel[process.env.SERVER_LOGGING_LEVEL] === LogLevel.DEBUG
 
 export const Stopwatch = ({ omitArgs, includeReturn }: Arguments = {}): MethodDecorator => {
   // Const injectLogger = Inject(PinoLogger);
@@ -37,18 +40,22 @@ export const Stopwatch = ({ omitArgs, includeReturn }: Arguments = {}): MethodDe
         const logger: PinoLogger = thisArgument[token]
 
         const logCall = (argumentsList) => {
-          logger.info(
-            `${traceTag}(${argumentsList.map(() => '%o').join(', ')})`,
-            // eslint-disable-next-line no-negated-condition
-            ...argumentsList.map((argument) => (argument !== undefined ? argument : 'undefined')),
-          )
+          if (mustShowExtensiveLogs) {
+            logger.info(
+              `${traceTag}(${argumentsList.map(() => '%o').join(', ')})`,
+              // eslint-disable-next-line no-negated-condition
+              ...argumentsList.map((argument) => (argument !== undefined ? argument : 'undefined')),
+            )
+          }
         }
 
         // TODO: reduce level to `debug`
         if (Array.isArray(omitArgs)) {
           logCall(Object.values(omit(arguments_, omitArgs)))
         } else if (omitArgs) {
-          logger.info(`${traceTag}()`)
+          if (mustShowExtensiveLogs) {
+            logger.info(`${traceTag}()`)
+          }
         } else {
           logCall([...arguments_])
         }
@@ -56,9 +63,11 @@ export const Stopwatch = ({ omitArgs, includeReturn }: Arguments = {}): MethodDe
         const start = Date.now()
 
         const handleResult = (res) => {
-          logger.info(`${traceTag} took ${Date.now() - start}ms`)
+          if (mustShowExtensiveLogs) {
+            logger.info(`${traceTag} took ${Date.now() - start}ms`)
+          }
 
-          if (includeReturn && res !== undefined) {
+          if (includeReturn && res !== undefined && mustShowExtensiveLogs) {
             logger.info(`${traceTag} -> %o`, res)
           }
 
@@ -66,7 +75,10 @@ export const Stopwatch = ({ omitArgs, includeReturn }: Arguments = {}): MethodDe
         }
 
         const handleError = (error) => {
-          logger.error(`${traceTag} failed after ${Date.now() - start}ms -> %s`, error.message)
+          if (mustShowExtensiveLogs) {
+            logger.error(`${traceTag} failed after ${Date.now() - start}ms -> %s`, error.message)
+          }
+
           throw error
         }
 

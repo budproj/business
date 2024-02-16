@@ -16,14 +16,24 @@ export class GetTeamDeltaCommand extends BaseDeltaCommand {
   }
 
   public async execute(teamID: string, options?: GetTeamStatusOptions): Promise<Delta> {
-    const comparisonDate = this.getComparisonDate()
+    const row = await this.core.entityManager.query(
+      `
+      SELECT *
+      FROM team_status ts
+      WHERE ts.team_id = $1
+      `,
+      [teamID],
+    )
+    if (row[0]) {
+      return {
+        progress: row[0].progress - row[0].previous_progress,
+        confidence: row[0].confidence - row[0].previous_confidence,
+      }
+    }
 
-    const currentStatus = await this.getTeamStatus.execute(teamID, options)
-    const previousStatus = await this.getTeamStatus.execute(teamID, {
-      ...options,
-      date: comparisonDate,
-    })
-
-    return this.marshal(currentStatus, previousStatus)
+    return {
+      progress: 0,
+      confidence: 0,
+    }
   }
 }

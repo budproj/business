@@ -32,7 +32,9 @@ export class ServerFactory {
   }
 
   private async createApplication(adapter: FastifyAdapter): Promise<NestFastifyApplication> {
-    const application = await NestFactory.create<NestFastifyApplication>(ServerModule, adapter)
+    const application = await NestFactory.create<NestFastifyApplication>(ServerModule, adapter, {
+      bufferLogs: true,
+    })
 
     application.enableCors()
 
@@ -45,6 +47,7 @@ export class ServerFactory {
 
     application.setGlobalPrefix(config.prefix ?? '')
     application.useLogger(logger)
+    application.flushLogs()
 
     await this.launchMicroservices(application, config)
     await this.launchServer(application, logger, config)

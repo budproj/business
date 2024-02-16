@@ -1,63 +1,62 @@
 import { GetStatusOptions, Status } from '@core/interfaces/status.interface'
-import { KeyResultMode } from '@core/modules/key-result/enums/key-result-mode.enum'
-import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
+import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 import { BaseStatusCommand } from '@core/ports/commands/base-status.command'
-import { Cacheable } from '@lib/cache/cacheable.decorator'
 import { Stopwatch } from '@lib/logger/pino.decorator'
 
 export class GetCycleStatusCommand extends BaseStatusCommand {
-  @Cacheable(
-    (cycleID, options) => [cycleID, Math.floor(options?.date?.getTime() / (1000 * 60 * 60))],
-    60 * 60,
-  )
   @Stopwatch({ omitArgs: true })
   public async execute(
     cycleID: string,
     options: GetStatusOptions = this.defaultOptions,
   ): Promise<Status> {
-    const keyResults = (await this.getKeyResultsFromCycle(cycleID, options)) as any
-
-    const filteredKeyResults = keyResults.filter((keyResult) => keyResult.teamId !== null)
-
-    const [cycleCheckIns, progresses, confidences] = await this.unzipKeyResultGroup(
-      filteredKeyResults,
+    const row = await this.core.entityManager.query(
+      `
+      WITH latest_check_in_by_cycle AS
+        (SELECT DISTINCT ON (o.cycle_id) krci.*, o.cycle_id
+        FROM public.key_result_check_in krci
+        JOIN public.key_result kr ON krci.key_result_id = kr.id
+        JOIN public.objective o ON kr.objective_id = o.id
+        WHERE o.mode = 'PUBLISHED'
+          AND o.team_id IS NOT NULL 
+        ORDER BY o.cycle_id,
+                  krci.created_at DESC)
+      SELECT cs.*,
+            to_json(lcibc.*) AS latest_check_in
+      FROM cycle_current_status cs
+      JOIN latest_check_in_by_cycle lcibc ON cs.cycle_id = lcibc.cycle_id
+      WHERE cs.cycle_id = $1
+      `,
+      [cycleID],
     )
 
-    const latestCheckIn = this.getLatestCheckInFromList(cycleCheckIns)
-    const isOutdated = this.isOutdated(latestCheckIn)
-    const isActive = keyResults[0]?.objective?.cycle?.active ?? this.defaultStatus.isActive
+    if (Array.isArray(row) && row.length === 0) {
+      return {
+        isOutdated: true,
+        isActive: true,
+        progress: 0,
+        confidence: 100,
+      }
+    }
+
+
+    const latest_check_in: KeyResultCheckIn = new KeyResultCheckIn()
+    latest_check_in.id = row[0].latest_check_in?.id
+    latest_check_in.value = row[0].latest_check_in?.value
+    latest_check_in.confidence = row[0].latest_check_in?.confidence
+    latest_check_in.createdAt = new Date(row[0].latest_check_in?.created_at)
+    latest_check_in.keyResultId = row[0].latest_check_in?.key_result_id
+    latest_check_in.userId = row[0].latest_check_in?.user_id
+    latest_check_in.comment = row[0].latest_check_in?.comment
+    latest_check_in.parentId = row[0].latest_check_in?.parent_id
+    latest_check_in.previousState = row[0].latest_check_in?.previous_state
 
     return {
-      isOutdated,
-      isActive,
-      latestCheckIn,
-      reportDate: latestCheckIn?.createdAt,
-      progress: this.getAverage(progresses),
-      confidence: this.getMin(confidences),
+      isOutdated: row[0].is_outdated,
+      isActive: row[0].is_active,
+      progress: row[0].progress,
+      confidence: row[0].confidence,
+      latestCheckIn: latest_check_in,
+      reportDate: new Date(row[0].last_check_in?.created_at),
     }
-  }
-
-  private async getKeyResultsFromCycle(
-    cycleID: string,
-    options: GetStatusOptions,
-  ): Promise<KeyResult[]> {
-    const filters = {
-      keyResult: {
-        createdAt: options.date,
-        mode: KeyResultMode.PUBLISHED,
-      },
-      cycle: {
-        id: cycleID,
-      },
-    }
-    const orderAttributes = this.zipEntityOrderAttributes(
-      ['keyResultCheckIn'],
-      [['createdAt']],
-      [['DESC']],
-    )
-
-    const keyResults = await this.core.keyResult.getWithRelationFilters(filters, orderAttributes)
-
-    return this.removeKeyResultCheckInsBeforeDate(keyResults, options.date)
   }
 }

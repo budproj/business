@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common'
+import { InjectEntityManager } from '@nestjs/typeorm'
+import { EntityManager } from 'typeorm'
 
 import { AuthJwtProvider } from '@infrastructure/authz/providers/jwt.provider'
 import { NatsProvider } from '@interface/nats/nats.provider'
@@ -13,6 +15,7 @@ import { UserProvider } from './modules/user/user.provider'
 @Injectable()
 export class CoreProvider {
   constructor(
+    @InjectEntityManager() public entityManager: EntityManager,
     public readonly user: UserProvider,
     public readonly team: TeamProvider,
     public readonly cycle: CycleProvider,
