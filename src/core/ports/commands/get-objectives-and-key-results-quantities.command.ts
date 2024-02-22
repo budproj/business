@@ -23,8 +23,8 @@ export class GetObjectivesAndKeyResultQuantities extends Command<ObjectivesAndKe
           select distinct team_id
           from user_company uc
                  inner join team_company tc on uc.company_id = tc.company_id
-          where ($2 is null and uc.user_id = $1)
-             or ($2 is not null and tc.team_id = cast($2 as uuid))
+          where (cast($2 as uuid) is null and uc.user_id = $1)
+             or (cast($2 as uuid) is not null and tc.team_id = cast($2 as uuid))
         ),
         cte_objective as (
           select * from "active_cycle_objective" o
@@ -41,18 +41,23 @@ export class GetObjectivesAndKeyResultQuantities extends Command<ObjectivesAndKe
         select 'keyResultsQuantity' as "key",
                count(*) as "value"
         from "key_result" kr
-        -- mudar para left join para trazer com "confidence == null" os que ainda não tiverem check-in
         inner join cte_objective o on o.id = kr."objective_id"
         
         union all
 
         -- 3. Quantidade de key results agrupados por confidence
-        select ci.confidence::text as "key",
+        select case when 
+        		ci.confidence = '200' then 'achieved'
+        		when ci.confidence = '66' then 'medium' 
+        		when ci.confidence = '32' then 'low'
+        		when ci.confidence = '-1' then 'barrier'
+        		when ci.confidence = '-100' then 'deprioritized' 
+        		else 'high' end as "key",
                count(*) as "value"
         from "key_result" kr
         inner join cte_objective o on o.id = kr."objective_id"
-        inner join "key_result_latest_check_in" ci on ci."key_result_id" = kr.id
-        group by ci.confidence;
+        left join "key_result_latest_check_in" ci on ci."key_result_id" = kr.id
+        group by 1;
       `,
       [user.id, teamId],
     )
@@ -60,9 +65,18 @@ export class GetObjectivesAndKeyResultQuantities extends Command<ObjectivesAndKe
     return rows.reduce(
       (accumulator, row) => ({
         ...accumulator,
-        [row.key]: row.value,
+        [row.key]: Number.parseInt(row.value),
       }),
-      {},
+      {
+        keyResultsQuantity: 0,
+        objectivesQuantity: 0,
+        high: 0,
+        medium: 0,
+        low: 0,
+        barrier: 0,
+        achieved: 0,
+        deprioritized: 0,
+      },
     )
   }
 }
