@@ -151,7 +151,7 @@ export class CreatedCommentInTaskNotification extends BaseNotification<
           authorPictureURL: data.userThatCommented.picture,
           companyId: data.userThatCommented.companies[0].id,
           commentText: cleanComment(data.comment.content),
-          answerId: data.answerId,
+          answerId: data.taskId,
         }
 
         await this.channels.email.dispatch(emailData, emailMetadata)
@@ -180,7 +180,7 @@ export class CreatedCommentInTaskNotification extends BaseNotification<
         authorPictureURL: data.userThatCommented.picture,
         companyId: data.userThatCommented.companies[0].id,
         commentText: cleanComment(data.comment.content),
-        answerId: data.answerId,
+        answerId: data.taskId,
       }
 
       await this.channels.email.dispatch(emailData, emailMetadata)
@@ -209,7 +209,7 @@ export class CreatedCommentInTaskNotification extends BaseNotification<
       authorPictureURL: data.userThatCommented.picture,
       companyId: data.userThatCommented.companies[0].id,
       commentText: cleanComment(data.comment.content),
-      answerId: data.answerId,
+      answerId: data.taskId,
     }
 
     await this.channels.email.dispatch(emailData, emailMetadata)
