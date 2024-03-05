@@ -25,6 +25,29 @@ interface Comment {
   createdAt: Date
 }
 
+enum TASK_STATUS {
+  pending = 'pending',
+  toDo = 'toDo',
+  doing = 'doing',
+  done = 'done',
+}
+
+interface ITask {
+  id: any
+  boardId: any
+  status: TASK_STATUS
+  title: string
+  description: string
+  dueDate: Date
+  initialDate: Date
+  priority: number
+  owner: string
+  attachments: string[]
+  supportTeamMembers: string[]
+  tags: string[]
+  createdAt: Date
+  updatedAt: Date
+}
 interface UserWithCompanies extends User {
   companies: Team[]
 }
@@ -33,7 +56,7 @@ type Data = ResolvedData & RelatedData
 
 type RelatedData = {
   userThatCommented: UserWithCompanies
-  taskThatReceivedComment: { task: string }
+  taskThatReceivedComment: ITask
   comment: Comment
 }
 
@@ -41,14 +64,11 @@ type Metadata = NotificationMetadata
 
 interface ActivityData {
   userThatCommented: UserWithCompanies
-  taskThatReceivedComment: { task: string }
+  taskThatReceivedComment: ITask
   comment: Comment
 }
 
-type ResolvedData = {
-  userThatCommented: UserWithCompanies
-  taskThatReceivedComment: { task: string }
-  comment: Comment
+type ResolvedData = RelatedData & {
   taskId: string
   userThatCommentedInitials: string
   taskOwner: User
