@@ -117,16 +117,8 @@ export class CreatedCommentInTaskNotification extends BaseNotification<
       'get-user-initials',
       relatedData.userThatCommented,
     )
-
-    const taskOwnerId = await this.channels.messageBroker.dispatch(
-      'task-management-microservice.get-owner',
-      {
-        id: taskId,
-      },
-    )
-
     const taskOwner = await this.core.dispatchCommand<User>('get-user', {
-      id: taskOwnerId,
+      id: relatedData.taskThatReceivedComment.owner,
     })
 
     return {
@@ -235,49 +227,42 @@ export class CreatedCommentInTaskNotification extends BaseNotification<
     await this.channels.email.dispatch(emailData, emailMetadata)
   }
 
-  private async dispatchCommentInRoutineNotificationMessage(): Promise<void> {
+  private async dispatchCommentInTaskNotificationMessage(): Promise<void> {
     const { data, metadata } = this.marshal()
 
-    if (data.taskOwner.id === data.userThatCommented.id) return
+    if (data.userThatCommented.id !== data.taskOwner.id) {
+      const recipientUser = data.taskOwner
+      const message = {
+        messageId: randomUUID(),
+        type: 'commentOnTask',
+        timestamp: new Date(metadata.timestamp).toISOString(),
+        recipientId: recipientUser.authzSub,
+        properties: {
+          sender: {
+            id: data.userThatCommented.authzSub,
+            name: `${data.userThatCommented.firstName} ${data.userThatCommented.lastName}`,
+            picture: data.userThatCommented.picture,
+          },
+          task: {
+            companyId: data.userThatCommented.companies[0].id,
+            taskId: data.taskId,
+          },
+          comment: {
+            id: data.comment.id,
+            content: data.comment.content,
+          },
+        },
+      }
+      await this.channels.messageBroker.dispatch('notifications-microservice.notification', message)
+    }
 
     const isCommentTagged = isTagged(data.comment.content)
-
     if (isCommentTagged) {
       const mentionedIds = getMentionedUserIdsFromComments(data.comment.content)
-
-      if (!mentionedIds.includes(data.taskOwner.id)) {
-        const recipientUsers = [data.taskOwner]
-
-        const messages = recipientUsers.map((recipient) => ({
-          messageId: randomUUID(),
-          type: 'commentOnTask',
-          timestamp: new Date(metadata.timestamp).toISOString(),
-          recipientId: recipient.authzSub,
-          properties: {
-            sender: {
-              id: data.userThatCommented.authzSub,
-              name: `${data.userThatCommented.firstName} ${data.userThatCommented.lastName}`,
-              picture: data.userThatCommented.picture,
-            },
-            task: {
-              companyId: data.userThatCommented.companies[0].id,
-              taskId: data.taskId,
-            },
-            comment: {
-              id: data.comment.id,
-              content: data.comment.content,
-            },
-          },
-        }))
-        // PUBLISHER
-        await this.channels.messageBroker.dispatchMultiple(
-          'notifications-microservice.notification',
-          messages,
-        )
-      }
-
-      const mentionedUsers = await this.user.getByIds(mentionedIds)
+      const mentionedIdsWithoutOwner = mentionedIds.filter((item) => item !== data.taskOwner.id)
+      const mentionedUsers = await this.user.getByIds(mentionedIdsWithoutOwner)
       const recipientUsers = [...mentionedUsers]
+
       const messages = recipientUsers.map((recipient) => ({
         messageId: randomUUID(),
         type: 'mentionOnTask',
@@ -304,37 +289,6 @@ export class CreatedCommentInTaskNotification extends BaseNotification<
         'notifications-microservice.notification',
         messages,
       )
-      return
     }
-    // It seems to me that has to be a better way to write this logic
-
-    const recipientUsers = [data.taskOwner]
-
-    const messages = recipientUsers.map((recipient) => ({
-      messageId: randomUUID(),
-      type: 'commentOnTask',
-      timestamp: new Date(metadata.timestamp).toISOString(),
-      recipientId: recipient.authzSub,
-      properties: {
-        sender: {
-          id: data.userThatCommented.authzSub,
-          name: `${data.userThatCommented.firstName} ${data.userThatCommented.lastName}`,
-          picture: data.userThatCommented.picture,
-        },
-        task: {
-          companyId: data.userThatCommented.companies[0].id,
-          taskId: data.taskId,
-        },
-        comment: {
-          id: data.comment.id,
-          content: data.comment.content,
-        },
-      },
-    }))
-
-    await this.channels.messageBroker.dispatchMultiple(
-      'notifications-microservice.notification',
-      messages,
-    )
   }
 }
