@@ -33,7 +33,7 @@ enum TASK_STATUS {
 }
 
 interface ITask {
-  id: any
+  _id: any
   boardId: any
   status: TASK_STATUS
   title: string
@@ -244,8 +244,8 @@ export class CreatedCommentInTaskNotification extends BaseNotification<
             picture: data.userThatCommented.picture,
           },
           task: {
-            companyId: data.userThatCommented.companies[0].id,
-            taskId: data.taskId,
+            id: data.taskThatReceivedComment._id,
+            name: data.taskThatReceivedComment.title,
           },
           comment: {
             id: data.comment.id,
@@ -275,8 +275,8 @@ export class CreatedCommentInTaskNotification extends BaseNotification<
             picture: data.userThatCommented.picture,
           },
           task: {
-            companyId: data.userThatCommented.companies[0].id,
-            taskId: data.taskId,
+            id: data.taskThatReceivedComment._id,
+            name: data.taskThatReceivedComment.title,
           },
           comment: {
             id: data.comment.id,
