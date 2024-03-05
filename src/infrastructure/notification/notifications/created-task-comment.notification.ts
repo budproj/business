@@ -100,8 +100,8 @@ export class CreatedCommentInTaskNotification extends BaseNotification<
   }
 
   public async dispatch(): Promise<void> {
-    await this.dispatchCommentInRoutineNotificationEmail()
-    await this.dispatchCommentInRoutineNotificationMessage()
+    // Await this.dispatchCommentInRoutineNotificationEmail()
+    await this.dispatchCommentInTaskNotificationMessage()
   }
 
   private async getRelatedData(): Promise<RelatedData> {
