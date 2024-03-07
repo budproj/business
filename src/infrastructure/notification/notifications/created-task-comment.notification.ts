@@ -69,9 +69,10 @@ interface ActivityData {
 }
 
 type ResolvedData = RelatedData & {
-  taskId: string
+  _id: string
   userThatCommentedInitials: string
   taskOwner: User
+  companyId: string
 }
 
 @Injectable()
@@ -111,10 +112,14 @@ export class CreatedCommentInTaskNotification extends BaseNotification<
   }
 
   private async getResolvedData(relatedData: RelatedData): Promise<ResolvedData> {
-    const taskId: string = relatedData.comment.entity.split('routine:')[1]
+    const _id: string = relatedData.comment.entity.split('routine:')[1]
 
     const userThatCommentedInitials = await this.core.dispatchCommand<string>(
       'get-user-initials',
+      relatedData.userThatCommented,
+    )
+    const companies = await this.core.dispatchCommand<Team[]>(
+      'get-user-companies',
       relatedData.userThatCommented,
     )
     const taskOwner = await this.core.dispatchCommand<User>('get-user', {
@@ -251,6 +256,8 @@ export class CreatedCommentInTaskNotification extends BaseNotification<
             id: data.comment.id,
             content: data.comment.content,
           },
+          taskBoard: data.taskThatReceivedComment,
+          companyId: data.companyId,
         },
       }
       await this.channels.messageBroker.dispatch('notifications-microservice.notification', message)
@@ -282,6 +289,8 @@ export class CreatedCommentInTaskNotification extends BaseNotification<
             id: data.comment.id,
             content: data.comment.content,
           },
+          taskBoard: data.taskThatReceivedComment,
+          companyId: data.companyId,
         },
       }))
 
