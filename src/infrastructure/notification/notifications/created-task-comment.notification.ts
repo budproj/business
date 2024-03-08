@@ -58,6 +58,7 @@ type RelatedData = {
   userThatCommented: UserWithCompanies
   taskThatReceivedComment: ITask
   comment: Comment
+  teamId: string
 }
 
 type Metadata = NotificationMetadata
@@ -66,13 +67,13 @@ interface ActivityData {
   userThatCommented: UserWithCompanies
   taskThatReceivedComment: ITask
   comment: Comment
+  teamId: string
 }
 
 type ResolvedData = RelatedData & {
   _id: string
   userThatCommentedInitials: string
   taskOwner: User
-  companyId: string
 }
 
 @Injectable()
@@ -106,9 +107,9 @@ export class CreatedCommentInTaskNotification extends BaseNotification<
   }
 
   private async getRelatedData(): Promise<RelatedData> {
-    const { comment, userThatCommented, taskThatReceivedComment } = this.activity.data
+    const { comment, userThatCommented, taskThatReceivedComment, teamId } = this.activity.data
 
-    return { comment, userThatCommented, taskThatReceivedComment }
+    return { comment, userThatCommented, taskThatReceivedComment, teamId }
   }
 
   private async getResolvedData(relatedData: RelatedData): Promise<ResolvedData> {
@@ -118,10 +119,6 @@ export class CreatedCommentInTaskNotification extends BaseNotification<
       'get-user-initials',
       relatedData.userThatCommented,
     )
-    const companies = await this.core.dispatchCommand<Team[]>(
-      'get-user-companies',
-      relatedData.userThatCommented,
-    )
     const taskOwner = await this.core.dispatchCommand<User>('get-user', {
       id: relatedData.taskThatReceivedComment.owner,
     })
@@ -129,108 +126,108 @@ export class CreatedCommentInTaskNotification extends BaseNotification<
     return {
       ...relatedData,
       userThatCommentedInitials,
-      taskId,
+      _id,
       taskOwner,
     }
   }
 
-  private async dispatchCommentInRoutineNotificationEmail(): Promise<void> {
-    const { data, metadata } = this.marshal()
+  // private async dispatchCommentInRoutineNotificationEmail(): Promise<void> {
+  //   const { data, metadata } = this.marshal()
 
-    if (data.taskOwner.id === data.userThatCommented.id) return
+  //   if (data.taskOwner.id === data.userThatCommented.id) return
 
-    const isCommentTagged = isTagged(data.comment.content)
+  //   const isCommentTagged = isTagged(data.comment.content)
 
-    if (isCommentTagged) {
-      const mentionedIds = getMentionedUserIdsFromComments(data.comment.content)
+  //   if (isCommentTagged) {
+  //     const mentionedIds = getMentionedUserIdsFromComments(data.comment.content)
 
-      // Caso usuário x tenha recebido comentário de usuário y marcando um usuário z,
-      // o usuário x e usuário z precisam ser notificados
-      if (!mentionedIds.includes(data.taskOwner.id)) {
-        const customData = {
-          userId: data.taskOwner.id,
-          recipientFirstName: data.taskOwner.firstName,
-        }
-        const recipients = (await this.buildRecipients([data.taskOwner], this.channels.email, [
-          customData,
-        ])) as EmailRecipient[]
+  //     // Caso usuário x tenha recebido comentário de usuário y marcando um usuário z,
+  //     // o usuário x e usuário z precisam ser notificados
+  //     if (!mentionedIds.includes(data.taskOwner.id)) {
+  //       const customData = {
+  //         userId: data.taskOwner.id,
+  //         recipientFirstName: data.taskOwner.firstName,
+  //       }
+  //       const recipients = (await this.buildRecipients([data.taskOwner], this.channels.email, [
+  //         customData,
+  //       ])) as EmailRecipient[]
 
-        const emailMetadata: EmailNotificationChannelMetadata = {
-          ...metadata,
-          recipients,
-          template: 'CommentInRoutine',
-        }
+  //       const emailMetadata: EmailNotificationChannelMetadata = {
+  //         ...metadata,
+  //         recipients,
+  //         template: 'CommentInRoutine',
+  //       }
 
-        const emailData = {
-          firstName: data.userThatCommented.firstName,
-          lastName: data.userThatCommented.lastName,
-          authorInitials: data.userThatCommentedInitials,
-          authorPictureURL: data.userThatCommented.picture,
-          companyId: data.userThatCommented.companies[0].id,
-          commentText: cleanComment(data.comment.content),
-          answerId: data.taskId,
-        }
+  //       const emailData = {
+  //         firstName: data.userThatCommented.firstName,
+  //         lastName: data.userThatCommented.lastName,
+  //         authorInitials: data.userThatCommentedInitials,
+  //         authorPictureURL: data.userThatCommented.picture,
+  //         companyId: data.userThatCommented.companies[0].id,
+  //         commentText: cleanComment(data.comment.content),
+  //         answerId: data.taskId,
+  //       }
 
-        await this.channels.email.dispatch(emailData, emailMetadata)
-      }
+  //       await this.channels.email.dispatch(emailData, emailMetadata)
+  //     }
 
-      const mentionedUsers = await this.user.getByIds(mentionedIds)
+  //     const mentionedUsers = await this.user.getByIds(mentionedIds)
 
-      const customDatas = mentionedUsers.map((user) => {
-        return { userId: user.id, recipientFirstName: user.firstName }
-      })
+  //     const customDatas = mentionedUsers.map((user) => {
+  //       return { userId: user.id, recipientFirstName: user.firstName }
+  //     })
 
-      const recipients = (await this.buildRecipients([data.taskOwner], this.channels.email, [
-        ...customDatas,
-      ])) as EmailRecipient[]
+  //     const recipients = (await this.buildRecipients([data.taskOwner], this.channels.email, [
+  //       ...customDatas,
+  //     ])) as EmailRecipient[]
 
-      const emailMetadata: EmailNotificationChannelMetadata = {
-        ...metadata,
-        recipients,
-        template: 'MentionInRoutine',
-      }
+  //     const emailMetadata: EmailNotificationChannelMetadata = {
+  //       ...metadata,
+  //       recipients,
+  //       template: 'MentionInRoutine',
+  //     }
 
-      const emailData = {
-        firstName: data.userThatCommented.firstName,
-        lastName: data.userThatCommented.lastName,
-        authorInitials: data.userThatCommentedInitials,
-        authorPictureURL: data.userThatCommented.picture,
-        companyId: data.userThatCommented.companies[0].id,
-        commentText: cleanComment(data.comment.content),
-        answerId: data.taskId,
-      }
+  //     const emailData = {
+  //       firstName: data.userThatCommented.firstName,
+  //       lastName: data.userThatCommented.lastName,
+  //       authorInitials: data.userThatCommentedInitials,
+  //       authorPictureURL: data.userThatCommented.picture,
+  //       companyId: data.userThatCommented.companies[0].id,
+  //       commentText: cleanComment(data.comment.content),
+  //       answerId: data.taskId,
+  //     }
 
-      await this.channels.email.dispatch(emailData, emailMetadata)
-      return
-    }
+  //     await this.channels.email.dispatch(emailData, emailMetadata)
+  //     return
+  //   }
 
-    const customData = {
-      userId: data.taskOwner.id,
-      recipientFirstName: data.taskOwner.firstName,
-    }
+  //   const customData = {
+  //     userId: data.taskOwner.id,
+  //     recipientFirstName: data.taskOwner.firstName,
+  //   }
 
-    const recipients = (await this.buildRecipients([data.taskOwner], this.channels.email, [
-      customData,
-    ])) as EmailRecipient[]
+  //   const recipients = (await this.buildRecipients([data.taskOwner], this.channels.email, [
+  //     customData,
+  //   ])) as EmailRecipient[]
 
-    const emailMetadata: EmailNotificationChannelMetadata = {
-      ...metadata,
-      recipients,
-      template: 'CommentInRoutine',
-    }
+  //   const emailMetadata: EmailNotificationChannelMetadata = {
+  //     ...metadata,
+  //     recipients,
+  //     template: 'CommentInRoutine',
+  //   }
 
-    const emailData = {
-      firstName: data.userThatCommented.firstName,
-      lastName: data.userThatCommented.lastName,
-      authorInitials: data.userThatCommentedInitials,
-      authorPictureURL: data.userThatCommented.picture,
-      companyId: data.userThatCommented.companies[0].id,
-      commentText: cleanComment(data.comment.content),
-      answerId: data.taskId,
-    }
+  //   const emailData = {
+  //     firstName: data.userThatCommented.firstName,
+  //     lastName: data.userThatCommented.lastName,
+  //     authorInitials: data.userThatCommentedInitials,
+  //     authorPictureURL: data.userThatCommented.picture,
+  //     companyId: data.userThatCommented.companies[0].id,
+  //     commentText: cleanComment(data.comment.content),
+  //     answerId: data.taskId,
+  //   }
 
-    await this.channels.email.dispatch(emailData, emailMetadata)
-  }
+  //   await this.channels.email.dispatch(emailData, emailMetadata)
+  // }
 
   private async dispatchCommentInTaskNotificationMessage(): Promise<void> {
     const { data, metadata } = this.marshal()
@@ -257,7 +254,7 @@ export class CreatedCommentInTaskNotification extends BaseNotification<
             content: data.comment.content,
           },
           taskBoard: data.taskThatReceivedComment,
-          companyId: data.companyId,
+          teamId: data.teamId,
         },
       }
       await this.channels.messageBroker.dispatch('notifications-microservice.notification', message)
@@ -290,7 +287,7 @@ export class CreatedCommentInTaskNotification extends BaseNotification<
             content: data.comment.content,
           },
           taskBoard: data.taskThatReceivedComment,
-          companyId: data.companyId,
+          teamId: data.teamId,
         },
       }))
 
