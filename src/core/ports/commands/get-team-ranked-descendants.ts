@@ -29,7 +29,8 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
       JOIN team_company tc ON t.id = tc.team_id
       LEFT JOIN team_current_status ts ON ts.team_id = tc.team_id
       WHERE t.parent_id IS NOT NULL AND tc.company_id = $1
-      ORDER BY coalesce(progress, 0) DESC;
+      ORDER BY coalesce(progress, 0) DESC
+      LIMIT 5;
     `,
       [teamID],
     )
