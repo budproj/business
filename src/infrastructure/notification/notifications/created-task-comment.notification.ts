@@ -8,14 +8,12 @@ import { User } from '@core/modules/user/user.orm-entity'
 import { UserProvider } from '@core/modules/user/user.provider'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
-import { EmailNotificationChannelMetadata } from '../channels/email/metadata.type'
-import { EmailRecipient } from '../types/email-recipient.type'
 import { NotificationMetadata } from '../types/notification-metadata.type'
 
 import { BaseNotification } from './base.notification'
 import { GenericActivityTypes } from './generic-activity-types'
 import { NotificationChannelHashMap } from './notification.factory'
-import { cleanComment, getMentionedUserIdsFromComments, isTagged } from './utils'
+import { getMentionedUserIdsFromComments, isTagged } from './utils'
 
 interface Comment {
   id: string
@@ -131,7 +129,7 @@ export class CreatedCommentInTaskNotification extends BaseNotification<
     }
   }
 
-  // private async dispatchCommentInRoutineNotificationEmail(): Promise<void> {
+  // Private async dispatchCommentInRoutineNotificationEmail(): Promise<void> {
   //   const { data, metadata } = this.marshal()
 
   //   if (data.taskOwner.id === data.userThatCommented.id) return
