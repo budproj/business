@@ -4,37 +4,79 @@ import { UserInterface } from '@core/modules/user/user.interface'
 
 import { Command } from './base.command'
 
-export class GetObjectivesAndKeyResultQuantities extends Command<any> {
-  public async execute(user: UserInterface, teamId?: TeamInterface['id']): Promise<any> {
-    let userReachableTeamsIds: Array<TeamInterface['id']> = []
+type Confidences = Awaited<ReturnType<KeyResultProvider['getActiveConfidenceKeyResultsQuantity']>>
 
-    if (teamId) {
-      const userReachableTeams = await this.core.team.getDescendantsByIds([teamId])
-      userReachableTeamsIds = userReachableTeams.map((team) => team.id)
-    } else {
-      const userCompanies = await this.core.team.getUserCompanies(user)
-      const userCompanyIDs = userCompanies.map((company) => company.id)
-      const userReachableTeams = await this.core.team.getDescendantsByIds(userCompanyIDs)
-      userReachableTeamsIds = userReachableTeams.map((team) => team.id)
-    }
+type ObjectivesAndKeyResultQuantities = Confidences & {
+  keyResultsQuantity: number
+  objectivesQuantity: number
+}
 
-    const keyResultsQuantityPromise =
-      this.core.keyResult.getActiveKeyResultsQuantity(userReachableTeamsIds)
-    const objectivesQuantityPromise =
-      this.core.objective.getActiveObjectivesQuantity(userReachableTeamsIds)
-    const confidencesPromise =
-      this.core.keyResult.getActiveConfidenceKeyResultsQuantity(userReachableTeamsIds)
+export class GetObjectivesAndKeyResultQuantities extends Command<ObjectivesAndKeyResultQuantities> {
+  public async execute(
+    user: UserInterface,
+    teamId?: TeamInterface['id'],
+  ): Promise<ObjectivesAndKeyResultQuantities> {
 
-    const [keyResultsQuantity, objectivesQuantity, confidences] = await Promise.all([
-      keyResultsQuantityPromise,
-      objectivesQuantityPromise,
-      confidencesPromise,
-    ])
+    const rows = await this.core.entityManager.query(
+      `
+        with cte_scope as (
+          select distinct team_id
+          from user_company uc
+                 inner join team_company tc on uc.company_id = tc.company_id
+          where (cast($2 as uuid) is null and uc.user_id = $1)
+             or (cast($2 as uuid) is not null and tc.team_id = cast($2 as uuid))
+        ),
+        cte_objective as (
+          select * from "active_cycle_objective" o
+          inner join cte_scope s on s.team_id = o.team_id
+        )
+        -- 1. Quantidade de objetivos
+        select 'objectivesQuantity' as "key",
+               count(*) as "value"
+        from cte_objective
+        
+        union all
 
-    return {
-      keyResultsQuantity,
-      objectivesQuantity,
-      ...confidences,
-    }
+        -- 2. Quantidade de key results
+        select 'keyResultsQuantity' as "key",
+               count(*) as "value"
+        from "key_result" kr
+        inner join cte_objective o on o.id = kr."objective_id"
+        
+        union all
+
+        -- 3. Quantidade de key results agrupados por confidence
+        select case when 
+        		ci.confidence = '200' then 'achieved'
+        		when ci.confidence = '66' then 'medium' 
+        		when ci.confidence = '32' then 'low'
+        		when ci.confidence = '-1' then 'barrier'
+        		when ci.confidence = '-100' then 'deprioritized' 
+        		else 'high' end as "key",
+               count(*) as "value"
+        from "key_result" kr
+        inner join cte_objective o on o.id = kr."objective_id"
+        left join "key_result_latest_check_in" ci on ci."key_result_id" = kr.id
+        group by 1;
+      `,
+      [user.id, teamId],
+    )
+
+    return rows.reduce(
+      (accumulator, row) => ({
+        ...accumulator,
+        [row.key]: Number.parseInt(row.value),
+      }),
+      {
+        keyResultsQuantity: 0,
+        objectivesQuantity: 0,
+        high: 0,
+        medium: 0,
+        low: 0,
+        barrier: 0,
+        achieved: 0,
+        deprioritized: 0,
+      },
+    )
   }
 }
