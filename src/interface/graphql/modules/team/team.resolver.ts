@@ -144,25 +144,25 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return updatedTeam
   }
 
-  @Cacheable((team, request) => [team.id, request], 5 * 60)
-  @Stopwatch()
-  @ResolveField('status', () => StatusGraphQLObject)
-  protected async getStatusForCycle(
-    @Parent() team: TeamGraphQLNode,
-    @Args() request: TeamStatusRequest,
-  ) {
-    this.logger.log({
-      team,
-      request,
-      message: 'Fetching current status for this team',
-    })
+  // @Cacheable((team, request) => [team.id, request], 5 * 60)
+  // @Stopwatch()
+  // @ResolveField('status', () => StatusGraphQLObject)
+  // protected async getStatusForCycle(
+  //   @Parent() team: TeamGraphQLNode,
+  //   @Args() request: TeamStatusRequest,
+  // ) {
+  //   this.logger.log({
+  //     team,
+  //     request,
+  //     message: 'Fetching current status for this team',
+  //   })
 
-    const result = await this.corePorts.dispatchCommand<Status>('get-team-status', team.id, request)
-    if (!result)
-      throw new UserInputError(`We could not find status for the team with ID ${team.id}`)
+  //   const result = await this.corePorts.dispatchCommand<Status>('get-team-status', team.id, request)
+  //   if (!result)
+  //     throw new UserInputError(`We could not find status for the team with ID ${team.id}`)
 
-    return result
-  }
+  //   return result
+  // }
 
   @Cacheable('0.ownerId', 60 * 60)
   @Stopwatch()
@@ -217,7 +217,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       Team
     >(request)
 
-    const result = await this.corePorts.dispatchCommand<Team[]>(
+    // Alterar esse any para Team + latest Check in, mesma coisa no front
+    const result = await this.corePorts.dispatchCommand<any[]>(
       'get-team-ranked-descendants',
       team.id,
       filters,
@@ -483,25 +484,25 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return marshalResponde
   }
 
-  @Cacheable((team, request) => [team.id, request], 15 * 60)
-  @Stopwatch()
-  @ResolveField('delta', () => DeltaGraphQLObject)
-  protected async getDeltaForTeam(
-    @Parent() team: TeamGraphQLNode,
-    @Args() request: TeamStatusRequest,
-  ) {
-    this.logger.log({
-      team,
-      request,
-      message: 'Fetching delta for this team',
-    })
+  // @Cacheable((team, request) => [team.id, request], 15 * 60)
+  // @Stopwatch()
+  // @ResolveField('delta', () => DeltaGraphQLObject)
+  // protected async getDeltaForTeam(
+  //   @Parent() team: TeamGraphQLNode,
+  //   @Args() request: TeamStatusRequest,
+  // ) {
+  //   this.logger.log({
+  //     team,
+  //     request,
+  //     message: 'Fetching delta for this team',
+  //   })
 
-    const result = await this.corePorts.dispatchCommand<Delta>('get-team-delta', team.id, request)
-    if (!result)
-      throw new UserInputError(`We could not find a delta for the team with ID ${team.id}`)
+  //   const result = await this.corePorts.dispatchCommand<Delta>('get-team-delta', team.id, request)
+  //   if (!result)
+  //     throw new UserInputError(`We could not find a delta for the team with ID ${team.id}`)
 
-    return result
-  }
+  //   return result
+  // }
 
   @Cacheable('0.id', 5 * 60)
   @Stopwatch()
