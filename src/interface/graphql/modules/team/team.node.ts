@@ -56,13 +56,25 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
     description:
       'The status of the given team. Here you can fetch the current progress, confidence, and others for that team',
   })
-  public status: StatusGraphQLObject
+  public status?: StatusGraphQLObject
+
+  @Field(() => StatusGraphQLObject, {
+    description:
+      'The status of the given team. Here you can fetch the current progress, confidence, and others for that team',
+  })
+  public statuses?: StatusGraphQLObject
 
   @Field(() => DeltaGraphQLObject, {
     complexity: 2,
     description: 'The delta of this team comparing with last week',
   })
-  public delta!: DeltaGraphQLObject
+  public delta?: DeltaGraphQLObject
+
+  @Field(() => DeltaGraphQLObject, {
+    complexity: 2,
+    description: 'The delta of this team comparing with last week',
+  })
+  public deltas?: DeltaGraphQLObject
 
   @Field(() => UserGraphQLNode, {
     complexity: 1,
