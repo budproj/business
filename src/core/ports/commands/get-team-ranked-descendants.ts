@@ -85,8 +85,8 @@ export class GetTeamRankedDescendantsCommand extends Command<any[]> {
         description: row.description,
         gender: row.gender,
         parentId: row.parent_id,
-        status: row_status,
-        delta: deltaData,
+        statuses: row_status,
+        deltas: deltaData,
       }
     })
   }
