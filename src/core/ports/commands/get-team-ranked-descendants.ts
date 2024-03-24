@@ -9,7 +9,8 @@ import { Team } from '@core/modules/team/team.orm-entity'
 import { Command } from '@core/ports/commands/base.command'
 import { CommandFactory } from '@core/ports/commands/command.factory'
 
-export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
+// Alterar esse any para Team + latest Check in, mesma coisa no front
+export class GetTeamRankedDescendantsCommand extends Command<any[]> {
   private readonly getTeamStatus: Command<Status>
 
   constructor(protected core: CoreProvider, protected factory: CommandFactory) {
@@ -67,7 +68,7 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
       latest_check_in.parentId = row.latest_check_in?.parent_id
       latest_check_in.previousState = row.latest_check_in?.previous_state
       latest_check_in.user = row.latest_check_in?.user
-      const status: Status = {
+      const row_status: Status = {
         progress: row?.status?.progress ?? 0,
         confidence: row?.status?.confidence ?? 0,
         isOutdated: row.is_outdated,
@@ -84,8 +85,8 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
         description: row.description,
         gender: row.gender,
         parentId: row.parent_id,
-        statuses: status,
-        deltas: deltaData,
+        status: row_status,
+        delta: deltaData,
       }
     })
   }
