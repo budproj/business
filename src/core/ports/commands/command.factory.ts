@@ -35,6 +35,8 @@ import { GetUserFullNameCommand } from '@core/ports/commands/get-user-full-name.
 import { GetUserInitialsCommand } from '@core/ports/commands/get-user-initials.command'
 import { GetUserSettingsCommand } from '@core/ports/commands/get-user-settings.command'
 import { GetUserTeamTreeCommand } from '@core/ports/commands/get-user-team-tree.command'
+import { GetUserTeamsStatus } from '@core/ports/commands/get-user-teams-status'
+import { GetUserTeams } from '@core/ports/commands/get-user-teams.command'
 import { GetUserWithTeamsBySubCommand } from '@core/ports/commands/get-user-with-teams-from-sub.command'
 import { GetUserCommand } from '@core/ports/commands/get-user.command'
 import { InviteUserCommand } from '@core/ports/commands/invite-user.command'
@@ -180,6 +182,8 @@ const commandTypes = [
   'get-user-initials',
   'get-user-key-results',
   'get-user-settings',
+  'get-user-teams-status',
+  'get-user-teams',
   'get-user-team-tree',
   'get-user-with-teams-by-sub',
   'get-users-by-ids',
@@ -300,6 +304,8 @@ export class CommandFactory {
     'get-user-initials': GetUserInitialsCommand,
     'get-user-key-results': GetUserKeyResultsCommand,
     'get-user-settings': GetUserSettingsCommand,
+    'get-user-teams-status': GetUserTeamsStatus,
+    'get-user-teams': GetUserTeams,
     'get-user-team-tree': GetUserTeamTreeCommand,
     'get-user-with-teams-by-sub': GetUserWithTeamsBySubCommand,
     'get-users-by-ids': GetUsersByIdsCommand,

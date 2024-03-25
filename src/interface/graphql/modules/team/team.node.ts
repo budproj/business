@@ -73,6 +73,10 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   @Field({ complexity: 1, description: 'Defines if the team is a company' })
   public readonly isCompany?: boolean
 
+  @Field({ complexity: 1, description: 'Defines if the team is a company' })
+  public readonly is_company?: boolean
+
+
   @Field(() => TeamGraphQLNode, {
     complexity: 1,
     nullable: true,
