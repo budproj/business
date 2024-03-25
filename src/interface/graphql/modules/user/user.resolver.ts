@@ -470,13 +470,14 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       command,
       user.id,
       filters,
-      {
-        active,
-        confidence,
-        onlyOwnerKeyResults,
-      },
+      { active, confidence, onlyOwnerKeyResults },
     )
-    return this.relay.marshalResponse(queryResult, connection, user)
+    // eslint-disable-next-line no-warning-comments
+    // TODO: Esse filtro deve ser removido quando o backend for refatorado. O filtro pode ser feito dentro dos comandos, mas como a feature precisava ser entregue, foi feito dessa forma.
+    const filteredResults = onlyKeyResultsFromCompany
+      ? queryResult.filter((keyResult) => keyResult.teamId !== null)
+      : queryResult
+    return this.relay.marshalResponse<KeyResultInterface>(filteredResults, connection, user)
   }
 
   @Cacheable('0.id', 5 * 60)
