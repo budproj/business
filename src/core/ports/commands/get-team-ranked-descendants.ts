@@ -40,10 +40,12 @@ export class GetTeamRankedDescendantsCommand extends Command<any[]> {
     SELECT t.*,
     to_json(ts.*) as status,
     to_json(lcibt.*) as latest_check_in,
+    to_json(cqac.*) as "tacticalCycle",
     ts.progress - ts.previous_progress as delta_progress,
     ts.confidence - ts.previous_confidence as delta_confidence
     FROM team t
     JOIN team_company tc ON t.id = tc.team_id
+    join team_current_quarterly_active_cycle cqac on t.id = cqac.t_id
     LEFT JOIN team_status ts ON ts.team_id = tc.team_id
     join latest_check_in_by_team_with_user lcibt ON t.id = lcibt.team_id
     WHERE t.parent_id IS NOT NULL AND tc.company_id = $1
@@ -56,6 +58,18 @@ export class GetTeamRankedDescendantsCommand extends Command<any[]> {
       const deltaData = {
         progress: row.delta_progress ?? 0,
         confidence: row.delta_confidence ?? 0,
+      }
+      const row_tactical_cycle = {
+        dateStart: new Date(row.tacticalCycle.date_start),
+        dateEnd: new Date(row.tacticalCycle.date_end),
+        createdAt: new Date(row.tacticalCycle.created_at),
+        updatedAt: new Date(row.tacticalCycle.updated_at),
+        id: row.tacticalCycle.id,
+        teamId: row.tacticalCycle.team_id,
+        period: row.tacticalCycle.period,
+        cadence: row.tacticalCycle.cadence,
+        active: row.tacticalCycle.active,
+        parentId: row.tacticalCycle.parent_id,
       }
       const latest_check_in: KeyResultCheckIn = new KeyResultCheckIn()
       latest_check_in.id = row.latest_check_in?.id
@@ -87,6 +101,7 @@ export class GetTeamRankedDescendantsCommand extends Command<any[]> {
         parentId: row.parent_id,
         statuses: row_status,
         deltas: deltaData,
+        tacticalCycles: row_tactical_cycle,
       }
     })
   }
