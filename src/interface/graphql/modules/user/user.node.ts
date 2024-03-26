@@ -131,6 +131,13 @@ export class UserGraphQLNode implements GuardedNodeGraphQLInterface {
   })
   public readonly keyResults?: UserKeyResultsGraphQLConnection
 
+  @Field(() => UserKeyResultsGraphQLConnection, {
+    complexity: 0,
+    nullable: true,
+    description: 'The creation date ordered list of key results that this user owns',
+  })
+  public readonly keyResultsStatus?: UserKeyResultsGraphQLConnection
+
   @Field(() => UserKeyResultCommentsGraphQLConnection, {
     complexity: 0,
     nullable: true,

@@ -481,6 +481,47 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return this.relay.marshalResponse<KeyResultInterface>(filteredResults, connection, user)
   }
 
+  @Stopwatch()
+  @ResolveField('keyResultsStatus', () => UserKeyResultsGraphQLConnection, { nullable: true })
+  protected async getKeyResultsStatusForRequestAndUser(
+    @Args() request: UserKeyResultsRequest,
+    @Parent() user: UserGraphQLNode,
+  ) {
+    this.logger.log({
+      user,
+      request,
+      message: 'Fetching key results statuses for user',
+    })
+
+    const [options, _, connection] = this.relay.unmarshalRequest<UserKeyResultsRequest, KeyResult>(
+      request,
+    )
+
+    const {
+      active,
+      hasUserCheckMarks,
+      confidence,
+      onlyKeyResultsFromCompany,
+      onlyOwnerKeyResults,
+      ...filters
+    } = options
+    const command = hasUserCheckMarks
+      ? 'get-user-key-results-statuses-with-checkmarks'
+      : 'get-user-key-results-statuses'
+
+    const queryResult = await this.corePorts.dispatchCommand<KeyResultInterface[]>(
+      command,
+      user.id,
+      filters,
+      {
+        active,
+        confidence,
+        onlyOwnerKeyResults,
+      },
+    )
+    return this.relay.marshalResponse(queryResult, connection, user)
+  }
+
   @Cacheable('0.id', 5 * 60)
   @ResolveField('userIndicators', () => UserIndicatorsObject, {
     nullable: true,
