@@ -44,7 +44,8 @@ select lci.*, concat('{"fullName": "', u.first_name, u.last_name, '"}')::json as
       `,
       [userID],
     )
-    const blah = rows.map((row) => {
+
+    return rows.map((row) => {
       const deltaData = {
         progress: row.delta_progress,
         confidence: row.delta_confidence,
@@ -58,39 +59,5 @@ select lci.*, concat('{"fullName": "', u.first_name, u.last_name, '"}')::json as
         tacticalCycle: row.tacticalCycle,
       }
     })
-
-    return blah // Sipa nao precisa
-
-    // If (Array.isArray(rows) && rows.length === 0) {
-    //   return [
-    //     {
-    //       isOutdated: true,
-    //       isActive: true,
-    //       progress: 0,
-    //       confidence: 100,
-    //     },
-    //   ]
-    // }
-
-    // const latest_check_in: KeyResultCheckIn = new KeyResultCheckIn()
-    // latest_check_in.id = rows.last_check_in?.id
-    // latest_check_in.value = rows[0].last_check_in?.value
-    // latest_check_in.confidence = rows[0].last_check_in?.confidence
-    // latest_check_in.createdAt = new Date(rows[0].last_check_in?.created_at)
-    // latest_check_in.keyResultId = rows[0].last_check_in?.key_result_id
-    // latest_check_in.userId = rows[0].last_check_in?.user_id
-    // latest_check_in.comment = rows[0].last_check_in?.comment
-    // latest_check_in.parentId = rows[0].last_check_in?.parent_id
-    // latest_check_in.previousState = rows[0].last_check_in?.previous_state
-
-    // const toReturn: Status = {
-    //   isOutdated: rows[0].is_outdated,
-    //   confidence: rows[0].confidence,
-    //   progress: rows[0].progress,
-    //   reportDate: new Date(rows[0].last_check_in?.created_at),
-    //   isActive: rows[0].is_active,
-    //   latestCheckIn: latest_check_in,
-    // }
-    // return blah
   }
 }
