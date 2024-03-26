@@ -107,6 +107,14 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
   })
   public readonly tacticalCycle?: CycleGraphQLNode
 
+  @Field(() => CycleGraphQLNode, {
+    complexity: 1,
+    nullable: true,
+    description:
+      'Based on the current date, this key defines what is the current active tactical cycle for this team',
+  })
+  public readonly tacticalCycles?: CycleGraphQLNode
+
   // **********************************************************************************************
   // CONNECTION FIELDS
   // **********************************************************************************************
