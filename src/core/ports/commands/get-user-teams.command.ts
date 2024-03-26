@@ -1,3 +1,4 @@
+import { Status } from '@core/interfaces/status.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 
 import { Command } from './base.command'
@@ -35,7 +36,7 @@ export class GetUserTeams extends Command<Team[]> {
         name: row.name,
         description: row.description,
         statuses: row_status,
-        is_company: row.is_company,
+        is_company: row.is_company ?? false,
         updatedAt: row.updated_at,
         ownerId: row.owner_id,
         createdAt: row.created_at,
