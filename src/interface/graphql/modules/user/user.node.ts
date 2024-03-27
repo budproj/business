@@ -110,6 +110,13 @@ export class UserGraphQLNode implements GuardedNodeGraphQLInterface {
   })
   public readonly ownedTeams?: UserTeamsGraphQLConnection
 
+  @Field(() => UserTeamsGraphQLConnection, {
+    complexity: 0,
+    nullable: true,
+    description: 'The creation date ordered list of teams that this user owns',
+  })
+  public readonly teams_status?: any // Colocar tipo
+
   @Field(() => UserObjectivesGraphQLConnection, {
     complexity: 0,
     nullable: true,
@@ -123,6 +130,13 @@ export class UserGraphQLNode implements GuardedNodeGraphQLInterface {
     description: 'The creation date ordered list of key results that this user owns',
   })
   public readonly keyResults?: UserKeyResultsGraphQLConnection
+
+  @Field(() => UserKeyResultsGraphQLConnection, {
+    complexity: 0,
+    nullable: true,
+    description: 'The creation date ordered list of key results that this user owns',
+  })
+  public readonly keyResultsStatus?: UserKeyResultsGraphQLConnection
 
   @Field(() => UserKeyResultCommentsGraphQLConnection, {
     complexity: 0,

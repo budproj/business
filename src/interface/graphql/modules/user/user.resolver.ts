@@ -330,14 +330,57 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       TeamFiltersRequest,
       Team
     >(request)
-
+    // Console.log(user)
+    // console.log(filters)
+    // console.log(queryOptions)
     const queryResult = await this.core.user.getUserTeams(user, filters, queryOptions)
 
     return this.relay.marshalResponse<TeamInterface>(queryResult, connection, user)
   }
 
-  @Cacheable((request, user) => [user.id, request], 1 * 60)
   @Stopwatch()
+  @ResolveField('teams_status', () => UserTeamsGraphQLConnection)
+  protected async getStatusFromAllTeamsForCycle(
+    @Parent() user: UserGraphQLNode,
+    @Args() request: TeamFiltersRequest,
+  ) {
+    this.logger.log({
+      user,
+      message: 'Fetching current status for all teams of this user',
+    })
+
+    const [_, __, connection] = this.relay.unmarshalRequest<TeamFiltersRequest, Team>(request)
+
+    const result = await this.corePorts.dispatchCommand<any[]>('get-user-teams-status', user.id)
+    if (!result)
+      throw new UserInputError(`We could not find teams status for the user with ID ${user.id}`)
+
+    return this.relay.marshalResponse<TeamInterface>(result, connection, user)
+  }
+
+  @Stopwatch()
+  @ResolveField('get_teams', () => UserTeamsGraphQLConnection)
+  protected async getDataFromAllTeams(
+    @Parent() user: UserGraphQLNode,
+    @Args() request: TeamFiltersRequest,
+  ) {
+    this.logger.log({
+      user,
+      message: 'Fetching current status for all teams of this user',
+    })
+
+    const [_, __, connection] = this.relay.unmarshalRequest<TeamFiltersRequest, Team>(request)
+
+    const result = await this.corePorts.dispatchCommand<any[]>('get-user-teams', user.id)
+    if (!result)
+      throw new UserInputError(`We could not find teams status for the user with ID ${user.id}`)
+    console.log(result)
+    console.log('result')
+    return this.relay.marshalResponse<TeamInterface>(result, connection, user)
+  }
+
+  @Cacheable((request, user) => [user.id, request], 1 * 60)
+  // @Stopwatch()
   @ResolveField('ownedTeams', () => UserTeamsGraphQLConnection, { nullable: true })
   protected async getOwnedTeamsForRequestAndUser(
     @Args() request: TeamFiltersRequest,
@@ -436,6 +479,47 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       ? queryResult.filter((keyResult) => keyResult.teamId !== null)
       : queryResult
     return this.relay.marshalResponse<KeyResultInterface>(filteredResults, connection, user)
+  }
+
+  @Stopwatch()
+  @ResolveField('keyResultsStatus', () => UserKeyResultsGraphQLConnection, { nullable: true })
+  protected async getKeyResultsStatusForRequestAndUser(
+    @Args() request: UserKeyResultsRequest,
+    @Parent() user: UserGraphQLNode,
+  ) {
+    this.logger.log({
+      user,
+      request,
+      message: 'Fetching key results statuses for user',
+    })
+
+    const [options, _, connection] = this.relay.unmarshalRequest<UserKeyResultsRequest, KeyResult>(
+      request,
+    )
+
+    const {
+      active,
+      hasUserCheckMarks,
+      confidence,
+      onlyKeyResultsFromCompany,
+      onlyOwnerKeyResults,
+      ...filters
+    } = options
+    const command = hasUserCheckMarks
+      ? 'get-user-key-results-statuses-with-checkmarks'
+      : 'get-user-key-results-statuses'
+
+    const queryResult = await this.corePorts.dispatchCommand<KeyResultInterface[]>(
+      command,
+      user.id,
+      filters,
+      {
+        active,
+        confidence,
+        onlyOwnerKeyResults,
+      },
+    )
+    return this.relay.marshalResponse(queryResult, connection, user)
   }
 
   @Cacheable('0.id', 5 * 60)
