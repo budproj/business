@@ -105,13 +105,6 @@ export class KeyResultGraphQLNode implements GuardedNodeGraphQLInterface {
   })
   public status: StatusGraphQLObject
 
-  @Field(() => StatusGraphQLObject, {
-    complexity: 1,
-    description:
-      'The status of the given key-result. Here you can fetch the current progress, confidence, and others for that key-result',
-  })
-  public statuses?: StatusGraphQLObject
-
   @Field(() => DeltaGraphQLObject, {
     complexity: 1,
     description: 'The delta of this key-result comparing with last week',
