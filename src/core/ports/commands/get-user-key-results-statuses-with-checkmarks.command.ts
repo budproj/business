@@ -26,7 +26,7 @@ export class GetUserKeyResultsStatusesWithCheckMarksCommand extends Command<KeyR
          latest_check_in_by_kr_with_user as (
           select lci.*, concat('{"fullName": "', u.first_name, u.last_name, '"}')::json as user from latest_check_in_by_kr lci join "user" u on lci.user_id = u.id)
           
-          select kr.*, to_json(krs.*) as status, to_json(lci.*) as latest_check_infrom key_result_check_mark krcm 
+          select kr.*, to_json(krs.*) as status, to_json(lci.*) as latest_check_in from key_result_check_mark krcm 
       join key_result kr on krcm.key_result_id = kr.id
       join key_result_status krs on kr.id = krs.id
       left join latest_check_in_by_kr_with_user lci on kr.id = lci.key_result_id
