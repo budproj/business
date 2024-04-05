@@ -16,6 +16,7 @@ export interface UserInterface extends CoreEntityInterface {
   nickname?: string
   about?: string
   linkedInProfileAddress?: string
+  fullName?: string
 }
 
 export interface UserCredentialsAdditionalData {

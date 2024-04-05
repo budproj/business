@@ -56,13 +56,25 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
     description:
       'The status of the given team. Here you can fetch the current progress, confidence, and others for that team',
   })
-  public status: StatusGraphQLObject
+  public status?: StatusGraphQLObject
+
+  @Field(() => StatusGraphQLObject, {
+    description:
+      'The status of the given team. Here you can fetch the current progress, confidence, and others for that team',
+  })
+  public statuses?: StatusGraphQLObject
 
   @Field(() => DeltaGraphQLObject, {
     complexity: 2,
     description: 'The delta of this team comparing with last week',
   })
-  public delta!: DeltaGraphQLObject
+  public delta?: DeltaGraphQLObject
+
+  @Field(() => DeltaGraphQLObject, {
+    complexity: 2,
+    description: 'The delta of this team comparing with last week',
+  })
+  public deltas?: DeltaGraphQLObject
 
   @Field(() => UserGraphQLNode, {
     complexity: 1,
@@ -72,6 +84,10 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
 
   @Field({ complexity: 1, description: 'Defines if the team is a company' })
   public readonly isCompany?: boolean
+
+  @Field({ complexity: 1, description: 'Defines if the team is a company' })
+  public readonly is_company?: boolean
+
 
   @Field(() => TeamGraphQLNode, {
     complexity: 1,
@@ -94,6 +110,14 @@ export class TeamGraphQLNode implements GuardedNodeGraphQLInterface {
       'Based on the current date, this key defines what is the current active tactical cycle for this team',
   })
   public readonly tacticalCycle?: CycleGraphQLNode
+
+  @Field(() => CycleGraphQLNode, {
+    complexity: 1,
+    nullable: true,
+    description:
+      'Based on the current date, this key defines what is the current active tactical cycle for this team',
+  })
+  public readonly tacticalCycles?: CycleGraphQLNode
 
   // **********************************************************************************************
   // CONNECTION FIELDS

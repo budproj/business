@@ -217,6 +217,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       Team
     >(request)
 
+    // Alterar esse any para Team + latest Check in, mesma coisa no front
     const result = await this.corePorts.dispatchCommand<Team[]>(
       'get-team-ranked-descendants',
       team.id,
