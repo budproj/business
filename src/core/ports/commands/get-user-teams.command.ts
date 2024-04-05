@@ -10,16 +10,28 @@ export class GetUserTeams extends Command<Team[]> {
   }
 
   // @Stopwatch()
-  public async execute(userID: string): Promise<any[]> {
+  public async execute(userID: string): Promise<Team[]> {
     const rows = await this.core.entityManager.query(
       `
-      SELECT t.id, t.name, to_json(ts.*) as status, t.description,
-      ts.team_id = tc.company_id as is_company
-      FROM team t
-      left join team_status ts on t.id = ts.team_id
-      join team_company tc on t.id = tc.team_id
-      join team_users_user tuu on t.id = tuu.team_id
-      where tuu.user_id = $1
+      SELECT
+        t.id,
+        t.name,
+        to_json(ts.*) as status,
+        to_json(u.*) as owner,
+        t.description,
+        t.updated_at,
+        t.owner_id,
+        t.created_at,
+        t.parent_id,
+        ts.team_id = tc.company_id as is_company
+      FROM
+        team t
+        left join team_status ts on t.id = ts.team_id
+        join team_company tc on t.id = tc.team_id
+        join team_users_user tuu on t.id = tuu.team_id
+        join "user" u on t.owner_id = u.id
+      where
+        tuu.user_id = $1
       `,
       [userID],
     )
@@ -39,6 +51,7 @@ export class GetUserTeams extends Command<Team[]> {
         is_company: row.is_company ?? false,
         updatedAt: row.updated_at,
         ownerId: row.owner_id,
+        owner: row.owner,
         createdAt: row.created_at,
         gender: row.gender,
         parentId: row.parent_id,

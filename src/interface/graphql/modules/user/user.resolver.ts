@@ -351,7 +351,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
     const [_, __, connection] = this.relay.unmarshalRequest<TeamFiltersRequest, Team>(request)
 
-    const result = await this.corePorts.dispatchCommand<any[]>('get-user-teams-status', user.id)
+    const result = await this.corePorts.dispatchCommand<Team[]>('get-user-teams-status', user.id)
     if (!result)
       throw new UserInputError(`We could not find teams status for the user with ID ${user.id}`)
 
@@ -371,7 +371,7 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
     const [_, __, connection] = this.relay.unmarshalRequest<TeamFiltersRequest, Team>(request)
 
-    const result = await this.corePorts.dispatchCommand<any[]>('get-user-teams', user.id)
+    const result = await this.corePorts.dispatchCommand<Team[]>('get-user-teams', user.id)
     if (!result)
       throw new UserInputError(`We could not find teams status for the user with ID ${user.id}`)
     console.log(result)

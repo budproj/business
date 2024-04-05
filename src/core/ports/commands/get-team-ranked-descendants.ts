@@ -8,9 +8,8 @@ import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { Team } from '@core/modules/team/team.orm-entity'
 import { Command } from '@core/ports/commands/base.command'
 import { CommandFactory } from '@core/ports/commands/command.factory'
-
 // Alterar esse any para Team + latest Check in, mesma coisa no front
-export class GetTeamRankedDescendantsCommand extends Command<any[]> {
+export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
   private readonly getTeamStatus: Command<Status>
 
   constructor(protected core: CoreProvider, protected factory: CommandFactory) {

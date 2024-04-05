@@ -22,7 +22,7 @@ type Options = {
   onlyOwnerKeyResults?: boolean
 }
 
-export class GetUserKeyResultsStatusesCommand extends Command<any[]> {
+export class GetUserKeyResultsStatusesCommand extends Command<KeyResult[]> {
   public async execute(
     userID: string,
     filters?: KeyResultInterface,
