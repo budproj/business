@@ -1,12 +1,8 @@
-<<<<<<< HEAD
 import { uniqBy } from 'lodash'
 
 import { Status } from '@core/interfaces/status.interface'
 // eslint-disable-next-line import/order
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
-=======
-import { intersectionBy, uniqBy } from 'lodash'
->>>>>>> b957831... perf(query): create get user key result statuses command
 
 // Export interface Status {
 //     progress: number
@@ -26,11 +22,7 @@ type Options = {
   onlyOwnerKeyResults?: boolean
 }
 
-<<<<<<< HEAD
-export class GetUserKeyResultsStatusesCommand extends Command<any[]> {
-=======
 export class GetUserKeyResultsStatusesCommand extends Command<KeyResult[]> {
->>>>>>> b957831... perf(query): create get user key result statuses command
   public async execute(
     userID: string,
     filters?: KeyResultInterface,
@@ -47,16 +39,9 @@ export class GetUserKeyResultsStatusesCommand extends Command<KeyResult[]> {
          latest_check_in_by_kr_with_user as (
           select lci.*, concat('{"fullName": "', u.first_name, u.last_name, '"}')::json as user from latest_check_in_by_kr lci join "user" u on lci.user_id = u.id)
           
-<<<<<<< HEAD
           select kr.*, to_json(krs.*) as status, to_json(lci.*) as latest_check_in from key_result kr 
       join key_result_status krs on kr.id = krs.id
       left join latest_check_in_by_kr_with_user lci on kr.id = lci.key_result_id
-=======
-          select kr.*, to_json(krs.*) as status from key_result kr 
-      join key_result_status krs on kr.id = krs.id
-      left join latest_check_in_by_kr_with_user lci on kr.id = lci.key_result_id
-      where 
->>>>>>> b957831... perf(query): create get user key result statuses command
       where kr.owner_id = $1 
       and mode = $2`,
       [userID, filters.mode],
