@@ -17,6 +17,7 @@ RUN npm i --ignore-scripts
 COPY . ./
 
 RUN npm run prisma:generate:llm
+RUN npm run prisma:generate:mission-control
 RUN npm run build
 
 FROM node:16.16.0-alpine3.15 AS final
@@ -36,5 +37,6 @@ RUN mkdir -p node_modules
 RUN npm i --ignore=dev --ignore-scripts
 RUN npm run prisma:generate:llm
 RUN ls -al
+RUN npm run prisma:generate:mission-control
 
 CMD [ "npm", "run", "start:prod" ]
