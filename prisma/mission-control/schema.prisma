@@ -1,0 +1,25 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../schema/mission-control/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("MISSION_CONTROL_DATABASE_URL")
+}
+
+model Task {
+  userId            String
+  teamId            String
+  weekId            String
+  templateId        String
+  score             Float
+  availableSubtasks String[]
+  completedSubtasks String[]
+
+  @@id([userId, teamId, weekId, templateId])
+  @@index([userId, teamId, weekId, templateId])
+}
