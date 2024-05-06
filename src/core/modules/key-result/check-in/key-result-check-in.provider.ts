@@ -2,9 +2,6 @@ import { Injectable } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
 import { Any, DeleteResult, SelectQueryBuilder } from 'typeorm'
 
-import { EventPublisher } from '@core/common/messaging/base-scenarios/abstract'
-import { CheckInEvent } from '@core/common/messaging/base-scenarios/checkin.event'
-import { CHECK_IN_TASK_TEMPLATE_ID } from '@core/common/mission-control/tasks-template/constants'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { Sorting } from '@core/enums/sorting'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
@@ -32,7 +29,6 @@ export class KeyResultCheckInProvider extends CoreEntityProvider<
     protected readonly repository: KeyResultCheckInRepository,
     private readonly moduleReference: ModuleRef,
     private readonly team: TeamProvider,
-    private readonly fulfillerTaskPublisher: EventPublisher,
   ) {
     super(KeyResultCheckInProvider.name, repository)
   }
@@ -104,33 +100,7 @@ export class KeyResultCheckInProvider extends CoreEntityProvider<
   public async createCheckIn(
     checkIn: Partial<KeyResultCheckInInterface>,
   ): Promise<KeyResultCheckIn[]> {
-    const createdCheckin = await this.create(checkIn)
-
-    const {
-      keyResult: { id: keyResultId, teamId },
-    } = await this.repository.findOne(createdCheckin[0].id, {
-      relations: ['keyResult', 'user'],
-    })
-
-    const { ownerId } = await this.keyResultProvider.getFromID(createdCheckin[0].keyResultId)
-
-    const companies = await this.team.getUserCompanies({ id: ownerId })
-
-    const messageInterface = {
-      userId: ownerId,
-      companyId: companies[0].id,
-      date: Date.now(),
-      payload: {
-        teamId,
-        keyResultId,
-      },
-    }
-
-    await this.fulfillerTaskPublisher.publish<CheckInEvent>(CHECK_IN_TASK_TEMPLATE_ID, {
-      ...messageInterface,
-    })
-
-    return createdCheckin
+    return this.create(checkIn)
   }
 
   public async deleteFromObjective(objectiveID: string): Promise<DeleteResult> {

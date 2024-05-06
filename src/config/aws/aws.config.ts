@@ -10,11 +10,6 @@ export const awsConfig = registerAs(
       accessKeyID: process.env.AWS_CREDENTIALS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_CREDENTIALS_SECRET_ACCESS_KEY,
     },
-    sqs: {
-      endpoint: process.env.AWS_SQS_ENDPOINT,
-      createTaskQueueName: process.env.AWS_SQS_CREATE_TASK_QUEUE_NAME,
-      createTaskQueueUrl: process.env.AWS_SQS_CREATE_TASK_QUEUE_URL,
-    },
     s3: {
       bucketName: process.env.AWS_S3_BUCKET_NAME,
     },

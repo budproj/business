@@ -5,7 +5,6 @@ import { Any, Brackets, DeleteResult, FindConditions, In, Raw } from 'typeorm'
 import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
 import { CONFIDENCE_TAG_THRESHOLDS } from '@adapters/confidence-tag/confidence-tag.constants'
 import { ConfidenceTag } from '@adapters/confidence-tag/confidence-tag.enum'
-import { EventPublisher } from '@core/common/messaging/base-scenarios/abstract'
 import { CoreEntityProvider } from '@core/entity.provider'
 import { CoreQueryContext } from '@core/interfaces/core-query-context.interface'
 import { GetOptions } from '@core/interfaces/get-options'
@@ -19,7 +18,6 @@ import { CreationQuery } from '@core/types/creation-query.type'
 import { EntityOrderAttributes } from '@core/types/order-attribute.type'
 import { AnalyticsProvider } from '@infrastructure/analytics/analytics.provider'
 import { Stopwatch } from '@lib/logger/pino.decorator'
-import { PostgresJsService } from 'src/mission-control/infra/database/postgresjs/postgresjs.service'
 
 import { ProgressRecord } from '../../../adapters/analytics/progress-record.interface'
 import { Cycle } from '../cycle/cycle.orm-entity'
@@ -66,9 +64,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     protected readonly cycleProvider: CycleProvider,
     public readonly timeline: KeyResultTimelineProvider,
     protected readonly repository: KeyResultRepository,
-    private readonly postgres: PostgresJsService,
     private readonly analyticsProvider: AnalyticsProvider,
-    public fulfillerTaskPublisher: EventPublisher,
   ) {
     super(KeyResultProvider.name, repository)
   }
@@ -104,7 +100,8 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       : allConfidences
     const keyResultMode = filtersRest.mode ?? KeyResultMode.PUBLISHED
 
-    const queryResult = await this.postgres.getSqlInstance()<GetKeyResultsQuery[]>`WITH results AS (
+    const queryResult: GetKeyResultsQuery[] = await this.repository.query(
+      `WITH results AS (
       SELECT
         "key_result"."id" AS "key_result_id",
         "key_result"."created_at" AS "key_result_created_at",
@@ -159,19 +156,21 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
               LEFT JOIN cycle "cycle" ON "cycle"."id" = "objective"."cycle_id"
               LEFT JOIN key_result_check_in "check_in" ON "check_in"."key_result_id" = "key_result"."id"
           WHERE
-              "key_result"."team_id" = ANY(${teamsIds}::uuid[]) 
-              AND "cycle"."active" =  ${active}
-              AND "key_result"."mode" =  ${keyResultMode as KeyResultMode}
+              "key_result"."team_id" = ANY($1::uuid[]) 
+              AND "cycle"."active" =  $2
+              AND "key_result"."mode" =  $3
       ), total_count AS (
-        SELECT COUNT(*) FROM results WHERE rn = 1 AND COALESCE(check_in_confidence, 100) = ANY(${confidenceNumbers}::int[])
+        SELECT COUNT(*) FROM results WHERE rn = 1 AND COALESCE(check_in_confidence, 100) = ANY($4::int[])
       )
       SELECT *, (SELECT * FROM total_count) AS total
       FROM results a
       WHERE
         a.rn = 1 and
-        COALESCE(a.check_in_confidence, 100) =  ANY(${confidenceNumbers}::int[])
-      LIMIT ${queryLimit}
-      OFFSET ${queryOffset};`
+        COALESCE(a.check_in_confidence, 100) =  ANY($4::int[])
+      LIMIT $5
+      OFFSET $6;`,
+      [teamsIds, active, keyResultMode, confidenceNumbers, queryLimit, queryOffset],
+    )
 
     const parsedResult = toApplication(queryResult)
 
