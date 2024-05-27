@@ -24,48 +24,13 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
   ): Promise<Team[]> {
     const rows = await this.core.entityManager.query(
       `
-      SELECT query.*
-        FROM
-          (SELECT t.name,
-                  t.updated_at,
-                  t.owner_id,
-                  t.created_at,
-                  t.id,
-                  t.description,
-                  t.gender,
-                  t.parent_id,
-                  ts.is_outdated,
-                  ts.is_active,
-                  ts.progress,
-                  ts.confidence,
-                  ts.previous_progress,
-                  krlci.created_at AS latest_check_in_created_at,
-                  ROW_NUMBER() OVER(PARTITION BY t.name
-                    ORDER BY CASE
-                      WHEN krlci.created_at IS NULL THEN 0
-                      ELSE 1
-                      END DESC, krlci.created_at DESC) num
-          FROM team t
-          INNER JOIN team_company tc ON t.id = tc.team_id
-          INNER JOIN key_result kr ON kr.team_id = tc.team_id
-          LEFT JOIN key_result_latest_check_in krlci ON krlci.key_result_id = kr.id
-          LEFT JOIN team_status ts ON ts.team_id = tc.team_id
-          WHERE t.parent_id IS NOT NULL
-            AND tc.company_id = $1) AS query
-        WHERE num = 1
-        ORDER BY coalesce(progress, 0) DESC
+      SELECT t.*
+      FROM team t
+      JOIN team_company tc ON t.id = tc.team_id
+      LEFT JOIN team_current_status ts ON ts.team_id = tc.team_id
+      WHERE t.parent_id IS NOT NULL AND tc.company_id = $1
+      ORDER BY coalesce(progress, 0) DESC;
     `,
-      [teamID],
-    )
-
-    const tacticalCycle = await this.core.entityManager.query(
-      `
-      SELECT date_start, date_end 
-        FROM "cycle" c
-        WHERE c.team_id = $1
-          AND c.cadence = 'QUARTERLY'
-          AND c.active = true
-      `,
       [teamID],
     )
 
@@ -79,24 +44,6 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
         description: row.description,
         gender: row.gender,
         parentId: row.parent_id,
-        status: {
-          isOutdated: row.is_outdated,
-          isActive: row.is_active,
-          progress: row.progress,
-          confidence: row.confidence,
-          latestCheckIn: row.latest_check_in_created_at
-            ? {
-                createdAt: row.latest_check_in_created_at,
-              }
-            : null,
-        },
-        delta: {
-          progess: row.progess - row.previous_progress,
-        },
-        tacticalCycle: {
-          dateStart: tacticalCycle.date_start,
-          dateEnd: tacticalCycle.date_end,
-        },
       })
     })
   }

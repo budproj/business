@@ -157,8 +157,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching current status for this team',
     })
 
-    if (team.status) return team.status
-
     const result = await this.corePorts.dispatchCommand<Status>('get-team-status', team.id, request)
     if (!result)
       throw new UserInputError(`We could not find status for the team with ID ${team.id}`)
@@ -498,8 +496,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       message: 'Fetching delta for this team',
     })
 
-    if (team.delta) return team.delta
-
     const result = await this.corePorts.dispatchCommand<Delta>('get-team-delta', team.id, request)
     if (!result)
       throw new UserInputError(`We could not find a delta for the team with ID ${team.id}`)
@@ -515,8 +511,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       team,
       message: 'Fetching tactical cycle for this team',
     })
-
-    if (team.tacticalCycle) return team.tacticalCycle
 
     return this.corePorts.dispatchCommand<Cycle | undefined>('get-team-tactical-cycle', team.id)
   }
