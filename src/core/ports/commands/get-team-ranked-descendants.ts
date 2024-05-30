@@ -91,11 +91,11 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
             : null,
         },
         delta: {
-          progess: row.progess - row.previous_progress,
+          progress: row.progress - row.previous_progress,
         },
         tacticalCycle: {
-          dateStart: tacticalCycle.date_start,
-          dateEnd: tacticalCycle.date_end,
+          dateStart: tacticalCycle[0].date_start,
+          dateEnd: tacticalCycle[0].date_end,
         },
       })
     })
