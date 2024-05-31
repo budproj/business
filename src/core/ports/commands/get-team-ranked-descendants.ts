@@ -80,10 +80,10 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
         gender: row.gender,
         parentId: row.parent_id,
         status: {
-          isOutdated: row.is_outdated,
-          isActive: row.is_active,
-          progress: row.progress,
-          confidence: row.confidence,
+          isOutdated: row.is_outdated ?? false,
+          isActive: row.is_active ?? false,
+          progress: row.progress ?? 0,
+          confidence: row.confidence ?? -100,
           latestCheckIn: row.latest_check_in_created_at
             ? {
                 createdAt: row.latest_check_in_created_at,
@@ -91,7 +91,7 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
             : null,
         },
         delta: {
-          progress: row.progress - row.previous_progress,
+          progress: (row.progress ?? 0) - (row.previous_progress ?? 0),
         },
         tacticalCycle: {
           dateStart: tacticalCycle[0].date_start,
