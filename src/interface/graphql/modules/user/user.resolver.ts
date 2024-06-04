@@ -75,7 +75,6 @@ import { UserGraphQLNode } from './user.node'
 
 @GuardedResolver(UserGraphQLNode)
 export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserInterface> {
-  private readonly logger = new Logger(UserGraphQLResolver.name)
   private readonly uploadProvider: UploadGraphQLProvider
 
   constructor(
@@ -96,11 +95,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     @Args() request: NodeIndexesRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      request,
-      message: 'Fetching user with provided indexes',
-    })
-
     const user = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
     if (!user) throw new UserInputError(`We could not found an user with the provided arguments`)
 
@@ -113,10 +107,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   protected async getMyUserForRequestUserWithContext(
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log(
-      `Fetching data about the user that is executing the request. Provided user ID: ${userWithContext.id}`,
-    )
-
     const user = await this.queryGuard.getOneWithActionScopeConstraint(
       { id: userWithContext.id },
       userWithContext,
@@ -133,12 +123,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   ) {
     const canUpdate = await this.accessControl.canUpdate(userWithContext, request.id)
     if (!canUpdate) throw new UnauthorizedException()
-
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received update user request',
-    })
 
     const picture = await this.parseUserPictureFileToRemoteURL(request.data.picture)
     const newData = picture
@@ -171,12 +155,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     const canDelete = await this.accessControl.canDelete(userWithContext, request.id)
     if (!canDelete) throw new UnauthorizedException()
 
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received deactivate user request',
-    })
-
     return this.corePorts.dispatchCommand<User>('deactivate-user', request.id)
   }
 
@@ -187,12 +165,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   ) {
     const canDelete = await this.accessControl.canDelete(userWithContext, request.id)
     if (!canDelete) throw new UnauthorizedException()
-
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received reactivate user request',
-    })
 
     return this.corePorts.dispatchCommand<User>('reactivate-user', request.id)
   }
@@ -206,12 +178,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
 
     const canCreate = await this.accessControl.canCreate(userWithContext, teamID)
     if (!canCreate) throw new UnauthorizedException()
-
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received create user request',
-    })
 
     const createdUser = await this.corePorts.dispatchCommand<User>('create-user', newUserData, {
       autoInvite: !locale,
@@ -243,12 +209,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     const canUpdate = intersection(userWithContext.token.permissions, permissionsArray).length > 0
     if (!canUpdate) throw new UnauthorizedException()
 
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received update user role request',
-    })
-
     await this.corePorts.dispatchCommand<User>('update-user-role', request.id, request.role)
     return this.corePorts.dispatchCommand<User>('get-user', request.id)
   }
@@ -260,11 +220,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   protected async requestChangeUserPasswordEmailForRequestAndRequestUserWithContext(
     @Args() request: UserRquest,
   ) {
-    this.logger.log({
-      request,
-      message: 'Received update user role request',
-    })
-
     await this.corePorts.dispatchCommand<User>('request-change-user-password-email', request.id)
   }
 
@@ -273,21 +228,11 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   @Stopwatch()
   @ResolveField('authzRole', () => UserRoleObject)
   protected async getRoleForUser(@Parent() user: UserGraphQLNode) {
-    this.logger.log({
-      user,
-      message: 'Fetching user role',
-    })
-
     return this.corePorts.dispatchCommand<Role>('get-user-role', user.id)
   }
 
   @ResolveField('fullName', () => String)
   protected async getFullNameForUser(@Parent() user: UserGraphQLNode) {
-    this.logger.log({
-      user,
-      message: 'Fetching user full name',
-    })
-
     return this.core.user.buildUserFullName(user)
   }
 
@@ -298,12 +243,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     @Args() request: TeamFiltersRequest,
     @Parent() user: UserGraphQLNode,
   ) {
-    this.logger.log({
-      user,
-      request,
-      message: 'Fetching companies for user',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       TeamFiltersRequest,
       Team
@@ -320,12 +259,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     @Args() request: TeamFiltersRequest,
     @Parent() user: UserGraphQLNode,
   ) {
-    this.logger.log({
-      user,
-      request,
-      message: 'Fetching teams for user',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       TeamFiltersRequest,
       Team
@@ -343,12 +276,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     @Args() request: TeamFiltersRequest,
     @Parent() user: UserGraphQLNode,
   ) {
-    this.logger.log({
-      user,
-      request,
-      message: 'Fetching owned teams for user',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       TeamFiltersRequest,
       Team
@@ -365,10 +292,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
   protected async getIsTeamLeaderForRequestAndUser(
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      userWithContext,
-      message: 'Fetching if is team leader for user',
-    })
     const isTeamLeader = await this.accessControl.isUserTeamLeader(userWithContext)
 
     return isTeamLeader
@@ -380,12 +303,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     @Args() request: ObjectiveFiltersRequest,
     @Parent() user: UserGraphQLNode,
   ) {
-    this.logger.log({
-      user,
-      request,
-      message: 'Fetching objectives for user',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       ObjectiveFiltersRequest,
       Objective
@@ -402,12 +319,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     @Args() request: UserKeyResultsRequest,
     @Parent() user: UserGraphQLNode,
   ) {
-    this.logger.log({
-      user,
-      request,
-      message: 'Fetching key results for user',
-    })
-
     const [options, _, connection] = this.relay.unmarshalRequest<UserKeyResultsRequest, KeyResult>(
       request,
     )
@@ -443,11 +354,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     nullable: true,
   })
   protected async getUserIndicatorsForRequestAndUser(@Parent() user: UserGraphQLNode) {
-    this.logger.log({
-      user,
-      message: 'Fetching user key results progress',
-    })
-
     const queryResult = await this.corePorts.dispatchCommand('get-user-indicators', user.id)
 
     return queryResult
@@ -461,12 +367,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     @Args() request: KeyResultCommentFiltersRequest,
     @Parent() user: UserGraphQLNode,
   ) {
-    this.logger.log({
-      user,
-      request,
-      message: 'Fetching comments by user',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultCommentFiltersRequest,
       KeyResultComment
@@ -489,12 +389,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     @Args() request: KeyResultCheckInFiltersRequest,
     @Parent() user: UserGraphQLNode,
   ) {
-    this.logger.log({
-      user,
-      request,
-      message: 'Fetching check-ins by user',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultCheckInFiltersRequest,
       KeyResultCheckIn
@@ -515,12 +409,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     @Args() request: UserTasksRequest,
     @Parent() user: UserGraphQLNode,
   ) {
-    this.logger.log({
-      user,
-      request,
-      message: 'Fetching tasks for user',
-    })
-
     const [options, getOptions, connection] = this.relay.unmarshalRequest<UserTasksRequest, Task>(
       request,
     )
@@ -576,11 +464,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     @RequestUserWithContext() userWithContext: UserWithContext,
     @Parent() user: UserGraphQLNode,
   ) {
-    this.logger.log({
-      user,
-      message: 'Fetching user amplitude data',
-    })
-
     const isInTheSameCompany = await this.accessControl.isInTheSameCompany(userWithContext, user.id)
     if (!isInTheSameCompany) throw new ForbiddenException()
 
@@ -600,12 +483,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     @Args() request: UserSettingFiltersRequest,
     @Parent() user: UserGraphQLNode,
   ) {
-    this.logger.log({
-      user,
-      request,
-      message: 'Fetching settings for user',
-    })
-
     const [filters, _, connection] = this.relay.unmarshalRequest<
       UserSettingFiltersRequest,
       UserSetting

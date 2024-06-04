@@ -33,7 +33,6 @@ export class AuthzClientProvider {
 
   public async updateUser(userId: string, userData: Record<string, unknown>): Promise<User> {
     try {
-      this.logger.debug(`Updating user ${userId}`)
       return await this.mgmtClient.updateUser({ id: userId }, userData)
     } catch (error: unknown) {
       this.logger.error(error)
@@ -43,8 +42,6 @@ export class AuthzClientProvider {
 
   public async newUser(data: CreateUserData): Promise<User> {
     try {
-      this.logger.debug(`Creating new user`)
-
       const user = await this.mgmtClient.createUser(data)
 
       const availableRoles = await this.mgmtClient.getRoles()
@@ -61,7 +58,6 @@ export class AuthzClientProvider {
 
   public async inviteUser(email: string): Promise<void> {
     try {
-      this.logger.debug(`Inviting user with e-mail ${email}`)
       await this.authClient.requestChangePasswordEmail({ email, connection: this.connection })
     } catch (error: unknown) {
       this.logger.error(error)

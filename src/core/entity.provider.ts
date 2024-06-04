@@ -240,11 +240,6 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
     query: SelectQueryBuilder<E>,
     queryContext?: CoreQueryContext,
   ): Promise<E> {
-    this.logger.debug({
-      queryContext,
-      message: `Getting one for request`,
-    })
-
     return query.getOne()
   }
 
@@ -252,11 +247,6 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
     query: SelectQueryBuilder<E>,
     queryContext?: CoreQueryContext,
   ): Promise<E[]> {
-    this.logger.debug({
-      queryContext,
-      message: `Getting many for request`,
-    })
-
     return query.getMany()
   }
 

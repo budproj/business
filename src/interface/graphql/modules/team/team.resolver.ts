@@ -64,7 +64,6 @@ import { TeamGraphQLNode } from './team.node'
 
 @GuardedResolver(TeamGraphQLNode)
 export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamInterface> {
-  private readonly logger = new Logger(TeamGraphQLResolver.name)
 
   constructor(
     protected readonly core: CoreProvider,
@@ -80,11 +79,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     @Args() request: NodeIndexesRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      request,
-      message: 'Fetching team with provided indexes',
-    })
-
     const team = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
     if (!team) throw new UserInputError(`We could not found a team with the provided arguments`)
 
@@ -100,12 +94,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
 
     const canCreate = await this.accessControl.canCreate(userWithContext, parentID)
     if (!canCreate) throw new UnauthorizedException()
-
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received create team request',
-    })
 
     const payload = {
       name: data.name,
@@ -129,12 +117,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     const canUpdate = await this.accessControl.canUpdate(userWithContext, request.id)
     if (!canUpdate) throw new UnauthorizedException()
 
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received update team request',
-    })
-
     const updatedTeam = await this.corePorts.dispatchCommand<Team>('update-team', request.id, {
       ...request.data,
     })
@@ -151,12 +133,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     @Parent() team: TeamGraphQLNode,
     @Args() request: TeamStatusRequest,
   ) {
-    this.logger.log({
-      team,
-      request,
-      message: 'Fetching current status for this team',
-    })
-
     if (team.status) return team.status
 
     const result = await this.corePorts.dispatchCommand<Status>('get-team-status', team.id, request)
@@ -170,11 +146,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   @Stopwatch()
   @ResolveField('owner', () => UserGraphQLNode)
   protected async getOwnerForTeam(@Parent() team: TeamGraphQLNode) {
-    this.logger.log({
-      team,
-      message: 'Fetching owner for team',
-    })
-
     return this.core.user.getOne({ id: team.ownerId })
   }
 
@@ -185,12 +156,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     @Args() request: TeamFiltersRequest,
     @Parent() team: TeamGraphQLNode,
   ) {
-    this.logger.log({
-      team,
-      request,
-      message: 'Fetching child teams for team',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       TeamFiltersRequest,
       Team
@@ -208,12 +173,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     @Args() request: TeamFiltersRequest,
     @Parent() team: TeamGraphQLNode,
   ) {
-    this.logger.log({
-      team,
-      request,
-      message: 'Fetching ranked descendants for team',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       TeamFiltersRequest,
       Team
@@ -233,11 +192,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   @Stopwatch()
   @ResolveField('parent', () => TeamGraphQLNode, { nullable: true })
   protected async getParentForTeam(@Parent() team: TeamGraphQLNode) {
-    this.logger.log({
-      team,
-      message: 'Fetching parent team for team',
-    })
-
     return this.core.team.getOne({ id: team.parentId })
   }
 
@@ -252,12 +206,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     @Parent() team: TeamGraphQLNode,
     @Info() info: ResolvedFieldInfo,
   ) {
-    this.logger.log({
-      team,
-      request,
-      message: 'Fetching users for team',
-    })
-
     const [rawFilters, getOptions, connection] = this.relay.unmarshalRequest<
       UserFiltersRequest,
       User
@@ -310,11 +258,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
 
   @ResolveField('isCompany', () => Boolean)
   protected async getIsCompanyForTeam(@Parent() team: TeamGraphQLNode) {
-    this.logger.log({
-      team,
-      message: 'Deciding if the team is a company',
-    })
-
     return this.core.team.specification.isACompany.isSatisfiedBy(team)
   }
 
@@ -325,12 +268,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     @Args() request: CycleFiltersRequest,
     @Parent() team: TeamGraphQLNode,
   ) {
-    this.logger.log({
-      team,
-      request,
-      message: 'Fetching cycles for team',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       CycleFiltersRequest,
       Cycle
@@ -347,12 +284,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     @Args() request: ObjectiveFiltersRequest,
     @Parent() team: TeamGraphQLNode,
   ) {
-    this.logger.log({
-      team,
-      request,
-      message: 'Fetching objectives for team',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       ObjectiveFiltersRequest,
       Objective
@@ -377,12 +308,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     @Args() request: ObjectiveFiltersRequest,
     @Parent() team: TeamGraphQLNode,
   ) {
-    this.logger.log({
-      team,
-      request,
-      message: 'Fetching support objectives for team',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       ObjectiveFiltersRequest,
       Objective
@@ -407,12 +332,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     @Args() request: ObjectiveFiltersRequest,
     @Parent() team: TeamGraphQLNode,
   ) {
-    this.logger.log({
-      team,
-      request,
-      message: 'Fetching all objectives for team',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       ObjectiveFiltersRequest,
       Objective
@@ -438,8 +357,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
 
     const allObjectives = uniqBy([...objectives, ...supportObjectives], 'id')
 
-    this.logger.log('Got unique objectives %', allObjectives)
-
     return this.relay.marshalResponse<ObjectiveInterface>(allObjectives, connection, team)
   }
 
@@ -449,12 +366,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     @Args() request: UserKeyResultsRequest,
     @Parent() team: TeamGraphQLNode,
   ) {
-    this.logger.log({
-      team,
-      request,
-      message: 'Fetching key-results for team',
-    })
-
     const [options, _, connection] = this.relay.unmarshalRequest<UserKeyResultsRequest, KeyResult>(
       request,
     )
@@ -478,10 +389,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
       hasMoreToLoad,
     )
 
-    console.log('\n\n\n\n\n\n\n\n\n\n\n')
-    console.log({ marshalResponde, hasMoreToLoad, totalCount, filters })
-    console.log('\n\n\n\n\n\n\n\n\n\n\n')
-
     return marshalResponde
   }
 
@@ -492,12 +399,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     @Parent() team: TeamGraphQLNode,
     @Args() request: TeamStatusRequest,
   ) {
-    this.logger.log({
-      team,
-      request,
-      message: 'Fetching delta for this team',
-    })
-
     if (team.delta) return team.delta
 
     const result = await this.corePorts.dispatchCommand<Delta>('get-team-delta', team.id, request)
@@ -511,11 +412,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   @Stopwatch()
   @ResolveField('tacticalCycle', () => CycleGraphQLNode, { nullable: true })
   protected async getTacticalCycleForTeam(@Parent() team: TeamGraphQLNode) {
-    this.logger.log({
-      team,
-      message: 'Fetching tactical cycle for this team',
-    })
-
     if (team.tacticalCycle) return team.tacticalCycle
 
     return this.corePorts.dispatchCommand<Cycle | undefined>('get-team-tactical-cycle', team.id)
@@ -526,11 +422,6 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     @RequestUserWithContext() userWithContext: UserWithContext,
     @Parent() team: TeamGraphQLNode,
   ) {
-    this.logger.log({
-      userWithContext,
-      message: 'Quantities of the company',
-    })
-
     const data = await this.corePorts.dispatchCommand(
       'get-objectives-and-key-results-quantities',
       userWithContext,

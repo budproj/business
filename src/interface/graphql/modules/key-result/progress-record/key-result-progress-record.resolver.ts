@@ -14,7 +14,6 @@ import { KeyResultProgressRecordGraphQLNode } from './key-result-progress-record
 
 @GuardedResolver(KeyResultProgressRecordGraphQLNode)
 export class KeyResultProgressRecordGraphQLResolver extends BaseGraphQLResolver {
-  private readonly logger = new Logger(KeyResultProgressRecordGraphQLResolver.name)
 
   constructor(private readonly corePorts: CorePortsProvider) {
     super()
@@ -24,11 +23,6 @@ export class KeyResultProgressRecordGraphQLResolver extends BaseGraphQLResolver 
   protected async resolveKeyResultForKeyResultProgressRecord(
     @Parent() keyResultProgressRecord: KeyResultProgressRecordGraphQLNode,
   ) {
-    this.logger.log({
-      keyResultProgressRecord,
-      message: 'Fetching key result for key result progress record',
-    })
-
     return this.corePorts.dispatchCommand<KeyResult>('get-key-result', {
       id: keyResultProgressRecord.keyResultId,
     })
@@ -38,11 +32,6 @@ export class KeyResultProgressRecordGraphQLResolver extends BaseGraphQLResolver 
   protected async resolveKeyResultCheckInForKeyResultProgressRecord(
     @Parent() keyResultProgressRecord: KeyResultProgressRecordGraphQLNode,
   ) {
-    this.logger.log({
-      keyResultProgressRecord,
-      message: 'Fetching key result check-in for key result progress record',
-    })
-
     return this.corePorts.dispatchCommand<KeyResultCheckIn>('get-key-result-check-in', {
       id: keyResultProgressRecord.keyResultCheckInId,
     })

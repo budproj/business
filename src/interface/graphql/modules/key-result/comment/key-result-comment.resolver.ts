@@ -32,8 +32,6 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   KeyResultComment,
   KeyResultCommentInterface
 > {
-  private readonly logger = new Logger(KeyResultCommentGraphQLResolver.name)
-
   constructor(
     protected readonly core: CoreProvider,
     private readonly corePorts: CorePortsProvider,
@@ -49,11 +47,6 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: NodeIndexesRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      request,
-      message: 'Fetching key-result comment with provided indexes',
-    })
-
     const keyResultComment = await this.queryGuard.getOneWithActionScopeConstraint(
       request,
       userWithContext,
@@ -76,12 +69,6 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   ) {
     const canCreate = await this.accessControl.canCreate(userWithContext, request.data.keyResultId)
     if (!canCreate) throw new UnauthorizedException()
-
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received create comment request',
-    })
 
     const keyResultStatus = await this.corePorts.dispatchCommand<Status>(
       'get-key-result-status',
@@ -114,12 +101,6 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
     @RequestUserWithContext() userWithContext: UserWithContext,
     @Args() request: KeyResultCommentDeleteRequest,
   ) {
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Removing key result comment',
-    })
-
     const keyResult = await this.core.keyResult.getFromKeyResultCommentID(request.id)
     if (!keyResult) throw new UserInputError('We were not able to find your key-result comment')
 
@@ -143,11 +124,6 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   protected async getUserForKeyResultComment(
     @Parent() keyResultComment: KeyResultCommentGraphQLNode,
   ) {
-    this.logger.log({
-      keyResultComment,
-      message: 'Fetching user for key result comment',
-    })
-
     return this.core.user.getOne({ id: keyResultComment.userId })
   }
 
@@ -155,21 +131,11 @@ export class KeyResultCommentGraphQLResolver extends GuardedNodeGraphQLResolver<
   protected async getKeyResultForKeyResultComment(
     @Parent() keyResultComment: KeyResultCommentGraphQLNode,
   ) {
-    this.logger.log({
-      keyResultComment,
-      message: 'Fetching key result for key result comment',
-    })
-
     return this.core.keyResult.getOne({ id: keyResultComment.keyResultId })
   }
 
   @ResolveField('extra', () => String, { nullable: true })
   protected async stringfyExtra(@Parent() keyResultComment: KeyResultCommentGraphQLNode) {
-    this.logger.log({
-      keyResultComment,
-      message: 'Fetching extra and stringfying it',
-    })
-
     return JSON.stringify(keyResultComment.extra)
   }
 }

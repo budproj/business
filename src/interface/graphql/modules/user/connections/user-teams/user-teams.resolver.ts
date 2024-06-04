@@ -28,8 +28,6 @@ export class UserTeamsConnectionGraphQLResolver extends GuardedConnectionGraphQL
   Team,
   TeamInterface
 > {
-  private readonly logger = new Logger(UserTeamsConnectionGraphQLResolver.name)
-
   constructor(
     protected readonly core: CoreProvider,
     private readonly corePorts: CorePortsProvider,
@@ -43,12 +41,6 @@ export class UserTeamsConnectionGraphQLResolver extends GuardedConnectionGraphQL
     @Args() request: TeamAndUserRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received add team to user request',
-    })
-
     const canUpdate = await this.accessControl.canUpdate(userWithContext, request.userID)
     if (!canUpdate) throw new UnauthorizedException()
 
@@ -60,12 +52,6 @@ export class UserTeamsConnectionGraphQLResolver extends GuardedConnectionGraphQL
     @Args() request: TeamAndUsersRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received add team to users request',
-    })
-
     const [{ usersIDs: usersToAddTeam, teamID }, __, connection] = this.relay.unmarshalRequest<
       TeamAndUsersRequest,
       User
@@ -89,12 +75,6 @@ export class UserTeamsConnectionGraphQLResolver extends GuardedConnectionGraphQL
     @Args() request: TeamAndUserRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received remove team to user request',
-    })
-
     const canUpdate = await this.accessControl.canUpdate(userWithContext, request.userID)
     if (!canUpdate) throw new UnauthorizedException()
 
@@ -104,11 +84,6 @@ export class UserTeamsConnectionGraphQLResolver extends GuardedConnectionGraphQL
   @Cacheable('0.id', 5 * 60)
   @ResolveField('quantities', () => QuantityNode)
   protected async quantities(@RequestUserWithContext() userWithContext: UserWithContext) {
-    this.logger.log({
-      userWithContext,
-      message: 'Quantities of the company',
-    })
-
     const data = await this.corePorts.dispatchCommand(
       'get-objectives-and-key-results-quantities',
       userWithContext,

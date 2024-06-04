@@ -22,7 +22,6 @@ import { TeamFlagsRequest } from './requests/team-flags.request'
 
 @GuardedResolver(FlagsGraphQLNode)
 export class FlagsGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamInterface> {
-  private readonly logger = new Logger(FlagsGraphQLResolver.name)
 
   constructor(
     protected corePorts: CorePortsProvider,
@@ -39,11 +38,6 @@ export class FlagsGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamI
   ) {
     const canRead = await this.accessControl.canRead(userWithContext, request.id)
     if (!canRead) throw new UnauthorizedException()
-
-    this.logger.log({
-      request,
-      message: 'Fetching team flags for team',
-    })
 
     const { outdated, low, noRelated, barrier } = await this.corePorts.dispatchCommand<TeamFlag>(
       'get-team-flags',
@@ -67,11 +61,6 @@ export class FlagsGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamI
   ) {
     const canRead = await this.accessControl.canRead(userWithContext, request.id)
     if (!canRead) throw new UnauthorizedException()
-
-    this.logger.log({
-      request,
-      message: 'Fetching team flags data for team',
-    })
 
     const [, _, connection] = this.relay.unmarshalRequest<TeamFlagsRequest, User>(request)
 

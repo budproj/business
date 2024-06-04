@@ -21,7 +21,6 @@ export class ObjectivesConnectionGraphQLResolver extends GuardedConnectionGraphQ
   Objective,
   ObjectiveInterface
 > {
-  private readonly logger = new Logger(ObjectivesConnectionGraphQLResolver.name)
 
   constructor(
     protected readonly core: CoreProvider,
@@ -35,12 +34,6 @@ export class ObjectivesConnectionGraphQLResolver extends GuardedConnectionGraphQ
     @Args() request: ObjectiveFiltersRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      request,
-      userWithContext,
-      message: 'Fetching objectives with filters',
-    })
-
     const [options, _, connection] = this.relay.unmarshalRequest<
       ObjectiveFiltersRequest,
       Objective

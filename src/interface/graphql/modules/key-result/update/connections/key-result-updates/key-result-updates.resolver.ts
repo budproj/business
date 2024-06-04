@@ -20,8 +20,6 @@ export class KeyResultUpdatesConnectionGraphQLResolver extends GuardedConnection
   KeyResultUpdate,
   KeyResultUpdateInterface
 > {
-  private readonly logger = new Logger(KeyResultUpdatesConnectionGraphQLResolver.name)
-
   constructor(protected readonly core: CoreProvider) {
     super(Resource.KEY_RESULT, core, core.keyResult.keyResultUpdateProvider)
   }
@@ -33,12 +31,6 @@ export class KeyResultUpdatesConnectionGraphQLResolver extends GuardedConnection
     @Args() request: KeyResultUpdateFiltersRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      request,
-      userWithContext,
-      message: 'Fetching key-result updates with filters',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultUpdateFiltersRequest,
       KeyResultUpdate

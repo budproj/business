@@ -24,8 +24,6 @@ import { TaskGraphQLNode } from './task.node'
 
 @GuardedResolver(TaskGraphQLNode)
 export class TaskGraphQLResolver extends GuardedNodeGraphQLResolver<Task, TaskInterface> {
-  private readonly logger = new Logger(TaskGraphQLResolver.name)
-
   constructor(
     protected readonly core: CoreProvider,
     protected accessControl: UserAccessControl,
@@ -41,12 +39,6 @@ export class TaskGraphQLResolver extends GuardedNodeGraphQLResolver<Task, TaskIn
   ) {
     const canUpdate = await this.accessControl.canUpdate(userWithContext, userWithContext.id)
     if (!canUpdate) throw new UnauthorizedException()
-
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received create user task request',
-    })
 
     const task = await this.corePorts.dispatchCommand<Task>('create-task', {
       task: request,
@@ -69,12 +61,6 @@ export class TaskGraphQLResolver extends GuardedNodeGraphQLResolver<Task, TaskIn
 
     const canUpdate = await this.accessControl.canUpdate(userWithContext, oldTask?.assignedUserId)
     if (!canUpdate) throw new UnauthorizedException()
-
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received toggle user task request',
-    })
 
     const task = await this.corePorts.dispatchCommand<Task>(
       'toggle-task',
@@ -99,12 +85,6 @@ export class TaskGraphQLResolver extends GuardedNodeGraphQLResolver<Task, TaskIn
     const canUpdate = await this.accessControl.canUpdate(userWithContext, oldTask?.assignedUserId)
     if (!canUpdate) throw new UnauthorizedException()
 
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received delete user task request',
-    })
-
     const deletedTask = await this.corePorts.dispatchCommand<Task>('delete-task', request.id)
 
     if (!deletedTask) throw new UserInputError('We were not able to delete this task')
@@ -126,12 +106,6 @@ export class TaskGraphQLResolver extends GuardedNodeGraphQLResolver<Task, TaskIn
     const canUpdate = await this.accessControl.canUpdate(userWithContext, oldTask?.assignedUserId)
 
     if (!canUpdate) throw new UnauthorizedException()
-
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received update user task description request',
-    })
 
     const task = await this.corePorts.dispatchCommand<Task>(
       'update-task-description',

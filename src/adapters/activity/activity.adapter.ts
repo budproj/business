@@ -4,7 +4,6 @@ import { Activity } from './activities/base.activity'
 import { ActivityDispatcher } from './interfaces/activity-dispatcher.interface'
 
 export class ActivityAdapter<S extends string = string> {
-  private readonly logger = new Logger(ActivityAdapter.name)
 
   constructor(private readonly dispatchers: Record<S, ActivityDispatcher>) {}
 
@@ -16,13 +15,6 @@ export class ActivityAdapter<S extends string = string> {
       ([name, dispatcher]) =>
         !ignoreDispatchers.includes(name as S) && dispatcher.dispatch<D>(activity),
     )
-
-    this.logger.log({
-      activityType: activity.type,
-      metadata: activity.metadata,
-      data: activity.data,
-      message: 'Dispatching activity',
-    })
 
     await Promise.all(dispatchPromises)
   }

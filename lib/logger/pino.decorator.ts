@@ -41,7 +41,7 @@ export const Stopwatch = ({ omitArgs, includeReturn }: Arguments = {}): MethodDe
 
         const logCall = (argumentsList) => {
           if (mustShowExtensiveLogs) {
-            logger.info(
+            logger.trace(
               `${traceTag}(${argumentsList.map(() => '%o').join(', ')})`,
               // eslint-disable-next-line no-negated-condition
               ...argumentsList.map((argument) => (argument !== undefined ? argument : 'undefined')),
@@ -54,7 +54,7 @@ export const Stopwatch = ({ omitArgs, includeReturn }: Arguments = {}): MethodDe
           logCall(Object.values(omit(arguments_, omitArgs)))
         } else if (omitArgs) {
           if (mustShowExtensiveLogs) {
-            logger.info(`${traceTag}()`)
+            logger.trace(`${traceTag}()`)
           }
         } else {
           logCall([...arguments_])
@@ -64,11 +64,11 @@ export const Stopwatch = ({ omitArgs, includeReturn }: Arguments = {}): MethodDe
 
         const handleResult = (res) => {
           if (mustShowExtensiveLogs) {
-            logger.info(`${traceTag} took ${Date.now() - start}ms`)
+            logger.trace(`${traceTag} took ${Date.now() - start}ms`)
           }
 
           if (includeReturn && res !== undefined && mustShowExtensiveLogs) {
-            logger.info(`${traceTag} -> %o`, res)
+            logger.trace(`${traceTag} -> %o`, res)
           }
 
           return res

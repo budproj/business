@@ -20,8 +20,6 @@ export class KeyResultCommentsConnectionGraphQLResolver extends GuardedConnectio
   KeyResultComment,
   KeyResultCommentInterface
 > {
-  private readonly logger = new Logger(KeyResultCommentsConnectionGraphQLResolver.name)
-
   constructor(protected readonly core: CoreProvider) {
     super(Resource.KEY_RESULT_COMMENT, core, core.keyResult.keyResultCommentProvider)
   }
@@ -33,12 +31,6 @@ export class KeyResultCommentsConnectionGraphQLResolver extends GuardedConnectio
     @Args() request: KeyResultCommentFiltersRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      request,
-      userWithContext,
-      message: 'Fetching key-result comments with filters',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultCommentFiltersRequest,
       KeyResultComment

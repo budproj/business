@@ -23,8 +23,6 @@ export class TeamsConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
   Team,
   TeamInterface
 > {
-  private readonly logger = new Logger(TeamsConnectionGraphQLResolver.name)
-
   constructor(protected readonly core: CoreProvider) {
     super(Resource.TEAM, core, core.team)
   }
@@ -36,12 +34,6 @@ export class TeamsConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
     @Args() request: TeamFiltersRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      request,
-      userWithContext,
-      message: 'Fetching teams with filters',
-    })
-
     const [{ level, ...filters }, queryOptions, connection] = this.relay.unmarshalRequest<
       TeamFiltersRequest,
       Team

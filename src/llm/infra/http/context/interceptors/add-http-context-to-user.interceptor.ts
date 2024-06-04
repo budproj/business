@@ -10,7 +10,6 @@ import { HTTPRequest } from '../types'
 
 @Injectable()
 export class AddHTTPContextToUserInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(AddHTTPContextToUserInterceptor.name)
   private readonly authz = new PolicyAdapter()
 
   constructor(private readonly core: CoreProvider) {}
@@ -22,11 +21,6 @@ export class AddHTTPContextToUserInterceptor implements NestInterceptor {
     const request = executionContext.switchToHttp().getRequest<HTTPRequest>()
 
     request.userWithContext = await this.getRequestUser(request)
-
-    this.logger.debug({
-      requestUser: request.userWithContext,
-      message: `Selected user with ID ${request.userWithContext?.id.toString()} for current request`,
-    })
 
     return next.handle()
   }

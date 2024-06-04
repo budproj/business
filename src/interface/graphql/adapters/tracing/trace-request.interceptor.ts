@@ -13,7 +13,6 @@ import { GraphQLRequest } from '../context/interfaces/request.interface'
 @Injectable()
 export class TraceGraphQLRequestInterceptor implements NestInterceptor {
   protected readonly godmode: GodmodeProvider
-  private readonly logger = new Logger(TraceGraphQLRequestInterceptor.name)
   private readonly tracing = new TracingProvider('http-request')
 
   public intercept(executionContext: ExecutionContext, next: CallHandler): Observable<any> {
@@ -22,11 +21,6 @@ export class TraceGraphQLRequestInterceptor implements NestInterceptor {
 
     const tracingData = this.getTracingData(request)
     request.tracing = tracingData
-
-    this.logger.debug({
-      requestTracing: request.tracing,
-      message: 'Attached tracing on current request',
-    })
 
     return next.handle()
   }

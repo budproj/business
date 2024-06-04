@@ -11,7 +11,6 @@ import { AWSConfigProvider } from '@config/aws/aws.provider'
 
 @Injectable()
 export class AWSSESProvider implements EmailProviderInterface {
-  private readonly logger = new Logger(AWSSESProvider.name)
   private readonly config: AWSSESConfigInterface
 
   constructor(
@@ -34,16 +33,7 @@ export class AWSSESProvider implements EmailProviderInterface {
   public async send(data: EmailData, metadata: EmailMetadata): Promise<void> {
     const parameters = this.buildTemplateEmailParams(data, metadata)
 
-    this.logger.debug({
-      parameters,
-      message: 'Sending e-mail with AWS SES',
-    })
-
     await this.remote.sendBulkTemplatedEmail(parameters).promise()
-
-    this.logger.debug({
-      message: 'Email sent',
-    })
   }
 
   private buildTemplateEmailParams(

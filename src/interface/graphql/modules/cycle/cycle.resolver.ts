@@ -44,7 +44,6 @@ import { Stopwatch } from '@lib/logger/pino.decorator';
 
 @GuardedResolver(CycleGraphQLNode)
 export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, CycleInterface> {
-  private readonly logger = new Logger(CycleGraphQLResolver.name)
 
   constructor(
     protected readonly core: CoreProvider,
@@ -59,11 +58,6 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     @Args() request: NodeIndexesRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      request,
-      message: 'Fetching cycle with provided indexes',
-    })
-
     const cycle = await this.queryGuard.getOneWithActionScopeConstraint(request, userWithContext)
     if (!cycle) throw new UserInputError(`We could not found a cycle with the provided arguments`)
 
@@ -75,11 +69,6 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     @Args() request: CyclesInSamePeriodRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      request,
-      message: 'Fetching cycles in same period',
-    })
-
     const [{ fromCycles, ...filters }, queryOptions, connection] = this.relay.unmarshalRequest<
       CyclesInSamePeriodRequest,
       Cycle
@@ -101,12 +90,6 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     @Parent() cycle: CycleGraphQLNode,
     @Args() request: StatusRequest,
   ) {
-    this.logger.log({
-      cycle,
-      request,
-      message: 'Fetching current status for this cycle',
-    })
-
     const result = await this.corePorts.dispatchCommand<Status>(
       'get-cycle-status',
       cycle.id,
@@ -122,11 +105,6 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   @Stopwatch({ omitArgs: true })
   @ResolveField('team', () => TeamGraphQLNode)
   protected async getTeamForCycle(@Parent() cycle: CycleGraphQLNode) {
-    this.logger.log({
-      cycle,
-      message: 'Fetching team for cycle',
-    })
-
     return this.core.team.getOne({ id: cycle.teamId })
   }
 
@@ -137,12 +115,6 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     @Args() request: ObjectiveFiltersRequest,
     @Parent() cycle: CycleGraphQLNode,
   ) {
-    this.logger.log({
-      cycle,
-      request,
-      message: 'Fetching objectives for cycle',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       ObjectiveFiltersRequest,
       Objective
@@ -157,11 +129,6 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   @Stopwatch({ omitArgs: true })
   @ResolveField('parent', () => CycleGraphQLNode, { nullable: true })
   protected async getParentCycleForCycle(@Parent() cycle: CycleGraphQLNode) {
-    this.logger.log({
-      cycle,
-      message: 'Fetching parent cycle for cycle',
-    })
-
     return this.core.cycle.getOne({ id: cycle.parentId })
   }
 
@@ -170,12 +137,6 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     @Args() request: CycleFiltersRequest,
     @Parent() cycle: CycleGraphQLNode,
   ) {
-    this.logger.log({
-      cycle,
-      request,
-      message: 'Fetching child cycles for cycle',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       CycleFiltersRequest,
       Cycle
@@ -194,12 +155,6 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     @Args() request: KeyResultFiltersRequest,
     @Parent() cycle: CycleGraphQLNode,
   ) {
-    this.logger.log({
-      request,
-      cycle,
-      message: 'Fetching key results for cycle',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultFiltersRequest,
       KeyResult
@@ -217,11 +172,6 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
 
   @ResolveField('delta', () => DeltaGraphQLObject)
   protected async getDeltaForObjective(@Parent() cycle: CycleGraphQLNode) {
-    this.logger.log({
-      cycle,
-      message: 'Fetching delta for this cycle',
-    })
-
     const result = await this.corePorts.dispatchCommand<Delta>('get-cycle-delta', cycle.id)
     if (!result)
       throw new UserInputError(`We could not find a delta for the cyle with ID ${cycle.id}`)
@@ -236,13 +186,6 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   ) {
     const canCreate = await this.accessControl.canCreate(userWithContext, request.data.teamId)
     if (!canCreate) throw new UnauthorizedException()
-
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received create cycle request',
-    })
-
     const cycle = await this.corePorts.dispatchCommand<Cycle>('create-cycle', {
       ...request.data,
     })
@@ -259,12 +202,6 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
     const canUpdate = await this.accessControl.canUpdate(userWithContext, request.id)
     if (!canUpdate) throw new UnauthorizedException()
 
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received update cycle request',
-    })
-
     const cycle = await this.corePorts.dispatchCommand<Cycle>('update-cycle', request.id, {
       ...request.data,
     })
@@ -280,12 +217,6 @@ export class CycleGraphQLResolver extends GuardedNodeGraphQLResolver<Cycle, Cycl
   ) {
     const canDelete = await this.accessControl.canDelete(userWithContext, request.id)
     if (!canDelete) throw new UnauthorizedException()
-
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received delete cycle request',
-    })
 
     const deleteResult = await this.corePorts.dispatchCommand('delete-cycle', request.id)
     if (!deleteResult) throw new UserInputError('We could not delete your cycle')
