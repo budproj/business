@@ -98,7 +98,7 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
               ? {
                   createdAt: row.latest_check_in_created_at,
                   user: {
-                    firstName: row.first_name,
+                    fullName: row.first_name,
                   },
                 }
               : undefined,
