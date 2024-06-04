@@ -55,7 +55,7 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
         INNER JOIN team_company tc ON t.id = tc.team_id
         LEFT JOIN key_result kr ON kr.team_id = tc.team_id
         LEFT JOIN key_result_latest_check_in krlci ON krlci.key_result_id = kr.id
-        left join "user" u on u.id = krlci.user_id 
+        LEFT JOIN "user" u ON u.id = krlci.user_id 
         LEFT JOIN team_status ts ON ts.team_id = tc.team_id
         WHERE t.parent_id IS NOT NULL
           AND tc.company_id = $1) AS query
