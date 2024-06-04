@@ -12,6 +12,8 @@ export const typeormConfig = registerAs('typeorm', (): TypeORMConfigInterface =>
     endpoint: {
       host: cliConfig.host,
       port: cliConfig.port,
+      host2: cliConfig.host2,
+      port2: cliConfig.port2,
       database: cliConfig.database,
     },
 
