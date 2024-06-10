@@ -14,7 +14,6 @@ import { GraphQLRequest } from '../interfaces/request.interface'
 @Injectable()
 export class AddContextToUserInterceptor implements NestInterceptor {
   protected readonly godmode: GodmodeProvider
-  private readonly logger = new Logger(AddContextToUserInterceptor.name)
   private readonly authz = new PolicyAdapter()
 
   constructor(private readonly core: CoreProvider, private readonly config: GraphQLConfigProvider) {
@@ -31,11 +30,6 @@ export class AddContextToUserInterceptor implements NestInterceptor {
     request.userWithContext = this.godmode.enabled
       ? await this.godmode.getGodUser(this.core)
       : await this.getRequestUser(request)
-
-    this.logger.debug({
-      requestUser: request.userWithContext,
-      message: `Selected user with ID ${request.userWithContext?.id.toString()} for current request`,
-    })
 
     return next.handle()
   }

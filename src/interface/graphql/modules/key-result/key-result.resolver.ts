@@ -62,7 +62,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   KeyResult,
   KeyResultInterface
 > {
-  private readonly logger = new Logger(KeyResultGraphQLResolver.name)
 
   constructor(
     protected readonly core: CoreProvider,
@@ -79,11 +78,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   ) {
     const canRead = await this.accessControl.canRead(userWithContext, request.id)
     if (!canRead) throw new UnauthorizedException()
-
-    this.logger.log({
-      request,
-      message: 'Fetching key-result with provided indexes',
-    })
 
     const keyResult = await this.corePorts.dispatchCommand<KeyResult>('get-key-result', request)
 
@@ -102,12 +96,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
   ) {
     const canUpdate = await this.accessControl.canUpdate(userWithContext, request.id)
     if (!canUpdate) throw new UnauthorizedException()
-
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received update key-result request',
-    })
 
     const originalKeyResult = await this.corePorts.dispatchCommand<KeyResult>('get-key-result', {
       id: request.id,
@@ -141,12 +129,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     )
     if (!canCreate) throw new UnauthorizedException()
 
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received create key-result request',
-    })
-
     const keyResult = await this.corePorts.dispatchCommand<KeyResult>('create-key-result', {
       ...request.data,
     })
@@ -163,12 +145,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     const canDelete = await this.accessControl.canDelete(userWithContext, request.id)
     if (!canDelete) throw new UnauthorizedException()
 
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received delete key-result request',
-    })
-
     const deleteResult = await this.corePorts.dispatchCommand('delete-key-result', request.id)
     if (!deleteResult) throw new UserInputError('We could not delete your key-result')
 
@@ -177,13 +153,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
 
   @ResolveField('owner', () => UserGraphQLNode)
   protected async getOwnerForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
-    this.logger.log({
-      keyResult,
-      message: 'Fetching owner for key result',
-    })
-
-    console.log('')
-
     return this.core.user.getOne({ id: keyResult.ownerId })
   }
 
@@ -192,11 +161,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: KeyResultSupportTeamMembersFiltersRequest,
     @Parent() keyResult: KeyResultGraphQLNode,
   ) {
-    this.logger.log({
-      keyResult: keyResult.supportTeamMembers,
-      message: 'Fetching supportTeamMembers',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest(request)
 
     const queryResult = await this.corePorts.dispatchCommand<User[]>(
@@ -209,21 +173,11 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
 
   @ResolveField('team', () => TeamGraphQLNode)
   protected async getTeamForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
-    this.logger.log({
-      keyResult,
-      message: 'Fetching team for key result',
-    })
-
     return this.core.team.getOne({ id: keyResult.teamId })
   }
 
   @ResolveField('objective', () => ObjectiveGraphQLNode)
   protected async getObjectiveForKeyResult(@Parent() keyResult: KeyResultGraphQLNode) {
-    this.logger.log({
-      keyResult,
-      message: 'Fetching objective for key result',
-    })
-
     return this.core.objective.getFromKeyResult(keyResult)
   }
 
@@ -232,12 +186,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: KeyResultCommentFiltersRequest,
     @Parent() keyResult: KeyResult,
   ) {
-    this.logger.log({
-      keyResult,
-      request,
-      message: 'Fetching key-result comments',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultCommentFiltersRequest,
       KeyResultComment
@@ -253,12 +201,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: KeyResultUpdateFiltersRequest,
     @Parent() keyResult: KeyResult,
   ) {
-    this.logger.log({
-      keyResult,
-      request,
-      message: 'Fetching key-result updates',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultUpdateFiltersRequest,
       KeyResultUpdate
@@ -275,13 +217,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Parent() keyResult: KeyResult,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      userWithContext,
-      keyResult,
-      request,
-      message: 'Fetching key-result checklist',
-    })
-
     const [filters, _, connection] = this.relay.unmarshalRequest<
       KeyResultCheckMarkFiltersRequest,
       KeyResultCheckMark
@@ -305,12 +240,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: KeyResultCheckInFiltersRequest,
     @Parent() keyResult: KeyResult,
   ) {
-    this.logger.log({
-      keyResult,
-      request,
-      message: 'Fetching key-result check-ins',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultCommentFiltersRequest,
       KeyResultComment
@@ -326,12 +255,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: ConnectionFiltersRequest,
     @Parent() keyResult: KeyResultGraphQLNode,
   ) {
-    this.logger.log({
-      keyResult,
-      request,
-      message: 'Fetching timeline for key result',
-    })
-
     const connection = this.relay.unmarshalRequest<
       ConnectionFiltersRequest,
       KeyResultCheckIn | KeyResultComment | KeyResultUpdate
@@ -347,12 +270,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Parent() keyResult: KeyResultGraphQLNode,
     @Args() request: StatusRequest,
   ) {
-    this.logger.log({
-      keyResult,
-      request,
-      message: 'Fetching current status for this key-result',
-    })
-
     const result = await this.corePorts.dispatchCommand<Status>(
       'get-key-result-status',
       keyResult.id,
@@ -368,11 +285,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
 
   @ResolveField('delta', () => DeltaGraphQLObject)
   protected async getDeltaForObjective(@Parent() keyResult: KeyResultGraphQLNode) {
-    this.logger.log({
-      keyResult,
-      message: 'Fetching delta for this key-result',
-    })
-
     const result = await this.corePorts.dispatchCommand<Delta>('get-key-result-delta', keyResult.id)
     if (!result)
       throw new UserInputError(
@@ -387,12 +299,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Parent() keyResult: KeyResultGraphQLNode,
     @Args() request: ConnectionFiltersRequest,
   ) {
-    this.logger.log({
-      keyResult,
-      request,
-      message: 'Fetching progress history for key result',
-    })
-
     const connection = this.relay.unmarshalRequest<ConnectionFiltersRequest, ProgressRecord>(
       request,
     )[2]
@@ -407,11 +313,6 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
 
   @ResolveField('commentCount', () => String, { nullable: true })
   protected async stringfyExtra(@Parent() keyResult: KeyResultGraphQLNode) {
-    this.logger.log({
-      keyResult,
-      message: 'Fetching key result comment count and stringfying it',
-    })
-
     return JSON.stringify(keyResult.commentCount)
   }
 }

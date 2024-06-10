@@ -44,8 +44,6 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   Objective,
   ObjectiveInterface
 > {
-  private readonly logger = new Logger(ObjectiveGraphQLResolver.name)
-
   constructor(
     protected readonly core: CoreProvider,
     protected readonly corePorts: CorePortsProvider,
@@ -59,11 +57,6 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: NodeIndexesRequest,
     @RequestUserWithContext() authorizationUser: UserWithContext,
   ) {
-    this.logger.log({
-      request,
-      message: 'Fetching objective with provided indexes',
-    })
-
     const objective = await this.queryGuard.getOneWithActionScopeConstraint(
       request,
       authorizationUser,
@@ -82,12 +75,6 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     const canUpdate = await this.accessControl.canUpdate(userWithContext, request.id)
     if (!canUpdate) throw new UnauthorizedException()
 
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received update objective request',
-    })
-
     const objective = await this.corePorts.dispatchCommand<KeyResult>(
       'update-objective',
       request.id,
@@ -104,15 +91,6 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: NodeDeleteRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    // Const canDelete = await this.accessControl.canDelete(userWithContext, request.id)
-    // if (!canDelete) throw new UnauthorizedException()
-
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received delete objective request',
-    })
-
     const deleteResult = await this.corePorts.dispatchCommand('delete-objective', request.id)
     if (!deleteResult) throw new UserInputError('We could not delete your objective')
 
@@ -130,13 +108,6 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
       request.data.ownerId,
     )
     if (!canCreate) throw new UnauthorizedException()
-
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received create objective request',
-    })
-
     const objective = await this.corePorts.dispatchCommand<Objective>('create-objective', {
       ...request.data,
     })
@@ -147,31 +118,16 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
 
   @ResolveField('owner', () => UserGraphQLNode)
   protected async getOwnerForObjective(@Parent() objective: ObjectiveGraphQLNode) {
-    this.logger.log({
-      objective,
-      message: 'Fetching owner for objective',
-    })
-
     return this.core.user.getOne({ id: objective.ownerId })
   }
 
   @ResolveField('cycle', () => CycleGraphQLNode)
   protected async getCycleForObjective(@Parent() objective: ObjectiveGraphQLNode) {
-    this.logger.log({
-      objective,
-      message: 'Fetching cycle for objective',
-    })
-
     return this.core.cycle.getFromObjective(objective)
   }
 
   @ResolveField('team', () => TeamGraphQLNode, { nullable: true })
   protected async getTeamForObjective(@Parent() objective: ObjectiveGraphQLNode) {
-    this.logger.log({
-      objective,
-      message: 'Fetching team for objective',
-    })
-
     return this.corePorts.dispatchCommand<Team>('get-team', objective.teamId)
   }
 
@@ -180,12 +136,6 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: TeamFiltersRequest,
     @Parent() objective: ObjectiveGraphQLNode,
   ) {
-    this.logger.log({
-      objective,
-      request,
-      message: 'Fetching support teams for objective',
-    })
-
     const [_, __, connection] = this.relay.unmarshalRequest<TeamFiltersRequest, Team>(request)
 
     const queryResult = await this.corePorts.dispatchCommand<Team[]>(
@@ -201,12 +151,6 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: KeyResultFiltersRequest,
     @Parent() objective: ObjectiveGraphQLNode,
   ) {
-    this.logger.log({
-      objective,
-      request,
-      message: 'Fetching key-results for objective',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultFiltersRequest,
       KeyResult
@@ -230,12 +174,6 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Parent() objective: ObjectiveGraphQLNode,
     @Args() request: StatusRequest,
   ) {
-    this.logger.log({
-      objective,
-      request,
-      message: 'Fetching current status for this objective',
-    })
-
     const result = await this.corePorts.dispatchCommand<Status>(
       'get-objective-status',
       objective.id,
@@ -249,11 +187,6 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
 
   @ResolveField('delta', () => DeltaGraphQLObject)
   protected async getDeltaForObjective(@Parent() objective: ObjectiveGraphQLNode) {
-    this.logger.log({
-      objective,
-      message: 'Fetching delta for this objective',
-    })
-
     const result = await this.corePorts.dispatchCommand<Delta>('get-objective-delta', objective.id)
     if (!result)
       throw new UserInputError(
@@ -270,13 +203,6 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
   ) {
     const canPublish = await this.accessControl.canUpdate(userWithContext, request.id)
     if (!canPublish) throw new UnauthorizedException()
-
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received publish objective and key-results request',
-    })
-
     const objective = await this.corePorts.dispatchCommand<Objective>(
       'publish-objective-and-key-results',
       request.id,

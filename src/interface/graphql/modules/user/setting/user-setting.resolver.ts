@@ -24,8 +24,6 @@ export class UserSettingGraphQLResolver extends GuardedNodeGraphQLResolver<
   UserSetting,
   UserSettingInterface
 > {
-  private readonly logger = new Logger(UserSettingGraphQLResolver.name)
-
   constructor(
     protected corePorts: CorePortsProvider,
     protected accessControl: UserAccessControl,
@@ -39,11 +37,6 @@ export class UserSettingGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: NodeIndexesRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      request,
-      message: 'Fetching user setting with provided indexes',
-    })
-
     const canRead = await this.accessControl.canRead(userWithContext, request.id)
     if (!canRead) throw new UnauthorizedException()
 
@@ -55,11 +48,6 @@ export class UserSettingGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: UserSettingUpdateMainTeamRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      request,
-      message: 'Received update main team in preferences request',
-    })
-
     const canUpdate = await this.accessControl.canUpdate(userWithContext, request.userID)
     if (!canUpdate) throw new UnauthorizedException()
 
@@ -75,11 +63,6 @@ export class UserSettingGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: UserSettingUpdateRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      request,
-      message: 'Received update setting request',
-    })
-
     const canUpdate = await this.accessControl.canRead(userWithContext, request.userID)
     if (!canUpdate) throw new UnauthorizedException()
 
@@ -93,11 +76,6 @@ export class UserSettingGraphQLResolver extends GuardedNodeGraphQLResolver<
 
   @ResolveField('preferences', () => String, { nullable: false })
   protected async stringfyExtra(@Parent() userSettings: UserSettingGraphQLNode) {
-    this.logger.log({
-      userSettings,
-      message: 'Fetching user settings preferences and stringfying it',
-    })
-
     if (!userSettings.preferences.main_team) {
       // TODO: maybe one day elaborate a trigger in pure SQL to get the company as default
       const partialUser = { id: userSettings.userId }

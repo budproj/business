@@ -20,8 +20,6 @@ export class CyclesConnectionGraphQLResolver extends GuardedConnectionGraphQLRes
   Cycle,
   CycleInterface
 > {
-  private readonly logger = new Logger(CyclesConnectionGraphQLResolver.name)
-
   constructor(protected readonly core: CoreProvider) {
     super(Resource.CYCLE, core, core.cycle)
   }
@@ -31,12 +29,6 @@ export class CyclesConnectionGraphQLResolver extends GuardedConnectionGraphQLRes
     @Args() request: CycleFiltersRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      request,
-      userWithContext,
-      message: 'Fetching teams with filters',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       CycleFiltersRequest,
       Cycle

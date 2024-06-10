@@ -11,7 +11,6 @@ import { GraphQLConfigProvider } from '@config/graphql/graphql.provider'
 @Injectable()
 export class TokenGraphQLGuard extends AuthGuard('jwt') {
   protected readonly godmode: GodmodeProvider
-  private readonly logger = new Logger(TokenGraphQLGuard.name)
 
   constructor(private readonly config: GraphQLConfigProvider) {
     super()
@@ -26,10 +25,6 @@ export class TokenGraphQLGuard extends AuthGuard('jwt') {
     const graphqlExecutionContext = GqlExecutionContext.create(executionContext)
     const request = graphqlExecutionContext.getContext().req
     const guardRequest = () => super.canActivate(new ExecutionContextHost([request]))
-
-    this.logger.debug({
-      message: 'Evaluating if we should allow request',
-    })
 
     return guardRequest()
   }

@@ -30,7 +30,6 @@ export class KeyResultKeyResultSupportTeamConnectionGraphQLResolver extends Guar
   User,
   UserInterface
 > {
-  private readonly logger = new Logger(KeyResultKeyResultSupportTeamConnectionGraphQLResolver.name)
 
   constructor(
     protected readonly core: CoreProvider,
@@ -50,13 +49,6 @@ export class KeyResultKeyResultSupportTeamConnectionGraphQLResolver extends Guar
   ) {
     const canUpdate = await this.accessControl.canUpdate(userWithContext, request.data.keyResultId)
     if (!canUpdate) throw new UnauthorizedException()
-
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received add user to support team request',
-    })
-
     const keyResult = await this.corePorts.dispatchCommand<KeyResult>('get-key-result', {
       id: request.data.keyResultId,
     })
@@ -81,12 +73,6 @@ export class KeyResultKeyResultSupportTeamConnectionGraphQLResolver extends Guar
   ) {
     const canUpdate = await this.accessControl.canUpdate(userWithContext, request.data.keyResultId)
     if (!canUpdate) throw new UnauthorizedException()
-
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received remove user to support team request',
-    })
 
     const keyResult = await this.corePorts.dispatchCommand<KeyResult>('get-key-result', {
       id: request.data.keyResultId,

@@ -33,8 +33,6 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
   KeyResultCheckMark,
   KeyResultCheckMarkInterface
 > {
-  private readonly logger = new Logger(KeyResultCheckMarkGraphQLResolver.name)
-
   constructor(
     protected readonly core: CoreProvider,
     private readonly corePorts: CorePortsProvider,
@@ -57,12 +55,6 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
   ) {
     const canCreate = await this.accessControl.canCreate(userWithContext, request.data.keyResultId)
     if (!canCreate) throw new UnauthorizedException()
-
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received create check mark request',
-    })
 
     const keyResultStatus = await this.corePorts.dispatchCommand<Status>(
       'get-key-result-status',
@@ -90,12 +82,6 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
     @Args() request: KeyResultCheckMarkToggleRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received toggle check mark request',
-    })
-
     const toggledCheckMark = await this.corePorts.dispatchCommand<KeyResultCheckMark>(
       'toggle-check-mark',
       request.data,
@@ -113,12 +99,6 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
     @Args() request: KeyResultCheckMarkUpdateDescriptionRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received update check mark description request',
-    })
-
     const updatedCheckMark = await this.corePorts.dispatchCommand<KeyResultCheckMark>(
       'update-check-mark-description',
       { id: request.id, ...request.data },
@@ -138,12 +118,6 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
     @Args() request: KeyResultCheckMarkUpdateAssigneeRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received update check mark assignee request',
-    })
-
     const updatedCheckMark = await this.corePorts.dispatchCommand<KeyResultCheckMark>(
       'update-check-mark-assignee',
       { id: request.id, ...request.data },
@@ -162,12 +136,6 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
     @Args() request: KeyResultCheckMarkDeleteRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received delete check mark request',
-    })
-
     const deletedResponse = await this.corePorts.dispatchCommand<KeyResultCheckMark>(
       'delete-check-mark',
       request,
@@ -180,11 +148,6 @@ export class KeyResultCheckMarkGraphQLResolver extends GuardedNodeGraphQLResolve
 
   @ResolveField('assignedUser', () => UserGraphQLNode)
   protected async getOwnerForKeyResult(@Parent() checkMark: KeyResultCheckMarkGraphQLNode) {
-    this.logger.log({
-      checkMark,
-      message: 'Fetching user assigned to check mark',
-    })
-
     const user = await this.corePorts.dispatchCommand<User>('get-user', {
       id: checkMark.assignedUserId,
     })

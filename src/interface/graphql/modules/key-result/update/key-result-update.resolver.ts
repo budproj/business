@@ -24,7 +24,6 @@ export class KeyResultUpdateGraphQLResolver extends GuardedNodeGraphQLResolver<
   KeyResultUpdate,
   KeyResultUpdateInterface
 > {
-  private readonly logger = new Logger(KeyResultUpdateGraphQLResolver.name)
 
   constructor(
     protected readonly core: CoreProvider,
@@ -41,11 +40,6 @@ export class KeyResultUpdateGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: NodeIndexesRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      request,
-      message: 'Fetching key-result update with provided indexes',
-    })
-
     const keyResultUpdate = await this.queryGuard.getOneWithActionScopeConstraint(
       request,
       userWithContext,
@@ -62,11 +56,6 @@ export class KeyResultUpdateGraphQLResolver extends GuardedNodeGraphQLResolver<
   protected async getKeyResultForKeyResultUpdate(
     @Parent() keyResultUpdate: KeyResultUpdateGraphQLNode,
   ) {
-    this.logger.log({
-      keyResultUpdate,
-      message: 'Fetching key result for key result update',
-    })
-
     return this.core.keyResult.getOne({ id: keyResultUpdate.keyResultId })
   }
 }

@@ -27,12 +27,6 @@ export class GraphQLRequiredPoliciesGraphQLGuard
     const request = this.getGraphQLRequestFromContext(graphqlExecutionContext)
     const resolverRequiredActions = this.getResolverRequiredActions(graphqlExecutionContext)
 
-    this.logger.debug({
-      resolverRequiredActions,
-      user: request.user,
-      message: 'Checking if user is allowed in given route',
-    })
-
     const hasRequiredPolicies = this.authorization.canUserExecuteActions(
       request.user,
       resolverRequiredActions,

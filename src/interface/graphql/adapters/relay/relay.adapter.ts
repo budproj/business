@@ -43,7 +43,6 @@ export class RelayGraphQLAdapter {
     hasNextPage?: boolean,
   ): Connection<N> {
     const connection = connectionFromArray(nodes, {})
-    console.log({ nodes, connectionRequest, connection })
 
     const pageInfo = {
       ...connection.pageInfo,

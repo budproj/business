@@ -7,8 +7,6 @@ import { AuthzConfigProvider } from '@config/authz/authz.provider'
 
 @Injectable()
 export class AuthzStrategyProvider extends PassportStrategy(Strategy) {
-  private readonly logger = new Logger(AuthzStrategyProvider.name)
-
   constructor(protected readonly config: AuthzConfigProvider) {
     super({
       secretOrKeyProvider: passportJwtSecret({
@@ -22,8 +20,6 @@ export class AuthzStrategyProvider extends PassportStrategy(Strategy) {
   }
 
   protected validate(token: any) {
-    this.logger.debug({ message: 'Received request to guarded endpoint with token', token })
-
     return { token }
   }
 }

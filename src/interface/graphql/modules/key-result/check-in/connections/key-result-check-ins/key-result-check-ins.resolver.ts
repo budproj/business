@@ -20,7 +20,6 @@ export class KeyResultCheckInsConnectionGraphQLResolver extends GuardedConnectio
   KeyResultCheckIn,
   KeyResultCheckInInterface
 > {
-  private readonly logger = new Logger(KeyResultCheckInsConnectionGraphQLResolver.name)
 
   constructor(protected readonly core: CoreProvider) {
     super(Resource.KEY_RESULT_CHECK_IN, core, core.keyResult.keyResultCheckInProvider)
@@ -34,12 +33,6 @@ export class KeyResultCheckInsConnectionGraphQLResolver extends GuardedConnectio
     @RequestUserWithContext()
     authorizedRequestKeyResultCheckIn: UserWithContext,
   ) {
-    this.logger.log({
-      request,
-      authorizedRequestKeyResultCheckIn,
-      message: 'Fetching key-result check-ins with filters',
-    })
-
     const [filters, queryOptions, connection] = this.relay.unmarshalRequest<
       KeyResultCheckInFiltersRequest,
       KeyResultCheckIn

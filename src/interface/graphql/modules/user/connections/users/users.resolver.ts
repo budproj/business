@@ -23,8 +23,6 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
   User,
   UserInterface
 > {
-  private readonly logger = new Logger(UsersConnectionGraphQLResolver.name)
-
   constructor(
     protected readonly core: CoreProvider,
     private readonly corePorts: CorePortsProvider,
@@ -38,12 +36,6 @@ export class UsersConnectionGraphQLResolver extends GuardedConnectionGraphQLReso
     @Args() request: UserFiltersRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      request,
-      userWithContext,
-      message: 'Fetching users with filters',
-    })
-
     const [rawFilters, queryOptions, connection] = this.relay.unmarshalRequest<
       UserFiltersRequest,
       User

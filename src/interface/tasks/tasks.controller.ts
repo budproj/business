@@ -20,8 +20,6 @@ interface RabbitMQRequestStructure {
 
 @Controller()
 export class TasksController {
-  private readonly logger = new Logger(TasksController.name)
-
   constructor(
     private readonly corePorts: CorePortsProvider,
     private readonly notification: NotificationProvider,
@@ -33,8 +31,6 @@ export class TasksController {
     queue: 'business.notification-ports',
     routingKey: 'business.notification-ports.#',
     errorHandler: (channel, msg, error) => {
-      // TODO: inject logger and use it instead
-      console.log('@RabbitRPC on channel', channel, 'and with message', msg, 'failed due to', error);
       return defaultNackErrorHandler(channel, msg, error);
     },
     queueOptions: {
@@ -78,30 +74,13 @@ export class TasksController {
   ): Promise<unknown> {
     const { routingKey } = request.fields
 
-    // Console.log('core-ports', routingKey)
-    //
-    // this.logger.log({
-    //   message: `New ${routingKey} message received`,
-    // })
-
     const commandName = routingKey.split('.')[2]
 
     if (!commandName || !isOfTypeCommand(commandName)) {
       return 'Invalid Command'
     }
 
-    // This.logger.log({
-    //   payload,
-    //   message: `Executing the ${commandName} command`,
-    // })
-
     const dataReturned = await this.corePorts.dispatchCommand<unknown>(commandName, payload)
-
-    // This.logger.log({
-    //   data: dataReturned,
-    //   message: `${commandName} data retunerd`,
-    // })
-
     return dataReturned
   }
 }

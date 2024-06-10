@@ -18,7 +18,6 @@ import { PermissionsGraphQLObject } from '../objects/permissions.object'
 
 @GuardedResolver(PermissionsGraphQLObject)
 export class PermissionsGraphQLResolver {
-  private readonly logger = new Logger(PermissionsGraphQLResolver.name)
   private readonly authz = new PolicyAdapter()
 
   @Cacheable((scope, user) => [user.id, scope], 15 * 60)
@@ -28,7 +27,6 @@ export class PermissionsGraphQLResolver {
     scope: Scope,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log(`Fetching user permissions for user with ID ${userWithContext.id}`)
 
     const resourcePolicy = this.authz.getResourcePolicyFromPermissions(
       userWithContext.token.permissions,

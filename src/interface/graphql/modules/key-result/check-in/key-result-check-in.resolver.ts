@@ -34,8 +34,6 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   KeyResultCheckIn,
   KeyResultCheckInInterface
 > {
-  private readonly logger = new Logger(KeyResultCheckInGraphQLResolver.name)
-
   constructor(
     protected readonly core: CoreProvider,
     private readonly corePorts: CorePortsProvider,
@@ -56,11 +54,6 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: NodeIndexesRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      request,
-      message: 'Fetching key result check-in with provided indexes',
-    })
-
     const keyResultCheckIn = await this.queryGuard.getOneWithActionScopeConstraint(
       request,
       userWithContext,
@@ -81,13 +74,6 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   ) {
     const canCreate = await this.accessControl.canCreate(userWithContext, request.data.keyResultId)
     if (!canCreate) throw new UnauthorizedException()
-
-    this.logger.log({
-      request,
-      userWithContext,
-      message: 'Received create check-in request',
-    })
-
     const keyResultStatus = await this.corePorts.dispatchCommand<Status>(
       'get-key-result-status',
       request.data.keyResultId,
@@ -108,12 +94,6 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
 
     if (!createdCheckIn) throw new UserInputError('We were not able to create your check-in')
 
-    this.logger.log({
-      userWithContext,
-      keyResultCheckIn,
-      message: 'Created a new check-in in our database',
-    })
-
     return createdCheckIn
   }
 
@@ -124,12 +104,6 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
     @Args() request: KeyResultCheckInDeleteRequest,
     @RequestUserWithContext() userWithContext: UserWithContext,
   ) {
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Removing key result check-in',
-    })
-
     const keyResult = await this.core.keyResult.getFromKeyResultCheckInID(request.id)
     if (!keyResult) throw new UserInputError('We were not able to find your key-result check-in')
 
@@ -156,11 +130,6 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   protected async resolveProgressForKeyResultCheckIn(
     @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
   ) {
-    this.logger.log({
-      keyResultCheckIn,
-      message: 'Fetching relative percentage progress for key result check-in',
-    })
-
     return this.core.keyResult.getCheckInProgress(keyResultCheckIn)
   }
 
@@ -168,11 +137,6 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   protected async resolveUserForKeyResultCheckIn(
     @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
   ) {
-    this.logger.log({
-      keyResultCheckIn,
-      message: 'Fetching user for key result check-in',
-    })
-
     return this.core.user.getOne({ id: keyResultCheckIn.userId })
   }
 
@@ -180,11 +144,6 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   protected async resolveKeyResultForKeyResultCheckIn(
     @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
   ) {
-    this.logger.log({
-      keyResultCheckIn,
-      message: 'Fetching key result for key result check-in',
-    })
-
     return this.core.keyResult.getOne({ id: keyResultCheckIn.keyResultId })
   }
 
@@ -192,21 +151,11 @@ export class KeyResultCheckInGraphQLResolver extends GuardedNodeGraphQLResolver<
   protected async resolveParentForKeyResultCheckIn(
     @Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode,
   ) {
-    this.logger.log({
-      keyResultCheckIn,
-      message: 'Fetching parent for key result check-in',
-    })
-
     return this.core.keyResult.getParentCheckInFromCheckIn(keyResultCheckIn)
   }
 
   @ResolveField('delta', () => KeyResultCheckInDeltaGraphQLObject)
   protected async getDeltaForObjective(@Parent() keyResultCheckIn: KeyResultCheckInGraphQLNode) {
-    this.logger.log({
-      keyResultCheckIn,
-      message: 'Fetching delta for this key-result check-in',
-    })
-
     const result = await this.corePorts.dispatchCommand<KeyResultCheckInDelta>(
       'get-key-result-check-in-delta',
       keyResultCheckIn.id,
