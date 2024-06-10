@@ -4,14 +4,6 @@ import { Status } from '@core/interfaces/status.interface'
 // eslint-disable-next-line import/order
 import { KeyResultCheckIn } from '@core/modules/key-result/check-in/key-result-check-in.orm-entity'
 
-// Export interface Status {
-//     progress: number
-//     confidence: number
-//     isOutdated: boolean
-//     latestCheckIn?: KeyResultCheckInInterface
-//     checkmarks?: KeyResultCheckMarkInterface[]
-//   }
-
 import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-result.interface'
 import { KeyResult } from '@core/modules/key-result/key-result.orm-entity'
 
@@ -31,36 +23,47 @@ export class GetUserKeyResultsStatusesCommand extends Command<any[]> {
     const rowsOwnerKeyResults = await this.core.entityManager.query(
       `
       WITH latest_check_in_by_kr AS
-            (SELECT DISTINCT ON (kr.id) krci.*
-            FROM public.key_result_check_in krci
-            JOIN public.key_result kr ON krci.key_result_id = kr.id
-            ORDER BY kr.id,
-                      krci.created_at DESC),
-         latest_check_in_by_kr_with_user as (
-          select lci.*, concat('{"fullName": "', u.first_name, u.last_name, '"}')::json as user from latest_check_in_by_kr lci join "user" u on lci.user_id = u.id)
-          
-          select kr.*, to_json(krs.*) as status, to_json(lci.*) as latest_check_in from key_result kr 
-      join key_result_status krs on kr.id = krs.id
-      left join latest_check_in_by_kr_with_user lci on kr.id = lci.key_result_id
-      where kr.owner_id = $1 
-      and mode = $2`,
+        (SELECT DISTINCT ON (kr.id) krci.*
+        FROM public.key_result_check_in krci
+        INNERR JOIN public.key_result kr ON krci.key_result_id = kr.id
+        ORDER BY kr.id,
+                  krci.created_at DESC),
+          latest_check_in_by_kr_with_user AS
+        (SELECT lci.*,
+                concat('{"fullName": "', u.first_name, u.last_name, '"}')::JSON AS USER
+        FROM latest_check_in_by_kr lci
+        INNER JOIN "user" u ON lci.user_id = u.id)
+        SELECT kr.*,
+              to_json(krs.*) AS status,
+              to_json(lci.*) AS latest_check_in
+        FROM key_result kr
+        INNER JOIN key_result_status krs ON kr.id = krs.id
+        LEFT JOIN latest_check_in_by_kr_with_user lci ON kr.id = lci.key_result_id
+        WHERE kr.owner_id = $1
+          AND MODE = $2`,
       [userID, filters.mode],
     )
     const rowsSupportTeamKeyResults = await this.core.entityManager.query(
       `WITH latest_check_in_by_kr AS
-    (SELECT DISTINCT ON (kr.id) krci.*
-    FROM public.key_result_check_in krci
-    JOIN public.key_result kr ON krci.key_result_id = kr.id
-    ORDER BY kr.id,
-              krci.created_at DESC),
-    latest_check_in_by_kr_with_user as (
-    select lci.*, concat('{"fullName": "', u.first_name, u.last_name, '"}')::json as user from latest_check_in_by_kr lci join "user" u on lci.user_id = u.id)
-    
-    select kr.*, to_json(krs.*) as status, to_json(lci.*) as latest_check_in from key_result kr 
-    join key_result_support_team_members_user krstmu on kr.id = krstmu.key_result_id 
-    join key_result_status krs on kr.id = krs.id
-    left join latest_check_in_by_kr_with_user lci on kr.id = lci.key_result_id
-    where krstmu.user_id = $1 and mode = $2
+        (SELECT DISTINCT ON (kr.id) krci.*
+        FROM public.key_result_check_in krci
+        INNER JOIN public.key_result kr ON krci.key_result_id = kr.id
+        ORDER BY kr.id,
+                  krci.created_at DESC),
+          latest_check_in_by_kr_with_user AS
+        (SELECT lci.*,
+                concat('{"fullName": "', u.first_name, u.last_name, '"}')::JSON AS USER
+        FROM latest_check_in_by_kr lci
+        JOIN "user" u ON lci.user_id = u.id)
+      SELECT kr.*,
+            to_json(krs.*) AS status,
+            to_json(lci.*) AS latest_check_in
+      FROM key_result kr
+      JOIN key_result_support_team_members_user krstmu ON kr.id = krstmu.key_result_id
+      JOIN key_result_status krs ON kr.id = krs.id
+      LEFT JOIN latest_check_in_by_kr_with_user lci ON kr.id = lci.key_result_id
+      WHERE krstmu.user_id = $1
+        AND MODE = $2
 `,
       [userID, filters.mode],
     )
