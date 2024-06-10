@@ -287,6 +287,14 @@ export class KeyResultGraphQLResolver extends GuardedNodeGraphQLResolver<
       KeyResultCheckMark
     >(request)
 
+    if (keyResult?.checkMarks) {
+      return this.relay.marshalResponse<KeyResultCheckMarkInterface>(
+        keyResult?.checkMarks,
+        connection,
+        keyResult,
+      )
+    }
+
     const queryResult = await this.corePorts.dispatchCommand<KeyResultCheckMark[]>(
       'get-check-list-for-key-result',
       keyResult.id,
