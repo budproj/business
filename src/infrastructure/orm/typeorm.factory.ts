@@ -10,11 +10,24 @@ export class TypeORMFactory implements TypeOrmOptionsFactory {
   public createTypeOrmOptions() {
     return {
       type: this.config.type as any,
-      host: this.config.endpoint.host,
-      port: this.config.endpoint.port,
-      database: this.config.endpoint.database,
-      username: this.config.authentication.user,
-      password: this.config.authentication.password,
+      replication: {
+        master: {
+          host: this.config.endpoint.host,
+          port: this.config.endpoint.port,
+          database: this.config.endpoint.database,
+          username: this.config.authentication.user,
+          password: this.config.authentication.password,
+        },
+        slaves: [
+          {
+            host: this.config.endpoint.host2 || this.config.endpoint.host,
+            port: this.config.endpoint.port2 || this.config.endpoint.port,
+            database: this.config.endpoint.database,
+            username: this.config.authentication.user,
+            password: this.config.authentication.password,
+          },
+        ],
+      },
       namingStrategy: this.config.conventions.naming,
       logging: this.config.logging.enabled,
       poolSize: this.config.poolSize,

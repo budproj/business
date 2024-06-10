@@ -19,6 +19,8 @@ export interface TypeORMExtraConfigInterface {
 export interface TypeORMEndpointConfigInterface {
   host: string
   port: number
+  host2: string
+  port2: number
   database: string
 }
 

@@ -4,6 +4,8 @@ export = {
   type: process.env.TYPEORM_CONNECTION_TYPE,
   host: process.env.TYPEORM_HOST,
   port: Number.parseInt(process.env.TYPEORM_PORT, 10),
+  host2: process.env.TYPEORM_HOST2,
+  port2: Number.parseInt(process.env.TYPEORM_PORT2, 10),
   username: process.env.TYPEORM_USERNAME,
   password: process.env.TYPEORM_PASSWORD,
   database: process.env.TYPEORM_DATABASE,
