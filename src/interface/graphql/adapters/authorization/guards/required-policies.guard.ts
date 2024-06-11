@@ -31,13 +31,6 @@ export class GraphQLRequiredPoliciesGraphQLGuard
       request.user,
       resolverRequiredActions,
     )
-    if (!hasRequiredPolicies)
-      this.logger.error({
-        resolverRequiredActions,
-        token: request.user.token,
-        message:
-          'User is not allowed to use this resolver, since the user does not have all required policies',
-      })
 
     return hasRequiredPolicies
   }

@@ -1,7 +1,6 @@
 import {
   ForbiddenException,
   InternalServerErrorException,
-  Logger,
   UnauthorizedException,
 } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
@@ -355,12 +354,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     @Args() request: UserKeyResultsRequest,
     @Parent() user: UserGraphQLNode,
   ) {
-    this.logger.log({
-      user,
-      request,
-      message: 'Fetching key results statuses for user',
-    })
-
     const [options, _, connection] = this.relay.unmarshalRequest<UserKeyResultsRequest, KeyResult>(
       request,
     )

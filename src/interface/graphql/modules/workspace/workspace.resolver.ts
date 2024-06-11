@@ -37,11 +37,6 @@ export class WorkspaceGraphQLResolver extends GuardedNodeGraphQLResolver<Team, T
   protected async getWorkspaceForRequestAndRequestUserWithContext(
     @Args() request: NodeIndexesRequest,
   ) {
-    this.logger.log({
-      request,
-      message: 'Fetching workspace with provided indexes',
-    })
-
     const indexes = {
       ...request,
       // eslint-disable-next-line unicorn/no-null
@@ -62,12 +57,6 @@ export class WorkspaceGraphQLResolver extends GuardedNodeGraphQLResolver<Team, T
   ) {
     const canCreate = await this.accessControl.canCreate(userWithContext)
     if (!canCreate) throw new UnauthorizedException()
-
-    this.logger.log({
-      userWithContext,
-      request,
-      message: 'Received create workspace request',
-    })
 
     const rootUser = await this.corePorts.dispatchCommand<User>('create-user', request.data.user, {
       autoInvite: request.data.options.autoInvite,
