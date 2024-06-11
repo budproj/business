@@ -33,6 +33,8 @@ import { GetTeamTreeCommand } from '@core/ports/commands/get-team-tree.command'
 import { GetTeamCommand } from '@core/ports/commands/get-team.command'
 import { GetUserFullNameCommand } from '@core/ports/commands/get-user-full-name.command'
 import { GetUserInitialsCommand } from '@core/ports/commands/get-user-initials.command'
+import { GetUserKeyResultsStatusesWithCheckMarksCommand } from '@core/ports/commands/get-user-key-results-statuses-with-checkmarks.command'
+import { GetUserKeyResultsStatusesCommand } from '@core/ports/commands/get-user-key-results-statuses.command'
 import { GetUserSettingsCommand } from '@core/ports/commands/get-user-settings.command'
 import { GetUserTeamTreeCommand } from '@core/ports/commands/get-user-team-tree.command'
 import { GetUserWithTeamsBySubCommand } from '@core/ports/commands/get-user-with-teams-from-sub.command'
@@ -219,6 +221,8 @@ const commandTypes = [
   'get-users-from-team',
   'get-team-flags',
   'get-user-key-results-status',
+  'get-user-key-results-statuses',
+  'get-user-key-results-statuses-with-checkmarks',
   'get-user-indicators',
   'get-user-profile-amplitude',
   'get-team-score',
@@ -299,6 +303,8 @@ export class CommandFactory {
     'get-user-full-name': GetUserFullNameCommand,
     'get-user-initials': GetUserInitialsCommand,
     'get-user-key-results': GetUserKeyResultsCommand,
+    'get-user-key-results-statuses': GetUserKeyResultsStatusesCommand,
+    'get-user-key-results-statuses-with-checkmarks': GetUserKeyResultsStatusesWithCheckMarksCommand,
     'get-user-settings': GetUserSettingsCommand,
     'get-user-team-tree': GetUserTeamTreeCommand,
     'get-user-with-teams-by-sub': GetUserWithTeamsBySubCommand,

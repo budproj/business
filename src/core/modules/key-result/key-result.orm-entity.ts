@@ -17,6 +17,7 @@ import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
 
 import { KeyResultCheckInInterface } from './check-in/key-result-check-in.interface'
+import { KeyResultCheckMark } from './check-mark/key-result-check-mark.orm-entity'
 import { KeyResultCommentInterface } from './comment/key-result-comment.interface'
 import { KeyResultFormat } from './enums/key-result-format.enum'
 import { KeyResultMode } from './enums/key-result-mode.enum'
@@ -90,4 +91,6 @@ export class KeyResult extends CoreEntity implements KeyResultInterface {
 
   @Column({ type: 'json', nullable: true })
   public commentCount?: JSON
+
+  checkMarks?: KeyResultCheckMark[]
 }

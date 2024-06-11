@@ -76,8 +76,6 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
       [teamID],
     )
 
-    console.log({ rows })
-
     return rows.map((row) => {
       return Object.assign(new Team(), {
         name: row.name,
