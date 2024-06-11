@@ -25,8 +25,7 @@ export class GetUserKeyResultsStatusesWithCheckMarksCommand extends Command<KeyR
         ORDER BY kr.id, krci.created_at DESC
       ),
       latest_check_in_by_kr_with_user AS (
-        SELECT lci.*,
-              concat('{"fullName": "', u.first_name, ' ', u.last_name, '"}')::JSON AS user
+        SELECT lci.*
         FROM latest_check_in_by_kr lci
         JOIN "user" u ON lci.user_id = u.id
       ),
@@ -34,6 +33,7 @@ export class GetUserKeyResultsStatusesWithCheckMarksCommand extends Command<KeyR
         SELECT krcm.key_result_id,
               jsonb_agg(to_jsonb(krcm.*)) AS check_marks
         FROM key_result_check_mark krcm
+        WHERE krcm.assigned_user_id = $1
         GROUP BY krcm.key_result_id
       ),
       key_results_with_check_marks AS (
@@ -48,8 +48,8 @@ export class GetUserKeyResultsStatusesWithCheckMarksCommand extends Command<KeyR
       )
       SELECT DISTINCT krwcm.*
       FROM key_results_with_check_marks krwcm
+      JOIN key_result_check_mark krcm ON krwcm.id = krcm.key_result_id
       LEFT JOIN key_result_support_team_members_user krstu ON krwcm.id = krstu.key_result_id  
-      LEFT JOIN key_result_check_mark krcm ON krwcm.id = krcm.key_result_id
       WHERE krwcm.mode = $2
       AND krwcm.team_id IS NOT NULL
       AND (
