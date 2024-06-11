@@ -57,9 +57,6 @@ export class GetUsersFromTeam extends Command<User[]> {
         relations[user.id].map((teamId) => {
           // ...and look for the team in the teamsMap using the teamId
           const team = teamsMap.get(teamId)
-          if (!team) {
-            this.logger.warn(`Team ${teamId} not found for user ${user.id}`)
-          }
 
           return team
         }),

@@ -6,7 +6,6 @@ export function GodBypass(value: any) {
 
     descriptor.value = function (this: GodmodeClassInterface, ...methodArguments: any[]) {
       if (this.godmode.enabled) {
-        this.logger.debug(`Godmode enabled, bypassing ${key} method`)
         return value
       }
 
