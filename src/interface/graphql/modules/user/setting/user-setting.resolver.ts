@@ -1,4 +1,4 @@
-import { Logger, UnauthorizedException } from '@nestjs/common'
+import { UnauthorizedException } from '@nestjs/common'
 import { Args, Parent, ResolveField } from '@nestjs/graphql'
 
 import { Resource } from '@adapters/policy/enums/resource.enum'

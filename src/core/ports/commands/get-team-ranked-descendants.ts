@@ -65,7 +65,7 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
       [teamID],
     )
 
-    const tacticalCycle = await this.core.entityManager.query(
+    const tacticalCycles = await this.core.entityManager.query(
       `
       SELECT date_start, date_end 
         FROM "cycle" c
@@ -104,10 +104,13 @@ export class GetTeamRankedDescendantsCommand extends Command<Team[]> {
         delta: {
           progress: (row.progress ?? 0) - (row.previous_progress ?? 0),
         },
-        tacticalCycle: {
-          dateStart: tacticalCycle[0].date_start,
-          dateEnd: tacticalCycle[0].date_end,
-        },
+        tacticalCycle:
+          tacticalCycles.length > 0
+            ? {
+                dateStart: tacticalCycles[0].date_start,
+                dateEnd: tacticalCycles[0].date_end,
+              }
+            : null,
       })
     })
   }
