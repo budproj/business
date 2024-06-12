@@ -124,7 +124,7 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
     return updatedTeam
   }
 
-  @Cacheable((team, request) => [team.id, request], 5 * 60)
+  // @Cacheable((team, request) => [team.id, request], 5 * 60)
   @Stopwatch()
   @ResolveField('status', () => StatusGraphQLObject)
   protected async getStatusForCycle(

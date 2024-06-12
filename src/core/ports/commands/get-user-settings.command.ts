@@ -12,7 +12,24 @@ export class GetUserSettingsCommand extends Command<UserSetting[]> {
 
   public async execute(userID: string, keys?: Key[]): Promise<UserSetting[]> {
     const userSettings = await this.core.user.setting.getFromUser(userID)
+    if (userSettings.length <= 0) {
+      const setting = await this.core.user.setting.createOne({
+        key: Key.LOCALE,
+        value: 'pt-BR',
+        userId: userID,
+      })
+      await this.propagateNewSetting(setting)
+      return keys ? GetUserSettingsCommand.reduceToKeys([setting], keys) : filter(userSettings)
+    }
 
     return keys ? GetUserSettingsCommand.reduceToKeys(userSettings, keys) : filter(userSettings)
+  }
+
+  private async propagateNewSetting(setting: UserSetting): Promise<void> {
+    if (setting.key === Key.LOCALE) await this.propagateLocale(setting)
+  }
+
+  private async propagateLocale(setting: UserSetting): Promise<void> {
+    return this.core.user.updateUserProperty(setting.userId, setting.key, setting.value)
   }
 }
