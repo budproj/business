@@ -1,6 +1,5 @@
 import {
   InternalServerErrorException,
-  Logger,
   NotImplementedException,
   UnauthorizedException,
 } from '@nestjs/common'
@@ -64,7 +63,6 @@ import { TeamGraphQLNode } from './team.node'
 
 @GuardedResolver(TeamGraphQLNode)
 export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamInterface> {
-
   constructor(
     protected readonly core: CoreProvider,
     protected readonly corePorts: CorePortsProvider,
