@@ -1,0 +1,14 @@
+name: deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: environment
+
+jobs:
+  deploy:
+    uses: budproj/github-actions/.github/workflows/deploy.yaml@main
+    with:
+      environment: ${{ inputs.environment }}
+    secrets: inherit
