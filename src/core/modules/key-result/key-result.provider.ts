@@ -579,7 +579,12 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
         return map
       }, {})
 
-    return keyResults.map((keyResult) => {
+    const keyResultsWithoutDeprioritized = keyResults.filter((keyResult) => {
+      const keyResultCheckIn = checkInsMap[keyResult.id]
+      return keyResultCheckIn.confidence !== -100
+    })
+
+    return keyResultsWithoutDeprioritized.map((keyResult) => {
       const keyResultCheckIn = checkInsMap[keyResult.id]
       return keyResultCheckIn
         ? this.keyResultCheckInProvider.getProgressFromValue(keyResult, keyResultCheckIn?.value)
