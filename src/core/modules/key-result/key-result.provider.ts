@@ -581,7 +581,11 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
 
     const keyResultsWithoutDeprioritized = keyResults.filter((keyResult) => {
       const keyResultCheckIn = checkInsMap[keyResult.id]
-      return keyResultCheckIn.confidence !== -100
+      if (keyResultCheckIn) {
+        return keyResultCheckIn.confidence !== -100
+      }
+
+      return true
     })
 
     return keyResultsWithoutDeprioritized.map((keyResult) => {
