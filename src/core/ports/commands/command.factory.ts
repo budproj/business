@@ -86,6 +86,7 @@ import { GetTeamCompanyCommand } from './get-team-company.command'
 import { GetTeamFlagsCommand } from './get-team-flags.command'
 import { GetTeamMembersCommand } from './get-team-members.command'
 import { GetTeamOwnerCommand } from './get-team-owner.command'
+import { GetTeamProgressWithChildren } from './get-team-progress-with-children.command'
 import { GetTeamScore } from './get-team-score.command'
 import { GetUserCompaniesCommand } from './get-user-companies.command'
 import { GetUserIndicators } from './get-user-indicators.command'
@@ -227,6 +228,7 @@ const commandTypes = [
   'get-user-profile-amplitude',
   'get-team-score',
   'update-main-team-in-preferences',
+  'get-team-progress-with-children',
 ] as const
 
 export type CommandType = typeof commandTypes[number]
@@ -348,6 +350,7 @@ export class CommandFactory {
     'get-user-profile-amplitude': GetUserAmplitudeData,
     'get-team-score': GetTeamScore,
     'update-main-team-in-preferences': UpdateUserMainTeamInPreferencesCommand,
+    'get-team-progress-with-children': GetTeamProgressWithChildren,
   }
 
   constructor(private readonly core: CoreProvider) {}

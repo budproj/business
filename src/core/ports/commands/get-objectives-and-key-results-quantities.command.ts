@@ -16,10 +16,8 @@ export class GetObjectivesAndKeyResultQuantities extends Command<ObjectivesAndKe
     user: UserInterface,
     teamId?: TeamInterface['id'],
   ): Promise<ObjectivesAndKeyResultQuantities> {
-
-    const rows = await this.core.entityManager.query(
-      `
-        with cte_scope as (
+    const query = `
+    with cte_scope as (
           select distinct team_id
           from user_company uc
                  inner join team_company tc on uc.company_id = tc.company_id
@@ -58,14 +56,43 @@ export class GetObjectivesAndKeyResultQuantities extends Command<ObjectivesAndKe
         inner join cte_objective o on o.id = kr."objective_id"
         left join "key_result_latest_check_in" ci on ci."key_result_id" = kr.id
         group by 1;
-      `,
-      [user.id, teamId],
-    )
+    `
+
+    if (teamId) {
+      const descendants = await this.core.team.getDescendantsByIds([teamId])
+
+      const arrayOfTeamsWithRows = await Promise.all(
+        descendants.map(async (team) => {
+          console.log(team.name)
+          return this.core.entityManager.query(query, [user.id, team.id])
+        }),
+      )
+      const flattenArray = arrayOfTeamsWithRows.flat(1)
+      console.log({ flattenArray })
+      return flattenArray.reduce(
+        (accumulator, row) => ({
+          ...accumulator,
+          [row.key]: Number(accumulator[row.key] || 0) + Number(row.value),
+        }),
+        {
+          keyResultsQuantity: 0,
+          objectivesQuantity: 0,
+          high: 0,
+          medium: 0,
+          low: 0,
+          barrier: 0,
+          achieved: 0,
+          deprioritized: 0,
+        },
+      )
+    }
+
+    const rows = await this.core.entityManager.query(query, [user.id, teamId])
 
     return rows.reduce(
       (accumulator, row) => ({
         ...accumulator,
-        [row.key]: Number.parseInt(row.value),
+        [row.key]: Number(row.value),
       }),
       {
         keyResultsQuantity: 0,
