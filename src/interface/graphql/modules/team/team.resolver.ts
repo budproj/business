@@ -432,6 +432,8 @@ export class TeamGraphQLResolver extends GuardedNodeGraphQLResolver<Team, TeamIn
   protected async progressWithChildren(@Parent() team: TeamGraphQLNode) {
     const data = await this.corePorts.dispatchCommand('get-team-progress-with-children', team)
 
+    console.log({ data })
+
     return data
   }
 }

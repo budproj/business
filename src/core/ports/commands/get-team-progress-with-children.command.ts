@@ -24,8 +24,13 @@ export class GetTeamProgressWithChildren extends Command<number> {
       [team.id],
     )
 
+    console.log({ result })
+
     const totalProgress = result[0].total_progress
     const teamCount = result[0].team_count
+
+    console.log({ totalProgress })
+    console.log({ teamCount })
 
     return totalProgress / teamCount
   }
