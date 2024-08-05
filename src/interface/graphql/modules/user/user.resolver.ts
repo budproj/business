@@ -126,9 +126,9 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     const picture = await this.parseUserPictureFileToRemoteURL(request.data.picture)
     const newData = picture
       ? {
-        ...request.data,
-        picture,
-      }
+          ...request.data,
+          picture,
+        }
       : { ...request.data }
 
     try {
