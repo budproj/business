@@ -126,9 +126,9 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     const picture = await this.parseUserPictureFileToRemoteURL(request.data.picture)
     const newData = picture
       ? {
-          ...request.data,
-          picture,
-        }
+        ...request.data,
+        picture,
+      }
       : { ...request.data }
 
     try {
@@ -251,7 +251,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return this.relay.marshalResponse<Team>(userCompanies, connection, user)
   }
 
-  @Cacheable((request, user) => [user.id, request], 1 * 60)
   @Stopwatch()
   @ResolveField('teams', () => UserTeamsGraphQLConnection, { nullable: true })
   protected async getTeamsForRequestAndUser(
