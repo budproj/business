@@ -251,7 +251,6 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
     return this.relay.marshalResponse<Team>(userCompanies, connection, user)
   }
 
-  @Cacheable((request, user) => [user.id, request], 1 * 60)
   @Stopwatch()
   @ResolveField('teams', () => UserTeamsGraphQLConnection, { nullable: true })
   protected async getTeamsForRequestAndUser(
