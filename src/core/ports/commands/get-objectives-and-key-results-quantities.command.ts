@@ -55,6 +55,7 @@ export class GetObjectivesAndKeyResultQuantities extends Command<ObjectivesAndKe
         from "key_result" kr
         inner join cte_objective o on o.id = kr."objective_id"
         left join "key_result_latest_check_in" ci on ci."key_result_id" = kr.id
+        where kr.mode = 'PUBLISHED'
         group by 1;
     `
 
@@ -63,7 +64,6 @@ export class GetObjectivesAndKeyResultQuantities extends Command<ObjectivesAndKe
 
       const arrayOfTeamsWithRows = await Promise.all(
         descendants.map(async (team) => {
-          console.log(team.name)
           return this.core.entityManager.query(query, [user.id, team.id])
         }),
       )
