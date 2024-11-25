@@ -17,6 +17,8 @@ import { UserProfileProvider } from '@infrastructure/amplitude/providers/user-pr
 import { AuthzCredentialsProvider } from '@infrastructure/authz/providers/credentials.provider'
 import { Stopwatch } from '@lib/logger/pino.decorator'
 
+import { TeamRepository } from '../team/team.repository'
+
 import { UserStatus } from './enums/user-status.enum'
 import { UserCredentialsAdditionalData, UserInterface } from './user.interface'
 import { User } from './user.orm-entity'
@@ -30,6 +32,7 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
   constructor(
     public readonly setting: UserSettingProvider,
     protected readonly repository: UserRepository,
+    protected readonly team_repository: TeamRepository,
     authz: AuthzCredentialsProvider,
     amplitude: UserProfileProvider,
   ) {
@@ -45,18 +48,10 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     filters?: FindConditions<TeamInterface>,
     options?: GetOptions<TeamInterface>,
   ): Promise<TeamInterface[]> {
-    const queryOptions = this.repository.marshalGetOptions(options)
-    const whereSelector = {
-      id: user.id,
-      ...filters,
-    }
-
-    const queryResult = await this.repository.find({
-      relations: ['teams'],
-      where: whereSelector,
-      ...queryOptions,
-    })
-    return uniqBy(flatten(queryResult.map((user) => user.teams)), 'id')
+    return this.team_repository
+      .createQueryBuilder('team')
+      .innerJoin('team.users', 'user', 'user.id = :userId', { userId: user.id })
+      .getMany()
   }
 
   public async getUsersByTeams(

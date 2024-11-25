@@ -6,12 +6,14 @@ import { UserSettingRepository } from '@core/modules/user/setting/user-setting.r
 import { AmplitudeModule } from '@infrastructure/amplitude/amplitude.module'
 import { AuthzModule } from '@infrastructure/authz/authz.module'
 
+import { TeamRepository } from '../team/team.repository'
+
 import { UserProvider } from './user.provider'
 import { UserRepository } from './user.repository'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserRepository, UserSettingRepository]),
+    TypeOrmModule.forFeature([UserRepository, TeamRepository, UserSettingRepository]),
     AuthzModule,
     AmplitudeModule,
   ],
