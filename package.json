@@ -38,7 +38,6 @@
     "waypoint:build": "waypoint build -var=\"GITHUB_TOKEN=$GITHUB_TOKEN\"",
     "waypoint:deploy": "waypoint deploy",
     "waypoint:up": "waypoint up -var=\"GITHUB_TOKEN=$GITHUB_TOKEN\"",
-    "prepare": "husky install",
     "prisma:generate:llm": "npx prisma generate --schema=\"prisma/llm/schema.prisma\"",
     "migrate:dev:llm": "npx prisma migrate dev --schema=\"prisma/llm/schema.prisma\"",
     "prisma:generate:dist:llm": "npx prisma generate --schema=\"prisma/llm/schema.prisma\"",
