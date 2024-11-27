@@ -45,12 +45,15 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
   @Stopwatch()
   public async getUserTeams(
     user: Partial<UserInterface>,
-    filters?: FindConditions<TeamInterface>,
+    filters?: Partial<TeamInterface>,
     options?: GetOptions<TeamInterface>,
   ): Promise<TeamInterface[]> {
     return this.team_repository
       .createQueryBuilder('team')
       .innerJoin('team.users', 'user', 'user.id = :userId', { userId: user.id })
+      .andWhere(filters)
+      .take(options?.limit ?? 0)
+      .offset(options?.offset ?? 0)
       .getMany()
   }
 
