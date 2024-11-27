@@ -51,9 +51,6 @@ export class UserProvider extends CoreEntityProvider<User, UserInterface> {
     return this.team_repository
       .createQueryBuilder('team')
       .innerJoin('team.users', 'user', 'user.id = :userId', { userId: user.id })
-      .andWhere(filters)
-      .take(options?.limit ?? 0)
-      .offset(options?.offset ?? 0)
       .getMany()
   }
 
