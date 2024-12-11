@@ -258,7 +258,6 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
   private async dispatchMentions(): Promise<void> {
     const { data } = this.marshal()
     if (data.checkIn.comment) {
-      console.log('coco')
       await Promise.all([this.dispatchMentionsEmails(), this.dispatchMentionsMessaging()])
     }
   }
