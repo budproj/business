@@ -36,6 +36,7 @@ type KeyResultWithColor = {
 type CreatedCheckInMetadata = {
   teamMembers: UserInterface[]
   keyResultOwner: UserInterface
+  supportTeam: UserInterface[]
 } & NotificationMetadata
 
 type RelatedData = {
@@ -77,21 +78,29 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
   }
 
   public async prepare(): Promise<void> {
-    const { keyResultOwner, parentCheckIn, teamMembers, ...relatedData } =
+    const { keyResult, keyResultOwner, parentCheckIn, teamMembers, team, cycle } =
       await this.getRelatedData(this.activity.data)
     const resolvedData = await this.getResolvedData(parentCheckIn)
+
+    const supportTeam = await this.core.dispatchCommand<UserInterface[]>(
+      'get-key-result-support-team',
+      keyResult.id,
+    )
 
     const data = {
       keyResultOwner,
       teamMembers,
       parentCheckIn,
-      ...relatedData,
+      team,
+      cycle,
+      keyResult,
       ...resolvedData,
     }
 
     const metadata = {
       keyResultOwner,
       teamMembers,
+      supportTeam,
     }
 
     this.data = data
@@ -256,10 +265,7 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
   }
 
   private async dispatchMentions(): Promise<void> {
-    const { data } = this.marshal()
-    if (data.checkIn.comment) {
-      await Promise.all([this.dispatchMentionsEmails(), this.dispatchMentionsMessaging()])
-    }
+    await Promise.all([this.dispatchMentionsEmails(), this.dispatchMentionsMessaging()])
   }
 
   private async dispatchMentionsMessaging(): Promise<void> {
@@ -267,7 +273,8 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
 
     const commentContent = data.checkIn.comment
     const mentionedIds = getMentionedUserIdsFromComments(commentContent)
-    const ownerAndSupportTeamIds = uniqBy([metadata.keyResultOwner, ...metadata.teamMembers], 'id')
+    const supportTeam = metadata.supportTeam.filter((user) => user !== undefined)
+    const ownerAndSupportTeamIds = uniqBy([metadata.keyResultOwner, ...supportTeam], 'id')
 
     const recipientIds = mentionedIds.filter(
       (userId) => !ownerAndSupportTeamIds.map((user) => user.id).includes(userId),
