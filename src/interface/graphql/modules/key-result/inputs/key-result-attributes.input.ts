@@ -1,6 +1,7 @@
 import { Field, Float, ID, InputType } from '@nestjs/graphql'
 
 import { KeyResultFormat } from '@core/modules/key-result/enums/key-result-format.enum'
+import { KeyResultType } from '@core/modules/key-result/enums/key-result-type.enum'
 
 @InputType('KeyResultAttributesInput', {
   description: 'Data that you can assign to a given key-result',
@@ -11,6 +12,12 @@ export class KeyResultAttributesInput {
 
   @Field(() => Float, { description: 'The initial value of the key result', nullable: true })
   public readonly initialValue?: number
+
+  @Field(() => KeyResultType, {
+    description: 'The type of growing of the key result',
+    nullable: true,
+  })
+  public readonly type?: KeyResultType
 
   @Field(() => Float, { description: 'The goal of the key result', nullable: true })
   public readonly goal?: number
