@@ -16,6 +16,7 @@ import { KeyResultInterface } from '@core/modules/key-result/interfaces/key-resu
 import { TeamGender } from '@core/modules/team/enums/team-gender.enum'
 import { TeamInterface } from '@core/modules/team/interfaces/team.interface'
 import { UserInterface } from '@core/modules/user/user.interface'
+import { GetTeamMembersCommandResult } from '@core/ports/commands/get-team-members.command'
 import { CorePortsProvider } from '@core/ports/ports.provider'
 
 import { EmailNotificationChannelMetadata } from '../channels/email/metadata.type'
@@ -24,19 +25,26 @@ import { NotificationMetadata } from '../types/notification-metadata.type'
 
 import { BaseNotification } from './base.notification'
 import { NotificationChannelHashMap } from './notification.factory'
-import { GetTeamMembersCommandResult } from "@core/ports/commands/get-team-members.command";
+import { cleanComment, getMentionedUserIdsFromComments } from './utils'
 
 type CreatedCheckInData = RelatedData & ResolvedData
 
+type KeyResultWithColor = {
+  confidenceColor: string
+} & KeyResultInterface
+
 type CreatedCheckInMetadata = {
   teamMembers: UserInterface[]
+  keyResultOwner: UserInterface
+  supportTeam: UserInterface[]
 } & NotificationMetadata
 
 type RelatedData = {
+  keyResultOwner: UserInterface
   team: TeamInterface
   author: UserInterface
   cycle: CycleInterface
-  keyResult: KeyResultInterface
+  keyResult: KeyResultWithColor
   teamMembers: UserInterface[]
   parentCheckIn?: KeyResultCheckInInterface
 }
@@ -70,20 +78,29 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
   }
 
   public async prepare(): Promise<void> {
-    const { parentCheckIn, teamMembers, ...relatedData } = await this.getRelatedData(
-      this.activity.data,
-    )
+    const { keyResult, keyResultOwner, parentCheckIn, teamMembers, team, cycle } =
+      await this.getRelatedData(this.activity.data)
     const resolvedData = await this.getResolvedData(parentCheckIn)
 
+    const supportTeam = await this.core.dispatchCommand<UserInterface[]>(
+      'get-key-result-support-team',
+      keyResult.id,
+    )
+
     const data = {
+      keyResultOwner,
       teamMembers,
       parentCheckIn,
-      ...relatedData,
+      team,
+      cycle,
+      keyResult,
       ...resolvedData,
     }
 
     const metadata = {
+      keyResultOwner,
       teamMembers,
+      supportTeam,
     }
 
     this.data = data
@@ -92,6 +109,11 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
 
   public async dispatch(): Promise<void> {
     const { data } = this.marshal()
+    const mentionedIds = getMentionedUserIdsFromComments(data.checkIn.comment)
+
+    if (mentionedIds.length > 0) {
+      await this.dispatchMentions()
+    }
 
     if (
       data.checkIn.confidence === CONFIDENCE_TAG_THRESHOLDS.barrier &&
@@ -111,9 +133,13 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
   }
 
   private async getRelatedData(checkIn: KeyResultCheckInInterface): Promise<RelatedData> {
-    const keyResult = await this.core.dispatchCommand<KeyResultInterface>('get-key-result', {
+    const keyResult = await this.core.dispatchCommand<KeyResultWithColor>('get-key-result', {
       id: checkIn.keyResultId,
     })
+    keyResult.confidenceColor = await this.core.dispatchCommand<string>(
+      'get-key-result-confidence-color',
+      keyResult,
+    )
     const cycle = await this.core.dispatchCommand<CycleInterface>('get-key-result-cycle', keyResult)
     const parentCheckIn = await this.core.dispatchCommand<KeyResultCheckInInterface>(
       'get-key-result-check-in',
@@ -136,7 +162,10 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
     })
 
     const { users: keyResultTeamMembers, teams } = keyResult.teamId
-      ? await this.core.dispatchCommand<GetTeamMembersCommandResult>('get-team-members', keyResult.teamId)
+      ? await this.core.dispatchCommand<GetTeamMembersCommandResult>(
+          'get-team-members',
+          keyResult.teamId,
+        )
       : { users: [], teams: [] }
 
     const keyResultSupportTeamMembers = await this.core.dispatchCommand<UserInterface[]>(
@@ -152,6 +181,7 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
     const teamMembers = keyResultMembers.filter((member) => member.id !== author.id)
 
     return {
+      keyResultOwner,
       keyResult,
       cycle,
       team,
@@ -232,6 +262,109 @@ export class CreatedKeyResultCheckInNotification extends BaseNotification<
     }
 
     await this.channels.email.dispatch(emailData, emailMetadata)
+  }
+
+  private async dispatchMentions(): Promise<void> {
+    await Promise.all([this.dispatchMentionsEmails(), this.dispatchMentionsMessaging()])
+  }
+
+  private async dispatchMentionsMessaging(): Promise<void> {
+    const { data, metadata } = this.marshal()
+
+    const commentContent = data.checkIn.comment
+    const mentionedIds = getMentionedUserIdsFromComments(commentContent)
+    const supportTeam = metadata.supportTeam.filter((user) => user !== undefined)
+    const ownerAndSupportTeamIds = uniqBy([metadata.keyResultOwner, ...supportTeam], 'id')
+
+    const recipientIds = mentionedIds.filter(
+      (userId) => !ownerAndSupportTeamIds.map((user) => user.id).includes(userId),
+    )
+
+    const recipients = await this.core.dispatchCommand<UserInterface[]>(
+      'get-users-by-ids',
+      recipientIds,
+    )
+
+    const messages = recipients.map((recipient) => ({
+      messageId: randomUUID(),
+      type: 'taggedInComment',
+      timestamp: new Date(metadata.timestamp).toISOString(),
+      recipientId: recipient.authzSub,
+      properties: {
+        sender: {
+          id: data.author.authzSub,
+          name: data.author.firstName,
+          picture: data.author.picture,
+        },
+        keyResult: {
+          id: data.keyResult.id,
+          name: data.keyResult.title,
+        },
+        comment: {
+          id: data.checkIn.id,
+          content: data.checkIn.comment,
+        },
+      },
+    }))
+
+    await this.channels.messageBroker.dispatchMultiple(
+      'notifications-microservice.notification',
+      messages,
+    )
+  }
+
+  private async dispatchMentionsEmails(): Promise<void> {
+    const marshal = this.marshal()
+    const { data: genericData, metadata: genericMetadata } = marshal
+
+    const commentContent = genericData.checkIn.comment
+    const cleanCommentContent = cleanComment(commentContent)
+    const mentionedIds = getMentionedUserIdsFromComments(commentContent)
+
+    const ownerAndSupportTeamIds = uniqBy(
+      [genericMetadata.keyResultOwner, ...genericMetadata.teamMembers],
+      'id',
+    )
+
+    const recipientIds = mentionedIds.filter(
+      (userId) => !ownerAndSupportTeamIds.map((user) => user.id).includes(userId),
+    )
+
+    const users = await this.core.dispatchCommand<UserInterface[]>('get-users-by-ids', recipientIds)
+
+    const customData = users.map((user) => ({
+      userId: user.id,
+      mentionedFirstName: user.firstName,
+    }))
+
+    const recipients = (await this.buildRecipients(
+      users,
+      this.channels.email,
+      customData,
+    )) as EmailRecipient[]
+
+    const metadata: EmailNotificationChannelMetadata = {
+      ...genericMetadata,
+      recipients,
+      template: 'NewKeyResultCommentMention',
+    }
+
+    const emailData = {
+      authorFirstName: genericData.authorInitials,
+      teamId: genericData.team.id,
+      keyResultTeam: genericData.team.name,
+      isMaleTeam: genericData.team.gender === TeamGender.MALE,
+      isFemaleTeam: genericData.team.gender === TeamGender.FEMALE,
+      authorFullName: genericData.author.fullName,
+      authorPictureURL: genericData.author.picture,
+      authorInitials: genericData.authorInitials,
+      keyResultTitle: genericData.keyResult.title,
+      keyResultConfidenceTagColor: genericData.keyResult.confidenceColor,
+      keyResultComment: cleanCommentContent,
+      keyResultId: genericData.keyResult.id,
+    }
+
+    await this.channels.email.dispatch(emailData, metadata)
   }
 
   private async dispatchLowConfidenceEmail(): Promise<void> {
