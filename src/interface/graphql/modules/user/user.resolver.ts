@@ -71,6 +71,7 @@ import { UserUpdateRoleRequest } from './requests/user-update-role.request'
 import { UserUpdateRequest } from './requests/user-update.request'
 import { UserTasksRequest } from './task/requests/user-tasks.request'
 import { UserGraphQLNode } from './user.node'
+import { UserStatus } from '@core/modules/user/enums/user-status.enum'
 
 @GuardedResolver(UserGraphQLNode)
 export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserInterface> {
@@ -111,6 +112,9 @@ export class UserGraphQLResolver extends GuardedNodeGraphQLResolver<User, UserIn
       userWithContext,
     )
     if (!user) throw new UserInputError(`We could not found an user with ID ${userWithContext.id}`)
+    if (user.status === UserStatus.INACTIVE) {
+      return this.corePorts.dispatchCommand<User>('deactivate-user', userWithContext.id)
+    }
 
     return user
   }
