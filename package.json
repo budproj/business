@@ -67,7 +67,7 @@
     "@grpc/proto-loader": "^0.6.9",
     "@hapi/joi": "^17.1.1",
     "@nestjs/apollo": "10.0.8",
-    "@nestjs/cli": "^8.2.4",
+    "@nestjs/cli": "^10.4.9",
     "@nestjs/common": "^8.4.2",
     "@nestjs/config": "^2.0.0",
     "@nestjs/core": "^8.4.2",
