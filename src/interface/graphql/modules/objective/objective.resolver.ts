@@ -111,6 +111,7 @@ export class ObjectiveGraphQLResolver extends GuardedNodeGraphQLResolver<
     const objective = await this.corePorts.dispatchCommand<Objective>('create-objective', {
       ...request.data,
     })
+    console.log('Resolver', objective)
     if (!objective) throw new UserInputError(`We could not create your objective`)
 
     return objective

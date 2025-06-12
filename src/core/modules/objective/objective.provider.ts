@@ -147,8 +147,9 @@ export class ObjectiveProvider extends CoreEntityProvider<Objective, ObjectiveIn
   }
 
   public async createObjective(objectiveData: ObjectiveInterface): Promise<Objective> {
-    console.log(objectiveData)
+    console.log('inicio Provider', objectiveData)
     const [queryResult] = await this.create(objectiveData)
+    console.log('fim Provider', queryResult)
     return queryResult
   }
 

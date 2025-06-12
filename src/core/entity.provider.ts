@@ -169,7 +169,9 @@ export abstract class CoreEntityProvider<E extends CoreEntity, I> {
     data: Partial<I> | Array<Partial<I>>,
     _queryContext?: CoreQueryContext,
   ): Promise<E[]> {
+    console.log('Entity', data)
     const result = await this.repository.insert(data as QueryDeepPartialEntity<E>)
+    console.log('Entity result', result)
     const createdIDs = result.identifiers.map((data) => data.id)
 
     const createdData = await this.repository.findByIds(createdIDs)
