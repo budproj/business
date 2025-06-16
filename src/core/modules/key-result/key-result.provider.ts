@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { uniqBy, pickBy, omitBy, identity, isEmpty, maxBy, flatten, keyBy, uniq } from 'lodash'
-import { Any, Brackets, DeleteResult, FindConditions, In, Raw } from 'typeorm'
+import { Any, Brackets, DeleteResult, EntityManager, FindConditions, In, Raw } from 'typeorm'
 
 import { ConfidenceTagAdapter } from '@adapters/confidence-tag/confidence-tag.adapters'
 import { CONFIDENCE_TAG_THRESHOLDS } from '@adapters/confidence-tag/confidence-tag.constants'
@@ -65,6 +65,7 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     public readonly timeline: KeyResultTimelineProvider,
     protected readonly repository: KeyResultRepository,
     private readonly analyticsProvider: AnalyticsProvider,
+    private readonly entityManager: EntityManager,
   ) {
     super(KeyResultProvider.name, repository)
   }
@@ -694,6 +695,33 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
       keyResultId: id,
     })
     const updates = await this.keyResultUpdateProvider.delete({ keyResultId: id })
+
+    // Task is a new table that will not be implemented in this backend
+    // Task exclusion will be manual for now
+    await this.entityManager.query(
+      `
+      DELETE FROM task_comment
+      WHERE task_id IN (SELECT id FROM task WHERE key_result_id = $1) 
+    `,
+      [id],
+    )
+
+    await this.entityManager.query(
+      `
+      DELETE FROM task_history
+      WHERE task_id IN (SELECT id FROM task WHERE key_result_id = $1)
+      `,
+      [id],
+    )
+
+    await this.entityManager.query(
+      `
+      DELETE FROM task
+      WHERE key_result_id = $1
+      `,
+      [id],
+    )
+
     const keyResult = await this.delete({ id })
 
     return {
@@ -712,6 +740,32 @@ export class KeyResultProvider extends CoreEntityProvider<KeyResult, KeyResultIn
     const checkIns = await this.keyResultCheckInProvider.deleteFromObjective(objectiveId)
     const checkMarks = await this.keyResultCheckMarkProvider.deleteFromObjective(objectiveId)
     const updates = await this.keyResultUpdateProvider.deleteFromObjective(objectiveId)
+
+    // Task is a new table that will not be implemented in this backend
+    // Task exclusion will be manual for now
+    await this.entityManager.query(
+      `
+      DELETE FROM task_comment
+      WHERE task_id IN (SELECT task.id FROM task JOIN key_result kr ON kr.id = task.key_result_id WHERE kr.objective_id = $1)
+    `,
+      [objectiveId],
+    )
+
+    await this.entityManager.query(
+      `
+      DELETE FROM task_history
+      WHERE task_id IN (SELECT task.id FROM task JOIN key_result kr ON kr.id = task.key_result_id WHERE kr.objective_id = $1)
+      `,
+      [objectiveId],
+    )
+
+    await this.entityManager.query(
+      `
+      DELETE FROM task
+      WHERE key_result_id IN (SELECT id FROM key_result WHERE objective_id = $1 )
+      `,
+      [objectiveId],
+    )
 
     const keyResults = await this.delete({
       objectiveId,
