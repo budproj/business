@@ -15,6 +15,15 @@ import { LogLevel } from '@lib/logger/logger.enum'
     LoggerModule.forRoot({
       pinoHttp: {
         level: LogLevel[process.env.SERVER_LOGGING_LEVEL],
+        autoLogging: true,
+        genReqId: (req) => req.headers['x-request-id'] || Date.now(),
+        serializers: {
+          req: (req) => ({
+            id: req.id,
+            method: req.method,
+            url: req.url,
+          }),
+        },
         redact: {
           paths: ['req.headers'],
         },
