@@ -1,5 +1,12 @@
-import { ServerFactory } from '@infrastructure/server/server.factory'
+import { AppModule } from '@/app.module'
+import { getServerConfig } from '@infrastructure/server/server.config'
 
-const serverFactory = new ServerFactory()
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
-serverFactory.bootstrap()
+async function bootstrap() {
+  const { app, PORT } = await getServerConfig(AppModule)
+
+  await app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Started server listening on ${PORT}`)
+  })
+}
+
+void bootstrap()

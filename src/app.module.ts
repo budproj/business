@@ -32,4 +32,4 @@ import { LogLevel } from '@lib/logger/logger.enum'
     }),
   ],
 })
-export class ServerModule {}
+export class AppModule {}
