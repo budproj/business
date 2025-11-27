@@ -30,8 +30,8 @@ export class TasksController {
     exchange: 'bud',
     queue: 'business.notification-ports',
     routingKey: 'business.notification-ports.#',
-    errorHandler: (channel, msg, error) => {
-      return defaultNackErrorHandler(channel, msg, error);
+    errorHandler: (channel, message, error) => {
+      return defaultNackErrorHandler(channel, message, error)
     },
     queueOptions: {
       deadLetterExchange: 'dead',
